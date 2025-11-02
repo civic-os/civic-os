@@ -92,6 +92,9 @@ export class SchemaEditorPage implements OnDestroy {
       search_fields: null,
       show_map: false,
       map_property_name: null,
+      show_calendar: false,
+      calendar_property_name: null,
+      calendar_color_property: null,
       insert: false,
       select: true,
       update: false,
@@ -105,6 +108,9 @@ export class SchemaEditorPage implements OnDestroy {
       search_fields: null,
       show_map: false,
       map_property_name: null,
+      show_calendar: false,
+      calendar_property_name: null,
+      calendar_color_property: null,
       insert: false,
       select: true,
       update: false,
@@ -232,6 +238,13 @@ export class SchemaEditorPage implements OnDestroy {
       // Dynamically import JointJS to enable lazy loading
       const { dia, shapes } = await import('@joint/core');
 
+      // Wait for CSS to settle after theme application
+      // This ensures getComputedStyle() returns fresh values, not stale ones from previous theme
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Get actual computed theme colors (after CSS recalculation)
+      const colors = this.getThemeColors();
+
       // Initialize graph and paper
       this.graph = new dia.Graph({}, { cellNamespace: shapes });
 
@@ -248,7 +261,7 @@ export class SchemaEditorPage implements OnDestroy {
           }
         },
         background: {
-          color: 'var(--base-200)'
+          color: colors.base200  // Use computed value, not CSS variable string
         },
         // Disable element dragging when not in edit mode
         interactive: (cellView: dia.CellView) => {
