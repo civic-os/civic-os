@@ -27,7 +27,7 @@ The default configuration uses a shared Keycloak instance at `auth.civic-os.org`
 
 **Setup:**
 1. Use the default settings in `.env.example`
-2. Run `./fetch-keycloak-jwk.sh` in the `example/` directory
+2. Run `./fetch-keycloak-jwk.sh` in the `examples/pothole/` directory (or your chosen example)
 3. Start the application
 
 **When to use this:** Initial exploration of Civic OS, understanding the basic flow.
@@ -44,7 +44,7 @@ Add Keycloak to your Docker Compose setup:
 
 #### 1. Add Keycloak Service to docker-compose.yml
 
-Edit `example/docker-compose.yml` and uncomment (or add) the Keycloak service:
+Edit `examples/pothole/docker-compose.yml` and uncomment (or add) the Keycloak service:
 
 ```yaml
 services:
@@ -78,7 +78,7 @@ Access Keycloak admin console at: **http://localhost:8080**
 
 #### 3. Update Configuration
 
-Edit `example/.env`:
+Edit `examples/pothole/.env`:
 
 ```bash
 KEYCLOAK_URL=http://localhost:8080
@@ -342,7 +342,7 @@ After setting up your Keycloak realm, configure Civic OS to use it.
 
 ### 1. Update Environment File
 
-Edit `example/.env`:
+Edit `examples/pothole/.env`:
 
 ```bash
 # Database Configuration
@@ -592,5 +592,5 @@ After completing authentication setup:
 
 For more information, see:
 - [CLAUDE.md](../CLAUDE.md) - Developer guide and architecture details
-- [example/README.md](../example/README.md) - Docker setup and database initialization
+- [examples/pothole/README.md](../examples/pothole/README.md) - Docker setup and database initialization
 - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - Common issues and solutions

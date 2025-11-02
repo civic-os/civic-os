@@ -111,7 +111,7 @@ VALUES ('issues', 'photo', 'Photo', 'Upload a photo of the issue', 50);
 
 ### Docker Compose Services
 
-The `example/docker-compose.yml` includes:
+The `examples/pothole/docker-compose.yml` includes:
 - **MinIO** (ports 9000/9001) - S3-compatible storage
 - **s3-signer service** - Generates presigned URLs
 - **thumbnail-worker service** - Processes uploaded files
@@ -122,7 +122,7 @@ The `example/docker-compose.yml` includes:
 
 ## Example Usage
 
-See `example/init-scripts/07_add_file_fields.sql` for complete example with:
+See `examples/pothole/init-scripts/07_add_file_fields.sql` for complete example with:
 - `Issue.photo` (image field)
 - `WorkPackage.report_pdf` (PDF field)
 

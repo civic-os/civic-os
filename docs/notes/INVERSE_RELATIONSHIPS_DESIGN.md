@@ -25,7 +25,7 @@ The inverse relationships feature is now production-ready with the following cap
 - `src/app/pages/detail/detail.page.ts` - Added `inverseRelationships$` observable
 - `src/app/pages/detail/detail.page.html` - Added "Related Records" section with DaisyUI cards
 - `src/app/pages/detail/detail.page.spec.ts` - Added mocks for new methods
-- `example/init-scripts/06_add_fk_indexes.sql` - Added database indexes for foreign keys
+- `examples/pothole/init-scripts/06_add_fk_indexes.sql` - Added database indexes for foreign keys
 
 **Next Steps:** Phases 3 & 4 deferred pending user feedback.
 
@@ -1103,7 +1103,7 @@ describe('Inverse Relationships Performance', () => {
 - Added interfaces to `src/app/interfaces/entity.ts`
 - Implemented methods in `src/app/services/schema.service.ts` and `src/app/services/data.service.ts`
 - Updated `src/app/pages/detail/detail.page.ts` and template
-- Created `example/init-scripts/06_add_fk_indexes.sql` for database indexes
+- Created `examples/pothole/init-scripts/06_add_fk_indexes.sql` for database indexes
 - Updated test specs to mock new methods
 - Feature is production-ready for basic use cases
 
@@ -1130,7 +1130,7 @@ describe('Inverse Relationships Performance', () => {
 
 **Implementation Notes (2025-10-10):**
 - Error handling implemented via `catchError` in DataService, returns empty arrays on error
-- Database indexes added in `example/init-scripts/06_add_fk_indexes.sql`
+- Database indexes added in `examples/pothole/init-scripts/06_add_fk_indexes.sql`
 - Responsive design uses DaisyUI's responsive card system
 - Loading states handled automatically by Angular's async pipe
 - Caching deferred - SchemaService already caches metadata, relationship data refreshes on navigation

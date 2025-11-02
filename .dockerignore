@@ -35,10 +35,9 @@ coverage/
 *.md
 !docker/README.md
 docs/
-broader-impacts/
 
 # Example deployments (not needed in container)
-example/
+examples/
 
 # Test files
 *.spec.ts

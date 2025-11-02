@@ -56,8 +56,8 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Allow Angular app to be configured at container runtime (for flexible deployments)
 - [x] Save selected Theme in localstorage and use on reload
 - [x] Allow user profile editing (via Keycloak account console with JWT sync)
-- [ ] App and Database update deployments
-- [ ] Automatically assign new users the "user" role
+- [x] App and Database update deployments
+- [x] Automatically assign new users the "user" role
 - [ ] Title updates (configure base from Angular Runtime)
 - [ ] Application Logging from frontend and pattern for SQL logging
 - [x] Application Analytics (external Matomo integration; see Phase 3 for built-in analytics engine)
@@ -132,6 +132,12 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Database-backed storage for all telemetry data
   - [ ] Admin dashboard for viewing analytics and trends
   - [ ] Replace external Matomo dependency with self-contained solution
+
+
+## Phase 4: Extension Modules
+- [ ] Financial Tools (Accounting)
+- [ ] Payments Integration
+
 
 ---
 

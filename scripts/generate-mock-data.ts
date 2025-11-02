@@ -4,7 +4,7 @@
  * CIVIC OS MOCK DATA GENERATOR - GENERIC TEMPLATE
  *
  * This is a generic template for generating mock data. For production use,
- * copy this file to your deployment folder (e.g., example/, broader-impacts/)
+ * copy this file to your deployment folder (e.g., examples/pothole/, examples/broader-impacts/)
  * and customize it for your domain:
  *
  * 1. Update DEFAULT_CONFIG (outputPath, geographyBounds, excludeTables)
@@ -12,8 +12,10 @@
  * 3. Add domain-specific logic to generateFakeValue() if needed
  * 4. Update config path to ./mock-data-config.json
  *
- * See example/generate-mock-data.ts and broader-impacts/generate-mock-data.ts
+ * See examples/pothole/generate-mock-data.ts and examples/broader-impacts/generate-mock-data.ts
  * for domain-specific implementations.
+ *
+ * Alternatively, use the wrapper script: ./examples/generate.sh <example-name>
  */
 
 import { faker } from '@faker-js/faker';

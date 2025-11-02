@@ -355,7 +355,7 @@ app.listen(PORT, () => {
 **Docker Compose Setup:**
 
 ```yaml
-# Add to example/docker-compose.yml
+# Add to examples/pothole/docker-compose.yml
 services:
   s3-signer:
     build: ./s3-signer-service
@@ -1887,7 +1887,7 @@ START: Do you need file storage?
 **Why MinIO?** Free, S3-compatible, runs locally, perfect for development.
 
 ```yaml
-# Add to example/docker-compose.yml
+# Add to examples/pothole/docker-compose.yml
 services:
   minio:
     image: minio/minio:latest

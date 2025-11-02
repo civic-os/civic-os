@@ -146,18 +146,20 @@ ng generate component pages/page-name --type=page  # Use "page" suffix by conven
 
 **Mock Data Generation:**
 ```bash
-# For the Pot Hole example project:
-set -a && source example/.env && set +a && npm run generate:mock:example
-set -a && source example/.env && set +a && npm run generate:mock:example:sql  # SQL file only
+# Using the wrapper script (recommended):
+./examples/generate.sh pothole              # Generate for Pot Hole example
+./examples/generate.sh pothole --sql        # SQL file only
+./examples/generate.sh broader-impacts      # Generate for Broader Impacts (UMFlint)
+./examples/generate.sh broader-impacts --sql # SQL file only
 
-# For the Broader Impacts (UMFlint) project:
-set -a && source broader-impacts/.env && set +a && npm run generate:mock:bi
-set -a && source broader-impacts/.env && set +a && npm run generate:mock:bi:sql  # SQL file only
+# Using npm scripts directly (alternative):
+set -a && source examples/pothole/.env && set +a && npm run generate:mock:pothole
+set -a && source examples/broader-impacts/.env && set +a && npm run generate:mock:bi
 ```
 
-The mock data generator is **validation-aware**: it fetches validation rules from `metadata.validations` and generates compliant data (respects min/max, minLength/maxLength, pattern constraints). Configure `scripts/mock-data-config.json` to control record counts and geography bounds. See `scripts/README.md` for details.
+The mock data generator is **validation-aware**: it fetches validation rules from `metadata.validations` and generates compliant data (respects min/max, minLength/maxLength, pattern constraints). Each example has its own `mock-data-config.json` to control record counts and geography bounds.
 
-**Important**: Mock data should be generated AFTER database initialization (after `docker-compose up`), not during init scripts. This allows schema changes to flow smoothly without being blocked by stale static SQL files. The deprecated `example/init-scripts/05_mock_data.sql.deprecated` file is kept only as reference.
+**Important**: Mock data should be generated AFTER database initialization (after `docker-compose up`), not during init scripts. This allows schema changes to flow smoothly without being blocked by stale static SQL files. Examples are located in the `examples/` directory (pothole, broader-impacts). All examples use the same port configuration - only run one example at a time.
 
 ## Database Setup
 
@@ -165,7 +167,7 @@ Docker Compose runs PostgreSQL 17 with PostGIS 3.5 and PostgREST locally with Ke
 
 **Migration Flow** (automatic on first `docker-compose up`):
 1. Postgres container builds custom image with Sqitch installed (`docker/dev-postgres/Dockerfile`)
-2. Init script creates authenticator role (`example/init-scripts/00_create_authenticator.sh`)
+2. Init script creates authenticator role (`examples/<example-name>/init-scripts/00_create_authenticator.sh`)
 3. Init script runs Sqitch migrations to deploy core schema (`postgres/migrations/`)
 4. Example-specific scripts run (pothole tables, permissions, etc.)
 
@@ -326,7 +328,7 @@ INSERT INTO metadata.validations VALUES
   ('users', 'phone', 'pattern', '^\d{10}$', 'Phone must be 10 digits (no dashes)', 1);
 ```
 
-**See Also:** `example/init-scripts/02_validation_examples.sql` for complete examples in the Pot Hole domain.
+**See Also:** `examples/pothole/init-scripts/02_validation_examples.sql` for complete examples in the Pot Hole domain.
 
 **Future Enhancement:** Async/RPC validators for database lookups (uniqueness checks, cross-field validation). See `docs/development/ADVANCED_VALIDATION.md`.
 

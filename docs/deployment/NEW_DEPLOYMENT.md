@@ -31,7 +31,7 @@ This guide walks you through deploying a **new Civic OS instance** with your own
 ### What This Guide Covers
 
 This guide helps you:
-- Create a new deployment instance parallel to the `example/` folder
+- Create a new deployment instance parallel to the `examples/pothole/` folder
 - Convert your ERD to Civic OS-compatible SQL schema
 - Set up Docker Compose with PostgreSQL, PostgREST, and Keycloak
 - Configure permissions and metadata
@@ -70,7 +70,7 @@ Before starting, ensure you have:
 
 ## Step 1: Create Your Deployment Folder
 
-Create a new folder parallel to the `example/` directory. This keeps your deployment separate from the example Pot Hole system.
+Create a new folder parallel to the `examples/pothole/` directory. This keeps your deployment separate from the example Pot Hole system.
 
 ```bash
 # Navigate to the Civic OS project root
@@ -89,7 +89,7 @@ Your folder structure should look like:
 
 ```
 civic-os-frontend/
-├── example/              # Pot Hole example (reference)
+├── examples/pothole/              # Pot Hole example (reference)
 ├── my-project/           # Your new deployment
 │   ├── init-scripts/     # Database initialization SQL
 │   ├── docker-compose.yml
@@ -253,7 +253,7 @@ This script runs all Civic OS core scripts from the `postgres/` directory.
 
 **Copy from example:**
 ```bash
-cp ../example/init-scripts/00_init.sh ./init-scripts/00_init.sh
+cp ../examples/pothole/init-scripts/00_init.sh ./init-scripts/00_init.sh
 ```
 
 **Contents** (should look like this):
@@ -437,7 +437,7 @@ NOTIFY pgrst, 'reload schema';
 
 #### Optional: `04_<domain>_validation.sql` - Validation Rules
 
-Add frontend validation rules and CHECK constraints. See `example/init-scripts/02_validation_examples.sql` for patterns.
+Add frontend validation rules and CHECK constraints. See `examples/pothole/init-scripts/02_validation_examples.sql` for patterns.
 
 **Example:**
 ```sql
@@ -475,7 +475,7 @@ Copy the example Docker Compose file and customize it for your deployment.
 
 ```bash
 # From your my-project directory
-cp ../example/docker-compose.yml ./docker-compose.yml
+cp ../examples/pothole/docker-compose.yml ./docker-compose.yml
 ```
 
 ### Key Configuration Points
@@ -859,7 +859,7 @@ npx ts-node generate-mock-data.ts --sql # Generate SQL file
 - Tailored validation handling
 - No cross-deployment conflicts
 
-**Examples**: See `example/generate-mock-data.ts` (pot-hole domain) and `broader-impacts/generate-mock-data.ts` (research tracking domain) for reference implementations.
+**Examples**: See `examples/pothole/generate-mock-data.ts` (pot-hole domain) and `examples/broader-impacts/generate-mock-data.ts` (research tracking domain) for reference implementations.
 
 ---
 
@@ -1034,7 +1034,7 @@ ON CONFLICT (table_name) DO UPDATE
   SET search_fields = EXCLUDED.search_fields;
 ```
 
-**See**: `example/init-scripts/05_add_text_search.sql` for complete pattern.
+**See**: `examples/pothole/init-scripts/05_add_text_search.sql` for complete pattern.
 
 ---
 
@@ -1467,18 +1467,18 @@ NOTIFY pgrst, 'reload schema';
 ### Step 5: Copy Supporting Files
 ```bash
 # Copy init script runner
-cp ../example/init-scripts/00_init.sh ./init-scripts/00_init.sh
+cp ../examples/pothole/init-scripts/00_init.sh ./init-scripts/00_init.sh
 chmod +x ./init-scripts/00_init.sh
 
 # Copy Docker Compose
-cp ../example/docker-compose.yml ./docker-compose.yml
+cp ../examples/pothole/docker-compose.yml ./docker-compose.yml
 
 # Copy environment files
-cp ../example/.env.example ./.env.example
-cp ../example/.env.example ./.env
+cp ../examples/pothole/.env.example ./.env.example
+cp ../examples/pothole/.env.example ./.env
 
 # Copy Keycloak fetch script
-cp ../example/fetch-keycloak-jwk.sh ./fetch-keycloak-jwk.sh
+cp ../examples/pothole/fetch-keycloak-jwk.sh ./fetch-keycloak-jwk.sh
 chmod +x ./fetch-keycloak-jwk.sh
 ```
 
@@ -1551,7 +1551,7 @@ After completing this guide, you can:
 - **[CLAUDE.md](../../CLAUDE.md)** - Comprehensive developer guide
 - **[AUTHENTICATION.md](../AUTHENTICATION.md)** - Complete Keycloak setup
 - **[TROUBLESHOOTING.md](../TROUBLESHOOTING.md)** - Common issues and solutions
-- **[example/README.md](../../example/README.md)** - Example deployment reference
+- **[examples/pothole/README.md](../../examples/pothole/README.md)** - Example deployment reference
 - **[scripts/README.md](../../scripts/README.md)** - Mock data generator docs
 
 ---

@@ -42,4 +42,4 @@ testem.log
 Thumbs.db
 
 # Example environment files
-example/.env
+examples/*/.env

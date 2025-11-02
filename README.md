@@ -73,8 +73,8 @@ npm test -- --no-watch --browsers=ChromeHeadless  # Run once and exit
 npm run build          # Production build
 
 # Mock Data Generation
-set -a && source example/.env && set +a && npm run generate:mock  # Generate SQL
-set -a && source example/.env && set +a && npm run generate:seed  # Insert into DB
+./examples/generate.sh pothole              # Generate for Pot Hole example
+./examples/generate.sh broader-impacts      # Generate for Broader Impacts
 
 # Code Generation
 ng generate component components/component-name
@@ -133,10 +133,14 @@ src/app/
 │   └── permissions.service.ts # RBAC management
 └── interfaces/          # TypeScript interfaces
 
-example/                 # Docker Compose setup
-├── docker-compose.yml   # PostgreSQL + PostgREST + Keycloak
-├── init-scripts/        # Database initialization
-└── postgres/            # Core schema and RBAC setup
+examples/                # Example deployments
+├── pothole/             # Pot Hole tracking example
+│   ├── docker-compose.yml   # PostgreSQL + PostgREST + MinIO
+│   ├── init-scripts/        # Database initialization
+│   └── generate-mock-data.ts # Mock data generator
+├── broader-impacts/     # UM-Flint research tracking example
+│   └── ...              # Same structure as pothole
+└── generate.sh          # Unified mock data generation script
 
 postgres/                # Shared PostgreSQL scripts
 ├── 0_postgis_setup.sql       # PostGIS extension
@@ -150,7 +154,7 @@ postgres/                # Shared PostgreSQL scripts
 
 - **[AUTHENTICATION.md](./docs/AUTHENTICATION.md)** - Complete Keycloak setup guide for testing RBAC features
 - **[CLAUDE.md](./CLAUDE.md)** - Comprehensive developer guide, architecture details, and coding patterns
-- **[example/README.md](./example/README.md)** - Docker Compose setup instructions
+- **[examples/pothole/README.md](./examples/pothole/README.md)** - Docker Compose setup instructions for Pot Hole example
 - **[TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)** - Common issues and solutions (especially RBAC configuration)
 - **[ROADMAP.md](./docs/ROADMAP.md)** - Development roadmap and feature tracking
 
