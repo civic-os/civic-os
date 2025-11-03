@@ -98,6 +98,21 @@
       </app-pagination>
     </div>
 
+    <!-- Calendar View (only shown when enabled) -->
+    @if (showCalendar()) {
+      <div class="calendar-container mb-4">
+        <app-time-slot-calendar
+          mode="list"
+          [events]="calendarEvents()"
+          [loading]="isLoading()"
+          [initialView]="(calendarState$ | async)?.view || 'timeGridWeek'"
+          [initialDate]="(calendarState$ | async)?.date"
+          (eventClick)="onCalendarEventClick($event)"
+          (dateRangeChange)="onCalendarDateRangeChange($event)">
+        </app-time-slot-calendar>
+      </div>
+    }
+
     <!-- Grid container for table and map -->
     <div class="list-content-grid" [class.with-map]="showMap()">
       <div class="overflow-x-auto">

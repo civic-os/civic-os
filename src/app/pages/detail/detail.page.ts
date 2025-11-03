@@ -26,8 +26,20 @@ import { DataService } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { ManyToManyEditorComponent } from '../../components/many-to-many-editor/many-to-many-editor.component';
+import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
+
+export interface CalendarSection {
+  meta: {
+    sourceTable: string;
+    sourceEntityDisplayName: string;
+    sourceColumn: string;
+    calendarPropertyName: string;
+    calendarColorProperty: string | null;
+  };
+  events: CalendarEvent[];
+}
 
 @Component({
     selector: 'app-detail',
@@ -38,7 +50,8 @@ import { tap } from 'rxjs/operators';
     CommonModule,
     RouterModule,
     DisplayPropertyComponent,
-    ManyToManyEditorComponent
+    ManyToManyEditorComponent,
+    TimeSlotCalendarComponent
 ]
 })
 export class DetailPage {
@@ -170,6 +183,84 @@ export class DetailPage {
       )
     );
 
+  // Calendar sections for entities with time_slot properties
+  public calendarSections$: Observable<CalendarSection[]> =
+    combineLatest([
+      this.entity$,
+      this.data$,
+      this.schema.getEntities()
+    ]).pipe(
+      debounceTime(0),
+      distinctUntilChanged((prev, curr) => {
+        return prev[0]?.table_name === curr[0]?.table_name &&
+               prev[1]?.id === curr[1]?.id;
+      }),
+      mergeMap(([entity, data, allEntities]) => {
+        if (!entity || !data) return of([]);
+
+        // Get inverse relationship metadata
+        return this.schema.getInverseRelationships(entity.table_name).pipe(
+          mergeMap(relationships => {
+            // Filter to only relationships where source entity has calendar enabled
+            const calendarRelationships = relationships
+              .map(rel => {
+                const sourceEntity = allEntities.find(e => e.table_name === rel.sourceTable);
+                return { rel, sourceEntity };
+              })
+              .filter(({ sourceEntity }) =>
+                sourceEntity?.show_calendar && sourceEntity?.calendar_property_name
+              );
+
+            if (calendarRelationships.length === 0) {
+              return of([]);
+            }
+
+            // Fetch calendar data for each relationship
+            const calendarDataObservables = calendarRelationships.map(({ rel, sourceEntity }) =>
+              this.data.getData({
+                key: rel.sourceTable,
+                fields: ['id', 'display_name', sourceEntity!.calendar_property_name!, sourceEntity!.calendar_color_property || ''].filter(f => f),
+                filters: [{
+                  column: rel.sourceColumn,
+                  operator: 'eq',
+                  value: data.id
+                }],
+                orderField: sourceEntity!.calendar_property_name!,
+                orderDirection: 'asc'
+              }).pipe(
+                map(records => ({
+                  meta: {
+                    sourceTable: rel.sourceTable,
+                    sourceEntityDisplayName: sourceEntity!.display_name,
+                    sourceColumn: rel.sourceColumn,
+                    calendarPropertyName: sourceEntity!.calendar_property_name!,
+                    calendarColorProperty: sourceEntity!.calendar_color_property
+                  },
+                  events: records.map((record: any) => {
+                    const { start, end } = this.parseTimeSlot(record[sourceEntity!.calendar_property_name!]);
+                    return {
+                      id: record.id,
+                      title: record.display_name || `${sourceEntity!.display_name} #${record.id}`,
+                      start: start,
+                      end: end,
+                      color: sourceEntity!.calendar_color_property ? record[sourceEntity!.calendar_color_property] : '#3B82F6',
+                      extendedProps: { data: record }
+                    } as CalendarEvent;
+                  })
+                } as CalendarSection))
+              )
+            );
+
+            return calendarDataObservables.length > 0
+              ? combineLatest(calendarDataObservables)
+              : of([]);
+          })
+        );
+      }),
+      // Filter out sections with no events
+      map(sections => sections.filter(s => s.events.length > 0))
+    );
+
   // Threshold for showing preview vs "View all" only
   readonly LARGE_RELATIONSHIP_THRESHOLD = 20;
 
@@ -209,5 +300,68 @@ export class DetailPage {
         this.deleteError.set('Failed to delete record. Please try again.');
       }
     });
+  }
+
+  /**
+   * Navigate to Create page for a related entity with pre-filled query params.
+   *
+   * Use Cases:
+   * - "Add Appointment" from Resource detail page → pre-fills resource_id
+   * - Calendar date selection → pre-fills time_slot + resource_id
+   * - "Add Issue for User" → pre-fills assigned_user_id
+   *
+   * @param tableName - Target entity to create (e.g., 'appointments', 'issues')
+   * @param fkColumn - Foreign key column name to pre-fill (e.g., 'resource_id', 'user_id')
+   * @param additionalParams - Optional extra query params (e.g., { time_slot: '[start,end)', status: 'pending' })
+   *
+   * Example template usage:
+   * <button (click)="navigateToCreateRelated('appointments', 'resource_id')">
+   *   Add Appointment
+   * </button>
+   *
+   * Example with additional params:
+   * <button (click)="navigateToCreateRelated('appointments', 'resource_id', { status: 'pending' })">
+   *   Add Pending Appointment
+   * </button>
+   */
+  navigateToCreateRelated(tableName: string, fkColumn: string, additionalParams?: Record<string, any>) {
+    this.router.navigate(['/create', tableName], {
+      queryParams: {
+        [fkColumn]: this.entityId,
+        ...additionalParams
+      }
+    });
+  }
+
+  /**
+   * Navigate to detail page when calendar event is clicked
+   */
+  onCalendarEventClick(event: CalendarEvent, section: CalendarSection) {
+    this.router.navigate(['/view', section.meta.sourceTable, event.id]);
+  }
+
+  /**
+   * Handle date selection in calendar - navigate to Create with pre-filled time slot
+   */
+  onCalendarDateSelect(selection: { start: Date; end: Date }, section: CalendarSection) {
+    const tstzrange = `[${selection.start.toISOString()},${selection.end.toISOString()})`;
+    this.navigateToCreateRelated(section.meta.sourceTable, section.meta.sourceColumn, {
+      [section.meta.calendarPropertyName]: tstzrange
+    });
+  }
+
+  /**
+   * Parse tstzrange string to Date objects
+   */
+  private parseTimeSlot(tstzrange: string): { start: Date; end: Date } {
+    const match = tstzrange.match(/\[(.+?),(.+?)\)/);
+    if (!match) {
+      // Return empty dates if parsing fails
+      return { start: new Date(), end: new Date() };
+    }
+    return {
+      start: new Date(match[1]),
+      end: new Date(match[2])
+    };
   }
 }

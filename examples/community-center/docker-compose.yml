@@ -1,0 +1,163 @@
+services:
+  postgres:
+    build:
+      context: ../..
+      dockerfile: docker/dev-postgres/Dockerfile
+    platform: linux/amd64
+    container_name: postgres_db
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Mount Sqitch files for migrations
+      - ../../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
+      - ../../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
+      - ../../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
+      # Mount example-specific init scripts
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - postgrest-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    container_name: postgrest_api
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PGRST_DB_SCHEMA: public,metadata
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_DB_PRE_REQUEST: "public.check_jwt"
+      PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
+      PGRST_JWT_AUD: "account"
+      PGRST_OPENAPI_SERVER_PROXY_URI: "http://localhost:3000"
+      PGRST_LOG_LEVEL: "info"
+    volumes:
+      - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - postgrest-network
+    restart: unless-stopped
+
+  # Optional: Swagger UI for API documentation
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui
+    ports:
+      - "8080:8080"
+    environment:
+      API_URL: "http://postgrest:3000/"
+    depends_on:
+      - postgrest
+    networks:
+      - postgrest-network
+
+  # MinIO - S3-compatible object storage for local development (optional)
+  minio:
+    image: minio/minio:latest
+    container_name: minio_local
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Web Console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - postgrest-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  # S3 Signer Service - Generates presigned upload URLs
+  s3-signer:
+    build:
+      context: ../../services/s3-signer
+      dockerfile: Dockerfile
+    container_name: broader_impacts_s3_signer
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - S3_ENDPOINT=http://minio:9000
+      - S3_PUBLIC_ENDPOINT=http://localhost:9000
+      - S3_BUCKET=${S3_BUCKET:-civic-os-files}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - AWS_REGION=us-east-1
+      - PORT=3001
+    networks:
+      - postgrest-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Thumbnail Worker - Generates image and PDF thumbnails
+  thumbnail-worker:
+    build:
+      context: ../../services/thumbnail-worker
+      dockerfile: Dockerfile
+    container_name: broader_impacts_thumbnail_worker
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - S3_ENDPOINT=http://minio:9000
+      - S3_BUCKET=${S3_BUCKET:-civic-os-files}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - AWS_REGION=us-east-1
+    networks:
+      - postgrest-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Optional: Local Keycloak instance for RBAC testing
+  # Uncomment this section to run Keycloak locally (recommended for testing roles/permissions)
+  # See docs/AUTHENTICATION.md for complete setup instructions
+  # Note: The broader-impacts deployment can use the shared Keycloak instance (auth.civic-os.org)
+  # or run its own instance. If running both example and broader-impacts simultaneously,
+  # change the Keycloak port to avoid conflicts (e.g., 8083:8080)
+  # keycloak:
+  #   image: quay.io/keycloak/keycloak:24.0
+  #   container_name: broader_impacts_keycloak
+  #   environment:
+  #     KEYCLOAK_ADMIN: admin
+  #     KEYCLOAK_ADMIN_PASSWORD: admin
+  #     KC_HEALTH_ENABLED: true
+  #     KC_METRICS_ENABLED: true
+  #   ports:
+  #     - "8083:8080"  # Changed to 8083 to avoid conflict with example
+  #   command: start-dev
+  #   networks:
+  #     - postgrest-network
+  #   # Note: After starting Keycloak, access admin console at http://localhost:8083
+  #   #       Login: admin / admin
+  #   #       Follow docs/AUTHENTICATION.md to configure realm, client, and roles
+
+volumes:
+  postgres_data:
+  init-scripts:
+  minio_data:
+
+networks:
+  postgrest-network:
+    driver: bridge

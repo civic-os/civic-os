@@ -567,7 +567,7 @@ describe('ListPage', () => {
       const entityWithoutMap = {
         ...MOCK_ENTITIES.issue,
         show_map: false,
-        map_property_name: null
+        map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null
       };
 
       mockSchemaService.getEntity.and.returnValue(of(entityWithoutMap));

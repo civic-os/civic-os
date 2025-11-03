@@ -71,7 +71,10 @@ describe('EntityManagementService', () => {
         p_description: 'Track issues',
         p_sort_order: 1,
         p_show_map: false,
-        p_map_property_name: null
+        p_map_property_name: null,
+        p_show_calendar: false,
+        p_calendar_property_name: null,
+        p_calendar_color_property: null
       });
       req.flush({});
     });
@@ -89,7 +92,10 @@ describe('EntityManagementService', () => {
         p_description: null,
         p_sort_order: null,
         p_show_map: false,
-        p_map_property_name: null
+        p_map_property_name: null,
+        p_show_calendar: false,
+        p_calendar_property_name: null,
+        p_calendar_color_property: null
       });
       req.flush({});
     });

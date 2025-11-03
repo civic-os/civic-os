@@ -44,7 +44,10 @@ export class EntityManagementService {
     description: string | null,
     sortOrder: number | null,
     showMap: boolean = false,
-    mapPropertyName: string | null = null
+    mapPropertyName: string | null = null,
+    showCalendar: boolean = false,
+    calendarPropertyName: string | null = null,
+    calendarColorProperty: string | null = null
   ): Observable<ApiResponse> {
     return this.http.post(
       getPostgrestUrl() + 'rpc/upsert_entity_metadata',
@@ -54,7 +57,10 @@ export class EntityManagementService {
         p_description: description,
         p_sort_order: sortOrder,
         p_show_map: showMap,
-        p_map_property_name: mapPropertyName
+        p_map_property_name: mapPropertyName,
+        p_show_calendar: showCalendar,
+        p_calendar_property_name: calendarPropertyName,
+        p_calendar_color_property: calendarColorProperty
       }
     ).pipe(
       map((response: any) => <ApiResponse>{ success: true, body: response }),

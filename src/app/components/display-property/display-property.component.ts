@@ -23,6 +23,7 @@ import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { HighlightPipe } from '../../pipes/highlight.pipe';
 import { ImageViewerComponent } from '../image-viewer/image-viewer.component';
 import { PdfViewerComponent } from '../pdf-viewer/pdf-viewer.component';
+import { DisplayTimeSlotComponent } from '../display-time-slot/display-time-slot.component';
 import { getS3Config } from '../../config/runtime';
 
 @Component({
@@ -35,6 +36,7 @@ import { getS3Config } from '../../config/runtime';
         HighlightPipe,
         ImageViewerComponent,
         PdfViewerComponent,
+        DisplayTimeSlotComponent,
     ],
     templateUrl: './display-property.component.html',
     styleUrl: './display-property.component.css'

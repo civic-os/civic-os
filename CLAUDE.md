@@ -72,6 +72,8 @@ CREATE TABLE contacts (
 );
 ```
 
+**Status Type** (`Status`): Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with composite FK pattern for type safety. Uses generated column for entity_type discriminator and supports workflow transitions via `metadata.status_transitions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design specification. **Status**: Design phase - not yet implemented.
+
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, S3 signer service, thumbnail worker, and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
 **Geography (GeoPoint) Type**: When adding a geography column, you must create a paired computed field function `<column_name>_text` that returns `ST_AsText()`. PostgREST exposes this as a virtual field. Data format: Insert/Update uses EWKT `"SRID=4326;POINT(lng lat)"`, Read receives WKT `"POINT(lng lat)"`.
@@ -282,6 +284,44 @@ Override `metadata.properties.display_name` to change labels. Set `sort_order` t
 2. Update `SchemaService.getPropertyType()` to detect the type
 3. Add rendering logic to `DisplayPropertyComponent`
 4. Add input control to `EditPropertyComponent`
+
+### Creating Records with Pre-filled Fields (Query Param Pattern)
+
+The CreatePage supports pre-filling form fields via query parameters, enabling contextual record creation from Detail pages, calendars, or other views.
+
+**How It Works:**
+- Query params are applied AFTER the form is built
+- Only empty fields are pre-filled (existing values are preserved)
+- Fields remain editable (no special UI treatment)
+- Invalid param names are silently ignored
+- Invalid param values are caught by standard validation
+
+**Example Use Cases:**
+
+1. **Pre-fill foreign key from Detail page:**
+   ```typescript
+   // In DetailPage template or component:
+   navigateToCreateRelated('appointments', 'resource_id')
+   // Result: /create/appointments?resource_id=5
+   ```
+
+2. **Pre-fill multiple fields:**
+   ```typescript
+   navigateToCreateRelated('appointments', 'resource_id', {
+     time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)',
+     status: 'pending'
+   })
+   // Result: /create/appointments?resource_id=5&time_slot=[...]&status=pending
+   ```
+
+3. **Direct URL with query params:**
+   ```
+   /create/issues?assigned_user_id=abc-123&status_id=1&priority=high
+   ```
+
+**Implementation Details:**
+- CreatePage.applyQueryParamDefaults() (`src/app/pages/create/create.page.ts:258`)
+- DetailPage.navigateToCreateRelated() (`src/app/pages/detail/detail.page.ts:236`)
 
 ### Form Validation
 

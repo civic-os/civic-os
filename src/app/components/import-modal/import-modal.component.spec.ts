@@ -74,7 +74,7 @@ describe('ImportModalComponent', () => {
     sort_order: 1,
     description: 'Test entity',
     show_map: false,
-    map_property_name: null
+    map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null
   };
 
   const mockProperties: SchemaEntityProperty[] = [

@@ -17,9 +17,9 @@
 
 
 import { Component, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { Observable, mergeMap, of, tap, map } from 'rxjs';
+import { Observable, mergeMap, of, tap, map, take } from 'rxjs';
 import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType } from '../../interfaces/entity';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule, Params } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import Keycloak from 'keycloak-js';
 
@@ -99,6 +99,11 @@ export class CreatePage {
               if (status === 'VALID' && this.showValidationError) {
                 this.showValidationError = false;
               }
+            });
+
+            // NEW: Apply query param defaults after form is ready
+            this.route.queryParams.pipe(take(1)).subscribe(params => {
+              this.applyQueryParamDefaults(params);
             });
           })
         );
@@ -236,6 +241,34 @@ export class CreatePage {
   }
 
   /**
+   * Apply query parameter values as defaults to form controls.
+   * Only sets values for fields that are currently empty.
+   *
+   * Use Cases:
+   * - Pre-fill foreign key when creating from Detail page: ?resource_id=5
+   * - Pre-fill time slot from calendar selection: ?time_slot=[start,end)
+   * - Pre-fill multiple fields: ?resource_id=5&status=pending
+   *
+   * Behavior:
+   * - Fields remain editable (no special UI treatment)
+   * - markAsTouched() triggers validation immediately
+   * - Invalid param names are silently ignored
+   * - Invalid param values are caught by standard validation
+   */
+  private applyQueryParamDefaults(params: Params): void {
+    if (!this.createForm) return;
+
+    Object.keys(params).forEach(paramKey => {
+      const control = this.createForm!.get(paramKey);
+      if (control && !control.value) {
+        // Only set if field is currently empty
+        control.setValue(params[paramKey]);
+        control.markAsTouched(); // Trigger validation display
+      }
+    });
+  }
+
+  /**
    * TIMEZONE-SENSITIVE CODE: Submit-time transformation for datetime fields
    *
    * This method transforms form values back to PostgreSQL-compatible formats:
@@ -300,6 +333,16 @@ export class CreatePage {
 
       // Money: Keep as number, PostgREST accepts numeric values for money type
     });
+
+    // Remove audit fields AFTER transformation (managed by database triggers)
+    // BUT only if they're NOT in currentProps (i.e., they're read-only metadata, not user-editable fields)
+    const editableColumns = new Set(this.currentProps.map(p => p.column_name));
+    if (!editableColumns.has('created_at')) {
+      delete transformed.created_at;
+    }
+    if (!editableColumns.has('updated_at')) {
+      delete transformed.updated_at;
+    }
 
     return transformed;
   }

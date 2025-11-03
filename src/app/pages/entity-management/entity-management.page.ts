@@ -30,6 +30,7 @@ interface EntityRow extends SchemaEntityTable {
   customDisplayName: string | null;
   customDescription: string | null;
   geoPointProperties?: string[]; // Available GeoPoint properties for this entity
+  timeSlotProperties?: string[]; // Available TimeSlot properties for this entity
 }
 
 interface EntityData {
@@ -92,14 +93,17 @@ export class EntityManagementPage {
               } as EntityData);
             }
 
-            // Fetch GeoPoint properties for each entity
+            // Fetch GeoPoint and TimeSlot properties for each entity
             const propertyObservables = entityRows.map(entity =>
               this.schemaService.getPropertiesForEntity(entity).pipe(
                 map(properties => {
                   const geoPoints = properties
                     .filter(p => p.geography_type === 'Point')
                     .map(p => p.column_name);
-                  return { ...entity, geoPointProperties: geoPoints };
+                  const timeSlots = properties
+                    .filter(p => p.udt_name === 'time_slot')
+                    .map(p => p.column_name);
+                  return { ...entity, geoPointProperties: geoPoints, timeSlotProperties: timeSlots };
                 }),
                 catchError(() => of(entity))
               )
@@ -107,11 +111,11 @@ export class EntityManagementPage {
 
             // Wait for all property fetches
             return forkJoin(propertyObservables).pipe(
-              map(entityRowsWithGeoPoints => {
+              map(entityRowsWithProperties => {
                 // Update entities signal
-                this.entities.set(entityRowsWithGeoPoints);
+                this.entities.set(entityRowsWithProperties);
                 return {
-                  entities: entityRowsWithGeoPoints,
+                  entities: entityRowsWithProperties,
                   loading: false,
                   isAdmin: true
                 } as EntityData;
@@ -191,8 +195,20 @@ export class EntityManagementPage {
     this.saveEntityMetadata(entity);
   }
 
+  onShowCalendarChange(entity: EntityRow) {
+    this.saveEntityMetadata(entity);
+  }
+
+  onCalendarPropertyChange(entity: EntityRow) {
+    this.saveEntityMetadata(entity);
+  }
+
   hasGeoPointProperties(entity: EntityRow): boolean {
     return (entity.geoPointProperties?.length ?? 0) > 0;
+  }
+
+  hasTimeSlotProperties(entity: EntityRow): boolean {
+    return (entity.timeSlotProperties?.length ?? 0) > 0;
   }
 
   private saveEntityMetadata(entity: EntityRow) {
@@ -236,7 +252,10 @@ export class EntityManagementPage {
       entity.customDescription || null,
       entity.sort_order,
       entity.show_map,
-      entity.map_property_name
+      entity.map_property_name,
+      entity.show_calendar,
+      entity.calendar_property_name,
+      entity.calendar_color_property
     ).subscribe({
       next: (response) => {
         // Clear saving state

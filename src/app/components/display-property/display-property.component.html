@@ -106,6 +106,9 @@
         {{ formatPhoneNumber(datum()) }}
       </a>
     }
+    @if (propType() == EntityPropertyType.TimeSlot) {
+      <app-display-time-slot [datum]="datum()" />
+    }
     @if (propType() == EntityPropertyType.ManyToMany) {
       <div class="flex flex-wrap gap-2">
         @if (datum() && datum().length > 0) {

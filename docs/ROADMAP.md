@@ -24,6 +24,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [X] Add pagination
 - [x] Add text search as an indexed column and toggle-able search box
 - [x] Add Map view for List pages
+- [x] Add Calendar view for List pages (TimeSlot property type with FullCalendar integration)
 - [x] Add Sortable columns and default sort
 - [x] Add filter-able columns (mostly FK fields, but also expand to other indexed fields like datetime)
 - [x] Add spreadsheet Import/Export capabilities
@@ -84,6 +85,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
     - [ ] Export diagram as image (PNG/SVG)
     - [ ] Minimap for navigation in large schemas
 - [ ] Advanced Form Validation by use of RPCs
+- [ ] Add static helper text fields (display-only metadata.properties entries for form guidance, no database column)
 - [ ] Add customizable template pages (primarily for PDF)
 - [ ] Research safe database schema editing, sandboxing
 - [ ] One-to-One relationship created as child record

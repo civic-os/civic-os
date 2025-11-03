@@ -304,6 +304,250 @@ NOTIFY pgrst, 'reload schema';
 }
 ```
 
+---
+
+## Calendar & TimeSlot Widgets (NEW)
+
+**Dependency:** Requires Phase 1 of Calendar Integration (TimeSlot property type) to be completed first.
+
+**Reference:** See `docs/development/CALENDAR_INTEGRATION.md` for TimeSlot type implementation details.
+
+### New Widget Types for Reservations/Scheduling
+
+Add to `metadata.widget_types`:
+
+```sql
+INSERT INTO metadata.widget_types (widget_type, display_name, description, icon_name) VALUES
+  ('my_upcoming_reservations', 'My Upcoming Reservations', 'Show user''s approved reservations in timeline view', 'event'),
+  ('my_pending_requests', 'My Pending Requests', 'Show user''s requests awaiting approval', 'schedule'),
+  ('manager_approval_queue', 'Pending Approval Queue', 'Show requests awaiting manager approval (managers only)', 'approval'),
+  ('todays_schedule', 'Today''s Schedule', 'Show all reservations for today across all resources', 'today');
+```
+
+### Widget Configuration Schemas
+
+#### My Upcoming Reservations Widget
+```json
+{
+  "entityKey": "reservations",
+  "userFieldName": "reserved_by",  // FK to civic_os_users
+  "timeSlotField": "time_slot",    // tstzrange column
+  "daysAhead": 7,                  // Show next 7 days (default)
+  "limit": 10,                     // Max reservations to show
+  "showColumns": ["display_name", "resource", "time_slot", "attendee_count"]
+}
+```
+
+**Behavior:**
+- Filters: `reserved_by = current_user_id()` AND `lower(time_slot) >= NOW()`
+- Order: `time_slot ASC` (chronological)
+- Groups by date using timeline/agenda view
+- Only shows approved reservations
+
+**Example output:**
+```
+Today (Nov 2)
+  2:00 PM - 4:00 PM    Birthday Party - Club House (30 attendees)
+
+Tomorrow (Nov 3)
+  6:00 PM - 9:00 PM    Book Club - Club House (15 attendees)
+
+Saturday (Nov 6)
+  10:00 AM - 1:00 PM   Community Meeting - Club House (25 attendees)
+```
+
+#### My Pending Requests Widget
+```json
+{
+  "entityKey": "reservation_requests",
+  "userFieldName": "requested_by",
+  "timeSlotField": "time_slot",
+  "statusField": "status",
+  "statusFilter": "pending",
+  "limit": 5,
+  "showColumns": ["display_name", "resource", "time_slot", "status_color"]
+}
+```
+
+**Behavior:**
+- Filters: `requested_by = current_user_id()` AND `status = 'pending'`
+- Order: `created_at DESC` (most recent first)
+- Shows status badge with color
+- Click to view request detail page
+
+**Example output:**
+```
+⏳ Community Meeting - Club House
+   Requested: Nov 7, 10:00 AM - 1:00 PM
+   Status: Pending approval
+
+⏳ Book Club - Club House
+   Requested: Nov 3, 6:00 PM - 9:00 PM
+   Status: Pending approval
+```
+
+#### Manager Approval Queue Widget (Manager Role Only)
+```json
+{
+  "entityKey": "reservation_requests",
+  "statusField": "status",
+  "statusFilter": "pending",
+  "timeSlotField": "time_slot",
+  "limit": 10,
+  "requiresRole": "manager",
+  "showColumns": ["display_name", "requested_by", "resource", "time_slot", "created_at"],
+  "showActions": true  // Show approve/deny buttons in widget
+}
+```
+
+**Behavior:**
+- Filters: `status = 'pending'`
+- Order: `created_at ASC` (oldest first - FIFO)
+- Only visible to managers
+- Optional: Quick approve/deny actions inline (Phase 4+)
+- Click to view request detail for full approval workflow
+
+**Example output:**
+```
+Pending Requests (3)
+
+⏳ Birthday Party - Club House
+   Requested by: John Doe
+   Time: Nov 10, 2:00 PM - 4:00 PM
+   Submitted: 2 days ago
+   [View Details] [Approve] [Deny]
+
+⏳ Team Meeting - Club House
+   Requested by: Jane Smith
+   Time: Nov 12, 9:00 AM - 11:00 AM
+   Submitted: 1 day ago
+   [View Details]
+```
+
+#### Today's Schedule Widget (Manager Role Only)
+```json
+{
+  "entityKey": "reservations",
+  "timeSlotField": "time_slot",
+  "dateFilter": "today",
+  "requiresRole": "manager",
+  "groupBy": "resource_id",
+  "showColumns": ["resource", "display_name", "time_slot", "reserved_by", "attendee_count"]
+}
+```
+
+**Behavior:**
+- Filters: `lower(time_slot)::date = CURRENT_DATE` OR `upper(time_slot)::date = CURRENT_DATE` (overlaps today)
+- Order: `time_slot ASC`
+- Groups by resource
+- Shows all resources' schedules for today
+
+**Example output:**
+```
+Today's Reservations (Nov 2, 2025)
+
+Club House
+  2:00 PM - 4:00 PM    Birthday Party (John Doe, 30 attendees)
+  6:00 PM - 9:00 PM    Book Club (Jane Smith, 15 attendees)
+
+Conference Room A
+  9:00 AM - 11:00 AM   Team Standup (Sarah Johnson, 10 attendees)
+  1:00 PM - 3:00 PM    Client Meeting (Mike Brown, 5 attendees)
+
+(Empty for other resources)
+```
+
+### TimelineAgendaWidgetComponent
+
+**Purpose:** Reusable component for rendering time-based data in agenda/timeline style.
+
+**File:** `src/app/components/widgets/timeline-agenda-widget/timeline-agenda-widget.component.ts`
+
+**Features:**
+- Groups events by date (Today, Tomorrow, specific dates)
+- Formats time slots using `DisplayTimeSlotComponent`
+- Responsive layout (stacked on mobile)
+- Links to detail pages
+- Auto-refresh enabled (default 60 seconds)
+- Handles empty state ("No upcoming reservations")
+
+**Usage:** Shared by all calendar widgets (DRY principle)
+
+```typescript
+@Component({
+  selector: 'app-timeline-agenda-widget',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DisplayTimeSlotComponent, CommonModule]
+})
+export class TimelineAgendaWidgetComponent {
+  widget = input.required<DashboardWidget>();
+
+  // Fetch data with filters from config
+  events$ = this.loadEvents();
+
+  // Group events by date
+  groupedEvents = computed(() => {
+    const events = this.events();
+    return this.groupByDate(events);
+  });
+
+  private groupByDate(events: any[]): Map<string, any[]> {
+    // Group by date, with special handling for "Today", "Tomorrow"
+    // Format dates as "Today (Nov 2)", "Tomorrow (Nov 3)", "Saturday (Nov 6)"
+  }
+}
+```
+
+### Implementation Notes
+
+**Dependencies (Must be completed first):**
+1. ✅ Phase 1: TimeSlot property type (domain, detection, display components)
+2. ✅ DisplayTimeSlotComponent (for formatting time ranges)
+3. ✅ Reservations schema (separate tables design with trigger sync)
+
+**Widget Integration Points:**
+- Reuses `DisplayTimeSlotComponent` from calendar integration
+- Leverages existing `FilteredListWidgetComponent` architecture
+- Uses existing permission system (`requiresRole` config)
+- Standard auto-refresh with configurable intervals
+
+**Timeline for Calendar Widgets:**
+- **After Calendar Phase 1** (TimeSlot type): Can implement basic versions (list view only)
+- **After Calendar Phase 2** (Calendar component): Can enhance with mini calendar option
+- **After Dashboard Phase 2** (Filtered lists): Widget infrastructure ready
+- **Suggested**: Implement as **Dashboard Phase 2.5** or **Phase 3.5**
+
+### Example Dashboard Configuration
+
+**"My Reservations" Dashboard (for community members):**
+```sql
+INSERT INTO metadata.dashboards (display_name, description, is_default, is_public)
+VALUES ('My Reservations', 'View your upcoming reservations and pending requests', FALSE, TRUE);
+
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width)
+VALUES
+  (1, 'my_upcoming_reservations', 'My Upcoming Reservations',
+   '{"entityKey": "reservations", "daysAhead": 7, "limit": 10}', 1, 2),
+  (1, 'my_pending_requests', 'My Pending Requests',
+   '{"entityKey": "reservation_requests", "limit": 5}', 2, 2);
+```
+
+**"Manager Dashboard" (for facility managers):**
+```sql
+INSERT INTO metadata.dashboards (display_name, description, is_default, is_public)
+VALUES ('Facility Management', 'Approve requests and view today''s schedule', FALSE, FALSE);
+
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width)
+VALUES
+  (2, 'manager_approval_queue', 'Pending Approvals',
+   '{"entityKey": "reservation_requests", "limit": 10, "showActions": true}', 1, 1),
+  (2, 'todays_schedule', 'Today''s Schedule',
+   '{"entityKey": "reservations", "groupBy": "resource_id"}', 2, 1);
+```
+
+---
+
 ### Frontend Components
 
 **New Angular components:**

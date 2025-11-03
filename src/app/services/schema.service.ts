@@ -217,6 +217,7 @@ export class SchemaService {
       ['hex_color'].includes(val.udt_name) ? EntityPropertyType.Color :
       ['email_address'].includes(val.udt_name) ? EntityPropertyType.Email :
       ['phone_number'].includes(val.udt_name) ? EntityPropertyType.Telephone :
+      ['time_slot'].includes(val.udt_name) ? EntityPropertyType.TimeSlot :
       ['varchar'].includes(val.udt_name) ? EntityPropertyType.TextShort :
       ['text'].includes(val.udt_name) ? EntityPropertyType.TextLong :
       EntityPropertyType.Unknown;

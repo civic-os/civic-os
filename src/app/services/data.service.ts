@@ -368,6 +368,66 @@ export class DataService {
   }
 
   /**
+   * Compares time_slot (tstzrange) values.
+   * Input: [2025-11-07T15:00:00Z,2025-11-07T22:00:00Z) (ISO 8601 format we send)
+   * Response: [\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\") (PostgreSQL format with escaped quotes)
+   */
+  private compareTimeSlotValues(inputValue: any, responseValue: any): { isTimeSlot: boolean, matches: boolean } {
+    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
+      return { isTimeSlot: false, matches: false };
+    }
+
+    // Check if both values look like tstzrange format: [start,end)
+    const tstzrangePattern = /^\[.+,.+\)$/;
+    if (!tstzrangePattern.test(inputValue) || !tstzrangePattern.test(responseValue)) {
+      return { isTimeSlot: false, matches: false };
+    }
+
+    try {
+      // Parse both values to extract start and end timestamps
+      const parseRange = (range: string): { start: string, end: string } | null => {
+        // Handle both formats:
+        // - ISO: [2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)
+        // - PG:  [\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")
+        const match = range.match(/\[\"?([^\",]+)\"?,\s*\"?([^\")]+)\"?\)/);
+        if (!match) return null;
+        return { start: match[1], end: match[2] };
+      };
+
+      const inputParsed = parseRange(inputValue);
+      const responseParsed = parseRange(responseValue);
+
+      if (!inputParsed || !responseParsed) {
+        return { isTimeSlot: false, matches: false };
+      }
+
+      // Normalize timestamps to ISO 8601 for comparison
+      const normalizeTimestamp = (ts: string): string => {
+        // Convert "2025-11-07 15:00:00+00" to "2025-11-07T15:00:00Z"
+        return ts.replace(' ', 'T').replace(/\+00$/, 'Z');
+      };
+
+      const inputStartNormalized = normalizeTimestamp(inputParsed.start);
+      const inputEndNormalized = normalizeTimestamp(inputParsed.end);
+      const responseStartNormalized = normalizeTimestamp(responseParsed.start);
+      const responseEndNormalized = normalizeTimestamp(responseParsed.end);
+
+      // Compare as Date objects to handle any remaining format quirks
+      const inputStartDate = new Date(inputStartNormalized).getTime();
+      const inputEndDate = new Date(inputEndNormalized).getTime();
+      const responseStartDate = new Date(responseStartNormalized).getTime();
+      const responseEndDate = new Date(responseEndNormalized).getTime();
+
+      const matches = inputStartDate === responseStartDate && inputEndDate === responseEndDate;
+
+      return { isTimeSlot: true, matches };
+    } catch (error) {
+      // Error parsing - not a time_slot field
+      return { isTimeSlot: false, matches: false };
+    }
+  }
+
+  /**
    * Compares geography/geometry fields by converting EWKB to EWKT.
    * Input: EWKT format like "SRID=4326;POINT(-83 43)"
    * Response: EWKB hex format like "0101000020E6100000..."
@@ -456,8 +516,14 @@ export class DataService {
                 if (colorComparison.isColor) {
                   match = colorComparison.matches;
                 } else {
-                  // Primitive value - use loose equality to handle string vs number (e.g., "4" vs 4)
-                  match = inputValue == responseValue;  // Use == for type coercion
+                  // Check if this is a time_slot field and compare properly
+                  const timeSlotComparison = this.compareTimeSlotValues(inputValue, responseValue);
+                  if (timeSlotComparison.isTimeSlot) {
+                    match = timeSlotComparison.matches;
+                  } else {
+                    // Primitive value - use loose equality to handle string vs number (e.g., "4" vs 4)
+                    match = inputValue == responseValue;  // Use == for type coercion
+                  }
                 }
               }
             }

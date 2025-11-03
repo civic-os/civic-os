@@ -40,9 +40,11 @@ describe('CreatePage', () => {
   let mockRouter: jasmine.SpyObj<Router>;
   let mockKeycloak: jasmine.SpyObj<Keycloak>;
   let routeParams: BehaviorSubject<any>;
+  let queryParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
     routeParams = new BehaviorSubject({ entityKey: 'Issue' });
+    queryParams = new BehaviorSubject({});
 
     mockSchemaService = jasmine.createSpyObj('SchemaService', [
       'getEntity',
@@ -65,7 +67,7 @@ describe('CreatePage', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideRouter([]),
-        { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
+        { provide: ActivatedRoute, useValue: { params: routeParams.asObservable(), queryParams: queryParams.asObservable() } },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },
         { provide: AnalyticsService, useValue: mockAnalyticsService },

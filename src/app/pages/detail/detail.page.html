@@ -122,6 +122,42 @@
           }
         }
 
+        <!-- Calendar Sections -->
+        @if (calendarSections$ | async; as calendarSections) {
+          @if (calendarSections.length > 0) {
+            <div class="mt-8">
+              @for (section of calendarSections; track section.meta.sourceTable) {
+                <div class="card bg-base-200 mb-6">
+                  <div class="card-body">
+                    <h3 class="card-title">
+                      {{ section.meta.sourceEntityDisplayName }}
+                      <span class="badge badge-primary">{{ section.events.length }}</span>
+                    </h3>
+
+                    <!-- "Add" button with query params -->
+                    <div class="card-actions justify-end mb-4">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        (click)="navigateToCreateRelated(section.meta.sourceTable, section.meta.sourceColumn)">
+                        <span class="material-symbols-outlined">add</span>
+                        Add {{ section.meta.sourceEntityDisplayName }}
+                      </button>
+                    </div>
+
+                    <!-- Calendar View -->
+                    <app-time-slot-calendar
+                      mode="display"
+                      [events]="section.events"
+                      (eventClick)="onCalendarEventClick($event, section)"
+                      (dateSelect)="onCalendarDateSelect($event, section)">
+                    </app-time-slot-calendar>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
         <!-- Delete Confirmation Modal -->
         @if (showDeleteModal()) {
           <div class="modal modal-open">

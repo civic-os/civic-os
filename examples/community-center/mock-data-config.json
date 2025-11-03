@@ -1,0 +1,20 @@
+{
+  "recordsPerEntity": {
+    "resources": 5,
+    "reservation_requests": 40,
+    "reservations": 0
+  },
+  "geographyBounds": {
+    "minLat": 42.3314,
+    "maxLat": 42.3414,
+    "minLng": -83.0558,
+    "maxLng": -83.0458
+  },
+  "excludeTables": [
+    "reservations"
+  ],
+  "outputFormat": "sql",
+  "outputPath": "./init-scripts/03_mock_data.sql",
+  "generateUsers": true,
+  "userCount": 15
+}

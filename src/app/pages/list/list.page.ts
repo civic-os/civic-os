@@ -17,11 +17,11 @@
 
 import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, shareReplay, switchMap, from, forkJoin } from 'rxjs';
+import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, shareReplay, switchMap, from, forkJoin, BehaviorSubject } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
@@ -30,6 +30,7 @@ import { DisplayPropertyComponent } from '../../components/display-property/disp
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { GeoPointMapComponent, MapMarker } from '../../components/geo-point-map/geo-point-map.component';
+import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { ImportExportButtonsComponent } from '../../components/import-export-buttons/import-export-buttons.component';
 import { FilterCriteria } from '../../interfaces/query';
 
@@ -54,6 +55,7 @@ interface FilterChip {
     FilterBarComponent,
     PaginationComponent,
     GeoPointMapComponent,
+    TimeSlotCalendarComponent,
     ImportExportButtonsComponent
 ]
 })
@@ -146,6 +148,25 @@ export class ListPage implements OnInit, OnDestroy {
     }))
   );
 
+  // Derive calendar state from URL query params
+  // IMPORTANT: Declared before data$ so it's available when data$ references it in combineLatest
+  public calendarState$: Observable<{ view: string; date: string } | null> =
+    this.route.queryParams.pipe(
+      map(params => {
+        // Only return state if cal_view and cal_date are present
+        if (params['cal_view'] && params['cal_date']) {
+          return {
+            view: params['cal_view'],
+            date: params['cal_date']
+          };
+        }
+        // Default to "this week" if no params (but only if entity shows calendar)
+        // We can't check entity here since it's not available yet, so return null
+        // and handle default in the template/component
+        return null;
+      })
+    );
+
   public data$: Observable<any> = this.route.params.pipe(
     // switchMap cancels previous subscription when params change
     switchMap(p => {
@@ -181,14 +202,15 @@ export class ListPage implements OnInit, OnDestroy {
         this.searchQuery$,
         this.sortState$,
         this.filters$,
-        this.pagination$
+        this.pagination$,
+        this.calendarState$
       ]).pipe(
         // Batch synchronous emissions during initialization
         debounceTime(0),
         // Skip emissions when values haven't actually changed
         distinctUntilChanged((prev, curr) => {
-          const [prevEntity, prevProps, prevSearch, prevSort, prevFilters, prevPagination] = prev;
-          const [currEntity, currProps, currSearch, currSort, currFilters, currPagination] = curr;
+          const [prevEntity, prevProps, prevSearch, prevSort, prevFilters, prevPagination, prevCalendarState] = prev;
+          const [currEntity, currProps, currSearch, currSort, currFilters, currPagination, currCalendarState] = curr;
 
           return prevEntity?.table_name === currEntity?.table_name &&
                  prevProps?.length === currProps?.length &&
@@ -197,10 +219,11 @@ export class ListPage implements OnInit, OnDestroy {
                  prevSort?.direction === currSort?.direction &&
                  JSON.stringify(prevFilters) === JSON.stringify(currFilters) &&
                  prevPagination?.page === currPagination?.page &&
-                 prevPagination?.pageSize === currPagination?.pageSize;
+                 prevPagination?.pageSize === currPagination?.pageSize &&
+                 JSON.stringify(prevCalendarState) === JSON.stringify(currCalendarState);
         }),
         tap(() => this.isLoading.set(true)),
-        switchMap(([entity, props, search, sortState, filters, pagination]) => {
+        switchMap(([entity, props, search, sortState, filters, pagination, calendarState]) => {
           if (props && props.length > 0 && p['entityKey']) {
             let columns = props
               .map(x => SchemaService.propertyToSelectString(x));
@@ -216,7 +239,25 @@ export class ListPage implements OnInit, OnDestroy {
 
             // Filter out any filters that don't match current entity's columns
             const validColumnNames = props.map(p => p.column_name);
-            const validFilters = filters.filter(f => validColumnNames.includes(f.column));
+            let validFilters = filters.filter(f => validColumnNames.includes(f.column));
+
+            // Add calendar date range filter if calendar is shown and state is set
+            if (entity?.show_calendar && entity?.calendar_property_name && calendarState) {
+              const range = this.calculateDateRange(calendarState.view, calendarState.date);
+              validFilters = [
+                ...validFilters,
+                {
+                  column: entity.calendar_property_name,
+                  operator: 'ov',
+                  value: `[${range.start.toISOString()},${range.end.toISOString()})`
+                }
+              ];
+            }
+
+            // When calendar is active, use larger page size to show all events in range
+            const effectivePagination = (entity?.show_calendar && calendarState)
+              ? { page: 1, pageSize: 1000 }
+              : pagination;
 
             // Only apply search if entity has search_fields defined
             const validSearch = (entity && entity.search_fields && entity.search_fields.length > 0)
@@ -230,7 +271,7 @@ export class ListPage implements OnInit, OnDestroy {
               orderField: orderField,
               orderDirection: sortState.direction || undefined,
               filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
-              pagination: pagination
+              pagination: effectivePagination
             });
           } else {
             return of({ data: [], totalCount: 0 });
@@ -318,6 +359,44 @@ export class ListPage implements OnInit, OnDestroy {
       } as MapMarker));
 
     return markers;
+  });
+
+  // Calendar-related signals
+  // Check if calendar should be shown
+  public showCalendar = computed(() => {
+    const entity = this.entitySignal();
+    return entity?.show_calendar && entity?.calendar_property_name;
+  });
+
+  // Build calendar events from main data
+  public calendarEvents = computed(() => {
+    const entity = this.entitySignal();
+    const data = this.dataSignal();
+
+    if (!entity?.show_calendar || !entity?.calendar_property_name || !data || data.length === 0) {
+      return [];
+    }
+
+    const dateProp = entity.calendar_property_name;
+    const colorProp = entity.calendar_color_property;
+
+    const events = data
+      .filter((row: any) => !!row[dateProp])
+      .map((row: any) => {
+        const rawValue = row[dateProp];
+        const { start, end } = this.parseTimeSlot(rawValue);
+
+        return {
+          id: row.id,
+          title: row.display_name || `${entity.display_name} #${row.id}`,
+          start: start,
+          end: end,
+          color: colorProp ? row[colorProp] : '#3B82F6',
+          extendedProps: { data: row }
+        } as CalendarEvent;
+      });
+
+    return events;
   });
 
   // Build filter chips with compact format
@@ -730,5 +809,124 @@ export class ListPage implements OnInit, OnDestroy {
     // For now, we can manually trigger a reload by navigating to the same route
     // This will cause the data$ observable to re-fetch
     window.location.reload();
+  }
+
+  /**
+   * Navigate to detail page when calendar event is clicked
+   */
+  public onCalendarEventClick(event: CalendarEvent) {
+    if (this.entityKey) {
+      this.router.navigate(['/view', this.entityKey, event.id]);
+    }
+  }
+
+  /**
+   * Handle calendar date range changes (prev/next/view change)
+   * Updates URL query params which triggers main data$ observable to refetch
+   */
+  public onCalendarDateRangeChange(range: { start: Date; end: Date }) {
+
+    // Infer calendar view from range duration
+    const durationDays = Math.round((range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24));
+
+    let view: string;
+    let focusDate: Date;
+
+    if (durationDays <= 1) {
+      view = 'timeGridDay';
+      focusDate = range.start;
+    } else if (durationDays <= 7) {
+      view = 'timeGridWeek';
+      focusDate = range.start;
+    } else {
+      // Month view: range includes overflow days, find the 1st of the featured month
+      view = 'dayGridMonth';
+
+      // The featured month is the month containing the midpoint of the range
+      const midpoint = new Date((range.start.getTime() + range.end.getTime()) / 2);
+      focusDate = new Date(midpoint.getFullYear(), midpoint.getMonth(), 1);
+    }
+
+    // Update URL query params with new calendar state
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        cal_view: view,
+        cal_date: focusDate.toISOString().split('T')[0], // YYYY-MM-DD
+        page: 1  // Reset pagination when calendar navigates
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+
+    // Data will automatically refetch due to combineLatest observing route.queryParams
+  }
+
+  /**
+   * Parse tstzrange string to Date objects
+   */
+  private parseTimeSlot(tstzrange: string): { start: Date; end: Date } {
+    // Parse: ["2025-03-15 14:00:00+00","2025-03-15 16:00:00+00")
+    // Note: PostgreSQL returns tstzrange with escaped quotes in JSON
+    const match = tstzrange.match(/\["?([^",]+)"?,\s*"?([^")]+)"?\)/);
+    if (!match) {
+      // Return empty dates if parsing fails
+      return { start: new Date(), end: new Date() };
+    }
+    return {
+      start: new Date(match[1]),
+      end: new Date(match[2])
+    };
+  }
+
+  /**
+   * Get ISO date string for the start of this week (Sunday)
+   * Used as default when no calendar URL params are present
+   */
+  private getThisWeekStartDate(): string {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const sunday = new Date(now);
+    sunday.setDate(now.getDate() - dayOfWeek);
+    return sunday.toISOString().split('T')[0]; // YYYY-MM-DD
+  }
+
+  /**
+   * Calculate date range from calendar view and focus date
+   * Mirrors FullCalendar's range calculation logic
+   */
+  private calculateDateRange(view: string, dateStr: string): { start: Date; end: Date } {
+    const date = new Date(dateStr + 'T00:00:00'); // Ensure consistent parsing in local timezone
+
+    if (view === 'timeGridDay') {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setHours(24, 0, 0, 0);
+      return { start, end };
+    } else if (view === 'timeGridWeek') {
+      const start = new Date(date);
+      const dayOfWeek = start.getDay();
+      start.setDate(start.getDate() - dayOfWeek); // Go to Sunday
+      start.setHours(0, 0, 0, 0);
+
+      const end = new Date(start);
+      end.setDate(end.getDate() + 7);
+      return { start, end };
+    } else if (view === 'dayGridMonth') {
+      // For month view, extend to surrounding weeks to show complete weeks
+      const start = new Date(date.getFullYear(), date.getMonth(), 1);
+      start.setDate(start.getDate() - start.getDay()); // Go back to Sunday
+      start.setHours(0, 0, 0, 0);
+
+      const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      const end = new Date(lastDayOfMonth);
+      end.setDate(end.getDate() + (6 - end.getDay()) + 1); // Go forward to Saturday + 1
+
+      return { start, end };
+    }
+
+    // Fallback
+    return { start: date, end: date };
   }
 }

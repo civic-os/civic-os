@@ -100,8 +100,8 @@ describe('SchemaEditorPage - System Type Filtering', () => {
     it('should filter out system types', () => {
       // Set up entities
       component.entities.set([
-        { table_name: 'issues', display_name: 'Issues', description: 'Issue tracking', sort_order: 1, search_fields: null, show_map: false, map_property_name: null, insert: true, select: true, update: true, delete: true },
-        { table_name: 'statuses', display_name: 'Statuses', description: 'Issue statuses', sort_order: 2, search_fields: null, show_map: false, map_property_name: null, insert: true, select: true, update: true, delete: true }
+        { table_name: 'issues', display_name: 'Issues', description: 'Issue tracking', sort_order: 1, search_fields: null, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null, insert: true, select: true, update: true, delete: true },
+        { table_name: 'statuses', display_name: 'Statuses', description: 'Issue statuses', sort_order: 2, search_fields: null, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null, insert: true, select: true, update: true, delete: true }
       ]);
 
       // Set up system types
@@ -125,8 +125,8 @@ describe('SchemaEditorPage - System Type Filtering', () => {
 
     it('should filter out junction tables', () => {
       component.entities.set([
-        { table_name: 'issues', display_name: 'Issues', description: 'Issue tracking', sort_order: 1, search_fields: null, show_map: false, map_property_name: null, insert: true, select: true, update: true, delete: true },
-        { table_name: 'tags', display_name: 'Tags', description: 'Tag labels', sort_order: 2, search_fields: null, show_map: false, map_property_name: null, insert: true, select: true, update: true, delete: true }
+        { table_name: 'issues', display_name: 'Issues', description: 'Issue tracking', sort_order: 1, search_fields: null, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null, insert: true, select: true, update: true, delete: true },
+        { table_name: 'tags', display_name: 'Tags', description: 'Tag labels', sort_order: 2, search_fields: null, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null, insert: true, select: true, update: true, delete: true }
       ]);
 
       component.systemTypes.set(new Set(['files', 'civic_os_users']));

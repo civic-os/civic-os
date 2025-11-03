@@ -384,6 +384,16 @@ export class EditPage {
       // Money: Keep as number, PostgREST accepts numeric values for money type
     });
 
+    // Remove audit fields AFTER transformation (managed by database triggers)
+    // BUT only if they're NOT in currentProps (i.e., they're read-only metadata, not user-editable fields)
+    const editableColumns = new Set(this.currentProps.map(p => p.column_name));
+    if (!editableColumns.has('created_at')) {
+      delete transformed.created_at;
+    }
+    if (!editableColumns.has('updated_at')) {
+      delete transformed.updated_at;
+    }
+
     return transformed;
   }
 }

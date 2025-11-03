@@ -1,7 +1,7 @@
 services:
   postgres:
     build:
-      context: ..
+      context: ../..
       dockerfile: docker/dev-postgres/Dockerfile
     platform: linux/amd64
     container_name: broader_impacts_postgres
@@ -14,9 +14,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Mount Sqitch files for migrations
-      - ../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
-      - ../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
-      - ../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
+      - ../../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
+      - ../../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
+      - ../../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
       # Mount project-specific init scripts
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
@@ -105,7 +105,7 @@ services:
   # S3 Signer Service - Generates presigned upload URLs
   s3-signer:
     build:
-      context: ../services/s3-signer
+      context: ../../services/s3-signer
       dockerfile: Dockerfile
     container_name: broader_impacts_s3_signer
     environment:
@@ -129,7 +129,7 @@ services:
   # Thumbnail Worker - Generates image and PDF thumbnails
   thumbnail-worker:
     build:
-      context: ../services/thumbnail-worker
+      context: ../../services/thumbnail-worker
       dockerfile: Dockerfile
     container_name: broader_impacts_thumbnail_worker
     environment:
