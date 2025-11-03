@@ -42,7 +42,13 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Set up Record Defaults (On Create)
 
 ### Logic
-- [ ] Build manually triggerable Logic (via Button on Entity detail page)
+- [ ] **Entity Action Buttons** - Manually triggerable logic via buttons on Entity detail pages (see `docs/development/ENTITY_ACTIONS.md`)
+  - [ ] Database schema (entity_actions, protected_rpcs tables) and migration
+  - [ ] Per-RPC permission system with role mapping
+  - [ ] Conditional visibility and disabled state (JSONB expressions evaluated client-side)
+  - [ ] RPC-driven post-action behavior (messages, navigation, refresh controlled by return value)
+  - [ ] Frontend integration (DetailPage buttons, confirmation modals, loading states)
+  - [ ] Example implementation in pothole domain (approve/reject actions)
 
 ### Dashboards (Phased Development)
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
