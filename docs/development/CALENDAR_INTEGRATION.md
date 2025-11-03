@@ -675,7 +675,7 @@ npm install @fullcalendar/core @fullcalendar/angular @fullcalendar/daygrid @full
 
 ### Database Metadata Schema
 
-**File**: `postgres/3_civic_os_schema.sql`
+**Migration**: Create a new Sqitch migration (or modify `postgres/migrations/deploy/v0-9-0-add-time-slot-domain.sql`)
 
 **Extend `metadata.entities` table**:
 ```sql
@@ -887,7 +887,7 @@ INSERT INTO metadata.validations (
 
 ### Backend RPC Function
 
-**File**: `postgres/3_civic_os_schema.sql` or separate migration
+**Migration**: Create a new Sqitch migration for overlap validation
 
 **Overlap checker**:
 ```sql

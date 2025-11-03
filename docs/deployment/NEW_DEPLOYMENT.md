@@ -161,7 +161,7 @@ CREATE TRIGGER set_updated_at_trigger
   EXECUTE FUNCTION public.set_updated_at();
 ```
 
-**Note**: The `set_created_at()` and `set_updated_at()` functions are provided by core Civic OS scripts in `postgres/3_civic_os_schema.sql`.
+**Note**: The `set_created_at()` and `set_updated_at()` functions are provided by the Civic OS baseline migration (`postgres/migrations/deploy/v0-4-0-baseline.sql`).
 
 ### Property Types
 
@@ -404,7 +404,7 @@ CREATE POLICY "authors: delete permission" ON public.authors
 -- Repeat for other tables...
 ```
 
-**Note**: The `has_permission()` function is provided by core Civic OS scripts in `postgres/2_rbac_functions.sql`.
+**Note**: The `has_permission()` function is provided by the Civic OS baseline migration (`postgres/migrations/deploy/v0-4-0-baseline.sql`).
 
 #### `03_<domain>_data.sql` - Seed Data
 
@@ -703,7 +703,7 @@ WHERE p.table_name = 'books'
   AND r.display_name = 'user';
 ```
 
-**Note**: See `postgres/4_rbac_sample_data.sql` for default roles (anonymous, user, editor, admin).
+**Note**: Default roles (anonymous, user, editor, admin) are defined in the Civic OS baseline migration (`postgres/migrations/deploy/v0-4-0-baseline.sql`).
 
 ---
 

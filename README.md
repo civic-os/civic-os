@@ -142,12 +142,12 @@ examples/                # Example deployments
 │   └── ...              # Same structure as pothole
 └── generate.sh          # Unified mock data generation script
 
-postgres/                # Shared PostgreSQL scripts
-├── 0_postgis_setup.sql       # PostGIS extension
-├── 1_postgrest_setup.sql     # PostgREST roles and RLS
-├── 2_rbac_functions.sql      # Permission checking functions
-├── 3_civic_os_schema.sql     # Metadata tables and views
-└── 4_rbac_sample_data.sql    # Default roles
+postgres/                # Database schema management
+├── migrations/          # Sqitch-managed versioned migrations
+│   ├── deploy/         # Schema changes (forward migrations)
+│   ├── revert/         # Rollback scripts
+│   └── verify/         # Verification tests
+└── sqitch.plan         # Migration execution plan
 ```
 
 ## Documentation

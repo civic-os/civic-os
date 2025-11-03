@@ -24,7 +24,7 @@ The system tracks two independent caches:
 
 #### Database Layer
 
-**`postgres/5_schema_cache_versioning.sql`**
+**Civic OS Baseline Migration** (`postgres/migrations/deploy/v0-4-0-baseline.sql`)
 - Adds `updated_at TIMESTAMPTZ` columns to all metadata tables
 - Creates triggers using `set_updated_at()` function to auto-update timestamps
 - Defines `schema_cache_versions` view that returns latest version for each cache

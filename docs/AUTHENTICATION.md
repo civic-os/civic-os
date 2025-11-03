@@ -488,7 +488,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 **Troubleshooting:**
 - If you get 401 Unauthorized: Token expired or invalid, login again and get new token
-- If you get empty response: Function may not be exposed via RPC (check postgres/2_rbac_functions.sql)
+- If you get empty response: Function may not be exposed via RPC (check `postgres/migrations/deploy/v0-4-0-baseline.sql`)
 - If roles are empty: Check JWT token at jwt.io - roles should be in `realm_access.roles`
 
 ---

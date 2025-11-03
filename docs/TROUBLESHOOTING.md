@@ -24,7 +24,7 @@ The PostgreSQL `get_user_roles()` function cannot extract roles from the JWT cla
    Or manually apply just the updated function:
    ```sql
    -- Connect to your database and run the updated get_user_roles() function
-   -- from postgres/2_rbac_functions.sql
+   -- from postgres/migrations/deploy/v0-4-0-baseline.sql
    ```
 
 2. **Use the Debug Panel** to diagnose the issue:
@@ -70,7 +70,7 @@ The PostgreSQL `get_user_roles()` function cannot extract roles from the JWT cla
    - The claim path in `get_user_roles()` matches your Keycloak configuration
 
 5. **Update get_user_roles() if needed**:
-   If your Keycloak uses a different claim structure, modify the function in `postgres/2_rbac_functions.sql` to match. The updated function already tries three common patterns in order:
+   If your Keycloak uses a different claim structure, modify the function in `postgres/migrations/deploy/v0-4-0-baseline.sql` to match. The updated function already tries three common patterns in order:
    - `realm_access.roles`
    - `resource_access.myclient.roles`
    - `roles`

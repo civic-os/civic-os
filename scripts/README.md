@@ -339,8 +339,8 @@ Available Faker modules for building display names:
 
 **Error: "No users found in civic_os_users table"**
 - The database needs at least one user for foreign key references
-- Check that core Civic OS init scripts have run
-- User creation happens in `postgres/3_civic_os_schema.sql`
+- Check that core Civic OS migrations have run (`sqitch deploy`)
+- User table is created in the baseline migration (`postgres/migrations/deploy/v0-4-0-baseline.sql`)
 
 **Generated SQL has syntax errors**
 - Check for special characters in your data
