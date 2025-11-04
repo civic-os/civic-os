@@ -1,14 +1,19 @@
 # Custom Dashboards Feature - Design Document (v3 - Revised)
 
-**Status:** 🔵 Design Phase - Not Yet Implemented
+**Status:** 🟢 Phase 1 Complete - View-only implementation with markdown widgets
 **Created:** 2025-01-15
-**Updated:** 2025-01-15
+**Updated:** 2025-01-04 (Phase 1 implementation)
 **Author:** Design Discussion with Claude
 
 **Version History:**
 - v1: Initial design
 - v2: Added hybrid storage approach and auto-refresh
 - v3: Critical analysis, revised phasing, identified gaps and killer features
+- v4: Phase 1 implemented (October 2025) - Dashboard viewing and markdown widgets
+
+**Related Documentation:**
+- `docs/INTEGRATOR_GUIDE.md` - Complete setup guide with SQL examples, database schema, and widget development
+- `CLAUDE.md` - Brief feature overview for developers
 
 ## Overview
 

@@ -4,6 +4,10 @@
 
 This document specifies the implementation of Excel import/export functionality for Civic OS list views. The feature enables users to export data to spreadsheets for analysis and bulk-import records from Excel files with comprehensive validation.
 
+**Related Documentation:**
+- `docs/INTEGRATOR_GUIDE.md` - Integrator overview, use cases, and configuration
+- `CLAUDE.md` - Brief feature mention for developers
+
 **Key Features:**
 - Export entire datasets (including system fields) to Excel
 - Import records from Excel with FK name-to-ID resolution

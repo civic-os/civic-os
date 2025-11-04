@@ -2,6 +2,13 @@
 
 This guide covers deploying Civic OS to production environments using Docker containers.
 
+**Audience**: DevOps engineers, system administrators, and deployment engineers setting up Civic OS in production.
+
+**Related Documentation**:
+- `docs/INTEGRATOR_GUIDE.md` - Metadata configuration, database patterns, and system administration
+- `CLAUDE.md` - Developer quick-reference for building applications
+- `docs/AUTHENTICATION.md` - Keycloak setup and RBAC configuration
+
 **License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2025 Civic OS, L3C. See the LICENSE file for full terms.
 
 ---

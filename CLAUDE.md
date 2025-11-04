@@ -47,6 +47,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `Color`: `hex_color` → Color chip display with native HTML5 color picker
 - `Email`: `email_address` → Clickable mailto: link, HTML5 email input
 - `Telephone`: `phone_number` → Clickable tel: link with formatted display, masked input (XXX) XXX-XXXX
+- `TimeSlot`: `time_slot` (tstzrange) → Formatted date range display, dual datetime-local inputs with validation, optional calendar visualization
 
 **Color Type**: Use the `hex_color` domain for RGB color values. The domain enforces `#RRGGBB` format validation at the database level. UI displays colors as badges with colored swatches, and provides both a visual color picker and text input for editing. Example:
 ```sql
@@ -72,9 +73,42 @@ CREATE TABLE contacts (
 );
 ```
 
+**TimeSlot Type** (`TimeSlot`): Use the `time_slot` domain for appointment scheduling, reservations, and time-based bookings. The domain wraps PostgreSQL's `tstzrange` (timestamp range with timezone). Database stores UTC timestamps, UI displays in user's local timezone. Display component formats ranges intelligently (same-day: "Mar 15, 2025 2:00 PM - 4:00 PM" vs multi-day: "Mar 15, 2025 2:00 PM - Mar 17, 2025 11:00 AM"). Edit component provides two datetime-local inputs with validation (end must be after start).
+
+**Calendar Integration**: Entities with `time_slot` columns can enable calendar visualization. Set `show_calendar=true` and `calendar_property_name` in `metadata.entities` to show calendar view on List pages. Detail pages automatically display calendar sections for related entities with TimeSlot properties. Requires Civic OS v0.9.0+ (includes `time_slot` domain and `btree_gist` extension).
+
+**Overlap Prevention**: Use GIST exclusion constraints to prevent double-booking at database level. Requires `btree_gist` extension (included in v0.9.0+). Frontend async validation (Phase 5) is deferred - overlaps are caught on submit.
+
+Example:
+```sql
+CREATE TABLE reservations (
+  id BIGSERIAL PRIMARY KEY,
+  resource_id INT NOT NULL REFERENCES resources(id),
+  time_slot time_slot NOT NULL,
+  purpose TEXT NOT NULL,
+
+  -- Prevent overlapping reservations for same resource
+  CONSTRAINT no_overlaps EXCLUDE USING GIST (resource_id WITH =, time_slot WITH &&)
+);
+
+-- REQUIRED: GiST index for efficient range queries and constraint enforcement
+CREATE INDEX idx_reservations_time_slot ON reservations USING GIST(time_slot);
+
+-- Enable calendar view on List page
+UPDATE metadata.entities SET
+  show_calendar = TRUE,
+  calendar_property_name = 'time_slot',
+  calendar_color_property = NULL  -- Optional: hex_color column for event colors
+WHERE table_name = 'reservations';
+```
+
+See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide and `examples/community-center/` for working example.
+
 **Status Type** (`Status`): Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with composite FK pattern for type safety. Uses generated column for entity_type discriminator and supports workflow transitions via `metadata.status_transitions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design specification. **Status**: Design phase - not yet implemented.
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, S3 signer service, thumbnail worker, and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
+
+**Microservices Architecture**: File storage features (S3 signer, thumbnail worker) currently use Node.js services with PostgreSQL LISTEN/NOTIFY. **Planned migration** to Go + River (PostgreSQL table queue) for improved reliability, at-least-once delivery, automatic retries, and zero additional infrastructure. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and migration plan
 
 **Geography (GeoPoint) Type**: When adding a geography column, you must create a paired computed field function `<column_name>_text` that returns `ST_AsText()`. PostgREST exposes this as a virtual field. Data format: Insert/Update uses EWKT `"SRID=4326;POINT(lng lat)"`, Read receives WKT `"POINT(lng lat)"`.
 
@@ -112,6 +146,24 @@ CREATE INDEX idx_issue_tags_tag_id ON issue_tags(tag_id);
 The UI displays in display mode by default (read-only badges) with an "Edit" button to enter edit mode (checkboxes with pending changes preview). Users need CREATE and DELETE permissions on the junction table to edit relationships. See `ManyToManyEditorComponent` and `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details.
 
 **Full-Text Search**: Add `civic_os_text_search` tsvector column (generated, indexed) and configure `metadata.entities.search_fields` array. Frontend automatically displays search input on List pages. See example tables for implementation pattern.
+
+**Excel Import/Export**: List pages include Import/Export buttons for bulk data operations. Export preserves filters/search/sort and includes foreign key display names. Import supports name-to-ID resolution for foreign keys with comprehensive validation. Requires CREATE permission.
+
+**Limitations**: No M:M relationships (use junction table import), 10MB file limit, 50,000 row export limit, INSERT only (no updates).
+
+See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for complete specification.
+
+## Custom Dashboards (Preview)
+
+**Status**: Phase 1 - View-only implementation complete, management UI in progress
+
+The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards. Currently supports markdown widgets (static content); dynamic widgets (filtered lists, stat cards) planned for Phase 2.
+
+**Current**: ✅ View dashboards ✅ Markdown widgets ❌ Management UI ❌ Auto-refresh ❌ Dynamic data widgets
+
+**Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern—markdown implemented, filtered_list/stat_card/query_result planned.
+
+See `docs/INTEGRATOR_GUIDE.md` for complete setup guide with SQL examples, database schema, widget config format, and custom widget development. See `docs/notes/DASHBOARD_DESIGN.md` for architecture and Phase 2-5 roadmap.
 
 ## Development Commands
 
@@ -232,6 +284,18 @@ All API calls use PostgREST conventions:
 
 The `SchemaService.propertyToSelectString()` method builds PostgREST-compatible select strings for foreign keys and user references.
 
+## Built-in PostgreSQL Functions
+
+Civic OS provides helper functions for JWT data extraction (`current_user_id()`, `current_user_email()`), RBAC checks (`has_permission()`, `is_admin()`), and programmatic metadata configuration (`upsert_entity_metadata()`, `set_role_permission()`).
+
+**Example**: RLS policy using JWT helper
+```sql
+CREATE POLICY "Users see own records" ON my_table
+  FOR SELECT TO authenticated USING (user_id = current_user_id());
+```
+
+See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters and examples.
+
 ## Authentication & RBAC
 
 **Keycloak Authentication**: See `docs/AUTHENTICATION.md` for complete setup instructions including running your own Keycloak instance for RBAC testing.
@@ -250,6 +314,7 @@ The `SchemaService.propertyToSelectString()` method builds PostgREST-compatible 
 - **Permissions Page** (`/permissions`) - Manage role-based table permissions
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
+- **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
 
 **Troubleshooting RBAC**: See `docs/TROUBLESHOOTING.md` for debugging JWT roles and permissions issues.
 
@@ -277,13 +342,46 @@ The `SchemaService.propertyToSelectString()` method builds PostgREST-compatible 
 **Why FK indexes matter:** The inverse relationships feature (showing related records on Detail pages) requires indexes on foreign key columns to avoid full table scans. Without these indexes, queries like `SELECT * FROM issues WHERE status_id = 1` will be slow on large tables.
 
 ### Custom Property Display
-Override `metadata.properties.display_name` to change labels. Set `sort_order` to control field ordering. Set `column_width` (1-2) for form field width in Create/Edit forms. Set `sortable` to enable/disable column sorting on List pages.
+
+Override property metadata to customize UI behavior:
+- **`display_name`**: Custom label (default: column_name)
+- **`sort_order`**: Field ordering in forms/tables
+- **`column_width`**: Form field width - 1 (half) or 2 (full, default)
+- **`sortable`**: Enable/disable column sorting on List pages
+- **`filterable`**: Enable/disable property in filter bar (supports ForeignKeyName, User, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)
+- **`show_on_list`**: Show property in List page table (default: true)
+- **`show_on_create`**: Show property in Create form (default: true)
+- **`show_on_edit`**: Show property in Edit form (default: true)
+- **`show_on_detail`**: Show property in Detail page (default: true)
+
+**Example**: Configure issue status filtering and hide system fields from forms
+```sql
+-- Enable filtering on status dropdown
+INSERT INTO metadata.properties (table_name, column_name, filterable)
+VALUES ('issues', 'status_id', TRUE)
+ON CONFLICT (table_name, column_name) DO UPDATE SET filterable = TRUE;
+
+-- Hide timestamps from create/edit forms (keep on detail)
+UPDATE metadata.properties
+SET show_on_create = FALSE, show_on_edit = FALSE
+WHERE column_name IN ('created_at', 'updated_at');
+```
 
 ### Handling New Property Types
 1. Add new type to `EntityPropertyType` enum
 2. Update `SchemaService.getPropertyType()` to detect the type
 3. Add rendering logic to `DisplayPropertyComponent`
 4. Add input control to `EditPropertyComponent`
+
+### Metadata Tables Reference
+
+Configure Civic OS behavior via metadata tables:
+- **`metadata.entities`** / **`metadata.properties`** - Entity/property display settings (use Entity/Property Management pages or SQL)
+- **`metadata.validations`** / **`metadata.constraint_messages`** - Validation rules and friendly error messages
+- **`metadata.roles`** / **`metadata.permissions`** - RBAC configuration (use Permissions page or SQL)
+- **`metadata.dashboards`** / **`metadata.dashboard_widgets`** - Dashboard configuration (Preview, SQL only)
+
+See `docs/INTEGRATOR_GUIDE.md` for complete metadata architecture, field descriptions, and configuration patterns.
 
 ### Creating Records with Pre-filled Fields (Query Param Pattern)
 
