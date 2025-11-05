@@ -253,8 +253,10 @@ The example includes a `mock-data-config.json` file for generating additional te
 
 ```bash
 # Generate mock data (from project root)
-set -a && source examples/community-center/.env && set +a
-npm run generate:mock:community-center
+npm run generate community-center
+
+# Or using the shell wrapper
+./examples/generate.sh community-center
 ```
 
 **Note**: Currently, the schema includes sufficient sample data (1 resource, 4 requests). Mock data generation is optional and can be configured via `mock-data-config.json`.

@@ -200,15 +200,15 @@ ng generate component pages/page-name --type=page  # Use "page" suffix by conven
 
 **Mock Data Generation:**
 ```bash
-# Using the wrapper script (recommended):
-./examples/generate.sh pothole              # Generate for Pot Hole example
-./examples/generate.sh pothole --sql        # SQL file only
-./examples/generate.sh broader-impacts      # Generate for Broader Impacts (UMFlint)
-./examples/generate.sh broader-impacts --sql # SQL file only
+# Using npm wrapper (recommended):
+npm run generate pothole              # Generate for Pot Hole example
+npm run generate pothole -- --sql     # SQL file only
+npm run generate broader-impacts      # Generate for Broader Impacts (UMFlint)
+npm run generate community-center     # Generate for Community Center example
 
-# Using npm scripts directly (alternative):
-set -a && source examples/pothole/.env && set +a && npm run generate:mock:pothole
-set -a && source examples/broader-impacts/.env && set +a && npm run generate:mock:bi
+# Using shell wrapper (alternative):
+./examples/generate.sh pothole --sql
+./examples/generate.sh broader-impacts
 ```
 
 The mock data generator is **validation-aware**: it fetches validation rules from `metadata.validations` and generates compliant data (respects min/max, minLength/maxLength, pattern constraints). Each example has its own `mock-data-config.json` to control record counts and geography bounds.
