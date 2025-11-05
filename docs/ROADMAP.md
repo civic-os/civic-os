@@ -68,6 +68,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Title updates (configure base from Angular Runtime)
 - [ ] Application Logging from frontend and pattern for SQL logging
 - [x] Application Analytics (external Matomo integration; see Phase 3 for built-in analytics engine)
+- [ ] Move api functionality (views, functions, rpcs) into `api` schema that is also accessible via postgrest
 
 ## Phase 2: Introspection Tools
 

@@ -335,6 +335,14 @@ export class PropertyManagementPage {
     return typeLabels[property.type] || 'Unknown';
   }
 
+  /**
+   * Check if property is an auto-managed timestamp field.
+   * These fields are managed by database triggers and cannot be edited by users.
+   */
+  isSystemTimestamp(property: PropertyRow): boolean {
+    return property.column_name === 'created_at' || property.column_name === 'updated_at';
+  }
+
   isFilterableType(property: PropertyRow): boolean {
     // Exclude system fields from filtering
     const systemFields = ['id', 'created_at', 'updated_at', 'civic_os_text_search'];

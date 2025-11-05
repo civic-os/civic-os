@@ -174,7 +174,20 @@ VALUES ('users', 'username', 'pattern', '^[a-zA-Z0-9_]{3,20}$', 'Username must b
 
 **`metadata.constraint_messages`** - Maps database constraint names to user-friendly error messages
 
-When database constraints are violated (CHECK, UNIQUE, FOREIGN KEY), PostgreSQL returns cryptic error messages. This table maps constraint names to friendly messages that users can understand.
+When database constraints are violated (CHECK, UNIQUE, FOREIGN KEY, EXCLUSION), PostgreSQL returns cryptic error messages like `"23514: new row violates check constraint"`. This table maps constraint names to friendly messages that users see in the UI.
+
+**How It Works** (Implemented in v0.9.0):
+1. Frontend preloads constraint messages at startup via `public.constraint_messages` view
+2. Messages are cached in `SchemaService` alongside entities and properties
+3. When a constraint error occurs, `ErrorService` extracts the constraint name from the PostgreSQL error
+4. The cached message is looked up and displayed to the user
+5. Cache is refreshed on navigation when `schema_cache_versions` detects changes
+
+**Supported Error Codes**:
+- `23514` - CHECK constraint violations
+- `23P01` - Exclusion constraint violations (e.g., overlapping time slots)
+- `23505` - UNIQUE constraint violations (future support)
+- `23503` - FOREIGN KEY violations (future support)
 
 Fields:
 - `constraint_name` (PK) - PostgreSQL constraint name
@@ -190,16 +203,30 @@ VALUES
   ('age_minimum', 'users', 'age', 'You must be at least 18 years old'),
   ('valid_email_domain', 'users', 'email', 'Email must be from an authorized domain');
 
--- UNIQUE constraints
+-- UNIQUE constraints (currently falls back to generic "Record must be unique")
 INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
 VALUES
   ('users_email_key', 'users', 'email', 'An account with this email address already exists'),
   ('issues_ticket_number_key', 'issues', 'ticket_number', 'This ticket number is already in use');
 
--- FOREIGN KEY constraints
+-- FOREIGN KEY constraints (currently falls back to generic error)
 INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
 VALUES
   ('issues_assigned_to_fkey', 'issues', 'assigned_to', 'Cannot delete user: they have assigned issues');
+
+-- EXCLUSION constraints (v0.9.0+, used for TimeSlot overlap prevention)
+INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
+VALUES
+  ('no_overlapping_reservations', 'reservations', 'time_slot',
+   'This time slot is already booked. Please select a different time or check the calendar for availability.');
+```
+
+**Finding Constraint Names**: Query `pg_constraint` to find constraint names in your database:
+```sql
+SELECT conname, conrelid::regclass AS table_name, contype
+FROM pg_constraint
+WHERE conrelid::regclass::text = 'your_table_name';
+-- contype: 'c' = CHECK, 'u' = UNIQUE, 'f' = FOREIGN KEY, 'x' = EXCLUSION
 ```
 
 ---

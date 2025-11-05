@@ -641,4 +641,233 @@ describe('ListPage', () => {
     });
   });
 
+  describe('Calendar Integration', () => {
+    describe('calendarEvents', () => {
+      it('should return empty array when entity has no calendar configuration', (done) => {
+        const entityWithoutCalendar = { ...MOCK_ENTITIES.issue, show_calendar: false };
+        const mockProps = [MOCK_PROPERTIES.textShort];
+        mockSchemaService.getEntity.and.returnValue(of(entityWithoutCalendar));
+        mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
+        mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+
+        routeParams.next({ entityKey: 'Issue' });
+
+        setTimeout(() => {
+          const events = component.calendarEvents();
+          expect(events).toEqual([]);
+          done();
+        }, 100);
+      });
+
+      it('should generate calendar events with default color when calendar_color_property is null', (done) => {
+        const calendarEntity = {
+          ...MOCK_ENTITIES.issue,
+          show_calendar: true,
+          calendar_property_name: 'time_slot',
+          calendar_color_property: null
+        };
+        const mockProps = [MOCK_PROPERTIES.textShort];
+        const mockData = [
+          {
+            id: 1,
+            display_name: 'Team Meeting',
+            time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)'
+          },
+          {
+            id: 2,
+            display_name: 'Workshop',
+            time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)'
+          }
+        ];
+
+        mockSchemaService.getEntity.and.returnValue(of(calendarEntity));
+        mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
+        mockDataService.getDataPaginated.and.returnValue(of({ data: mockData as any, totalCount: 2 }));
+
+        routeParams.next({ entityKey: 'Issue' });
+
+        setTimeout(() => {
+          const events = component.calendarEvents();
+          expect(events.length).toBe(2);
+
+          // All events should use default blue color
+          expect(events[0].color).toBe('#3B82F6');
+          expect(events[1].color).toBe('#3B82F6');
+
+          // Verify event structure
+          expect(events[0].title).toBe('Team Meeting');
+          expect(events[0].start).toEqual(new Date('2025-03-15T14:00:00Z'));
+          expect(events[0].end).toEqual(new Date('2025-03-15T16:00:00Z'));
+          done();
+        }, 100);
+      });
+
+      it('should use custom colors from calendar_color_property when specified', (done) => {
+        const calendarEntity = {
+          ...MOCK_ENTITIES.issue,
+          show_calendar: true,
+          calendar_property_name: 'time_slot',
+          calendar_color_property: 'status_color'
+        };
+
+        const mockData = [
+          {
+            id: 1,
+            display_name: 'Approved Reservation',
+            time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)',
+            status_color: '#10B981'  // Green
+          },
+          {
+            id: 2,
+            display_name: 'Pending Reservation',
+            time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)',
+            status_color: '#EF4444'  // Red
+          },
+          {
+            id: 3,
+            display_name: 'Tentative Booking',
+            time_slot: '[2025-03-22T13:00:00Z,2025-03-22T15:00:00Z)',
+            status_color: '#F59E0B'  // Amber
+          }
+        ];
+
+        const mockProps = [MOCK_PROPERTIES.textShort];
+        mockSchemaService.getEntity.and.returnValue(of(calendarEntity));
+        mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
+        mockDataService.getDataPaginated.and.returnValue(of({ data: mockData as any, totalCount: 3 }));
+
+        routeParams.next({ entityKey: 'Issue' });
+
+        setTimeout(() => {
+          const events = component.calendarEvents();
+          expect(events.length).toBe(3);
+
+          // Each event should have its custom color
+          expect(events[0].color).toBe('#10B981');
+          expect(events[1].color).toBe('#EF4444');
+          expect(events[2].color).toBe('#F59E0B');
+
+          // Verify titles are preserved
+          expect(events[0].title).toBe('Approved Reservation');
+          expect(events[1].title).toBe('Pending Reservation');
+          expect(events[2].title).toBe('Tentative Booking');
+          done();
+        }, 100);
+      });
+
+      it('should filter out rows with null time_slot values', (done) => {
+        const calendarEntity = {
+          ...MOCK_ENTITIES.issue,
+          show_calendar: true,
+          calendar_property_name: 'time_slot',
+          calendar_color_property: null
+        };
+
+        const mockData = [
+          {
+            id: 1,
+            display_name: 'Valid Event',
+            time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)'
+          },
+          {
+            id: 2,
+            display_name: 'No Time Slot',
+            time_slot: null  // Should be filtered out
+          },
+          {
+            id: 3,
+            display_name: 'Another Valid Event',
+            time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)'
+          }
+        ];
+
+        const mockProps = [MOCK_PROPERTIES.textShort];
+        mockSchemaService.getEntity.and.returnValue(of(calendarEntity));
+        mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
+        mockDataService.getDataPaginated.and.returnValue(of({ data: mockData as any, totalCount: 3 }));
+
+        routeParams.next({ entityKey: 'Issue' });
+
+        setTimeout(() => {
+          const events = component.calendarEvents();
+          expect(events.length).toBe(2);
+          expect(events[0].id).toBe(1);
+          expect(events[1].id).toBe(3);
+          done();
+        }, 100);
+      });
+
+      it('should fallback to default color when color property value is missing', (done) => {
+        const calendarEntity = {
+          ...MOCK_ENTITIES.issue,
+          show_calendar: true,
+          calendar_property_name: 'time_slot',
+          calendar_color_property: 'status_color'
+        };
+
+        const mockData = [
+          {
+            id: 1,
+            display_name: 'With Color',
+            time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)',
+            status_color: '#10B981'
+          },
+          {
+            id: 2,
+            display_name: 'Without Color',
+            time_slot: '[2025-03-20T09:00:00Z,2025-03-20T12:00:00Z)',
+            status_color: null  // Missing color, should use default
+          }
+        ];
+
+        const mockProps = [MOCK_PROPERTIES.textShort];
+        mockSchemaService.getEntity.and.returnValue(of(calendarEntity));
+        mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
+        mockDataService.getDataPaginated.and.returnValue(of({ data: mockData as any, totalCount: 2 }));
+
+        routeParams.next({ entityKey: 'Issue' });
+
+        setTimeout(() => {
+          const events = component.calendarEvents();
+          expect(events.length).toBe(2);
+          expect(events[0].color).toBe('#10B981');
+          expect(events[1].color).toBe('#3B82F6');  // Fallback to default
+          done();
+        }, 100);
+      });
+
+      it('should use entity display_name in title when row has no display_name', (done) => {
+        const calendarEntity = {
+          ...MOCK_ENTITIES.issue,
+          display_name: 'Reservation',
+          show_calendar: true,
+          calendar_property_name: 'time_slot',
+          calendar_color_property: null
+        };
+
+        const mockData = [
+          {
+            id: 1,
+            time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)'
+            // No display_name property
+          }
+        ];
+
+        const mockProps = [MOCK_PROPERTIES.textShort];
+        mockSchemaService.getEntity.and.returnValue(of(calendarEntity));
+        mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
+        mockDataService.getDataPaginated.and.returnValue(of({ data: mockData as any, totalCount: 1 }));
+
+        routeParams.next({ entityKey: 'Issue' });
+
+        setTimeout(() => {
+          const events = component.calendarEvents();
+          expect(events.length).toBe(1);
+          expect(events[0].title).toBe('Reservation #1');
+          done();
+        }, 100);
+      });
+    });
+  });
+
 });

@@ -28,22 +28,26 @@ describe('VersionService', () => {
 
   const mockVersions: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-    { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+    { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
   ];
 
   const updatedEntitiesVersion: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
-    { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+    { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
   ];
 
   const updatedPropertiesVersion: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-    { cache_name: 'properties', version: '2025-01-02T00:00:00Z' }
+    { cache_name: 'properties', version: '2025-01-02T00:00:00Z' },
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
   ];
 
   const updatedBothVersions: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
-    { cache_name: 'properties', version: '2025-01-02T00:00:00Z' }
+    { cache_name: 'properties', version: '2025-01-02T00:00:00Z' },
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
   ];
 
   beforeEach(() => {
@@ -92,6 +96,26 @@ describe('VersionService', () => {
       const currentVersions = service.getCurrentVersions();
       expect(currentVersions.entities).toBeNull();
       expect(currentVersions.properties).toBeNull();
+    });
+
+    it('should handle init with only 2 cache entries (pre-v0.9.0 database)', (done) => {
+      // Simulate database that doesn't have constraint_messages table yet
+      const versionsWithoutConstraintMessages: CacheVersion[] = [
+        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+      ];
+
+      service.init().subscribe(() => {
+        const currentVersions = service.getCurrentVersions();
+        // Should successfully store the versions that are present
+        expect(currentVersions.entities).toBe('2025-01-01T00:00:00Z');
+        expect(currentVersions.properties).toBe('2025-01-01T00:00:00Z');
+        // constraintMessagesVersion should remain null (graceful degradation)
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+      req.flush(versionsWithoutConstraintMessages);
     });
   });
 
@@ -161,6 +185,45 @@ describe('VersionService', () => {
 
       const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
       req.flush(updatedBothVersions);
+    });
+
+    it('should handle missing constraint_messages entry (backward compatibility)', (done) => {
+      // Simulate pre-v0.9.0 database that only returns entities and properties
+      const versionsWithoutConstraintMessages: CacheVersion[] = [
+        { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
+        { cache_name: 'properties', version: '2025-01-02T00:00:00Z' }
+      ];
+
+      service.checkForUpdates().subscribe(result => {
+        // Should detect entities and properties changes, but not fail on missing constraint_messages
+        expect(result.entitiesNeedsRefresh).toBe(true);
+        expect(result.propertiesNeedsRefresh).toBe(true);
+        expect(result.constraintMessagesNeedsRefresh).toBe(false); // Not present, so no refresh
+        expect(result.hasChanges).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+      req.flush(versionsWithoutConstraintMessages);
+    });
+
+    it('should detect when only constraint_messages changed', (done) => {
+      const constraintMessagesChanged: CacheVersion[] = [
+        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'constraint_messages', version: '2025-01-02T00:00:00Z' }
+      ];
+
+      service.checkForUpdates().subscribe(result => {
+        expect(result.entitiesNeedsRefresh).toBe(false);
+        expect(result.propertiesNeedsRefresh).toBe(false);
+        expect(result.constraintMessagesNeedsRefresh).toBe(true);
+        expect(result.hasChanges).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+      req.flush(constraintMessagesChanged);
     });
   });
 

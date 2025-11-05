@@ -1658,13 +1658,22 @@ END $$;
 - [x] Auto-include calendar property in query
 - [x] Test with example schema - ready for testing with community-center
 
-### Phase 4: Detail Page Section ✅ COMPLETE
+### Phase 4: Detail Page Section ⏸️ DISABLED (UX Issues)
+**Status**: Implemented but disabled due to UX problems (2025-11-04)
+
 - [x] Detect inverse calendar relationships (calendarSections$ observable)
 - [x] Load related calendar data
 - [x] Render calendar section(s)
 - [x] Implement "Add" button with FK pre-fill
 - [x] Implement date selection → Create with prefill
 - [x] Test navigation flow - ready for manual testing
+
+**Current Status**: Feature is implemented but commented out in `detail.page.html` due to:
+- Redundancy in 1:1 relationships (same record shown in Related Records + calendar section)
+- No way to control whether calendars show on List page vs Detail page
+- Visual clutter with multiple calendar sections
+
+**See**: `docs/notes/CALENDAR_RELATED_RECORDS_TODO.md` for detailed problem analysis and potential solutions.
 
 ### Phase 5: Overlap Validation ⏸️ DEFERRED
 **Status**: Not implemented - can be added in future release

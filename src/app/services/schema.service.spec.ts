@@ -797,15 +797,17 @@ describe('SchemaService', () => {
     it('should trigger background refresh of schema and properties', () => {
       service.refreshCache();
 
-      // refreshCache() calls getSchema() and getProperties()
+      // refreshCache() calls getSchema(), getProperties(), and getConstraintMessages()
       // getProperties() internally calls getEntities() which may trigger another getSchema()
-      // So we may get 2 schema_entities requests (race condition) and 1 schema_properties request
+      // So we may get 2 schema_entities requests (race condition), 1 schema_properties request, and 1 constraint_messages request
       const requests = httpMock.match(req => req.url.includes('schema_entities'));
       const propsReq = httpMock.expectOne(req => req.url.includes('schema_properties'));
+      const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
 
-      // Flush all schema_entities requests (there may be 1 or 2 depending on timing)
+      // Flush all requests
       requests.forEach(req => req.flush([]));
       propsReq.flush([]);
+      constraintMsgsReq.flush([]);
     });
   });
 
@@ -888,6 +890,7 @@ describe('SchemaService', () => {
     it('should allow refreshCache() to trigger new requests after initial load completes', () => {
       const mockEntities = [MOCK_ENTITIES.issue];
       const mockProperties = [MOCK_PROPERTIES.textShort];
+      const mockConstraintMessages: any[] = [];
 
       // Initial load
       service.getEntities().subscribe();
@@ -897,16 +900,22 @@ describe('SchemaService', () => {
       // Refresh cache
       service.refreshCache();
 
-      // Should make new requests (cache was cleared)
-      const requests = httpMock.match(req => req.url.includes('schema_entities') || req.url.includes('schema_properties'));
-      expect(requests.length).toBe(2); // Both entities and properties should refetch
+      // Should make new requests (cache was cleared) - entities, properties, AND constraint_messages
+      const requests = httpMock.match(req =>
+        req.url.includes('schema_entities') ||
+        req.url.includes('schema_properties') ||
+        req.url.includes('constraint_messages')
+      );
+      expect(requests.length).toBe(3); // All three caches should refetch
 
-      // Flush both requests
+      // Flush all requests
       requests.forEach(req => {
         if (req.request.url.includes('schema_entities')) {
           req.flush(mockEntities);
-        } else {
+        } else if (req.request.url.includes('schema_properties')) {
           req.flush(mockProperties);
+        } else if (req.request.url.includes('constraint_messages')) {
+          req.flush(mockConstraintMessages);
         }
       });
     });
@@ -1383,6 +1392,134 @@ describe('SchemaService', () => {
       const result = SchemaService.propertyToSelectString(m2mProp);
       // Format: column_name:junctionTable!sourceColumn(relatedTable!targetColumn(fields))
       expect(result).toBe('categories:issue_categories!issue_id(categories!category_id(id,display_name))');
+    });
+  });
+
+  describe('getConstraintMessages()', () => {
+    it('should fetch constraint messages from PostgREST on first call', (done) => {
+      const mockMessages = [
+        {
+          constraint_name: 'no_overlapping_reservations',
+          table_name: 'reservations',
+          column_name: 'time_slot',
+          error_message: 'This time slot is already booked.'
+        },
+        {
+          constraint_name: 'price_positive',
+          table_name: 'products',
+          column_name: 'price',
+          error_message: 'Price must be greater than zero.'
+        }
+      ];
+
+      service.getConstraintMessages().subscribe(messages => {
+        expect(messages).toEqual(mockMessages);
+        expect(messages.length).toBe(2);
+        done();
+      });
+
+      expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
+    });
+
+    it('should cache constraint messages and return from memory on subsequent calls', (done) => {
+      const mockMessages = [
+        {
+          constraint_name: 'test_constraint',
+          table_name: 'test_table',
+          column_name: 'test_column',
+          error_message: 'Test error message'
+        }
+      ];
+
+      // First call - fetches from HTTP
+      service.getConstraintMessages().subscribe(() => {
+        // Second call - should return from cache without HTTP request
+        service.getConstraintMessages().subscribe(cachedMessages => {
+          expect(cachedMessages).toEqual(mockMessages);
+          done();
+        });
+        // No HTTP request should be made for the second call
+      });
+
+      expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
+    });
+
+    it('should handle HTTP errors gracefully and return empty array', (done) => {
+      service.getConstraintMessages().subscribe(messages => {
+        expect(messages).toEqual([]);
+        done();
+      });
+
+      const req = httpMock.expectOne(req => req.url.includes('constraint_messages'));
+      req.error(new ProgressEvent('error'), { status: 500, statusText: 'Server Error' });
+    });
+
+    it('should prevent duplicate HTTP requests when called multiple times before response', (done) => {
+      const mockMessages = [
+        {
+          constraint_name: 'test_constraint',
+          table_name: 'test_table',
+          column_name: null,
+          error_message: 'Test error'
+        }
+      ];
+
+      // Call getConstraintMessages() three times in quick succession
+      const sub1 = service.getConstraintMessages().subscribe();
+      const sub2 = service.getConstraintMessages().subscribe();
+      const sub3 = service.getConstraintMessages().subscribe(messages => {
+        expect(messages).toEqual(mockMessages);
+        done();
+      });
+
+      // Should only make ONE HTTP request despite three subscriptions
+      expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
+
+      sub1.unsubscribe();
+      sub2.unsubscribe();
+      sub3.unsubscribe();
+    });
+  });
+
+  describe('refreshCache()', () => {
+    it('should clear constraint messages cache and reload on next call', (done) => {
+      const firstMessages = [
+        {
+          constraint_name: 'constraint_v1',
+          table_name: 'table1',
+          column_name: 'col1',
+          error_message: 'Version 1 message'
+        }
+      ];
+      const secondMessages = [
+        {
+          constraint_name: 'constraint_v2',
+          table_name: 'table2',
+          column_name: 'col2',
+          error_message: 'Version 2 message'
+        }
+      ];
+
+      // First load
+      service.getConstraintMessages().subscribe(() => {
+        // Refresh cache - this triggers getEntities(), getProperties(), and getConstraintMessages()
+        service.refreshCache();
+
+        // Flush all HTTP requests from refreshCache()
+        const entitiesRequests = httpMock.match(req => req.url.includes('schema_entities'));
+        const propsReq = httpMock.expectOne(req => req.url.includes('schema_properties'));
+        const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
+
+        entitiesRequests.forEach(req => req.flush([]));
+        propsReq.flush([]);
+        constraintMsgsReq.flush(secondMessages);  // Return new data
+
+        // Verify second data was loaded
+        expect(service.constraintMessages).toEqual(secondMessages);
+        done();
+      });
+
+      expectPostgrestRequest(httpMock, 'constraint_messages', firstMessages);
     });
   });
 });

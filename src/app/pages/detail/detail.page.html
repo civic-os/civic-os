@@ -122,7 +122,13 @@
           }
         }
 
-        <!-- Calendar Sections -->
+        <!-- Calendar Sections - DISABLED
+             TODO: This feature needs UX improvements before enabling:
+             - Creates redundancy in 1:1 relationships (e.g., Reservation ← Reservation Request)
+             - No way to distinguish between "show calendar on list page" vs "show in related records"
+             - Consider adding separate entity metadata flag: show_calendar_in_related_records
+             - Consider minimum threshold (e.g., only show if 2+ related events)
+             - Consider combining with regular Related Records section instead of separate calendar
         @if (calendarSections$ | async; as calendarSections) {
           @if (calendarSections.length > 0) {
             <div class="mt-8">
@@ -134,7 +140,6 @@
                       <span class="badge badge-primary">{{ section.events.length }}</span>
                     </h3>
 
-                    <!-- "Add" button with query params -->
                     <div class="card-actions justify-end mb-4">
                       <button
                         class="btn btn-primary btn-sm"
@@ -144,7 +149,6 @@
                       </button>
                     </div>
 
-                    <!-- Calendar View -->
                     <app-time-slot-calendar
                       mode="display"
                       [events]="section.events"
@@ -157,6 +161,7 @@
             </div>
           }
         }
+        -->
 
         <!-- Delete Confirmation Modal -->
         @if (showDeleteModal()) {

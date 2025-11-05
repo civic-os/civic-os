@@ -52,6 +52,7 @@ describe('schemaVersionGuard', () => {
     const noChanges: CacheUpdateCheck = {
       entitiesNeedsRefresh: false,
       propertiesNeedsRefresh: false,
+      constraintMessagesNeedsRefresh: false,
       hasChanges: false
     };
     mockVersionService.checkForUpdates.and.returnValue(of(noChanges));
@@ -75,6 +76,7 @@ describe('schemaVersionGuard', () => {
     const entitiesChanged: CacheUpdateCheck = {
       entitiesNeedsRefresh: true,
       propertiesNeedsRefresh: false,
+      constraintMessagesNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(entitiesChanged));
@@ -97,6 +99,7 @@ describe('schemaVersionGuard', () => {
     const propertiesChanged: CacheUpdateCheck = {
       entitiesNeedsRefresh: false,
       propertiesNeedsRefresh: true,
+      constraintMessagesNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(propertiesChanged));
@@ -119,6 +122,7 @@ describe('schemaVersionGuard', () => {
     const bothChanged: CacheUpdateCheck = {
       entitiesNeedsRefresh: true,
       propertiesNeedsRefresh: true,
+      constraintMessagesNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(bothChanged));
@@ -141,6 +145,7 @@ describe('schemaVersionGuard', () => {
     const bothChanged: CacheUpdateCheck = {
       entitiesNeedsRefresh: true,
       propertiesNeedsRefresh: true,
+      constraintMessagesNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(bothChanged));

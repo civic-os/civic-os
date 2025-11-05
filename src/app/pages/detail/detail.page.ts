@@ -42,17 +42,17 @@ export interface CalendarSection {
 }
 
 @Component({
-    selector: 'app-detail',
-    templateUrl: './detail.page.html',
-    styleUrl: './detail.page.css',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
+  selector: 'app-detail',
+  templateUrl: './detail.page.html',
+  styleUrl: './detail.page.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
     CommonModule,
     RouterModule,
     DisplayPropertyComponent,
     ManyToManyEditorComponent,
-    TimeSlotCalendarComponent
-]
+    // TimeSlotCalendarComponent
+  ]
 })
 export class DetailPage {
   private route = inject(ActivatedRoute);

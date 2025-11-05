@@ -83,12 +83,17 @@ describe('AppComponent', () => {
     const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
     versionReqs.forEach(req => req.flush([
       { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+      { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
     ]));
 
     // Handle dashboard requests from DashboardSelectorComponent
     const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
     dashboardReqs.forEach(req => req.flush([]));
+
+    // Handle constraint messages request (SchemaService.init())
+    const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+    constraintMsgsReqs.forEach(req => req.flush([]));
 
     expect(app).toBeTruthy();
   });
@@ -105,12 +110,17 @@ describe('AppComponent', () => {
     const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
     versionReqs.forEach(req => req.flush([
       { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+      { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
     ]));
 
     // Handle dashboard requests from DashboardSelectorComponent
     const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
     dashboardReqs.forEach(req => req.flush([]));
+
+    // Handle constraint messages request (SchemaService.init())
+    const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+    constraintMsgsReqs.forEach(req => req.flush([]));
 
     expect(app.title).toEqual('frontend');
   });
@@ -126,10 +136,13 @@ describe('AppComponent', () => {
       const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
       versionReqs.forEach(req => req.flush([
         { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
       ]));
       const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
       dashboardReqs.forEach(req => req.flush([]));
+      const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+      constraintMsgsReqs.forEach(req => req.flush([]));
 
       expect(app.themeService).toBe(mockThemeService);
     });
@@ -148,7 +161,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -176,7 +190,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -204,7 +219,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -238,10 +254,13 @@ describe('AppComponent', () => {
     const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
     versionReqs.forEach(req => req.flush([
       { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+      { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
     ]));
     const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
     dashboardReqs.forEach(req => req.flush([]));
+    const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+    constraintMsgsReqs.forEach(req => req.flush([]));
 
     return { fixture, app };
   }
@@ -377,7 +396,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -405,7 +425,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -435,7 +456,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -465,7 +487,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);
@@ -495,7 +518,8 @@ describe('AppComponent', () => {
         } else if (req.request.url.includes('schema_cache_versions')) {
           req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' }
+            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
           ]);
         } else if (req.request.url.includes('rpc/get_dashboards')) {
           req.flush([]);

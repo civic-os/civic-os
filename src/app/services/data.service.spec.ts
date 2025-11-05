@@ -1835,4 +1835,83 @@ describe('DataService', () => {
       });
     });
   });
+
+  describe('Edit Integrity - TimeSlot Comparison (Cross-Browser)', () => {
+    it('should match TimeSlot values without milliseconds (Firefox format)', () => {
+      const input = {
+        time_slot: '[2025-11-04T20:00:00Z,2025-11-04T22:00:00Z)'
+      };
+      const response = {
+        success: true,
+        body: [{
+          time_slot: '[\"2025-11-04 20:00:00+00\",\"2025-11-04 22:00:00+00\")'
+        }]
+      };
+
+      // Use a private method via type assertion to test
+      const result = (service as any).checkEditResult(input, response);
+      expect(result.success).toBe(true);
+    });
+
+    it('should match TimeSlot values with milliseconds (Chrome format)', () => {
+      const input = {
+        time_slot: '[2025-11-04T20:00:00.000Z,2025-11-04T22:00:00.000Z)'
+      };
+      const response = {
+        success: true,
+        body: [{
+          time_slot: '[\"2025-11-04 20:00:00+00\",\"2025-11-04 22:00:00+00\")'
+        }]
+      };
+
+      const result = (service as any).checkEditResult(input, response);
+      expect(result.success).toBe(true);
+    });
+
+    it('should match TimeSlot values with different millisecond precision', () => {
+      const input = {
+        time_slot: '[2025-11-04T14:30:00.123Z,2025-11-04T16:30:00.456Z)'
+      };
+      const response = {
+        success: true,
+        body: [{
+          time_slot: '[\"2025-11-04 14:30:00+00\",\"2025-11-04 16:30:00+00\")'
+        }]
+      };
+
+      const result = (service as any).checkEditResult(input, response);
+      expect(result.success).toBe(true);
+    });
+
+    it('should not match TimeSlot values with different times', () => {
+      const input = {
+        time_slot: '[2025-11-04T20:00:00.000Z,2025-11-04T22:00:00.000Z)'
+      };
+      const response = {
+        success: true,
+        body: [{
+          time_slot: '[\"2025-11-04 21:00:00+00\",\"2025-11-04 23:00:00+00\")'  // Different time
+        }]
+      };
+
+      const result = (service as any).checkEditResult(input, response);
+      expect(result.success).toBe(false);
+    });
+
+    it('should handle timezone conversions correctly', () => {
+      const input = {
+        time_slot: '[2025-11-04T20:00:00Z,2025-11-04T22:00:00Z)'
+      };
+      const response = {
+        success: true,
+        body: [{
+          // PostgreSQL returns UTC (+00)
+          time_slot: '[\"2025-11-04 20:00:00+00\",\"2025-11-04 22:00:00+00\")'
+        }]
+      };
+
+      const result = (service as any).checkEditResult(input, response);
+      expect(result.success).toBe(true);
+    });
+  });
 });

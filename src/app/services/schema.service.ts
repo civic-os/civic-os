@@ -18,11 +18,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize } from 'rxjs';
+import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
+import { ConstraintMessage } from '../interfaces/api';
 
 @Injectable({
   providedIn: 'root'
@@ -31,15 +32,18 @@ export class SchemaService {
   private http = inject(HttpClient);
 
   public properties?: SchemaEntityProperty[];
+  public constraintMessages?: ConstraintMessage[];
   private tables = signal<SchemaEntityTable[] | undefined>(undefined);
 
   // Cached observables for HTTP requests (with shareReplay)
   private schemaCache$?: Observable<SchemaEntityTable[]>;
   private propertiesCache$?: Observable<SchemaEntityProperty[]>;
+  private constraintMessagesCache$?: Observable<ConstraintMessage[]>;
 
   // In-flight request tracking to prevent duplicate concurrent requests
   private loadingEntities = false;
   private loadingProperties = false;
+  private loadingConstraintMessages = false;
 
   // Observable from signal - created once in injection context
   private tables$ = toObservable(this.tables).pipe(
@@ -67,18 +71,25 @@ export class SchemaService {
   public init() {
     // Load schema on init
     this.getSchema().subscribe();
+    // Preload constraint messages for error handling
+    this.getConstraintMessages().subscribe();
   }
 
   public refreshCache() {
     // Clear cached observables to force fresh HTTP requests
     this.schemaCache$ = undefined;
     this.propertiesCache$ = undefined;
+    this.constraintMessagesCache$ = undefined;
+    // Clear processed cache
+    this.constraintMessages = undefined;
     // Reset loading flags to allow new fetches
     this.loadingEntities = false;
     this.loadingProperties = false;
+    this.loadingConstraintMessages = false;
     // Refresh schema in background - new values will emit to subscribers
     this.getSchema().subscribe();
     this.getProperties().subscribe();
+    this.getConstraintMessages().subscribe();
   }
 
   /**
@@ -166,6 +177,45 @@ export class SchemaService {
       })
     );
   }
+
+  /**
+   * Fetches constraint error messages from the database.
+   * Used by ErrorService to display user-friendly error messages
+   * instead of PostgreSQL constraint violation codes.
+   * Results are cached and preloaded on app initialization.
+   */
+  public getConstraintMessages(): Observable<ConstraintMessage[]> {
+    // Return cached messages if available
+    if (this.constraintMessages) {
+      return of(this.constraintMessages);
+    }
+
+    // Create cached HTTP observable if it doesn't exist
+    if (!this.constraintMessagesCache$ && !this.loadingConstraintMessages) {
+      this.loadingConstraintMessages = true;
+      this.constraintMessagesCache$ = this.http.get<ConstraintMessage[]>(
+        getPostgrestUrl() + 'constraint_messages'
+      ).pipe(
+        tap(messages => {
+          this.constraintMessages = messages;
+        }),
+        catchError(err => {
+          console.error('Failed to load constraint messages:', err);
+          // Return empty array on error - graceful degradation
+          return of([]);
+        }),
+        finalize(() => {
+          // Reset loading flag when HTTP completes (success or error)
+          this.loadingConstraintMessages = false;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+
+    // Return cached observable or empty array if cache wasn't created
+    return this.constraintMessagesCache$ || of([]);
+  }
+
   public getPropertiesForEntity(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getProperties().pipe(map(props => {
       return props.filter(p => p.table_name == table.table_name);
@@ -315,6 +365,11 @@ export class SchemaService {
       .pipe(map(props => {
         return props
           .filter(p =>{
+            // Exclude auto-managed timestamp fields (created_at, updated_at)
+            // These are managed by database triggers and should never be in create forms
+            if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
+              return false;
+            }
             return !(p.is_generated || p.is_identity) &&
               p.is_updatable &&
               p.show_on_create !== false;
@@ -327,6 +382,11 @@ export class SchemaService {
       .pipe(map(props => {
         return props
           .filter(p =>{
+            // Exclude auto-managed timestamp fields (created_at, updated_at)
+            // These are managed by database triggers and should never be in edit forms
+            if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
+              return false;
+            }
             return !(p.is_generated || p.is_identity) &&
               p.is_updatable &&
               p.show_on_edit !== false;

@@ -175,6 +175,36 @@ ALTER TABLE reservation_requests
   CHECK (NOT isempty(time_slot) AND lower(time_slot) < upper(time_slot));
 
 -- ============================================================================
+-- CONSTRAINT ERROR MESSAGES
+-- ============================================================================
+
+-- User-friendly error messages for constraint violations
+-- Note: constraint_messages has unique constraint on constraint_name only
+INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
+VALUES (
+  'no_overlapping_reservations',
+  'reservations',
+  'time_slot',
+  'This time slot is already booked for this facility. Please select a different time or check the calendar for availability.'
+)
+ON CONFLICT (constraint_name) DO UPDATE
+SET error_message = EXCLUDED.error_message,
+    table_name = EXCLUDED.table_name,
+    column_name = EXCLUDED.column_name;
+
+INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
+VALUES (
+  'valid_time_slot_bounds',
+  'reservations',
+  'time_slot',
+  'Invalid time slot: end time must be after start time.'
+)
+ON CONFLICT (constraint_name) DO UPDATE
+SET error_message = EXCLUDED.error_message,
+    table_name = EXCLUDED.table_name,
+    column_name = EXCLUDED.column_name;
+
+-- ============================================================================
 -- METADATA CONFIGURATION
 -- ============================================================================
 

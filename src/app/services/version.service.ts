@@ -21,13 +21,14 @@ import { Observable, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 export interface CacheVersion {
-  cache_name: 'entities' | 'properties';
+  cache_name: 'entities' | 'properties' | 'constraint_messages';
   version: string; // ISO timestamp
 }
 
 export interface CacheUpdateCheck {
   entitiesNeedsRefresh: boolean;
   propertiesNeedsRefresh: boolean;
+  constraintMessagesNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -40,6 +41,7 @@ export class VersionService {
   // In-memory cache versions
   private entitiesVersion: string | null = null;
   private propertiesVersion: string | null = null;
+  private constraintMessagesVersion: string | null = null;
 
   /**
    * Initialize version tracking by fetching current versions from database.
@@ -65,11 +67,13 @@ export class VersionService {
         const result: CacheUpdateCheck = {
           entitiesNeedsRefresh: false,
           propertiesNeedsRefresh: false,
+          constraintMessagesNeedsRefresh: false,
           hasChanges: false
         };
 
         const dbEntitiesVersion = versions.find(v => v.cache_name === 'entities')?.version;
         const dbPropertiesVersion = versions.find(v => v.cache_name === 'properties')?.version;
+        const dbConstraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages')?.version;
 
         // Check entities cache
         if (dbEntitiesVersion && this.entitiesVersion && dbEntitiesVersion !== this.entitiesVersion) {
@@ -80,6 +84,12 @@ export class VersionService {
         // Check properties cache
         if (dbPropertiesVersion && this.propertiesVersion && dbPropertiesVersion !== this.propertiesVersion) {
           result.propertiesNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
+        // Check constraint_messages cache
+        if (dbConstraintMessagesVersion && this.constraintMessagesVersion && dbConstraintMessagesVersion !== this.constraintMessagesVersion) {
+          result.constraintMessagesNeedsRefresh = true;
           result.hasChanges = true;
         }
 
@@ -107,6 +117,7 @@ export class VersionService {
   private updateLocalVersions(versions: CacheVersion[]): void {
     const entitiesVersion = versions.find(v => v.cache_name === 'entities');
     const propertiesVersion = versions.find(v => v.cache_name === 'properties');
+    const constraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages');
 
     if (entitiesVersion) {
       this.entitiesVersion = entitiesVersion.version;
@@ -114,6 +125,10 @@ export class VersionService {
 
     if (propertiesVersion) {
       this.propertiesVersion = propertiesVersion.version;
+    }
+
+    if (constraintMessagesVersion) {
+      this.constraintMessagesVersion = constraintMessagesVersion.version;
     }
   }
 
@@ -123,6 +138,7 @@ export class VersionService {
   public reset(): void {
     this.entitiesVersion = null;
     this.propertiesVersion = null;
+    this.constraintMessagesVersion = null;
   }
 
   /**

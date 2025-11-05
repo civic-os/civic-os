@@ -194,22 +194,28 @@
                             </label>
                           </div>
                           <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2">
+                            <label class="label cursor-pointer justify-start gap-2"
+                                   [class.opacity-50]="isSystemTimestamp(property)"
+                                   [class.cursor-not-allowed]="isSystemTimestamp(property)">
                               <input
                                 type="checkbox"
                                 class="checkbox checkbox-sm"
                                 [(ngModel)]="property.show_on_create"
-                                (ngModelChange)="onVisibilityChange(property)" />
+                                (ngModelChange)="onVisibilityChange(property)"
+                                [disabled]="isSystemTimestamp(property)" />
                               <span class="label-text text-xs">Show on Create</span>
                             </label>
                           </div>
                           <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2">
+                            <label class="label cursor-pointer justify-start gap-2"
+                                   [class.opacity-50]="isSystemTimestamp(property)"
+                                   [class.cursor-not-allowed]="isSystemTimestamp(property)">
                               <input
                                 type="checkbox"
                                 class="checkbox checkbox-sm"
                                 [(ngModel)]="property.show_on_edit"
-                                (ngModelChange)="onVisibilityChange(property)" />
+                                (ngModelChange)="onVisibilityChange(property)"
+                                [disabled]="isSystemTimestamp(property)" />
                               <span class="label-text text-xs">Show on Edit</span>
                             </label>
                           </div>

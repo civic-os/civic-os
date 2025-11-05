@@ -176,10 +176,12 @@ The `backend_only` flag tells the frontend to skip creating a validator but stil
 - [ ] Update forms to apply cross-field validators at FormGroup level
 
 ### Phase 3: Enhanced Error Mapping
-- [ ] Enhance `ErrorService` to query `metadata.constraint_messages` via HTTP
-- [ ] Cache constraint messages in service
+- [x] Enhance `ErrorService` to query `metadata.constraint_messages` via HTTP (✅ Implemented in v0.9.0)
+- [x] Cache constraint messages in service (✅ Implemented in v0.9.0)
 - [ ] Map CHECK constraint errors to specific field names
 - [ ] Display field-specific errors in forms (not just generic dialog)
+
+**Implementation Note (v0.9.0)**: Constraint message lookup is now fully implemented. The `SchemaService` preloads `constraint_messages` from the public view at application startup, using the same caching pattern as entities and properties. The `ErrorService.parseToHumanWithLookup()` method extracts constraint names from PostgreSQL error messages (codes 23514 for CHECK, 23P01 for exclusion) and performs synchronous lookups in the cached data. The `VersionService` tracks constraint message cache staleness via `schema_cache_versions` view. See migration `v0-9-0-add-constraint-messages-view` for database setup.
 
 ### Phase 4: Admin UI for Validation Rules
 - [ ] Add validation management to Property Management page

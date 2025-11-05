@@ -31,6 +31,7 @@ import { getPostgrestUrl } from '../config/runtime';
 export class DataService {
   private http = inject(HttpClient);
   private analytics = inject(AnalyticsService);
+  private errorService = inject(ErrorService);
 
   private get(url: string): Observable<any> {
     return this.http.get(getPostgrestUrl() + url);
@@ -387,11 +388,36 @@ export class DataService {
       // Parse both values to extract start and end timestamps
       const parseRange = (range: string): { start: string, end: string } | null => {
         // Handle both formats:
-        // - ISO: [2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)
+        // - ISO: [2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z) (with milliseconds)
+        // - ISO: [2025-11-07T15:00:00Z,2025-11-07T22:00:00Z) (without milliseconds)
         // - PG:  [\"2025-11-07 15:00:00+00\",\"2025-11-07 22:00:00+00\")
-        const match = range.match(/\[\"?([^\",]+)\"?,\s*\"?([^\")]+)\"?\)/);
-        if (!match) return null;
-        return { start: match[1], end: match[2] };
+
+        // First try to match quoted format (PostgreSQL response)
+        let match = range.match(/\[\"([^\"]+)\",\"([^\"]+)\"\)/);
+        if (match) {
+          return { start: match[1], end: match[2] };
+        }
+
+        // Then try unquoted format (our input)
+        // Remove the [ and ) brackets first
+        if (!range.startsWith('[') || !range.endsWith(')')) {
+          return null;
+        }
+        const content = range.substring(1, range.length - 1);
+
+        // Find the middle comma by looking for the pattern: Z, or .000Z,
+        // This works because ISO timestamps end with Z (or +00) before the comma separator
+        const separatorIndex = content.search(/Z,|(?:\.\d{3}Z),/);
+        if (separatorIndex === -1) {
+          return null;
+        }
+
+        // Find the actual comma position (after the Z)
+        const commaIndex = content.indexOf(',', separatorIndex);
+        const start = content.substring(0, commaIndex).trim();
+        const end = content.substring(commaIndex + 1).trim();
+
+        return { start, end };
       };
 
       const inputParsed = parseRange(inputValue);
@@ -404,7 +430,11 @@ export class DataService {
       // Normalize timestamps to ISO 8601 for comparison
       const normalizeTimestamp = (ts: string): string => {
         // Convert "2025-11-07 15:00:00+00" to "2025-11-07T15:00:00Z"
-        return ts.replace(' ', 'T').replace(/\+00$/, 'Z');
+        // Also strip milliseconds (.000) since PostgreSQL doesn't return them
+        let normalized = ts.replace(' ', 'T').replace(/\+00$/, 'Z');
+        // Remove milliseconds if present (e.g., "2025-11-07T15:00:00.000Z" -> "2025-11-07T15:00:00Z")
+        normalized = normalized.replace(/\.\d{3}Z$/, 'Z');
+        return normalized;
       };
 
       const inputStartNormalized = normalizeTimestamp(inputParsed.start);
@@ -479,6 +509,8 @@ export class DataService {
     }
 
     let identical: boolean;
+    const mismatches: string[] = [];  // Track fields that don't match
+
     if(representation?.body?.[0] === undefined) {
       // Empty response - likely RLS blocking SELECT after UPDATE
       // This could be due to permissions, token expiration, or validation issues
@@ -530,6 +562,11 @@ export class DataService {
           }
         }
 
+        // Track fields that don't match
+        if (!match) {
+          mismatches.push(key);
+        }
+
         return match;
       });
     }
@@ -537,13 +574,16 @@ export class DataService {
     if (identical) {
       return <ApiResponse>{success: true, body: representation.body};
     } else {
+      // Build enhanced error message with field-level details
+      const mismatchList = mismatches.length > 0 ? mismatches.join(', ') : 'unknown fields';
       return <ApiResponse>{
         success: false,
         error: {
           httpCode: 400,
           message: "The update was not applied. The returned data does not match the submitted data.",
           humanMessage: "Could not update",
-          hint: "Please verify your changes and try again. If the problem persists, contact support."
+          hint: `Some fields were modified by the database (possibly: ${mismatchList}). This may indicate a configuration issue - contact your administrator if this persists.`,
+          details: `Field mismatches: ${mismatchList}`
         }
       };
     }
@@ -571,7 +611,7 @@ export class DataService {
       };
     }
 
-    error.humanMessage = ErrorService.parseToHuman(error);
+    error.humanMessage = this.errorService.parseToHumanWithLookup(error);
     let resp: ApiResponse = {success: false, error: error};
     return of(resp);
   }

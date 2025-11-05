@@ -228,6 +228,11 @@ export class ListPage implements OnInit, OnDestroy {
             let columns = props
               .map(x => SchemaService.propertyToSelectString(x));
 
+            // Add calendar color property to select fields if configured
+            if (entity?.calendar_color_property && !columns.includes(entity.calendar_color_property)) {
+              columns.push(entity.calendar_color_property);
+            }
+
             // Build order field for PostgREST
             let orderField: string | undefined = undefined;
             if (sortState.column && sortState.direction) {
@@ -386,12 +391,14 @@ export class ListPage implements OnInit, OnDestroy {
         const rawValue = row[dateProp];
         const { start, end } = this.parseTimeSlot(rawValue);
 
+        const colorValue = colorProp && row[colorProp] ? row[colorProp] : '#3B82F6';
+
         return {
           id: row.id,
           title: row.display_name || `${entity.display_name} #${row.id}`,
           start: start,
           end: end,
-          color: colorProp ? row[colorProp] : '#3B82F6',
+          color: colorValue,
           extendedProps: { data: row }
         } as CalendarEvent;
       });

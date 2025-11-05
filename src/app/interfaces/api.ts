@@ -29,3 +29,14 @@ export interface ApiError {
     humanMessage: string;
     message: string;
 }
+
+/**
+ * Database constraint error messages for user-friendly error display
+ * Maps PostgreSQL constraint names to friendly error messages
+ */
+export interface ConstraintMessage {
+    constraint_name: string;
+    table_name: string;
+    column_name: string | null;
+    error_message: string;
+}

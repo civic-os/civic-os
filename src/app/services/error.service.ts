@@ -18,19 +18,22 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiError } from '../interfaces/api';
 import { AnalyticsService } from './analytics.service';
+import { SchemaService } from './schema.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ErrorService {
   private analytics = inject(AnalyticsService);
+  private schemaService = inject(SchemaService);
 
   /**
-   * Parse API error to human-readable message with analytics tracking.
+   * Parse API error to human-readable message with constraint message lookup and analytics tracking.
+   * Looks up constraint violations in cached constraint_messages for user-friendly error display.
    * Use this instance method when possible for analytics support.
    */
   public parseToHumanWithTracking(err: ApiError): string {
-    const message = ErrorService.parseToHuman(err);
+    const message = this.parseToHumanWithLookup(err);
 
     // Track error with status code or PostgreSQL error code
     if (err.httpCode) {
@@ -51,8 +54,51 @@ export class ErrorService {
   }
 
   /**
-   * Parse API error to human-readable message (static version, no tracking).
-   * Kept for backwards compatibility.
+   * Parse API error to human-readable message with constraint message lookup.
+   * Checks cached constraint_messages for user-friendly error text.
+   * Handles both CHECK constraints (23514) and exclusion constraints (23P01).
+   */
+  public parseToHumanWithLookup(err: ApiError): string {
+    // Handle constraint violations with lookup
+    if (err.code === '23514' || err.code === '23P01') {
+      // Extract constraint name from error details or message
+      // PostgreSQL format examples:
+      // CHECK: 'new row for relation "table_name" violates check constraint "constraint_name"'
+      // Exclusion: 'conflicting key value violates exclusion constraint "constraint_name"'
+      const constraintMatch = err.details?.match(/constraint "([^"]+)"/) || err.message?.match(/constraint "([^"]+)"/);
+
+      if (constraintMatch && constraintMatch[1]) {
+        const constraintName = constraintMatch[1];
+
+        // Look up constraint message in cached data
+        const constraintMessages = this.schemaService.constraintMessages;
+        if (constraintMessages) {
+          const messageEntry = constraintMessages.find(cm => cm.constraint_name === constraintName);
+          if (messageEntry) {
+            return messageEntry.error_message;
+          }
+        }
+
+        // Fallback if no cached message found
+        if (err.code === '23P01') {
+          return `This conflicts with an existing record. Please check your input and try again.`;
+        } else {
+          return `Validation failed: ${constraintName}`;
+        }
+      }
+
+      // Generic fallback if we can't extract constraint name
+      return err.code === '23P01' ? 'This conflicts with an existing record.' : 'Validation failed';
+    }
+
+    // For all other errors, use the static method
+    return ErrorService.parseToHuman(err);
+  }
+
+  /**
+   * Parse API error to human-readable message (static version, no tracking, no lookup).
+   * Kept for backwards compatibility. Does NOT perform constraint message lookups.
+   * Use parseToHumanWithLookup() instance method for full functionality.
    */
   public static parseToHuman(err: ApiError): string {
     //https://postgrest.org/en/stable/references/errors.html
@@ -61,17 +107,9 @@ export class ErrorService {
     } else if(err.code == '23505') {
       return "Record must be unique";
     } else if(err.code == '23514') {
-      // CHECK constraint violation
-      // Try to extract constraint name from details or message
-      // PostgreSQL format: 'new row for relation "table_name" violates check constraint "constraint_name"'
-      const constraintMatch = err.details?.match(/constraint "([^"]+)"/) || err.message?.match(/constraint "([^"]+)"/);
-      if (constraintMatch && constraintMatch[1]) {
-        const constraintName = constraintMatch[1];
-        // TODO: In a real implementation, we would look up the constraint_name in metadata.constraint_messages
-        // For now, return a generic message with the constraint name
-        return `Validation failed: ${constraintName}`;
-      }
       return "Validation failed";
+    } else if(err.code == '23P01') {
+      return "This conflicts with an existing record.";
     } else if(err.httpCode == 404) {
       return "Resource not found";
     } else if(err.httpCode == 401) {
