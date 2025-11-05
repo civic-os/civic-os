@@ -52,6 +52,40 @@ export class ImageViewerComponent {
   }
 
   /**
+   * Download the original image file
+   * Fetches as blob to force download instead of navigation
+   */
+  async downloadImage() {
+    const img = this.currentImage();
+    if (!img) return;
+
+    const url = this.getS3Url(img.s3_original_key);
+    const filename = this.getDownloadFilename();
+
+    try {
+      // Fetch the image as a blob
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // Create a temporary blob URL
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Create a temporary anchor element and click it
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Failed to download image:', error);
+    }
+  }
+
+  /**
    * Get image URL (prefer large thumbnail, fallback to original)
    */
   getImageUrl(): string {

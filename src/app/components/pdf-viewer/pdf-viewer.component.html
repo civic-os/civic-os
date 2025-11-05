@@ -16,12 +16,9 @@
           <!-- Fallback for browsers without PDF support -->
           <div class="p-8 text-center">
             <p class="mb-4">Your browser doesn't support embedded PDF viewing.</p>
-            <a
-              [href]="getPdfUrl()"
-              [download]="getDownloadFilename()"
-              class="btn btn-primary">
+            <button (click)="downloadPdf()" class="btn btn-primary">
               Download PDF
-            </a>
+            </button>
           </div>
         </iframe>
       }
@@ -32,12 +29,9 @@
       <button (click)="openFullScreen()" class="btn">
         Open in New Tab
       </button>
-      <a
-        [href]="getPdfUrl()"
-        [download]="getDownloadFilename()"
-        class="btn btn-primary">
+      <button (click)="downloadPdf()" class="btn btn-primary">
         Download
-      </a>
+      </button>
       <button (click)="close()" class="btn">Close</button>
     </div>
   </div>

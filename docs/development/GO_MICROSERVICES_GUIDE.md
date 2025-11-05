@@ -1,7 +1,7 @@
 # Go Microservices Implementation Guide
 
-**Status:** Planned (not yet implemented)
-**Purpose:** Complete guide for migrating Civic OS microservices from Node.js + LISTEN/NOTIFY to Go + River (PostgreSQL table queue)
+**Status:** ✅ **CURRENT** - Implemented in v0.10.0
+**Purpose:** Complete guide for Civic OS microservices using Go + River (PostgreSQL table queue)
 
 ---
 
@@ -64,7 +64,7 @@
 
 ---
 
-### Future State (Go + River)
+### Current State (Go + River) - v0.10.0+
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -1083,7 +1083,7 @@ jobs:
 
 ```sql
 SELECT state, COUNT(*)
-FROM river_job
+FROM metadata.river_job
 GROUP BY state
 ORDER BY state;
 ```
@@ -1092,7 +1092,7 @@ ORDER BY state;
 
 ```sql
 SELECT queue, kind, state, COUNT(*)
-FROM river_job
+FROM metadata.river_job
 WHERE state IN ('available', 'scheduled', 'running')
 GROUP BY queue, kind, state
 ORDER BY COUNT(*) DESC;
@@ -1106,7 +1106,7 @@ SELECT
   percentile_cont(0.50) WITHIN GROUP (ORDER BY finalized_at - scheduled_at) AS p50_latency,
   percentile_cont(0.95) WITHIN GROUP (ORDER BY finalized_at - scheduled_at) AS p95_latency,
   percentile_cont(0.99) WITHIN GROUP (ORDER BY finalized_at - scheduled_at) AS p99_latency
-FROM river_job
+FROM metadata.river_job
 WHERE state = 'completed'
   AND finalized_at > NOW() - INTERVAL '1 hour'
 GROUP BY kind;
@@ -1116,7 +1116,7 @@ GROUP BY kind;
 
 ```sql
 SELECT id, kind, queue, errors, attempt, max_attempts, created_at
-FROM river_job
+FROM metadata.river_job
 WHERE state = 'discarded'
 ORDER BY finalized_at DESC
 LIMIT 100;
@@ -1126,7 +1126,7 @@ LIMIT 100;
 
 ```sql
 SELECT id, kind, queue, attempted_by, attempt, created_at
-FROM river_job
+FROM metadata.river_job
 WHERE state = 'running'
 ORDER BY created_at DESC;
 ```
@@ -1145,14 +1145,19 @@ WHERE relname = 'river_job';
 
 ### Autovacuum Tuning
 
-**Critical for high-throughput queues:**
+**Table-level settings (already configured in v0.10.0 migration):**
 
 ```sql
-ALTER TABLE river_job SET (
+ALTER TABLE metadata.river_job SET (
   autovacuum_vacuum_scale_factor = 0.01,  -- Vacuum at 1% dead tuples (default: 20%)
-  autovacuum_vacuum_cost_delay = 1,       -- Aggressive (default: 20ms)
-  autovacuum_naptime = 20                 -- Check every 20 seconds (default: 60s)
+  autovacuum_vacuum_cost_delay = 1        -- Aggressive (default: 20ms)
 );
+```
+
+**Server-level setting (optional, add to `postgresql.conf` for production):**
+
+```ini
+autovacuum_naptime = 20  # Check every 20 seconds (default: 60s)
 ```
 
 **Check autovacuum activity:**
@@ -1212,31 +1217,188 @@ riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 
 ---
 
-## Migration Plan
+## Production Deployment
 
-### Phase 1: Preparation (2-3 days)
+### Environment Variables
 
-**Tasks:**
-1. Install River CLI: `go install github.com/riverqueue/river/cmd/river@latest`
-2. Run River migrations: `river migrate-up --database-url "$DATABASE_URL"`
-3. Set up Go development environment (Go 1.23+)
-4. Create test database for validation
-5. Review Go best practices and River documentation
+Both Go microservices require the following environment variables:
 
-**Deliverables:**
-- River tables created in PostgreSQL
-- Go development environment ready
-- Test database configured
+#### Common Configuration (Both Services)
+
+```bash
+# PostgreSQL Connection
+DATABASE_URL=postgres://user:password@host:5432/database_name
+
+# AWS Configuration
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your-access-key-id
+AWS_SECRET_ACCESS_KEY=your-secret-access-key
+
+# S3 Bucket
+S3_BUCKET=your-bucket-name
+```
+
+#### S3 Signer Specific
+
+```bash
+# Public endpoint for presigned URLs (MinIO/Docker only)
+# For production AWS S3, OMIT this variable entirely
+S3_PUBLIC_ENDPOINT=http://localhost:9000
+```
+
+**Important**: `S3_PUBLIC_ENDPOINT` is **only for local MinIO** in Docker environments. This tells the S3 signer to generate presigned URLs using `localhost:9000` instead of the internal Docker hostname. For production AWS S3, **do not set this variable** - the service will use standard AWS URLs.
+
+#### Thumbnail Worker Specific
+
+```bash
+# Internal S3 endpoint (MinIO/Docker only)
+# For production AWS S3, OMIT this variable entirely
+AWS_ENDPOINT_URL=http://minio:9000
+```
+
+**Important**: `AWS_ENDPOINT_URL` is **only for local MinIO** in Docker environments. For production AWS S3, **do not set this variable** - the service will use standard AWS endpoints.
 
 ---
 
-### Phase 2: S3 Signer Migration (1-2 weeks)
+### Development vs Production Configuration
 
-**Tasks:**
+| Configuration | Development (MinIO) | Production (AWS S3) |
+|---------------|---------------------|---------------------|
+| `AWS_ENDPOINT_URL` | `http://minio:9000` | **Omit** (uses AWS default) |
+| `S3_PUBLIC_ENDPOINT` | `http://localhost:9000` | **Omit** (uses AWS default) |
+| `S3_BUCKET` | `civic-os-files` | Your production bucket name |
+| S3 URL Style | Path-style (forced) | Virtual-hosted (AWS default) |
+| IAM Authentication | Access keys | Access keys or IAM roles |
 
-1. **Build Go Service** (3-4 days)
-   - Create `services/s3-signer/` directory
-   - Implement `S3PresignArgs` job type
+---
+
+### Docker Deployment
+
+**Building Images:**
+
+```bash
+# Build S3 Signer
+docker build -t civic-os/s3-signer:0.10.0 services/s3-signer-go/
+
+# Build Thumbnail Worker
+docker build -t civic-os/thumbnail-worker:0.10.0 services/thumbnail-worker-go/
+```
+
+**Running with Docker Compose (Production):**
+
+```yaml
+services:
+  s3-signer:
+    image: civic-os/s3-signer:0.10.0
+    environment:
+      - DATABASE_URL=postgres://user:pass@db-host:5432/civic_os
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET=your-production-bucket
+      # NO S3_PUBLIC_ENDPOINT for production!
+    restart: unless-stopped
+
+  thumbnail-worker:
+    image: civic-os/thumbnail-worker:0.10.0
+    environment:
+      - DATABASE_URL=postgres://user:pass@db-host:5432/civic_os
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET=your-production-bucket
+      # NO AWS_ENDPOINT_URL for production!
+    restart: unless-stopped
+```
+
+**Running Standalone:**
+
+```bash
+# Set environment variables
+export DATABASE_URL="postgres://user:pass@host:5432/civic_os"
+export AWS_REGION="us-east-1"
+export AWS_ACCESS_KEY_ID="your-key"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+export S3_BUCKET="your-bucket"
+
+# Run S3 Signer
+./s3-signer
+
+# Run Thumbnail Worker (requires libvips and poppler-utils installed)
+./thumbnail-worker
+```
+
+---
+
+### System Dependencies
+
+#### S3 Signer
+- **Go Runtime**: Go 1.23+ (if running from source)
+- **Network**: Outbound HTTPS to AWS S3 and PostgreSQL
+
+#### Thumbnail Worker
+- **Go Runtime**: Go 1.23+ (if running from source)
+- **libvips**: Image processing library (8.x+)
+  - Ubuntu/Debian: `apt-get install libvips-dev`
+  - RHEL/CentOS: `yum install vips-devel`
+  - Alpine: `apk add vips-dev`
+- **poppler-utils**: PDF rendering (`pdftoppm` command)
+  - Ubuntu/Debian: `apt-get install poppler-utils`
+  - RHEL/CentOS: `yum install poppler-utils`
+  - Alpine: `apk add poppler-utils`
+- **Network**: Outbound HTTPS to AWS S3 and PostgreSQL
+
+**Docker images include all dependencies** - no manual installation needed.
+
+---
+
+### Upgrading from v0.9.0 (Node.js) to v0.10.0 (Go)
+
+**Database Migration:**
+The database schema migrates automatically via Sqitch when you update to v0.10.0. The migration adds River job queue tables to the `metadata` schema.
+
+**Service Migration Steps:**
+
+1. **Stop old Node.js services:**
+   ```bash
+   docker-compose stop s3-signer-node thumbnail-worker-node
+   # OR
+   systemctl stop civic-os-s3-signer civic-os-thumbnail-worker
+   ```
+
+2. **Update database** (if not using automatic Sqitch migrations):
+   ```bash
+   sqitch deploy
+   ```
+
+3. **Update docker-compose.yml or systemd units** to use new Go services
+
+4. **Start new Go services:**
+   ```bash
+   docker-compose up -d s3-signer thumbnail-worker
+   # OR
+   systemctl start civic-os-s3-signer-go civic-os-thumbnail-worker-go
+   ```
+
+5. **Verify services are running:**
+   ```bash
+   docker-compose logs s3-signer thumbnail-worker
+   # Should see: "River client started"
+   ```
+
+**Important**: The new Go services use the **same database tables and triggers** as the Node.js services. File uploads that were in progress during the upgrade will complete automatically with the new workers. No data migration is required.
+
+**Rollback**: If needed, you can roll back by stopping the Go services and restarting the Node.js services. The database changes are backward-compatible.
+
+---
+
+## Migration Plan (✅ COMPLETED in v0.10.0)
+
+The migration from Node.js + LISTEN/NOTIFY to Go + River was completed in v0.10.0. This section is kept for historical reference.
+
+### Phase 1: Preparation ✅ COMPLETED
+
+**Completed Tasks:**
    - Implement `S3PresignWorker` with AWS SDK v2
    - Write unit tests
    - Create Dockerfile

@@ -10,9 +10,9 @@ This document provides a comprehensive guide to implementing file storage featur
 
 ### Components
 
-- **Database**: `metadata.files` table stores file metadata and S3 keys, `file_upload_requests` table manages presigned URL workflow
-- **S3 Signer Service**: Node.js service listens to PostgreSQL NOTIFY events and generates presigned upload URLs
-- **Thumbnail Worker**: Background service processes uploaded images (3 sizes: 150px, 400px, 800px) and PDFs (first page at 400px) using Sharp and Poppler
+- **Database**: `metadata.files` table stores file metadata and S3 keys, `file_upload_requests` table manages presigned URL workflow, `metadata.river_job` table queues background jobs
+- **S3 Signer Service**: Go microservice (v0.10.0+) uses River job queue to generate presigned upload URLs with automatic retries
+- **Thumbnail Worker**: Go microservice (v0.10.0+) processes uploaded images (3 sizes: 150x150, 400x400, 800x800) and PDFs (first page) using bimg (libvips) and pdftoppm with white background letterboxing
 - **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails
 - **UUIDv7**: Time-ordered UUIDs improve B-tree index performance
 
@@ -119,6 +119,262 @@ The `examples/pothole/docker-compose.yml` includes:
 ### Database Migration
 
 **Migration**: `postgres/migrations/deploy/v0-5-0-add-file-storage.sql` adds core file storage infrastructure
+
+---
+
+## Production Configuration
+
+### Environment Variables
+
+Both microservices (S3 Signer and Thumbnail Worker) require environment variables for production deployment.
+
+#### Required for Both Services
+
+```bash
+# PostgreSQL
+DATABASE_URL=postgres://user:password@host:5432/database
+
+# AWS Credentials
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+
+# S3 Bucket
+S3_BUCKET=your-production-bucket
+```
+
+#### Development-Only Variables (MinIO)
+
+```bash
+# S3 Signer: Public endpoint for presigned URLs
+S3_PUBLIC_ENDPOINT=http://localhost:9000  # LOCAL ONLY - omit for AWS S3
+
+# Thumbnail Worker: Internal S3 endpoint
+AWS_ENDPOINT_URL=http://minio:9000  # LOCAL ONLY - omit for AWS S3
+```
+
+⚠️ **Critical**: `S3_PUBLIC_ENDPOINT` and `AWS_ENDPOINT_URL` are **only for local MinIO development**. Do NOT set these variables in production with AWS S3 - the services will automatically use correct AWS endpoints.
+
+---
+
+### System Requirements
+
+#### S3 Signer
+- **Runtime**: Docker image or Go 1.23+ binary
+- **Dependencies**: None (statically linked binary)
+- **Network**: Outbound HTTPS to AWS S3 and PostgreSQL
+
+#### Thumbnail Worker
+- **Runtime**: Docker image or Go 1.23+ binary
+- **Dependencies** (if running binary directly):
+  - libvips 8.x+ (`libvips-dev` or `vips-devel` package)
+  - poppler-utils (`pdftoppm` command)
+- **Network**: Outbound HTTPS to AWS S3 and PostgreSQL
+
+**Recommended**: Use Docker images which include all dependencies pre-installed.
+
+---
+
+### IAM Permissions (AWS S3)
+
+The services require the following S3 permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::your-bucket-name"
+    }
+  ]
+}
+```
+
+**Security Best Practice**: Use IAM roles (EC2/ECS task roles) instead of access keys when possible.
+
+---
+
+### Deployment Options
+
+#### Option 1: Docker Compose (Recommended)
+
+```yaml
+services:
+  s3-signer:
+    image: ghcr.io/civic-os/s3-signer:0.10.0
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - AWS_REGION=us-east-1
+      - S3_BUCKET=${S3_BUCKET}
+    restart: unless-stopped
+
+  thumbnail-worker:
+    image: ghcr.io/civic-os/thumbnail-worker:0.10.0
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - AWS_REGION=us-east-1
+      - S3_BUCKET=${S3_BUCKET}
+    restart: unless-stopped
+```
+
+#### Option 2: Kubernetes
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: civic-os-file-workers
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: s3-signer
+        image: ghcr.io/civic-os/s3-signer:0.10.0
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: database-url
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: S3_BUCKET
+          value: "your-bucket"
+
+      - name: thumbnail-worker
+        image: ghcr.io/civic-os/thumbnail-worker:0.10.0
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: database-url
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: S3_BUCKET
+          value: "your-bucket"
+```
+
+#### Option 3: Systemd Services
+
+```ini
+# /etc/systemd/system/civic-os-s3-signer.service
+[Unit]
+Description=Civic OS S3 Signer
+After=postgresql.service
+
+[Service]
+Type=simple
+User=civicos
+Environment="DATABASE_URL=postgres://..."
+Environment="AWS_REGION=us-east-1"
+Environment="S3_BUCKET=your-bucket"
+ExecStart=/usr/local/bin/s3-signer
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+---
+
+### Monitoring & Health Checks
+
+#### Service Logs
+
+Both services log to stdout/stderr:
+- Startup banner with configuration
+- Job processing status (Job ID, attempt number, duration)
+- Error details with stack traces
+
+```bash
+# Docker
+docker logs s3-signer
+docker logs thumbnail-worker
+
+# Kubernetes
+kubectl logs deployment/civic-os-file-workers -c s3-signer
+kubectl logs deployment/civic-os-file-workers -c thumbnail-worker
+
+# Systemd
+journalctl -u civic-os-s3-signer -f
+journalctl -u civic-os-thumbnail-worker -f
+```
+
+#### Database Monitoring
+
+Check job queue health directly in PostgreSQL:
+
+```sql
+-- Pending jobs
+SELECT queue, COUNT(*)
+FROM metadata.river_job
+WHERE state = 'available'
+GROUP BY queue;
+
+-- Failed jobs (dead-letter queue)
+SELECT id, kind, args, errors, attempt, max_attempts
+FROM metadata.river_job
+WHERE state = 'discarded'
+ORDER BY finalized_at DESC
+LIMIT 10;
+
+-- Job processing rate (last hour)
+SELECT
+  queue,
+  COUNT(*) as completed,
+  AVG(EXTRACT(EPOCH FROM (finalized_at - scheduled_at))) as avg_duration_seconds
+FROM metadata.river_job
+WHERE state = 'completed'
+  AND finalized_at > NOW() - INTERVAL '1 hour'
+GROUP BY queue;
+```
+
+---
+
+### Scaling
+
+#### Horizontal Scaling
+
+Both services support horizontal scaling - run multiple instances:
+
+```bash
+# Docker Compose
+docker-compose up -d --scale s3-signer=3 --scale thumbnail-worker=3
+
+# Kubernetes
+kubectl scale deployment civic-os-file-workers --replicas=5
+```
+
+River's row-level locking ensures each job is processed by only one worker, even with multiple instances.
+
+#### Vertical Scaling
+
+**S3 Signer** (I/O-bound):
+- Default: 50 workers per instance
+- Memory: ~50-100MB per instance
+- CPU: Minimal (mostly network I/O)
+
+**Thumbnail Worker** (CPU-bound):
+- Default: 10 workers per instance
+- Memory: ~300-500MB per instance (libvips memory usage)
+- CPU: High during thumbnail generation
+
+Adjust worker counts in code (`main.go`) if needed based on your workload.
+
+---
 
 ## Example Usage
 

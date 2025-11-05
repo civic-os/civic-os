@@ -108,7 +108,7 @@ See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, S3 signer service, thumbnail worker, and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
-**Microservices Architecture**: File storage features (S3 signer, thumbnail worker) currently use Node.js services with PostgreSQL LISTEN/NOTIFY. **Planned migration** to Go + River (PostgreSQL table queue) for improved reliability, at-least-once delivery, automatic retries, and zero additional infrastructure. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and migration plan
+**Microservices Architecture**: File storage features (S3 signer, thumbnail worker) use Go + River (v0.10.0+) with PostgreSQL table queue for reliable job processing. Provides at-least-once delivery, automatic retries with exponential backoff, row-level locking, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
 
 **Geography (GeoPoint) Type**: When adding a geography column, you must create a paired computed field function `<column_name>_text` that returns `ST_AsText()`. PostgREST exposes this as a virtual field. Data format: Insert/Update uses EWKT `"SRID=4326;POINT(lng lat)"`, Read receives WKT `"POINT(lng lat)"`.
 

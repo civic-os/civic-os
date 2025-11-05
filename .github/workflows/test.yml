@@ -7,8 +7,9 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test:
-    name: Unit Tests
+  # Angular Frontend Tests
+  angular-tests:
+    name: Angular Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +33,7 @@ jobs:
         if: always()
         with:
           files: ./coverage/civic-os/lcov.info
+          flags: angular
           fail_ci_if_error: false
 
   test-migrations:
@@ -131,3 +133,126 @@ jobs:
           fi
         env:
           PGPASSWORD: postgres
+
+  # Go Microservices Tests
+  go-services-tests:
+    name: Go Microservices Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [s3-signer-go, thumbnail-worker-go]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install system dependencies (thumbnail-worker only)
+        if: matrix.service == 'thumbnail-worker-go'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev poppler-utils
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('services/${{ matrix.service }}/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        working-directory: services/${{ matrix.service }}
+        run: go mod download
+
+      - name: Run Go tests
+        working-directory: services/${{ matrix.service }}
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Run Go vet
+        working-directory: services/${{ matrix.service }}
+        run: go vet ./...
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          file: services/${{ matrix.service }}/coverage.out
+          flags: go-${{ matrix.service }}
+          fail_ci_if_error: false
+
+  # Docker Build Tests
+  docker-build:
+    name: Docker Build Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [s3-signer-go, thumbnail-worker-go]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/${{ matrix.service }}
+          file: services/${{ matrix.service }}/Dockerfile
+          push: false
+          tags: civic-os/${{ matrix.service }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Lint and Format Checks
+  lint:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install Angular dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Lint Angular code
+        run: npx ng lint || true  # Don't fail CI on lint warnings for now
+
+      - name: Check Go formatting (s3-signer)
+        working-directory: services/s3-signer-go
+        run: |
+          if [ "$(gofmt -l .)" != "" ]; then
+            echo "Go files are not formatted. Run 'gofmt -w .' to fix."
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Check Go formatting (thumbnail-worker)
+        working-directory: services/thumbnail-worker-go
+        run: |
+          if [ "$(gofmt -l .)" != "" ]; then
+            echo "Go files are not formatted. Run 'gofmt -w .' to fix."
+            gofmt -l .
+            exit 1
+          fi

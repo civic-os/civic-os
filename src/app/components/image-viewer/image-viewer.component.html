@@ -1,34 +1,31 @@
 <dialog #imageDialog class="modal">
-  <div class="modal-box max-w-6xl p-4">
+  <div class="modal-box max-w-6xl p-0">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center p-4 pb-3">
       <h3 class="font-bold text-lg">{{ currentImage()?.file_name }}</h3>
       <button (click)="close()" class="btn btn-sm btn-circle btn-ghost">✕</button>
     </div>
 
     <!-- Image Container -->
-    <div class="overflow-auto max-h-[70vh] bg-base-200 rounded-lg flex items-center justify-center">
+    <div class="overflow-auto max-h-[70vh] bg-base-200 flex items-start justify-center">
       @if (currentImage()) {
         <img
           [src]="getImageUrl()"
           [alt]="currentImage()!.file_name"
           [class.w-full]="!zoomed()"
-          class="block max-w-full"
+          class="not-prose block max-w-full"
         />
       }
     </div>
 
     <!-- Actions -->
-    <div class="modal-action">
+    <div class="modal-action px-4 pb-4 pt-3">
       <button (click)="toggleZoom()" class="btn">
         {{ zoomed() ? 'Fit to Screen' : 'Actual Size' }}
       </button>
-      <a
-        [href]="getImageUrl()"
-        [download]="getDownloadFilename()"
-        class="btn btn-primary">
+      <button (click)="downloadImage()" class="btn btn-primary">
         Download
-      </a>
+      </button>
       <button (click)="close()" class="btn">Close</button>
     </div>
   </div>

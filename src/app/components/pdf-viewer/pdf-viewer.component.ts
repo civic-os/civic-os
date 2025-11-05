@@ -72,6 +72,40 @@ export class PdfViewerComponent {
   }
 
   /**
+   * Download the PDF file
+   * Fetches as blob to force download instead of browser PDF viewer
+   */
+  async downloadPdf() {
+    const pdf = this.currentPdf();
+    if (!pdf) return;
+
+    const url = this.getS3Url(pdf.s3_original_key);
+    const filename = this.getDownloadFilename();
+
+    try {
+      // Fetch the PDF as a blob
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // Create a temporary blob URL
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Create a temporary anchor element and click it
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+    }
+  }
+
+  /**
    * Construct S3 URL from key
    */
   private getS3Url(s3Key: string): string {

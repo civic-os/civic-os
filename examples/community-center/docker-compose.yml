@@ -84,21 +84,21 @@ services:
       timeout: 10s
       retries: 3
 
-  # S3 Signer Service - Generates presigned upload URLs
+  # S3 Signer Service - Generates presigned upload URLs (Go + River)
   s3-signer:
     build:
-      context: ../../services/s3-signer
+      context: ../../services/s3-signer-go
       dockerfile: Dockerfile
     container_name: broader_impacts_s3_signer
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - S3_ENDPOINT=http://minio:9000
-      - S3_PUBLIC_ENDPOINT=http://localhost:9000
+      - AWS_ENDPOINT_URL=http://minio:9000
+      - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
       - S3_BUCKET=${S3_BUCKET:-civic-os-files}
       - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
       - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
       - AWS_REGION=us-east-1
-      - PORT=3001
+      
     networks:
       - postgrest-network
     depends_on:
@@ -108,15 +108,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Thumbnail Worker - Generates image and PDF thumbnails
+  # Thumbnail Worker - Generates image and PDF thumbnails (Go + River + bimg)
   thumbnail-worker:
     build:
-      context: ../../services/thumbnail-worker
+      context: ../../services/thumbnail-worker-go
       dockerfile: Dockerfile
     container_name: broader_impacts_thumbnail_worker
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - S3_ENDPOINT=http://minio:9000
+      - AWS_ENDPOINT_URL=http://minio:9000
       - S3_BUCKET=${S3_BUCKET:-civic-os-files}
       - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
       - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
