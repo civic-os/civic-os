@@ -334,8 +334,8 @@ jobs:
       - name: Build and push S3 Signer image
         uses: docker/build-push-action@v5
         with:
-          context: ./services/s3-signer
-          file: ./services/s3-signer/Dockerfile
+          context: ./services/s3-signer-go
+          file: ./services/s3-signer-go/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -386,8 +386,8 @@ jobs:
       - name: Build and push Thumbnail Worker image
         uses: docker/build-push-action@v5
         with:
-          context: ./services/thumbnail-worker
-          file: ./services/thumbnail-worker/Dockerfile
+          context: ./services/thumbnail-worker-go
+          file: ./services/thumbnail-worker-go/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
