@@ -1,0 +1,21 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgrest
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: postgrest
+spec:
+  type: ClusterIP
+  selector:
+    app: civic-os
+    component: postgrest
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP

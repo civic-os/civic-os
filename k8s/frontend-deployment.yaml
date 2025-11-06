@@ -1,0 +1,121 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: civic-os
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: civic-os
+        component: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/civic-os/frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        env:
+        # PostgREST connection (MUST be public HTTPS URL, not internal service)
+        # The Angular SPA makes API calls from the browser
+        - name: POSTGREST_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: POSTGREST_URL
+
+        # Keycloak configuration
+        - name: KEYCLOAK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: KEYCLOAK_URL
+        - name: KEYCLOAK_REALM
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: KEYCLOAK_REALM
+        - name: KEYCLOAK_CLIENT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: KEYCLOAK_CLIENT_ID
+
+        # Map configuration
+        - name: MAP_TILE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: MAP_TILE_URL
+        - name: MAP_ATTRIBUTION
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: MAP_ATTRIBUTION
+        - name: MAP_DEFAULT_LAT
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: MAP_DEFAULT_LAT
+        - name: MAP_DEFAULT_LNG
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: MAP_DEFAULT_LNG
+        - name: MAP_DEFAULT_ZOOM
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: MAP_DEFAULT_ZOOM
+
+        # S3 configuration (for file storage - v0.10.0+)
+        - name: S3_PUBLIC_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_PUBLIC_ENDPOINT
+              optional: true
+        - name: S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_BUCKET
+              optional: true
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3

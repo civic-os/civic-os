@@ -1,0 +1,70 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thumbnail-worker
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: thumbnail-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: civic-os
+      component: thumbnail-worker
+  template:
+    metadata:
+      labels:
+        app: civic-os
+        component: thumbnail-worker
+    spec:
+      containers:
+      - name: thumbnail-worker
+        image: ghcr.io/civic-os/thumbnail-worker:latest
+        imagePullPolicy: Always
+        env:
+        # Database connection
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: DATABASE_URL
+
+        # S3/AWS configuration
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: AWS_REGION
+        - name: AWS_ENDPOINT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: AWS_ENDPOINT_URL
+              optional: true
+        - name: S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_BUCKET
+
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi

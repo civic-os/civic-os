@@ -32,12 +32,14 @@ This guide covers deploying Civic OS to production environments using Docker con
 
 ## Overview
 
-Civic OS uses a containerized architecture with four main components:
+Civic OS uses a containerized architecture with six main components:
 
 1. **Frontend** - Angular SPA served by nginx
 2. **PostgREST** - REST API layer with JWT authentication
 3. **Migrations** - Sqitch-based database schema migrations (runs before PostgREST)
 4. **PostgreSQL** - Database with PostGIS extensions
+5. **S3 Signer** - Go microservice that generates presigned upload URLs via River job queue
+6. **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails via River job queue
 
 All components are configured via environment variables, enabling the same container images to run across dev, staging, and production environments.
 
@@ -181,16 +183,17 @@ MAP_DEFAULT_ZOOM=13
 
 # ======================================
 # S3 / File Storage Configuration
-# (Required for v0.5.0+ file upload features)
+# (Required for v0.10.0+ file upload features)
 # ======================================
+# Public-facing S3 endpoint (used by frontend for downloads)
 S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 S3_BUCKET=civic-os-files-prod
-S3_REGION=us-east-1
 
-# Backend S3 configuration (for s3-signer and thumbnail-worker)
-S3_ENDPOINT=https://s3.amazonaws.com  # Internal endpoint for AWS SDK
-S3_ACCESS_KEY_ID=your-access-key
-S3_SECRET_ACCESS_KEY=your-secret-key
+# AWS SDK configuration (for s3-signer and thumbnail-worker microservices)
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=us-east-1
+AWS_ENDPOINT_URL=  # Leave empty for real AWS S3, set for MinIO/S3-compatible storage
 
 # ======================================
 # Container Registry

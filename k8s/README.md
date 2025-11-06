@@ -8,11 +8,18 @@ This directory contains example Kubernetes manifests for deploying Civic OS. The
 
 ## Architecture Overview
 
-Civic OS uses a three-subdomain architecture:
+Civic OS uses a three-subdomain architecture with six containerized components:
 
+### Public-Facing Services (via Ingress)
 - **app.yourdomain.com** - Frontend (Angular SPA)
 - **api.yourdomain.com** - PostgREST API (public REST API)
 - **docs.yourdomain.com** - Swagger UI (auto-generated API documentation)
+
+### Backend Services (internal)
+- **PostgREST** - REST API layer with JWT authentication
+- **S3 Signer** - Go microservice that generates presigned upload URLs via River job queue
+- **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails via River job queue
+- **PostgreSQL** - Managed database (recommended) or in-cluster StatefulSet
 
 The frontend is a Single Page Application (SPA) that makes API calls from the browser to the public API endpoint. This means configuration must use **public HTTPS URLs**, not internal Kubernetes service URLs.
 
@@ -67,17 +74,21 @@ kubectl get svc -n ingress-nginx ingress-nginx-controller
 
 ### 4. Create Secrets
 
-**For managed external database (recommended):**
+**For managed external database and S3 storage (recommended):**
 
 ```bash
 kubectl create secret generic civic-os-secrets \
   --from-literal=DATABASE_URL='postgresql://user:pass@host:port/dbname?sslmode=require' \
+  --from-literal=AWS_ACCESS_KEY_ID='your-access-key-id' \
+  --from-literal=AWS_SECRET_ACCESS_KEY='your-secret-access-key' \
   --namespace civic-os
 ```
 
-**Example for Digital Ocean managed PostgreSQL:**
+**Example for Digital Ocean managed PostgreSQL + AWS S3:**
 ```bash
 DATABASE_URL='postgresql://doadmin:password@db-postgresql-nyc3-12345.ondigitalocean.com:25060/defaultdb?sslmode=require'
+AWS_ACCESS_KEY_ID='AKIAIOSFODNN7EXAMPLE'
+AWS_SECRET_ACCESS_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 ```
 
 See `secrets.yaml` for production secret management options (Sealed Secrets recommended).
@@ -85,19 +96,31 @@ See `secrets.yaml` for production secret management options (Sealed Secrets reco
 ### 5. Deploy Civic OS
 
 ```bash
-# Apply all manifests
+# Apply configuration and secrets
 kubectl apply -f configmap.yaml
 kubectl apply -f secrets.yaml  # if using template
-kubectl apply -f frontend-deployment.yaml
-kubectl apply -f frontend-service.yaml
+
+# Deploy backend services (must come before frontend)
 kubectl apply -f postgrest-deployment.yaml
 kubectl apply -f postgrest-service.yaml
+kubectl apply -f s3-signer-deployment.yaml
+kubectl apply -f thumbnail-worker-deployment.yaml
+
+# Deploy frontend
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f frontend-service.yaml
+
+# Deploy optional services
 kubectl apply -f swagger-ui.yaml
+
+# Configure ingress (external access)
 kubectl apply -f ingress.yaml
 
 # Optional: Enable network policy for security isolation
 kubectl apply -f network-policy.yaml
 ```
+
+**Note**: The `postgrest-deployment.yaml` includes an initContainer that runs database migrations before PostgREST starts, ensuring the schema is up-to-date.
 
 ### 6. Verify Deployment
 

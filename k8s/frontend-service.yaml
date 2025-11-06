@@ -1,0 +1,21 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: civic-os
+    component: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP

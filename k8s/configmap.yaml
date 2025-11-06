@@ -33,3 +33,10 @@ data:
   PGRST_DB_PRE_REQUEST: "public.check_jwt"
   PGRST_JWT_AUD: "account"
   PGRST_LOG_LEVEL: "info"
+
+  # S3 / File Storage Configuration (v0.10.0+)
+  # Public-facing S3 endpoint (used by frontend for file downloads)
+  S3_PUBLIC_ENDPOINT: "https://s3.yourdomain.com"
+  S3_BUCKET: "civic-os-files-prod"
+  AWS_REGION: "us-east-1"
+  # AWS_ENDPOINT_URL: ""  # Leave empty for AWS S3, set for MinIO/S3-compatible storage

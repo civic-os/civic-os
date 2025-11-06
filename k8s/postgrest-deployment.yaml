@@ -1,0 +1,125 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgrest
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: postgrest
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: civic-os
+      component: postgrest
+  template:
+    metadata:
+      labels:
+        app: civic-os
+        component: postgrest
+    spec:
+      # Run migrations before starting PostgREST
+      initContainers:
+      - name: migrations
+        image: ghcr.io/civic-os/migrations:latest
+        env:
+        - name: PGRST_DB_URI
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: DATABASE_URL
+        - name: CIVIC_OS_VERIFY_FULL
+          value: "false"
+
+      containers:
+      - name: postgrest
+        image: ghcr.io/civic-os/postgrest:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        env:
+        # Database connection (from secret)
+        - name: PGRST_DB_URI
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: DATABASE_URL
+
+        # Database schema configuration
+        - name: PGRST_DB_SCHEMA
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PGRST_DB_SCHEMA
+        - name: PGRST_DB_ANON_ROLE
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PGRST_DB_ANON_ROLE
+        - name: PGRST_DB_PRE_REQUEST
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PGRST_DB_PRE_REQUEST
+
+        # Keycloak configuration (for JWKS fetching)
+        - name: KEYCLOAK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: KEYCLOAK_URL
+        - name: KEYCLOAK_REALM
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: KEYCLOAK_REALM
+
+        # JWT configuration
+        - name: PGRST_JWT_SECRET
+          value: "@/etc/postgrest/jwt-secret.jwks"
+        - name: PGRST_JWT_AUD
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PGRST_JWT_AUD
+
+        # API configuration (use public URL for OpenAPI spec)
+        - name: PGRST_OPENAPI_SERVER_PROXY_URI
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: POSTGREST_URL
+        - name: PGRST_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PGRST_LOG_LEVEL
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 5
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
