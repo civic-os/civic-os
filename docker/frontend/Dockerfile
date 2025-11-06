@@ -13,8 +13,9 @@ COPY package*.json ./
 
 # Install dependencies with npm cache mount for faster rebuilds
 # Use ci for clean, reproducible builds
+# Skip devDependencies (testing tools like pa11y-ci, Puppeteer) in production
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps
+    npm ci --omit=dev --legacy-peer-deps
 
 # Copy source code
 COPY . .
