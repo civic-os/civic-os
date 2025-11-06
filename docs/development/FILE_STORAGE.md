@@ -135,9 +135,9 @@ Both microservices (S3 Signer and Thumbnail Worker) require environment variable
 DATABASE_URL=postgres://user:password@host:5432/database
 
 # AWS Credentials
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
+S3_REGION=us-east-1
+S3_ACCESS_KEY_ID=your-access-key
+S3_SECRET_ACCESS_KEY=your-secret-key
 
 # S3 Bucket
 S3_BUCKET=your-production-bucket
@@ -150,10 +150,10 @@ S3_BUCKET=your-production-bucket
 S3_PUBLIC_ENDPOINT=http://localhost:9000  # LOCAL ONLY - omit for AWS S3
 
 # Thumbnail Worker: Internal S3 endpoint
-AWS_ENDPOINT_URL=http://minio:9000  # LOCAL ONLY - omit for AWS S3
+S3_ENDPOINT=http://minio:9000  # LOCAL ONLY - omit for AWS S3
 ```
 
-⚠️ **Critical**: `S3_PUBLIC_ENDPOINT` and `AWS_ENDPOINT_URL` are **only for local MinIO development**. Do NOT set these variables in production with AWS S3 - the services will automatically use correct AWS endpoints.
+⚠️ **Critical**: `S3_PUBLIC_ENDPOINT` and `S3_ENDPOINT` are **only for local MinIO development**. Do NOT set these variables in production with AWS S3 - the services will automatically use correct AWS endpoints.
 
 ---
 
@@ -215,7 +215,7 @@ services:
     image: ghcr.io/civic-os/s3-signer:0.10.0
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - AWS_REGION=us-east-1
+      - S3_REGION=us-east-1
       - S3_BUCKET=${S3_BUCKET}
     restart: unless-stopped
 
@@ -223,7 +223,7 @@ services:
     image: ghcr.io/civic-os/thumbnail-worker:0.10.0
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - AWS_REGION=us-east-1
+      - S3_REGION=us-east-1
       - S3_BUCKET=${S3_BUCKET}
     restart: unless-stopped
 ```
@@ -248,7 +248,7 @@ spec:
             secretKeyRef:
               name: civic-os-secrets
               key: database-url
-        - name: AWS_REGION
+        - name: S3_REGION
           value: "us-east-1"
         - name: S3_BUCKET
           value: "your-bucket"
@@ -261,7 +261,7 @@ spec:
             secretKeyRef:
               name: civic-os-secrets
               key: database-url
-        - name: AWS_REGION
+        - name: S3_REGION
           value: "us-east-1"
         - name: S3_BUCKET
           value: "your-bucket"
@@ -279,7 +279,7 @@ After=postgresql.service
 Type=simple
 User=civicos
 Environment="DATABASE_URL=postgres://..."
-Environment="AWS_REGION=us-east-1"
+Environment="S3_REGION=us-east-1"
 Environment="S3_BUCKET=your-bucket"
 ExecStart=/usr/local/bin/s3-signer
 Restart=always

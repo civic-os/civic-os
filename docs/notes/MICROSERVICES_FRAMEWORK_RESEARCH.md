@@ -780,9 +780,9 @@ services:
   s3-signer:
     image: ghcr.io/civic-os/s3-signer:latest
     environment:
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: ${S3_BUCKET}
       REDIS_URL: redis://redis:6379
       DATABASE_URL: ${DATABASE_URL}
@@ -795,9 +795,9 @@ services:
   thumbnail-worker:
     image: ghcr.io/civic-os/thumbnail-worker:latest
     environment:
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: ${S3_BUCKET}
       RABBITMQ_URL: amqp://civic_os:${RABBITMQ_PASSWORD}@rabbitmq:5672/
       DATABASE_URL: ${DATABASE_URL}
@@ -812,9 +812,9 @@ services:
   notification-service:
     image: ghcr.io/civic-os/notification-service:latest
     environment:
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       SQS_QUEUE_URL: ${SQS_QUEUE_URL}
       DATABASE_URL: ${DATABASE_URL}
     depends_on:

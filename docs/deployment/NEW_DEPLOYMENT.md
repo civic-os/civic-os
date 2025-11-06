@@ -575,11 +575,11 @@ s3-signer:
     context: ../../services/s3-signer-go
   environment:
     - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    - AWS_ENDPOINT_URL=http://minio:9000
+    - S3_ENDPOINT=http://minio:9000
     - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
     - S3_BUCKET=${S3_BUCKET:-civic-os-files}
-    - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
-    - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+    - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+    - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
 ```
 
 **Thumbnail Worker (Image/PDF Processing):**
@@ -589,10 +589,10 @@ thumbnail-worker:
     context: ../../services/thumbnail-worker-go
   environment:
     - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    - AWS_ENDPOINT_URL=http://minio:9000
+    - S3_ENDPOINT=http://minio:9000
     - S3_BUCKET=${S3_BUCKET:-civic-os-files}
-    - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
-    - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+    - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+    - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
 ```
 
 **Key Points:**
@@ -636,10 +636,10 @@ S3_BUCKET=civic-os-files
 S3_PUBLIC_ENDPOINT=http://localhost:9000
 
 # For production: replace MinIO with AWS S3 or DigitalOcean Spaces
-# AWS_ACCESS_KEY_ID=your-access-key-id
-# AWS_SECRET_ACCESS_KEY=your-secret-access-key
-# AWS_REGION=us-east-1
-# AWS_ENDPOINT_URL=  # Leave empty for AWS, set for MinIO/S3-compatible
+# S3_ACCESS_KEY_ID=your-access-key-id
+# S3_SECRET_ACCESS_KEY=your-secret-access-key
+# S3_REGION=us-east-1
+# S3_ENDPOINT=  # Leave empty for AWS, set for MinIO/S3-compatible
 # S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 ```
 
@@ -834,10 +834,10 @@ For production, replace MinIO with AWS S3 or DigitalOcean Spaces:
 ```bash
 # Remove MinIO credentials
 # Add AWS credentials
-AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-AWS_REGION=us-east-1
-AWS_ENDPOINT_URL=  # Leave empty for AWS S3
+S3_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+S3_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+S3_REGION=us-east-1
+S3_ENDPOINT=  # Leave empty for AWS S3
 
 # Update public endpoint for HTTPS
 S3_PUBLIC_ENDPOINT=https://civic-os-files-prod.s3.amazonaws.com
@@ -851,20 +851,20 @@ S3_BUCKET=civic-os-files-prod
 # Update s3-signer and thumbnail-worker:
 s3-signer:
   environment:
-    - AWS_ENDPOINT_URL=  # Empty for AWS S3
-    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    - AWS_REGION=${AWS_REGION}
+    - S3_ENDPOINT=  # Empty for AWS S3
+    - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+    - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+    - S3_REGION=${S3_REGION}
     - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT}
     - S3_BUCKET=${S3_BUCKET}
 ```
 
 **DigitalOcean Spaces Example:**
 ```bash
-AWS_ACCESS_KEY_ID=DO00EXAMPLE
-AWS_SECRET_ACCESS_KEY=DOEXAMPLE
-AWS_ENDPOINT_URL=https://nyc3.digitaloceanspaces.com
-AWS_REGION=nyc3
+S3_ACCESS_KEY_ID=DO00EXAMPLE
+S3_SECRET_ACCESS_KEY=DOEXAMPLE
+S3_ENDPOINT=https://nyc3.digitaloceanspaces.com
+S3_REGION=nyc3
 S3_PUBLIC_ENDPOINT=https://civic-os-files-prod.nyc3.digitaloceanspaces.com
 S3_BUCKET=civic-os-files-prod
 ```

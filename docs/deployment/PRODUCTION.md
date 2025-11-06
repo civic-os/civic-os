@@ -190,10 +190,10 @@ S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 S3_BUCKET=civic-os-files-prod
 
 # AWS SDK configuration (for s3-signer and thumbnail-worker microservices)
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_REGION=us-east-1
-AWS_ENDPOINT_URL=  # Leave empty for real AWS S3, set for MinIO/S3-compatible storage
+S3_ACCESS_KEY_ID=your-access-key
+S3_SECRET_ACCESS_KEY=your-secret-key
+S3_REGION=us-east-1
+S3_ENDPOINT=  # Leave empty for real AWS S3, set for MinIO/S3-compatible storage
 
 # ======================================
 # Container Registry

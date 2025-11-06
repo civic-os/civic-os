@@ -34,26 +34,26 @@ spec:
               key: DATABASE_URL
 
         # S3/AWS configuration
-        - name: AWS_ACCESS_KEY_ID
+        - name: S3_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
               name: civic-os-secrets
-              key: AWS_ACCESS_KEY_ID
-        - name: AWS_SECRET_ACCESS_KEY
+              key: S3_ACCESS_KEY_ID
+        - name: S3_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
               name: civic-os-secrets
-              key: AWS_SECRET_ACCESS_KEY
-        - name: AWS_REGION
+              key: S3_SECRET_ACCESS_KEY
+        - name: S3_REGION
           valueFrom:
             configMapKeyRef:
               name: civic-os-config
-              key: AWS_REGION
-        - name: AWS_ENDPOINT_URL
+              key: S3_REGION
+        - name: S3_ENDPOINT
           valueFrom:
             configMapKeyRef:
               name: civic-os-config
-              key: AWS_ENDPOINT_URL
+              key: S3_ENDPOINT
               optional: true
         - name: S3_BUCKET
           valueFrom:

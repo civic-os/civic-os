@@ -13,6 +13,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
@@ -148,27 +149,43 @@ func main() {
 
 	// Get configuration from environment variables
 	databaseURL := getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/civic_os")
-	awsRegion := getEnv("AWS_REGION", "us-east-1")
+
+	// S3 configuration with dual support (generic S3_* names take priority)
+	s3AccessKey := getS3Env("S3_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID", "")
+	s3SecretKey := getS3Env("S3_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY", "")
+	s3Region := getS3Env("S3_REGION", "AWS_REGION", "us-east-1")
+	s3Endpoint := getS3Env("S3_ENDPOINT", "AWS_ENDPOINT_URL", "")
 	publicEndpoint := getEnv("S3_PUBLIC_ENDPOINT", "")
 
 	log.Printf("Database URL: %s", maskPassword(databaseURL))
-	log.Printf("AWS Region: %s", awsRegion)
+	log.Printf("S3 Region: %s", s3Region)
+	if s3Endpoint != "" {
+		log.Printf("S3 Endpoint: %s", s3Endpoint)
+	}
 	if publicEndpoint != "" {
 		log.Printf("S3 Public Endpoint: %s", publicEndpoint)
 	}
 
-	// Initialize AWS S3 client
-	log.Println("\n[Init] Loading AWS configuration...")
+	// Initialize AWS S3 client with explicit credentials
+	log.Println("\n[Init] Loading AWS SDK configuration...")
 	awsCfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion(awsRegion),
+		config.WithRegion(s3Region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			s3AccessKey,
+			s3SecretKey,
+			"", // session token (not used)
+		)),
 	)
 	if err != nil {
-		log.Fatalf("Failed to load AWS configuration: %v", err)
+		log.Fatalf("Failed to load AWS SDK configuration: %v", err)
 	}
 
-	// Configure S3 client with path-style URLs (required for MinIO)
+	// Configure S3 client with custom endpoint (if provided) and path-style URLs
 	s3Client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
-		o.UsePathStyle = true
+		if s3Endpoint != "" {
+			o.BaseEndpoint = aws.String(s3Endpoint)
+		}
+		o.UsePathStyle = true // Required for MinIO and DigitalOcean Spaces
 	})
 
 	// For presigning, use public endpoint if configured (for local MinIO/Docker)
@@ -176,10 +193,15 @@ func main() {
 	if publicEndpoint != "" {
 		// Create separate config with public endpoint for presigned URLs
 		publicCfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion(awsRegion),
+			config.WithRegion(s3Region),
+			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+				s3AccessKey,
+				s3SecretKey,
+				"",
+			)),
 		)
 		if err != nil {
-			log.Fatalf("Failed to load AWS configuration for presigning: %v", err)
+			log.Fatalf("Failed to load AWS SDK configuration for presigning: %v", err)
 		}
 
 		publicS3Client := s3.NewFromConfig(publicCfg, func(o *s3.Options) {
@@ -187,10 +209,10 @@ func main() {
 			o.UsePathStyle = true // Required for MinIO path-style URLs
 		})
 		s3PresignClient = s3.NewPresignClient(publicS3Client)
-		log.Printf("[Init] ✓ AWS S3 client initialized with public endpoint for presigning")
+		log.Printf("[Init] ✓ S3 client initialized with public endpoint for presigning")
 	} else {
 		s3PresignClient = s3.NewPresignClient(s3Client)
-		log.Println("[Init] ✓ AWS S3 client initialized")
+		log.Println("[Init] ✓ S3 client initialized")
 	}
 
 	// Initialize PostgreSQL connection pool
@@ -271,6 +293,24 @@ func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
+	return defaultValue
+}
+
+// getS3Env retrieves S3-related environment variable with dual support for generic and AWS-specific names.
+// Priority: Generic S3_* names first, fallback to AWS_* names with deprecation warning.
+// This maintains backward compatibility while migrating to vendor-neutral naming.
+func getS3Env(genericKey, awsKey, defaultValue string) string {
+	// Try generic S3_* name first (preferred)
+	if value := os.Getenv(genericKey); value != "" {
+		return value
+	}
+
+	// Fallback to AWS-specific name (deprecated)
+	if value := os.Getenv(awsKey); value != "" {
+		log.Printf("⚠️  WARNING: %s is deprecated, use %s instead (AWS-specific naming will be removed in v1.0.0)", awsKey, genericKey)
+		return value
+	}
+
 	return defaultValue
 }
 

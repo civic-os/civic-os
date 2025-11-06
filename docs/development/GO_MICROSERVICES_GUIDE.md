@@ -929,9 +929,9 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/civic_os
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: civic-os-files
       S3_ENDPOINT: http://minio:9000
       S3_PUBLIC_ENDPOINT: http://localhost:9000
@@ -946,9 +946,9 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/civic_os
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: civic-os-files
       S3_ENDPOINT: http://minio:9000
     depends_on:
@@ -970,9 +970,9 @@ services:
     image: ghcr.io/civic-os/s3-signer:${VERSION:-latest}
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      AWS_REGION: ${AWS_REGION}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: ${S3_REGION}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: ${S3_BUCKET}
     depends_on:
       - postgres
@@ -987,9 +987,9 @@ services:
     image: ghcr.io/civic-os/thumbnail-worker:${VERSION:-latest}
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      AWS_REGION: ${AWS_REGION}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_REGION: ${S3_REGION}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: ${S3_BUCKET}
     depends_on:
       - postgres
@@ -1230,9 +1230,9 @@ Both Go microservices require the following environment variables:
 DATABASE_URL=postgres://user:password@host:5432/database_name
 
 # AWS Configuration
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your-access-key-id
-AWS_SECRET_ACCESS_KEY=your-secret-access-key
+S3_REGION=us-east-1
+S3_ACCESS_KEY_ID=your-access-key-id
+S3_SECRET_ACCESS_KEY=your-secret-access-key
 
 # S3 Bucket
 S3_BUCKET=your-bucket-name
@@ -1253,10 +1253,10 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 ```bash
 # Internal S3 endpoint (MinIO/Docker only)
 # For production AWS S3, OMIT this variable entirely
-AWS_ENDPOINT_URL=http://minio:9000
+S3_ENDPOINT=http://minio:9000
 ```
 
-**Important**: `AWS_ENDPOINT_URL` is **only for local MinIO** in Docker environments. For production AWS S3, **do not set this variable** - the service will use standard AWS endpoints.
+**Important**: `S3_ENDPOINT` is **only for local MinIO** in Docker environments. For production AWS S3, **do not set this variable** - the service will use standard AWS endpoints.
 
 ---
 
@@ -1264,7 +1264,7 @@ AWS_ENDPOINT_URL=http://minio:9000
 
 | Configuration | Development (MinIO) | Production (AWS S3) |
 |---------------|---------------------|---------------------|
-| `AWS_ENDPOINT_URL` | `http://minio:9000` | **Omit** (uses AWS default) |
+| `S3_ENDPOINT` | `http://minio:9000` | **Omit** (uses AWS default) |
 | `S3_PUBLIC_ENDPOINT` | `http://localhost:9000` | **Omit** (uses AWS default) |
 | `S3_BUCKET` | `civic-os-files` | Your production bucket name |
 | S3 URL Style | Path-style (forced) | Virtual-hosted (AWS default) |
@@ -1292,9 +1292,9 @@ services:
     image: civic-os/s3-signer:0.10.0
     environment:
       - DATABASE_URL=postgres://user:pass@db-host:5432/civic_os
-      - AWS_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
       - S3_BUCKET=your-production-bucket
       # NO S3_PUBLIC_ENDPOINT for production!
     restart: unless-stopped
@@ -1303,11 +1303,11 @@ services:
     image: civic-os/thumbnail-worker:0.10.0
     environment:
       - DATABASE_URL=postgres://user:pass@db-host:5432/civic_os
-      - AWS_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
       - S3_BUCKET=your-production-bucket
-      # NO AWS_ENDPOINT_URL for production!
+      # NO S3_ENDPOINT for production!
     restart: unless-stopped
 ```
 
@@ -1316,9 +1316,9 @@ services:
 ```bash
 # Set environment variables
 export DATABASE_URL="postgres://user:pass@host:5432/civic_os"
-export AWS_REGION="us-east-1"
-export AWS_ACCESS_KEY_ID="your-key"
-export AWS_SECRET_ACCESS_KEY="your-secret"
+export S3_REGION="us-east-1"
+export S3_ACCESS_KEY_ID="your-key"
+export S3_SECRET_ACCESS_KEY="your-secret"
 export S3_BUCKET="your-bucket"
 
 # Run S3 Signer

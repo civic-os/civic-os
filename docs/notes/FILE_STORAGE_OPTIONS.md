@@ -290,7 +290,7 @@ const app = express();
 app.use(express.json());
 
 const s3 = new AWS.S3({
-  region: process.env.AWS_REGION || 'us-east-1'
+  region: process.env.S3_REGION || 'us-east-1'
 });
 
 const pool = new Pool({
@@ -362,9 +362,9 @@ services:
     container_name: s3_signer
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres_db:5432/civic_os_db
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_REGION=${S3_REGION:-us-east-1}
       - S3_BUCKET=${S3_BUCKET}
       - PORT=3001
     networks:
@@ -727,7 +727,7 @@ const { Client } = require('pg');
 const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3({
-  region: process.env.AWS_REGION || 'us-east-1'
+  region: process.env.S3_REGION || 'us-east-1'
 });
 
 async function main() {
@@ -806,9 +806,9 @@ services:
     container_name: s3_worker
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres_db:5432/civic_os_db
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_REGION=${S3_REGION:-us-east-1}
       - S3_BUCKET=${S3_BUCKET}
     networks:
       - postgres_network
@@ -1206,7 +1206,7 @@ const sharp = require('sharp');
 const ExifParser = require('exif-parser');
 
 const s3 = new AWS.S3({
-  region: process.env.AWS_REGION || 'us-east-1'
+  region: process.env.S3_REGION || 'us-east-1'
 });
 
 const THUMBNAIL_SIZES = {
@@ -1442,9 +1442,9 @@ services:
     container_name: thumbnail_worker
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres_db:5432/civic_os_db
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_REGION=${S3_REGION:-us-east-1}
       - S3_BUCKET=${S3_BUCKET}
     networks:
       - postgres_network
@@ -1913,8 +1913,8 @@ volumes:
 // sign-service.js
 const s3 = new AWS.S3({
   endpoint: process.env.S3_ENDPOINT || 'http://minio:9000',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'minioadmin',
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'minioadmin',
+  accessKeyId: process.env.S3_ACCESS_KEY_ID || 'minioadmin',
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || 'minioadmin',
   s3ForcePathStyle: true, // Required for MinIO
   signatureVersion: 'v4'
 });
