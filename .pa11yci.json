@@ -3,7 +3,6 @@
     "standard": "WCAG2AA",
     "runners": ["axe", "htmlcs"],
     "chromeLaunchConfig": {
-      "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       "args": ["--no-sandbox", "--disable-setuid-sandbox"]
     },
     "timeout": 60000,
