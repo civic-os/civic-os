@@ -17,9 +17,10 @@ This guide walks you through deploying a **new Civic OS instance** with your own
 7. [Step 5: Configure Environment Variables](#step-5-configure-environment-variables)
 8. [Step 6: Set Up Authentication](#step-6-set-up-authentication)
 9. [Step 7: Start Your Services](#step-7-start-your-services)
-10. [Step 8: Configure Metadata (Optional)](#step-8-configure-metadata-optional)
-11. [Step 9: Generate Mock Data](#step-9-generate-mock-data)
-12. [Step 10: Access Your Application](#step-10-access-your-application)
+10. [Step 8: Configure File Storage (Optional)](#step-8-configure-file-storage-optional)
+11. [Step 9: Configure Metadata (Optional)](#step-9-configure-metadata-optional)
+12. [Step 10: Generate Mock Data](#step-10-generate-mock-data)
+13. [Step 11: Access Your Application](#step-11-access-your-application)
 13. [Schema Design Best Practices](#schema-design-best-practices)
 14. [Troubleshooting](#troubleshooting)
 15. [Example Walkthrough](#example-walkthrough)
@@ -33,8 +34,9 @@ This guide walks you through deploying a **new Civic OS instance** with your own
 This guide helps you:
 - Create a new deployment instance parallel to the `examples/pothole/` folder
 - Convert your ERD to Civic OS-compatible SQL schema
-- Set up Docker Compose with PostgreSQL, PostgREST, and Keycloak
+- Set up Docker Compose with PostgreSQL, PostgREST, Keycloak, and file storage
 - Configure permissions and metadata
+- Set up S3-compatible file storage for uploads (images, PDFs, documents)
 - Generate realistic mock data for testing
 
 ### How Civic OS Works
@@ -48,10 +50,14 @@ Civic OS reads metadata via schema_entities & schema_properties views
   ↓
 Angular frontend auto-generates List/Detail/Create/Edit pages
   ↓
-Smart components adapt to property types (text, date, geography, foreign keys, etc.)
+Smart components adapt to property types (text, date, geography, foreign keys, files, etc.)
+  ↓
+Go microservices handle file uploads via River job queue
 ```
 
 **Key Concept**: You define your schema in SQL, and Civic OS handles the UI. No manual form building required!
+
+**File Storage (v0.10.0+)**: Civic OS includes built-in support for file uploads (images, PDFs, documents) with automatic thumbnail generation. Uses S3-compatible storage (AWS S3, MinIO, DigitalOcean Spaces) and Go microservices for reliable background processing.
 
 ---
 
@@ -478,6 +484,24 @@ Copy the example Docker Compose file and customize it for your deployment.
 cp ../examples/pothole/docker-compose.yml ./docker-compose.yml
 ```
 
+### Services Included
+
+The Docker Compose configuration includes:
+
+**Core Services:**
+- **PostgreSQL** with PostGIS - Database with spatial extensions
+- **PostgREST** - REST API layer with JWT authentication
+- **Swagger UI** (optional) - API documentation viewer
+
+**File Storage Services (v0.10.0+):**
+- **MinIO** - S3-compatible object storage for local development
+- **S3 Signer** - Go microservice that generates presigned upload URLs
+- **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails
+- **MinIO Init** - One-time setup container to create S3 bucket
+
+**Authentication (optional):**
+- **Keycloak** - Identity provider for RBAC (commented out by default)
+
 ### Key Configuration Points
 
 The default configuration should work out of the box, but review these sections:
@@ -527,6 +551,57 @@ postgrest:
 - `PGRST_DB_PRE_REQUEST: "public.check_jwt"` - Enables JWT validation
 - `PGRST_JWT_SECRET` - Path to Keycloak public key (JWKS format)
 
+#### File Storage Services (Optional - Required for File Uploads)
+
+If your application needs file upload capabilities (images, PDFs, documents), the example docker-compose includes:
+
+**MinIO (S3-Compatible Storage):**
+```yaml
+minio:
+  image: minio/minio:latest
+  ports:
+    - "9000:9000"  # API
+    - "9001:9001"  # Web Console
+  environment:
+    MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+    MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+  command: server /data --console-address ":9001"
+```
+
+**S3 Signer (Presigned Upload URLs):**
+```yaml
+s3-signer:
+  build:
+    context: ../../services/s3-signer-go
+  environment:
+    - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    - AWS_ENDPOINT_URL=http://minio:9000
+    - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+    - S3_BUCKET=${S3_BUCKET:-civic-os-files}
+    - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+    - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+```
+
+**Thumbnail Worker (Image/PDF Processing):**
+```yaml
+thumbnail-worker:
+  build:
+    context: ../../services/thumbnail-worker-go
+  environment:
+    - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    - AWS_ENDPOINT_URL=http://minio:9000
+    - S3_BUCKET=${S3_BUCKET:-civic-os-files}
+    - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+    - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+```
+
+**Key Points:**
+- MinIO provides S3-compatible storage for local development
+- S3 Signer listens for file upload requests via PostgreSQL NOTIFY/LISTEN
+- Thumbnail Worker processes images and PDFs using River job queue
+- For production, replace MinIO with AWS S3, DigitalOcean Spaces, or similar
+- See `docs/development/FILE_STORAGE.md` for complete implementation guide
+
 ---
 
 ## Step 5: Configure Environment Variables
@@ -535,14 +610,37 @@ Create environment files for your deployment.
 
 ### `.env.example` - Template
 ```bash
+# ======================================
 # Database Configuration
+# ======================================
 POSTGRES_DB=my_app_db
 POSTGRES_PASSWORD=CHANGE_ME_TO_SECURE_PASSWORD
 
+# ======================================
 # Keycloak Settings (update if using your own Keycloak)
+# ======================================
 KEYCLOAK_URL=https://auth.civic-os.org
 KEYCLOAK_REALM=civic-os-dev
 KEYCLOAK_CLIENT_ID=myclient
+
+# ======================================
+# S3 / File Storage Configuration (Optional)
+# Required only if using file upload features
+# ======================================
+# MinIO credentials (for local development)
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=minioadmin
+
+# S3 bucket configuration
+S3_BUCKET=civic-os-files
+S3_PUBLIC_ENDPOINT=http://localhost:9000
+
+# For production: replace MinIO with AWS S3 or DigitalOcean Spaces
+# AWS_ACCESS_KEY_ID=your-access-key-id
+# AWS_SECRET_ACCESS_KEY=your-secret-access-key
+# AWS_REGION=us-east-1
+# AWS_ENDPOINT_URL=  # Leave empty for AWS, set for MinIO/S3-compatible
+# S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 ```
 
 ### `.env` - Actual Configuration
@@ -625,7 +723,12 @@ NAME              IMAGE                          STATUS
 postgres_db       postgis/postgis:17-3.5-alpine  Up (healthy)
 postgrest_api     postgrest/postgrest:latest     Up
 swagger_ui        swaggerapi/swagger-ui          Up
+minio_local       minio/minio:latest            Up (healthy)
+s3_signer         civic-os-s3-signer-go         Up
+thumbnail_worker  civic-os-thumbnail-worker-go  Up
 ```
+
+**Note**: minio_init will show as "Exit 0" (this is normal - it's a one-time setup container)
 
 **Test PostgREST API**:
 ```bash
@@ -638,7 +741,137 @@ curl http://localhost:3000/schema_properties
 
 ---
 
-## Step 8: Configure Metadata (Optional)
+## Step 8: Configure File Storage (Optional)
+
+Skip this step if your application doesn't need file upload capabilities.
+
+### What You Get
+
+File storage features (v0.10.0+) enable:
+- **Image uploads** with automatic thumbnail generation
+- **PDF uploads** with thumbnail previews
+- **Document storage** (any file type)
+- **Presigned URLs** for secure, direct-to-S3 uploads
+- **Background processing** via River job queue (reliable, at-least-once delivery)
+
+### Architecture
+
+The file storage system uses:
+1. **Frontend** - File upload UI component
+2. **metadata.files table** - Stores file metadata (UUID, size, MIME type, S3 key)
+3. **S3 Signer (Go)** - Generates presigned upload URLs via River jobs
+4. **Thumbnail Worker (Go)** - Processes uploaded files and generates thumbnails
+5. **S3-compatible storage** - MinIO (local dev) or AWS S3/DigitalOcean Spaces (production)
+
+### Adding File Properties to Your Schema
+
+To add file upload capability to a table:
+
+```sql
+-- Add file column (foreign key to metadata.files)
+ALTER TABLE my_table
+  ADD COLUMN photo_id UUID REFERENCES metadata.files(id) ON DELETE SET NULL;
+
+-- REQUIRED: Create index for performance
+CREATE INDEX idx_my_table_photo_id ON my_table(photo_id);
+```
+
+**File Type Validation**: Use domain types for type safety:
+
+```sql
+-- For images only (JPEG, PNG, WebP, AVIF)
+ALTER TABLE profiles
+  ADD COLUMN avatar_id file_image REFERENCES metadata.files(id) ON DELETE SET NULL;
+
+-- For PDFs only
+ALTER TABLE documents
+  ADD COLUMN contract_id file_pdf REFERENCES metadata.files(id) ON DELETE SET NULL;
+
+-- For any file type
+ALTER TABLE attachments
+  ADD COLUMN file_id UUID REFERENCES metadata.files(id) ON DELETE SET NULL;
+```
+
+The UI will automatically:
+- Show file upload button
+- Display thumbnails for images/PDFs
+- Provide download links
+- Handle validation based on column type
+
+### Verify File Storage is Working
+
+```bash
+# Check MinIO web console
+open http://localhost:9001
+# Login: minioadmin / minioadmin
+# Verify bucket exists and is accessible
+
+# Check S3 Signer logs
+docker-compose logs s3-signer
+# Should show: "Connected to database" and "Listening for requests..."
+
+# Check Thumbnail Worker logs
+docker-compose logs thumbnail-worker
+# Should show: "Worker started" and "Polling for jobs..."
+```
+
+### Test File Upload
+
+1. Navigate to a create/edit form for a table with file columns
+2. Click the file upload button
+3. Select an image or PDF
+4. Submit the form
+5. Check the detail page - should show thumbnail and download link
+6. Check MinIO console - should see uploaded file in the bucket
+
+**Troubleshooting**: See `docs/development/FILE_STORAGE.md` for complete troubleshooting guide including S3 connection issues, thumbnail generation failures, and permission problems.
+
+### Production S3 Configuration
+
+For production, replace MinIO with AWS S3 or DigitalOcean Spaces:
+
+**Update `.env`:**
+```bash
+# Remove MinIO credentials
+# Add AWS credentials
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_REGION=us-east-1
+AWS_ENDPOINT_URL=  # Leave empty for AWS S3
+
+# Update public endpoint for HTTPS
+S3_PUBLIC_ENDPOINT=https://civic-os-files-prod.s3.amazonaws.com
+S3_BUCKET=civic-os-files-prod
+```
+
+**Update `docker-compose.yml`:**
+```yaml
+# Comment out or remove minio and minio-init services
+
+# Update s3-signer and thumbnail-worker:
+s3-signer:
+  environment:
+    - AWS_ENDPOINT_URL=  # Empty for AWS S3
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - AWS_REGION=${AWS_REGION}
+    - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT}
+    - S3_BUCKET=${S3_BUCKET}
+```
+
+**DigitalOcean Spaces Example:**
+```bash
+AWS_ACCESS_KEY_ID=DO00EXAMPLE
+AWS_SECRET_ACCESS_KEY=DOEXAMPLE
+AWS_ENDPOINT_URL=https://nyc3.digitaloceanspaces.com
+AWS_REGION=nyc3
+S3_PUBLIC_ENDPOINT=https://civic-os-files-prod.nyc3.digitaloceanspaces.com
+S3_BUCKET=civic-os-files-prod
+```
+
+---
+
+## Step 9: Configure Metadata (Optional)
 
 Customize how your entities and properties appear in the UI using the metadata tables.
 
@@ -707,7 +940,7 @@ WHERE p.table_name = 'books'
 
 ---
 
-## Step 9: Generate Mock Data
+## Step 10: Generate Mock Data
 
 Create domain-specific mock data for your deployment.
 
@@ -863,7 +1096,7 @@ npx ts-node generate-mock-data.ts --sql # Generate SQL file
 
 ---
 
-## Step 10: Access Your Application
+## Step 11: Access Your Application
 
 ### Start the Frontend
 
