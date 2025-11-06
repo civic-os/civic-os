@@ -132,13 +132,13 @@ func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int
 
 		// Generate thumbnail with proper centering and background handling
 		options := bimg.Options{
-			Width:   size.Width,
-			Height:  size.Height,
-			Embed:   true,                                         // Maintain aspect ratio, center within dimensions
-			Gravity: bimg.GravityCentre,                           // Center the image
-			Background: bimg.Color{R: 255, G: 255, B: 255},        // White background for transparent areas
-			Type:    bimg.JPEG,
-			Quality: size.Quality,
+			Width:      size.Width,
+			Height:     size.Height,
+			Embed:      true,                               // Maintain aspect ratio, center within dimensions
+			Gravity:    bimg.GravityCentre,                 // Center the image
+			Background: bimg.Color{R: 255, G: 255, B: 255}, // White background for transparent areas
+			Type:       bimg.JPEG,
+			Quality:    size.Quality,
 		}
 
 		thumbnail, err := bimg.NewImage(imageData).Process(options)

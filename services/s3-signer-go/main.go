@@ -184,7 +184,7 @@ func main() {
 
 		publicS3Client := s3.NewFromConfig(publicCfg, func(o *s3.Options) {
 			o.BaseEndpoint = aws.String(publicEndpoint)
-			o.UsePathStyle = true  // Required for MinIO path-style URLs
+			o.UsePathStyle = true // Required for MinIO path-style URLs
 		})
 		s3PresignClient = s3.NewPresignClient(publicS3Client)
 		log.Printf("[Init] ✓ AWS S3 client initialized with public endpoint for presigning")
