@@ -1,0 +1,19 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "runners": ["axe", "htmlcs"],
+    "chromeLaunchConfig": {
+      "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    },
+    "timeout": 60000,
+    "wait": 1000
+  },
+  "urls": [
+    "http://localhost:4200",
+    "http://localhost:4200/view/issues",
+    "http://localhost:4200/detail/issues/1",
+    "http://localhost:4200/create/issues",
+    "http://localhost:4200/edit/issues/1"
+  ]
+}

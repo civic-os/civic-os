@@ -72,8 +72,8 @@
 
   @if (propType() == EntityPropertyType.Color) {
     <div class="flex items-center gap-4">
-      <input type="color" class="w-24 h-12 cursor-pointer" [id]="prop().column_name" [formControlName]="prop().column_name" />
-      <input type="text" placeholder="#3B82F6" class="input w-full font-mono" [formControlName]="prop().column_name" />
+      <input type="color" class="w-24 h-12 cursor-pointer" [id]="prop().column_name" [formControlName]="prop().column_name" aria-label="Color picker" />
+      <input type="text" placeholder="#3B82F6" class="input w-full font-mono" [formControlName]="prop().column_name" [attr.aria-label]="prop().display_name + ' (hex code)'" />
     </div>
   }
 
@@ -119,15 +119,15 @@
 
       <!-- Upload Progress -->
       @if (uploadingFile()) {
-        <div class="flex items-center gap-2 text-sm">
-          <span class="loading loading-spinner loading-sm"></span>
+        <div class="flex items-center gap-2 text-sm" role="status" aria-live="polite">
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           <span>Uploading...</span>
         </div>
       }
 
       <!-- Upload Error -->
       @if (uploadError()) {
-        <div class="alert alert-error text-sm">
+        <div class="alert alert-error text-sm" role="alert" aria-live="assertive">
           <span>{{ uploadError() }}</span>
         </div>
       }
@@ -144,8 +144,9 @@
                 class="btn btn-ghost btn-sm"
                 (click)="onClearFile(prop().column_name)"
                 [disabled]="uploadingFile()"
+                aria-label="Clear uploaded file"
               >
-                <span class="material-symbols-outlined text-base">close</span>
+                <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
                 Clear
               </button>
             </div>
@@ -162,12 +163,12 @@
                   />
                 </div>
               } @else if (file.thumbnail_status === 'pending' || file.thumbnail_status === 'processing') {
-                <div class="flex items-center gap-2 text-sm text-base-content/60">
-                  <span class="loading loading-spinner loading-sm"></span>
+                <div class="flex items-center gap-2 text-sm text-base-content/60" role="status" aria-live="polite">
+                  <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                   <span>Generating thumbnail...</span>
                 </div>
               } @else if (file.thumbnail_status === 'failed') {
-                <div class="text-sm text-warning">
+                <div class="text-sm text-warning" role="alert">
                   <span>⚠ Thumbnail generation failed (image uploaded successfully)</span>
                 </div>
               }
@@ -197,7 +198,7 @@
 
   @if (form().controls[prop().column_name]; as ctl) {
     @if (ctl.invalid && (ctl.dirty || ctl.touched)) {
-      <div class="text-error text-sm mt-1">
+      <div class="text-error text-sm mt-1" role="alert" aria-live="polite">
         @if (ctl.errors?.['required']) {
           <div>
             @if (prop().validation_rules) {

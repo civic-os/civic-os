@@ -1,0 +1,20 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:4200"],
+      "numberOfRuns": 3,
+      "settings": {
+        "onlyCategories": ["accessibility"],
+        "chromeFlags": "--no-sandbox"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": ["error", {"minScore": 0.9}]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

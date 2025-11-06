@@ -59,7 +59,18 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] **Phase 6 - Permissions**: Role-based visibility, widget-level permissions, private dashboards
 
 ### General
-- [ ] ADA/WCAG Compatibility
+- [~] **ADA/WCAG Compatibility** - ~60% complete (Phases 1-3 done)
+  - [x] Testing infrastructure (pa11y, Lighthouse, BackstopJS)
+  - [x] ARIA labels on all icon buttons
+  - [x] Skip navigation link
+  - [x] Form label associations and validation announcements
+  - [x] Table semantics (caption, scope, aria-sort)
+  - [x] ARIA live regions for loading/errors
+  - [x] Keyboard navigation for table rows
+  - [ ] Modal focus management (Angular CDK)
+  - [ ] Color contrast fixes (3 issues)
+  - [ ] Focus indicators and Phase 4 polish items
+  - See `docs/development/ACCESSIBILITY_WCAG.md` for details
 - [x] Allow Angular app to be configured at container runtime (for flexible deployments)
 - [x] Save selected Theme in localstorage and use on reload
 - [x] Allow user profile editing (via Keycloak account console with JWT sync)

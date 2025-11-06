@@ -1,10 +1,15 @@
+<!-- Skip Navigation Link -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:p-4 focus:bg-primary focus:text-primary-content">
+  Skip to main content
+</a>
+
 <div class="drawer">
   <input id="main-drawer" [(ngModel)]="drawerOpen" type="checkbox" class="drawer-toggle" />
   <div class="drawer-content">
     <div class="navbar bg-base-300">
       <div class="flex-none">
-        <label for="main-drawer" class="btn btn-square btn-ghost drawer-button">
-          <span class="material-symbols-outlined">menu</span>
+        <label for="main-drawer" class="btn btn-square btn-ghost drawer-button" aria-label="Open navigation menu">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
         </label>
       </div>
       <div class="flex-1">
@@ -31,11 +36,11 @@
           </ul>
         </div>
         <details id="profile-dropdown" class="dropdown dropdown-end">
-          <summary class="btn m-1 btn-ghost">
+          <summary class="btn m-1 btn-ghost" aria-label="User account menu">
             @if (this.auth.authenticated()) {
-              <span class="material-symbols-outlined">account_circle</span>
+              <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
             } @else {
-              <span class="material-symbols-outlined">person</span>
+              <span class="material-symbols-outlined" aria-hidden="true">person</span>
             }
           </summary>
           <ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
@@ -50,9 +55,9 @@
         </details>
       </div>
     </div>
-    <div class="container mx-auto px-2 md:px-0">
+    <main id="main-content" class="container mx-auto px-2 md:px-0">
       <router-outlet></router-outlet>
-    </div>
+    </main>
   </div>
   <div class="drawer-side">
     <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
@@ -60,8 +65,8 @@
       <div class="w-80 min-h-full bg-base-200 text-base-content flex flex-col">
         <div class="navbar bg-base-300">
           <div class="flex-none">
-            <label for="main-drawer" class="btn btn-square btn-ghost">
-              <span class="material-symbols-outlined">close</span>
+            <label for="main-drawer" class="btn btn-square btn-ghost" aria-label="Close navigation menu">
+              <span class="material-symbols-outlined" aria-hidden="true">close</span>
             </label>
           </div>
         </div>
@@ -71,7 +76,7 @@
             <a [class.menu-active]="isRouteActive('/')"
                [class.font-bold]="isRouteActive('/')"
                [class.opacity-85]="!isRouteActive('/')">
-              <span class="material-symbols-outlined">home</span>
+              <span class="material-symbols-outlined" aria-hidden="true">home</span>
               Home
             </a>
           </li>
@@ -98,7 +103,7 @@
             <a [class.menu-active]="isRouteActive('/schema-editor')"
                [class.font-bold]="isRouteActive('/schema-editor')"
                [class.opacity-85]="!isRouteActive('/schema-editor')">
-              <span class="material-symbols-outlined">account_tree</span>
+              <span class="material-symbols-outlined" aria-hidden="true">account_tree</span>
               Database Schema
             </a>
           </li>
@@ -113,7 +118,7 @@
               <a [class.menu-active]="isRouteActive('/entity-management')"
                  [class.font-bold]="isRouteActive('/entity-management')"
                  [class.opacity-85]="!isRouteActive('/entity-management')">
-                <span class="material-symbols-outlined">dashboard_customize</span>
+                <span class="material-symbols-outlined" aria-hidden="true">dashboard_customize</span>
                 Entities
               </a>
             </li>
@@ -121,7 +126,7 @@
               <a [class.menu-active]="isRouteActive('/property-management')"
                  [class.font-bold]="isRouteActive('/property-management')"
                  [class.opacity-85]="!isRouteActive('/property-management')">
-                <span class="material-symbols-outlined">tune</span>
+                <span class="material-symbols-outlined" aria-hidden="true">tune</span>
                 Properties
               </a>
             </li>
@@ -129,7 +134,7 @@
               <a [class.menu-active]="isRouteActive('/permissions')"
                  [class.font-bold]="isRouteActive('/permissions')"
                  [class.opacity-85]="!isRouteActive('/permissions')">
-                <span class="material-symbols-outlined">lock</span>
+                <span class="material-symbols-outlined" aria-hidden="true">lock</span>
                 Permissions
               </a>
             </li>

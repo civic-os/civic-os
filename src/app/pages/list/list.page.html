@@ -16,17 +16,18 @@
         @if (entity.search_fields && entity.search_fields.length > 0) {
           <div class="form-control flex-1">
             <label class="input input-bordered flex items-center gap-2">
-              <span class="material-symbols-outlined text-base-content/50">search</span>
+              <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">search</span>
               <input
                 type="text"
                 [formControl]="searchControl"
                 placeholder="Search {{ entity.display_name }}..."
-                class="grow" />
+                class="grow"
+                [attr.aria-label]="'Search ' + entity.display_name" />
               @if (searchControl.value && isLoading()) {
-                <span class="loading loading-spinner loading-sm"></span>
+                <span class="loading loading-spinner loading-sm" role="status" aria-label="Searching"></span>
               } @else if (searchControl.value && !isLoading()) {
-                <button class="btn btn-ghost btn-xs btn-circle" (click)="clearSearch()" type="button">
-                  <span class="material-symbols-outlined text-base">close</span>
+                <button class="btn btn-ghost btn-xs btn-circle" (click)="clearSearch()" type="button" aria-label="Clear search">
+                  <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
                 </button>
               }
             </label>
@@ -61,8 +62,8 @@
 
         <!-- Add Button -->
         @if (entity.insert) {
-          <button class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey">
-            <span class="material-symbols-outlined">add_circle</span>
+          <button class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="'Add new ' + entity.display_name">
+            <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
             <span class="hidden sm:inline">Add {{ entity.display_name }}</span>
           </button>
         }
@@ -76,8 +77,8 @@
             @for (chip of chips; track chip.column) {
               <div class="badge badge-md gap-1 border border-primary bg-primary/10">
                 <span>{{ chip.columnLabel }} ({{ chip.displayValue }})</span>
-                <button class="btn btn-ghost btn-xs btn-circle hover:bg-primary/20 -mr-1" (click)="removeFilter(chip.column)" type="button">
-                  <span class="material-symbols-outlined text-sm">close</span>
+                <button class="btn btn-ghost btn-xs btn-circle hover:bg-primary/20 -mr-1" (click)="removeFilter(chip.column)" type="button" [attr.aria-label]="'Remove filter: ' + chip.columnLabel">
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                 </button>
               </div>
             }
@@ -118,22 +119,29 @@
       <div class="overflow-x-auto">
         <table class="table table-zebra">
         @if (displayProperties$ | async; as props) {
+          <caption class="sr-only">{{ entity.display_name }} List</caption>
           <!-- head -->
           <thead>
             <tr>
               @for (prop of props; track prop) {
                 <th
+                  scope="col"
                   [class.sortable]="prop.sortable !== false"
-                  (click)="onHeaderClick(prop)">
+                  (click)="onHeaderClick(prop)"
+                  [attr.aria-sort]="
+                    sortStateSignal().column === prop.column_name
+                      ? (sortStateSignal().direction === 'asc' ? 'ascending' : 'descending')
+                      : (prop.sortable !== false ? 'none' : null)
+                  ">
                   <span class="header-content">
                     {{ prop.display_name }}
                     @if (sortStateSignal().column === prop.column_name && sortStateSignal().direction === 'asc') {
-                      <span class="material-symbols-outlined sort-icon sort-icon-flipped">sort</span>
+                      <span class="material-symbols-outlined sort-icon sort-icon-flipped" aria-hidden="true">sort</span>
                     } @else if (sortStateSignal().column === prop.column_name && sortStateSignal().direction === 'desc') {
-                      <span class="material-symbols-outlined sort-icon">sort</span>
+                      <span class="material-symbols-outlined sort-icon" aria-hidden="true">sort</span>
                     }
                     @if (isColumnFiltered(prop.column_name)) {
-                      <span class="material-symbols-outlined text-base-content/50 text-sm ml-1">filter_alt</span>
+                      <span class="material-symbols-outlined text-base-content/50 text-sm ml-1" aria-hidden="true">filter_alt</span>
                     }
                   </span>
                 </th>
@@ -150,7 +158,12 @@
                     [class.highlighted-row]="showMap() && highlightedRecordId() === row.id"
                     [attr.data-record-id]="row.id"
                     (mouseenter)="onRowHover(row.id)"
-                    (mouseleave)="onRowHover(null)">
+                    (mouseleave)="onRowHover(null)"
+                    tabindex="0"
+                    role="link"
+                    [attr.aria-label]="'View details for ' + entity.display_name"
+                    (keydown.enter)="onRowKeyPress($any($event), row.id)"
+                    (keydown.space)="onRowKeyPress($any($event), row.id)">
                     @for (prop of props; track prop) {
                       <td>
                         <app-display-property

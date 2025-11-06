@@ -1,0 +1,70 @@
+{
+  "id": "civic_os_accessibility",
+  "viewports": [
+    {
+      "label": "phone",
+      "width": 375,
+      "height": 667
+    },
+    {
+      "label": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "label": "desktop",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "onBeforeScript": "puppet/onBefore.js",
+  "onReadyScript": "puppet/onReady.js",
+  "scenarios": [
+    {
+      "label": "Home Page",
+      "url": "http://localhost:4200",
+      "delay": 1000,
+      "misMatchThreshold": 0.1
+    },
+    {
+      "label": "List Page - Issues",
+      "url": "http://localhost:4200/view/issues",
+      "delay": 1500,
+      "misMatchThreshold": 0.1
+    },
+    {
+      "label": "Detail Page - Issue",
+      "url": "http://localhost:4200/detail/issues/1",
+      "delay": 1500,
+      "misMatchThreshold": 0.1
+    },
+    {
+      "label": "Create Page - Issue",
+      "url": "http://localhost:4200/create/issues",
+      "delay": 1000,
+      "misMatchThreshold": 0.1
+    },
+    {
+      "label": "Edit Page - Issue",
+      "url": "http://localhost:4200/edit/issues/1",
+      "delay": 1500,
+      "misMatchThreshold": 0.1
+    }
+  ],
+  "paths": {
+    "bitmaps_reference": "backstop_data/bitmaps_reference",
+    "bitmaps_test": "backstop_data/bitmaps_test",
+    "engine_scripts": "backstop_data/engine_scripts",
+    "html_report": "backstop_data/html_report",
+    "ci_report": "backstop_data/ci_report"
+  },
+  "report": ["browser"],
+  "engine": "puppeteer",
+  "engineOptions": {
+    "args": ["--no-sandbox"]
+  },
+  "asyncCaptureLimit": 5,
+  "asyncCompareLimit": 50,
+  "debug": false,
+  "debugWindow": false
+}

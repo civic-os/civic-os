@@ -43,3 +43,9 @@ Thumbs.db
 
 # Example environment files
 examples/*/.env
+
+# Accessibility testing artifacts
+backstop_data/
+baseline-lighthouse.html
+.lighthouseci/
+pa11y-results/

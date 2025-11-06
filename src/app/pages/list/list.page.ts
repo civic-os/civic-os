@@ -800,6 +800,17 @@ export class ListPage implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle keyboard navigation on table rows
+   */
+  public onRowKeyPress(event: KeyboardEvent, recordId: number) {
+    // Prevent default scrolling behavior for space key
+    event.preventDefault();
+    if (this.entityKey) {
+      this.router.navigate(['/view', this.entityKey, recordId]);
+    }
+  }
+
+  /**
    * Handle map reset button click - clear highlighted record and reset map view
    */
   public onResetView() {
