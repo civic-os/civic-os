@@ -195,6 +195,10 @@ S3_SECRET_ACCESS_KEY=your-secret-key
 S3_REGION=us-east-1
 S3_ENDPOINT=  # Leave empty for real AWS S3, set for MinIO/S3-compatible storage
 
+# Thumbnail Worker Configuration
+THUMBNAIL_MAX_WORKERS=5  # Concurrent workers (tune based on CPU/memory)
+# Tuning: Low memory (512Mi)=2-3, Medium (1Gi)=5-7, High (2Gi)=10-12
+
 # ======================================
 # Container Registry
 # ======================================
@@ -884,6 +888,22 @@ docker exec -it civic_os_postgres psql -U postgres -d civic_os_prod -c "\du"
 ```bash
 docker stats
 ```
+
+**Thumbnail worker high memory usage:**
+
+If the thumbnail worker is consuming too much memory, reduce `THUMBNAIL_MAX_WORKERS`:
+```bash
+# Edit .env file
+THUMBNAIL_MAX_WORKERS=3  # Reduce from default 5
+
+# Restart service
+docker-compose restart thumbnail-worker
+```
+
+Memory usage scales with worker count (~100MB per worker). Match worker count to available memory:
+- 512Mi container: 2-3 workers
+- 1Gi container: 5-7 workers
+- 2Gi container: 10-12 workers
 
 **Analyze slow queries:**
 ```sql

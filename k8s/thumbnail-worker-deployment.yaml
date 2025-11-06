@@ -61,10 +61,18 @@ spec:
               name: civic-os-config
               key: S3_BUCKET
 
+        # Worker configuration
+        - name: THUMBNAIL_MAX_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: THUMBNAIL_MAX_WORKERS
+              optional: true
+
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
-          limits:
-            cpu: 1000m
+            cpu: 500m
             memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 1Gi

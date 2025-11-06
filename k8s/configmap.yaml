@@ -40,3 +40,9 @@ data:
   S3_BUCKET: "civic-os-files-prod"
   S3_REGION: "us-east-1"
   # S3_ENDPOINT: ""  # Leave empty for AWS S3, set for MinIO/S3-compatible storage
+
+  # Thumbnail Worker Configuration (v0.10.0+)
+  # Max concurrent thumbnail generation workers (default: 5)
+  # Higher values = faster processing but more memory usage (~100MB per worker)
+  # Scale based on your workload and available resources
+  THUMBNAIL_MAX_WORKERS: "5"

@@ -71,6 +71,7 @@ Environment variables:
 | `S3_BUCKET` | S3 bucket name for files | `civic-os-files` |
 | `AWS_ACCESS_KEY_ID` | AWS access key (or use IAM role) | - |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret key (or use IAM role) | - |
+| `THUMBNAIL_MAX_WORKERS` | Max concurrent workers (tune based on CPU/memory) | `5` |
 
 ## Development
 
@@ -232,12 +233,19 @@ pdftoppm -v     # Should show version
 
 ### High memory usage
 
-Thumbnail generation is memory-intensive. Monitor memory and adjust worker count:
+Thumbnail generation is memory-intensive (~100MB per worker). Reduce worker count via `THUMBNAIL_MAX_WORKERS`:
 
-```go
-Queues: map[string]river.QueueConfig{
-    "thumbnails": {MaxWorkers: 5}, // Reduce if memory constrained
-},
+```bash
+# Docker
+docker run -e THUMBNAIL_MAX_WORKERS=3 ...
+
+# Kubernetes (via ConfigMap)
+THUMBNAIL_MAX_WORKERS: "3"
+
+# Tuning guidance:
+# - Low memory (512Mi): 2-3 workers
+# - Medium memory (1Gi): 5-7 workers
+# - High memory (2Gi): 10-12 workers
 ```
 
 ### Slow processing
@@ -259,8 +267,8 @@ kubectl scale deployment thumbnail-worker --replicas=5
 - **Processing time**:
   - Images: 200-500ms per file (depends on size)
   - PDFs: 1-3 seconds per file (PDF conversion adds overhead)
-- **Throughput**: 20-50 jobs/sec per instance (CPU-bound)
-- **Concurrency**: 10 workers per instance (configurable)
+- **Throughput**: 10-20 jobs/sec per instance (CPU-bound, default 5 workers)
+- **Concurrency**: Configurable via `THUMBNAIL_MAX_WORKERS` (default: 5)
 
 ## Related
 

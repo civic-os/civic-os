@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -281,12 +282,16 @@ func main() {
 	s3Endpoint := getS3Env("S3_ENDPOINT", "AWS_ENDPOINT_URL", "")
 	bucket := getEnv("S3_BUCKET", "civic-os-files")
 
+	// Worker concurrency configuration
+	maxWorkers := getEnvInt("THUMBNAIL_MAX_WORKERS", 5)
+
 	log.Printf("Database URL: %s", maskPassword(databaseURL))
 	log.Printf("S3 Region: %s", s3Region)
 	log.Printf("S3 Bucket: %s", bucket)
 	if s3Endpoint != "" {
 		log.Printf("S3 Endpoint: %s", s3Endpoint)
 	}
+	log.Printf("Max workers: %d", maxWorkers)
 
 	// Check for pdftoppm (required for PDF processing)
 	if _, err := exec.LookPath("pdftoppm"); err != nil {
@@ -348,7 +353,7 @@ func main() {
 	log.Println("[Init] Starting River client...")
 	riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 		Queues: map[string]river.QueueConfig{
-			"thumbnails": {MaxWorkers: 10}, // CPU-bound, fewer workers
+			"thumbnails": {MaxWorkers: maxWorkers}, // Configurable via THUMBNAIL_MAX_WORKERS
 		},
 		Workers: workers,
 		Logger:  slog.Default(),
@@ -367,7 +372,7 @@ func main() {
 	log.Println("🚀 Thumbnail Worker is running!")
 	log.Println("=============================================")
 	log.Println("Listening to queue: thumbnails")
-	log.Println("Max workers: 10")
+	log.Printf("Max workers: %d (tune via THUMBNAIL_MAX_WORKERS env var)", maxWorkers)
 	log.Println("Thumbnail sizes: small (150x150), medium (400x400), large (800x800)")
 	log.Println("Press Ctrl+C to gracefully shutdown")
 	log.Println("=============================================")
@@ -417,6 +422,17 @@ func getS3Env(genericKey, awsKey, defaultValue string) string {
 		return value
 	}
 
+	return defaultValue
+}
+
+// getEnvInt retrieves environment variable as integer with fallback to default value
+func getEnvInt(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		if intValue, err := strconv.Atoi(value); err == nil {
+			return intValue
+		}
+		log.Printf("⚠️  WARNING: Invalid integer value for %s: %s, using default: %d", key, value, defaultValue)
+	}
 	return defaultValue
 }
 
