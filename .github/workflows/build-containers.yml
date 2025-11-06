@@ -235,7 +235,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          # Build amd64 only (DigitalOcean DOKS is amd64-only)
+          # Add linux/arm64 if deploying to AWS Graviton or ARM-based infrastructure
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -287,7 +289,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          # Build amd64 only (DigitalOcean DOKS is amd64-only)
+          # Add linux/arm64 if deploying to AWS Graviton or ARM-based infrastructure
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -339,7 +343,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          # Build amd64 only (DigitalOcean DOKS is amd64-only)
+          # Add linux/arm64 if deploying to AWS Graviton or ARM-based infrastructure
+          # Note: arm64 builds via QEMU emulation take 5-10x longer than native amd64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -391,7 +398,11 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          # Build amd64 only (DigitalOcean DOKS is amd64-only)
+          # Add linux/arm64 if deploying to AWS Graviton or ARM-based infrastructure
+          # Note: arm64 builds via QEMU emulation take 5-10x longer than native amd64
+          # Note: This service uses libvips (C library) which complicates cross-compilation
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
