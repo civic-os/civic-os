@@ -79,7 +79,7 @@ func (w *S3PresignWorker) Work(ctx context.Context, job *river.Job[S3PresignArgs
 	}
 
 	// Build S3 key: {entity_type}/{entity_id}/{file_id}/original.{ext}
-	bucket := "civic-os-files" // TODO: Make configurable via env var
+	bucket := getEnv("S3_BUCKET", "civic-os-files")
 	s3Key := fmt.Sprintf("%s/%s/%s/original%s", job.Args.EntityType, job.Args.EntityID, fileID, fileExt)
 
 	// Generate presigned upload URL
