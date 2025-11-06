@@ -12,10 +12,11 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies with npm cache mount for faster rebuilds
-# Use ci for clean, reproducible builds
-# Skip devDependencies (testing tools like pa11y-ci, Puppeteer) in production
+# Install only production dependencies first (skip test tooling like pa11y-ci, Puppeteer)
+# Then explicitly install Angular CLI which is needed for build but listed as devDependency
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --legacy-peer-deps
+    PUPPETEER_SKIP_DOWNLOAD='true' npm ci --omit=dev --legacy-peer-deps && \
+    PUPPETEER_SKIP_DOWNLOAD='true' npm install --no-save --legacy-peer-deps @angular/cli @angular-devkit/build-angular
 
 # Copy source code
 COPY . .
