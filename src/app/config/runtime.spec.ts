@@ -47,6 +47,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should return URL from window.civicOsConfig in production mode', () => {
       window.civicOsConfig = {
         postgrestUrl: 'https://api.example.com/',
+        swaggerUrl: '',
         keycloak: { url: '', realm: '', clientId: '' },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
         s3: { endpoint: '', bucket: '' }
@@ -68,6 +69,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should return config from window.civicOsConfig in production mode', () => {
       window.civicOsConfig = {
         postgrestUrl: '',
+        swaggerUrl: '',
         keycloak: {
           url: 'https://auth.example.com',
           realm: 'my-realm',
@@ -98,6 +100,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should return map config from window.civicOsConfig in production mode', () => {
       window.civicOsConfig = {
         postgrestUrl: '',
+        swaggerUrl: '',
         keycloak: { url: '', realm: '', clientId: '' },
         map: {
           tileUrl: 'https://tiles.example.com/{z}/{x}/{y}.png',
@@ -121,6 +124,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should return S3 config from window.civicOsConfig in production mode', () => {
       window.civicOsConfig = {
         postgrestUrl: '',
+        swaggerUrl: '',
         keycloak: { url: '', realm: '', clientId: '' },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
         s3: {
@@ -140,6 +144,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should build correct Keycloak account URL with referrer params', () => {
       window.civicOsConfig = {
         postgrestUrl: '',
+        swaggerUrl: '',
         keycloak: {
           url: 'https://auth.example.com',
           realm: 'civic-os-dev',
@@ -159,6 +164,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should include URL-encoded referrer_uri parameter', () => {
       window.civicOsConfig = {
         postgrestUrl: '',
+        swaggerUrl: '',
         keycloak: {
           url: 'https://auth.example.com',
           realm: 'test-realm',
@@ -189,6 +195,7 @@ describe('Runtime Configuration Helpers', () => {
     it('should include all required parameters in correct format', () => {
       window.civicOsConfig = {
         postgrestUrl: '',
+        swaggerUrl: '',
         keycloak: {
           url: 'https://keycloak.test.com',
           realm: 'my-realm',
