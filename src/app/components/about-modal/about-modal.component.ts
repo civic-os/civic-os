@@ -50,7 +50,7 @@ export class AboutModalComponent {
   readonly copyright = '© 2023-2025 Civic OS, L3C';
 
   // External links
-  readonly githubUrl = 'https://github.com/civic-os/civic-os-frontend';
+  readonly githubUrl = 'https://github.com/civic-os/civic-os';
   readonly apiDocsUrl = getApiDocsUrl(); // Swagger UI for interactive API documentation
 
   /**

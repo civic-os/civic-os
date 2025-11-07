@@ -97,7 +97,7 @@
       </div>
     }
     @if (propType() == EntityPropertyType.Email) {
-      <a [href]="'mailto:' + datum()" class="link link-primary">
+      <a [href]="'mailto:' + datum()" class="link link-primary break-words">
         {{ datum() }}
       </a>
     }

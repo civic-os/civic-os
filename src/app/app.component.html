@@ -48,11 +48,11 @@
               <li><a (click)="openSettings()">Preferences</a></li>
               <li><a [href]="getKeycloakAccountUrl()">Account Settings</a></li>
               <li><a (click)="this.auth.logout()">Logout</a></li>
-              <li class="border-t border-base-300 my-1"></li>
-              <li><a (click)="openAbout()">About Civic OS</a></li>
             } @else {
               <li><a (click)="this.auth.login()">Log In</a></li>
             }
+            <li class="border-t border-base-300 my-1"></li>
+            <li><a (click)="openAbout()">About Civic OS</a></li>
           </ul>
         </details>
       </div>
