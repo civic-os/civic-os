@@ -55,11 +55,6 @@ spec:
               name: civic-os-config
               key: S3_ENDPOINT
               optional: true
-        - name: S3_BUCKET
-          valueFrom:
-            configMapKeyRef:
-              name: civic-os-config
-              key: S3_BUCKET
 
         # Worker configuration
         - name: THUMBNAIL_MAX_WORKERS

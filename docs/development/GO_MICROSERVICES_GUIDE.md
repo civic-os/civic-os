@@ -629,7 +629,6 @@ func main() {
     workers := river.NewWorkers()
     river.AddWorker(workers, &ThumbnailWorker{
         s3Client: s3Client,
-        bucket:   os.Getenv("S3_BUCKET"),
         dbPool:   dbPool,
     })
 
@@ -949,7 +948,6 @@ services:
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
-      S3_BUCKET: civic-os-files
       S3_ENDPOINT: http://minio:9000
     depends_on:
       - postgres
@@ -990,7 +988,6 @@ services:
       S3_REGION: ${S3_REGION}
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
-      S3_BUCKET: ${S3_BUCKET}
     depends_on:
       - postgres
     restart: unless-stopped
@@ -1306,7 +1303,6 @@ services:
       - S3_REGION=us-east-1
       - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
       - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
-      - S3_BUCKET=your-production-bucket
       # NO S3_ENDPOINT for production!
     restart: unless-stopped
 ```

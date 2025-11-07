@@ -13,10 +13,7 @@ import (
 
 func TestThumbnailArgs_Kind(t *testing.T) {
 	args := ThumbnailArgs{
-		FileID:   "019a5463-3c75-770c-ab5a-1e162ef32b7f",
-		S3Key:    "Issue/26/019a5463-3c75-770c-ab5a-1e162ef32b7f/original.png",
-		FileType: "image",
-		Bucket:   "civic-os-files",
+		FileID: "019a5463-3c75-770c-ab5a-1e162ef32b7f",
 	}
 
 	expectedKind := "thumbnail_generate"
@@ -173,10 +170,7 @@ func TestGetEnv_WithMissingValue(t *testing.T) {
 
 func BenchmarkThumbnailArgs_Kind(b *testing.B) {
 	args := ThumbnailArgs{
-		FileID:   "019a5463-3c75-770c-ab5a-1e162ef32b7f",
-		S3Key:    "Issue/26/019a5463-3c75-770c-ab5a-1e162ef32b7f/original.png",
-		FileType: "image",
-		Bucket:   "civic-os-files",
+		FileID: "019a5463-3c75-770c-ab5a-1e162ef32b7f",
 	}
 
 	b.ResetTimer()

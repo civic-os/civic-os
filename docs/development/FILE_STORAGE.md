@@ -224,7 +224,6 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - S3_REGION=us-east-1
-      - S3_BUCKET=${S3_BUCKET}
     restart: unless-stopped
 ```
 
@@ -263,8 +262,6 @@ spec:
               key: database-url
         - name: S3_REGION
           value: "us-east-1"
-        - name: S3_BUCKET
-          value: "your-bucket"
 ```
 
 #### Option 3: Systemd Services

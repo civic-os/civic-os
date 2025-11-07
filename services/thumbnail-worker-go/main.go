@@ -30,11 +30,9 @@ import (
 // ============================================================================
 
 // ThumbnailArgs defines the arguments for generating thumbnails
+// Only contains file_id; worker queries metadata.files for all file metadata
 type ThumbnailArgs struct {
-	FileID   string `json:"file_id"`
-	S3Key    string `json:"s3_key"`
-	FileType string `json:"file_type"` // "image" or "pdf"
-	Bucket   string `json:"bucket"`
+	FileID string `json:"file_id"`
 }
 
 // Kind returns the job type identifier for River routing
@@ -77,7 +75,6 @@ var thumbnailSizes = []ThumbnailSize{
 type ThumbnailWorker struct {
 	river.WorkerDefaults[ThumbnailArgs]
 	s3Client *s3.Client
-	bucket   string
 	dbPool   *pgxpool.Pool
 }
 
@@ -85,11 +82,20 @@ type ThumbnailWorker struct {
 func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs]) error {
 	startTime := time.Now()
 	log.Printf("[Job %d] Starting thumbnail generation job (attempt %d/%d)", job.ID, job.Attempt, job.MaxAttempts)
-	log.Printf("[Job %d] File: %s (type: %s)", job.ID, job.Args.S3Key, job.Args.FileType)
+
+	// Query database for file metadata (single source of truth)
+	var bucket, s3Key, fileType string
+	query := `SELECT s3_bucket, s3_original_key, file_type FROM metadata.files WHERE id = $1`
+	err := w.dbPool.QueryRow(ctx, query, job.Args.FileID).Scan(&bucket, &s3Key, &fileType)
+	if err != nil {
+		log.Printf("[Job %d] Error querying file metadata: %v", job.ID, err)
+		return fmt.Errorf("failed to query file metadata from database: %w", err)
+	}
+	log.Printf("[Job %d] File: %s (type: %s, bucket: %s)", job.ID, s3Key, fileType, bucket)
 
 	// Download original file from S3
 	log.Printf("[Job %d] Downloading original from S3...", job.ID)
-	fileData, err := w.downloadFromS3(ctx, job.Args.Bucket, job.Args.S3Key)
+	fileData, err := w.downloadFromS3(ctx, bucket, s3Key)
 	if err != nil {
 		log.Printf("[Job %d] Error downloading file: %v", job.ID, err)
 		return fmt.Errorf("failed to download file from S3: %w", err)
@@ -98,10 +104,10 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 
 	// Generate thumbnails based on file type
 	var thumbnailKeys map[string]string
-	if job.Args.FileType == "pdf" {
-		thumbnailKeys, err = w.generatePDFThumbnails(ctx, job.ID, fileData, job.Args.S3Key)
+	if fileType == "pdf" {
+		thumbnailKeys, err = w.generatePDFThumbnails(ctx, job.ID, fileData, s3Key, bucket)
 	} else {
-		thumbnailKeys, err = w.generateImageThumbnails(ctx, job.ID, fileData, job.Args.S3Key)
+		thumbnailKeys, err = w.generateImageThumbnails(ctx, job.ID, fileData, s3Key, bucket)
 	}
 
 	if err != nil {
@@ -125,7 +131,7 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 }
 
 // generateImageThumbnails creates thumbnails for image files using bimg (libvips)
-func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int64, imageData []byte, originalKey string) (map[string]string, error) {
+func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int64, imageData []byte, originalKey, bucket string) (map[string]string, error) {
 	thumbnailKeys := make(map[string]string)
 	basePath := filepath.Dir(originalKey)
 
@@ -151,7 +157,7 @@ func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int
 		// Upload to S3
 		// Expected format: {entity_type}/{entity_id}/{file_id}/thumb-{size}.jpg
 		thumbnailKey := fmt.Sprintf("%s/thumb-%s.jpg", basePath, size.Name)
-		err = w.uploadToS3(ctx, w.bucket, thumbnailKey, thumbnail)
+		err = w.uploadToS3(ctx, bucket, thumbnailKey, thumbnail)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload %s thumbnail: %w", size.Name, err)
 		}
@@ -164,7 +170,7 @@ func (w *ThumbnailWorker) generateImageThumbnails(ctx context.Context, jobID int
 }
 
 // generatePDFThumbnails creates thumbnails for PDF files (first page only)
-func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64, pdfData []byte, originalKey string) (map[string]string, error) {
+func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64, pdfData []byte, originalKey, bucket string) (map[string]string, error) {
 	log.Printf("[Job %d] Converting PDF first page to image...", jobID)
 
 	// Write PDF to temp file
@@ -198,7 +204,7 @@ func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64
 	log.Printf("[Job %d] ✓ PDF converted to image (%d bytes)", jobID, len(imageData))
 
 	// Generate thumbnails from the converted image (same as image thumbnails)
-	return w.generateImageThumbnails(ctx, jobID, imageData, originalKey)
+	return w.generateImageThumbnails(ctx, jobID, imageData, originalKey, bucket)
 }
 
 // downloadFromS3 retrieves a file from S3
@@ -280,14 +286,12 @@ func main() {
 	s3SecretKey := getS3Env("S3_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY", "")
 	s3Region := getS3Env("S3_REGION", "AWS_REGION", "us-east-1")
 	s3Endpoint := getS3Env("S3_ENDPOINT", "AWS_ENDPOINT_URL", "")
-	bucket := getEnv("S3_BUCKET", "civic-os-files")
 
 	// Worker concurrency configuration
 	maxWorkers := getEnvInt("THUMBNAIL_MAX_WORKERS", 5)
 
 	log.Printf("Database URL: %s", maskPassword(databaseURL))
 	log.Printf("S3 Region: %s", s3Region)
-	log.Printf("S3 Bucket: %s", bucket)
 	if s3Endpoint != "" {
 		log.Printf("S3 Endpoint: %s", s3Endpoint)
 	}
@@ -344,7 +348,6 @@ func main() {
 	workers := river.NewWorkers()
 	river.AddWorker(workers, &ThumbnailWorker{
 		s3Client: s3Client,
-		bucket:   bucket,
 		dbPool:   dbPool,
 	})
 	log.Println("[Init] ✓ ThumbnailWorker registered")

@@ -48,6 +48,7 @@ export interface FileReference {
     file_name: string;
     file_type: string;
     file_size: number;
+    s3_bucket: string;
     s3_key_prefix: string;
     s3_original_key: string;
     s3_thumbnail_small_key?: string;

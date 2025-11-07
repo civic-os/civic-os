@@ -9,3 +9,4 @@ v0-8-2-fix-schema-relations-cross-schema-bug [v0-6-0-add-phone-jwt-sync] 2025-10
 v0-9-0-add-time-slot-domain [v0-8-2-fix-schema-relations-cross-schema-bug] 2025-11-02T17:22:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add time_slot domain and calendar view metadata
 v0-9-0-add-constraint-messages-view [v0-9-0-add-time-slot-domain] 2025-11-04T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add public view for constraint messages and update cache versioning
 v0-10-0-add-river-queue [v0-9-0-add-constraint-messages-view] 2025-11-05T12:15:08Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add River job queue schema for Go microservices migration
+v0-10-8-fix-thumbnail-bucket-config [v0-10-0-add-river-queue] 2025-11-06T00:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix thumbnail bucket configuration to use database column

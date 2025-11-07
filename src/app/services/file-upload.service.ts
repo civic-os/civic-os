@@ -150,7 +150,7 @@ export class FileUploadService {
 
   /**
    * Create file record in database
-   * Extracts S3 key from presigned URL
+   * Extracts S3 key and bucket name from presigned URL
    */
   private async createFileRecord(
     fileId: string,
@@ -161,19 +161,18 @@ export class FileUploadService {
     entityId: string,
     presignedUrl: string
   ): Promise<FileReference> {
-    // Extract S3 key from presigned URL (before query params)
-    // For path-style URLs: http://host/bucket/key -> remove leading / and bucket name
+    // Extract S3 bucket and key from presigned URL (before query params)
+    // For path-style URLs: http://host/bucket/key
     const url = new URL(presignedUrl);
-    let s3Key = url.pathname.substring(1);  // Remove leading /
+    const pathWithoutLeadingSlash = url.pathname.substring(1);  // Remove leading /
 
-    // Remove bucket name prefix if present (path-style S3/MinIO URLs)
+    // Split path: first segment is bucket, rest is key
     // URL: http://localhost:9000/civic-os-files/Issue/1/.../file.png
-    // Key should be: Issue/1/.../file.png (without bucket name)
-    const pathParts = s3Key.split('/');
-    if (pathParts.length > 1) {
-      // First segment might be bucket name, remove it
-      s3Key = pathParts.slice(1).join('/');
-    }
+    // Bucket: civic-os-files
+    // Key: Issue/1/.../file.png
+    const pathParts = pathWithoutLeadingSlash.split('/');
+    const s3Bucket = pathParts[0];  // First segment is bucket name
+    const s3Key = pathParts.slice(1).join('/');  // Rest is the S3 key
 
     const body = {
       id: fileId,
@@ -182,6 +181,7 @@ export class FileUploadService {
       file_name: fileName,
       file_type: fileType,
       file_size: fileSize,
+      s3_bucket: s3Bucket,
       s3_original_key: s3Key,
       thumbnail_status: fileType.startsWith('image/') || fileType === 'application/pdf' ? 'pending' : 'not_applicable'
     };
