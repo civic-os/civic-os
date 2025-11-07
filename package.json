@@ -2,6 +2,7 @@
   "name": "civic-os",
   "version": "0.10.8",
   "license": "AGPL-3.0-or-later",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -11,6 +12,9 @@
     "test:headless": "ng test --browsers=ChromeHeadlessCI --watch=false",
     "test:ci": "ng test --browsers=ChromeHeadlessCI --watch=false --code-coverage",
     "generate": "ts-node scripts/generate-wrapper.ts",
+    "update-version": "node scripts/update-version.js",
+    "postversion": "npm run update-version",
+    "prebuild": "npm run update-version",
     "a11y:pa11y": "pa11y-ci --config .pa11yci.json",
     "a11y:lighthouse": "lhci autorun",
     "a11y:audit": "lighthouse http://localhost:4200 --only-categories=accessibility --output=html --output-path=./baseline-lighthouse.html",

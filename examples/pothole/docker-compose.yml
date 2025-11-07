@@ -57,7 +57,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      API_URL: "http://postgrest:3000/"
+      API_URL: "http://localhost:3000/"
     depends_on:
       - postgrest
     networks:

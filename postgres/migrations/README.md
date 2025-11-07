@@ -487,6 +487,23 @@ cat postgres/migrations/revert/v0-4-0-migration_name.sql
    - Set `CIVIC_OS_VERIFY_FULL=true` in GitHub Actions
    - Catches schema drift before production
 
+9. **🚨 CRITICAL: Always include NOTIFY at the end of migrations**
+   - PostgREST caches the database schema in memory
+   - Schema changes are NOT automatically detected
+   - Add `NOTIFY pgrst, 'reload schema';` before `COMMIT;` in deploy scripts
+   - **Failure to include NOTIFY will cause 404 errors and schema cache issues**
+   - Example:
+     ```sql
+     -- Your migration changes here
+     ALTER TABLE metadata.files ADD COLUMN new_field TEXT;
+
+     -- Force PostgREST to reload schema cache
+     NOTIFY pgrst, 'reload schema';
+
+     COMMIT;
+     ```
+   - Note: Revert scripts should also include NOTIFY if they modify schema
+
 ## Additional Resources
 
 - [Sqitch Tutorial](https://sqitch.org/docs/manual/sqitchtutorial/)

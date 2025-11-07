@@ -15,27 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export interface Environment {
-    postgrestUrl: string,
-    swaggerUrl: string,
-    map: {
-        tileUrl: string,
-        attribution: string,
-        defaultCenter: [number, number],  // [lat, lng]
-        defaultZoom: number
-    },
-    keycloak: {
-        url: string,
-        realm: string,
-        clientId: string
-    },
-    s3: {
-        endpoint: string,  // Public S3 endpoint (browser-accessible)
-        bucket: string
-    },
-    matomo?: {
-        url: string,
-        siteId: string,
-        enabled: boolean
-    }
-}
+/**
+ * Application version.
+ *
+ * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
+ * This file is generated from package.json by scripts/update-version.js
+ * Run 'npm run update-version' to regenerate after version changes.
+ */
+export const APP_VERSION = '0.10.8';

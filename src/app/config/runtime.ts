@@ -31,6 +31,7 @@ declare global {
   interface Window {
     civicOsConfig?: {
       postgrestUrl: string;
+      swaggerUrl: string;
       map: {
         tileUrl: string;
         attribution: string;
@@ -130,4 +131,16 @@ export function getMatomoConfig(): { url: string | null; siteId: string | null; 
     siteId: config?.siteId || null,
     enabled: config?.enabled ?? true  // Default to enabled if not specified
   };
+}
+
+/**
+ * Get Swagger UI documentation URL.
+ * Swagger UI provides an interactive interface for the PostgREST OpenAPI specification.
+ *
+ * @returns URL to Swagger UI (e.g., "http://localhost:8080/" or "https://api-docs.example.com/")
+ * @example
+ * const apiDocsUrl = getApiDocsUrl();
+ */
+export function getApiDocsUrl(): string {
+  return window.civicOsConfig?.swaggerUrl || environment.swaggerUrl;
 }

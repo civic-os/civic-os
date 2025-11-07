@@ -30,6 +30,7 @@ import { SchemaEntityTable } from './interfaces/entity';
 import { AuthService } from './services/auth.service';
 import { DashboardSelectorComponent } from './components/dashboard-selector/dashboard-selector.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
+import { AboutModalComponent } from './components/about-modal/about-modal.component';
 import { getKeycloakAccountUrl } from './config/runtime';
 
 @Component({
@@ -39,7 +40,8 @@ import { getKeycloakAccountUrl } from './config/runtime';
     CommonModule,
     FormsModule,
     DashboardSelectorComponent,
-    SettingsModalComponent
+    SettingsModalComponent,
+    AboutModalComponent
 ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
@@ -60,6 +62,9 @@ export class AppComponent {
 
   // Control settings modal visibility
   showSettingsModal = signal(false);
+
+  // Control about modal visibility
+  showAboutModal = signal(false);
 
   // Expose Keycloak account URL helper to template
   public getKeycloakAccountUrl = getKeycloakAccountUrl;
@@ -141,6 +146,13 @@ export class AppComponent {
    */
   public openSettings() {
     this.showSettingsModal.set(true);
+  }
+
+  /**
+   * Open the about modal
+   */
+  public openAbout() {
+    this.showAboutModal.set(true);
   }
 
   /**

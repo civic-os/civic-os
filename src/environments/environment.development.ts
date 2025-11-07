@@ -19,6 +19,7 @@ import { Environment } from "../app/interfaces/environment";
 
 export const environment: Environment = {
     postgrestUrl: 'http://localhost:3000/',
+    swaggerUrl: 'http://localhost:8080',
     map: {
         tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
