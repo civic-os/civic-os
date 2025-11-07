@@ -175,6 +175,7 @@ KEYCLOAK_CLIENT_ID=civic-os-prod
 # ======================================
 FRONTEND_PORT=80
 FRONTEND_POSTGREST_URL=https://api.yourdomain.com/
+SWAGGER_URL=https://api.yourdomain.com:8080  # Swagger UI for API docs link in About modal
 
 # Map Configuration (Optional)
 MAP_DEFAULT_LAT=43.0125
@@ -308,6 +309,7 @@ metadata:
   namespace: civic-os-prod
 data:
   POSTGREST_URL: "https://api.yourdomain.com/"
+  SWAGGER_URL: "https://api.yourdomain.com:8080"
   KEYCLOAK_URL: "https://auth.yourdomain.com"
   KEYCLOAK_REALM: "production"
   KEYCLOAK_CLIENT_ID: "civic-os-prod"

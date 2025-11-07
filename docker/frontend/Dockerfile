@@ -51,6 +51,7 @@ RUN chmod +x /docker-entrypoint.sh
 
 # Set default environment variables (can be overridden at runtime)
 ENV POSTGREST_URL=http://localhost:3000/ \
+    SWAGGER_URL=http://localhost:8080 \
     KEYCLOAK_URL=https://auth.civic-os.org \
     KEYCLOAK_REALM=civic-os-dev \
     KEYCLOAK_CLIENT_ID=myclient \

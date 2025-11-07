@@ -131,6 +131,9 @@ services:
       # PostgREST connection (frontend → postgrest)
       POSTGREST_URL: ${FRONTEND_POSTGREST_URL:-http://localhost:3000/}
 
+      # Swagger UI connection (for API documentation link in About modal)
+      SWAGGER_URL: ${SWAGGER_URL:-http://localhost:8080}
+
       # Keycloak configuration
       KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM}

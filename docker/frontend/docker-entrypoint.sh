@@ -10,6 +10,7 @@ echo "======================================"
 
 echo "Configuration:"
 echo "  POSTGREST_URL: $POSTGREST_URL"
+echo "  SWAGGER_URL: $SWAGGER_URL"
 echo "  KEYCLOAK_URL: $KEYCLOAK_URL"
 echo "  KEYCLOAK_REALM: $KEYCLOAK_REALM"
 echo "  KEYCLOAK_CLIENT_ID: $KEYCLOAK_CLIENT_ID"
@@ -31,6 +32,7 @@ cat > /tmp/config-script.html <<EOF
 <script>
 window.civicOsConfig = {
   postgrestUrl: '${POSTGREST_URL}',
+  swaggerUrl: '${SWAGGER_URL}',
   map: {
     tileUrl: '${MAP_TILE_URL}',
     attribution: "${MAP_ATTRIBUTION}",

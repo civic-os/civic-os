@@ -304,19 +304,45 @@ SELECT set_role_permission(
 
 ### File Storage System
 
-**`metadata.files`** - Tracks uploaded files stored in S3
+**`metadata.files`** - Tracks uploaded files stored in S3-compatible storage (MinIO for development, AWS S3 for production)
 
 Fields:
 - `id` (UUID PK) - Unique file identifier (referenced by entity FKs)
 - `original_filename` - User's original filename
-- `s3_key` - S3 object key (path in bucket)
+- `s3_key` - S3 object key (path in bucket: `{entity_type}/{entity_id}/{file_id}/original.{ext}`)
 - `mime_type` - Content type (e.g., 'image/jpeg', 'application/pdf')
 - `size_bytes` - File size for quota enforcement
 - `thumbnail_status` - Enum: 'pending', 'processing', 'completed', 'failed', 'not_applicable'
 - `entity_table`, `entity_id` - Back-reference to owning entity
 - `created_by` (UUID FK) - User who uploaded the file
 
-**File Storage Architecture**: See `docs/development/FILE_STORAGE.md` for complete implementation including S3 signer service, thumbnail worker, and presigned URL workflow.
+**File Storage Architecture** (v0.10.0+):
+
+Civic OS provides a complete file upload workflow using **Go microservices** with River job queue:
+
+1. **S3 Signer Service**: Generates presigned upload URLs via PostgreSQL job queue
+   - Frontend calls `request_file_upload()` RPC which creates job in `metadata.river_job` table
+   - Go service polls for jobs, generates presigned S3 URLs, updates `file_upload_requests` table
+   - Provides at-least-once delivery with automatic retries and exponential backoff
+
+2. **Thumbnail Worker**: Processes uploaded images and PDFs asynchronously
+   - Listens for file creation events via PostgreSQL NOTIFY
+   - Generates 3 thumbnail sizes for images (150x150, 400x400, 800x800) using libvips
+   - Extracts first page of PDFs as thumbnail (400x400) using pdftoppm
+   - White background letterboxing preserves aspect ratio
+   - Stores thumbnails in S3: `{entity_type}/{entity_id}/{file_id}/thumb-{size}.jpg`
+
+3. **Property Types**: `FileImage`, `FilePDF`, `File` detected from validation metadata
+   - UI automatically shows thumbnails, lightbox viewers, and download links
+   - Validation enforced via `fileType` and `maxFileSize` in `metadata.validations`
+
+**Deployment Requirements**:
+- S3-compatible storage (MinIO, AWS S3, DigitalOcean Spaces)
+- Two Go microservice containers (s3-signer, thumbnail-worker)
+- PostgreSQL with River tables (`metadata.river_job`, `metadata.river_leader`)
+- Environment variables: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`
+
+**Implementation Guide**: See `docs/development/FILE_STORAGE.md` for complete setup instructions including adding file properties to your schema, validation configuration, and deployment examples.
 
 ---
 
@@ -998,11 +1024,15 @@ See `postgres/migrations/README.md` for complete documentation.
 ### Deployment
 
 Civic OS provides production-ready Docker containers for all components:
-- Frontend (Angular app): `ghcr.io/civic-os/frontend:v0.9.0`
-- PostgREST API: `ghcr.io/civic-os/postgrest:v0.9.0`
-- Migrations: `ghcr.io/civic-os/migrations:v0.9.0`
+- **Frontend** (Angular app): `ghcr.io/civic-os/frontend:v0.10.0`
+- **PostgREST** API: `ghcr.io/civic-os/postgrest:v0.10.0`
+- **Migrations** (Sqitch): `ghcr.io/civic-os/migrations:v0.10.0`
+- **S3 Signer** (Go + River): `ghcr.io/civic-os/s3-signer:v0.10.0` - Generates presigned upload URLs
+- **Thumbnail Worker** (Go + River): `ghcr.io/civic-os/thumbnail-worker:v0.10.0` - Processes images and PDFs
 
-**Runtime Configuration**: All instances use environment variables for configuration (PostgREST URL, Keycloak settings, etc.). No rebuild required for deployment.
+**Runtime Configuration**: All instances use environment variables for configuration (PostgREST URL, Keycloak settings, S3 credentials, etc.). No rebuild required for deployment.
+
+**Microservices Architecture (v0.10.0+)**: File storage features use Go microservices with PostgreSQL-based River job queue for reliable background processing. See File Storage System section above for architecture details.
 
 See `docs/deployment/PRODUCTION.md` for complete deployment guide including:
 - Environment variable configuration
@@ -1030,6 +1060,14 @@ See `docs/deployment/PRODUCTION.md` for complete deployment guide including:
 - CDN: Serve static assets from CDN in production
 - Compression: Enable gzip/brotli in nginx/CDN
 - Lazy loading: Angular already implements lazy-loaded routes
+
+**File Storage Microservices** (v0.10.0+):
+- **Thumbnail Worker**: Tune `THUMBNAIL_MAX_WORKERS` based on available memory
+  - Low memory (512Mi): 2-3 workers
+  - Medium (1Gi): 5-7 workers (default: 5)
+  - High (2Gi): 10-12 workers
+- **S3 Signer**: Lightweight service, default settings typically sufficient
+- **River Job Queue**: Monitor `metadata.river_job` table for stuck jobs, configure retries
 
 ---
 
@@ -1062,6 +1100,10 @@ archive_command = 'cp %p /backup/wal/%f'
 - Database: Connection count, query latency, table sizes
 - PostgREST: Request rate, error rate, response time
 - Frontend: Page load time, API call latency
+- File Storage Microservices (v0.10.0+):
+  - S3 Signer: Job queue depth, presigned URL generation time
+  - Thumbnail Worker: Processing time per file, memory usage, failed jobs
+  - River Queue: Monitor `metadata.river_job` for stuck jobs (state = 'running' for >10 min)
 
 **Recommended Tools**:
 - Database: pg_stat_statements, pg_stat_activity
@@ -1075,7 +1117,8 @@ archive_command = 'cp %p /backup/wal/%f'
 - **CLAUDE.md** - Developer quick-reference for building Civic OS apps
 - **docs/deployment/PRODUCTION.md** - Production deployment guide
 - **docs/AUTHENTICATION.md** - Keycloak setup and RBAC configuration
-- **docs/development/FILE_STORAGE.md** - File storage architecture
+- **docs/development/FILE_STORAGE.md** - File storage architecture and setup
+- **docs/development/GO_MICROSERVICES_GUIDE.md** - Go microservices architecture (River job queue)
 - **docs/development/CALENDAR_INTEGRATION.md** - Calendar system implementation
 - **docs/development/IMPORT_EXPORT.md** - Import/Export specification
 - **docs/notes/DASHBOARD_DESIGN.md** - Dashboard system architecture
