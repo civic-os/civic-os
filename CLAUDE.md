@@ -470,6 +470,112 @@ INSERT INTO metadata.validations VALUES
 
 **Future Enhancement:** Async/RPC validators for database lookups (uniqueness checks, cross-field validation). See `docs/development/ADVANCED_VALIDATION.md`.
 
+### Notification System
+
+**Version**: v0.11.0+
+
+Send multi-channel notifications (email, SMS) to users using database-managed templates and a River-based Go microservice.
+
+**Key Features**:
+- Database-managed templates with Go template syntax (`{{.Entity.field}}`, conditionals, loops)
+- Multi-channel delivery (email via AWS SES Phase 1, SMS Phase 2)
+- Template management UI at `/notifications/templates` (admin-only)
+- Real-time template validation with 500ms debouncing
+- HTML preview in sandboxed iframe
+- User notification preferences per channel
+- Polymorphic entity references (link notifications to any entity)
+- Automatic retries with exponential backoff
+
+**Quick Start** (create template + trigger):
+
+```sql
+-- 1. Create notification template
+INSERT INTO metadata.notification_templates (
+    name, description, entity_type,
+    subject_template, html_template, text_template
+) VALUES (
+    'issue_created',
+    'Notify assigned user when issue created',
+    'issues',
+    'New issue: {{.Entity.display_name}}',
+    '<h2>New Issue</h2><p>{{.Entity.display_name}}</p><a href="{{.Metadata.site_url}}/view/issues/{{.Entity.id}}">View Issue</a>',
+    'New Issue: {{.Entity.display_name}}\nView: {{.Metadata.site_url}}/view/issues/{{.Entity.id}}'
+);
+
+-- 2. Create trigger to send notification automatically
+CREATE OR REPLACE FUNCTION notify_issue_created()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE v_issue_data JSONB;
+BEGIN
+    IF NEW.assigned_user_id IS NOT NULL THEN
+        -- Build entity data with embedded relationships
+        SELECT jsonb_build_object(
+            'id', NEW.id,
+            'display_name', NEW.display_name,
+            'severity', NEW.severity,
+            'status', jsonb_build_object(
+                'id', s.id,
+                'display_name', s.display_name
+            )
+        )
+        INTO v_issue_data
+        FROM statuses s WHERE s.id = NEW.status_id;
+
+        -- Create notification (auto-enqueues River job)
+        PERFORM create_notification(
+            p_user_id := NEW.assigned_user_id,
+            p_template_name := 'issue_created',
+            p_entity_type := 'issues',
+            p_entity_id := NEW.id::text,
+            p_entity_data := v_issue_data,
+            p_channels := ARRAY['email']
+        );
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER issue_created_notification_trigger
+    AFTER INSERT ON issues FOR EACH ROW
+    EXECUTE FUNCTION notify_issue_created();
+```
+
+**Template Context**:
+- `Entity` - Entity data passed as JSONB (your custom fields)
+- `Metadata.site_url` - Application URL for generating links
+
+**Go Template Syntax**:
+- `{{.Entity.field}}` - Access entity data
+- `{{if .Entity.field}}...{{end}}` - Conditionals
+- `{{range .Entity.items}}...{{end}}` - Loops
+- `{{.Entity.status.display_name}}` - Nested relationships (manually joined in trigger)
+
+**Deployment Requirements**:
+1. Apply v0.11.0 migration: `sqitch deploy v0-11-0-add-notifications`
+2. Configure environment: `AWS_SES_FROM_EMAIL`, `SITE_URL`, AWS credentials
+3. Deploy notification worker service (see `docker-compose.yml` examples)
+4. Verify AWS SES sender email and move out of sandbox mode
+5. Configure SPF/DKIM DNS records for deliverability
+
+**Monitoring**:
+```sql
+-- Check notification status
+SELECT user_id, template_name, status, error_message, sent_at
+FROM metadata.notifications
+WHERE created_at > NOW() - INTERVAL '1 hour'
+ORDER BY created_at DESC;
+
+-- Check River queue depth
+SELECT COUNT(*) FROM metadata.river_job
+WHERE kind = 'send_notification' AND state = 'available';
+```
+
+**See Also**:
+- `docs/development/NOTIFICATIONS.md` - Complete architecture, troubleshooting, AWS SES setup
+- `docs/INTEGRATOR_GUIDE.md` (Notification System section) - Template creation patterns, embedded relationships
+- `examples/pothole/init-scripts/08_notification_templates.sql` - Complete working examples
+- `services/notification-worker-go/` - Go microservice source code
+
 ### Visual Diagramming with JointJS
 
 **Reference Implementation**: Schema Editor (`/schema-editor`)

@@ -1,0 +1,71 @@
+/* Template Editor Component Styles */
+
+/* Preview panel sticky positioning */
+.sticky {
+  position: sticky;
+  top: 1rem;
+}
+
+/* Ensure iframe renders HTML correctly */
+iframe {
+  border: 1px solid var(--bc);
+  border-opacity: 0.2;
+}
+
+/* Monospace font for template inputs */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .sticky {
+    position: relative;
+    top: 0;
+  }
+
+  .max-h-screen {
+    max-height: none;
+  }
+}
+
+/* Code-like appearance for template syntax help */
+code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+/* Strong tab styling */
+.tabs {
+  margin-bottom: 1rem;
+  border-bottom: 2px solid hsl(var(--bc) / 0.2);
+}
+
+.tab {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  color: hsl(var(--bc) / 0.6);
+}
+
+.tab:hover {
+  color: hsl(var(--bc) / 0.8);
+  background-color: hsl(var(--bc) / 0.05);
+}
+
+.tab-active {
+  color: hsl(var(--p));
+  border-bottom-color: hsl(var(--p));
+  background-color: hsl(var(--p) / 0.1);
+  font-weight: 700;
+}
+
+.tab-active:hover {
+  color: hsl(var(--p));
+  background-color: hsl(var(--p) / 0.15);
+}

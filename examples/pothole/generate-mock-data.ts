@@ -324,9 +324,13 @@ class MockDataGenerator {
       // Use full name for private table (e.g., "John Doe" instead of "John D.")
       const fullName = user.full_name || user.display_name;
 
-      // Generate email from full name
+      // Generate email from full name with @example.com domain
       const nameParts = fullName.toLowerCase().split(' ');
-      const email = faker.internet.email({ firstName: nameParts[0], lastName: nameParts[nameParts.length - 1] });
+      const email = faker.internet.email({
+        firstName: nameParts[0],
+        lastName: nameParts[nameParts.length - 1],
+        provider: 'example.com'
+      });
 
       // Generate phone number in format ###-###-####
       const phone = `${faker.string.numeric(3)}-${faker.string.numeric(3)}-${faker.string.numeric(4)}`;
@@ -621,14 +625,14 @@ class MockDataGenerator {
         return '#' + faker.string.hexadecimal({ length: 6, casing: 'lower', prefix: '' });
 
       case EntityPropertyType.Email:
-        // Generate realistic email based on context
+        // Generate realistic email with @example.com domain
         if (prop.column_name.includes('company')) {
           // Company email: companyname@example.com
           const companyName = faker.company.name().toLowerCase().replace(/[^a-z0-9]/g, '');
           return `${companyName}@example.com`;
         } else {
           // Personal email: firstname.lastname@example.com
-          return faker.internet.email();
+          return faker.internet.email({ provider: 'example.com' });
         }
 
       case EntityPropertyType.Telephone:

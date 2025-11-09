@@ -23,6 +23,7 @@ import { EditPage } from './pages/edit/edit.page';
 import { PermissionsPage } from './pages/permissions/permissions.page';
 import { EntityManagementPage } from './pages/entity-management/entity-management.page';
 import { PropertyManagementPage } from './pages/property-management/property-management.page';
+import { TemplateManagementPage } from './pages/template-management/template-management.page';
 import { DashboardPage } from './pages/dashboard/dashboard.page';
 import { schemaVersionGuard } from './guards/schema-version.guard';
 import { authGuard } from './guards/auth.guard';
@@ -57,6 +58,11 @@ export const routes: Routes = [
     {
         path: 'property-management',
         component: PropertyManagementPage,
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
+        path: 'notifications/templates',
+        component: TemplateManagementPage,
         canActivate: [schemaVersionGuard, authGuard]
     },
     {

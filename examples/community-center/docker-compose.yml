@@ -84,6 +84,22 @@ services:
       timeout: 10s
       retries: 3
 
+  # Inbucket - SMTP server with web UI for local email testing
+  inbucket:
+    image: inbucket/inbucket:latest
+    container_name: community_center_inbucket
+    ports:
+      - "9100:9000"  # Web UI (changed from 9000 to avoid conflict with MinIO)
+      - "2500:2500"  # SMTP
+      - "1100:1100"  # POP3
+    environment:
+      - INBUCKET_SMTP_ADDR=0.0.0.0:2500
+      - INBUCKET_POP3_ADDR=0.0.0.0:1100
+      - INBUCKET_WEB_ADDR=0.0.0.0:9000
+    networks:
+      - postgrest-network
+    restart: unless-stopped
+
   # S3 Signer Service - Generates presigned upload URLs (Go + River)
   s3-signer:
     build:
@@ -127,6 +143,30 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    restart: unless-stopped
+
+  # Notification Worker - Sends multi-channel notifications (Go + River + SMTP)
+  notification-worker:
+    build:
+      context: ../../services/notification-worker-go
+      dockerfile: Dockerfile
+    container_name: community_center_notification_worker
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SITE_URL=${SITE_URL:-http://localhost:4200}
+      - NOTIFICATION_TIMEZONE=${NOTIFICATION_TIMEZONE:-America/New_York}
+      - SMTP_HOST=${SMTP_HOST:-inbucket}  # Default to Inbucket for local dev
+      - SMTP_PORT=${SMTP_PORT:-2500}       # Inbucket SMTP port
+      - SMTP_USERNAME=${SMTP_USERNAME:-}   # Empty for Inbucket (no auth required)
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}   # Empty for Inbucket
+      - SMTP_FROM=${SMTP_FROM:-noreply@example.com}  # Match mock data domain
+    networks:
+      - postgrest-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      inbucket:
+        condition: service_started
     restart: unless-stopped
 
   # Optional: Local Keycloak instance for RBAC testing

@@ -1,0 +1,19 @@
+/* Template Management Page Styles */
+
+/* Ensure modal doesn't overflow viewport */
+.modal-box {
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+/* Table responsiveness */
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.875rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.75rem 0.5rem;
+  }
+}

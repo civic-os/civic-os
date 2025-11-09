@@ -844,6 +844,447 @@ WHERE table_name = 'issues';
 
 ---
 
+### Notification System
+
+**Version**: v0.11.0+
+
+Send multi-channel notifications (email, SMS) to users using database-managed templates and a River-based microservice.
+
+**Features**:
+- Database-managed templates with Go template syntax
+- Multi-channel delivery (email via AWS SES, SMS in Phase 2)
+- Template validation and HTML preview UI
+- User notification preferences
+- Polymorphic entity references (link notifications to any entity)
+- Automatic retries with exponential backoff
+
+**Requirements**:
+- Civic OS v0.11.0+ (notification worker + schema)
+- AWS SES account with verified sender email
+- PostgreSQL database with River queue (`metadata.river_job`)
+
+#### Creating Notification Templates
+
+**Method 1: Template Management UI** (recommended for non-technical users)
+
+1. Navigate to `/notifications/templates` (admin-only)
+2. Click "Create Template"
+3. Fill in template details:
+   - **Name**: Unique identifier (e.g., `issue_created`)
+   - **Description**: Human-readable description
+   - **Entity Type**: Expected entity table name (documentation only)
+   - **Subject**: Email subject line (Go template syntax)
+   - **HTML Body**: Email HTML body (Go template with XSS protection)
+   - **Text Body**: Plain text email fallback
+   - **SMS** (optional): SMS message for Phase 2
+4. Use live preview panel to test templates with sample data
+5. Real-time validation shows syntax errors as you type
+6. Save template
+
+**Method 2: SQL INSERT** (recommended for seed scripts)
+
+```sql
+INSERT INTO metadata.notification_templates (
+    name,
+    description,
+    entity_type,
+    subject_template,
+    html_template,
+    text_template
+) VALUES (
+    'issue_created',
+    'Notify assigned user when new issue is created',
+    'issues',
+    -- Subject (text/template)
+    'New issue assigned: {{.Entity.display_name}}',
+    -- HTML (html/template with XSS protection)
+    '<div style="font-family: Arial, sans-serif;">
+      <h2 style="color: #2563eb;">New Issue Assigned</h2>
+      <p>You have been assigned to: <strong>{{.Entity.display_name}}</strong></p>
+      {{if .Entity.severity}}
+      <p><strong>Severity:</strong> {{.Entity.severity}}/5</p>
+      {{end}}
+      {{if .Entity.description}}
+      <p><strong>Description:</strong> {{.Entity.description}}</p>
+      {{end}}
+      <p>
+        <a href="{{.Metadata.site_url}}/view/issues/{{.Entity.id}}"
+           style="display: inline-block; background-color: #2563eb; color: white;
+                  padding: 12px 24px; text-decoration: none; border-radius: 4px;">
+          View Issue
+        </a>
+      </p>
+      <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">
+        This is an automated notification.
+      </p>
+    </div>',
+    -- Text (text/template, plain text fallback)
+    'New Issue Assigned
+
+You have been assigned to: {{.Entity.display_name}}
+{{if .Entity.severity}}
+Severity: {{.Entity.severity}}/5
+{{end}}
+{{if .Entity.description}}
+Description: {{.Entity.description}}
+{{end}}
+
+View at: {{.Metadata.site_url}}/view/issues/{{.Entity.id}}
+
+---
+This is an automated notification.'
+);
+```
+
+**Go Template Syntax Quick Reference**:
+
+```handlebars
+{{.Entity.field_name}}                  # Access entity data
+{{.Metadata.site_url}}                  # Site URL for links
+
+{{if .Entity.field}}                    # Conditional rendering
+  Field value: {{.Entity.field}}
+{{end}}
+
+{{if eq .Entity.status "urgent"}}       # Comparison
+  ⚠️ URGENT
+{{else}}
+  Status: {{.Entity.status}}
+{{end}}
+
+{{range .Entity.items}}                 # Iteration
+  - {{.name}}
+{{end}}
+```
+
+**Template Context**:
+- `Entity` - Entity data passed to `create_notification()` as JSONB
+- `Metadata.site_url` - Application URL from `SITE_URL` environment variable
+
+See [Go template documentation](https://pkg.go.dev/text/template) for full syntax reference.
+
+#### Sending Notifications
+
+**Pattern 1: Automatic Notifications via Triggers** (recommended)
+
+Create PostgreSQL triggers that automatically send notifications when events occur:
+
+```sql
+-- Send notification when issue is created with assigned user
+CREATE OR REPLACE FUNCTION notify_issue_created()
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = metadata, public
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_issue_data JSONB;
+BEGIN
+    -- Only send if issue has assigned user
+    IF NEW.assigned_user_id IS NOT NULL THEN
+        -- Build issue data with embedded status relationship
+        SELECT jsonb_build_object(
+            'id', NEW.id,
+            'display_name', NEW.display_name,
+            'description', NEW.description,
+            'severity', NEW.severity,
+            'status', jsonb_build_object(
+                'id', s.id,
+                'display_name', s.display_name,
+                'color', s.color
+            )
+        )
+        INTO v_issue_data
+        FROM statuses s
+        WHERE s.id = NEW.status_id;
+
+        -- Create notification (auto-enqueues River job)
+        PERFORM create_notification(
+            p_user_id := NEW.assigned_user_id,
+            p_template_name := 'issue_created',
+            p_entity_type := 'issues',
+            p_entity_id := NEW.id::text,
+            p_entity_data := v_issue_data,
+            p_channels := ARRAY['email']::TEXT[]
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+-- Attach trigger
+CREATE TRIGGER issue_created_notification_trigger
+    AFTER INSERT ON issues
+    FOR EACH ROW
+    EXECUTE FUNCTION notify_issue_created();
+```
+
+**Pattern 2: Manual Notification Calls**
+
+Send notifications directly from application code or scheduled jobs:
+
+```sql
+-- Send notification to specific user
+SELECT create_notification(
+    p_user_id := '123e4567-e89b-12d3-a456-426614174000',
+    p_template_name := 'issue_created',
+    p_entity_type := 'issues',
+    p_entity_id := '42',
+    p_entity_data := jsonb_build_object(
+        'id', 42,
+        'display_name', 'Pothole on Main St',
+        'severity', 5,
+        'description', 'Large pothole needs immediate attention'
+    ),
+    p_channels := ARRAY['email']
+);
+
+-- Batch notifications (e.g., daily digest)
+SELECT create_notification(
+    p_user_id := user_id,
+    p_template_name := 'daily_summary',
+    p_entity_type := NULL,  -- No entity reference
+    p_entity_id := NULL,
+    p_entity_data := jsonb_build_object(
+        'date', CURRENT_DATE,
+        'unread_count', (SELECT COUNT(*) FROM notifications WHERE user_id = u.id AND read = false),
+        'new_issues_count', (SELECT COUNT(*) FROM issues WHERE created_at::date = CURRENT_DATE)
+    )
+)
+FROM civic_os_users u
+WHERE u.daily_digest_enabled = TRUE;
+```
+
+#### Embedded Relationships in Notifications
+
+When templates need related entity data (e.g., status display name), manually join and construct nested JSONB:
+
+```sql
+-- Template accesses nested status: {{.Entity.status.display_name}}
+CREATE OR REPLACE FUNCTION notify_issue_status_changed()
+RETURNS TRIGGER
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_issue_data JSONB;
+BEGIN
+    -- Only notify if status changed and user assigned
+    IF NEW.status_id IS DISTINCT FROM OLD.status_id
+       AND NEW.assigned_user_id IS NOT NULL THEN
+
+        -- Fetch issue with embedded status relationship
+        SELECT jsonb_build_object(
+            'id', NEW.id,
+            'display_name', NEW.display_name,
+            'status', jsonb_build_object(
+                'id', s.id,
+                'display_name', s.display_name,
+                'color', s.color
+            )
+        )
+        INTO v_issue_data
+        FROM statuses s
+        WHERE s.id = NEW.status_id;
+
+        PERFORM create_notification(
+            p_user_id := NEW.assigned_user_id,
+            p_template_name := 'issue_status_changed',
+            p_entity_type := 'issues',
+            p_entity_id := NEW.id::text,
+            p_entity_data := v_issue_data
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+```
+
+**Template using nested data**:
+```handlebars
+Subject: Issue status updated: {{.Entity.display_name}}
+
+HTML:
+<p>Status changed to:
+  <span style="background-color: {{.Entity.status.color}};
+                color: white; padding: 4px 8px; border-radius: 4px;">
+    {{.Entity.status.display_name}}
+  </span>
+</p>
+```
+
+#### User Notification Preferences
+
+Users can manage notification preferences via `metadata.notification_preferences`:
+
+```sql
+-- Disable email notifications
+UPDATE metadata.notification_preferences
+SET enabled = FALSE
+WHERE user_id = current_user_id() AND channel = 'email';
+
+-- Use custom email address
+UPDATE metadata.notification_preferences
+SET email_address = 'custom@example.com'
+WHERE user_id = current_user_id() AND channel = 'email';
+
+-- View notification history
+SELECT
+    n.created_at,
+    n.template_name,
+    n.status,
+    n.channels_sent,
+    t.description
+FROM metadata.notifications n
+JOIN metadata.notification_templates t ON n.template_name = t.name
+WHERE n.user_id = current_user_id()
+ORDER BY n.created_at DESC
+LIMIT 20;
+```
+
+**Default Preferences**: When users are created, a trigger automatically creates default preferences (email enabled). Custom applications can modify this behavior by updating the `create_default_notification_preferences()` trigger function.
+
+#### Monitoring & Troubleshooting
+
+**Check notification status**:
+```sql
+-- View recent notifications
+SELECT
+    n.id,
+    n.user_id,
+    u.email,
+    n.template_name,
+    n.status,
+    n.error_message,
+    n.created_at,
+    n.sent_at
+FROM metadata.notifications n
+JOIN metadata.civic_os_users u ON n.user_id = u.id
+ORDER BY n.created_at DESC
+LIMIT 20;
+
+-- Count notifications by status
+SELECT status, COUNT(*)
+FROM metadata.notifications
+GROUP BY status;
+```
+
+**Check River job queue**:
+```sql
+-- Queue depth (pending notifications)
+SELECT COUNT(*)
+FROM metadata.river_job
+WHERE kind = 'send_notification' AND state = 'available';
+
+-- Failed jobs
+SELECT id, state, errors, attempt, max_attempts
+FROM metadata.river_job
+WHERE kind = 'send_notification' AND state = 'retryable'
+ORDER BY scheduled_at DESC
+LIMIT 10;
+```
+
+**Worker logs**:
+```bash
+# View notification worker logs
+docker logs -f civic-os-notification-worker
+
+# Check worker is running
+docker ps | grep notification-worker
+```
+
+**Common Issues**:
+- **Notifications stuck in pending**: Worker not running or database connection failed
+- **Template validation timeout**: ValidationWorker overloaded (check logs)
+- **AWS SES authentication errors**: Verify IAM credentials and SES region
+- **Emails not delivered**: Check SES sandbox mode (only verified recipients) or SPF/DKIM configuration
+
+See `docs/development/NOTIFICATIONS.md` for complete troubleshooting guide with diagnostics and fixes.
+
+#### Example: Complete Notification Setup
+
+Full example for "Pothole Tracker" domain with two notification types:
+
+```sql
+-- 1. Create templates
+INSERT INTO metadata.notification_templates (name, description, entity_type, subject_template, html_template, text_template) VALUES
+('issue_created', 'Notify assigned user when issue created', 'issues',
+    'New issue assigned: {{.Entity.display_name}}',
+    '<h2>New Issue Assigned</h2><p>{{.Entity.display_name}}</p><p>Severity: {{.Entity.severity}}/5</p><a href="{{.Metadata.site_url}}/view/issues/{{.Entity.id}}">View Issue</a>',
+    'New Issue: {{.Entity.display_name}}\nSeverity: {{.Entity.severity}}/5\nView: {{.Metadata.site_url}}/view/issues/{{.Entity.id}}'
+),
+('issue_status_changed', 'Notify when status changes', 'issues',
+    'Issue status updated: {{.Entity.display_name}}',
+    '<h2>Status Updated</h2><p>{{.Entity.display_name}}</p><p>New Status: {{.Entity.status.display_name}}</p>',
+    'Status Updated: {{.Entity.display_name}}\nNew Status: {{.Entity.status.display_name}}'
+);
+
+-- 2. Create trigger for issue creation
+CREATE OR REPLACE FUNCTION notify_issue_created() RETURNS TRIGGER AS $$
+DECLARE v_issue_data JSONB;
+BEGIN
+    IF NEW.assigned_user_id IS NOT NULL THEN
+        SELECT jsonb_build_object('id', NEW.id, 'display_name', NEW.display_name, 'severity', NEW.severity)
+        INTO v_issue_data;
+
+        PERFORM create_notification(
+            p_user_id := NEW.assigned_user_id,
+            p_template_name := 'issue_created',
+            p_entity_type := 'issues',
+            p_entity_id := NEW.id::text,
+            p_entity_data := v_issue_data
+        );
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER issue_created_notification_trigger
+    AFTER INSERT ON issues FOR EACH ROW EXECUTE FUNCTION notify_issue_created();
+
+-- 3. Create trigger for status changes
+CREATE OR REPLACE FUNCTION notify_issue_status_changed() RETURNS TRIGGER AS $$
+DECLARE v_issue_data JSONB;
+BEGIN
+    IF NEW.status_id IS DISTINCT FROM OLD.status_id AND NEW.assigned_user_id IS NOT NULL THEN
+        SELECT jsonb_build_object('id', NEW.id, 'display_name', NEW.display_name,
+            'status', jsonb_build_object('id', s.id, 'display_name', s.display_name))
+        INTO v_issue_data FROM statuses s WHERE s.id = NEW.status_id;
+
+        PERFORM create_notification(
+            p_user_id := NEW.assigned_user_id,
+            p_template_name := 'issue_status_changed',
+            p_entity_type := 'issues',
+            p_entity_id := NEW.id::text,
+            p_entity_data := v_issue_data
+        );
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER issue_status_changed_notification_trigger
+    AFTER UPDATE ON issues FOR EACH ROW EXECUTE FUNCTION notify_issue_status_changed();
+
+-- 4. Test notification
+INSERT INTO issues (display_name, severity, status_id, assigned_user_id)
+VALUES ('Test Issue', 3, 1, (SELECT id FROM civic_os_users LIMIT 1));
+
+-- 5. Verify notification created
+SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;
+```
+
+**Production Deployment**:
+1. Apply v0.11.0 migration: `sqitch deploy v0-11-0-add-notifications`
+2. Configure environment variables (`AWS_SES_FROM_EMAIL`, `SITE_URL`, AWS credentials)
+3. Deploy notification worker service (see `docker-compose.yml` examples)
+4. Verify AWS SES sender email and move out of sandbox mode
+5. Configure SPF/DKIM DNS records for deliverability
+
+See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, AWS SES setup, and Phase 2 roadmap (SMS, bounce handling, unsubscribe mechanism).
+
+---
+
 ## Database Patterns
 
 ### Custom Domains

@@ -17,30 +17,28 @@
 
 import { Component, ChangeDetectionStrategy, input, output, signal, inject, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { AnalyticsService } from '../../services/analytics.service';
+import { NotificationService, type NotificationPreference } from '../../services/notification.service';
 import { getMatomoConfig } from '../../config/runtime';
 
 /**
  * Settings modal component for user preferences.
  *
- * Currently contains:
+ * Contains:
  * - Analytics opt-out preference (localStorage-based)
- *
- * Future enhancements could include:
- * - Default list page size
- * - Table column visibility defaults
- * - Notification preferences
- * - Display preferences
+ * - Notification preferences (email/SMS enabled/disabled)
  */
 @Component({
   selector: 'app-settings-modal',
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './settings-modal.component.html',
   styleUrl: './settings-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsModalComponent {
   private readonly analyticsService = inject(AnalyticsService);
+  private readonly notificationService = inject(NotificationService);
   private readonly matomoConfig = getMatomoConfig();
 
   // Input: Control visibility of modal
@@ -52,12 +50,43 @@ export class SettingsModalComponent {
   // State: Analytics enabled/disabled preference
   analyticsEnabled = signal<boolean>(true);
 
+  // State: Notification preferences
+  notificationPreferences = signal<NotificationPreference[]>([]);
+  emailPreference = signal<NotificationPreference | undefined>(undefined);
+  smsPreference = signal<NotificationPreference | undefined>(undefined);
+  preferencesLoading = signal<boolean>(false);
+
   // Check if analytics is configured at all
   analyticsConfigured = this.matomoConfig.url && this.matomoConfig.siteId;
 
   constructor() {
     // Load initial preference from localStorage
     this.analyticsEnabled.set(this.analyticsService.getUserPreference());
+
+    // Load notification preferences when modal opens
+    effect(() => {
+      if (this.showModal()) {
+        this.loadNotificationPreferences();
+      }
+    });
+  }
+
+  /**
+   * Load notification preferences from API
+   */
+  private loadNotificationPreferences(): void {
+    this.preferencesLoading.set(true);
+    this.notificationService.getUserPreferences().subscribe({
+      next: (preferences) => {
+        this.notificationPreferences.set(preferences);
+        this.emailPreference.set(preferences.find(p => p.channel === 'email'));
+        this.smsPreference.set(preferences.find(p => p.channel === 'sms'));
+        this.preferencesLoading.set(false);
+      },
+      error: () => {
+        this.preferencesLoading.set(false);
+      }
+    });
   }
 
   /**
@@ -67,6 +96,36 @@ export class SettingsModalComponent {
   onAnalyticsToggle(): void {
     const enabled = this.analyticsEnabled();
     this.analyticsService.setEnabled(enabled);
+  }
+
+  /**
+   * Handle email notification toggle
+   */
+  onEmailToggle(enabled: boolean): void {
+    this.notificationService.updatePreference('email', enabled).subscribe({
+      next: () => {
+        // Update local state
+        const pref = this.emailPreference();
+        if (pref) {
+          this.emailPreference.set({ ...pref, enabled });
+        }
+      }
+    });
+  }
+
+  /**
+   * Handle SMS notification toggle
+   */
+  onSmsToggle(enabled: boolean): void {
+    this.notificationService.updatePreference('sms', enabled).subscribe({
+      next: () => {
+        // Update local state
+        const pref = this.smsPreference();
+        if (pref) {
+          this.smsPreference.set({ ...pref, enabled });
+        }
+      }
+    });
   }
 
   /**

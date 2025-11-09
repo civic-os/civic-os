@@ -1,0 +1,159 @@
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold">Notification Templates</h1>
+      <p class="text-base-content/60 mt-1">Manage email and SMS notification templates</p>
+    </div>
+    @if (isAdmin() && !loading()) {
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Create Template
+      </button>
+    }
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-error mb-4" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center min-h-[400px]">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  }
+
+  <!-- Templates Table -->
+  @if (!loading() && isAdmin() && !error()) {
+    @if (hasTemplates()) {
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Entity Type</th>
+              <th>Channels</th>
+              <th>Created</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (template of templates(); track template.id) {
+              <tr>
+                <td>
+                  <div class="font-medium">{{ template.name }}</div>
+                </td>
+                <td>
+                  <div class="text-sm text-base-content/70 max-w-md truncate">
+                    {{ template.description || '—' }}
+                  </div>
+                </td>
+                <td>
+                  @if (template.entity_type) {
+                    <div class="badge badge-ghost">{{ template.entity_type }}</div>
+                  } @else {
+                    <span class="text-base-content/40">—</span>
+                  }
+                </td>
+                <td>
+                  <div class="flex gap-1">
+                    <div class="badge badge-sm badge-primary">Email</div>
+                    @if (template.sms_template) {
+                      <div class="badge badge-sm badge-secondary">SMS</div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="text-sm text-base-content/70">
+                    {{ formatDate(template.created_at) }}
+                  </div>
+                </td>
+                <td class="text-right">
+                  <div class="flex gap-2 justify-end">
+                    <button
+                      class="btn btn-sm btn-ghost"
+                      (click)="openEditModal(template)"
+                      title="Edit template">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-ghost text-error"
+                      (click)="confirmDelete(template)"
+                      title="Delete template">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <h3 class="text-xl font-semibold mb-2">No templates yet</h3>
+        <p class="text-base-content/60 mb-4">Create your first notification template to get started.</p>
+        <button class="btn btn-primary" (click)="openCreateModal()">
+          Create Template
+        </button>
+      </div>
+    }
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (deletingTemplate()) {
+    <dialog class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Delete Template?</h3>
+        <p class="mb-4">
+          Are you sure you want to delete the template <strong>{{ deletingTemplate()!.name }}</strong>?
+          This action cannot be undone.
+        </p>
+        <div class="modal-action">
+          <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
+          <button class="btn btn-error" (click)="deleteTemplate()">Delete</button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop" (click)="closeModals()">
+        <button>close</button>
+      </form>
+    </dialog>
+  }
+
+  <!-- Create/Edit Template Modal -->
+  @if (showCreateModal() || editingTemplate()) {
+    <dialog class="modal modal-open">
+      <div class="modal-box max-w-7xl">
+        <h3 class="font-bold text-lg mb-4">
+          {{ editingTemplate() ? 'Edit Template' : 'Create Template' }}
+        </h3>
+        <app-template-editor
+          [template]="editingTemplate()"
+          (save)="handleTemplateSaved($event)"
+          (cancel)="closeModals()">
+        </app-template-editor>
+      </div>
+      <form method="dialog" class="modal-backdrop" (click)="closeModals()">
+        <button>close</button>
+      </form>
+    </dialog>
+  }
+</div>

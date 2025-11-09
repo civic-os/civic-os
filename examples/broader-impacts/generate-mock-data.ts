@@ -327,9 +327,13 @@ class MockDataGenerator {
       // Use full name for private table (e.g., "John Doe" instead of "John D.")
       const fullName = user.full_name || user.display_name;
 
-      // Generate email from full name
+      // Generate email from full name with @example.com domain
       const nameParts = fullName.toLowerCase().split(' ');
-      const email = faker.internet.email({ firstName: nameParts[0], lastName: nameParts[nameParts.length - 1] });
+      const email = faker.internet.email({
+        firstName: nameParts[0],
+        lastName: nameParts[nameParts.length - 1],
+        provider: 'example.com'
+      });
 
       // Generate phone number in format ###-###-####
       const phone = `${faker.string.numeric(3)}-${faker.string.numeric(3)}-${faker.string.numeric(4)}`;
@@ -602,7 +606,7 @@ class MockDataGenerator {
         return `SRID=4326;POINT(${lng} ${lat})`;
 
       case EntityPropertyType.Email:
-        return faker.internet.email();
+        return faker.internet.email({ provider: 'example.com' });
 
       case EntityPropertyType.Telephone:
         // Generate phone in format: 5551234567 (10 digits, matches phone_number domain CHECK constraint)

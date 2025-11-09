@@ -141,6 +141,11 @@ export class AppComponent {
     this.drawerOpen = false;
   }
 
+  public navigateToNotificationTemplates() {
+    this.router.navigate(['notifications', 'templates']);
+    this.drawerOpen = false;
+  }
+
   /**
    * Open the settings modal
    */

@@ -140,6 +140,14 @@
                 Permissions
               </a>
             </li>
+            <li (click)="navigateToNotificationTemplates()">
+              <a [class.menu-active]="isRouteActive('/notifications/templates')"
+                 [class.font-bold]="isRouteActive('/notifications/templates')"
+                 [class.opacity-85]="!isRouteActive('/notifications/templates')">
+                <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+                Notifications
+              </a>
+            </li>
           }
         </ul>
       </div>

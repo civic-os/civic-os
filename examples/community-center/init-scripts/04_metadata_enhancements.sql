@@ -125,119 +125,79 @@ BEGIN
 
   -- Only create dashboard if we have a user
   IF v_user_id IS NOT NULL THEN
-    -- Create dashboard
-    INSERT INTO metadata.dashboards (
-      display_name,
-      description,
-      is_public,
-      created_by,
-      sort_order
-    ) VALUES (
-      'Community Center Overview',
-      'Facility reservations, pending requests, and resource availability',
-      TRUE,  -- Public dashboard (visible to all users)
-      v_user_id,
-      1
-    )
-    ON CONFLICT (display_name) DO UPDATE SET
-      description = EXCLUDED.description,
-      sort_order = EXCLUDED.sort_order
-    RETURNING id INTO v_dashboard_id;
+    -- Check if dashboard already exists
+    SELECT id INTO v_dashboard_id
+    FROM metadata.dashboards
+    WHERE display_name = 'Community Center Overview';
 
-    -- Delete existing panels for this dashboard (in case we're re-running)
-    DELETE FROM metadata.dashboard_panels WHERE dashboard_id = v_dashboard_id;
+    IF v_dashboard_id IS NOT NULL THEN
+      -- Update existing dashboard
+      UPDATE metadata.dashboards
+      SET description = 'Facility reservations, pending requests, and resource availability',
+          sort_order = 1,
+          updated_at = NOW()
+      WHERE id = v_dashboard_id;
+    ELSE
+      -- Create new dashboard
+      INSERT INTO metadata.dashboards (
+        display_name,
+        description,
+        is_public,
+        created_by,
+        sort_order
+      ) VALUES (
+        'Community Center Overview',
+        'Facility reservations, pending requests, and resource availability',
+        TRUE,  -- Public dashboard (visible to all users)
+        v_user_id,
+        1
+      )
+      RETURNING id INTO v_dashboard_id;
+    END IF;
 
-    -- Panel 1: Pending Requests (Top Priority)
-    INSERT INTO metadata.dashboard_panels (
-      dashboard_id,
-      panel_type,
-      entity_name,
-      title,
-      description,
-      filters,
-      sort_order,
-      width_columns,
-      height_rows
+    /* FUTURE (Phase 2): Dashboard widgets (filtered lists and calendar)
+
+    -- Delete existing widgets for this dashboard (in case we're re-running)
+    DELETE FROM metadata.dashboard_widgets WHERE dashboard_id = v_dashboard_id;
+
+    -- Panel 1: Pending Requests
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, entity_key, title,
+      config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id,
-      'list',
-      'reservation_requests',
-      'Pending Approval',
-      'Reservation requests awaiting review',
-      '[{"column": "status_id", "operator": "eq", "value": "1"}]'::JSONB,
-      1,
-      2,  -- Full width
-      1   -- Standard height
+      v_dashboard_id, 'filtered_list', 'reservation_requests', 'Pending Approval',
+      '{"filters": [{"column": "status_id", "operator": "eq", "value": "1"}]}'::JSONB,
+      1, 2, 1
     );
 
-    -- Panel 2: Upcoming Reservations
-    INSERT INTO metadata.dashboard_panels (
-      dashboard_id,
-      panel_type,
-      entity_name,
-      title,
-      description,
-      filters,
-      sort_order,
-      width_columns,
-      height_rows
+    -- Panel 2: Upcoming Reservations (Calendar)
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, entity_key, title,
+      config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id,
-      'calendar',
-      'reservations',
-      'Upcoming Reservations',
-      'Calendar view of all approved bookings',
-      NULL,  -- No filters, show all
-      2,
-      2,  -- Full width
-      2   -- Taller for calendar
+      v_dashboard_id, 'calendar', 'reservations', 'Upcoming Reservations',
+      '{}'::JSONB, 2, 2, 2
     );
 
     -- Panel 3: Available Facilities
-    INSERT INTO metadata.dashboard_panels (
-      dashboard_id,
-      panel_type,
-      entity_name,
-      title,
-      description,
-      filters,
-      sort_order,
-      width_columns,
-      height_rows
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, entity_key, title,
+      config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id,
-      'list',
-      'resources',
-      'Available Facilities',
-      'Community center spaces available for reservation',
-      '[{"column": "active", "operator": "eq", "value": "true"}]'::JSONB,
-      3,
-      1,  -- Half width
-      1
+      v_dashboard_id, 'filtered_list', 'resources', 'Available Facilities',
+      '{"filters": [{"column": "active", "operator": "eq", "value": "true"}]}'::JSONB,
+      3, 1, 1
     );
 
     -- Panel 4: Recent Requests
-    INSERT INTO metadata.dashboard_panels (
-      dashboard_id,
-      panel_type,
-      entity_name,
-      title,
-      description,
-      filters,
-      sort_order,
-      width_columns,
-      height_rows
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, entity_key, title,
+      config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id,
-      'list',
-      'reservation_requests',
-      'Recent Requests',
-      'Latest reservation requests (all statuses)',
-      NULL,  -- No filters, show recent
-      4,
-      1,  -- Half width
-      1
+      v_dashboard_id, 'filtered_list', 'reservation_requests', 'Recent Requests',
+      '{}'::JSONB, 4, 1, 1
     );
+    */
 
     RAISE NOTICE 'Dashboard "Community Center Overview" created successfully with ID %', v_dashboard_id;
   ELSE

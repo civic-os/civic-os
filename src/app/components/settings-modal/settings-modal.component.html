@@ -22,13 +22,54 @@
       </div>
     }
 
-    <!-- Future sections can be added here -->
-    <!-- Example:
+    <!-- Notifications Section -->
     <div class="py-4">
-      <h4 class="font-semibold mb-3">Display</h4>
-      ...
+      <h4 class="font-semibold mb-3">Notifications</h4>
+
+      @if (preferencesLoading()) {
+        <div class="text-sm opacity-70">Loading preferences...</div>
+      } @else {
+        <!-- Email Notifications -->
+        @if (emailPreference(); as email) {
+          <div class="mb-4">
+            <label class="label cursor-pointer justify-start gap-3">
+              <input
+                type="checkbox"
+                class="checkbox"
+                [checked]="email.enabled"
+                (change)="onEmailToggle($any($event.target).checked)"
+              />
+              <span class="label-text">Email notifications</span>
+            </label>
+            <p class="text-sm opacity-70 ml-9">
+              Send notifications to: <strong>{{ email.email_address }}</strong>
+            </p>
+          </div>
+        }
+
+        <!-- SMS Notifications -->
+        @if (smsPreference(); as sms) {
+          <div class="mb-4">
+            <label class="label cursor-pointer justify-start gap-3">
+              <input
+                type="checkbox"
+                class="checkbox"
+                [checked]="sms.enabled"
+                (change)="onSmsToggle($any($event.target).checked)"
+              />
+              <span class="label-text">SMS notifications</span>
+            </label>
+            <p class="text-sm opacity-70 ml-9">
+              Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
+            </p>
+          </div>
+        }
+
+        @if (!emailPreference() && !smsPreference()) {
+          <p class="text-sm opacity-70">No notification preferences found. They will be created on your next login.</p>
+        }
+      }
     </div>
-    -->
 
     <div class="modal-action">
       <button class="btn" (click)="close()">Close</button>

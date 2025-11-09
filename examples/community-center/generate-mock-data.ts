@@ -284,7 +284,7 @@ class MockDataGenerator {
         display_name: displayName,
         // Store full data for private table generation
         _full_name: fullName,
-        _email: faker.internet.email({ firstName, lastName: fullName.split(' ')[1] }).toLowerCase(),
+        _email: faker.internet.email({ firstName, lastName: fullName.split(' ')[1], provider: 'example.com' }).toLowerCase(),
         _phone: faker.string.numeric(10),
       };
 
@@ -607,7 +607,7 @@ class MockDataGenerator {
         return faker.date.future({ years: 1 }).toISOString();
 
       case EntityPropertyType.Email:
-        return faker.internet.email().toLowerCase();
+        return faker.internet.email({ provider: 'example.com' }).toLowerCase();
 
       case EntityPropertyType.Telephone:
         return faker.string.numeric(10);
