@@ -139,12 +139,13 @@
     }
     @if (propType() == EntityPropertyType.FileImage) {
       @if (datum()?.thumbnail_status === 'completed' && datum()?.s3_thumbnail_medium_key) {
-        <div class="cursor-pointer" (click)="onImageClick(datum())">
+        <div>
           <img
             [src]="getS3Url(datum().s3_thumbnail_medium_key)"
             [alt]="datum().file_name"
-            class="not-prose w-32 h-32 object-cover rounded border hover:opacity-80 transition-opacity"
+            class="not-prose w-32 h-32 object-cover rounded border hover:opacity-80 transition-opacity cursor-pointer"
             [title]="'Click to view full size: ' + datum().file_name"
+            (click)="onImageClick(datum())"
           />
         </div>
       } @else if (datum()?.thumbnail_status === 'processing' || datum()?.thumbnail_status === 'pending') {

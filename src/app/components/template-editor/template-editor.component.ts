@@ -415,31 +415,61 @@ ${content}
   private fetchRandomEntityData(entityKey: string): void {
     this.loadingSampleData.set(true);
 
-    // Get the most recent record (order by id desc, limit 1)
-    const query = {
-      key: entityKey,
-      fields: ['*'],  // Select all fields
-      orderField: 'id',
-      orderDirection: 'desc',
-      pagination: { page: 0, pageSize: 1 }
-    };
-
-    this.dataService.getData(query)
+    // First, get the entity schema to build proper field list
+    this.schemaService.getEntity(entityKey)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
-          if (response && response.length > 0) {
-            // Pretty-print the JSON for better readability
-            const prettyJson = JSON.stringify(response[0], null, 2);
-            this.sampleData.set(prettyJson);
-          } else {
-            // No data available, provide empty object
-            this.sampleData.set('{\n  "id": 1,\n  "display_name": "Example ' + entityKey + '"\n}');
+        next: (entity: SchemaEntityTable | undefined) => {
+          if (!entity) {
+            this.loadingSampleData.set(false);
+            return;
           }
-          this.loadingSampleData.set(false);
+
+          // Get all properties for this entity to build explicit field list
+          this.schemaService.getPropertiesForEntity(entity)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (properties) => {
+                // Build explicit field list from schema properties
+                const fields = properties.map(prop => prop.column_name);
+
+                // Get the most recent record with explicit field list
+                const query = {
+                  key: entityKey,
+                  fields: fields,  // Use explicit field list instead of '*'
+                  orderField: 'id',
+                  orderDirection: 'desc',
+                  pagination: { page: 0, pageSize: 1 }
+                };
+
+                this.dataService.getData(query)
+                  .pipe(takeUntil(this.destroy$))
+                  .subscribe({
+                    next: (response) => {
+                      if (response && response.length > 0) {
+                        // Pretty-print the JSON for better readability
+                        const prettyJson = JSON.stringify(response[0], null, 2);
+                        this.sampleData.set(prettyJson);
+                      } else {
+                        // No data available, provide empty object
+                        this.sampleData.set('{\n  "id": 1,\n  "display_name": "Example ' + entityKey + '"\n}');
+                      }
+                      this.loadingSampleData.set(false);
+                    },
+                    error: (err: Error) => {
+                      console.error('Error fetching sample data:', err);
+                      this.loadingSampleData.set(false);
+                    }
+                  });
+              },
+              error: (err: Error) => {
+                console.error('Error fetching entity properties:', err);
+                this.loadingSampleData.set(false);
+              }
+            });
         },
-        error: (err) => {
-          console.error('Error fetching sample data:', err);
+        error: (err: Error) => {
+          console.error('Error fetching entity schema:', err);
           this.loadingSampleData.set(false);
         }
       });

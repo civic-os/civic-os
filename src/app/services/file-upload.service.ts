@@ -41,6 +41,10 @@ interface UploadUrlResponse {
 export class FileUploadService {
   private readonly apiUrl = getPostgrestUrl();
 
+  // Track in-flight uploads to prevent duplicates (e.g., double-clicks, re-renders)
+  // Key format: "{entityType}:{entityId}:{fileName}"
+  private inFlightUploads = new Map<string, Promise<FileReference>>();
+
   constructor(private http: HttpClient) {}
 
   /**
@@ -50,12 +54,48 @@ export class FileUploadService {
    * 3. Upload file directly to S3
    * 4. Create file record in database
    * 5. Optionally wait for thumbnails
+   *
+   * Includes duplicate prevention: if upload already in progress for same
+   * entityType/entityId/fileName, returns the existing promise instead of
+   * starting a new upload (prevents 409 PRIMARY KEY errors on metadata.files)
    */
   async uploadFile(
     file: File,
     entityType: string,
     entityId: string,
     waitForThumbnails = false
+  ): Promise<FileReference> {
+    // Generate unique key for this upload request
+    const uploadKey = `${entityType}:${entityId}:${file.name}`;
+
+    // Check if upload already in progress
+    const existingUpload = this.inFlightUploads.get(uploadKey);
+    if (existingUpload) {
+      return existingUpload;
+    }
+
+    // Start new upload and track the promise
+    const uploadPromise = this.performUpload(file, entityType, entityId, waitForThumbnails);
+
+    this.inFlightUploads.set(uploadKey, uploadPromise);
+
+    try {
+      const result = await uploadPromise;
+      return result;
+    } finally {
+      // Always clean up, even if upload fails
+      this.inFlightUploads.delete(uploadKey);
+    }
+  }
+
+  /**
+   * Internal method that performs the actual upload workflow
+   */
+  private async performUpload(
+    file: File,
+    entityType: string,
+    entityId: string,
+    waitForThumbnails: boolean
   ): Promise<FileReference> {
     // Step 1: Request presigned upload URL
     const requestId = await this.requestUploadUrl(file.name, file.type, entityType, entityId);

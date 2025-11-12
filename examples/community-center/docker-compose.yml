@@ -100,59 +100,31 @@ services:
       - postgrest-network
     restart: unless-stopped
 
-  # S3 Signer Service - Generates presigned upload URLs (Go + River)
-  s3-signer:
+  # Consolidated Worker - Combines S3 Signer, Thumbnail Worker, and Notification Worker
+  # Single service with shared connection pool (4 connections total instead of 12)
+  consolidated-worker:
     build:
-      context: ../../services/s3-signer-go
+      context: ../../services/consolidated-worker-go
       dockerfile: Dockerfile
-    container_name: broader_impacts_s3_signer
+    container_name: community_center_consolidated_worker
     environment:
+      # Database Configuration (shared pool with explicit limits)
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DB_MAX_CONNS=${DB_MAX_CONNS:-4}  # Total connections for all workers (default: 4)
+      - DB_MIN_CONNS=${DB_MIN_CONNS:-1}
+
+      # S3 Configuration (for S3 Signer and Thumbnail Worker)
       - S3_ENDPOINT=http://minio:9000
       - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
       - S3_BUCKET=${S3_BUCKET:-civic-os-files}
       - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
       - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
       - S3_REGION=us-east-1
-      
-    networks:
-      - postgrest-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    restart: unless-stopped
 
-  # Thumbnail Worker - Generates image and PDF thumbnails (Go + River + bimg)
-  thumbnail-worker:
-    build:
-      context: ../../services/thumbnail-worker-go
-      dockerfile: Dockerfile
-    container_name: broader_impacts_thumbnail_worker
-    environment:
-      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - S3_ENDPOINT=http://minio:9000
-      - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
-      - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - S3_REGION=us-east-1
-    networks:
-      - postgrest-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    restart: unless-stopped
+      # Thumbnail Worker Configuration
+      - THUMBNAIL_MAX_WORKERS=${THUMBNAIL_MAX_WORKERS:-3}
 
-  # Notification Worker - Sends multi-channel notifications (Go + River + SMTP)
-  notification-worker:
-    build:
-      context: ../../services/notification-worker-go
-      dockerfile: Dockerfile
-    container_name: community_center_notification_worker
-    environment:
-      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # Notification Worker Configuration
       - SITE_URL=${SITE_URL:-http://localhost:4200}
       - NOTIFICATION_TIMEZONE=${NOTIFICATION_TIMEZONE:-America/New_York}
       - SMTP_HOST=${SMTP_HOST:-inbucket}  # Default to Inbucket for local dev
@@ -164,6 +136,8 @@ services:
       - postgrest-network
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
       inbucket:
         condition: service_started
