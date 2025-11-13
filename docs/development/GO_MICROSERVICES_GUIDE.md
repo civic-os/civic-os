@@ -1,7 +1,9 @@
 # Go Microservices Implementation Guide
 
-**Status:** ✅ **CURRENT** - Implemented in v0.10.0
+**Status:** ✅ **CURRENT** - Updated in v0.11.0 for Consolidated Worker Architecture
 **Purpose:** Complete guide for Civic OS microservices using Go + River (PostgreSQL table queue)
+
+> **⚠️ ARCHITECTURAL CHANGE (v0.11.0)**: The three separate Go microservices (S3 Signer, Thumbnail Worker, Notification Worker) have been consolidated into a single `consolidated-worker` service. This reduces database connections from 12 to 4, simplifies deployment from 3 containers to 1, and maintains all functionality with improved resource efficiency. The architecture documented below reflects this consolidated approach, though historical references to separate services remain for context.
 
 ---
 
@@ -64,18 +66,19 @@
 
 ---
 
-### Current State (Go + River) - v0.10.0+
+### Current State (Go + River + Consolidated Worker) - v0.11.0+
 
 ```
 ┌─────────────────────────────────────────────────┐
 │  Angular Frontend                               │
-│  - Uploads file metadata via PostgREST          │
+│  - Uploads files, creates notifications, etc.   │
 └───────────────┬─────────────────────────────────┘
                 │ HTTP REST
                 ↓
 ┌─────────────────────────────────────────────────┐
 │  PostgREST API                                  │
 │  - INSERT into metadata.file_upload_requests    │
+│  - INSERT into metadata.notifications           │
 └───────────────┬─────────────────────────────────┘
                 │ PostgreSQL protocol
                 ↓
@@ -84,26 +87,42 @@
 │  - Trigger inserts job into river_job table     │
 │  - ACID guarantees (job + data commit together) │
 │  - Single river_job table for all job types     │
-└─────┬──────────────────────────┬────────────────┘
-      │ FOR UPDATE SKIP LOCKED   │ FOR UPDATE SKIP LOCKED
-      ↓                          ↓
-┌──────────────┐          ┌──────────────┐
-│  S3 Signer   │          │  Thumbnail   │
-│  (Go+River)  │          │  Worker      │
-│              │          │  (Go+River+  │
-│  - Claims    │          │   bimg)      │
-│    jobs from │          │              │
-│    queue:    │          │  - Claims    │
-│    "s3_      │          │    jobs from │
-│    signer"   │          │    queue:    │
-│  - Generates │          │    "thumb-   │
-│    presigned │          │    nails"    │
-│    URLs      │          │  - Generates │
-│  - Updates   │          │    thumbnails│
-│    database  │          │  - Uploads   │
-│              │          │    to S3     │
-└──────────────┘          └──────────────┘
+└───────────────┬─────────────────────────────────┘
+                │ FOR UPDATE SKIP LOCKED (shared pool)
+                ↓
+┌───────────────────────────────────────────────────┐
+│  Consolidated Worker (Go + River)                 │
+│  - Single process with shared DB connection pool  │
+│  - Claims jobs for all types from river_job:      │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ S3 Signer Worker                             │ │
+│  │  - Kind: "s3_presign"                        │ │
+│  │  - Generates presigned upload URLs           │ │
+│  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ Thumbnail Worker (bimg + libvips)            │ │
+│  │  - Kind: "generate_thumbnail"                │ │
+│  │  - Generates image/PDF thumbnails            │ │
+│  │  - Uploads to S3                             │ │
+│  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ Notification Worker                          │ │
+│  │  - Kind: "send_notification"                 │ │
+│  │  - Sends emails via SMTP/SES                 │ │
+│  │  - Template rendering with Go templates      │ │
+│  └──────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────┘
 ```
+
+**Consolidated Worker Benefits (v0.11.0)**:
+- **Reduced Database Connections**: 4 connections total (shared pool) vs 12 (4 per service × 3 services)
+- **Simplified Deployment**: Single container instead of 3 separate containers
+- **Shared Code**: Common utilities, error handling, and configuration management
+- **Lower Memory Footprint**: ~200MB for consolidated worker vs ~600MB for 3 separate services
+- **Same Reliability**: River queue provides at-least-once delivery, retries, and durability for all job types
 
 #### Benefits of New Architecture
 

@@ -103,8 +103,7 @@ kubectl apply -f secrets.yaml  # if using template
 # Deploy backend services (must come before frontend)
 kubectl apply -f postgrest-deployment.yaml
 kubectl apply -f postgrest-service.yaml
-kubectl apply -f s3-signer-deployment.yaml
-kubectl apply -f thumbnail-worker-deployment.yaml
+kubectl apply -f consolidated-worker-deployment.yaml
 
 # Deploy frontend
 kubectl apply -f frontend-deployment.yaml
@@ -138,6 +137,85 @@ kubectl get ingress -n civic-os
 kubectl logs -n civic-os -l app=postgrest
 kubectl logs -n civic-os -l app=frontend
 ```
+
+---
+
+## Resource Tuning
+
+### Consolidated Worker Configuration
+
+The `consolidated-worker` deployment includes tier-based resource configurations in the YAML comments. By default, it's configured for **Small Production** (< 100 uploads/day).
+
+**To customize for your deployment scale:**
+
+1. **Edit the deployment file:**
+   ```bash
+   kubectl edit deployment consolidated-worker -n civic-os
+   ```
+
+2. **Update resources based on your tier** (see comments in `consolidated-worker-deployment.yaml`):
+
+**Development (< 10 uploads/day):**
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+      - name: consolidated-worker
+        env:
+        - name: THUMBNAIL_MAX_WORKERS
+          value: "2"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 384Mi
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+```
+
+**Medium Production (100-500 uploads/day):**
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+      - name: consolidated-worker
+        env:
+        - name: THUMBNAIL_MAX_WORKERS
+          value: "6"
+        - name: DB_MAX_CONNS
+          value: "8"
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1536Mi
+          limits:
+            cpu: 4000m
+            memory: 3Gi
+```
+
+**High Traffic (>500 uploads/day) - Horizontal Scaling:**
+```bash
+# Scale out instead of up
+kubectl scale deployment consolidated-worker --replicas=3 -n civic-os
+
+# Each replica processes jobs independently via River queue
+# Total capacity: 3 replicas × 4 workers = 12 concurrent thumbnail jobs
+```
+
+**Update ConfigMap for tuning:**
+```bash
+kubectl edit configmap civic-os-config -n civic-os
+
+# Add or update:
+data:
+  THUMBNAIL_MAX_WORKERS: "4"  # Adjust based on your tier
+```
+
+**Memory Formula:** `(THUMBNAIL_MAX_WORKERS × 150MB) + 200MB baseline`
+
+For complete tuning guidance, see `docs/deployment/PRODUCTION.md`.
 
 ---
 

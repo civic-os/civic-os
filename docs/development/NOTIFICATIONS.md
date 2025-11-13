@@ -4,7 +4,9 @@
 
 **Version**: 0.11.0
 
-This document describes the architecture and implementation plan for the Civic OS notification system, a River-based microservice that provides multi-channel notifications (email, SMS) with template support.
+This document describes the architecture and implementation plan for the Civic OS notification system, which runs as part of the `consolidated-worker` service alongside S3 presigning and thumbnail generation. The notification worker uses River queue for reliable multi-channel notifications (email, SMS) with template support.
+
+> **ℹ️ Deployment Note**: The notification worker runs within the `consolidated-worker` container (v0.11.0+), sharing database connections with S3 Signer and Thumbnail Worker for improved resource efficiency.
 
 ## Overview
 
@@ -1737,14 +1739,27 @@ Add to `docker-compose.yml`:
 
 ```yaml
 services:
-  notification-worker:
+  consolidated-worker:
     build:
-      context: ./services/notification-worker-go
+      context: ./services/consolidated-worker-go
       dockerfile: Dockerfile
-    container_name: civic-os-notification-worker
+    container_name: civic-os-consolidated-worker
     restart: unless-stopped
     environment:
+      # Database Configuration (shared pool)
       DATABASE_URL: postgres://authenticator:${AUTHENTICATOR_PASSWORD}@postgres:5432/civic_os
+      DB_MAX_CONNS: 4
+
+      # S3 Configuration (for S3 Signer and Thumbnail Worker)
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: civic-os-files
+      S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+
+      # Thumbnail Worker Configuration
+      THUMBNAIL_MAX_WORKERS: 3
+
+      # Notification Worker Configuration
       SMTP_HOST: ${SMTP_HOST:-email-smtp.us-east-1.amazonaws.com}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME}
@@ -1753,6 +1768,7 @@ services:
       SITE_URL: http://localhost:4200
     depends_on:
       - postgres
+      - minio
     networks:
       - civic-os-network
 ```
@@ -2574,7 +2590,7 @@ CREATE TABLE metadata.email_bounces (
 
 ```bash
 # 1. Start services
-docker-compose up -d postgres notification-worker
+docker-compose up -d postgres consolidated-worker
 
 # 2. Create test notification
 psql $DATABASE_URL -c "
@@ -2588,7 +2604,7 @@ SELECT create_notification(
 "
 
 # 3. Check worker logs
-docker logs -f civic-os-notification-worker
+docker logs -f civic-os-consolidated-worker
 
 # 4. Verify notification status
 psql $DATABASE_URL -c "SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;"
@@ -2673,14 +2689,14 @@ SELECT * FROM metadata.notifications WHERE status = 'failed';
 
 ```bash
 # Check worker logs for template syntax errors
-docker logs civic-os-notification-worker | grep "render error"
+docker logs civic-os-consolidated-worker | grep "render error"
 ```
 
 ### SES Authentication Errors
 
 ```bash
 # Verify AWS credentials
-docker exec civic-os-notification-worker env | grep AWS
+docker exec civic-os-consolidated-worker env | grep AWS
 
 # Test SES access
 aws ses verify-email-identity --email-address test@example.com
@@ -3577,14 +3593,14 @@ WHERE kind = 'validate_template_parts' AND state = 'running'
 **Diagnosis:**
 ```bash
 # Check SMTP environment variables in worker
-docker exec civic-os-notification-worker env | grep SMTP
+docker exec civic-os-consolidated-worker env | grep SMTP
 
 # Test SMTP connection manually
 telnet $SMTP_HOST $SMTP_PORT
 # Should see: 220 [server banner]
 
 # Check worker logs for detailed error
-docker logs civic-os-notification-worker | grep -i "authentication"
+docker logs civic-os-consolidated-worker | grep -i "authentication"
 ```
 
 **Fix:**

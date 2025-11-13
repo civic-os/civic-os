@@ -106,9 +106,9 @@ See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide
 
 **Status Type** (`Status`): Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with composite FK pattern for type safety. Uses generated column for entity_type discriminator and supports workflow transitions via `metadata.status_transitions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design specification. **Status**: Design phase - not yet implemented.
 
-**File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, S3 signer service, thumbnail worker, and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
+**File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
-**Microservices Architecture**: File storage features (S3 signer, thumbnail worker) use Go + River (v0.10.0+) with PostgreSQL table queue for reliable job processing. Provides at-least-once delivery, automatic retries with exponential backoff, row-level locking, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
+**Consolidated Worker Architecture**: File storage, thumbnail generation, and notification features run in a single Go + River microservice with a shared PostgreSQL connection pool (4 connections vs 12 with separate services). Provides at-least-once delivery, automatic retries with exponential backoff, row-level locking, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
 
 **Geography (GeoPoint) Type**: When adding a geography column, you must create a paired computed field function `<column_name>_text` that returns `ST_AsText()`. PostgREST exposes this as a virtual field. Data format: Insert/Update uses EWKT `"SRID=4326;POINT(lng lat)"`, Read receives WKT `"POINT(lng lat)"`.
 
@@ -574,7 +574,7 @@ WHERE kind = 'send_notification' AND state = 'available';
 - `docs/development/NOTIFICATIONS.md` - Complete architecture, troubleshooting, AWS SES setup
 - `docs/INTEGRATOR_GUIDE.md` (Notification System section) - Template creation patterns, embedded relationships
 - `examples/pothole/init-scripts/08_notification_templates.sql` - Complete working examples
-- `services/notification-worker-go/` - Go microservice source code
+- `services/consolidated-worker-go/` - Go microservice source code
 
 ### Visual Diagramming with JointJS
 

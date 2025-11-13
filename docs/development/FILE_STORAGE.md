@@ -11,8 +11,9 @@ This document provides a comprehensive guide to implementing file storage featur
 ### Components
 
 - **Database**: `metadata.files` table stores file metadata and S3 keys, `file_upload_requests` table manages presigned URL workflow, `metadata.river_job` table queues background jobs
-- **S3 Signer Service**: Go microservice (v0.10.0+) uses River job queue to generate presigned upload URLs with automatic retries
-- **Thumbnail Worker**: Go microservice (v0.10.0+) processes uploaded images (3 sizes: 150x150, 400x400, 800x800) and PDFs (first page) using bimg (libvips) and pdftoppm with white background letterboxing
+- **Consolidated Worker**: Single Go microservice (v0.11.0+) combining S3 Signer, Thumbnail Worker, and Notification Worker with shared database connection pool (4 connections vs 12)
+  - **S3 Signer**: Generates presigned upload URLs using River job queue with automatic retries
+  - **Thumbnail Worker**: Processes uploaded images (3 sizes: 150x150, 400x400, 800x800) and PDFs (first page) using bimg (libvips) and pdftoppm with white background letterboxing
 - **S3 Key Structure**: `{entity_type}/{entity_id}/{file_id}/original.{ext}` and `/thumb-{size}.jpg` for thumbnails
 - **UUIDv7**: Time-ordered UUIDs improve B-tree index performance
 
@@ -211,19 +212,16 @@ The services require the following S3 permissions:
 
 ```yaml
 services:
-  s3-signer:
-    image: ghcr.io/civic-os/s3-signer:0.10.0
+  consolidated-worker:
+    image: ghcr.io/civic-os/consolidated-worker:0.11.0
     environment:
       - DATABASE_URL=${DATABASE_URL}
+      - DB_MAX_CONNS=4  # Shared pool for all workers
       - S3_REGION=us-east-1
       - S3_BUCKET=${S3_BUCKET}
-    restart: unless-stopped
-
-  thumbnail-worker:
-    image: ghcr.io/civic-os/thumbnail-worker:0.10.0
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - THUMBNAIL_MAX_WORKERS=3
     restart: unless-stopped
 ```
 
@@ -233,35 +231,28 @@ services:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: civic-os-file-workers
+  name: civic-os-consolidated-worker
 spec:
   replicas: 2
   template:
     spec:
       containers:
-      - name: s3-signer
-        image: ghcr.io/civic-os/s3-signer:0.10.0
+      - name: consolidated-worker
+        image: ghcr.io/civic-os/consolidated-worker:0.11.0
         env:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
               name: civic-os-secrets
               key: database-url
+        - name: DB_MAX_CONNS
+          value: "4"
         - name: S3_REGION
           value: "us-east-1"
         - name: S3_BUCKET
           value: "your-bucket"
-
-      - name: thumbnail-worker
-        image: ghcr.io/civic-os/thumbnail-worker:0.10.0
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: civic-os-secrets
-              key: database-url
-        - name: S3_REGION
-          value: "us-east-1"
+        - name: THUMBNAIL_MAX_WORKERS
+          value: "3"
 ```
 
 #### Option 3: Systemd Services
@@ -359,17 +350,28 @@ River's row-level locking ensures each job is processed by only one worker, even
 
 #### Vertical Scaling
 
-**S3 Signer** (I/O-bound):
-- Default: 50 workers per instance
-- Memory: ~50-100MB per instance
-- CPU: Minimal (mostly network I/O)
+The **Consolidated Worker** (v0.11.0+) combines S3 Signer, Thumbnail Worker, and Notification Worker in a single service. Resources scale primarily with thumbnail worker count:
 
-**Thumbnail Worker** (CPU-bound):
-- Default: 10 workers per instance
-- Memory: ~300-500MB per instance (libvips memory usage)
-- CPU: High during thumbnail generation
+**Resource Characteristics:**
+- **S3 Signer**: 20 concurrent workers (I/O-bound, minimal resources)
+- **Thumbnail Worker**: 3 concurrent workers by default (CPU/memory intensive)
+- **Notification Worker**: 30 concurrent workers (I/O-bound, minimal resources)
 
-Adjust worker counts in code (`main.go`) if needed based on your workload.
+**Memory Formula:**
+```
+Total Memory = (THUMBNAIL_MAX_WORKERS × 150MB) + 200MB baseline
+```
+
+**Scaling Configuration:**
+
+| THUMBNAIL_MAX_WORKERS | Memory Needed | CPU (Burst) | Use Case |
+|----------------------|---------------|-------------|----------|
+| 2 | 500MB | 1 CPU | Development |
+| 3-4 | 800MB | 2 CPUs | Small production (<100 uploads/day) |
+| 6-8 | 1.4GB | 4 CPUs | Medium production (100-500 uploads/day) |
+| 8+ | Scale horizontally | - | High traffic (>500 uploads/day) |
+
+Adjust `THUMBNAIL_MAX_WORKERS` environment variable based on your container memory limits. See `docs/deployment/PRODUCTION.md` for complete tuning guide.
 
 ---
 

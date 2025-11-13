@@ -338,9 +338,9 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
 
 **Deployment Requirements**:
 - S3-compatible storage (MinIO, AWS S3, DigitalOcean Spaces)
-- Two Go microservice containers (s3-signer, thumbnail-worker)
+- Consolidated Worker container (handles S3 presigning, thumbnail generation, and notifications)
 - PostgreSQL with River tables (`metadata.river_job`, `metadata.river_leader`)
-- Environment variables: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`
+- Environment variables: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `DB_MAX_CONNS`
 
 **Implementation Guide**: See `docs/development/FILE_STORAGE.md` for complete setup instructions including adding file properties to your schema, validation configuration, and deployment examples.
 
@@ -1186,11 +1186,11 @@ LIMIT 10;
 
 **Worker logs**:
 ```bash
-# View notification worker logs
-docker logs -f civic-os-notification-worker
+# View consolidated worker logs (includes S3, thumbnail, and notification workers)
+docker logs -f civic-os-consolidated-worker
 
 # Check worker is running
-docker ps | grep notification-worker
+docker ps | grep consolidated-worker
 ```
 
 **Common Issues**:
@@ -1468,12 +1468,11 @@ Civic OS provides production-ready Docker containers for all components:
 - **Frontend** (Angular app): `ghcr.io/civic-os/frontend:v0.10.0`
 - **PostgREST** API: `ghcr.io/civic-os/postgrest:v0.10.0`
 - **Migrations** (Sqitch): `ghcr.io/civic-os/migrations:v0.10.0`
-- **S3 Signer** (Go + River): `ghcr.io/civic-os/s3-signer:v0.10.0` - Generates presigned upload URLs
-- **Thumbnail Worker** (Go + River): `ghcr.io/civic-os/thumbnail-worker:v0.10.0` - Processes images and PDFs
+- **Consolidated Worker** (Go + River): `ghcr.io/civic-os/consolidated-worker:v0.11.0` - Handles S3 presigning, thumbnail generation, and notifications in a single service
 
 **Runtime Configuration**: All instances use environment variables for configuration (PostgREST URL, Keycloak settings, S3 credentials, etc.). No rebuild required for deployment.
 
-**Microservices Architecture (v0.10.0+)**: File storage features use Go microservices with PostgreSQL-based River job queue for reliable background processing. See File Storage System section above for architecture details.
+**Consolidated Worker Architecture (v0.11.0+)**: File storage, thumbnail generation, and notification features run in a single Go microservice with a shared PostgreSQL connection pool (4 connections vs 12 with separate services). Uses PostgreSQL-based River job queue for reliable background processing. See File Storage System and Notification System sections above for architecture details.
 
 See `docs/deployment/PRODUCTION.md` for complete deployment guide including:
 - Environment variable configuration

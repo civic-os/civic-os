@@ -1,0 +1,152 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consolidated-worker
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: consolidated-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: civic-os
+      component: consolidated-worker
+  template:
+    metadata:
+      labels:
+        app: civic-os
+        component: consolidated-worker
+    spec:
+      containers:
+      - name: consolidated-worker
+        image: ghcr.io/civic-os/consolidated-worker:latest
+        imagePullPolicy: Always
+        env:
+        # Database connection (shared pool)
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: DATABASE_URL
+        - name: DB_MAX_CONNS
+          value: "4"
+        - name: DB_MIN_CONNS
+          value: "1"
+
+        # S3/AWS configuration (for S3 Signer and Thumbnail Worker)
+        - name: S3_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: S3_ACCESS_KEY_ID
+        - name: S3_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: S3_SECRET_ACCESS_KEY
+        - name: S3_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_REGION
+        - name: S3_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_ENDPOINT
+              optional: true
+        - name: S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_BUCKET
+        - name: S3_PUBLIC_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_PUBLIC_ENDPOINT
+
+        # Thumbnail Worker configuration
+        - name: THUMBNAIL_MAX_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: THUMBNAIL_MAX_WORKERS
+              optional: true
+
+        # Notification Worker configuration
+        - name: SITE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: SITE_URL
+        - name: NOTIFICATION_TIMEZONE
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: NOTIFICATION_TIMEZONE
+              optional: true
+        - name: SMTP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: SMTP_HOST
+        - name: SMTP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: SMTP_PORT
+        - name: SMTP_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: SMTP_USERNAME
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: SMTP_PASSWORD
+        - name: SMTP_FROM
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: SMTP_FROM
+
+        resources:
+          # Resource Tiers (scale based on file upload volume):
+          #
+          # SMALL PRODUCTION (DEFAULT - <100 uploads/day):
+          #   requests: 500m CPU / 768Mi RAM
+          #   limits: 2000m CPU / 1536Mi RAM
+          #   THUMBNAIL_MAX_WORKERS: 3-4
+          #
+          # DEVELOPMENT (<10 uploads/day):
+          #   requests: 200m CPU / 384Mi RAM
+          #   limits: 1000m CPU / 768Mi RAM
+          #   THUMBNAIL_MAX_WORKERS: 2
+          #
+          # MEDIUM PRODUCTION (100-500 uploads/day):
+          #   requests: 1000m CPU / 1536Mi RAM
+          #   limits: 4000m CPU / 3Gi RAM
+          #   THUMBNAIL_MAX_WORKERS: 6-8
+          #   DB_MAX_CONNS: 8
+          #
+          # HIGH TRAFFIC (>500 uploads/day):
+          #   Use horizontal scaling (increase replicas) instead of vertical scaling
+          #   Example: replicas: 3, THUMBNAIL_MAX_WORKERS: 4 per replica
+          #
+          # Memory Formula: (THUMBNAIL_MAX_WORKERS × 150MB) + 200MB baseline
+          # S3 Signer and Notification workers are I/O-bound (minimal resources)
+          # Thumbnail Worker is CPU/memory intensive (scales linearly with worker count)
+          #
+          # See docs/deployment/PRODUCTION.md for complete tuning guide
+          requests:
+            cpu: 500m      # Baseline for 3-4 thumbnail workers
+            memory: 768Mi  # (4 workers × 150MB) + 200MB baseline
+          limits:
+            cpu: 2000m     # Burst capacity for parallel image processing
+            memory: 1536Mi # Allows scaling to 8-9 workers without config change

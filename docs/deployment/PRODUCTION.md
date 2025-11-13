@@ -190,7 +190,7 @@ MAP_DEFAULT_ZOOM=13
 S3_PUBLIC_ENDPOINT=https://s3.yourdomain.com
 S3_BUCKET=civic-os-files-prod
 
-# AWS SDK configuration (for s3-signer and thumbnail-worker microservices)
+# AWS SDK configuration (for consolidated-worker microservice)
 S3_ACCESS_KEY_ID=your-access-key
 S3_SECRET_ACCESS_KEY=your-secret-key
 S3_REGION=us-east-1
@@ -891,21 +891,102 @@ docker exec -it civic_os_postgres psql -U postgres -d civic_os_prod -c "\du"
 docker stats
 ```
 
-**Thumbnail worker high memory usage:**
+**Consolidated Worker Resource Tuning:**
 
-If the thumbnail worker is consuming too much memory, reduce `THUMBNAIL_MAX_WORKERS`:
-```bash
-# Edit .env file
-THUMBNAIL_MAX_WORKERS=3  # Reduce from default 5
+The consolidated worker combines S3 presigning, thumbnail generation, and notifications in a single service. Resources scale primarily with `THUMBNAIL_MAX_WORKERS` (image processing is CPU/memory intensive).
 
-# Restart service
-docker-compose restart thumbnail-worker
+**Resource Formula:**
+```
+Memory needed = (THUMBNAIL_MAX_WORKERS × 150MB) + 200MB baseline
+CPU needed (burst) = THUMBNAIL_MAX_WORKERS × 250m
 ```
 
-Memory usage scales with worker count (~100MB per worker). Match worker count to available memory:
-- 512Mi container: 2-3 workers
-- 1Gi container: 5-7 workers
-- 2Gi container: 10-12 workers
+**Tier-Based Configuration:**
+
+| Deployment Scale | Upload Volume | CPU Request | Memory Request | CPU Limit | Memory Limit | THUMBNAIL_MAX_WORKERS | DB_MAX_CONNS |
+|------------------|---------------|-------------|----------------|-----------|--------------|----------------------|--------------|
+| **Development** | <10/day | 200m | 384Mi | 1000m | 768Mi | 2 | 4 |
+| **Small Production** | <100/day | 500m | 768Mi | 2000m | 1536Mi | 3-4 | 4 |
+| **Medium Production** | 100-500/day | 1000m | 1536Mi | 4000m | 3Gi | 6-8 | 8 |
+| **Large (Horizontal)** | >500/day | 500m × N | 768Mi × N | 2000m × N | 1536Mi × N | 4 per replica | 4 |
+
+**Tuning Steps:**
+
+1. **Calculate your needs:**
+   ```bash
+   # Determine container memory limit (e.g., 1536Mi = 1536MB)
+   # Calculate max workers: floor((memory_limit - 200MB) / 150MB)
+   # Example: floor((1536 - 200) / 150) = 8 workers
+   ```
+
+2. **Update environment variables:**
+   ```bash
+   # Edit .env or ConfigMap
+   THUMBNAIL_MAX_WORKERS=4  # Adjust based on calculation above
+   DB_MAX_CONNS=6           # Rule: THUMBNAIL_MAX_WORKERS + 2
+
+   # Restart service
+   docker-compose restart consolidated-worker
+   # OR for Kubernetes:
+   kubectl rollout restart deployment/consolidated-worker -n civic-os
+   ```
+
+3. **Monitor performance:**
+   ```bash
+   # Watch memory usage
+   docker stats consolidated-worker
+   # OR for Kubernetes:
+   kubectl top pod -l component=consolidated-worker -n civic-os
+
+   # Check for memory pressure
+   kubectl describe pod <pod-name> -n civic-os | grep -A 5 "Events:"
+   ```
+
+**When to Scale Horizontally:**
+
+For high traffic (>500 uploads/day), **prefer multiple replicas** over increasing resources:
+
+```yaml
+spec:
+  replicas: 3  # Scale out instead of up
+  template:
+    spec:
+      containers:
+      - name: consolidated-worker
+        env:
+        - name: THUMBNAIL_MAX_WORKERS
+          value: "4"  # Moderate per-replica
+        - name: DB_MAX_CONNS
+          value: "4"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 768Mi
+          limits:
+            cpu: 2000m
+            memory: 1536Mi
+```
+
+**Benefits of horizontal scaling:**
+- Better fault tolerance (jobs redistribute if pod fails)
+- More consistent performance (avoid CPU throttling)
+- River queue handles distribution automatically
+- Total capacity: 3 replicas × 4 workers = 12 concurrent jobs
+
+**Troubleshooting:**
+
+**Memory issues (OOMKilled):**
+- Reduce `THUMBNAIL_MAX_WORKERS` by 2
+- Increase container memory limit
+- Check for large file uploads (>10MB images, complex PDFs)
+
+**High CPU usage:**
+- Normal during image processing (expect 80-100% CPU during jobs)
+- If sustained high CPU with empty queue, check for worker thrashing
+
+**Connection pool exhausted:**
+- Increase `DB_MAX_CONNS` (rule: `THUMBNAIL_MAX_WORKERS + 2`)
+- Check for connection leaks in logs
 
 **Analyze slow queries:**
 ```sql

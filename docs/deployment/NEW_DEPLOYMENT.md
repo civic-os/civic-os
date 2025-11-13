@@ -568,38 +568,45 @@ minio:
   command: server /data --console-address ":9001"
 ```
 
-**S3 Signer (Presigned Upload URLs):**
+**Consolidated Worker (File Storage + Thumbnails + Notifications):**
 ```yaml
-s3-signer:
+consolidated-worker:
   build:
-    context: ../../services/s3-signer-go
+    context: ../../services/consolidated-worker-go
   environment:
+    # Database Configuration (shared pool with explicit limits)
     - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    - DB_MAX_CONNS=${DB_MAX_CONNS:-4}  # Total connections for all workers (default: 4)
+    - DB_MIN_CONNS=${DB_MIN_CONNS:-1}
+
+    # S3 Configuration (for S3 Signer and Thumbnail Worker)
     - S3_ENDPOINT=http://minio:9000
     - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
     - S3_BUCKET=${S3_BUCKET:-civic-os-files}
     - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
     - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
-```
+    - S3_REGION=us-east-1
 
-**Thumbnail Worker (Image/PDF Processing):**
-```yaml
-thumbnail-worker:
-  build:
-    context: ../../services/thumbnail-worker-go
-  environment:
-    - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    - S3_ENDPOINT=http://minio:9000
-    - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
-    - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+    # Thumbnail Worker Configuration
+    - THUMBNAIL_MAX_WORKERS=${THUMBNAIL_MAX_WORKERS:-3}
+
+    # Notification Worker Configuration
+    - SITE_URL=${SITE_URL:-http://localhost:4200}
+    - NOTIFICATION_TIMEZONE=${NOTIFICATION_TIMEZONE:-America/New_York}
+    - SMTP_HOST=${SMTP_HOST:-inbucket}  # Default to Inbucket for local dev
+    - SMTP_PORT=${SMTP_PORT:-2500}
+    - SMTP_USERNAME=${SMTP_USERNAME:-}
+    - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+    - SMTP_FROM=${SMTP_FROM:-noreply@example.com}
 ```
 
 **Key Points:**
 - MinIO provides S3-compatible storage for local development
-- S3 Signer listens for file upload requests via PostgreSQL NOTIFY/LISTEN
-- Thumbnail Worker processes images and PDFs using River job queue
+- Consolidated Worker combines S3 presigning, thumbnail generation, and notifications in a single service
+- Uses shared PostgreSQL connection pool (4 connections vs 12 with separate services)
+- Processes jobs using River queue for reliable background processing
 - For production, replace MinIO with AWS S3, DigitalOcean Spaces, or similar
-- See `docs/development/FILE_STORAGE.md` for complete implementation guide
+- See `docs/development/FILE_STORAGE.md` and `docs/development/NOTIFICATIONS.md` for implementation guides
 
 ---
 
@@ -718,13 +725,12 @@ docker-compose ps
 
 Expected output:
 ```
-NAME              IMAGE                          STATUS
-postgres_db       postgis/postgis:17-3.5-alpine  Up (healthy)
-postgrest_api     postgrest/postgrest:latest     Up
-swagger_ui        swaggerapi/swagger-ui          Up
-minio_local       minio/minio:latest            Up (healthy)
-s3_signer         civic-os-s3-signer-go         Up
-thumbnail_worker  civic-os-thumbnail-worker-go  Up
+NAME                  IMAGE                          STATUS
+postgres_db           postgis/postgis:17-3.5-alpine  Up (healthy)
+postgrest_api         postgrest/postgrest:latest     Up
+swagger_ui            swaggerapi/swagger-ui          Up
+minio_local           minio/minio:latest            Up (healthy)
+consolidated_worker   civic-os-consolidated-worker   Up
 ```
 
 **Note**: minio_init will show as "Exit 0" (this is normal - it's a one-time setup container)
@@ -805,12 +811,9 @@ open http://localhost:9001
 # Login: minioadmin / minioadmin
 # Verify bucket exists and is accessible
 
-# Check S3 Signer logs
-docker-compose logs s3-signer
-# Should show: "Connected to database" and "Listening for requests..."
-
-# Check Thumbnail Worker logs
-docker-compose logs thumbnail-worker
+# Check Consolidated Worker logs (includes S3, thumbnail, and notification workers)
+docker-compose logs consolidated-worker
+# Should show: "Connected to database" and worker startup messages for all three services
 # Should show: "Worker started" and "Polling for jobs..."
 ```
 
@@ -847,8 +850,8 @@ S3_BUCKET=civic-os-files-prod
 ```yaml
 # Comment out or remove minio and minio-init services
 
-# Update s3-signer and thumbnail-worker:
-s3-signer:
+# Update consolidated-worker:
+consolidated-worker:
   environment:
     - S3_ENDPOINT=  # Empty for AWS S3
     - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
