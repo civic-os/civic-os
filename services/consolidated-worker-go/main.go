@@ -194,9 +194,9 @@ func main() {
 	log.Println("[Init] Starting River client...")
 	riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 		Queues: map[string]river.QueueConfig{
-			"s3_signer":     {MaxWorkers: 20}, // I/O-bound, many workers
+			"s3_signer":     {MaxWorkers: 20},                  // I/O-bound, many workers
 			"thumbnails":    {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
-			"notifications": {MaxWorkers: 30}, // I/O-bound (SMTP), many workers
+			"notifications": {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
 		},
 		Workers: workers,
 		Logger:  slog.Default(),
