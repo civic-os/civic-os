@@ -311,6 +311,377 @@ NOTIFY pgrst, 'reload schema';
 
 ---
 
+## Map Widget (NEW - Phase 2)
+
+**Purpose:** Display filtered entity records with geography columns on an interactive map for geographic visualization and StoryMap-style narratives.
+
+**Dependency:** Requires existing `GeoPointMapComponent` (already implemented in List page map view).
+
+**Use Cases:**
+- **Simple StoryMap**: Multiple dashboards showing different filtered geographic views with narrative markdown
+- **Issue tracking**: Show all open potholes on a map with status-based filtering
+- **Asset management**: Display infrastructure locations color-coded by condition
+- **Event planning**: Show upcoming events on a map grouped by category
+
+### Widget Configuration Schema
+
+Add to `metadata.widget_types`:
+```sql
+INSERT INTO metadata.widget_types (widget_type, display_name, description, icon_name) VALUES
+  ('map', 'Geographic Map', 'Display filtered entity records with geography columns on interactive map', 'map');
+```
+
+### MapWidgetConfig Interface
+
+```typescript
+export interface MapWidgetConfig {
+  // Data source (required)
+  entityKey: string;           // Which entity to show (e.g., 'issues', 'events')
+  mapPropertyName: string;     // Which geography column (e.g., 'location')
+
+  // Filtering (optional)
+  filters?: FilterCondition[]; // Pre-filters (same pattern as filtered_list)
+  maxMarkers?: number;         // Default 500 (performance safety limit)
+
+  // Display (optional)
+  showColumns?: string[];      // Properties to show in marker popup/tooltip
+  popupTemplate?: string;      // Custom popup HTML template (Phase 3+)
+
+  // Map behavior (optional)
+  defaultZoom?: number;        // Override auto-fit zoom level
+  defaultCenter?: [number, number]; // [lng, lat] - override auto-fit center
+
+  // Future enhancements (Phase 4+)
+  enableClustering?: boolean;  // Group nearby markers
+  clusterRadius?: number;      // Pixels for clustering
+  colorProperty?: string;      // hex_color column for marker colors
+}
+```
+
+### Example Configurations
+
+#### Open Issues Map
+```json
+{
+  "entityKey": "issues",
+  "mapPropertyName": "location",
+  "filters": [
+    {"column": "status_id", "operator": "eq", "value": 1}
+  ],
+  "maxMarkers": 500,
+  "showColumns": ["display_name", "severity", "status", "created_at"],
+  "defaultZoom": 12
+}
+```
+
+#### Recent Events (Last 7 Days)
+```json
+{
+  "entityKey": "events",
+  "mapPropertyName": "venue_location",
+  "filters": [
+    {"column": "event_date", "operator": "gte", "value": "NOW() - INTERVAL '7 days'"}
+  ],
+  "showColumns": ["display_name", "event_date", "attendee_count"],
+  "defaultZoom": 10
+}
+```
+
+#### Infrastructure by Condition (Color-coded)
+```json
+{
+  "entityKey": "assets",
+  "mapPropertyName": "location",
+  "showColumns": ["display_name", "condition", "last_inspection"],
+  "colorProperty": "condition_color",
+  "enableClustering": true,
+  "clusterRadius": 50
+}
+```
+
+### MapWidgetComponent Implementation
+
+**File:** `src/app/components/widgets/map-widget/map-widget.component.ts`
+
+**Architecture:**
+- Reuses existing `GeoPointMapComponent` (90% of map logic already implemented)
+- Fetches filtered entity data using `DataService` (same pattern as `FilteredListWidget`)
+- Transforms entity records into marker format: `{ id, name, wkt }[]`
+- Handles auto-refresh using standard widget refresh infrastructure
+- Displays rich popups using existing `DisplayPropertyComponent`
+
+**Key Features:**
+```typescript
+@Component({
+  selector: 'app-map-widget',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [GeoPointMapComponent, CommonModule]
+})
+export class MapWidgetComponent implements OnInit {
+  widget = input.required<DashboardWidget>();
+
+  // Extract typed config
+  config = computed<MapWidgetConfig>(() => this.widget().config as MapWidgetConfig);
+
+  // Fetch filtered entity data
+  markers$ = this.dataService.getData(
+    this.config().entityKey,
+    [this.config().mapPropertyName, 'display_name', ...this.config().showColumns || []],
+    this.config().filters || [],
+    undefined, // no ordering
+    this.config().maxMarkers || 500
+  ).pipe(
+    map(response => this.transformToMarkers(response.data))
+  );
+
+  // Transform entity records to marker format
+  private transformToMarkers(records: any[]): MapMarker[] {
+    return records.map(record => ({
+      id: record.id,
+      name: record.display_name,
+      wkt: record[this.config().mapPropertyName + '_text'], // Computed WKT field
+      properties: record // Store full record for popup
+    }));
+  }
+
+  // Handle marker click (navigate to detail page)
+  onMarkerClick(markerId: string): void {
+    this.router.navigate(['/view', this.config().entityKey, markerId]);
+  }
+}
+```
+
+**Template:**
+```html
+@if (markers$ | async; as markers) {
+  <app-geo-point-map
+    mode="display"
+    [markers]="markers"
+    [width]="'100%'"
+    [height]="'400px'"
+    (markerClick)="onMarkerClick($event)"
+  />
+}
+```
+
+### Marker Popup Implementation
+
+**Challenge:** Display entity properties in Leaflet popup using Angular components.
+
+**Solution (Phase 2):** Simple HTML template with property values
+```typescript
+private createPopupContent(marker: MapMarker): string {
+  const props = this.config().showColumns || ['display_name'];
+  const rows = props.map(col => {
+    const value = marker.properties[col];
+    return `<tr><th>${col}</th><td>${value}</td></tr>`;
+  }).join('');
+
+  return `
+    <table class="table-compact">
+      ${rows}
+    </table>
+    <a href="/view/${this.config().entityKey}/${marker.id}" class="btn btn-sm btn-primary">
+      View Details
+    </a>
+  `;
+}
+```
+
+**Enhancement (Phase 3+):** Render Angular component in popup
+```typescript
+// Use Angular CDK Portal or ViewContainerRef to inject component
+private createAngularPopup(marker: MapMarker): HTMLElement {
+  const factory = this.resolver.resolveComponentFactory(EntityPopupComponent);
+  const componentRef = this.viewContainer.createComponent(factory);
+  componentRef.instance.entity = marker.properties;
+  componentRef.instance.columns = this.config().showColumns;
+  return componentRef.location.nativeElement;
+}
+```
+
+### Performance Considerations
+
+**Marker Limits:**
+- Default max: 500 markers (configurable)
+- Warning message if entity has more records: "Showing 500 of 1,247 issues. Apply filters to see more."
+- Recommendation: Use clustering for datasets > 100 markers
+
+**Auto-refresh Impact:**
+- Map widget follows standard refresh interval (default 60 seconds)
+- On refresh, markers are added/removed/updated without resetting map bounds (preserves user's zoom/pan)
+- Loading overlay (non-blocking) shows refresh in progress
+
+**Data Fetching:**
+```sql
+-- Widget needs geography column + display column + popup columns
+-- Example query generated by DataService:
+SELECT
+  id,
+  display_name,
+  location_text,  -- Computed WKT field (ST_AsText(location))
+  severity,
+  status_id,
+  created_at
+FROM issues
+WHERE status_id = 1
+ORDER BY created_at DESC
+LIMIT 500;
+```
+
+### Integration with Existing Map Infrastructure
+
+**Reuses from `GeoPointMapComponent`:**
+- ✅ Leaflet initialization and lifecycle management
+- ✅ Multi-marker rendering with auto-fit bounds
+- ✅ Dark mode support (theme-aware tile layers)
+- ✅ Hover interactions and tooltips
+- ✅ Click handlers with `markerClick` event
+- ✅ Signal-based reactivity
+
+**New Requirements for Widget:**
+- Add support for marker color overrides (via `colorProperty` config)
+- Add support for clustering (via Leaflet.markercluster plugin)
+- Add popup content injection (HTML or Angular component)
+- Add loading state overlay (transparent spinner on refresh)
+
+### StoryMap Use Case Example
+
+**Scenario:** Community organization wants to tell the story of neighborhood revitalization.
+
+**Dashboard 1: "Before" (2020)**
+```sql
+INSERT INTO metadata.dashboards (display_name, description)
+VALUES ('Neighborhood Revitalization - Before', 'Conditions in 2020 before project started');
+
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width) VALUES
+  (1, 'markdown', 'The Challenge', '{"content": "# The Challenge\n\nIn 2020, our neighborhood faced..."}', 1, 2),
+  (1, 'map', 'Infrastructure Issues (2020)', '{
+    "entityKey": "issues",
+    "mapPropertyName": "location",
+    "filters": [
+      {"column": "created_at", "operator": "lt", "value": "2021-01-01"}
+    ],
+    "showColumns": ["display_name", "severity", "created_at"]
+  }', 2, 2);
+```
+
+**Dashboard 2: "Progress" (2021-2023)**
+```sql
+INSERT INTO metadata.dashboards (display_name, description)
+VALUES ('Neighborhood Revitalization - Progress', 'Improvements made 2021-2023');
+
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width) VALUES
+  (2, 'markdown', 'Taking Action', '{"content": "# Taking Action\n\nBetween 2021-2023..."}', 1, 2),
+  (2, 'map', 'Resolved Issues', '{
+    "entityKey": "issues",
+    "mapPropertyName": "location",
+    "filters": [
+      {"column": "status", "operator": "eq", "value": "resolved"},
+      {"column": "resolved_at", "operator": "between", "value": ["2021-01-01", "2023-12-31"]}
+    ],
+    "showColumns": ["display_name", "resolution", "resolved_at"]
+  }', 2, 2);
+```
+
+**Dashboard 3: "Today" (2024+)**
+```sql
+INSERT INTO metadata.dashboards (display_name, description)
+VALUES ('Neighborhood Revitalization - Today', 'Current state and ongoing work');
+
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width) VALUES
+  (3, 'markdown', 'Looking Forward', '{"content": "# Looking Forward\n\nToday our neighborhood..."}', 1, 2),
+  (3, 'map', 'Active Projects', '{
+    "entityKey": "projects",
+    "mapPropertyName": "location",
+    "filters": [
+      {"column": "status", "operator": "eq", "value": "active"}
+    ],
+    "showColumns": ["display_name", "completion_date", "budget"]
+  }', 2, 2);
+```
+
+**Navigation:** Users click through dashboards 1 → 2 → 3 to see the story unfold geographically.
+
+### Implementation Timeline
+
+**Phase 2 - Basic Map Widget (1-2 weeks):**
+- MapWidgetComponent with config interface
+- Integration with `GeoPointMapComponent`
+- Data fetching via `DataService`
+- Simple HTML popups
+- Auto-refresh support
+- Tests
+
+**Phase 3 - Enhanced Popups (3-5 days):**
+- Angular component in popups
+- Custom popup templates
+- Rich formatting using `DisplayPropertyComponent`
+
+**Phase 4 - Advanced Features (1 week):**
+- Marker clustering (Leaflet.markercluster)
+- Color-coded markers (via `colorProperty`)
+- Performance optimizations
+- Mobile responsive improvements
+
+### Testing Strategy
+
+**Unit Tests:**
+- MapWidgetConfig validation
+- Marker transformation logic
+- Filter handling
+
+**Component Tests:**
+- MapWidgetComponent rendering
+- Data loading and error states
+- Marker click navigation
+- Auto-refresh behavior
+
+**Integration Tests:**
+- Full dashboard with map widget
+- Filter application
+- Multiple map widgets on same dashboard
+
+**E2E Tests:**
+- User creates map widget via editor
+- User navigates from map marker to detail page
+- Map updates on filter change
+- StoryMap workflow (navigate through dashboards)
+
+### Documentation Updates
+
+**INTEGRATOR_GUIDE.md additions:**
+```markdown
+### Map Widget
+
+Display filtered entity records with geography columns on an interactive map.
+
+**Requirements:**
+- Entity must have a `geography(Point, 4326)` column
+- Computed `_text` field for WKT format (e.g., `location_text`)
+
+**Configuration:**
+- `entityKey`: Table name
+- `mapPropertyName`: Geography column name
+- `filters`: Optional pre-filters
+- `showColumns`: Properties for popup tooltips
+- `maxMarkers`: Performance limit (default 500)
+
+**Example:**
+\```sql
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config) VALUES
+  (1, 'map', 'Open Issues Map', '{
+    "entityKey": "issues",
+    "mapPropertyName": "location",
+    "filters": [{"column": "status", "operator": "eq", "value": "open"}],
+    "showColumns": ["display_name", "severity", "created_at"]
+  }');
+\```
+```
+
+---
+
 ## Calendar & TimeSlot Widgets (NEW)
 
 **Dependency:** Requires Phase 1 of Calendar Integration (TimeSlot property type) to be completed first.
@@ -1138,9 +1509,9 @@ effectiveFilters = computed(() => [
 **Deliverable:** Static welcome dashboard at `/` with navigation, error handling, and solid foundation for Phase 2
 
 ### Phase 2: Dynamic Widgets + Auto-refresh (REVISED)
-**Goal: Real-time data with filtered lists and auto-refresh infrastructure**
+**Goal: Real-time data with filtered lists, map visualization, and auto-refresh infrastructure**
 
-**What changed:** Added FilteredListWidget (moved from Phase 1), removed StatCard (requires backend - move to Phase 5), added performance optimizations (staggered refresh).
+**What changed:** Added FilteredListWidget (moved from Phase 1), added MapWidget for geographic visualization and StoryMap use cases, removed StatCard (requires backend - move to Phase 5), added performance optimizations (staggered refresh).
 
 1. **FilteredListWidgetComponent**
    - Fetch filtered data using DataService
@@ -1149,32 +1520,43 @@ effectiveFilters = computed(() => [
    - Reuse DisplayPropertyComponent for column rendering
    - Support for all entity types
 
-2. **Auto-refresh infrastructure**
+2. **MapWidgetComponent** (NEW)
+   - Reuse existing `GeoPointMapComponent` (90% complete)
+   - Fetch filtered entity data with geography columns
+   - Transform records to marker format
+   - Display rich popups with entity properties
+   - Support for color-coded markers (via `colorProperty`)
+   - Auto-refresh with preserved zoom/pan state
+   - Link markers to entity detail pages
+   - Support all entities with geography columns
+
+3. **Auto-refresh infrastructure**
    - Add auto-refresh to WidgetContainerComponent
    - RxJS interval with filter/switchMap pattern
    - Pause when tab hidden (document.hidden check)
    - Pause when user clicks pause button
    - **Staggered refresh with jitter** (performance optimization)
 
-3. **Data freshness UX**
+4. **Data freshness UX**
    - "Updated Xm ago" timestamp on each widget
    - "Refreshing..." spinner overlay (non-blocking)
    - Manual refresh button
    - Failed refresh error state with retry
    - Countdown to next refresh (optional, nice-to-have)
 
-4. **Global refresh controls**
+5. **Global refresh controls**
    - Pause/resume all widgets button
    - Refresh all widgets now button
    - Widget-level refresh state management
 
-5. **Tests**
+6. **Tests**
    - FilteredListWidget component tests
+   - MapWidget component tests (marker rendering, popups, navigation)
    - Auto-refresh logic tests (interval, pause, resume)
    - Staggered refresh tests (jitter)
    - Memory leak tests (100+ refresh cycles)
 
-**Deliverable:** Auto-updating filtered list widgets with performance-optimized refresh
+**Deliverable:** Auto-updating filtered list and map widgets with performance-optimized refresh and StoryMap support
 
 ### Phase 3: Dashboard Management (REVISED)
 **Goal: Admin tools for creating/editing dashboards**

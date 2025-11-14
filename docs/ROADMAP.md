@@ -52,7 +52,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Dashboards (Phased Development)
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
-- [ ] **Phase 2 - Dynamic Widgets**: Filtered list widget, auto-refresh infrastructure, data freshness UX
+- [ ] **Phase 2 - Dynamic Widgets**: Filtered list widget, **map widget**, auto-refresh infrastructure, data freshness UX
 - [ ] **Phase 3 - Management**: Dashboard management UI, widget editor, user preferences, global filter bar
 - [ ] **Phase 4 - Polish**: Drag-and-drop reordering, dashboard templates, embedded links, mobile optimizations
 - [ ] **Phase 5 - Advanced Widgets**: Stat cards (backend aggregation required), charts (Chart.js), query results from views
