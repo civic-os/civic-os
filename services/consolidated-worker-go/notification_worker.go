@@ -40,11 +40,12 @@ func (NotificationArgs) InsertOpts() river.InsertOpts {
 
 // SMTPConfig holds SMTP server configuration
 type SMTPConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	From     string
+	Host           string
+	Port           string
+	Username       string
+	Password       string
+	From           string
+	SkipTestEmails bool // Skip sending to test/dummy email addresses (e.g., @example.com)
 }
 
 // NotificationWorker implements the River Worker interface
@@ -215,6 +216,12 @@ func (w *NotificationWorker) loadTemplate(ctx context.Context, templateName stri
 
 // sendEmail sends email via SMTP with STARTTLS
 func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rendered *RenderedNotification) error {
+	// Skip test/dummy email addresses if configured
+	if w.smtpConfig.SkipTestEmails && isTestEmail(toEmail) {
+		log.Printf("⚠️  Skipping test email: %s (SkipTestEmails=true)", toEmail)
+		return nil // Return success to mark notification as sent (prevents retries)
+	}
+
 	// Build MIME email with multipart/alternative (HTML + plain text)
 	headers := make(map[string]string)
 	headers["From"] = w.smtpConfig.From
@@ -309,6 +316,26 @@ func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rend
 	}
 
 	return nil
+}
+
+// isTestEmail detects RFC 2606 reserved test/documentation domains
+func isTestEmail(email string) bool {
+	email = strings.ToLower(strings.TrimSpace(email))
+
+	// RFC 2606 reserved documentation domains (should never receive real email)
+	testDomains := []string{
+		"@example.com",
+		"@example.org",
+		"@example.net",
+	}
+
+	for _, domain := range testDomains {
+		if strings.HasSuffix(email, domain) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // markNotificationSent updates notification status to 'sent'

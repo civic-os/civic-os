@@ -150,6 +150,7 @@ services:
       - SMTP_USERNAME=${SMTP_USERNAME:-}   # Empty for Inbucket (no auth required)
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}   # Empty for Inbucket
       - SMTP_FROM=${SMTP_FROM:-noreply@example.com}  # Match mock data domain
+      - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}  # Set to true in production to prevent sending to @example.com/@example.org/@example.net
     networks:
       - postgrest-network
     depends_on:

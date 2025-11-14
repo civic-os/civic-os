@@ -1765,6 +1765,7 @@ services:
       SMTP_USERNAME: ${SMTP_USERNAME}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ${SMTP_FROM:-noreply@civic-os.org}
+      SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-false}
       SITE_URL: http://localhost:4200
     depends_on:
       - postgres
@@ -1805,7 +1806,54 @@ SMTP_FROM=noreply@civic-os.org                 # Verified sender email
 # Application Configuration
 SITE_URL=https://app.civic-os.org
 DATABASE_URL=postgres://authenticator:password@postgres:5432/civic_os
+
+# Test Email Filtering (recommended for production)
+SKIP_TEST_EMAILS=true  # Prevent sending to @example.com/@example.org/@example.net
 ```
+
+### Test Email Filtering
+
+**Why filtering is needed**: In demo or staging environments with real SMTP providers (AWS SES, SendGrid, etc.), sending emails to test/dummy addresses can damage your sender reputation:
+
+- **AWS SES Sandbox**: Hard failures when sending to unverified `@example.com` addresses
+- **Production SMTP**: Bounces from invalid domains (RFC 2606 reserves `@example.com/@example.org/@example.net` for documentation)
+- **Sender Reputation**: High bounce rates trigger automatic account suspension
+- **Cost**: Wasted credits on undeliverable emails
+
+**How to enable**:
+
+```bash
+# Production/Staging: Filter test emails
+SKIP_TEST_EMAILS=true
+
+# Local Development: Send all emails (to Inbucket)
+SKIP_TEST_EMAILS=false  # or omit entirely (default)
+```
+
+**Filtered domains** (RFC 2606 reserved):
+- `@example.com`
+- `@example.org`
+- `@example.net`
+
+**Behavior when filtered**:
+- Logs warning: `⚠️  Skipping test email: user@example.com (SkipTestEmails=true)`
+- Marks notification as successfully sent (prevents retries)
+- No email transmission to SMTP server
+
+**Log monitoring**:
+
+```bash
+# Check filtered emails in worker logs
+docker logs consolidated_worker | grep "Skipping test email"
+
+# Or check notification records
+SELECT id, user_id, template_name, status, created_at
+FROM metadata.notifications
+WHERE status = 'sent'
+ORDER BY created_at DESC;
+```
+
+**Important**: This filter applies ONLY when `SKIP_TEST_EMAILS=true`. In local development with Inbucket, leave it disabled (`false`) so you can test the full notification flow with mock data.
 
 ### SMTP Email Provider Setup
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -56,6 +57,7 @@ func main() {
 	smtpUsername := getEnv("SMTP_USERNAME", "")
 	smtpPassword := getEnv("SMTP_PASSWORD", "")
 	smtpFrom := getEnv("SMTP_FROM", "noreply@civic-os.org")
+	skipTestEmails := getEnvBool("SKIP_TEST_EMAILS", false)
 
 	// Connection Pool Configuration (CRITICAL for connection reduction)
 	dbMaxConns := getEnvInt("DB_MAX_CONNS", 4)
@@ -70,6 +72,7 @@ func main() {
 	log.Printf("[Init]   SMTP Host: %s:%s", smtpHost, smtpPort)
 	log.Printf("[Init]   SMTP From: %s", smtpFrom)
 	log.Printf("[Init]   SMTP Auth: %v", smtpUsername != "")
+	log.Printf("[Init]   Skip Test Emails: %v", skipTestEmails)
 	log.Printf("[Init]   DB Max Connections: %d", dbMaxConns)
 	log.Printf("[Init]   DB Min Connections: %d", dbMinConns)
 
@@ -140,11 +143,12 @@ func main() {
 
 	// SMTP Configuration
 	smtpConfig := &SMTPConfig{
-		Host:     smtpHost,
-		Port:     smtpPort,
-		Username: smtpUsername,
-		Password: smtpPassword,
-		From:     smtpFrom,
+		Host:           smtpHost,
+		Port:           smtpPort,
+		Username:       smtpUsername,
+		Password:       smtpPassword,
+		From:           smtpFrom,
+		SkipTestEmails: skipTestEmails,
 	}
 	log.Println("[Init] ✓ SMTP configuration loaded")
 
@@ -283,8 +287,37 @@ func getEnvInt(key string, defaultValue int) int {
 	return defaultValue
 }
 
+// getEnvBool retrieves environment variable as boolean with fallback to default value
+func getEnvBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
+		}
+		log.Printf("⚠️  WARNING: Invalid boolean value for %s: %s, using default: %v", key, value, defaultValue)
+	}
+	return defaultValue
+}
+
 // maskPassword masks the password in a database URL for logging
 func maskPassword(dbURL string) string {
-	// Simple masking for logging (e.g., postgres://user:****@host:port/db)
-	return dbURL // Implement proper masking as needed
+	// Parse the URL to safely extract and mask the password
+	parsedURL, err := url.Parse(dbURL)
+	if err != nil {
+		// If parsing fails, return generic masked string to avoid leaking anything
+		return "[invalid-url]"
+	}
+
+	// If there's no user info, return as-is (no password to mask)
+	if parsedURL.User == nil {
+		return dbURL
+	}
+
+	// Get username and check if password exists
+	username := parsedURL.User.Username()
+	if _, hasPassword := parsedURL.User.Password(); hasPassword {
+		// Replace password with asterisks
+		parsedURL.User = url.UserPassword(username, "****")
+	}
+
+	return parsedURL.String()
 }
