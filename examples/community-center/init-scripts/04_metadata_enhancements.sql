@@ -47,69 +47,94 @@ ON CONFLICT (table_name) DO UPDATE SET
 -- PROPERTY METADATA (Resources Table)
 -- =====================================================
 
-INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order)
+INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, show_on_list, show_on_create, show_on_edit)
 VALUES
-  ('resources', 'display_name', 'Facility Name', 'Name of the community center facility', 1),
-  ('resources', 'description', 'Description', 'Details about the facility and amenities', 2),
-  ('resources', 'color', 'Display Color', 'Color used for this resource in calendars and maps', 3),
-  ('resources', 'capacity', 'Capacity', 'Maximum number of people allowed', 4),
-  ('resources', 'hourly_rate', 'Hourly Rate', 'Cost per hour to reserve this facility', 5),
-  ('resources', 'active', 'Active', 'Whether this facility is currently available for booking', 6),
-  ('resources', 'created_at', 'Created', 'When this facility was added to the system', 7),
-  ('resources', 'updated_at', 'Last Updated', 'When this facility information was last modified', 8)
+  ('resources', 'display_name', 'Facility Name', 'Name of the community center facility', 1, TRUE, TRUE, TRUE),
+  ('resources', 'description', 'Description', 'Details about amenities, equipment, and special features', 2, FALSE, TRUE, TRUE),
+  ('resources', 'color', 'Display Color', 'Color used for this resource in calendars and visual displays', 3, TRUE, TRUE, TRUE),
+  ('resources', 'capacity', 'Capacity', 'Maximum number of attendees allowed', 4, TRUE, TRUE, TRUE),
+  ('resources', 'hourly_rate', 'Hourly Rate', 'Rental cost per hour (USD)', 5, TRUE, TRUE, TRUE),
+  ('resources', 'active', 'Active', 'Whether this facility is currently available for booking', 6, FALSE, TRUE, TRUE),
+  ('resources', 'created_at', 'Created', 'When this facility was added to the system', 7, FALSE, FALSE, FALSE),
+  ('resources', 'updated_at', 'Last Updated', 'When this facility information was last modified', 8, FALSE, FALSE, FALSE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order;
+  sort_order = EXCLUDED.sort_order,
+  show_on_list = EXCLUDED.show_on_list,
+  show_on_create = EXCLUDED.show_on_create,
+  show_on_edit = EXCLUDED.show_on_edit;
 
 -- =====================================================
 -- PROPERTY METADATA (Reservation Requests Table)
 -- =====================================================
 
-INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, column_width, show_on_create)
+INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, column_width, show_on_list, show_on_create, show_on_edit)
 VALUES
-  ('reservation_requests', 'display_name', 'Request', 'Auto-generated request summary', 1, 1, FALSE),
-  ('reservation_requests', 'status_id', 'Status', 'Current state: pending, approved, denied, or cancelled', 2, 1, FALSE),
-  ('reservation_requests', 'resource_id', 'Facility', 'Which facility is being requested', 3, 1, TRUE),
-  ('reservation_requests', 'time_slot', 'Requested Time', 'Start and end date/time for the reservation', 4, 2, TRUE),
-  ('reservation_requests', 'purpose', 'Purpose', 'What the facility will be used for', 5, 2, TRUE),
-  ('reservation_requests', 'attendee_count', 'Expected Attendees', 'How many people will attend the event', 6, 1, TRUE),
-  ('reservation_requests', 'notes', 'Special Requests', 'Additional details or setup requirements', 7, 2, TRUE),
-  ('reservation_requests', 'requested_by', 'Requested By', 'Community member who submitted this request', 8, 1, FALSE),
-  ('reservation_requests', 'reviewed_by', 'Reviewed By', 'Staff member who approved or denied this request', 9, 1, FALSE),
-  ('reservation_requests', 'reviewed_at', 'Review Date', 'When this request was approved or denied', 10, 1, FALSE),
-  ('reservation_requests', 'denial_reason', 'Denial Reason', 'Explanation for why this request was denied', 11, 2, FALSE),
-  ('reservation_requests', 'reservation_id', 'Reservation', 'Link to approved reservation (if approved)', 12, 1, FALSE),
-  ('reservation_requests', 'created_at', 'Created At', 'When this request was first created', 13, 1, FALSE),
-  ('reservation_requests', 'updated_at', 'Updated At', 'When this request was last modified', 14, 1, FALSE)
+  ('reservation_requests', 'display_name', 'Request', 'Auto-generated summary of the request', 1, 1, FALSE, FALSE, FALSE),
+  ('reservation_requests', 'status_id', 'Status', 'Current state (pending → approved/denied/cancelled)', 2, 1, TRUE, FALSE, TRUE),
+  ('reservation_requests', 'resource_id', 'Facility', 'Select the facility you want to reserve', 3, 1, TRUE, TRUE, TRUE),
+  ('reservation_requests', 'time_slot', 'Requested Time', 'Select start and end times (displayed in your local timezone)', 4, 2, TRUE, TRUE, TRUE),
+  ('reservation_requests', 'purpose', 'Purpose', 'What the facility will be used for (e.g., Birthday Party, Board Meeting)', 5, 2, TRUE, TRUE, TRUE),
+  ('reservation_requests', 'attendee_count', 'Expected Attendees', 'Number of people expected to attend', 6, 1, TRUE, TRUE, TRUE),
+  ('reservation_requests', 'notes', 'Special Requests', 'Equipment needs, setup preferences, catering, decoration access, etc.', 7, 2, FALSE, TRUE, TRUE),
+  ('reservation_requests', 'requested_by', 'Requested By', 'Community member who submitted this request', 8, 1, FALSE, FALSE, FALSE),
+  ('reservation_requests', 'reviewed_by', 'Reviewed By', 'Staff member who processed this request', 9, 1, FALSE, FALSE, TRUE),
+  ('reservation_requests', 'reviewed_at', 'Review Date', 'When this request was approved or denied', 10, 1, FALSE, FALSE, TRUE),
+  ('reservation_requests', 'denial_reason', 'Denial Reason', 'Required when changing status to Denied', 11, 2, FALSE, FALSE, TRUE),
+  ('reservation_requests', 'reservation_id', 'Reservation', 'Link to approved reservation (auto-created by trigger)', 12, 1, FALSE, FALSE, FALSE),
+  ('reservation_requests', 'created_at', 'Submitted', 'When this request was first submitted', 13, 1, FALSE, FALSE, FALSE),
+  ('reservation_requests', 'updated_at', 'Last Modified', 'When this request was last updated', 14, 1, FALSE, FALSE, FALSE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
   sort_order = EXCLUDED.sort_order,
   column_width = EXCLUDED.column_width,
-  show_on_create = EXCLUDED.show_on_create;
+  show_on_list = EXCLUDED.show_on_list,
+  show_on_create = EXCLUDED.show_on_create,
+  show_on_edit = EXCLUDED.show_on_edit;
 
 -- =====================================================
 -- PROPERTY METADATA (Reservations Table)
 -- =====================================================
 
-INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, column_width, show_on_create)
+INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, column_width, show_on_list, show_on_create, show_on_edit)
 VALUES
-  ('reservations', 'display_name', 'Reservation', 'Auto-generated reservation summary', 1, 1, FALSE),
-  ('reservations', 'resource_id', 'Facility', 'Which facility is reserved', 2, 1, TRUE),
-  ('reservations', 'time_slot', 'Reserved Time', 'Start and end date/time for this booking', 3, 2, TRUE),
-  ('reservations', 'purpose', 'Event Purpose', 'What the facility will be used for', 4, 2, TRUE),
-  ('reservations', 'attendee_count', 'Expected Attendees', 'How many people will attend', 5, 1, TRUE),
-  ('reservations', 'notes', 'Setup Notes', 'Special setup or equipment requirements', 6, 2, TRUE),
-  ('reservations', 'reserved_by', 'Reserved By', 'Community member who booked this facility', 7, 1, FALSE),
-  ('reservations', 'created_at', 'Created At', 'When this reservation was first created', 8, 1, FALSE),
-  ('reservations', 'updated_at', 'Updated At', 'When this reservation was last modified', 9, 1, FALSE)
+  ('reservations', 'display_name', 'Reservation', 'Auto-generated reservation summary', 1, 1, FALSE, FALSE, FALSE),
+  ('reservations', 'resource_id', 'Facility', 'Which facility is reserved', 2, 1, TRUE, TRUE, TRUE),
+  ('reservations', 'time_slot', 'Reserved Time', 'Start and end date/time for this approved booking', 3, 2, TRUE, TRUE, TRUE),
+  ('reservations', 'purpose', 'Event Purpose', 'What the facility will be used for', 4, 2, TRUE, TRUE, TRUE),
+  ('reservations', 'attendee_count', 'Expected Attendees', 'Number of people expected to attend', 5, 1, TRUE, TRUE, TRUE),
+  ('reservations', 'notes', 'Setup Notes', 'Special setup or equipment requirements', 6, 2, FALSE, TRUE, TRUE),
+  ('reservations', 'reserved_by', 'Reserved By', 'Community member who booked this facility', 7, 1, FALSE, FALSE, FALSE),
+  ('reservations', 'created_at', 'Approved On', 'When this reservation was approved', 8, 1, FALSE, FALSE, FALSE),
+  ('reservations', 'updated_at', 'Last Modified', 'When this reservation was last updated', 9, 1, FALSE, FALSE, FALSE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
   sort_order = EXCLUDED.sort_order,
   column_width = EXCLUDED.column_width,
-  show_on_create = EXCLUDED.show_on_create;
+  show_on_list = EXCLUDED.show_on_list,
+  show_on_create = EXCLUDED.show_on_create,
+  show_on_edit = EXCLUDED.show_on_edit;
+
+-- =====================================================
+-- PROPERTY METADATA (Request Statuses Table)
+-- =====================================================
+
+INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, show_on_list, show_on_create, show_on_edit)
+VALUES
+  ('request_statuses', 'display_name', 'Status Name', 'Name of the status (Pending, Approved, Denied, Cancelled)', 1, TRUE, TRUE, TRUE),
+  ('request_statuses', 'emoji', 'Emoji', 'Visual icon for this status', 2, TRUE, TRUE, TRUE),
+  ('request_statuses', 'color', 'Color', 'Badge color for this status', 3, TRUE, TRUE, TRUE),
+  ('request_statuses', 'description', 'Description', 'Explanation of what this status means', 4, FALSE, TRUE, TRUE)
+ON CONFLICT (table_name, column_name) DO UPDATE SET
+  display_name = EXCLUDED.display_name,
+  description = EXCLUDED.description,
+  sort_order = EXCLUDED.sort_order,
+  show_on_list = EXCLUDED.show_on_list,
+  show_on_create = EXCLUDED.show_on_create,
+  show_on_edit = EXCLUDED.show_on_edit;
 
 -- =====================================================
 -- CUSTOM DASHBOARD

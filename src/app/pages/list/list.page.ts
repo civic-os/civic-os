@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, shareReplay, switchMap, from, forkJoin, BehaviorSubject } from 'rxjs';
+import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, switchMap, from, forkJoin, BehaviorSubject, concat } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
@@ -65,6 +65,7 @@ export class ListPage implements OnInit, OnDestroy {
   private schema = inject(SchemaService);
   private data = inject(DataService);
   private analytics = inject(AnalyticsService);
+  private destroyRef = inject(DestroyRef);
 
   // Pagination constants
   private readonly PAGE_SIZE_STORAGE_KEY = 'civic_os_list_page_size';
@@ -78,7 +79,7 @@ export class ListPage implements OnInit, OnDestroy {
   private rowHover$ = new Subject<number | null>();
 
   public entity$: Observable<SchemaEntityTable | undefined> = this.route.params.pipe(
-    mergeMap(p => {
+    switchMap(p => {
       if(p['entityKey']) {
         return this.schema.getEntity(p['entityKey']);
       } else {
@@ -87,7 +88,7 @@ export class ListPage implements OnInit, OnDestroy {
     })
   );
 
-  public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
+  public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(switchMap(e => {
     if(e) {
       let props = this.schema.getPropsForList(e);
       return props;
@@ -101,7 +102,7 @@ export class ListPage implements OnInit, OnDestroy {
     map(props => props.filter(p => p.show_on_list !== false))
   );
 
-  public filterProperties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
+  public filterProperties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(switchMap(e => {
     if(e) {
       return this.schema.getPropsForFilter(e);
     } else {
@@ -190,14 +191,14 @@ export class ListPage implements OnInit, OnDestroy {
         return of(p);
       }
     }),
-    mergeMap(p => {
+    switchMap(p => {
       if (!p['entityKey']) return of([]);
 
       // Now derive everything from the current route state
       return combineLatest([
         this.schema.getEntity(p['entityKey']),
         this.schema.getEntity(p['entityKey']).pipe(
-          mergeMap(e => e ? this.schema.getPropsForList(e) : of([]))
+          switchMap(e => e ? this.schema.getPropsForList(e) : of([]))
         ),
         this.searchQuery$,
         this.sortState$,
@@ -269,23 +270,27 @@ export class ListPage implements OnInit, OnDestroy {
               ? search
               : undefined;
 
-            return this.data.getDataPaginated({
-              key: p['entityKey'],
-              fields: columns,
-              searchQuery: validSearch || undefined,
-              orderField: orderField,
-              orderDirection: sortState.direction || undefined,
-              filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
-              pagination: effectivePagination
-            });
+            // CRITICAL: Emit empty dataset first (synchronous), then fetch real data (async)
+            // This prevents stale data flash when entity changes by immediately resetting toSignal()
+            return concat(
+              of({ data: [], totalCount: 0 }),
+              this.data.getDataPaginated({
+                key: p['entityKey'],
+                fields: columns,
+                searchQuery: validSearch || undefined,
+                orderField: orderField,
+                orderDirection: sortState.direction || undefined,
+                filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
+                pagination: effectivePagination
+              })
+            );
           } else {
             return of({ data: [], totalCount: 0 });
           }
         }),
         tap(() => this.isLoading.set(false))
       );
-    }),
-    shareReplay(1)
+    })
   );
 
   // Convert data$ observable to signal for use in computed
@@ -514,15 +519,21 @@ export class ListPage implements OnInit, OnDestroy {
   ngOnInit() {
     // Sync searchControl with URL query params (bidirectional)
     // URL → searchControl
-    this.searchQuery$.subscribe(query => {
-      if (this.searchControl.value !== query) {
-        this.searchControl.setValue(query, { emitEvent: false });
-      }
-    });
+    this.searchQuery$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(query => {
+        if (this.searchControl.value !== query) {
+          this.searchControl.setValue(query, { emitEvent: false });
+        }
+      });
 
     // searchControl → URL (debounced, reset to page 1)
     this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe(value => {
         // Track search queries (length only, not content for privacy)
         if (value && value.trim().length > 0 && this.entityKey) {
@@ -542,7 +553,8 @@ export class ListPage implements OnInit, OnDestroy {
     this.rowHover$
       .pipe(
         debounceTime(150), // Wait 150ms before updating map
-        distinctUntilChanged() // Skip if same value
+        distinctUntilChanged(), // Skip if same value
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(recordId => {
         this.highlightedRecordId.set(recordId);

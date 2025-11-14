@@ -96,6 +96,25 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
   // State
   isDark = this.themeService.isDark;
 
+  constructor() {
+    // Update FullCalendar when events change (bridge between reactive signals and imperative API)
+    effect(() => {
+      const events = this.calendarEventsComputed();
+
+      // Use untracked() to access ViewChild without creating signal dependency
+      const calendar = untracked(() => this.calendarComponent?.getApi());
+
+      if (calendar) {
+        // Remove all event sources (not just events) to prevent accumulation on navigation
+        // Each addEventSource() call creates a NEW source, so we must remove old sources first
+        calendar.getEventSources().forEach(source => source.remove());
+
+        // Add fresh event source with new data
+        calendar.addEventSource(events);
+      }
+    });
+  }
+
   // Computed calendar events based on mode
   private calendarEventsComputed = computed(() => {
     const events = this.events();

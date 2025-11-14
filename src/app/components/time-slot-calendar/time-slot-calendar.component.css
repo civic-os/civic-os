@@ -109,6 +109,11 @@
   margin-bottom: 0.75rem !important; /* Reduced from default 1.5rem */
 }
 
+/* Add margin to toolbar chunks to prevent button corner clipping with DaisyUI themes */
+:host ::ng-deep .fc-toolbar-chunk {
+  margin: 0 0.25rem;
+}
+
 :host ::ng-deep .fc-scrollgrid {
   margin-top: 0 !important; /* Remove extra top margin */
 }

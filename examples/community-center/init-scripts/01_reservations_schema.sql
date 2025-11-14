@@ -315,15 +315,15 @@ GRANT EXECUTE ON FUNCTION set_reviewed_at_timestamp TO authenticated;
 -- SAMPLE DATA
 -- ============================================================================
 
-INSERT INTO resources (display_name, description, color, capacity, hourly_rate, active)
-VALUES (
-  'Club House',
-  'Main community gathering space with kitchen, tables, and seating for 75. Perfect for parties, meetings, and events.',
-  '#3B82F6',
-  75,
-  25.00,
-  TRUE
-);
+-- INSERT INTO resources (display_name, description, color, capacity, hourly_rate, active)
+-- VALUES (
+--   'Club House',
+--   'Main community gathering space with kitchen, tables, and seating for 75. Perfect for parties, meetings, and events.',
+--   '#3B82F6',
+--   75,
+--   25.00,
+--   TRUE
+-- );
 
 DO $$
 DECLARE

@@ -35,6 +35,7 @@ Then open your browser to `http://localhost:4200` and navigate to:
 - **Metadata Enhancements**: User-friendly display names and helpful field descriptions
 - **Approval Workflow**: Request → Review → Approve/Deny → Auto-create Reservation
 - **Database Triggers**: Automatic synchronization between requests and reservations
+- **Notification System**: 5 email templates for workflow events (request created, submitted, approved, denied, cancelled)
 - **Row-Level Security**: Users can only see their own requests
 - **Timezone Handling**: Stores UTC, displays in user's local timezone
 
@@ -54,8 +55,11 @@ Then open your browser to `http://localhost:4200` and navigate to:
 - **`00_create_authenticator.sh`** - Creates PostgreSQL authenticator role
 - **`01_reservations_schema.sql`** - Tables, triggers, PostgreSQL grants, sample data
 - **`02_community_center_permissions.sql`** - RBAC permissions (maps standard roles to tables)
+- **`03_mock_data.sql`** - Realistic sample data (4 facilities, 12 reservation requests)
 - **`03_text_search.sql`** - Full-text search configuration
-- **`04_metadata_enhancements.sql`** - Display names, descriptions, and custom dashboard
+- **`04_metadata_enhancements.sql`** - Display names, descriptions, field visibility, custom dashboard
+- **`06_add_calendar_colors.sql`** - Status-based color mapping for calendar events
+- **`08_notification_templates.sql`** - Email templates and trigger functions for workflow notifications
 
 ## Schema Overview
 
@@ -259,7 +263,62 @@ npm run generate community-center
 ./examples/generate.sh community-center
 ```
 
-**Note**: Currently, the schema includes sufficient sample data (1 resource, 4 requests). Mock data generation is optional and can be configured via `mock-data-config.json`.
+**Note**: The schema includes realistic sample data (4 facilities, 12 reservation requests spread across next 30 days with mix of statuses). Mock data generation via the generator tool is optional and can be configured via `mock-data-config.json`.
+
+## Notification System
+
+This example includes 5 email templates with database triggers that automatically send notifications:
+
+1. **`reservation_request_created`** - Confirmation to requester when they submit
+2. **`reservation_request_submitted`** - Alert to staff (editor/admin roles) about new requests
+3. **`reservation_request_approved`** - Notification to requester when approved
+4. **`reservation_request_denied`** - Notification to requester with denial reason
+5. **`reservation_request_cancelled`** - Alert to staff when requester cancels
+
+### Testing Notifications (AWS SES Sandbox Mode)
+
+**Important**: By default, AWS SES accounts start in "sandbox mode" which restricts email sending.
+
+**Sandbox Mode Restrictions:**
+- Can only send to verified email addresses
+- Limited to 200 emails per 24-hour period
+- 1 email per second sending rate
+
+**To test notifications:**
+
+1. **Verify recipient email addresses** in AWS SES Console:
+   ```
+   SES Console → Verified Identities → Create Identity → Email Address
+   ```
+
+2. **Configure environment variables** in `.env`:
+   ```bash
+   AWS_SES_FROM_EMAIL=noreply@yourdomain.com  # Must be verified
+   AWS_ACCESS_KEY_ID=your_key
+   AWS_SECRET_ACCESS_KEY=your_secret
+   AWS_REGION=us-east-1
+   SITE_URL=http://localhost:4200
+   ```
+
+3. **Request production access** (optional, for sending to any email):
+   ```
+   SES Console → Account Dashboard → Request production access
+   ```
+
+**Monitoring notifications:**
+```sql
+-- Check recent notifications
+SELECT user_id, template_name, status, error_message, sent_at
+FROM metadata.notifications
+WHERE created_at > NOW() - INTERVAL '1 hour'
+ORDER BY created_at DESC;
+
+-- Check River job queue
+SELECT COUNT(*) FROM metadata.river_job
+WHERE kind = 'send_notification' AND state = 'available';
+```
+
+For complete setup guide, see `docs/development/NOTIFICATIONS.md`.
 
 ## Known Limitations
 
@@ -267,7 +326,6 @@ npm run generate community-center
 2. **No Recurring Events**: Each reservation is one-time
 3. **Capacity Not Enforced**: `attendee_count` can exceed resource capacity
 4. **Users Cannot Edit Requests**: Once submitted, must contact editor
-5. **No Notifications**: Approval/denial doesn't trigger emails
 
 ## Future Enhancements
 
@@ -275,7 +333,7 @@ See `docs/development/CALENDAR_INTEGRATION.md` for roadmap:
 - Phase 5: Frontend overlap validation with async validators
 - Payment processing integration
 - Recurring reservations (RRULE support)
-- Email/SMS notifications
+- SMS notifications (Phase 2 of notification system)
 - Conflict resolution UI
 
 ## Troubleshooting
