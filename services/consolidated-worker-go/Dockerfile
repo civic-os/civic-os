@@ -24,9 +24,15 @@ RUN go mod download
 # Copy source code
 COPY . .
 
+# Accept version as build argument
+ARG VERSION=dev
+
 # Build the application with CGO enabled (required for bimg/libvips)
 # -ldflags="-w -s" strips debug info for smaller binary
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s" -o consolidated-worker .
+# -X 'main.version' injects version at compile time
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -ldflags="-w -s -X 'main.version=${VERSION}'" \
+    -o consolidated-worker .
 
 # =============================================================================
 # Runtime Stage

@@ -17,10 +17,15 @@ import (
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 )
 
+var (
+	// version is set at compile time via -ldflags -X
+	version = "dev"
+)
+
 func main() {
 	log.Println("========================================")
 	log.Println("  Civic OS - Consolidated Worker")
-	log.Println("  Version: 0.11.0")
+	log.Printf("  Version: %s", version)
 	log.Println("========================================")
 	log.Println("  Combines:")
 	log.Println("    - S3 Signer")
@@ -83,6 +88,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("[Init] Failed to parse database URL: %v", err)
 	}
+
+	// Set application name for PostgreSQL connection identification
+	poolConfig.ConnConfig.RuntimeParams["application_name"] = "CivicOS-Worker " + version
 
 	// CRITICAL: Explicit connection pool limits to reduce connections
 	// Default pgxpool.New() would use 4 * runtime.NumCPU() = ~16 connections
