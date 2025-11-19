@@ -1,0 +1,56 @@
+<!--
+  Copyright (C) 2023-2025 Civic OS, L3C
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<div class="map-widget-container">
+  @if (isLoading()) {
+    <!-- Loading state -->
+    <div class="flex items-center justify-center h-[400px]">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (error()) {
+    <!-- Error state -->
+    <div class="flex items-center justify-center h-[400px] bg-base-200 rounded-lg">
+      <div class="text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-error opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p class="mt-4 text-error">{{ error() }}</p>
+      </div>
+    </div>
+  } @else if (markers().length > 0) {
+    <!-- Map with markers -->
+    <app-geo-point-map
+      [markers]="markers()"
+      [width]="'100%'"
+      [height]="'400px'"
+      [enableClustering]="config().enableClustering ?? false"
+      [clusterRadius]="config().clusterRadius ?? 50"
+      (markerClick)="onMarkerClick($event)"
+    />
+  } @else {
+    <!-- Empty state -->
+    <div class="flex items-center justify-center h-[400px] bg-base-200 rounded-lg">
+      <div class="text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        <p class="mt-4 text-base-content opacity-60">No locations to display</p>
+        <p class="text-sm text-base-content opacity-40 mt-2">Records without geography data will not appear on the map</p>
+      </div>
+    </div>
+  }
+</div>

@@ -59,7 +59,12 @@ export class DataService {
     if(query.filters && query.filters.length > 0) {
       query.filters.forEach(filter => {
         if (filter.value !== null && filter.value !== undefined && filter.value !== '') {
-          args.push(`${filter.column}=${filter.operator}.${filter.value}`);
+          // Handle 'in' operator with array values - PostgREST requires in.(val1,val2) format
+          if (filter.operator === 'in' && Array.isArray(filter.value)) {
+            args.push(`${filter.column}=in.(${filter.value.join(',')})`);
+          } else {
+            args.push(`${filter.column}=${filter.operator}.${filter.value}`);
+          }
         }
       });
     }
@@ -96,7 +101,12 @@ export class DataService {
     if(query.filters && query.filters.length > 0) {
       query.filters.forEach(filter => {
         if (filter.value !== null && filter.value !== undefined && filter.value !== '') {
-          args.push(`${filter.column}=${filter.operator}.${filter.value}`);
+          // Handle 'in' operator with array values - PostgREST requires in.(val1,val2) format
+          if (filter.operator === 'in' && Array.isArray(filter.value)) {
+            args.push(`${filter.column}=in.(${filter.value.join(',')})`);
+          } else {
+            args.push(`${filter.column}=${filter.operator}.${filter.value}`);
+          }
         }
       });
     }

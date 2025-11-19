@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard, DashboardWidget } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
@@ -43,7 +44,7 @@ import { WidgetContainerComponent } from '../../components/widget-container/widg
   styleUrl: './dashboard.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage {
   private dashboardService = inject(DashboardService);
   private route = inject(ActivatedRoute);
 
@@ -53,17 +54,22 @@ export class DashboardPage implements OnInit {
   loading = signal(true);
   error = signal<string | undefined>(undefined);
 
-  ngOnInit(): void {
-    // Get dashboard ID from route params
-    const dashboardId = this.route.snapshot.paramMap.get('id');
+  constructor() {
+    // Subscribe to route parameter changes to reload dashboard
+    // This ensures the component reacts when navigating between different dashboards
+    this.route.paramMap.pipe(
+      takeUntilDestroyed()  // Auto-cleanup on component destruction
+    ).subscribe(params => {
+      const dashboardId = params.get('id');
 
-    if (dashboardId) {
-      // Load specific dashboard by ID
-      this.loadDashboard(parseInt(dashboardId, 10));
-    } else {
-      // Load default dashboard (for / route)
-      this.loadDefaultDashboard();
-    }
+      if (dashboardId) {
+        // Load specific dashboard by ID
+        this.loadDashboard(parseInt(dashboardId, 10));
+      } else {
+        // Load default dashboard (for / route)
+        this.loadDefaultDashboard();
+      }
+    });
   }
 
   /**
@@ -122,9 +128,9 @@ export class DashboardPage implements OnInit {
    * Retry loading dashboard
    */
   retry(): void {
-    const dashboardId = this.route.snapshot.paramMap.get('id');
-    if (dashboardId) {
-      this.loadDashboard(parseInt(dashboardId, 10));
+    const currentDashboard = this.dashboard();
+    if (currentDashboard) {
+      this.loadDashboard(currentDashboard.id);
     } else {
       this.loadDefaultDashboard();
     }

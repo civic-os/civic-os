@@ -1,0 +1,79 @@
+<!--
+  Copyright (C) 2023-2025 Civic OS, L3C
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<div class="filtered-list-widget-container">
+  @if (isLoading()) {
+    <!-- Loading state -->
+    <div class="flex items-center justify-center py-8">
+      <span class="loading loading-spinner loading-md"></span>
+    </div>
+  } @else if (error()) {
+    <!-- Error state -->
+    <div class="alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ error() }}</span>
+    </div>
+  } @else if (records().length > 0) {
+    <!-- Table with records -->
+    <div class="overflow-x-auto">
+      <table class="table table-sm table-zebra">
+        <thead>
+          <tr>
+            @for (column of config().showColumns; track column) {
+              <th>{{ getColumnLabel(column) }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records(); track record.id) {
+            <tr class="hover:bg-base-200 cursor-pointer" (click)="onRowClick(record.id)">
+              @for (column of config().showColumns; track column) {
+                <td>
+                  @if (getProperty(column); as property) {
+                    <app-display-property
+                      [property]="property"
+                      [datum]="record[column]"
+                      [showLabel]="false"
+                    />
+                  } @else {
+                    {{ record[column] }}
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Result count -->
+    <div class="text-sm text-base-content opacity-60 mt-2 text-center">
+      Showing {{ records().length }} result{{ records().length === 1 ? '' : 's' }}
+    </div>
+  } @else {
+    <!-- Empty state -->
+    <div class="flex flex-col items-center justify-center py-8">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+      </svg>
+      <p class="mt-4 text-base-content opacity-60">No results found</p>
+      <p class="text-sm text-base-content opacity-40 mt-1">Try adjusting the filters</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,28 @@
+{
+  "recordsPerEntity": {
+    "participants": 50,
+    "teams": 6,
+    "team_rosters": 30,
+    "sponsors": 8
+  },
+  "geographyBounds": {
+    "minLat": 42.9625,
+    "maxLat": 43.0625,
+    "minLng": -83.7375,
+    "maxLng": -83.6375
+  },
+  "dateRanges": {
+    "participants.enrolled_date": {
+      "minDate": "2018-01-01",
+      "maxDate": "2025-11-15"
+    },
+    "sponsors.partnership_start": {
+      "minDate": "2018-01-01",
+      "maxDate": "2025-11-15"
+    }
+  },
+  "excludeTables": ["dashboards", "dashboard_widgets", "widget_types"],
+  "outputFormat": "insert",
+  "generateUsers": true,
+  "userCount": 10
+}

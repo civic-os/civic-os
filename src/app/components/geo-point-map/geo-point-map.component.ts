@@ -17,6 +17,7 @@
 
 import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject } from '@angular/core';
 import * as L from 'leaflet';
+import 'leaflet.markercluster';
 import { ThemeService } from '../../services/theme.service';
 import { getMapConfig } from '../../config/runtime';
 
@@ -42,6 +43,10 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   markers = input<MapMarker[]>([]);
   highlightedMarkerId = input<number | null>(null);
 
+  // Clustering inputs (multi-marker mode)
+  enableClustering = input<boolean>(false);
+  clusterRadius = input<number>(50);
+
   // Common inputs
   width = input<string>('100%');
   height = input<string>('300px');
@@ -58,6 +63,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   private map?: L.Map;
   private marker?: L.Marker; // For single-marker mode
   private markerMap = new Map<number, L.Marker>(); // For multi-marker mode
+  private markerClusterGroup?: L.MarkerClusterGroup; // For clustered multi-marker mode
   private allMarkersBounds?: L.LatLngBounds; // Store bounds for reset after hover
   private currentLat?: number;
   private currentLng?: number;
@@ -232,6 +238,12 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
         this.setLocation(adjustedLatLng.lat, adjustedLatLng.lng);
       });
     }
+
+    // Initialize multi-marker mode if markers are present
+    const initialMarkers = this.markers();
+    if (initialMarkers && initialMarkers.length > 0) {
+      this.updateMultiMarkers(initialMarkers);
+    }
   }
 
   /**
@@ -343,8 +355,28 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     this.markerMap.forEach(marker => marker.remove());
     this.markerMap.clear();
 
+    // Clear existing cluster group if present
+    if (this.markerClusterGroup) {
+      this.map.removeLayer(this.markerClusterGroup);
+      this.markerClusterGroup = undefined;
+    }
+
     if (markersData.length === 0) {
       return;
+    }
+
+    // Create cluster group if clustering is enabled
+    const clusteringEnabled = this.enableClustering();
+    if (clusteringEnabled) {
+      this.markerClusterGroup = L.markerClusterGroup({
+        maxClusterRadius: this.clusterRadius(),
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true, // Auto-zoom when cluster clicked
+        spiderfyOnMaxZoom: true, // Spread markers at max zoom
+        removeOutsideVisibleBounds: true, // Performance optimization
+        animate: true,
+        animateAddingMarkers: false // Disable for better performance with many markers
+      });
     }
 
     // Create new markers and collect coordinates for bounds
@@ -364,7 +396,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       const marker = L.marker(latLng, {
         icon: this.getLeafletIcon(),
         title: markerData.name
-      }).addTo(this.map!);
+      });
 
       // Add click handler
       marker.on('click', () => {
@@ -377,8 +409,20 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
         offset: [0, -20]
       });
 
+      // Add marker to cluster group OR directly to map
+      if (clusteringEnabled && this.markerClusterGroup) {
+        this.markerClusterGroup.addLayer(marker);
+      } else {
+        marker.addTo(this.map!);
+      }
+
       this.markerMap.set(markerData.id, marker);
     });
+
+    // Add cluster group to map if clustering enabled
+    if (clusteringEnabled && this.markerClusterGroup) {
+      this.map.addLayer(this.markerClusterGroup);
+    }
 
     // Auto-fit bounds to show all markers
     // Use setTimeout to ensure map is fully rendered and sized

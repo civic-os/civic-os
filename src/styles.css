@@ -1,4 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+/* Leaflet marker clustering styles - must be first */
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -153,17 +153,22 @@ The UI displays in display mode by default (read-only badges) with an "Edit" but
 
 See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for complete specification.
 
-## Custom Dashboards (Preview)
+## Custom Dashboards
 
-**Status**: Phase 1 - View-only implementation complete, management UI in progress
+**Status**: Phase 2 complete - Dynamic widgets (filtered lists, maps with clustering)
 
-The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards. Currently supports markdown widgets (static content); dynamic widgets (filtered lists, stat cards) planned for Phase 2.
+The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards.
 
-**Current**: ✅ View dashboards ✅ Markdown widgets ❌ Management UI ❌ Auto-refresh ❌ Dynamic data widgets
+**Current**: ✅ View dashboards ✅ Markdown widgets ✅ Filtered list widgets ✅ Map widgets with clustering ❌ Management UI ❌ Auto-refresh
 
-**Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern—markdown implemented, filtered_list/stat_card/query_result planned.
+**Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern.
 
-See `docs/INTEGRATOR_GUIDE.md` for complete setup guide with SQL examples, database schema, widget config format, and custom widget development. See `docs/notes/DASHBOARD_DESIGN.md` for architecture and Phase 2-5 roadmap.
+**Widget Types**:
+- `markdown` - Static content with optional HTML
+- `filtered_list` - Entity records in table format with filters, sorting, pagination
+- `map` - Geographic data on interactive map with optional clustering
+
+See `docs/development/DASHBOARD_WIDGETS.md` for complete widget configuration reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
 
 ## Development Commands
 

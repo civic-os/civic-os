@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Application version.
- *
- * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
- * This file is generated from package.json by scripts/update-version.js
- * Run 'npm run update-version' to regenerate after version changes.
- */
-export const APP_VERSION = '0.11.4';
+.filtered-list-widget-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure table is responsive within widget container */
+.filtered-list-widget-container .table {
+  font-size: 0.875rem; /* Slightly smaller for compact display */
+}

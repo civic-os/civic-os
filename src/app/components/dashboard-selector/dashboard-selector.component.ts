@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
 
@@ -40,7 +41,7 @@ import { DashboardService } from '../../services/dashboard.service';
   styleUrl: './dashboard-selector.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardSelectorComponent implements OnInit {
+export class DashboardSelectorComponent {
   private dashboardService = inject(DashboardService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -50,12 +51,21 @@ export class DashboardSelectorComponent implements OnInit {
   currentDashboardId = signal<number | undefined>(undefined);
   loading = signal(true);
 
-  ngOnInit(): void {
-    // Load all dashboards
+  constructor() {
+    // Load all available dashboards
     this.loadDashboards();
 
-    // Get current dashboard ID from route
-    this.updateCurrentDashboard();
+    // Subscribe to route parameter changes to update current dashboard highlight
+    this.route.paramMap.pipe(
+      takeUntilDestroyed()
+    ).subscribe(params => {
+      const dashboardId = params.get('id');
+      if (dashboardId) {
+        this.currentDashboardId.set(parseInt(dashboardId, 10));
+      } else {
+        this.currentDashboardId.set(undefined);
+      }
+    });
   }
 
   /**
@@ -74,18 +84,6 @@ export class DashboardSelectorComponent implements OnInit {
         this.loading.set(false);
       }
     });
-  }
-
-  /**
-   * Update current dashboard ID from route
-   */
-  private updateCurrentDashboard(): void {
-    const dashboardId = this.route.snapshot.paramMap.get('id');
-    if (dashboardId) {
-      this.currentDashboardId.set(parseInt(dashboardId, 10));
-    } else {
-      this.currentDashboardId.set(undefined);
-    }
   }
 
   /**

@@ -43,12 +43,16 @@
       }
     }
     <app-dialog #successDialog>
-      <button class="btn mx-2" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
-      <button class="btn mx-2" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
+      <div class="flex flex-col gap-2 w-full">
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
+      </div>
     </app-dialog>
     <app-dialog #errorDialog>
-      <button class="btn mx-2">Try again</button>
-      <button class="btn mx-2" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+      <div class="flex flex-col gap-2 w-full">
+        <button class="btn whitespace-normal h-auto min-h-12">Try again</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+      </div>
     </app-dialog>
   }
 </div>

@@ -33,20 +33,52 @@
               "src/styles.css",
               "node_modules/leaflet/dist/leaflet.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "dagre",
+              "graphlib",
+              "leaflet",
+              "leaflet.markercluster",
+              "lodash/cloneDeep",
+              "lodash/constant",
+              "lodash/defaults",
+              "lodash/each",
+              "lodash/filter",
+              "lodash/find",
+              "lodash/flatten",
+              "lodash/forEach",
+              "lodash/forIn",
+              "lodash/has",
+              "lodash/isUndefined",
+              "lodash/last",
+              "lodash/map",
+              "lodash/mapValues",
+              "lodash/max",
+              "lodash/merge",
+              "lodash/min",
+              "lodash/minBy",
+              "lodash/now",
+              "lodash/pick",
+              "lodash/range",
+              "lodash/reduce",
+              "lodash/sortBy",
+              "lodash/uniqueId",
+              "lodash/values",
+              "lodash/zipObject"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1.5mb",
-                  "maximumError": "2mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "3kb",
+                  "maximumError": "5kb"
                 }
               ],
               "outputHashing": "all"

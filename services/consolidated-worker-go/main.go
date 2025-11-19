@@ -314,10 +314,34 @@ func maskPassword(dbURL string) string {
 
 	// Get username and check if password exists
 	username := parsedURL.User.Username()
-	if _, hasPassword := parsedURL.User.Password(); hasPassword {
-		// Replace password with asterisks
-		parsedURL.User = url.UserPassword(username, "****")
+	if _, hasPassword := parsedURL.User.Password(); !hasPassword {
+		return dbURL
 	}
 
-	return parsedURL.String()
+	// Manually reconstruct URL with masked password to avoid URL encoding asterisks
+	var result string
+	if parsedURL.Scheme != "" {
+		result = parsedURL.Scheme + "://"
+	}
+
+	// Add username:**** (not URL-encoded)
+	result += username + ":****@"
+
+	// Add host
+	result += parsedURL.Host
+
+	// Add path
+	result += parsedURL.Path
+
+	// Add query parameters
+	if parsedURL.RawQuery != "" {
+		result += "?" + parsedURL.RawQuery
+	}
+
+	// Add fragment
+	if parsedURL.Fragment != "" {
+		result += "#" + parsedURL.Fragment
+	}
+
+	return result
 }

@@ -74,26 +74,68 @@ export interface MarkdownWidgetConfig {
 }
 
 /**
+ * Base configuration for widgets that display filtered entity data.
+ * Used by FilteredListWidget, MapWidget, and future data-driven widgets (charts, stats, etc.).
+ *
+ * This establishes the common pattern: fetch entity records → apply filters → display subset of columns.
+ */
+export interface FilteredEntityWidgetBase {
+  filters?: FilterCondition[];  // Optional pre-filters applied to entity query
+  showColumns?: string[];       // Properties to display (default: ['display_name'])
+}
+
+/**
  * Configuration for filtered list widget (Phase 2).
+ * Extends the base filtered entity pattern with table-specific display options.
  * Stored in dashboard_widgets.config as JSONB.
  */
-export interface FilteredListWidgetConfig {
-  filters: FilterCondition[];
-  orderBy: string;
-  orderDirection: 'asc' | 'desc';
-  limit: number;
-  showColumns: string[];
+export interface FilteredListWidgetConfig extends FilteredEntityWidgetBase {
+  orderBy: string;              // Column to sort by
+  orderDirection: 'asc' | 'desc'; // Sort direction
+  limit: number;                // Maximum records to display
+}
+
+/**
+ * Configuration for map widget (Phase 2).
+ * Extends the base filtered entity pattern with geography-specific options.
+ * Stored in dashboard_widgets.config as JSONB.
+ *
+ * Displays filtered entity records with geography columns on an interactive map.
+ */
+export interface MapWidgetConfig extends FilteredEntityWidgetBase {
+  // Data source (required)
+  entityKey: string;           // Which entity to show (e.g., 'participants', 'sponsors')
+  mapPropertyName: string;     // Which geography column (e.g., 'home_location', 'location')
+
+  // Result limiting (optional)
+  maxMarkers?: number;         // Default 500 (performance safety limit)
+
+  // Display (optional - inherited showColumns from base)
+  popupTemplate?: string;      // Custom popup HTML template (Phase 3+)
+
+  // Map behavior (optional)
+  defaultZoom?: number;        // Override auto-fit zoom level
+  defaultCenter?: [number, number]; // [lng, lat] - override auto-fit center
+
+  // Clustering (optional)
+  enableClustering?: boolean;  // Group nearby markers (default: false)
+  clusterRadius?: number;      // Pixels for clustering (default: 50)
+
+  // Future enhancements (Phase 4+)
+  colorProperty?: string;      // hex_color column for marker colors
 }
 
 /**
  * Configuration for stat card widget (Phase 5).
+ * Extends the base filtered entity pattern with aggregation-specific options.
  * Stored in dashboard_widgets.config as JSONB.
+ *
+ * Note: Requires backend aggregation RPC functions to be implemented.
  */
-export interface StatCardWidgetConfig {
+export interface StatCardWidgetConfig extends FilteredEntityWidgetBase {
   metric: 'count' | 'sum' | 'avg' | 'min' | 'max';
   entityKey: string;
   column?: string;  // Column to aggregate (required for sum/avg/min/max)
-  filters: FilterCondition[];
   suffix?: string;  // e.g., " open issues"
   prefix?: string;  // e.g., "$"
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';

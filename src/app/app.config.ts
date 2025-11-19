@@ -23,6 +23,8 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak } from 'keycloak-angular';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
 import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/markdown-widget.component';
+import { FilteredListWidgetComponent } from './components/widgets/filtered-list-widget/filtered-list-widget.component';
+import { MapWidgetComponent } from './components/widgets/map-widget/map-widget.component';
 import { provideMarkdown } from 'ngx-markdown';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
 import { importProvidersFrom } from '@angular/core';
@@ -77,10 +79,12 @@ export const appConfig: ApplicationConfig = {
 
     provideMarkdown(),
 
-    // Register widget components at startup
+    // Register widget components at startup (Phase 1 + Phase 2)
     provideAppInitializer(() => {
       const registry = inject(WidgetComponentRegistry);
-      registry.register('markdown', MarkdownWidgetComponent);
+      registry.register('markdown', MarkdownWidgetComponent);           // Phase 1
+      registry.register('filtered_list', FilteredListWidgetComponent);  // Phase 2
+      registry.register('map', MapWidgetComponent);                     // Phase 2
     }),
 
     // Initialize Matomo router tracking (if analytics enabled)

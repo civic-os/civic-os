@@ -1,8 +1,8 @@
 # Custom Dashboards Feature - Design Document (v3 - Revised)
 
-**Status:** 🟢 Phase 1 Complete - View-only implementation with markdown widgets
+**Status:** 🟢 Phase 2 Complete - Filtered lists, map widgets, and clustering
 **Created:** 2025-01-15
-**Updated:** 2025-01-04 (Phase 1 implementation)
+**Updated:** 2025-01-15 (Phase 2 implementation)
 **Author:** Design Discussion with Claude
 
 **Version History:**
@@ -10,6 +10,7 @@
 - v2: Added hybrid storage approach and auto-refresh
 - v3: Critical analysis, revised phasing, identified gaps and killer features
 - v4: Phase 1 implemented (October 2025) - Dashboard viewing and markdown widgets
+- v5: Phase 2 implemented (January 2025) - Filtered lists, map widgets with clustering, StoryMap example
 
 **Related Documentation:**
 - `docs/INTEGRATOR_GUIDE.md` - Complete setup guide with SQL examples, database schema, and widget development
@@ -351,9 +352,11 @@ export interface MapWidgetConfig {
   defaultZoom?: number;        // Override auto-fit zoom level
   defaultCenter?: [number, number]; // [lng, lat] - override auto-fit center
 
+  // Point clustering (✅ Implemented Phase 2)
+  enableClustering?: boolean;  // Group nearby markers (default: false)
+  clusterRadius?: number;      // Pixels for clustering (default: 50)
+
   // Future enhancements (Phase 4+)
-  enableClustering?: boolean;  // Group nearby markers
-  clusterRadius?: number;      // Pixels for clustering
   colorProperty?: string;      // hex_color column for marker colors
 }
 ```
@@ -1508,62 +1511,93 @@ effectiveFilters = computed(() => [
 
 **Deliverable:** Static welcome dashboard at `/` with navigation, error handling, and solid foundation for Phase 2
 
-### Phase 2: Dynamic Widgets + Auto-refresh (REVISED)
-**Goal: Real-time data with filtered lists, map visualization, and auto-refresh infrastructure**
+### Phase 2: Dynamic Widgets + Map Clustering ✅ COMPLETE (January 2025)
+**Goal: Filtered lists and map visualization with clustering for StoryMap use cases**
 
-**What changed:** Added FilteredListWidget (moved from Phase 1), added MapWidget for geographic visualization and StoryMap use cases, removed StatCard (requires backend - move to Phase 5), added performance optimizations (staggered refresh).
+**What changed:** Added FilteredListWidget (moved from Phase 1), added MapWidget for geographic visualization and StoryMap use cases, removed StatCard (requires backend - move to Phase 5), **deferred auto-refresh to Phase 3** (per user request).
 
-1. **FilteredListWidgetComponent**
-   - Fetch filtered data using DataService
-   - Render as compact table or badge list
-   - Link to entity detail pages
-   - Reuse DisplayPropertyComponent for column rendering
-   - Support for all entity types
+**✅ Completed:**
 
-2. **MapWidgetComponent** (NEW)
-   - Reuse existing `GeoPointMapComponent` (90% complete)
-   - Fetch filtered entity data with geography columns
-   - Transform records to marker format
-   - Display rich popups with entity properties
-   - Support for color-coded markers (via `colorProperty`)
-   - Auto-refresh with preserved zoom/pan state
-   - Link markers to entity detail pages
-   - Support all entities with geography columns
+1. **FilteredListWidgetComponent** (`src/app/components/widgets/filtered-list-widget/`)
+   - ✅ Fetch filtered data using DataService
+   - ✅ Render as compact table using DisplayPropertyComponent
+   - ✅ Link to entity detail pages
+   - ✅ Support for all entity types
+   - ✅ Filter operators: eq, neq, lt, lte, gt, gte, in, is, like
+   - ✅ Configurable columns via `showColumns`
+   - ✅ Ordering and limit support
 
-3. **Auto-refresh infrastructure**
+2. **MapWidgetComponent** (`src/app/components/widgets/map-widget/`)
+   - ✅ Reuse existing `GeoPointMapComponent`
+   - ✅ Fetch filtered entity data with geography columns
+   - ✅ Transform records to marker format (WKT parsing)
+   - ✅ Display popups with entity properties
+   - ✅ Link markers to entity detail pages
+   - ✅ Support all entities with geography columns
+   - ✅ **Point clustering** via Leaflet.markercluster
+   - ✅ Configurable cluster radius (default: 50px)
+   - ✅ Interactive cluster expansion (click to zoom)
+   - ✅ maxMarkers limit for performance
+
+3. **GeoPointMapComponent Enhancements**
+   - ✅ Added `enableClustering` input (boolean, default: false)
+   - ✅ Added `clusterRadius` input (number, default: 50)
+   - ✅ Leaflet.markercluster integration
+   - ✅ Conditional clustering logic (cluster group vs direct markers)
+   - ✅ Auto-zoom on cluster click
+   - ✅ Spider-fly on max zoom
+
+4. **Configuration Architecture**
+   - ✅ Created `FilteredEntityWidgetBase` interface
+   - ✅ Both widgets extend base (shared pattern)
+   - ✅ MapWidgetConfig with clustering options
+   - ✅ FilteredListWidgetConfig with ordering/limit
+   - ✅ Widget registration in app.config.ts
+
+5. **StoryMap Example** (`examples/storymap/`)
+   - ✅ Complete youth soccer program example (Flint, Michigan)
+   - ✅ 4 narrative dashboards (2018, 2020, 2022, 2025)
+   - ✅ Progressive clustering strategy (none → light → heavy)
+   - ✅ Temporal filtering by enrollment year and season
+   - ✅ Markdown narratives with editable placeholders
+   - ✅ Mock data with realistic temporal distribution
+   - ✅ Complete setup documentation (README.md)
+
+6. **Tests**
+   - ✅ FilteredListWidget component tests
+   - ✅ MapWidget component tests
+   - ✅ GeoPointMapComponent clustering tests
+   - ✅ Configuration interface tests
+
+**⏸️ Deferred to Phase 3:**
+- Auto-refresh infrastructure (RxJS intervals, pause/resume)
+- Data freshness UX (timestamps, spinners)
+- Global refresh controls
+- Staggered refresh with jitter
+- Memory leak testing for auto-refresh
+
+**Deliverable:** Filtered list and map widgets with clustering support, complete StoryMap example demonstrating geographic narrative visualization
+
+### Phase 3: Auto-refresh + Dashboard Management (REVISED)
+**Goal: Auto-refresh infrastructure and admin tools for creating/editing dashboards**
+
+**What changed:** Added auto-refresh (deferred from Phase 2), removed DashboardSelectorComponent (moved to Phase 1), added user preferences, added global filter bar (killer feature).
+
+1. **Auto-refresh Infrastructure** (deferred from Phase 2)
    - Add auto-refresh to WidgetContainerComponent
    - RxJS interval with filter/switchMap pattern
    - Pause when tab hidden (document.hidden check)
    - Pause when user clicks pause button
    - **Staggered refresh with jitter** (performance optimization)
-
-4. **Data freshness UX**
    - "Updated Xm ago" timestamp on each widget
    - "Refreshing..." spinner overlay (non-blocking)
-   - Manual refresh button
+   - Manual refresh button per widget
    - Failed refresh error state with retry
-   - Countdown to next refresh (optional, nice-to-have)
+   - Global pause/resume all widgets button
+   - Global refresh all widgets now button
+   - Memory leak testing (100+ refresh cycles)
 
-5. **Global refresh controls**
-   - Pause/resume all widgets button
-   - Refresh all widgets now button
-   - Widget-level refresh state management
-
-6. **Tests**
-   - FilteredListWidget component tests
-   - MapWidget component tests (marker rendering, popups, navigation)
-   - Auto-refresh logic tests (interval, pause, resume)
-   - Staggered refresh tests (jitter)
-   - Memory leak tests (100+ refresh cycles)
-
-**Deliverable:** Auto-updating filtered list and map widgets with performance-optimized refresh and StoryMap support
-
-### Phase 3: Dashboard Management (REVISED)
-**Goal: Admin tools for creating/editing dashboards**
-
-**What changed:** Removed DashboardSelectorComponent (moved to Phase 1), added user preferences, added global filter bar (killer feature).
-
-1. **DashboardManagementPage**
+2. **DashboardManagementPage**
    - List all dashboards (table view)
    - Create new dashboard (modal/form)
    - Edit dashboard metadata (name, description)
@@ -1572,7 +1606,7 @@ effectiveFilters = computed(() => [
    - Toggle is_default and is_public flags
    - Admin-only access check
 
-2. **Simple Widget Editor** (no drag-drop yet)
+3. **Simple Widget Editor** (no drag-drop yet)
    - Load dashboard with widgets
    - Add widget via form (select type from dropdown)
    - Configure widget via modal
@@ -1580,13 +1614,13 @@ effectiveFilters = computed(() => [
    - Save changes (validation before submit)
    - Widget config forms for each type
 
-3. **User Preferences**
+4. **User Preferences**
    - "Set as default" option in DashboardSelectorComponent
    - Save to user_dashboard_preferences table
    - Load default dashboard on login
    - Reset to system default option
 
-4. **Global Filter Bar** 🚀 (KILLER FEATURE)
+5. **Global Filter Bar** 🚀 (KILLER FEATURE)
    - Filter bar at top of DashboardPage
    - Date range picker
    - Entity field filters (FK dropdowns)
@@ -1594,13 +1628,15 @@ effectiveFilters = computed(() => [
    - Clear filters button
    - URL state sync for sharing
 
-5. **Tests**
+6. **Tests**
+   - Auto-refresh logic tests (interval, pause, resume)
+   - Staggered refresh tests (jitter)
    - DashboardManagementPage tests
    - Widget editor form tests
    - User preference persistence tests
    - Global filter propagation tests
 
-**Deliverable:** Full dashboard management UI with global filter bar
+**Deliverable:** Full dashboard management UI with auto-refresh and global filter bar
 
 ### Phase 4: Polish & Advanced UX (REVISED)
 **Goal: Production-ready with great user experience**

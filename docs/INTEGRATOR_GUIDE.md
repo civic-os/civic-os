@@ -373,9 +373,9 @@ Fields:
 
 ---
 
-### Dashboard System (Preview)
+### Dashboard System
 
-**Status**: Phase 1 - Core infrastructure complete, management UI in progress
+**Status**: Phase 2 - Filtered list and map widgets complete, management UI in progress
 
 **`metadata.dashboards`** - Dashboard definitions
 
@@ -391,8 +391,9 @@ Fields:
 **`metadata.widget_types`** - Registry of available widget types
 
 Pre-populated types:
-- `markdown` - Static content with markdown formatting (Phase 1, implemented)
-- `filtered_list` - Dynamic entity lists with filters (Phase 2, planned)
+- `markdown` - Static content with markdown formatting (Phase 1, ✅ implemented)
+- `filtered_list` - Dynamic entity lists with filters (Phase 2, ✅ implemented)
+- `map` - Interactive maps with filtered geographic data (Phase 2, ✅ implemented)
 - `stat_card` - Single metric display with sparklines (Phase 5, planned)
 - `query_result` - Results from database views or RPCs (Phase 5, planned)
 
@@ -404,38 +405,77 @@ Fields:
 - `widget_type` (FK) - Type from widget_types table
 - `title` - Widget title displayed in card header
 - `sort_order` - Position on dashboard (lower numbers first)
-- `entity_key` - Optional table name for filtered_list widgets
-- `refresh_interval_seconds` - Optional auto-refresh interval (NULL = no refresh)
+- `entity_key` - Optional table name for filtered_list and map widgets
+- `refresh_interval_seconds` - Optional auto-refresh interval (NULL = no refresh, deferred to Phase 3)
+- `width` - Widget width in DaisyUI grid units (1 = half-width, 2 = full-width)
+- `height` - Widget height in DaisyUI grid units (1-3)
 - `config` (JSONB) - Widget-specific configuration
 
-**Hybrid Storage Pattern**: Common fields (entity_key, title, refresh_interval) are typed columns for efficient queries. Widget-specific settings (e.g., markdown content, filter expressions, chart options) are stored in JSONB `config` field for flexibility.
+**Hybrid Storage Pattern**: Common fields (entity_key, title, refresh_interval, width, height) are typed columns for efficient queries. Widget-specific settings (e.g., markdown content, filter expressions, map options) are stored in JSONB `config` field for flexibility.
 
 **Creating Dashboards**:
 ```sql
--- 1. Create dashboard
-INSERT INTO metadata.dashboards (display_name, description, is_default, is_public, created_by, sort_order)
-VALUES ('Operations Dashboard', 'Real-time system metrics', FALSE, TRUE, current_user_id(), 10)
-RETURNING id;  -- Returns dashboard_id (e.g., 5)
+-- 1. Create dashboard (use DO block for variable assignment)
+DO $$
+DECLARE v_dashboard_id INT;
+BEGIN
+  INSERT INTO metadata.dashboards (display_name, description, is_default, is_public, sort_order)
+  VALUES ('Operations Dashboard', 'Real-time system metrics', FALSE, TRUE, 10)
+  RETURNING id INTO v_dashboard_id;
 
--- 2. Add markdown widget
-INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order)
-VALUES (
-  5,  -- dashboard_id from above
-  'markdown',
-  'Welcome Message',
-  '{"content": "# Operations Dashboard\n\nMonitor system health and metrics below.", "enableHtml": false}',
-  1
-);
+  -- 2. Add markdown widget
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'markdown',
+    NULL,  -- No title for header-only markdown
+    jsonb_build_object(
+      'content', E'# Operations Dashboard\n\nMonitor system health and metrics below.',
+      'enableHtml', false
+    ),
+    1, 2, 1  -- Full-width, single height unit
+  );
 
--- 3. Add another markdown widget
-INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order)
-VALUES (
-  5,
-  'markdown',
-  'System Status',
-  '{"content": "**Status**: All systems operational\n\n**Last Check**: 2025-11-04", "enableHtml": false}',
-  2
-);
+  -- 3. Add filtered list widget
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, entity_key, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'filtered_list',
+    'Recent Issues',
+    'issues',
+    jsonb_build_object(
+      'filters', jsonb_build_array(
+        jsonb_build_object('column', 'status_id', 'operator', 'eq', 'value', 1)
+      ),
+      'orderBy', 'created_at',
+      'orderDirection', 'desc',
+      'limit', 10,
+      'showColumns', jsonb_build_array('display_name', 'status_id', 'created_at')
+    ),
+    2, 1, 2  -- Half-width, double height
+  );
+
+  -- 4. Add map widget
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, entity_key, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'map',
+    'Issue Locations',
+    'issues',
+    jsonb_build_object(
+      'entityKey', 'issues',
+      'mapPropertyName', 'location',
+      'filters', jsonb_build_array(
+        jsonb_build_object('column', 'status_id', 'operator', 'eq', 'value', 1)
+      ),
+      'showColumns', jsonb_build_array('display_name', 'severity'),
+      'enableClustering', true,
+      'clusterRadius', 50,
+      'maxMarkers', 500
+    ),
+    3, 1, 2  -- Half-width, double height
+  );
+END $$;
 ```
 
 **Widget Config Examples**:
@@ -448,15 +488,49 @@ Markdown widget (`enableHtml` allows sanitized HTML via DOMPurify):
 }
 ```
 
-Filtered List widget (Phase 2, not yet implemented):
+Filtered List widget:
+```json
+{
+  "filters": [
+    {"column": "status_id", "operator": "eq", "value": 1},
+    {"column": "severity", "operator": "gte", "value": 3}
+  ],
+  "orderBy": "created_at",
+  "orderDirection": "desc",
+  "limit": 10,
+  "showColumns": ["display_name", "status_id", "severity", "created_at"]
+}
+```
+
+**Filter operators**: `eq` (equals), `neq` (not equals), `lt` (less than), `lte` (less than or equal), `gt` (greater than), `gte` (greater than or equal), `in` (in array), `is` (null check), `like` (pattern match)
+
+Map widget (requires geography column with paired `_text` computed field):
 ```json
 {
   "entityKey": "issues",
-  "filters": [{"property": "status_id", "value": "1"}],
-  "columns": ["id", "display_name", "created_at"],
-  "limit": 10
+  "mapPropertyName": "location",
+  "filters": [
+    {"column": "status_id", "operator": "eq", "value": 1}
+  ],
+  "showColumns": ["display_name", "severity"],
+  "enableClustering": true,
+  "clusterRadius": 50,
+  "maxMarkers": 500,
+  "defaultZoom": 12,
+  "defaultCenter": [42.3314, -83.0458]
 }
 ```
+
+**Map clustering**: When `enableClustering=true`, nearby markers are grouped into clusters to improve performance and reduce visual clutter. Click clusters to zoom in and expand. `clusterRadius` controls grouping distance in pixels (default: 50).
+
+**StoryMap Example**: See `examples/storymap/` for a complete Phase 2 demonstration. The Youth Soccer StoryMap shows program growth from 2018-2025 through four narrative dashboards with progressive clustering, filtered lists, and markdown narratives. This example demonstrates:
+- Temporal filtering (dashboards for different years)
+- Geographic visualization with clustering strategy (2018: no clustering, 2025: heavy clustering)
+- Filtered list widgets showing teams and sponsors by season
+- Map widgets displaying participant home locations
+- Markdown narratives with editable placeholders
+
+Setup: `cd examples/storymap && docker-compose up -d && npm run generate storymap && npm start`
 
 **Adding Custom Widget Types**:
 1. Insert into `metadata.widget_types`:
