@@ -10,7 +10,7 @@
 --
 
 -- =====================================================
--- Add map widget type (Dashboard Phase 2)
+-- Add widget types (Dashboard Phase 2)
 -- =====================================================
 INSERT INTO metadata.widget_types (widget_type, display_name, description, icon_name, is_active)
 VALUES (
@@ -18,6 +18,16 @@ VALUES (
   'Geographic Map',
   'Display filtered entity records with geography columns on interactive map with optional clustering',
   'map',
+  TRUE
+)
+ON CONFLICT (widget_type) DO NOTHING;
+
+INSERT INTO metadata.widget_types (widget_type, display_name, description, icon_name, is_active)
+VALUES (
+  'dashboard_navigation',
+  'Navigation',
+  'Sequential navigation with prev/next buttons and progress chips for storymap-style dashboards',
+  'navigation',
   TRUE
 )
 ON CONFLICT (widget_type) DO NOTHING;
@@ -97,11 +107,16 @@ BEGIN
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
   VALUES (
     v_dashboard_id,
-    'markdown',
+    'dashboard_navigation',
     NULL,
     jsonb_build_object(
-      'content', E'<div class="flex justify-between items-center py-2">\n  <span class="btn btn-outline btn-sm opacity-0 pointer-events-none">← Placeholder</span>\n  <div class="flex gap-2">\n    <span class="badge badge-primary">2018</span>\n    <a href="/dashboard/3" class="badge badge-outline hover:badge-primary">2020</a>\n    <a href="/dashboard/4" class="badge badge-outline hover:badge-primary">2022</a>\n    <a href="/dashboard/5" class="badge badge-outline hover:badge-primary">2025</a>\n  </div>\n  <a href="/dashboard/3" class="btn btn-primary btn-sm">2020: Building Momentum →</a>\n</div>',
-      'enableHtml', true
+      'forward', jsonb_build_object('url', '/dashboard/3', 'text', '2020: Building Momentum'),
+      'chips', jsonb_build_array(
+        jsonb_build_object('text', '2018', 'url', '/'),
+        jsonb_build_object('text', '2020', 'url', '/dashboard/3'),
+        jsonb_build_object('text', '2022', 'url', '/dashboard/4'),
+        jsonb_build_object('text', '2025', 'url', '/dashboard/5')
+      )
     ),
     100, 2, 1
   );
@@ -194,11 +209,17 @@ BEGIN
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
   VALUES (
     v_dashboard_id,
-    'markdown',
+    'dashboard_navigation',
     NULL,
     jsonb_build_object(
-      'content', E'<div class="flex justify-between items-center py-2">\n  <a href="/" class="btn btn-outline btn-sm">← 2018: Foundation Year</a>\n  <div class="flex gap-2">\n    <a href="/" class="badge badge-outline hover:badge-primary">2018</a>\n    <span class="badge badge-primary">2020</span>\n    <a href="/dashboard/4" class="badge badge-outline hover:badge-primary">2022</a>\n    <a href="/dashboard/5" class="badge badge-outline hover:badge-primary">2025</a>\n  </div>\n  <a href="/dashboard/4" class="btn btn-primary btn-sm">2022: Acceleration →</a>\n</div>',
-      'enableHtml', true
+      'backward', jsonb_build_object('url', '/', 'text', '2018: Foundation Year'),
+      'forward', jsonb_build_object('url', '/dashboard/4', 'text', '2022: Acceleration'),
+      'chips', jsonb_build_array(
+        jsonb_build_object('text', '2018', 'url', '/'),
+        jsonb_build_object('text', '2020', 'url', '/dashboard/3'),
+        jsonb_build_object('text', '2022', 'url', '/dashboard/4'),
+        jsonb_build_object('text', '2025', 'url', '/dashboard/5')
+      )
     ),
     100, 2, 1
   );
@@ -289,11 +310,17 @@ BEGIN
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
   VALUES (
     v_dashboard_id,
-    'markdown',
+    'dashboard_navigation',
     NULL,
     jsonb_build_object(
-      'content', E'<div class="flex justify-between items-center py-2">\n  <a href="/dashboard/3" class="btn btn-outline btn-sm">← 2020: Building Momentum</a>\n  <div class="flex gap-2">\n    <a href="/" class="badge badge-outline hover:badge-primary">2018</a>\n    <a href="/dashboard/3" class="badge badge-outline hover:badge-primary">2020</a>\n    <span class="badge badge-primary">2022</span>\n    <a href="/dashboard/5" class="badge badge-outline hover:badge-primary">2025</a>\n  </div>\n  <a href="/dashboard/5" class="btn btn-primary btn-sm">2025: Impact at Scale →</a>\n</div>',
-      'enableHtml', true
+      'backward', jsonb_build_object('url', '/dashboard/3', 'text', '2020: Building Momentum'),
+      'forward', jsonb_build_object('url', '/dashboard/5', 'text', '2025: Impact at Scale'),
+      'chips', jsonb_build_array(
+        jsonb_build_object('text', '2018', 'url', '/'),
+        jsonb_build_object('text', '2020', 'url', '/dashboard/3'),
+        jsonb_build_object('text', '2022', 'url', '/dashboard/4'),
+        jsonb_build_object('text', '2025', 'url', '/dashboard/5')
+      )
     ),
     100, 2, 1
   );
@@ -386,11 +413,17 @@ BEGIN
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
   VALUES (
     v_dashboard_id,
-    'markdown',
+    'dashboard_navigation',
     NULL,
     jsonb_build_object(
-      'content', E'<div class="flex justify-between items-center py-2">\n  <a href="/dashboard/4" class="btn btn-outline btn-sm">← 2022: Acceleration</a>\n  <div class="flex gap-2">\n    <a href="/" class="badge badge-outline hover:badge-primary">2018</a>\n    <a href="/dashboard/3" class="badge badge-outline hover:badge-primary">2020</a>\n    <a href="/dashboard/4" class="badge badge-outline hover:badge-primary">2022</a>\n    <span class="badge badge-primary">2025</span>\n  </div>\n  <a href="/" class="btn btn-primary btn-sm">↺ Back to Start</a>\n</div>',
-      'enableHtml', true
+      'backward', jsonb_build_object('url', '/dashboard/4', 'text', '2022: Acceleration'),
+      'forward', jsonb_build_object('url', '/', 'text', '↺ Back to Start'),
+      'chips', jsonb_build_array(
+        jsonb_build_object('text', '2018', 'url', '/'),
+        jsonb_build_object('text', '2020', 'url', '/dashboard/3'),
+        jsonb_build_object('text', '2022', 'url', '/dashboard/4'),
+        jsonb_build_object('text', '2025', 'url', '/dashboard/5')
+      )
     ),
     100, 2, 1
   );

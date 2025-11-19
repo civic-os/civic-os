@@ -1,0 +1,10 @@
+/**
+ * Dashboard Navigation Widget Styles
+ *
+ * Minimal styling - relies on DaisyUI classes for buttons and badges.
+ * Widget container handles height via widget-cell-compact class.
+ */
+
+.dashboard-navigation-container {
+  padding: 0.5rem 1rem;
+}

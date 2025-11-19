@@ -236,10 +236,11 @@ describe('GeoPointMapComponent', () => {
     it('should call initializeMap after view init', (done) => {
       fixture.detectChanges();
 
+      // Increased timeout to account for async ngAfterViewInit with dynamic import
       setTimeout(() => {
         expect(component['initializeMap']).toHaveBeenCalled();
         done();
-      }, 10);
+      }, 50);
     });
 
     it('should not emit valueChange in display mode', (done) => {
@@ -268,10 +269,11 @@ describe('GeoPointMapComponent', () => {
     it('should call initializeMap after view init', (done) => {
       fixture.detectChanges();
 
+      // Increased timeout to account for async ngAfterViewInit with dynamic import
       setTimeout(() => {
         expect(component['initializeMap']).toHaveBeenCalled();
         done();
-      }, 10);
+      }, 50);
     });
 
     it('should emit valueChange with EWKT format when setLocation is called', (done) => {
@@ -668,6 +670,41 @@ describe('GeoPointMapComponent', () => {
       fixture.componentRef.setInput('highlightedMarkerId', null);
 
       expect(component.highlightedMarkerId()).toBeNull();
+    });
+  });
+
+  describe('MarkerCluster Dynamic Loading', () => {
+    it('should have markerClusterLoaded signal initially false', () => {
+      // The signal should be false before ngAfterViewInit completes
+      expect(component['markerClusterLoaded']()).toBe(false);
+    });
+
+    it('should set markerClusterLoaded to true after ngAfterViewInit', (done) => {
+      // Mock initializeMap to prevent Leaflet DOM operations
+      spyOn<any>(component, 'initializeMap');
+
+      fixture.detectChanges();
+
+      // Wait for async ngAfterViewInit to complete
+      setTimeout(() => {
+        expect(component['markerClusterLoaded']()).toBe(true);
+        done();
+      }, 50);
+    });
+
+    it('should not call updateMultiMarkers before cluster is loaded', () => {
+      // Set up markers before ngAfterViewInit runs
+      fixture.componentRef.setInput('markers', [
+        { id: 1, name: 'Test', wkt: 'POINT(-83.5 43.0)' }
+      ]);
+
+      const updateSpy = spyOn<any>(component, 'updateMultiMarkers');
+
+      // The effect should not fire because markerClusterLoaded is false
+      fixture.detectChanges();
+
+      // Effect should not have called updateMultiMarkers yet
+      expect(updateSpy).not.toHaveBeenCalled();
     });
   });
 

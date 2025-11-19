@@ -191,6 +191,100 @@ The widget automatically fetches the `_text` field to get WKT format coordinates
 5. **Marker transformation**: Converts `{ id, display_name, home_location_text }` to `{ id, name, wkt }`
 6. **Map rendering**: GeoPointMapComponent displays markers with optional clustering
 
+## DashboardNavigationWidgetConfig
+
+Provides client-side navigation between dashboards using Angular's `routerLink` directive. This widget is ideal for storymap-style sequential dashboards.
+
+### Complete Configuration Reference
+
+```typescript
+interface DashboardNavigationWidgetConfig {
+  // Navigation buttons (optional)
+  backward?: {
+    url: string;    // Route URL (e.g., '/dashboard/3')
+    text: string;   // Button label
+  };
+  forward?: {
+    url: string;    // Route URL
+    text: string;   // Button label
+  };
+
+  // Progress chips (required)
+  chips: Array<{
+    text: string;   // Chip label (e.g., '2018')
+    url: string;    // Route URL (e.g., '/')
+  }>;
+}
+```
+
+### SQL Example
+
+```sql
+INSERT INTO metadata.dashboard_widgets (
+  dashboard_id, widget_type, title, config, sort_order, width, height
+) VALUES (
+  v_dashboard_id,
+  'dashboard_navigation',
+  NULL,  -- Navigation widgets typically have no title
+  jsonb_build_object(
+    'backward', jsonb_build_object('url', '/dashboard/3', 'text', '2020: Building Momentum'),
+    'forward', jsonb_build_object('url', '/dashboard/5', 'text', '2025: Impact at Scale'),
+    'chips', jsonb_build_array(
+      jsonb_build_object('text', '2018', 'url', '/'),
+      jsonb_build_object('text', '2020', 'url', '/dashboard/3'),
+      jsonb_build_object('text', '2022', 'url', '/dashboard/4'),
+      jsonb_build_object('text', '2025', 'url', '/dashboard/5')
+    )
+  ),
+  100,  -- High sort_order places at bottom
+  2,    -- Full width
+  1     -- Minimal height
+);
+```
+
+### Features
+
+- **Client-side navigation**: Uses Angular `routerLink` for instant transitions without page reload
+- **Active chip highlighting**: Current dashboard chip displays as `badge-primary`
+- **Invisible placeholders**: When `backward` or `forward` is omitted, an invisible placeholder maintains layout alignment
+- **DaisyUI styling**: Uses `btn`, `badge`, and flex utilities
+
+### Layout Patterns
+
+**First dashboard (no backward):**
+```sql
+jsonb_build_object(
+  'forward', jsonb_build_object('url', '/dashboard/3', 'text', 'Next Chapter'),
+  'chips', jsonb_build_array(...)
+)
+```
+
+**Middle dashboards (both directions):**
+```sql
+jsonb_build_object(
+  'backward', jsonb_build_object('url', '/dashboard/3', 'text', 'Previous'),
+  'forward', jsonb_build_object('url', '/dashboard/5', 'text', 'Next'),
+  'chips', jsonb_build_array(...)
+)
+```
+
+**Last dashboard (loop back):**
+```sql
+jsonb_build_object(
+  'backward', jsonb_build_object('url', '/dashboard/4', 'text', '2022: Acceleration'),
+  'forward', jsonb_build_object('url', '/', 'text', '↺ Back to Start'),
+  'chips', jsonb_build_array(...)
+)
+```
+
+### Why Not Markdown with HTML?
+
+Previous implementations used markdown widgets with HTML links (`<a href="...">`). While functional, this approach causes full page reloads because standard HTML links bypass Angular's router. The `dashboard_navigation` widget solves this by using `routerLink` for client-side navigation, providing:
+
+- Instant transitions (no white flash)
+- Preserved application state
+- Better user experience for narrative flows
+
 ## Widget Grid Layout
 
 Widgets use a 2-column grid system:

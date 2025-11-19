@@ -126,6 +126,32 @@ export interface MapWidgetConfig extends FilteredEntityWidgetBase {
 }
 
 /**
+ * Configuration for dashboard navigation widget (Phase 2).
+ * Provides sequential navigation between dashboards with prev/next buttons
+ * and progress indicator chips.
+ * Stored in dashboard_widgets.config as JSONB.
+ */
+export interface DashboardNavigationWidgetConfig {
+  // Previous button (optional - hidden placeholder shown if not provided)
+  backward?: {
+    url: string;   // Route URL (e.g., '/', '/dashboard/3')
+    text: string;  // Button text (e.g., '2018: Foundation Year')
+  };
+
+  // Next button (optional - hidden placeholder shown if not provided)
+  forward?: {
+    url: string;
+    text: string;
+  };
+
+  // Progress chips (required) - current route auto-highlighted
+  chips: Array<{
+    text: string;  // Chip label (e.g., '2018', '2020')
+    url: string;   // Route URL
+  }>;
+}
+
+/**
  * Configuration for stat card widget (Phase 5).
  * Extends the base filtered entity pattern with aggregation-specific options.
  * Stored in dashboard_widgets.config as JSONB.

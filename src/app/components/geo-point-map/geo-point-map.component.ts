@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject } from '@angular/core';
-import * as L from 'leaflet';
-import 'leaflet.markercluster';
+import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStrategy, effect, inject, signal } from '@angular/core';
+// Use default import (not namespace) so leaflet.markercluster can extend the L object
+import L from 'leaflet';
+// Note: leaflet.markercluster is loaded dynamically in ngAfterViewInit to avoid race conditions
 import { ThemeService } from '../../services/theme.service';
 import { getMapConfig } from '../../config/runtime';
 
@@ -72,13 +73,19 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   private pendingFrames: number[] = []; // Track requestAnimationFrame IDs for cleanup
   private tileLayer?: L.TileLayer; // Track current tile layer for theme switching
 
+  // Signal to track when markercluster plugin is loaded (prevents race conditions)
+  private markerClusterLoaded = signal(false);
+
   private themeService = inject(ThemeService);
 
   constructor() {
     // Watch for markers array changes
+    // Guards: map must exist, markers must have data, and cluster plugin must be loaded
     effect(() => {
       const markersData = this.markers();
-      if (this.map && markersData.length > 0) {
+      const clusterReady = this.markerClusterLoaded();
+
+      if (this.map && markersData.length > 0 && clusterReady) {
         this.updateMultiMarkers(markersData);
       }
     });
@@ -106,7 +113,13 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
+    // Dynamically import markercluster plugin to ensure it's loaded before use
+    // This prevents race conditions where the effect tries to use L.markerClusterGroup
+    // before the side-effect import has extended the L namespace
+    await import('leaflet.markercluster');
+    this.markerClusterLoaded.set(true);
+
     setTimeout(() => {
       this.initializeMap();
     }, 0);
@@ -368,15 +381,22 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     // Create cluster group if clustering is enabled
     const clusteringEnabled = this.enableClustering();
     if (clusteringEnabled) {
-      this.markerClusterGroup = L.markerClusterGroup({
-        maxClusterRadius: this.clusterRadius(),
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true, // Auto-zoom when cluster clicked
-        spiderfyOnMaxZoom: true, // Spread markers at max zoom
-        removeOutsideVisibleBounds: true, // Performance optimization
-        animate: true,
-        animateAddingMarkers: false // Disable for better performance with many markers
-      });
+      // Defensive check: ensure markerClusterGroup function exists
+      // This should always pass due to the signal guard, but provides a safety net
+      if (typeof L.markerClusterGroup !== 'function') {
+        console.error('GeoPointMapComponent: leaflet.markercluster plugin not loaded, falling back to non-clustered mode');
+        // Fall through to render without clustering
+      } else {
+        this.markerClusterGroup = L.markerClusterGroup({
+          maxClusterRadius: this.clusterRadius(),
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true, // Auto-zoom when cluster clicked
+          spiderfyOnMaxZoom: true, // Spread markers at max zoom
+          removeOutsideVisibleBounds: true, // Performance optimization
+          animate: true,
+          animateAddingMarkers: false // Disable for better performance with many markers
+        });
+      }
     }
 
     // Create new markers and collect coordinates for bounds

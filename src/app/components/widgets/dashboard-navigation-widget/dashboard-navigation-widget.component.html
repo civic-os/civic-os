@@ -1,0 +1,51 @@
+<!--
+  Copyright (C) 2023-2025 Civic OS, L3C
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<div class="dashboard-navigation-container">
+  <div class="flex justify-between items-center py-2">
+    <!-- Backward button (or placeholder for alignment) -->
+    @if (config().backward) {
+      <a [routerLink]="config().backward!.url" class="btn btn-outline btn-sm">
+        ← {{ config().backward!.text }}
+      </a>
+    } @else {
+      <!-- Invisible placeholder to maintain alignment -->
+      <span class="btn btn-outline btn-sm opacity-0 pointer-events-none">← Placeholder</span>
+    }
+
+    <!-- Progress chips -->
+    <div class="flex gap-2">
+      @for (chip of config().chips; track chip.url) {
+        @if (isCurrentRoute(chip.url)) {
+          <span class="badge badge-primary">{{ chip.text }}</span>
+        } @else {
+          <a [routerLink]="chip.url" class="badge badge-outline hover:badge-primary">{{ chip.text }}</a>
+        }
+      }
+    </div>
+
+    <!-- Forward button (or placeholder for alignment) -->
+    @if (config().forward) {
+      <a [routerLink]="config().forward!.url" class="btn btn-primary btn-sm">
+        {{ config().forward!.text }} →
+      </a>
+    } @else {
+      <!-- Invisible placeholder to maintain alignment -->
+      <span class="btn btn-primary btn-sm opacity-0 pointer-events-none">Placeholder →</span>
+    }
+  </div>
+</div>
