@@ -92,6 +92,19 @@ BEGIN
     ),
     3, 2, 1
   );
+
+  -- Navigation footer
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'markdown',
+    NULL,
+    jsonb_build_object(
+      'content', E'<div class="flex justify-between items-center py-2">\n  <span class="btn btn-outline btn-sm opacity-0 pointer-events-none">← Placeholder</span>\n  <div class="flex gap-2">\n    <span class="badge badge-primary">2018</span>\n    <a href="/dashboard/3" class="badge badge-outline hover:badge-primary">2020</a>\n    <a href="/dashboard/4" class="badge badge-outline hover:badge-primary">2022</a>\n    <a href="/dashboard/5" class="badge badge-outline hover:badge-primary">2025</a>\n  </div>\n  <a href="/dashboard/3" class="btn btn-primary btn-sm">2020: Building Momentum →</a>\n</div>',
+      'enableHtml', true
+    ),
+    100, 2, 1
+  );
 END $$;
 
 -- =====================================================
@@ -176,6 +189,19 @@ BEGIN
     ),
     4, 1, 2
   );
+
+  -- Navigation footer
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'markdown',
+    NULL,
+    jsonb_build_object(
+      'content', E'<div class="flex justify-between items-center py-2">\n  <a href="/" class="btn btn-outline btn-sm">← 2018: Foundation Year</a>\n  <div class="flex gap-2">\n    <a href="/" class="badge badge-outline hover:badge-primary">2018</a>\n    <span class="badge badge-primary">2020</span>\n    <a href="/dashboard/4" class="badge badge-outline hover:badge-primary">2022</a>\n    <a href="/dashboard/5" class="badge badge-outline hover:badge-primary">2025</a>\n  </div>\n  <a href="/dashboard/4" class="btn btn-primary btn-sm">2022: Acceleration →</a>\n</div>',
+      'enableHtml', true
+    ),
+    100, 2, 1
+  );
 END $$;
 
 -- =====================================================
@@ -257,6 +283,19 @@ BEGIN
       'showColumns', jsonb_build_array('display_name', 'sponsor_type', 'total_contribution')
     ),
     4, 1, 1
+  );
+
+  -- Navigation footer
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'markdown',
+    NULL,
+    jsonb_build_object(
+      'content', E'<div class="flex justify-between items-center py-2">\n  <a href="/dashboard/3" class="btn btn-outline btn-sm">← 2020: Building Momentum</a>\n  <div class="flex gap-2">\n    <a href="/" class="badge badge-outline hover:badge-primary">2018</a>\n    <a href="/dashboard/3" class="badge badge-outline hover:badge-primary">2020</a>\n    <span class="badge badge-primary">2022</span>\n    <a href="/dashboard/5" class="badge badge-outline hover:badge-primary">2025</a>\n  </div>\n  <a href="/dashboard/5" class="btn btn-primary btn-sm">2025: Impact at Scale →</a>\n</div>',
+      'enableHtml', true
+    ),
+    100, 2, 1
   );
 END $$;
 
@@ -341,5 +380,18 @@ BEGIN
       'showColumns', jsonb_build_array('display_name', 'sponsor_type', 'partnership_start', 'total_contribution')
     ),
     4, 1, 1
+  );
+
+  -- Navigation footer
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'markdown',
+    NULL,
+    jsonb_build_object(
+      'content', E'<div class="flex justify-between items-center py-2">\n  <a href="/dashboard/4" class="btn btn-outline btn-sm">← 2022: Acceleration</a>\n  <div class="flex gap-2">\n    <a href="/" class="badge badge-outline hover:badge-primary">2018</a>\n    <a href="/dashboard/3" class="badge badge-outline hover:badge-primary">2020</a>\n    <a href="/dashboard/4" class="badge badge-outline hover:badge-primary">2022</a>\n    <span class="badge badge-primary">2025</span>\n  </div>\n  <a href="/" class="btn btn-primary btn-sm">↺ Back to Start</a>\n</div>',
+      'enableHtml', true
+    ),
+    100, 2, 1
   );
 END $$;

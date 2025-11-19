@@ -42,6 +42,7 @@
           @for (widget of widgets(); track widget.id) {
             <div
               class="widget-cell"
+              [class.widget-cell-compact]="widget.height === 1"
               [style.grid-column]="'span ' + widget.width"
               [style.grid-row]="'span ' + widget.height"
             >

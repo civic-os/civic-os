@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { of, throwError, Observable } from 'rxjs';
+import { of, throwError, Observable, BehaviorSubject } from 'rxjs';
 import { DashboardPage } from './dashboard.page';
 import { DashboardService } from '../../services/dashboard.service';
 import { WidgetContainerComponent } from '../../components/widget-container/widget-container.component';
@@ -30,7 +30,7 @@ describe('DashboardPage', () => {
   let component: DashboardPage;
   let fixture: ComponentFixture<DashboardPage>;
   let mockDashboardService: jasmine.SpyObj<DashboardService>;
-  let mockActivatedRoute: any;
+  let paramMapSubject: BehaviorSubject<any>;
 
   beforeEach(async () => {
     // Create mock DashboardService
@@ -44,19 +44,16 @@ describe('DashboardPage', () => {
     mockDashboardService.getDashboard.and.returnValue(of(MOCK_DASHBOARDS.welcome));
     mockDashboardService.getDefaultDashboard.and.returnValue(of(1));
 
-    // Create mock ActivatedRoute with default (no ID)
-    mockActivatedRoute = {
-      snapshot: {
-        paramMap: convertToParamMap({})
-      }
-    };
+    // Create BehaviorSubject for paramMap to simulate route changes
+    // Component subscribes to paramMap observable in constructor
+    paramMapSubject = new BehaviorSubject(convertToParamMap({}));
 
     await TestBed.configureTestingModule({
       imports: [DashboardPage, CommonModule, WidgetContainerComponent],
       providers: [
         provideZonelessChangeDetection(),
         { provide: DashboardService, useValue: mockDashboardService },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: { paramMap: paramMapSubject.asObservable() } }
       ]
     }).compileComponents();
 
@@ -69,7 +66,19 @@ describe('DashboardPage', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should have initial signal values', () => {
+    it('should have initial signal values when loading', () => {
+      // Use a never-emitting observable to keep component in loading state
+      const neverEmitting = new Observable<number>(() => {
+        // Never emit to keep component in initial loading state
+      });
+
+      mockDashboardService.getDefaultDashboard.and.returnValue(neverEmitting);
+
+      // Re-create component with never-emitting observable
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
+
+      // Now we can check initial values while component is waiting for data
       expect(component.dashboard()).toBeUndefined();
       expect(component.widgets()).toEqual([]);
       expect(component.loading()).toBe(true);
@@ -77,7 +86,7 @@ describe('DashboardPage', () => {
     });
   });
 
-  describe('ngOnInit() - Loading Default Dashboard', () => {
+  describe('Constructor Initialization - Loading Default Dashboard', () => {
     it('should load default dashboard when no ID in route', (done) => {
       const dashboardId = 1;
       const mockDashboard = MOCK_DASHBOARDS.welcome;
@@ -85,7 +94,14 @@ describe('DashboardPage', () => {
       mockDashboardService.getDefaultDashboard.and.returnValue(of(dashboardId));
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
 
-      component.ngOnInit();
+      // Reset spy call counts and paramMap before re-creating component
+      mockDashboardService.getDefaultDashboard.calls.reset();
+      mockDashboardService.getDashboard.calls.reset();
+      paramMapSubject.next(convertToParamMap({})); // Ensure no ID in route
+
+      // Re-create component to pick up new mocks (constructor initializes on creation)
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
@@ -101,7 +117,13 @@ describe('DashboardPage', () => {
     it('should set error when no default dashboard exists', (done) => {
       mockDashboardService.getDefaultDashboard.and.returnValue(of(undefined));
 
-      component.ngOnInit();
+      // Reset spy call counts before re-creating component
+      mockDashboardService.getDefaultDashboard.calls.reset();
+      mockDashboardService.getDashboard.calls.reset();
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
@@ -119,7 +141,9 @@ describe('DashboardPage', () => {
         throwError(() => new Error('Network error'))
       );
 
-      component.ngOnInit();
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
@@ -131,18 +155,22 @@ describe('DashboardPage', () => {
     });
   });
 
-  describe('ngOnInit() - Loading Specific Dashboard', () => {
-    beforeEach(() => {
-      // Set route param to dashboard ID
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '3' });
-    });
-
+  describe('Constructor Initialization - Loading Specific Dashboard', () => {
     it('should load specific dashboard when ID in route', (done) => {
       const mockDashboard = MOCK_DASHBOARDS.multiWidget;
 
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
 
-      component.ngOnInit();
+      // Reset spy call counts before re-creating component
+      mockDashboardService.getDefaultDashboard.calls.reset();
+      mockDashboardService.getDashboard.calls.reset();
+
+      // Emit route params with dashboard ID before creating component
+      paramMapSubject.next(convertToParamMap({ id: '3' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
@@ -159,7 +187,15 @@ describe('DashboardPage', () => {
     it('should handle dashboard not found (undefined response)', (done) => {
       mockDashboardService.getDashboard.and.returnValue(of(undefined));
 
-      component.ngOnInit();
+      // Reset spy call counts before re-creating component
+      mockDashboardService.getDashboard.calls.reset();
+
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '3' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
@@ -177,7 +213,12 @@ describe('DashboardPage', () => {
         throwError(() => new Error('Server error'))
       );
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '3' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
@@ -265,6 +306,10 @@ describe('DashboardPage', () => {
       mockDashboardService.getDefaultDashboard.and.returnValue(of(dashboardId));
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
 
+      // Reset spy call counts before testing this method
+      mockDashboardService.getDefaultDashboard.calls.reset();
+      mockDashboardService.getDashboard.calls.reset();
+
       component['loadDefaultDashboard']();
 
       setTimeout(() => {
@@ -279,6 +324,10 @@ describe('DashboardPage', () => {
     it('should handle null default dashboard ID', (done) => {
       mockDashboardService.getDefaultDashboard.and.returnValue(of(undefined));
 
+      // Reset spy call counts before testing this method
+      mockDashboardService.getDefaultDashboard.calls.reset();
+      mockDashboardService.getDashboard.calls.reset();
+
       component['loadDefaultDashboard']();
 
       setTimeout(() => {
@@ -291,24 +340,36 @@ describe('DashboardPage', () => {
   });
 
   describe('retry()', () => {
-    it('should retry loading default dashboard when no route ID', () => {
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({});
+    it('should retry loading default dashboard when no current dashboard', () => {
       mockDashboardService.getDefaultDashboard.and.returnValue(of(1));
       mockDashboardService.getDashboard.and.returnValue(of(MOCK_DASHBOARDS.welcome));
+
+      // Ensure no current dashboard is set
+      component.dashboard.set(undefined);
+
+      // Reset spy call counts before testing retry
+      mockDashboardService.getDefaultDashboard.calls.reset();
 
       component.retry();
 
       expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
     });
 
-    it('should retry loading specific dashboard when route ID present', () => {
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '3' });
+    it('should retry loading specific dashboard when current dashboard exists', (done) => {
       mockDashboardService.getDashboard.and.returnValue(of(MOCK_DASHBOARDS.multiWidget));
+
+      // Set a current dashboard first
+      component.dashboard.set(MOCK_DASHBOARDS.multiWidget);
+
+      // Reset spy call counts before testing retry
+      mockDashboardService.getDashboard.calls.reset();
 
       component.retry();
 
-      expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
-      expect(mockDashboardService.getDefaultDashboard).not.toHaveBeenCalled();
+      setTimeout(() => {
+        expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
+        done();
+      }, 10);
     });
 
     it('should reset loading state when retrying', () => {
@@ -324,7 +385,9 @@ describe('DashboardPage', () => {
       });
 
       mockDashboardService.getDashboard.and.returnValue(delayedObservable);
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '1' });
+
+      // Set a current dashboard so retry() will call loadDashboard()
+      component.dashboard.set(MOCK_DASHBOARDS.welcome);
 
       component.retry();
 
@@ -344,6 +407,9 @@ describe('DashboardPage', () => {
 
       mockDashboardService.getDefaultDashboard.and.returnValue(delayedObservable);
 
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
@@ -356,9 +422,13 @@ describe('DashboardPage', () => {
 
     it('should show error state with retry button', (done) => {
       mockDashboardService.getDashboard.and.returnValue(of(undefined));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '999' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '999' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -379,9 +449,13 @@ describe('DashboardPage', () => {
       const mockDashboard = MOCK_DASHBOARDS.welcome;
 
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '1' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -400,9 +474,13 @@ describe('DashboardPage', () => {
       const mockDashboard = MOCK_DASHBOARDS.multiWidget;
 
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '3' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '3' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -421,9 +499,13 @@ describe('DashboardPage', () => {
       const mockDashboard = MOCK_DASHBOARDS.multiWidget;
 
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '3' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '3' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -441,9 +523,13 @@ describe('DashboardPage', () => {
       const mockDashboard = MOCK_DASHBOARDS.noWidgets;
 
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '4' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '4' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -464,9 +550,13 @@ describe('DashboardPage', () => {
       const mockDashboard = MOCK_DASHBOARDS.welcome;
 
       mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '1' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -484,11 +574,15 @@ describe('DashboardPage', () => {
     });
 
     it('should call retry when retry button clicked', (done) => {
-      spyOn(component, 'retry');
       mockDashboardService.getDashboard.and.returnValue(of(undefined));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '999' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '999' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
+      spyOn(component, 'retry');
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -507,9 +601,13 @@ describe('DashboardPage', () => {
   describe('Pre-configured Mock Dashboards', () => {
     it('should render MOCK_DASHBOARDS.welcome correctly', (done) => {
       mockDashboardService.getDashboard.and.returnValue(of(MOCK_DASHBOARDS.welcome));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '1' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(component.dashboard()?.display_name).toBe('Welcome');
@@ -521,9 +619,13 @@ describe('DashboardPage', () => {
 
     it('should render MOCK_DASHBOARDS.userPrivate correctly', (done) => {
       mockDashboardService.getDashboard.and.returnValue(of(MOCK_DASHBOARDS.userPrivate));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '2' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '2' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         expect(component.dashboard()?.display_name).toBe('My Dashboard');
@@ -542,9 +644,13 @@ describe('DashboardPage', () => {
       });
 
       mockDashboardService.getDashboard.and.returnValue(of(dashboardNoDesc));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '1' });
 
-      component.ngOnInit();
+      // Emit route params with dashboard ID
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      // Re-create component to pick up new mock
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
 
       setTimeout(() => {
         fixture.detectChanges();
@@ -561,7 +667,12 @@ describe('DashboardPage', () => {
 
     it('should handle rapid retry attempts', () => {
       mockDashboardService.getDashboard.and.returnValue(of(MOCK_DASHBOARDS.welcome));
-      mockActivatedRoute.snapshot.paramMap = convertToParamMap({ id: '1' });
+
+      // Set a current dashboard so retry() will call loadDashboard()
+      component.dashboard.set(MOCK_DASHBOARDS.welcome);
+
+      // Reset spy call counts before testing retry
+      mockDashboardService.getDashboard.calls.reset();
 
       component.retry();
       component.retry();

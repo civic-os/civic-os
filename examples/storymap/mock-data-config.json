@@ -1,7 +1,7 @@
 {
   "recordsPerEntity": {
-    "participants": 50,
-    "teams": 6,
+    "participants": 200,
+    "teams": 16,
     "team_rosters": 30,
     "sponsors": 8
   },

@@ -91,7 +91,7 @@ const command = `npx ts-node ${generatorFile} ${sqlOption}`.trim();
 console.log(sqlFlag ? 'Running generator (SQL output only)...' : 'Running generator (database + SQL output)...');
 
 try {
-  execSync(command, { stdio: 'inherit' });
+  execSync(command, { stdio: 'inherit', cwd: exampleDir });
   console.log('=== Mock data generation complete ===');
 } catch (error) {
   console.error('Error running generator:', error);

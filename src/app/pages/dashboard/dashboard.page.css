@@ -51,6 +51,11 @@
   display: flex;
 }
 
+.widget-cell-compact {
+  /* Reduced min-height for height-1 widgets (navigation bars, compact lists) */
+  min-height: auto;
+}
+
 .widget-cell > * {
   flex: 1; /* Widget container fills cell */
 }

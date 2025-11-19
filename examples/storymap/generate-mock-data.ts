@@ -620,11 +620,12 @@ class MockDataGenerator {
     }
 
     // Handle nullable fields (30% chance of null for optional fields)
-    // Exception for demo purposes: Issue.location and participants.home_location should always have values for map visualization
+    // Exception for demo purposes: certain columns should always have values for visualization
     const isIssueLocation = prop.table_name === 'Issue' && prop.column_name === 'location';
     const isParticipantLocation = prop.table_name === 'participants' && prop.column_name === 'home_location';
     const isSponsorLocation = prop.table_name === 'sponsors' && prop.column_name === 'location';
-    if (prop.is_nullable && prop.column_name !== 'display_name' && !isIssueLocation && !isParticipantLocation && !isSponsorLocation && faker.datatype.boolean({ probability: 0.3 })) {
+    const isSponsorContribution = prop.table_name === 'sponsors' && prop.column_name === 'total_contribution';
+    if (prop.is_nullable && prop.column_name !== 'display_name' && !isIssueLocation && !isParticipantLocation && !isSponsorLocation && !isSponsorContribution && faker.datatype.boolean({ probability: 0.3 })) {
       return null;
     }
 
