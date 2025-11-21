@@ -21,9 +21,11 @@ import { Observable, mergeMap, of, tap, map, take } from 'rxjs';
 import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType } from '../../interfaces/entity';
 import { ActivatedRoute, Router, RouterModule, Params } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
+import { AuthService } from '../../services/auth.service';
 import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from "../../components/edit-property/edit-property.component";
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -37,6 +39,7 @@ import { DialogComponent } from "../../components/dialog/dialog.component";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
     EditPropertyComponent,
+    EmptyStateComponent,
     CommonModule,
     ReactiveFormsModule,
     DialogComponent,
@@ -50,6 +53,7 @@ export class CreatePage {
   private router = inject(Router);
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
+  public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;

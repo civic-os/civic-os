@@ -178,7 +178,40 @@
                 }
               } @else {
                 <tr>
-                  <td colspan="100%" class="text-center border-spacing-4">No Entries</td>
+                  <td colspan="100%" class="p-8">
+                    @if (!entity.select && !auth.authenticated()) {
+                      <app-empty-state
+                        icon="lock"
+                        title="Sign in to view data"
+                        message="Log in to access this information."
+                        alertType="info"
+                        [showLoginButton]="true">
+                      </app-empty-state>
+                    } @else if (!entity.select) {
+                      <app-empty-state
+                        icon="block"
+                        title="Access denied"
+                        message="You don't have permission to view this data."
+                        alertType="error">
+                      </app-empty-state>
+                    } @else if (isFiltered()) {
+                      <app-empty-state
+                        icon="filter_alt_off"
+                        title="No results found"
+                        message="No records match your current filters or search. Try adjusting or clearing them."
+                        alertType="warning"
+                        [showClearFiltersButton]="true"
+                        (clearFilters)="onClearAllFilters()">
+                      </app-empty-state>
+                    } @else {
+                      <app-empty-state
+                        icon="inbox"
+                        title="No entries"
+                        message="There are no records in this table yet."
+                        alertType="info">
+                      </app-empty-state>
+                    }
+                  </td>
                 </tr>
               }
             }

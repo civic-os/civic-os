@@ -22,11 +22,13 @@ import { Observable, map, mergeMap, of, tap } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
 import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType } from '../../interfaces/entity';
 import { DialogComponent } from '../../components/dialog/dialog.component';
 import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CommonModule } from '@angular/common';
 
@@ -35,6 +37,7 @@ import { CommonModule } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
     EditPropertyComponent,
+    EmptyStateComponent,
     CommonModule,
     ReactiveFormsModule,
     DialogComponent,
@@ -50,6 +53,7 @@ export class EditPage {
   private router = inject(Router);
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
+  public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;

@@ -34,6 +34,16 @@
             <span class="material-symbols-outlined">save</span> Save
           </button>
         </form>
+      } @else {
+        <!-- Empty state when form is not available -->
+        <div class="p-8">
+          <app-empty-state
+            icon="block"
+            title="Access denied"
+            message="You don't have permission to create records of this type."
+            alertType="error">
+          </app-empty-state>
+        </div>
       }
     }
     <app-dialog #successDialog>

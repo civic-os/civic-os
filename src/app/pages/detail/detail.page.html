@@ -204,6 +204,33 @@
             </div>
           </div>
         }
+      } @else {
+        <!-- Empty state when data is not available -->
+        <div class="p-8">
+          @if (!entity.select && !auth.authenticated()) {
+            <app-empty-state
+              icon="lock"
+              title="Sign in to view this record"
+              message="Log in to access this information."
+              alertType="info"
+              [showLoginButton]="true">
+            </app-empty-state>
+          } @else if (!entity.select) {
+            <app-empty-state
+              icon="block"
+              title="Access denied"
+              message="You don't have permission to view this record."
+              alertType="error">
+            </app-empty-state>
+          } @else {
+            <app-empty-state
+              icon="error"
+              title="Record not found"
+              message="The record you're looking for doesn't exist."
+              alertType="error">
+            </app-empty-state>
+          }
+        </div>
       }
     }
   }

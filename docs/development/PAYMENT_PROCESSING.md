@@ -1,10 +1,25 @@
 # Payment Processing Microservice - Design Document
 
-**Version:** 2.0
+**Version:** 2.2
 **Target Release:** Phase 0 - Phase 5 (initial implementation)
 **Status:** Design Phase
 **Author:** Civic OS Development Team
-**Last Updated:** 2025-11-05
+**Last Updated:** 2025-11-21
+
+**Changelog:**
+- v2.2 (2025-11-21): Schema and service architecture revision
+  - Moved payment tables to separate `payments` schema (prevents metadata pollution)
+  - Separated payment-worker from consolidated-worker (optionality, bounded context)
+  - Updated all table references: metadata.payment_* → payments.*
+  - Updated PostgREST config to expose payments schema
+  - Added architectural rationale for separate service
+- v2.1 (2025-11-21): Incorporated patterns from Supabase Stripe Sync Engine analysis
+  - Added webhook event tracking table for deduplication
+  - Enhanced idempotency with timestamp-based WHERE clause pattern
+  - Replaced switch statement with handler registry pattern
+  - Clarified webhook acceptance pattern (always return 200)
+  - Added fixture-based testing strategy
+  - Improved schema design (indexes, proper PostgreSQL types)
 
 ---
 
@@ -23,9 +38,10 @@
 11. [Security & Permissions](#security--permissions)
 12. [Configuration](#configuration)
 13. [Stripe Account Setup Guide](#stripe-account-setup-guide)
-14. [Implementation Roadmap](#implementation-roadmap)
-15. [Testing Strategy](#testing-strategy)
-16. [Integration Examples](#integration-examples)
+14. [Design Patterns from Production Systems](#design-patterns-from-production-systems)
+15. [Implementation Roadmap](#implementation-roadmap)
+16. [Testing Strategy](#testing-strategy)
+17. [Integration Examples](#integration-examples)
 
 ---
 
@@ -43,7 +59,7 @@ The Payment Processing Microservice extends Civic OS with secure, provider-agnos
 - **Automatic Entity Sync**: Database triggers automatically update entity `payment_status` when payments succeed/fail
 - **Configurable Capture Timing**: Support both immediate and deferred capture flows per entity type
 - **Email Notifications**: SMTP-based email confirmations with customizable templates
-- **Webhook Idempotency**: Dedupe webhook events, audit trail for all provider callbacks
+- **Webhook Idempotency**: Timestamp-based idempotency with event tracking, audit trail for all provider callbacks
 - **Permission-Based Access**: Integrates with Civic OS RBAC (admin + billing_staff roles)
 - **Synchronous Payment Creation**: No frontend polling - RPC waits for payment intent creation
 - **Specialized UI**: SystemListPage/SystemDetailPage for payment history with refund capabilities
@@ -91,7 +107,7 @@ Based on requirements gathering (November 2025):
 │                         PostgREST API                             │
 │  ┌──────────────────────────────────────┐  ┌──────────────────┐ │
 │  │ RPCs:                                │  │ Views:           │ │
-│  │ - create_payment_intent_sync (NEW)   │  │ payment_trans... │ │
+│  │ - create_payment_intent_sync (NEW)   │  │ payments.trans...│ │
 │  │ - capture_payment_intent             │  │ (RLS-enabled)    │ │
 │  │ - refund_payment                     │  │                  │ │
 │  │ - process_webhook                    │  │                  │ │
@@ -109,9 +125,9 @@ Based on requirements gathering (November 2025):
 │  │ - enqueue_create_intent_job → River job                   │  │
 │  │                                                            │  │
 │  │ Tables:                                                    │  │
-│  │ - metadata.payment_transactions (RLS)                     │  │
-│  │ - metadata.payment_refunds                                │  │
-│  │ - metadata.payment_webhook_events                         │  │
+│  │ - payments.transactions (RLS)                             │  │
+│  │ - payments.refunds                                        │  │
+│  │ - payments.webhooks                                       │  │
 │  │ - metadata.entities (payment_capture_mode column)         │  │
 │  │ - metadata.river_job (queue)                              │  │
 │  └────────────────────────────────────────────────────────────┘  │
@@ -120,7 +136,7 @@ Based on requirements gathering (November 2025):
                │ Job Polling
                ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                  Go Payment Microservice                          │
+│            Go Payment Worker (Separate Service)                   │
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │ River Workers:                                           │   │
 │  │ - CreateIntentWorker   → Stripe API: create intent      │   │
@@ -132,6 +148,9 @@ Based on requirements gathering (November 2025):
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │ Payment Provider Interface (Stripe, PayPal future)       │   │
 │  └──────────────────────────────────────────────────────────┘   │
+│                                                                   │
+│  Note: Separate from consolidated-worker (files/notifications)   │
+│        Optional deployment for instances not using payments      │
 └──────────────┬────────────────────────────────────────────────────┘
                │
                │ HTTPS API Calls
@@ -200,14 +219,31 @@ Based on requirements gathering (November 2025):
 
 ## Database Schema
 
+### Schema Organization
+
+Payment tables live in a dedicated `payments` schema, separate from `metadata` schema:
+
+**Rationale:**
+- **Domain isolation** - Payments are a bounded context (money, compliance, multi-provider)
+- **Prevents pollution** - `metadata` schema already contains entities, properties, roles, permissions, files, notifications
+- **Security** - Schema-level audit logging and permissions
+- **Optionality** - Instances not using payments don't need this schema
+- **Multi-provider future** - Clean namespace for Stripe, PayPal, Square integrations
+
+```sql
+CREATE SCHEMA IF NOT EXISTS payments;
+GRANT USAGE ON SCHEMA payments TO authenticated, anon;
+COMMENT ON SCHEMA payments IS 'Payment processing tables (provider-agnostic core + provider-specific data)';
+```
+
 ### Core Tables
 
-#### `metadata.payment_transactions`
+#### `payments.transactions`
 
 Primary table for all payment records with polymorphic entity references.
 
 ```sql
-CREATE TABLE metadata.payment_transactions (
+CREATE TABLE payments.transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Ownership & Context
@@ -246,34 +282,34 @@ CREATE TABLE metadata.payment_transactions (
 );
 
 -- Indexes for common queries
-CREATE INDEX idx_payment_transactions_user_id ON metadata.payment_transactions(user_id);
-CREATE INDEX idx_payment_transactions_entity ON metadata.payment_transactions(entity_type, entity_id);
-CREATE INDEX idx_payment_transactions_status ON metadata.payment_transactions(status);
-CREATE INDEX idx_payment_transactions_provider_id ON metadata.payment_transactions(provider_payment_id);
-CREATE INDEX idx_payment_transactions_created_at ON metadata.payment_transactions(created_at DESC);
+CREATE INDEX idx_payment_transactions_user_id ON payments.transactions(user_id);
+CREATE INDEX idx_payment_transactions_entity ON payments.transactions(entity_type, entity_id);
+CREATE INDEX idx_payment_transactions_status ON payments.transactions(status);
+CREATE INDEX idx_payment_transactions_provider_id ON payments.transactions(provider_payment_id);
+CREATE INDEX idx_payment_transactions_created_at ON payments.transactions(created_at DESC);
 
 -- Trigger: Update updated_at timestamp
 CREATE TRIGGER update_payment_transactions_updated_at
-  BEFORE UPDATE ON metadata.payment_transactions
+  BEFORE UPDATE ON payments.transactions
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
 -- Trigger: Enqueue job on INSERT (create intent)
 CREATE TRIGGER enqueue_create_intent_job
-  AFTER INSERT ON metadata.payment_transactions
+  AFTER INSERT ON payments.transactions
   FOR EACH ROW
   EXECUTE FUNCTION enqueue_payment_create_intent_job();
 
 -- Trigger: Enqueue job on UPDATE (capture, cancel)
 CREATE TRIGGER enqueue_payment_status_job
-  AFTER UPDATE OF status ON metadata.payment_transactions
+  AFTER UPDATE OF status ON payments.transactions
   FOR EACH ROW
   WHEN (NEW.status IN ('capturing', 'canceling'))
   EXECUTE FUNCTION enqueue_payment_status_job();
 
 -- Trigger: Sync entity payment_status automatically
 CREATE TRIGGER sync_entity_payment_status
-  AFTER UPDATE OF status ON metadata.payment_transactions
+  AFTER UPDATE OF status ON payments.transactions
   FOR EACH ROW
   WHEN (NEW.status IN ('succeeded', 'failed', 'refunded', 'canceled')
         AND OLD.status <> NEW.status)
@@ -281,7 +317,7 @@ CREATE TRIGGER sync_entity_payment_status
 
 -- Trigger: Enqueue payment events (email, analytics)
 CREATE TRIGGER enqueue_payment_event
-  AFTER UPDATE OF status ON metadata.payment_transactions
+  AFTER UPDATE OF status ON payments.transactions
   FOR EACH ROW
   WHEN (NEW.status IN ('succeeded', 'failed', 'refunded')
         AND OLD.status <> NEW.status)
@@ -378,14 +414,14 @@ END;
 $$;
 ```
 
-#### `metadata.payment_refunds`
+#### `payments.refunds`
 
 Tracks refund operations (full or partial).
 
 ```sql
-CREATE TABLE metadata.payment_refunds (
+CREATE TABLE payments.refunds (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  payment_id UUID NOT NULL REFERENCES metadata.payment_transactions(id) ON DELETE CASCADE,
+  payment_id UUID NOT NULL REFERENCES payments.transactions(id) ON DELETE CASCADE,
 
   amount NUMERIC(10,2) NOT NULL CHECK (amount > 0),
   reason TEXT,
@@ -401,21 +437,21 @@ CREATE TABLE metadata.payment_refunds (
     CHECK (status IN ('pending', 'succeeded', 'failed'))
 );
 
-CREATE INDEX idx_payment_refunds_payment_id ON metadata.payment_refunds(payment_id);
+CREATE INDEX idx_payment_refunds_payment_id ON payments.refunds(payment_id);
 
 -- Trigger: Enqueue refund job on INSERT
 CREATE TRIGGER enqueue_refund_job
-  AFTER INSERT ON metadata.payment_refunds
+  AFTER INSERT ON payments.refunds
   FOR EACH ROW
   EXECUTE FUNCTION enqueue_payment_refund_job();
 ```
 
-#### `metadata.payment_webhook_events`
+#### `payments.webhooks`
 
-Audit log for all webhook events (idempotency tracking).
+Audit log and deduplication table for all webhook events. Uses atomic INSERT...ON CONFLICT pattern to prevent race conditions.
 
 ```sql
-CREATE TABLE metadata.payment_webhook_events (
+CREATE TABLE payments.webhooks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   provider TEXT NOT NULL,              -- 'stripe', 'paypal'
@@ -431,17 +467,19 @@ CREATE TABLE metadata.payment_webhook_events (
 
   received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-  -- Idempotency constraint
+  -- Idempotency constraint (prevents duplicate webhook processing)
   CONSTRAINT payment_webhook_events_unique_event
     UNIQUE (provider, provider_event_id)
 );
 
-CREATE INDEX idx_payment_webhook_events_processed ON metadata.payment_webhook_events(processed, received_at);
+CREATE INDEX idx_payment_webhook_events_processed ON payments.webhooks(processed, received_at);
+CREATE INDEX idx_payment_webhook_events_event_type ON payments.webhooks(event_type);
 
 -- Trigger: Enqueue webhook processing job on INSERT
 CREATE TRIGGER enqueue_webhook_processing_job
-  AFTER INSERT ON metadata.payment_webhook_events
+  AFTER INSERT ON payments.webhooks
   FOR EACH ROW
+  WHEN (NEW.processed = FALSE)  -- Only enqueue if not already processed
   EXECUTE FUNCTION enqueue_payment_webhook_job();
 ```
 
@@ -485,16 +523,16 @@ SELECT
   created_at,
   updated_at,
   completed_at
-FROM metadata.payment_transactions;
+FROM payments.transactions;
 
 -- Grant access
 GRANT SELECT ON payment_transactions TO authenticated;
 
 -- RLS on underlying table
-ALTER TABLE metadata.payment_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments.transactions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users see own payments, admins/billing_staff see all"
-  ON metadata.payment_transactions
+  ON payments.transactions
   FOR SELECT
   USING (
     user_id = current_user_id()
@@ -520,7 +558,7 @@ CREATE TABLE event_registrations (
 
   -- Standard payment columns (REQUIRED)
   payment_status TEXT DEFAULT 'pending',
-  payment_id UUID REFERENCES metadata.payment_transactions(id),
+  payment_id UUID REFERENCES payments.transactions(id),
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -551,7 +589,7 @@ The `update_entity_payment_status()` trigger automatically updates these columns
 1. **Add columns** to your entity table:
    ```sql
    ALTER TABLE your_table ADD COLUMN payment_status TEXT DEFAULT 'pending';
-   ALTER TABLE your_table ADD COLUMN payment_id UUID REFERENCES metadata.payment_transactions(id);
+   ALTER TABLE your_table ADD COLUMN payment_id UUID REFERENCES payments.transactions(id);
    ALTER TABLE your_table ADD CONSTRAINT valid_payment_status
      CHECK (payment_status IN ('pending', 'paid', 'payment_failed', 'refunded', 'canceled'));
    CREATE INDEX idx_your_table_payment_id ON your_table(payment_id);
@@ -640,10 +678,32 @@ CREATE TRIGGER auto_capture_on_checkin
 
 ## Go Microservice Design
 
+### Architectural Decision: Separate Payment Worker
+
+The payment service is deployed as a **separate Go microservice** (`payment-worker`), independent from the `consolidated-worker` (which handles files, thumbnails, and notifications).
+
+**Rationale:**
+
+1. **Optionality** - Instances not using payment features don't deploy payment code or dependencies
+2. **Bounded context** - Payments are a distinct domain (money, compliance, multi-provider)
+3. **Independent deployment** - Update payment features without redeploying file storage or notifications
+4. **Failure isolation** - Payment provider bugs don't crash file uploads or email sending
+5. **Security** - Smaller attack surface, easier PCI compliance auditing
+6. **Multi-provider future** - Clean namespace for adding PayPal, Square without bloating other services
+
+**Trade-off:** One additional container to deploy (acceptable given optionality and isolation benefits)
+
+**Service Comparison:**
+
+| Service | Handles | Deploy When... |
+|---------|---------|----------------|
+| `consolidated-worker` | Files, thumbnails, notifications | Always (core framework features) |
+| `payment-worker` | Stripe, PayPal, payment webhooks | Only if accepting payments |
+
 ### Directory Structure
 
 ```
-services/payments/
+services/payment-worker/
 ├── cmd/
 │   └── worker/
 │       └── main.go              # Entry point, River client initialization
@@ -700,7 +760,8 @@ type PaymentProvider interface {
 	GetPaymentStatus(ctx context.Context, providerPaymentID string) (*PaymentStatus, error)
 
 	// VerifyWebhookSignature validates webhook authenticity
-	VerifyWebhookSignature(ctx context.Context, payload []byte, signature string) error
+	// Returns the parsed event if signature is valid
+	VerifyWebhookSignature(ctx context.Context, payload []byte, signature string) (interface{}, error)
 }
 
 type CreateIntentParams struct {
@@ -863,6 +924,133 @@ func (p *StripeProvider) VerifyWebhookSignature(ctx context.Context, payload []b
 // ... additional methods (CancelIntent, GetPaymentStatus)
 ```
 
+### Webhook Handler Registry Pattern
+
+Instead of a monolithic switch statement, we use a handler registry for extensibility and testability:
+
+```go
+// internal/webhooks/handler.go
+package webhooks
+
+import (
+	"context"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+// EventHandler processes a specific webhook event type
+type EventHandler interface {
+	HandleEvent(ctx context.Context, db *pgxpool.Pool, payload map[string]interface{}) error
+}
+
+// HandlerRegistry maps event types to handlers
+type HandlerRegistry struct {
+	handlers map[string]EventHandler
+	logger   *zerolog.Logger
+}
+
+func NewHandlerRegistry(logger *zerolog.Logger) *HandlerRegistry {
+	return &HandlerRegistry{
+		handlers: make(map[string]EventHandler),
+		logger:   logger,
+	}
+}
+
+func (r *HandlerRegistry) Register(eventType string, handler EventHandler) {
+	r.handlers[eventType] = handler
+}
+
+func (r *HandlerRegistry) Dispatch(ctx context.Context, db *pgxpool.Pool, eventType string, payload map[string]interface{}) error {
+	handler, ok := r.handlers[eventType]
+	if !ok {
+		// Log unknown events instead of crashing
+		r.logger.Warn().
+			Str("event_type", eventType).
+			Msg("Unknown webhook event type - storing for investigation")
+		return r.storeUnknownEvent(ctx, db, eventType, payload)
+	}
+
+	return handler.HandleEvent(ctx, db, payload)
+}
+
+func (r *HandlerRegistry) storeUnknownEvent(ctx context.Context, db *pgxpool.Pool, eventType string, payload map[string]interface{}) error {
+	// Store in a separate table for manual investigation
+	_, err := db.Exec(ctx, `
+		INSERT INTO payments.unknown_webhooks (event_type, payload, received_at)
+		VALUES ($1, $2, NOW())
+	`, eventType, payload)
+	return err
+}
+```
+
+**Example Handler Implementation:**
+
+```go
+// internal/webhooks/handlers/payment_succeeded.go
+package handlers
+
+import (
+	"context"
+	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type PaymentIntentSucceededHandler struct{}
+
+func (h *PaymentIntentSucceededHandler) HandleEvent(
+	ctx context.Context,
+	db *pgxpool.Pool,
+	payload map[string]interface{},
+) error {
+	// Extract payment_intent ID from nested payload
+	data, ok := payload["data"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid payload structure")
+	}
+
+	obj, ok := data["object"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid data.object structure")
+	}
+
+	piID, ok := obj["id"].(string)
+	if !ok {
+		return fmt.Errorf("missing payment intent ID")
+	}
+
+	// Update payment status (idempotent via WHERE clause)
+	_, err := db.Exec(ctx, `
+		UPDATE payments.transactions
+		SET
+			status = 'succeeded',
+			completed_at = NOW(),
+			metadata = jsonb_set(COALESCE(metadata, '{}'), '{webhook_confirmed}', 'true')
+		WHERE provider_payment_id = $1
+		  AND status NOT IN ('succeeded', 'refunded')  -- Prevent overwriting terminal states
+	`, piID)
+
+	return err
+}
+```
+
+**Handler Setup in main.go:**
+
+```go
+func setupWebhookHandlers(logger *zerolog.Logger) *webhooks.HandlerRegistry {
+	registry := webhooks.NewHandlerRegistry(logger)
+
+	// Register Stripe event handlers
+	registry.Register("payment_intent.succeeded", &handlers.PaymentIntentSucceededHandler{})
+	registry.Register("payment_intent.payment_failed", &handlers.PaymentIntentFailedHandler{})
+	registry.Register("payment_intent.canceled", &handlers.PaymentIntentCanceledHandler{})
+	registry.Register("charge.refunded", &handlers.ChargeRefundedHandler{})
+
+	// Future: Easy to add more handlers without touching core routing logic
+	// registry.Register("charge.dispute.created", &handlers.DisputeCreatedHandler{})
+
+	return registry
+}
+```
+
 ### River Workers
 
 #### CreateIntentWorker
@@ -905,7 +1093,7 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 
 	err := w.db.QueryRow(ctx, `
 		SELECT user_id, amount, currency, description, capture_mode, entity_type, entity_id
-		FROM metadata.payment_transactions
+		FROM payments.transactions
 		WHERE id = $1
 	`, job.Args.PaymentID).Scan(
 		&payment.UserID,
@@ -937,7 +1125,7 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 	if err != nil {
 		// Update payment status to failed
 		_, _ = w.db.Exec(ctx, `
-			UPDATE metadata.payment_transactions
+			UPDATE payments.transactions
 			SET status = 'failed', metadata = jsonb_set(metadata, '{error}', to_jsonb($1::text))
 			WHERE id = $2
 		`, err.Error(), job.Args.PaymentID)
@@ -947,7 +1135,7 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 
 	// 3. Update payment record with provider details
 	_, err = w.db.Exec(ctx, `
-		UPDATE metadata.payment_transactions
+		UPDATE payments.transactions
 		SET
 			provider_payment_id = $1,
 			provider_client_secret = $2,
@@ -964,7 +1152,7 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 }
 ```
 
-#### ProcessWebhookWorker (with Signature Verification)
+#### ProcessWebhookWorker (with Handler Registry)
 
 ```go
 // internal/workers/process_webhook.go
@@ -974,9 +1162,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
-	"your-module/internal/providers"
+	"your-module/internal/webhooks"
 )
 
 type ProcessWebhookArgs struct {
@@ -987,60 +1176,65 @@ func (ProcessWebhookArgs) Kind() string { return "payment_process_webhook" }
 
 type ProcessWebhookWorker struct {
 	river.WorkerDefaults[ProcessWebhookArgs]
-	db       *pgxpool.Pool
-	provider providers.PaymentProvider
+	db              *pgxpool.Pool
+	handlerRegistry *webhooks.HandlerRegistry
 }
 
 func (w *ProcessWebhookWorker) Work(ctx context.Context, job *river.Job[ProcessWebhookArgs]) error {
-	// 1. Fetch webhook event
+	// Acquire advisory lock to prevent concurrent processing of same webhook
+	// Lock is automatically released at transaction end
+	lockID := hashWebhookEventID(job.Args.WebhookEventID)
+
+	_, err := w.db.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", lockID)
+	if err != nil {
+		return fmt.Errorf("acquire advisory lock: %w", err)
+	}
+
+	// Fetch webhook event
 	var eventType string
 	var payloadBytes []byte
+	var alreadyProcessed bool
 
-	err := w.db.QueryRow(ctx, `
-		SELECT event_type, payload::text
-		FROM metadata.payment_webhook_events
-		WHERE id = $1 AND processed = FALSE
-	`, job.Args.WebhookEventID).Scan(&eventType, &payloadBytes)
+	err = w.db.QueryRow(ctx, `
+		SELECT event_type, payload::text, processed
+		FROM payments.webhooks
+		WHERE id = $1
+	`, job.Args.WebhookEventID).Scan(&eventType, &payloadBytes, &alreadyProcessed)
 
 	if err != nil {
 		return fmt.Errorf("fetch webhook event: %w", err)
 	}
 
-	// 2. Verify webhook signature (deferred verification)
-	// Note: Signature should be stored in webhook event record if doing verification here
-	// For now, we trust that RPC already validated or we verify via payload inspection
+	// Idempotency check: Skip if already processed
+	if alreadyProcessed {
+		w.logger.Info().
+			Str("webhook_event_id", job.Args.WebhookEventID).
+			Msg("Webhook already processed, skipping")
+		return nil
+	}
 
-	// 3. Dispatch based on event type
+	// Parse payload
 	var payload map[string]interface{}
 	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
 		return fmt.Errorf("unmarshal payload: %w", err)
 	}
 
-	switch eventType {
-	case "payment_intent.succeeded":
-		err = w.handlePaymentSucceeded(ctx, payload)
-	case "payment_intent.payment_failed":
-		err = w.handlePaymentFailed(ctx, payload)
-	case "charge.refunded":
-		err = w.handleRefund(ctx, payload)
-	default:
-		// Unknown event type, mark as processed but log warning
-		fmt.Printf("WARNING: Unknown webhook event type: %s\n", eventType)
-		err = nil
-	}
+	// Dispatch to handler registry (replaces switch statement)
+	err = w.handlerRegistry.Dispatch(ctx, w.db, eventType, payload)
 
-	// 4. Mark webhook as processed
 	if err != nil {
+		// Mark as failed with error message
 		_, _ = w.db.Exec(ctx, `
-			UPDATE metadata.payment_webhook_events
+			UPDATE payments.webhooks
 			SET error = $1
 			WHERE id = $2
 		`, err.Error(), job.Args.WebhookEventID)
 		return err
 	}
 
+	// Mark as processed
 	_, err = w.db.Exec(ctx, `
-		UPDATE metadata.payment_webhook_events
+		UPDATE payments.webhooks
 		SET processed = TRUE, processed_at = NOW(), signature_verified = TRUE
 		WHERE id = $1
 	`, job.Args.WebhookEventID)
@@ -1048,34 +1242,12 @@ func (w *ProcessWebhookWorker) Work(ctx context.Context, job *river.Job[ProcessW
 	return err
 }
 
-func (w *ProcessWebhookWorker) handlePaymentSucceeded(ctx context.Context, payload map[string]interface{}) error {
-	// Extract payment_intent ID from payload
-	var piID string
-	if data, ok := payload["data"].(map[string]interface{}); ok {
-		if obj, ok := data["object"].(map[string]interface{}); ok {
-			piID = obj["id"].(string)
-		}
-	}
-
-	if piID == "" {
-		piID = payload["id"].(string) // Fallback
-	}
-
-	// Update payment status
-	_, err := w.db.Exec(ctx, `
-		UPDATE metadata.payment_transactions
-		SET
-			status = 'succeeded',
-			completed_at = NOW(),
-			metadata = jsonb_set(metadata, '{webhook_confirmed}', 'true')
-		WHERE provider_payment_id = $1
-		  AND status NOT IN ('succeeded', 'refunded')  -- Prevent double-processing
-	`, piID)
-
-	return err
+// hashWebhookEventID generates consistent advisory lock IDs
+func hashWebhookEventID(eventID string) int64 {
+	h := fnv.New64a()
+	h.Write([]byte(eventID))
+	return int64(h.Sum64())
 }
-
-// ... additional event handlers (handlePaymentFailed, handleRefund)
 ```
 
 ---
@@ -1374,7 +1546,7 @@ BEGIN
   END IF;
 
   -- Create payment record
-  INSERT INTO metadata.payment_transactions (
+  INSERT INTO payments.transactions (
     user_id,
     entity_type,
     entity_id,
@@ -1403,7 +1575,7 @@ BEGIN
   LOOP
     -- Check if client_secret is ready
     SELECT provider_client_secret INTO v_client_secret
-    FROM metadata.payment_transactions
+    FROM payments.transactions
     WHERE id = v_payment_id;
 
     EXIT WHEN v_client_secret IS NOT NULL;
@@ -1421,7 +1593,7 @@ BEGIN
       v_error TEXT;
     BEGIN
       SELECT status, metadata->>'error' INTO v_status, v_error
-      FROM metadata.payment_transactions
+      FROM payments.transactions
       WHERE id = v_payment_id;
 
       IF v_status = 'failed' THEN
@@ -1461,7 +1633,7 @@ BEGIN
   -- Verify ownership or permission
   IF NOT EXISTS (
     SELECT 1
-    FROM metadata.payment_transactions
+    FROM payments.transactions
     WHERE id = p_payment_id
       AND (
         user_id = current_user_id()
@@ -1474,7 +1646,7 @@ BEGIN
 
   -- Verify current status
   SELECT status INTO v_current_status
-  FROM metadata.payment_transactions
+  FROM payments.transactions
   WHERE id = p_payment_id;
 
   IF v_current_status IS NULL THEN
@@ -1486,7 +1658,7 @@ BEGIN
   END IF;
 
   -- Update status (trigger enqueues capture job)
-  UPDATE metadata.payment_transactions
+  UPDATE payments.transactions
   SET status = 'capturing'
   WHERE id = p_payment_id;
 END;
@@ -1521,7 +1693,7 @@ BEGIN
   -- Verify payment is refundable
   SELECT amount, status, entity_type, entity_id
   INTO v_payment_amount, v_payment_status, v_entity_type, v_entity_id
-  FROM metadata.payment_transactions
+  FROM payments.transactions
   WHERE id = p_payment_id;
 
   IF v_payment_amount IS NULL THEN
@@ -1551,7 +1723,7 @@ BEGIN
   END IF;
 
   -- Create refund record (trigger enqueues job)
-  INSERT INTO metadata.payment_refunds (
+  INSERT INTO payments.refunds (
     payment_id,
     amount,
     reason,
@@ -1573,11 +1745,13 @@ GRANT EXECUTE ON FUNCTION refund_payment TO authenticated;
 
 ### `process_payment_webhook()`
 
+Uses atomic INSERT...ON CONFLICT pattern to prevent race conditions during webhook deduplication.
+
 ```sql
 CREATE OR REPLACE FUNCTION process_payment_webhook(
   p_provider TEXT,
   p_payload JSONB
-) RETURNS UUID
+) RETURNS JSONB  -- Returns status for better observability
 SECURITY DEFINER
 LANGUAGE plpgsql
 AS $$
@@ -1585,6 +1759,7 @@ DECLARE
   v_event_id TEXT;
   v_event_type TEXT;
   v_webhook_event_id UUID;
+  v_is_duplicate BOOLEAN := FALSE;
 BEGIN
   -- Extract event metadata (provider-specific structure)
   IF p_provider = 'stripe' THEN
@@ -1594,45 +1769,68 @@ BEGIN
     RAISE EXCEPTION 'Unsupported provider: %', p_provider;
   END IF;
 
-  -- Idempotency check
-  SELECT id INTO v_webhook_event_id
-  FROM metadata.payment_webhook_events
-  WHERE provider = p_provider
-    AND provider_event_id = v_event_id;
-
-  IF v_webhook_event_id IS NOT NULL THEN
-    -- Already processed
-    RETURN v_webhook_event_id;
-  END IF;
-
-  -- Insert new webhook event (trigger enqueues processing job)
-  -- Note: Signature verification happens in Go worker (ProcessWebhookWorker)
-  INSERT INTO metadata.payment_webhook_events (
+  -- ATOMIC idempotency check + insert (prevents race conditions)
+  INSERT INTO payments.webhooks (
     provider,
     provider_event_id,
     event_type,
     payload,
-    signature_verified  -- Will be updated by worker after verification
+    signature_verified
   ) VALUES (
     p_provider,
     v_event_id,
     v_event_type,
     p_payload,
-    FALSE  -- Worker will verify and update
+    FALSE  -- Will be verified by worker
   )
+  ON CONFLICT (provider, provider_event_id) DO NOTHING
   RETURNING id INTO v_webhook_event_id;
 
-  RETURN v_webhook_event_id;
+  -- Check if we got an ID (new insert) or NULL (duplicate)
+  IF v_webhook_event_id IS NULL THEN
+    -- Duplicate webhook, retrieve existing ID
+    SELECT id INTO v_webhook_event_id
+    FROM payments.webhooks
+    WHERE provider = p_provider
+      AND provider_event_id = v_event_id;
+
+    v_is_duplicate := TRUE;
+
+    RAISE NOTICE 'Duplicate webhook received: % %', p_provider, v_event_id;
+  END IF;
+
+  -- Always return 200 OK to webhook sender (even for duplicates)
+  -- We handle retries internally via River jobs, not via webhook retries
+  RETURN jsonb_build_object(
+    'webhook_event_id', v_webhook_event_id,
+    'duplicate', v_is_duplicate,
+    'status', 'accepted'
+  );
 END;
 $$;
 
 -- Public endpoint (Stripe calls this directly)
 GRANT EXECUTE ON FUNCTION process_payment_webhook TO anon, authenticated;
+
+COMMENT ON FUNCTION process_payment_webhook IS
+'Accepts webhook events from payment providers. Always returns success (200 OK) to prevent provider retries. Processing happens asynchronously via River jobs. Idempotent via ON CONFLICT.';
 ```
 
 ---
 
 ## Webhook Architecture
+
+### Webhook Acceptance Pattern
+
+**Critical Design Decision:** We **always return 200 OK** to webhook senders (Stripe, PayPal, etc.). This prevents the provider from retrying, and instead we handle retries internally via River's job queue.
+
+**Rationale:**
+- Payment providers retry failed webhooks aggressively (exponential backoff, up to 3 days)
+- Provider retries can overwhelm our system during outages
+- We want full control over retry timing, backoff, and limits
+- Returning 200 immediately allows us to process asynchronously without blocking the provider
+
+**Trade-off:** We lose the ability to send retry hints (400 vs 500) to payment providers, but gain better control over internal retry logic.
 
 ### Single Entry Point Design
 
@@ -1649,33 +1847,103 @@ Stripe-Signature: t=...,v1=...
 }
 ```
 
+**Response (always 200):**
+```json
+{
+  "webhook_event_id": "550e8400-e29b-41d4-a716-446655440000",
+  "duplicate": false,
+  "status": "accepted"
+}
+```
+
 ### Flow
 
 ```
 1. Stripe sends webhook → PostgREST RPC endpoint
    ↓
-2. process_payment_webhook() extracts event ID, checks idempotency
+2. process_payment_webhook() extracts event ID
    ↓
-3. Insert into payment_webhook_events (dedupe via UNIQUE constraint)
+3. INSERT...ON CONFLICT DO NOTHING (atomic deduplication)
    ↓
-4. Trigger enqueues ProcessWebhookJob
+4. ALWAYS return 200 OK (even for duplicates)
    ↓
-5. Go worker polls job, VERIFIES SIGNATURE (deferred verification)
+5. Trigger enqueues ProcessWebhookJob (only for new events)
    ↓
-6. Worker dispatches to event-specific handler (payment_intent.succeeded, etc.)
+6. Go worker polls job, acquires advisory lock
    ↓
-7. Handler updates payment_transactions status
+7. Worker checks if already processed (double-check for safety)
    ↓
-8. Triggers fire: entity sync + email notification
+8. Worker dispatches to handler registry (no switch statement)
    ↓
-9. Mark webhook event as processed + signature_verified = TRUE
+9. Handler updates payment_transactions status
+   ↓
+10. Triggers fire: entity sync + email notification
+   ↓
+11. Mark webhook event as processed
+   ↓
+12. River handles retries automatically on failure
 ```
 
-### Security: Deferred Signature Verification
+### Idempotency Guarantees
 
-**Why deferred?** Webhook signature verification requires the raw request body and signature header. Since we're using PostgREST RPC (which receives parsed JSON), we verify signatures in the Go worker instead.
+**Three layers of protection:**
 
-**Alternative approach (future enhancement):** Add nginx/proxy layer that verifies signatures before forwarding to PostgREST.
+1. **Database constraint:** `UNIQUE (provider, provider_event_id)` prevents duplicate inserts
+2. **ON CONFLICT DO NOTHING:** Atomic check-and-insert prevents race conditions
+3. **Advisory locks:** Worker acquires lock before processing to prevent concurrent execution
+4. **Processed flag check:** Worker skips if `processed = TRUE` (defense in depth)
+
+### Security: Custom Body Parser for Signature Verification
+
+**Challenge:** Stripe signature verification requires the **exact raw request bytes**. If we parse JSON first, we lose the exact formatting (whitespace, key order) and signature verification fails.
+
+**Solution:** Custom body parser in HTTP layer (before PostgREST):
+
+```go
+// Preserve raw request body for signature verification
+func webhookBodyParser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/rpc/process_payment_webhook" {
+			// Read raw body
+			bodyBytes, _ := io.ReadAll(r.Body)
+			r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+			// Store in context for later verification
+			ctx := context.WithValue(r.Context(), "raw_body", bodyBytes)
+			ctx = context.WithValue(ctx, "stripe_signature", r.Header.Get("Stripe-Signature"))
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}
+```
+
+**Verification happens in worker:**
+```go
+func (w *ProcessWebhookWorker) Work(ctx context.Context, job *river.Job[ProcessWebhookArgs]) error {
+	// Retrieve raw body and signature from webhook event
+	var rawBody []byte
+	var signature string
+
+	err := w.db.QueryRow(ctx, `
+		SELECT payload, metadata->>'stripe_signature'
+		FROM payments.webhooks
+		WHERE id = $1
+	`, job.Args.WebhookEventID).Scan(&rawBody, &signature)
+
+	// Verify signature
+	event, err := w.provider.VerifyWebhookSignature(ctx, rawBody, signature)
+	if err != nil {
+		return fmt.Errorf("signature verification failed: %w", err)
+	}
+
+	// Process verified event...
+}
+```
+
+**Alternative:** Store signature in webhook event payload metadata and verify in worker.
 
 ### Event Type Handlers
 
@@ -1922,7 +2190,7 @@ All RPCs include validation:
 
 **PostgREST:**
 ```bash
-PGRST_DB_SCHEMAS="public,metadata"  # Expose metadata schema
+PGRST_DB_SCHEMAS="public,metadata,payments"  # Expose metadata and payments schemas
 ```
 
 **Go Payment Service:**
@@ -1954,7 +2222,7 @@ RIVER_WORKER_COUNT=5
 # docker-compose.yml
 services:
   payment-worker:
-    build: ./services/payments
+    build: ./services/payment-worker
     environment:
       DATABASE_URL: postgres://authenticator:password@postgres:5432/civic_os
       STRIPE_API_KEY: ${STRIPE_API_KEY}
@@ -2066,7 +2334,7 @@ stripe trigger payment_intent.succeeded
 3. Click **Send test webhook**
 4. Select `payment_intent.succeeded`
 5. Click **Send test webhook**
-6. Verify event appears in `metadata.payment_webhook_events` table
+6. Verify event appears in `payments.webhooks` table
 
 ### 6. Test Cards
 
@@ -2120,6 +2388,163 @@ Use these test cards in **test mode** only:
 - Rotate API keys and webhook secrets
 - Review and update email templates
 - Audit RLS policies and permissions
+
+---
+
+## Design Patterns from Production Systems
+
+This section documents patterns adopted from analysis of production payment synchronization systems (Supabase Stripe Sync Engine, November 2025).
+
+### Timestamp-Based Idempotency
+
+**Pattern:** Use `last_synced_at` column with WHERE clause to prevent stale data from overwriting newer data.
+
+```sql
+-- Payment transactions table includes sync timestamp
+ALTER TABLE payments.transactions
+  ADD COLUMN last_synced_at TIMESTAMPTZ;
+
+-- Upsert pattern with timestamp protection
+INSERT INTO payments.transactions (
+  id, provider_payment_id, status, amount, last_synced_at
+)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (id) DO UPDATE SET
+  provider_payment_id = EXCLUDED.provider_payment_id,
+  status = EXCLUDED.status,
+  amount = EXCLUDED.amount,
+  last_synced_at = EXCLUDED.last_synced_at
+WHERE payment_transactions.last_synced_at IS NULL
+   OR payment_transactions.last_synced_at < EXCLUDED.last_synced_at;
+```
+
+**How It Works:**
+- First insert: `last_synced_at` is NULL → UPDATE succeeds
+- Newer data: incoming timestamp > existing → UPDATE succeeds
+- **Stale data:** incoming timestamp < existing → UPDATE returns 0 rows (no-op)
+
+**Benefits:**
+- No advisory locks required (WHERE clause prevents stale writes)
+- Works across River job retries
+- Handles out-of-order webhook delivery
+- Simple to implement and understand
+
+### Atomic Webhook Deduplication
+
+**Pattern:** Use `INSERT...ON CONFLICT DO NOTHING` for race-condition-free deduplication.
+
+```sql
+-- Attempt insert, ignore duplicates
+INSERT INTO payments.webhooks (provider, provider_event_id, event_type, payload)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (provider, provider_event_id) DO NOTHING
+RETURNING id;
+
+-- If RETURNING id is NULL, event already exists
+```
+
+**Comparison to SELECT-then-INSERT:**
+
+```sql
+-- ❌ Race condition: Two requests can both pass SELECT check
+SELECT id FROM payment_webhook_events WHERE provider_event_id = $1;
+IF NOT FOUND THEN
+  INSERT INTO payment_webhook_events ...;
+END IF;
+
+-- ✅ Atomic: Database guarantees no duplicates
+INSERT ... ON CONFLICT DO NOTHING RETURNING id;
+```
+
+### Handler Registry Pattern
+
+**Pattern:** Map event types to handlers using a registry instead of monolithic switch statements.
+
+**Benefits:**
+- **Testability:** Each handler independently testable
+- **Extensibility:** Add handlers without modifying router code
+- **Graceful degradation:** Unknown events logged, not crashed
+- **Type safety:** Interface contract enforced
+
+**Implementation:** See "Webhook Handler Registry Pattern" section above (lines 879-1004).
+
+### Custom Body Parser for Signature Verification
+
+**Pattern:** Preserve raw HTTP request body for HMAC signature verification.
+
+**Challenge:** Stripe (and most payment providers) sign the exact raw bytes of the request body. If you parse JSON first, whitespace and key ordering changes, breaking signature verification.
+
+**Solution:** Custom HTTP middleware that:
+1. Reads raw body bytes
+2. Stores in context
+3. Resets body for downstream handlers
+4. Worker retrieves raw bytes for verification
+
+**See:** "Security: Custom Body Parser for Signature Verification" section above (lines 1848-1898).
+
+### Advisory Locks for Critical Sections
+
+**Pattern:** Use PostgreSQL advisory locks to prevent concurrent processing of same webhook.
+
+```go
+// Acquire lock at start of transaction
+lockID := hashWebhookEventID(job.Args.WebhookEventID)
+_, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", lockID)
+
+// Lock automatically released at transaction end
+```
+
+**When to Use:**
+- High-contention resources (same webhook processed by multiple workers)
+- Critical sections requiring atomic operations
+- Preventing duplicate side effects (sending emails, calling external APIs)
+
+**When NOT to Use:**
+- Low-contention operations (timestamp-based idempotency is simpler)
+- Read-only operations
+- Operations where duplicates are harmless
+
+### Unknown Event Handling
+
+**Pattern:** Log and store unknown webhook events instead of crashing.
+
+```go
+func (r *HandlerRegistry) Dispatch(ctx context.Context, eventType string, payload map[string]interface{}) error {
+    handler, ok := r.handlers[eventType]
+    if !ok {
+        // Store for manual investigation instead of failing
+        return r.storeUnknownEvent(ctx, eventType, payload)
+    }
+    return handler.HandleEvent(ctx, payload)
+}
+```
+
+**Benefits:**
+- Service continues running when provider adds new event types
+- Unknown events logged for future implementation
+- No emergency deployments when providers evolve their APIs
+
+**Database Table:**
+```sql
+CREATE TABLE payments.unknown_webhooks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type TEXT NOT NULL,
+  payload JSONB NOT NULL,
+  received_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+### Fixture-Based Integration Testing
+
+**Pattern:** Use real webhook payloads as test fixtures.
+
+**Benefits:**
+- High fidelity (tests use actual provider data structures)
+- Easy to add new event types (just capture webhook JSON)
+- Documents expected payload structure
+- Catches API changes during integration tests
+
+**Implementation:** See "Testing Strategy" section below.
 
 ---
 
@@ -2329,51 +2754,336 @@ Use these test cards in **test mode** only:
 
 ## Testing Strategy
 
-### Unit Tests
+### Fixture-Based Integration Testing
 
-**Go Provider Tests:**
+**Pattern:** Use real webhook payloads captured from Stripe as test fixtures.
+
+**Directory Structure:**
+```
+services/payments/
+├── test/
+│   ├── fixtures/
+│   │   ├── stripe/
+│   │   │   ├── payment_intent_succeeded.json
+│   │   │   ├── payment_intent_failed.json
+│   │   │   ├── charge_refunded.json
+│   │   │   └── customer_updated.json
+│   │   └── paypal/  # Future
+│   │       └── payment_capture_completed.json
+│   ├── helpers/
+│   │   ├── fixtures.go       # Fixture loading utilities
+│   │   ├── signature.go      # HMAC signature generation
+│   │   └── database.go       # Test DB setup/teardown
+│   └── integration/
+│       ├── webhook_test.go
+│       └── idempotency_test.go
+```
+
+**Generating Fixtures with Stripe CLI:**
+```bash
+# Trigger test webhooks and save payloads
+stripe trigger payment_intent.succeeded --print-json > test/fixtures/stripe/payment_intent_succeeded.json
+stripe trigger payment_intent.payment_failed --print-json > test/fixtures/stripe/payment_intent_failed.json
+stripe trigger charge.refunded --print-json > test/fixtures/stripe/charge_refunded.json
+
+# Or record live webhooks
+stripe listen --forward-to http://localhost:8080/webhooks --print-json > test/fixtures/
+```
+
+**Fixture Loader Helper:**
 ```go
-// internal/providers/stripe_test.go
-func TestStripeProvider_CreateIntent_ImmediateCapture(t *testing.T) {
-  // Test immediate capture mode
+// test/helpers/fixtures.go
+package helpers
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+)
+
+func LoadWebhookFixture(provider, eventName string) (map[string]interface{}, error) {
+	path := filepath.Join("test", "fixtures", provider, eventName+".json")
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var webhook map[string]interface{}
+	if err := json.Unmarshal(data, &webhook); err != nil {
+		return nil, err
+	}
+
+	return webhook, nil
 }
 
-func TestStripeProvider_CreateIntent_DeferredCapture(t *testing.T) {
-  // Test deferred capture mode
-}
-
-func TestStripeProvider_VerifyWebhookSignature(t *testing.T) {
-  // Test valid and invalid signatures
+// Customize fixture with test-specific data
+func CustomizeFixture(fixture map[string]interface{}, overrides map[string]interface{}) map[string]interface{} {
+	for key, value := range overrides {
+		setNestedValue(fixture, key, value)
+	}
+	return fixture
 }
 ```
 
-**Worker Tests:**
+**Signature Generation Helper:**
 ```go
-// internal/workers/create_intent_test.go
-func TestCreateIntentWorker_Work(t *testing.T) {
-  // Mock database and provider
-  // Verify job processing and database updates
+// test/helpers/signature.go
+package helpers
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"time"
+)
+
+func GenerateStripeSignature(payload []byte, secret string) string {
+	timestamp := time.Now().Unix()
+	signedPayload := fmt.Sprintf("%d.%s", timestamp, payload)
+
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(signedPayload))
+	signature := hex.EncodeToString(h.Sum(nil))
+
+	return fmt.Sprintf("t=%d,v1=%s", timestamp, signature)
+}
+```
+
+### Unit Tests
+
+**Handler Tests:**
+```go
+// internal/webhooks/handlers/payment_succeeded_test.go
+func TestPaymentIntentSucceededHandler(t *testing.T) {
+	// Arrange
+	mockDB := &MockDB{}
+	handler := &PaymentIntentSucceededHandler{}
+
+	payload := map[string]interface{}{
+		"data": map[string]interface{}{
+			"object": map[string]interface{}{
+				"id": "pi_test_123",
+			},
+		},
+	}
+
+	// Act
+	err := handler.HandleEvent(context.Background(), mockDB, payload)
+
+	// Assert
+	assert.NoError(t, err)
+	mockDB.AssertCalled(t, "Exec", mock.Anything, mock.MatchedBy(func(query string) bool {
+		return strings.Contains(query, "UPDATE payments.transactions")
+	}))
+}
+```
+
+**Provider Tests:**
+```go
+// internal/providers/stripe_test.go
+func TestStripeProvider_CreateIntent_ImmediateCapture(t *testing.T) {
+	provider := NewStripeProvider("sk_test_...", "whsec_...")
+
+	intent, err := provider.CreateIntent(context.Background(), CreateIntentParams{
+		Amount:      5000,
+		Currency:    "usd",
+		CaptureMode: "immediate",
+	})
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, intent.ClientSecret)
+	assert.Equal(t, "automatic", intent.CaptureMethod)
 }
 
-func TestPaymentEventWorker_SendEmail(t *testing.T) {
-  // Verify email jobs are enqueued correctly
+func TestStripeProvider_VerifyWebhookSignature(t *testing.T) {
+	payload := []byte(`{"id":"evt_test","type":"payment_intent.succeeded"}`)
+	signature := helpers.GenerateStripeSignature(payload, "whsec_test_secret")
+
+	event, err := provider.VerifyWebhookSignature(context.Background(), payload, signature)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, event)
 }
 ```
 
 ### Integration Tests
 
-**Database + Workers:**
+**Webhook Processing End-to-End:**
 ```go
-func TestPaymentFlow_ImmediateCapture_EndToEnd(t *testing.T) {
-  // 1. Insert payment record
-  // 2. Wait for worker to create intent
-  // 3. Verify provider_payment_id and client_secret populated
-  // 4. Simulate webhook success
-  // 5. Verify status = succeeded, entity synced, email sent
+// test/integration/webhook_test.go
+func TestWebhookProcessing_PaymentSucceeded(t *testing.T) {
+	// Setup test database
+	ctx := context.Background()
+	db := setupTestDB(t)
+	defer db.Close()
+
+	// Create test payment record
+	paymentID := createTestPayment(t, db, map[string]interface{}{
+		"provider_payment_id": "pi_test_123",
+		"status":              "pending_intent",
+		"amount":              50.00,
+	})
+
+	// Load fixture
+	webhook, err := helpers.LoadWebhookFixture("stripe", "payment_intent_succeeded")
+	require.NoError(t, err)
+
+	// Customize with test payment ID
+	webhook = helpers.CustomizeFixture(webhook, map[string]interface{}{
+		"data.object.id": "pi_test_123",
+	})
+
+	// Generate signature
+	payloadBytes, _ := json.Marshal(webhook)
+	signature := helpers.GenerateStripeSignature(payloadBytes, os.Getenv("STRIPE_WEBHOOK_SECRET"))
+
+	// Send webhook via HTTP
+	req := httptest.NewRequest("POST", "/rpc/process_payment_webhook", bytes.NewReader(payloadBytes))
+	req.Header.Set("Stripe-Signature", signature)
+
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	// Assert response
+	assert.Equal(t, 200, rr.Code)
+
+	// Wait for async processing (River job)
+	time.Sleep(1 * time.Second)
+
+	// Assert database state
+	var status string
+	err = db.QueryRow(ctx, "SELECT status FROM payments.transactions WHERE id = $1", paymentID).Scan(&status)
+	require.NoError(t, err)
+	assert.Equal(t, "succeeded", status)
+
+	// Assert webhook marked as processed
+	var processed bool
+	err = db.QueryRow(ctx, "SELECT processed FROM payments.webhooks ORDER BY received_at DESC LIMIT 1").Scan(&processed)
+	require.NoError(t, err)
+	assert.True(t, processed)
+}
+```
+
+**Idempotency Tests:**
+```go
+// test/integration/idempotency_test.go
+func TestWebhookIdempotency_DuplicateEvents(t *testing.T) {
+	webhook, _ := helpers.LoadWebhookFixture("stripe", "payment_intent_succeeded")
+	payloadBytes, _ := json.Marshal(webhook)
+	signature := helpers.GenerateStripeSignature(payloadBytes, os.Getenv("STRIPE_WEBHOOK_SECRET"))
+
+	// Send same webhook twice
+	for i := 0; i < 2; i++ {
+		req := httptest.NewRequest("POST", "/rpc/process_payment_webhook", bytes.NewReader(payloadBytes))
+		req.Header.Set("Stripe-Signature", signature)
+
+		rr := httptest.NewRecorder()
+		handler.ServeHTTP(rr, req)
+
+		assert.Equal(t, 200, rr.Code)
+	}
+
+	// Assert only one webhook event stored
+	var count int
+	db.QueryRow(context.Background(), "SELECT COUNT(*) FROM payments.webhooks").Scan(&count)
+	assert.Equal(t, 1, count)
 }
 
-func TestPaymentFlow_DeferredCapture_EndToEnd(t *testing.T) {
-  // Similar but test manual capture trigger
+func TestTimestampIdempotency_OlderDataRejected(t *testing.T) {
+	ctx := context.Background()
+	db := setupTestDB(t)
+
+	// Insert newer data
+	newerTime := time.Now()
+	db.Exec(ctx, `
+		INSERT INTO payments.transactions (id, provider_payment_id, amount, last_synced_at)
+		VALUES ($1, $2, $3, $4)
+	`, "test-payment-1", "pi_test_123", 5000, newerTime)
+
+	// Attempt to upsert older data
+	olderTime := newerTime.Add(-1 * time.Hour)
+	result, _ := db.Exec(ctx, `
+		INSERT INTO payments.transactions (id, provider_payment_id, amount, last_synced_at)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id) DO UPDATE SET
+			amount = EXCLUDED.amount,
+			last_synced_at = EXCLUDED.last_synced_at
+		WHERE payment_transactions.last_synced_at < EXCLUDED.last_synced_at
+	`, "test-payment-1", "pi_test_123", 3000, olderTime)
+
+	// Assert no rows affected (WHERE clause prevented update)
+	rowsAffected := result.RowsAffected()
+	assert.Equal(t, int64(0), rowsAffected)
+
+	// Assert original data preserved
+	var amount int64
+	db.QueryRow(ctx, "SELECT amount FROM payments.transactions WHERE id = $1", "test-payment-1").Scan(&amount)
+	assert.Equal(t, int64(5000), amount)
+}
+```
+
+**Concurrent Processing Tests:**
+```go
+func TestConcurrentWebhookProcessing(t *testing.T) {
+	webhook, _ := helpers.LoadWebhookFixture("stripe", "payment_intent_succeeded")
+
+	var wg sync.WaitGroup
+	errors := make(chan error, 10)
+
+	// Process same webhook from 10 goroutines
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := processWebhook(webhook); err != nil {
+				errors <- err
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errors)
+
+	// All goroutines should complete without error
+	for err := range errors {
+		t.Errorf("Concurrent processing error: %v", err)
+	}
+
+	// Only one payment record should exist
+	var count int
+	db.QueryRow(context.Background(), "SELECT COUNT(*) FROM payments.transactions WHERE provider_payment_id = $1", "pi_test_123").Scan(&count)
+	assert.Equal(t, 1, count)
+}
+```
+
+### Benchmark Tests
+
+```go
+func BenchmarkWebhookProcessing(b *testing.B) {
+	webhook, _ := helpers.LoadWebhookFixture("stripe", "payment_intent_succeeded")
+	payloadBytes, _ := json.Marshal(webhook)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		processWebhook(payloadBytes)
+	}
+}
+
+func BenchmarkTimestampIdempotency(b *testing.B) {
+	ctx := context.Background()
+	db := setupTestDB(b)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		db.Exec(ctx, `
+			INSERT INTO payments.transactions (...)
+			VALUES (...)
+			ON CONFLICT (id) DO UPDATE SET ...
+			WHERE payment_transactions.last_synced_at < EXCLUDED.last_synced_at
+		`, ...)
+	}
 }
 ```
 
@@ -2440,7 +3150,7 @@ test('Payment checkout flow - 3D Secure', async ({ page }) => {
 -- Add payment columns to event_registrations table
 ALTER TABLE event_registrations
   ADD COLUMN payment_status TEXT DEFAULT 'pending',
-  ADD COLUMN payment_id UUID REFERENCES metadata.payment_transactions(id);
+  ADD COLUMN payment_id UUID REFERENCES payments.transactions(id);
 
 ALTER TABLE event_registrations
   ADD CONSTRAINT valid_payment_status
@@ -2526,7 +3236,7 @@ export class EventRegistrationDetailComponent {
 -- Add payment columns
 ALTER TABLE facility_bookings
   ADD COLUMN payment_status TEXT DEFAULT 'pending',
-  ADD COLUMN payment_id UUID REFERENCES metadata.payment_transactions(id);
+  ADD COLUMN payment_id UUID REFERENCES payments.transactions(id);
 
 ALTER TABLE facility_bookings
   ADD CONSTRAINT valid_payment_status
@@ -2638,6 +3348,7 @@ WHERE table_name = 'permit_applications';
 |---------|------|---------|
 | 1.0 | 2025-11-05 | Initial design document |
 | 2.0 | 2025-11-05 | Major revision: Sync RPC, entity integration triggers, configurable capture, email service, Stripe onboarding guide, 12-week timeline |
+| 2.1 | 2025-11-21 | Incorporated production patterns from Supabase Stripe Sync Engine analysis:<br>• Added webhook event tracking table for atomic deduplication<br>• Enhanced idempotency with timestamp-based WHERE clause pattern<br>• Replaced switch statement with handler registry pattern<br>• Clarified webhook acceptance pattern (always return 200 OK)<br>• Added custom body parser pattern for signature verification<br>• Added advisory locks for critical sections<br>• Added unknown event handling (graceful degradation)<br>• Added comprehensive fixture-based testing strategy<br>• Added benchmark tests for performance validation<br>• Added new section: "Design Patterns from Production Systems" |
 
 ---
 

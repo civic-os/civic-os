@@ -22,11 +22,13 @@ import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType, InverseRel
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
 
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { ManyToManyEditorComponent } from '../../components/many-to-many-editor/many-to-many-editor.component';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -51,6 +53,7 @@ export interface CalendarSection {
     RouterModule,
     DisplayPropertyComponent,
     ManyToManyEditorComponent,
+    EmptyStateComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -59,6 +62,7 @@ export class DetailPage {
   private router = inject(Router);
   private schema = inject(SchemaService);
   private data = inject(DataService);
+  public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;

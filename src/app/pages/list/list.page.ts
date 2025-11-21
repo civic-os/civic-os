@@ -25,6 +25,7 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { AuthService } from '../../services/auth.service';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
@@ -32,6 +33,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 import { GeoPointMapComponent, MapMarker } from '../../components/geo-point-map/geo-point-map.component';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { ImportExportButtonsComponent } from '../../components/import-export-buttons/import-export-buttons.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { FilterCriteria } from '../../interfaces/query';
 
 interface FilterChip {
@@ -56,7 +58,8 @@ interface FilterChip {
     PaginationComponent,
     GeoPointMapComponent,
     TimeSlotCalendarComponent,
-    ImportExportButtonsComponent
+    ImportExportButtonsComponent,
+    EmptyStateComponent
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
@@ -66,6 +69,7 @@ export class ListPage implements OnInit, OnDestroy {
   private data = inject(DataService);
   private analytics = inject(AnalyticsService);
   private destroyRef = inject(DestroyRef);
+  public auth = inject(AuthService);
 
   // Pagination constants
   private readonly PAGE_SIZE_STORAGE_KEY = 'civic_os_list_page_size';
@@ -630,6 +634,29 @@ export class ListPage implements OnInit, OnDestroy {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { q: null, page: 1 },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  /**
+   * Clear all filters and search query
+   */
+  public onClearAllFilters() {
+    // Build params to clear all filter-related query params
+    const clearParams: any = { q: null, page: 1 };
+
+    // Clear all existing filter params
+    const currentParams = this.route.snapshot.queryParams;
+    Object.keys(currentParams).forEach(key => {
+      if (key.match(/^f\d+_(col|op|val)$/)) {
+        clearParams[key] = null;
+      }
+    });
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: clearParams,
       queryParamsHandling: 'merge',
       replaceUrl: true
     });

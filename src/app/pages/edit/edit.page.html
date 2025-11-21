@@ -40,6 +40,25 @@
             </button>
           </form>
         }
+      } @else {
+        <!-- Empty state when data is not available -->
+        <div class="p-8">
+          @if (!entity.update) {
+            <app-empty-state
+              icon="block"
+              title="Access denied"
+              message="You don't have permission to edit records of this type."
+              alertType="error">
+            </app-empty-state>
+          } @else {
+            <app-empty-state
+              icon="error"
+              title="Record not found"
+              message="The record you're looking for doesn't exist."
+              alertType="error">
+            </app-empty-state>
+          }
+        </div>
       }
     }
     <app-dialog #successDialog>
