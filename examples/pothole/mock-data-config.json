@@ -17,7 +17,7 @@
     "WorkPackageStatus",
     "Tag"
   ],
-  "outputFormat": "sql",
+  "outputFormat": "insert",
   "outputPath": "./example/init-scripts/04_mock_data.sql",
   "generateUsers": true,
   "userCount": 15

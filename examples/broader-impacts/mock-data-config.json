@@ -14,7 +14,7 @@
     "organization_types",
     "project_statuses"
   ],
-  "outputFormat": "sql",
+  "outputFormat": "insert",
   "generateUsers": false,
   "userCount": 10,
   "geographyBounds": {
