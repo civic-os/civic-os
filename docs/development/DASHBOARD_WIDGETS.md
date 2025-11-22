@@ -38,6 +38,7 @@ interface WidgetFilter {
 | `is` | Is (for NULL/boolean) | `null \| true \| false` | `column=is.value` | `deleted_at=is.null` |
 | `like` | Pattern match (case-sensitive) | `string` | `column=like.*pattern*` | `name=like.*smith*` |
 | `ilike` | Pattern match (case-insensitive) | `string` | `column=ilike.*pattern*` | `email=ilike.*@gmail.com` |
+| `ov` | Overlaps (for ranges) | `string` (range format) | `column=ov.[start,end)` | `time_slot=ov.[2025-03-10,2025-03-17)` |
 
 ### The `in` Operator (Important!)
 
@@ -190,6 +191,146 @@ The widget automatically fetches the `_text` field to get WKT format coordinates
 4. **Query execution**: Fetches records with filters
 5. **Marker transformation**: Converts `{ id, display_name, home_location_text }` to `{ id, name, wkt }`
 6. **Map rendering**: GeoPointMapComponent displays markers with optional clustering
+
+## CalendarWidgetConfig
+
+Displays entity records with time_slot columns on an interactive calendar with month/week/day views.
+
+### Complete Configuration Reference
+
+```typescript
+interface CalendarWidgetConfig {
+  // Data source (required)
+  entityKey: string;              // Entity to display (e.g., 'reservations', 'appointments')
+  timeSlotPropertyName: string;   // time_slot column name (e.g., 'time_slot', 'scheduled_time')
+
+  // Filtering (optional)
+  filters?: WidgetFilter[];       // Same filter format as filtered_list
+
+  // Display options (optional)
+  colorProperty?: string;         // hex_color column for event colors
+  defaultColor?: string;          // Fallback event color (default: '#3B82F6')
+  initialView?: string;           // 'dayGridMonth', 'timeGridWeek', 'timeGridDay' (default: 'timeGridWeek')
+  initialDate?: string;           // YYYY-MM-DD format (default: today)
+
+  // Interaction (optional)
+  showCreateButton?: boolean;     // Display "Create {Entity}" button (default: false)
+
+  // Performance (optional)
+  maxEvents?: number;             // Limit total events (default: 1000)
+
+  // Display columns (optional)
+  showColumns?: string[];         // Columns for future tooltip display (Phase 3+)
+}
+```
+
+### SQL Example
+
+```sql
+INSERT INTO metadata.dashboard_widgets (
+  dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+) VALUES (
+  v_dashboard_id,
+  'calendar',
+  'Upcoming Reservations',
+  'reservations',
+  jsonb_build_object(
+    'entityKey', 'reservations',
+    'timeSlotPropertyName', 'time_slot',
+    'colorProperty', 'status_color',
+    'defaultColor', '#3B82F6',
+    'initialView', 'timeGridWeek',
+    'initialDate', '2025-03-15',
+    'showCreateButton', true,
+    'maxEvents', 500,
+    'filters', jsonb_build_array(
+      jsonb_build_object(
+        'column', 'status',
+        'operator', 'neq',
+        'value', 'cancelled'
+      )
+    ),
+    'showColumns', jsonb_build_array('display_name', 'resource_id', 'status')
+  ),
+  1, 2, 2  -- sort_order, width (full width), height (medium)
+);
+```
+
+### TimeSlot Data Requirements
+
+Your entity must have:
+1. A `time_slot` column using the `time_slot` domain (PostgreSQL `tstzrange`)
+2. BTREE_GIST extension installed: `CREATE EXTENSION IF NOT EXISTS btree_gist;`
+3. (Optional) A `hex_color` column for per-event coloring
+
+The `time_slot` domain stores timestamp ranges with timezone. Data format:
+- **Storage**: `["2025-03-15 14:00:00+00","2025-03-15 16:00:00+00")`
+- **Display**: "Mar 15, 2025 2:00 PM - 4:00 PM" (in user's local timezone)
+
+### The `ov` (Overlaps) Operator
+
+The calendar widget uses the `ov` operator to filter events based on the visible date range:
+
+```sql
+-- Automatically applied when user navigates calendar
+WHERE time_slot && '[2025-03-10T00:00:00Z,2025-03-17T00:00:00Z)'
+```
+
+This operator finds all events that overlap with the specified date range.
+
+### How It Works
+
+1. **Config parsing**: Extracts typed CalendarWidgetConfig
+2. **Property fetching**: Gets schema properties including time_slot and color fields
+3. **Initial load**: Displays calendar without date range filter
+4. **Date navigation**: User changes calendar view/date → `dateRangeChange` event fires
+5. **Dynamic filtering**: Combines static filters + date range filter (ov operator)
+6. **Query execution**: Fetches records matching filters
+7. **Event transformation**: Converts `{ id, display_name, time_slot, color }` to `{ id, title, start, end, color }`
+8. **Calendar rendering**: TimeSlotCalendarComponent displays events with FullCalendar
+9. **Event interaction**: Click opens detail page in new tab
+10. **Auto-refresh**: If `refresh_interval_seconds` is set, automatically refetches events
+
+### Common Use Cases
+
+**Resource Scheduling**:
+```sql
+-- Display room/equipment reservations with color-coded status
+config := jsonb_build_object(
+  'entityKey', 'reservations',
+  'timeSlotPropertyName', 'time_slot',
+  'colorProperty', 'status_color',
+  'showCreateButton', true,
+  'filters', jsonb_build_array(
+    jsonb_build_object('column', 'resource_id', 'operator', 'eq', 'value', 5)
+  )
+);
+```
+
+**Appointment Calendar**:
+```sql
+-- Show appointments for specific user with week view
+config := jsonb_build_object(
+  'entityKey', 'appointments',
+  'timeSlotPropertyName', 'scheduled_time',
+  'initialView', 'timeGridWeek',
+  'showCreateButton', true,
+  'filters', jsonb_build_array(
+    jsonb_build_object('column', 'assigned_user_id', 'operator', 'eq', 'value', current_user_id())
+  )
+);
+```
+
+**Event Calendar**:
+```sql
+-- Display all upcoming events in month view
+config := jsonb_build_object(
+  'entityKey', 'events',
+  'timeSlotPropertyName', 'event_time',
+  'initialView', 'dayGridMonth',
+  'defaultColor', '#10B981'
+);
+```
 
 ## DashboardNavigationWidgetConfig
 

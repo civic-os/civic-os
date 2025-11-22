@@ -15,30 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export interface FilterCriteria {
-    column: string;
-    operator: string;
-    value: any;
-}
-
-export interface PaginationParams {
-    page: number;
-    pageSize: number;
-}
-
-export interface DataQuery {
-    key: string;
-    fields: string[];
-    entityId?: string;
-    orderField?: string;
-    orderDirection?: string;
-    searchQuery?: string;
-    filters?: FilterCriteria[];
-    pagination?: PaginationParams;
-    limit?: number;
-}
-
-export interface PaginatedResponse<T> {
-    data: T[];
-    totalCount: number;
+.calendar-widget-container {
+  width: 100%;
+  min-height: 650px; /* Fixed height to accommodate 600px calendar + create button + padding */
 }

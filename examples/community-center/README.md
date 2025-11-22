@@ -31,7 +31,8 @@ Then open your browser to `http://localhost:4200` and navigate to:
 - **TimeSlot Property Type**: Uses `time_slot` domain (tstzrange) for appointment scheduling
 - **Calendar Views**: List page shows calendar view of approved reservations
 - **Detail Page Calendars**: Resource detail pages show related reservations in a calendar
-- **Custom Dashboard**: "Community Center Overview" with pending requests, upcoming reservations, and facilities
+- **Dashboard Calendar Widget**: Interactive calendar widget on "Community Center Overview" dashboard with week/month/day views, auto-refresh on navigation, and create button
+- **Custom Dashboard**: "Community Center Overview" with calendar widget, pending requests, and facilities list
 - **Metadata Enhancements**: User-friendly display names and helpful field descriptions
 - **Approval Workflow**: Request → Review → Approve/Deny → Auto-create Reservation
 - **Database Triggers**: Automatic synchronization between requests and reservations
@@ -57,7 +58,7 @@ Then open your browser to `http://localhost:4200` and navigate to:
 - **`02_community_center_permissions.sql`** - RBAC permissions (maps standard roles to tables)
 - **`03_mock_data.sql`** - Realistic sample data (4 facilities, 12 reservation requests)
 - **`03_text_search.sql`** - Full-text search configuration
-- **`04_metadata_enhancements.sql`** - Display names, descriptions, field visibility, custom dashboard
+- **`04_metadata_enhancements.sql`** - Display names, descriptions, field visibility, custom dashboard with calendar and filtered list widgets
 - **`06_add_calendar_colors.sql`** - Status-based color mapping for calendar events
 - **`08_notification_templates.sql`** - Email templates and trigger functions for workflow notifications
 
@@ -136,10 +137,21 @@ Navigate to: /dashboard
 ```
 
 The "Community Center Overview" dashboard provides:
-- **Pending Approval**: Reservation requests awaiting review (editors can click to approve/deny)
-- **Upcoming Reservations**: Calendar view of all approved bookings
-- **Available Facilities**: List of active community center spaces
-- **Recent Requests**: Latest reservation requests across all statuses
+
+**1. Upcoming Reservations (Calendar Widget)** - Interactive calendar showing all approved bookings
+   - **Full-width calendar**: Week view by default (toggle to month/day)
+   - **Auto-refresh**: Calendar refetches events when you navigate to different dates
+   - **Event clicks**: Opens reservation detail page in new tab
+   - **Create button**: "Create Reservations" button for quick booking
+   - **Color-coded events**: All reservations display in blue (future: resource-based colors)
+
+**2. Pending Approval (Filtered List)** - Reservation requests awaiting staff review
+   - Shows only status="Pending" requests
+   - Editors can click to approve/deny
+
+**3. Available Facilities (Filtered List)** - Active community center spaces
+   - Shows only active=true resources
+   - Displays capacity, hourly rate, and color coding
 
 **First-Time Users**: The dashboard is set as the default landing page and is visible to all users (public dashboard).
 

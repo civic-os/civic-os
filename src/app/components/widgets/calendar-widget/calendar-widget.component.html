@@ -1,0 +1,62 @@
+<!--
+  Copyright (C) 2023-2025 Civic OS, L3C
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published
+  by the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<div class="calendar-widget-container">
+  @if (initialLoading() && !error()) {
+    <!-- Initial loading state (only shown before first successful fetch) -->
+    <div class="flex items-center justify-center h-[600px]">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (error() && initialLoading()) {
+    <!-- Error state (only if we've never successfully loaded) -->
+    <div class="flex items-center justify-center h-[600px] bg-base-200 rounded-lg">
+      <div class="text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-error opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p class="mt-4 text-error">{{ error() }}</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Calendar (always rendered after first successful load, uses loading overlay for refreshes) -->
+    @if (canShowCreateButton()) {
+      <div class="flex justify-end mb-2">
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="onCreateClick()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Create {{ getEntityDisplayName() }}
+        </button>
+      </div>
+    }
+
+    <app-time-slot-calendar
+      [mode]="'list'"
+      [events]="events()"
+      [defaultColor]="config().defaultColor ?? '#3B82F6'"
+      [loading]="isLoading()"
+      [initialView]="config().initialView ?? 'timeGridWeek'"
+      [initialDate]="config().initialDate"
+      (eventClick)="onEventClick($event)"
+      (dateRangeChange)="onDateRangeChange($event)"
+    />
+  }
+</div>

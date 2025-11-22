@@ -68,6 +68,10 @@ export class DataService {
         }
       });
     }
+    // Add limit if specified
+    if(query.limit) {
+      args.push(`limit=${query.limit}`);
+    }
     let url = query.key + '?' + args.join('&');
     return this.get(url);
   }
@@ -109,6 +113,10 @@ export class DataService {
           }
         }
       });
+    }
+    // Add limit if specified (though pagination typically handles this via Range header)
+    if(query.limit) {
+      args.push(`limit=${query.limit}`);
     }
 
     const url = query.key + '?' + args.join('&');

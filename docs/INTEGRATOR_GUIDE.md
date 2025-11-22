@@ -475,6 +475,29 @@ BEGIN
     ),
     3, 1, 2  -- Half-width, double height
   );
+
+  -- 5. Add calendar widget
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, entity_key, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'calendar',
+    'Upcoming Reservations',
+    'reservations',
+    jsonb_build_object(
+      'entityKey', 'reservations',
+      'timeSlotPropertyName', 'time_slot',
+      'colorProperty', 'status_color',
+      'defaultColor', '#3B82F6',
+      'initialView', 'timeGridWeek',
+      'showCreateButton', true,
+      'maxEvents', 500,
+      'filters', jsonb_build_array(
+        jsonb_build_object('column', 'status', 'operator', 'neq', 'value', 'cancelled')
+      ),
+      'showColumns', jsonb_build_array('display_name', 'resource_id', 'status')
+    ),
+    4, 2, 2  -- Full-width, double height
+  );
 END $$;
 ```
 
@@ -502,7 +525,7 @@ Filtered List widget:
 }
 ```
 
-**Filter operators**: `eq` (equals), `neq` (not equals), `lt` (less than), `lte` (less than or equal), `gt` (greater than), `gte` (greater than or equal), `in` (in array), `is` (null check), `like` (pattern match)
+**Filter operators**: `eq` (equals), `neq` (not equals), `lt` (less than), `lte` (less than or equal), `gt` (greater than), `gte` (greater than or equal), `in` (in array), `is` (null check), `like` (pattern match), `ov` (overlaps for ranges)
 
 Map widget (requires geography column with paired `_text` computed field):
 ```json
@@ -520,6 +543,26 @@ Map widget (requires geography column with paired `_text` computed field):
   "defaultCenter": [42.3314, -83.0458]
 }
 ```
+
+Calendar widget (requires time_slot column):
+```json
+{
+  "entityKey": "reservations",
+  "timeSlotPropertyName": "time_slot",
+  "colorProperty": "status_color",
+  "defaultColor": "#3B82F6",
+  "initialView": "timeGridWeek",
+  "initialDate": "2025-03-15",
+  "showCreateButton": true,
+  "maxEvents": 1000,
+  "filters": [
+    {"column": "status", "operator": "neq", "value": "cancelled"}
+  ],
+  "showColumns": ["display_name", "resource_id", "status"]
+}
+```
+
+**Calendar features**: Displays events with `time_slot` properties on interactive calendar with month/week/day views. Auto-fetches events when navigating calendar using the `ov` (overlaps) operator. Event clicks open detail page in new tab. Optional create button navigates to entity create form.
 
 **Map clustering**: When `enableClustering=true`, nearby markers are grouped into clusters to improve performance and reduce visual clutter. Click clusters to zoom in and expand. `clusterRadius` controls grouping distance in pixels (default: 50).
 

@@ -122,7 +122,7 @@ const DEFAULT_CONFIG: MockDataConfig = {
     minLng: -83.30,
     maxLng: -82.90,
   },
-  excludeTables: ['civic_os_users', 'civic_os_users_private', 'IssueStatus', 'WorkPackageStatus'],
+  excludeTables: ['civic_os_users', 'civic_os_users_private', 'IssueStatus', 'WorkPackageStatus', 'dashboards', 'dashboard_widgets'],
   outputFormat: 'insert',
   outputPath: './init-scripts/05_mock_data.sql.deprecated',
   generateUsers: true,  // Generate users by default so FK references work

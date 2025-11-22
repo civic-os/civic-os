@@ -159,7 +159,7 @@ See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for compl
 
 The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards.
 
-**Current**: ✅ View dashboards ✅ Markdown widgets ✅ Filtered list widgets ✅ Map widgets with clustering ❌ Management UI ❌ Auto-refresh
+**Current**: ✅ View dashboards ✅ Markdown widgets ✅ Filtered list widgets ✅ Map widgets with clustering ✅ Calendar widgets ❌ Management UI ❌ Auto-refresh
 
 **Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern.
 
@@ -167,6 +167,7 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 - `markdown` - Static content with optional HTML
 - `filtered_list` - Entity records in table format with filters, sorting, pagination
 - `map` - Geographic data on interactive map with optional clustering
+- `calendar` - Time-slotted events on interactive calendar with month/week/day views
 
 See `docs/development/DASHBOARD_WIDGETS.md` for complete widget configuration reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
 

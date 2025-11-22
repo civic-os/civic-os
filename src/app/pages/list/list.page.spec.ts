@@ -17,13 +17,14 @@
 
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { ListPage } from './list.page';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { AuthService } from '../../services/auth.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
@@ -35,6 +36,7 @@ describe('ListPage', () => {
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAnalyticsService: jasmine.SpyObj<AnalyticsService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
   let routeParams: BehaviorSubject<any>;
   let queryParams: BehaviorSubject<any>;
 
@@ -49,6 +51,9 @@ describe('ListPage', () => {
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getDataPaginated']);
     mockAnalyticsService = jasmine.createSpyObj('AnalyticsService', ['trackEvent']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
+      authenticated: signal(false)
+    });
 
     // Set default return values to prevent errors when component observables initialize
     mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
@@ -65,7 +70,8 @@ describe('ListPage', () => {
         { provide: ActivatedRoute, useValue: { params: routeParams.asObservable(), queryParams: queryParams.asObservable() } },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },
-        { provide: AnalyticsService, useValue: mockAnalyticsService }
+        { provide: AnalyticsService, useValue: mockAnalyticsService },
+        { provide: AuthService, useValue: mockAuthService }
       ]
     })
     .compileComponents();

@@ -17,12 +17,13 @@
 
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { DetailPage } from './detail.page';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -32,6 +33,7 @@ describe('DetailPage', () => {
   let fixture: ComponentFixture<DetailPage>;
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
   let mockDataService: jasmine.SpyObj<DataService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -44,6 +46,9 @@ describe('DetailPage', () => {
       'getEntities'
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
+      authenticated: signal(false)
+    });
 
     // Default mocks for inverse relationships
     mockSchemaService.getInverseRelationships.and.returnValue(of([]));
@@ -59,7 +64,8 @@ describe('DetailPage', () => {
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
         { provide: SchemaService, useValue: mockSchemaService },
-        { provide: DataService, useValue: mockDataService }
+        { provide: DataService, useValue: mockDataService },
+        { provide: AuthService, useValue: mockAuthService }
       ]
     })
     .compileComponents();

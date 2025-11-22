@@ -17,7 +17,7 @@
 
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
@@ -25,6 +25,7 @@ import { CreatePage } from './create.page';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { AuthService } from '../../services/auth.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { FormControl, Validators } from '@angular/forms';
@@ -37,6 +38,7 @@ describe('CreatePage', () => {
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAnalyticsService: jasmine.SpyObj<AnalyticsService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockKeycloak: jasmine.SpyObj<Keycloak>;
   let routeParams: BehaviorSubject<any>;
@@ -52,6 +54,9 @@ describe('CreatePage', () => {
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['createData', 'getData']);
     mockAnalyticsService = jasmine.createSpyObj('AnalyticsService', ['trackEvent']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
+      authenticated: signal(false)
+    });
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockKeycloak = jasmine.createSpyObj('Keycloak', ['updateToken']);
 
@@ -71,6 +76,7 @@ describe('CreatePage', () => {
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },
         { provide: AnalyticsService, useValue: mockAnalyticsService },
+        { provide: AuthService, useValue: mockAuthService },
         { provide: Router, useValue: mockRouter },
         { provide: Keycloak, useValue: mockKeycloak }
       ]

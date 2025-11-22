@@ -26,6 +26,7 @@ import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/ma
 import { FilteredListWidgetComponent } from './components/widgets/filtered-list-widget/filtered-list-widget.component';
 import { MapWidgetComponent } from './components/widgets/map-widget/map-widget.component';
 import { DashboardNavigationWidgetComponent } from './components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component';
+import { CalendarWidgetComponent } from './components/widgets/calendar-widget/calendar-widget.component';
 import { provideMarkdown } from 'ngx-markdown';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
 import { importProvidersFrom } from '@angular/core';
@@ -87,6 +88,7 @@ export const appConfig: ApplicationConfig = {
       registry.register('filtered_list', FilteredListWidgetComponent);  // Phase 2
       registry.register('map', MapWidgetComponent);                     // Phase 2
       registry.register('dashboard_navigation', DashboardNavigationWidgetComponent); // Phase 2
+      registry.register('calendar', CalendarWidgetComponent);           // Phase 2
     }),
 
     // Initialize Matomo router tracking (if analytics enabled)

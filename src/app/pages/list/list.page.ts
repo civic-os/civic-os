@@ -882,6 +882,9 @@ export class ListPage implements OnInit, OnDestroy {
    * Updates URL query params which triggers main data$ observable to refetch
    */
   public onCalendarDateRangeChange(range: { start: Date; end: Date }) {
+    // Show loading spinner immediately to prevent visual glitch during navigation
+    // (observable chain will handle data refresh, but this eliminates the delay)
+    this.isLoading.set(true);
 
     // Infer calendar view from range duration
     const durationDays = Math.round((range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24));

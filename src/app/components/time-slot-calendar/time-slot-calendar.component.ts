@@ -95,11 +95,19 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
 
   // State
   isDark = this.themeService.isDark;
+  private viewInitialized = signal(false); // Track whether ngAfterViewInit has run
 
   constructor() {
     // Update FullCalendar when events change (bridge between reactive signals and imperative API)
+    // CRITICAL: Only update after view is initialized to avoid ViewChild timing issues
     effect(() => {
       const events = this.calendarEventsComputed();
+      const isInitialized = this.viewInitialized();
+
+      // Skip if view hasn't been initialized yet (ViewChild not ready)
+      if (!isInitialized) {
+        return;
+      }
 
       // Use untracked() to access ViewChild without creating signal dependency
       const calendar = untracked(() => this.calendarComponent?.getApi());
@@ -148,46 +156,71 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     return calendarEvents;
   });
 
-  // Calendar options as computed signal (most Angular 20 approach)
-  calendarOptions = computed<CalendarOptions>(() => {
-    const mode = this.mode();
-    const events = this.calendarEventsComputed();
-    const view = this.initialView();
-    const date = this.initialDate();
-
-    return {
-      plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-      initialView: view,
-      initialDate: date || undefined, // FullCalendar accepts undefined
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
-      editable: mode === 'edit',
-      selectable: mode === 'edit', // Only allow selection in edit mode, not list/display
-      selectMirror: true,
-      dayMaxEvents: true,
-      weekends: true,
-      fixedWeekCount: false, // Show only the weeks needed (4-6), not always 6
-      events: events,
-      eventClick: (arg: EventClickArg) => this.handleEventClick(arg),
-      select: (arg: DateSelectArg) => this.handleDateSelect(arg),
-      datesSet: (arg) => this.handleDatesSet(arg),
-      height: '600px', // Fixed height to prevent resize loops
-      allDaySlot: false,
-      slotDuration: '01:00:00', // 1-hour slots (clear visual alignment for display mode)
-      slotLabelInterval: '01:00:00', // Show hourly labels
-      slotMinTime: '00:00:00', // Start at midnight (ensures accurate positioning calculations)
-      slotMaxTime: '24:00:00', // End at midnight next day (full 24-hour range)
-      eventMinHeight: 20, // Minimum event height in pixels for visibility
-      expandRows: false, // Consistent slot heights (no dynamic stretching)
-      scrollTime: '08:00:00' // Start scroll at 8am
-    };
-  });
+  // Calendar options as static property (stable object reference)
+  // CRITICAL: Don't include reactive inputs (view, date, events) - those are updated imperatively via effects
+  // This prevents calendar recreation on change detection
+  calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    selectMirror: true,
+    dayMaxEvents: true,
+    weekends: true,
+    fixedWeekCount: false, // Show only the weeks needed (4-6), not always 6
+    eventClick: (arg: EventClickArg) => this.handleEventClick(arg),
+    select: (arg: DateSelectArg) => this.handleDateSelect(arg),
+    datesSet: (arg) => this.handleDatesSet(arg),
+    height: '600px', // Fixed height to prevent resize loops
+    allDaySlot: false,
+    slotDuration: '01:00:00', // 1-hour slots (clear visual alignment for display mode)
+    slotLabelInterval: '01:00:00', // Show hourly labels
+    slotMinTime: '00:00:00', // Start at midnight (ensures accurate positioning calculations)
+    slotMaxTime: '24:00:00', // End at midnight next day (full 24-hour range)
+    eventMinHeight: 20, // Minimum event height in pixels for visibility
+    expandRows: false, // Consistent slot heights (no dynamic stretching)
+    scrollTime: '08:00:00', // Start scroll at 8am
+    nowIndicator: true, // Show current time indicator
+    slotLabelFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      omitZeroMinute: false,
+      meridiem: 'short'
+    }
+  };
 
   ngAfterViewInit() {
-    // Calendar is ready
+    // Calendar is ready - set initial view/date and mode-based options
+    const calendar = this.calendarComponent?.getApi();
+    if (calendar) {
+      // Set mode-based options (edit vs display/list)
+      const mode = this.mode();
+      calendar.setOption('editable', mode === 'edit');
+      calendar.setOption('selectable', mode === 'edit');
+
+      // Set initial view if provided
+      const view = this.initialView();
+      if (view && calendar.view.type !== view) {
+        calendar.changeView(view);
+      }
+
+      // Set initial date if provided
+      const date = this.initialDate();
+      if (date) {
+        calendar.gotoDate(new Date(date));
+      }
+
+      // Add initial events manually (effect will handle subsequent updates)
+      const events = this.calendarEventsComputed();
+      if (events.length > 0) {
+        calendar.addEventSource(events);
+      }
+    }
+
+    // Mark view as initialized - effect can now update events reactively
+    this.viewInitialized.set(true);
   }
 
   private transformEvents(events: CalendarEvent[]): EventInput[] {

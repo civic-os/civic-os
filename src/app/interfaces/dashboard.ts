@@ -126,6 +126,35 @@ export interface MapWidgetConfig extends FilteredEntityWidgetBase {
 }
 
 /**
+ * Configuration for calendar widget (Phase 2).
+ * Extends the base filtered entity pattern with time_slot-specific options.
+ * Stored in dashboard_widgets.config as JSONB.
+ *
+ * Displays filtered entity records with time_slot columns on an interactive calendar
+ * with month/week/day views.
+ */
+export interface CalendarWidgetConfig extends FilteredEntityWidgetBase {
+  // Data source (required)
+  entityKey: string;              // Which entity to show (e.g., 'reservations', 'appointments')
+  timeSlotPropertyName: string;   // Which time_slot column (e.g., 'time_slot', 'scheduled_time')
+
+  // Display options (optional)
+  colorProperty?: string;         // hex_color column for event colors
+  defaultColor?: string;          // Fallback event color (default: '#3B82F6')
+  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'; // Default: 'timeGridWeek'
+  initialDate?: string;           // YYYY-MM-DD format (default: today)
+
+  // Performance (optional)
+  maxEvents?: number;             // Maximum events to display (default: 1000)
+
+  // Interaction (optional)
+  showCreateButton?: boolean;     // Show "Create {Entity}" button (default: false)
+
+  // Future enhancements (Phase 3+)
+  // showColumns inherited from base - will be used for event tooltips
+}
+
+/**
  * Configuration for dashboard navigation widget (Phase 2).
  * Provides sequential navigation between dashboards with prev/next buttons
  * and progress indicator chips.

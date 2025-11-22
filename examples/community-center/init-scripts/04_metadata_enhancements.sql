@@ -180,28 +180,51 @@ BEGIN
       RETURNING id INTO v_dashboard_id;
     END IF;
 
-    /* FUTURE (Phase 2): Dashboard widgets (filtered lists and calendar)
-
     -- Delete existing widgets for this dashboard (in case we're re-running)
     DELETE FROM metadata.dashboard_widgets WHERE dashboard_id = v_dashboard_id;
 
-    -- Panel 1: Pending Requests
+    -- Panel 1: Upcoming Reservations (Calendar Widget)
     INSERT INTO metadata.dashboard_widgets (
       dashboard_id, widget_type, entity_key, title,
       config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id, 'filtered_list', 'reservation_requests', 'Pending Approval',
-      '{"filters": [{"column": "status_id", "operator": "eq", "value": "1"}]}'::JSONB,
-      1, 2, 1
+      v_dashboard_id,
+      'calendar',
+      'reservations',
+      'Upcoming Reservations',
+      jsonb_build_object(
+        'entityKey', 'reservations',
+        'timeSlotPropertyName', 'time_slot',
+        'colorProperty', NULL,  -- Will use resource colors via FK in future
+        'defaultColor', '#3B82F6',
+        'initialView', 'timeGridWeek',
+        'showCreateButton', true,
+        'maxEvents', 500,
+        'filters', jsonb_build_array(),  -- Show all reservations
+        'showColumns', jsonb_build_array('resource_id', 'purpose', 'attendee_count')
+      ),
+      1, 2, 2  -- Full width, double height
     );
 
-    -- Panel 2: Upcoming Reservations (Calendar)
+    -- Panel 2: Pending Approval Requests
     INSERT INTO metadata.dashboard_widgets (
       dashboard_id, widget_type, entity_key, title,
       config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id, 'calendar', 'reservations', 'Upcoming Reservations',
-      '{}'::JSONB, 2, 2, 2
+      v_dashboard_id,
+      'filtered_list',
+      'reservation_requests',
+      'Pending Approval',
+      jsonb_build_object(
+        'filters', jsonb_build_array(
+          jsonb_build_object('column', 'status_id', 'operator', 'eq', 'value', 1)
+        ),
+        'orderBy', 'created_at',
+        'orderDirection', 'desc',
+        'limit', 10,
+        'showColumns', jsonb_build_array('display_name', 'resource_id', 'time_slot', 'requested_by')
+      ),
+      2, 1, 1  -- Half width, single height
     );
 
     -- Panel 3: Available Facilities
@@ -209,20 +232,21 @@ BEGIN
       dashboard_id, widget_type, entity_key, title,
       config, sort_order, width, height
     ) VALUES (
-      v_dashboard_id, 'filtered_list', 'resources', 'Available Facilities',
-      '{"filters": [{"column": "active", "operator": "eq", "value": "true"}]}'::JSONB,
-      3, 1, 1
+      v_dashboard_id,
+      'filtered_list',
+      'resources',
+      'Available Facilities',
+      jsonb_build_object(
+        'filters', jsonb_build_array(
+          jsonb_build_object('column', 'active', 'operator', 'eq', 'value', true)
+        ),
+        'orderBy', 'display_name',
+        'orderDirection', 'asc',
+        'limit', 10,
+        'showColumns', jsonb_build_array('display_name', 'capacity', 'hourly_rate', 'color')
+      ),
+      3, 1, 1  -- Half width, single height
     );
-
-    -- Panel 4: Recent Requests
-    INSERT INTO metadata.dashboard_widgets (
-      dashboard_id, widget_type, entity_key, title,
-      config, sort_order, width, height
-    ) VALUES (
-      v_dashboard_id, 'filtered_list', 'reservation_requests', 'Recent Requests',
-      '{}'::JSONB, 4, 1, 1
-    );
-    */
 
     RAISE NOTICE 'Dashboard "Community Center Overview" created successfully with ID %', v_dashboard_id;
   ELSE

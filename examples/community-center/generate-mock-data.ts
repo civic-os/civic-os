@@ -107,7 +107,7 @@ const DEFAULT_CONFIG: MockDataConfig = {
     minLng: -83.0558,
     maxLng: -83.0458,
   },
-  excludeTables: ['civic_os_users', 'civic_os_users_private', 'reservations', 'request_statuses'],
+  excludeTables: ['civic_os_users', 'civic_os_users_private', 'reservations', 'request_statuses', 'dashboards', 'dashboard_widgets'],
   outputFormat: 'insert',
   outputPath: './community-center-mock-data.sql',
   generateUsers: true,
@@ -255,13 +255,15 @@ class MockDataGenerator {
       }
     }
 
+    // Clear user tables if we're regenerating them
+    // Use DELETE instead of TRUNCATE CASCADE to avoid cascading to metadata.dashboards
     if (this.config.generateUsers) {
       try {
-        await this.client.query(`TRUNCATE TABLE metadata.civic_os_users CASCADE`);
-        await this.client.query(`TRUNCATE TABLE metadata.civic_os_users_private CASCADE`);
-        console.log(`  Truncated civic_os_users tables`);
+        await this.client.query(`DELETE FROM metadata.civic_os_users_private`);
+        await this.client.query(`DELETE FROM metadata.civic_os_users`);
+        console.log(`  Cleared civic_os_users tables`);
       } catch (err: any) {
-        console.warn(`  Warning: Could not truncate user tables: ${err.message}`);
+        console.warn(`  Warning: Could not clear user tables: ${err.message}`);
       }
     }
 
