@@ -8,6 +8,20 @@
           </button>
           <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}
             <span class="ml-8 inline-flex gap-2">
+              @if (canInitiatePayment$ | async) {
+                <button
+                  class="btn btn-primary"
+                  (click)="initiatePayment()"
+                  [disabled]="paymentLoading()">
+                  @if (paymentLoading()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                    Processing...
+                  } @else {
+                    <span class="material-symbols-outlined">payment</span>
+                    {{ paymentButtonText$ | async }}
+                  }
+                </button>
+              }
               @if (entity.update) {
                 <button class="btn btn-accent" [routerLink]="'/edit/' + entityKey + '/' + data.id">
                   <span class="material-symbols-outlined">edit</span> Edit
@@ -21,6 +35,15 @@
             </span>
           </h1>
         </div>
+
+        <!-- Payment Error Alert -->
+        @if (paymentError()) {
+          <div class="alert alert-error mb-4">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ paymentError() }}</span>
+          </div>
+        }
+
         <h2 class="text-2xl font-bold mt-6 mb-4">Details</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
           @for (prop of regularProps; track prop.column_name) {
@@ -204,10 +227,26 @@
             </div>
           </div>
         }
+
+        <!-- Payment Checkout Modal -->
+        @if (currentPaymentId()) {
+          <app-payment-checkout
+            [paymentId]="currentPaymentId()!"
+            [isOpen]="showCheckoutModal()"
+            (paymentSuccess)="handlePaymentSuccess($event)"
+            (close)="handleCheckoutClose()">
+          </app-payment-checkout>
+        }
       } @else {
-        <!-- Empty state when data is not available -->
+        <!-- Loading or error state when data is not available -->
         <div class="p-8">
-          @if (!entity.select && !auth.authenticated()) {
+          @if (dataLoading()) {
+            <!-- Loading state -->
+            <div class="flex flex-col items-center justify-center gap-4 py-12">
+              <span class="loading loading-spinner loading-lg"></span>
+              <p class="text-base-content/60">Loading record...</p>
+            </div>
+          } @else if (!entity.select && !auth.authenticated()) {
             <app-empty-state
               icon="lock"
               title="Sign in to view this record"

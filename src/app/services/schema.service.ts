@@ -236,10 +236,10 @@ export class SchemaService {
       );
   }
   private getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
-    // System type detection: UUID foreign keys to metadata tables (File or User types)
+    // System type detection: UUID foreign keys to metadata tables (File, User, Payment types)
     // Uses centralized isSystemType() for consistency with Schema Editor/Inspector filtering
     if (val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)) {
-      // Discriminate between file and user system types
+      // Discriminate between file, user, and payment system types
       if (val.join_table === 'files') {
         // File type detection: Check fileType validation to determine specific subtype
         const fileTypeValidation = val.validation_rules?.find(v => v.type === 'fileType');
@@ -253,6 +253,10 @@ export class SchemaService {
         return EntityPropertyType.File;
       } else if (val.join_table === 'civic_os_users') {
         return EntityPropertyType.User;
+      } else if (val.join_table === 'payment_transactions' ||
+                 (val.join_table === 'transactions' && val.join_schema === 'payments')) {
+        // Payment type: UUID FK to payment_transactions view OR payments.transactions table
+        return EntityPropertyType.Payment;
       }
     }
 
@@ -287,6 +291,11 @@ export class SchemaService {
     // File types: Embed file metadata from files table (system type - see METADATA_SYSTEM_TABLES)
     if ([EntityPropertyType.File, EntityPropertyType.FileImage, EntityPropertyType.FilePDF].includes(prop.type)) {
       return `${prop.column_name}:files!${prop.column_name}(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at)`;
+    }
+
+    // Payment type: Embed payment data from payment_transactions view (system type)
+    if (prop.type === EntityPropertyType.Payment) {
+      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,display_name,created_at)`;
     }
 
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
@@ -329,6 +338,11 @@ export class SchemaService {
     // User fields also need just the ID for edit forms
     if (prop.type === EntityPropertyType.User) {
       return prop.column_name;
+    }
+
+    // Payment fields are read-only (show embedded data, not editable)
+    if (prop.type === EntityPropertyType.Payment) {
+      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,display_name,created_at)`;
     }
 
     // Everything else uses the column name directly

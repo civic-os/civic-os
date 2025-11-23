@@ -27,6 +27,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { EditTimeSlotComponent } from '../edit-time-slot/edit-time-slot.component';
+import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
 import { getS3Config } from '../../config/runtime';
 
 @Component({
@@ -40,7 +41,8 @@ import { getS3Config } from '../../config/runtime';
     NgxCurrencyDirective,
     ReactiveFormsModule,
     GeoPointMapComponent,
-    EditTimeSlotComponent
+    EditTimeSlotComponent,
+    PaymentBadgeComponent
 ],
     providers: [
         provideNgxMask(),

@@ -123,6 +123,9 @@ export class CreatePage {
   @ViewChild('successDialog') successDialog!: DialogComponent;
   @ViewChild('errorDialog') errorDialog!: DialogComponent;
 
+  // Store the created record ID for navigation
+  private createdRecordId?: number | string;
+
   submitForm(event: any) {
     event?.preventDefault?.();
 
@@ -165,6 +168,12 @@ export class CreatePage {
                   // Track successful record creation
                   if (this.entityKey) {
                     this.analytics.trackEvent('Entity', 'Create', this.entityKey);
+                  }
+
+                  // Store the created record ID for navigation
+                  // PostgREST returns array with single object (Prefer: return=representation)
+                  if (result.body && Array.isArray(result.body) && result.body.length > 0) {
+                    this.createdRecordId = result.body[0].id;
                   }
 
                   if (this.successDialog) {
@@ -235,6 +244,13 @@ export class CreatePage {
       this.router.navigate(['view', this.entityKey]);
     }
   }
+
+  navToDetail() {
+    if (this.entityKey && this.createdRecordId) {
+      this.router.navigate(['view', this.entityKey, this.createdRecordId]);
+    }
+  }
+
   navToCreate(key?: string) {
     this.createForm?.reset();
     if(key) {

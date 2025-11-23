@@ -24,6 +24,7 @@ import { HighlightPipe } from '../../pipes/highlight.pipe';
 import { ImageViewerComponent } from '../image-viewer/image-viewer.component';
 import { PdfViewerComponent } from '../pdf-viewer/pdf-viewer.component';
 import { DisplayTimeSlotComponent } from '../display-time-slot/display-time-slot.component';
+import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
 import { getS3Config } from '../../config/runtime';
 
 @Component({
@@ -37,6 +38,7 @@ import { getS3Config } from '../../config/runtime';
         ImageViewerComponent,
         PdfViewerComponent,
         DisplayTimeSlotComponent,
+        PaymentBadgeComponent,
     ],
     templateUrl: './display-property.component.html',
     styleUrl: './display-property.component.css'

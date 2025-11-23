@@ -41,9 +41,15 @@
           </form>
         }
       } @else {
-        <!-- Empty state when data is not available -->
+        <!-- Loading or error state when data is not available -->
         <div class="p-8">
-          @if (!entity.update) {
+          @if (dataLoading()) {
+            <!-- Loading state -->
+            <div class="flex flex-col items-center justify-center gap-4 py-12">
+              <span class="loading loading-spinner loading-lg"></span>
+              <p class="text-base-content/60">Loading record...</p>
+            </div>
+          } @else if (!entity.update) {
             <app-empty-state
               icon="block"
               title="Access denied"

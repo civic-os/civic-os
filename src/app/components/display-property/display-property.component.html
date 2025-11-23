@@ -198,6 +198,9 @@
         </div>
       </div>
     }
+    @if (propType() == EntityPropertyType.Payment) {
+      <app-payment-badge [payment]="datum()"></app-payment-badge>
+    }
     @if (propType() == EntityPropertyType.Unknown) {
       {{ datum() }}
     }

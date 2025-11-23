@@ -1,0 +1,471 @@
+# Payment Processing POC - Implementation Summary
+
+**Version:** 1.0
+**Status:** POC Complete (Property Type Approach)
+**Date:** 2025-11-22
+**Related Docs:** [PAYMENT_PROCESSING.md](./PAYMENT_PROCESSING.md) (Full Design), [PAYMENT_STATE_DIAGRAM.md](./PAYMENT_STATE_DIAGRAM.md)
+
+---
+
+## Overview
+
+This document describes the **implemented** payment POC using the **Property Type pattern**, which is simpler than the full polymorphic design described in PAYMENT_PROCESSING.md. The POC was developed for the Community Center reservation system as a proof-of-concept.
+
+### Key Difference from Full Design
+
+- **Full Design**: Polymorphic payments with `entity_type` + `entity_id` pattern (any entity can have payments)
+- **POC Implementation**: Direct foreign key pattern with `payment_transaction_id` column + `Payment` property type
+
+The POC validates core payment processing mechanics while deferring metadata-driven configuration to future work.
+
+---
+
+## Architecture Implemented
+
+### Core Components (v0.13.0 migration + community-center example)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Angular Frontend                          │
+│  ┌────────────────┐  ┌──────────────────┐                   │
+│  │ PaymentCheckout│  │ DetailPage       │                   │
+│  │ Component      │  │ (Pay Now button) │                   │
+│  └────────────────┘  └──────────────────┘                   │
+│  ┌──────────────────────────────────────┐                   │
+│  │ PaymentBadgeComponent (shared)       │                   │
+│  │ - DisplayPropertyComponent           │                   │
+│  │ - EditPropertyComponent              │                   │
+│  └──────────────────────────────────────┘                   │
+└───────────────┬──────────────────────────────────────────────┘
+                │
+                │ RPC Calls + PostgREST queries
+                ▼
+┌──────────────────────────────────────────────────────────────┐
+│                      PostgREST API                            │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │ RPC: initiate_reservation_request_payment(request_id)    ││
+│  │   - Creates new transaction on retry (orphans old)       ││
+│  │   - Returns payment_id (UUID)                             ││
+│  │   - Updates reservation_requests.payment_transaction_id   ││
+│  │                                                            ││
+│  │ View: payment_transactions (RLS-enabled)                  ││
+│  │   - Exposes payments.transactions via public view         ││
+│  └──────────────────────────────────────────────────────────┘│
+└───────────────┬──────────────────────────────────────────────┘
+                │
+                │ Triggers + Job Queue
+                ▼
+┌──────────────────────────────────────────────────────────────┐
+│                   PostgreSQL Database                         │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │ Schema: payments (v0.13.0 migration)                      ││
+│  │   - transactions table (id, user_id, amount, status, ...) ││
+│  │   - Trigger: enqueue_create_intent_job → River job       ││
+│  │                                                            ││
+│  │ Schema: metadata                                          ││
+│  │   - webhooks table (idempotency + audit)                 ││
+│  │   - river_job table (job queue)                          ││
+│  │                                                            ││
+│  │ Schema: public (example-specific)                         ││
+│  │   - reservation_requests.payment_transaction_id (FK)      ││
+│  │   - RPC: initiate_reservation_request_payment()          ││
+│  │   - RPC: calculate_reservation_cost()                    ││
+│  └──────────────────────────────────────────────────────────┘│
+└───────────────┬──────────────────────────────────────────────┘
+                │
+                │ Job Polling
+                ▼
+┌──────────────────────────────────────────────────────────────┐
+│         Payment Worker (Go + River)                           │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │ Workers:                                                  ││
+│  │   - CreateIntentWorker: Creates Stripe PaymentIntent     ││
+│  │   - WebhookHandler: Processes Stripe webhooks            ││
+│  │     * Gracefully ignores orphaned PaymentIntents         ││
+│  │                                                            ││
+│  │ Provider: StripeProvider                                  ││
+│  │   - Uses Stripe Go SDK                                    ││
+│  │   - Configured via STRIPE_SECRET_KEY env var             ││
+│  └──────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Implementation Details
+
+### 1. Database Schema (v0.13.0 Migration)
+
+**Core tables in `payments` schema:**
+
+```sql
+-- payments.transactions (managed by migration)
+CREATE TABLE payments.transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES metadata.civic_os_users(id),
+  amount NUMERIC(10,2) NOT NULL,
+  currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+  status VARCHAR(20) NOT NULL,  -- pending_intent, pending, succeeded, failed, canceled
+  provider VARCHAR(20) NOT NULL DEFAULT 'stripe',
+  provider_payment_id VARCHAR(255),  -- Stripe PaymentIntent ID
+  provider_client_secret TEXT,       -- For frontend Stripe.js
+  description TEXT,
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- RLS policies
+ALTER TABLE payments.transactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users see own payments" ON payments.transactions
+  FOR SELECT TO authenticated
+  USING (user_id = current_user_id());
+```
+
+**Example entity integration (community-center specific):**
+
+```sql
+-- reservation_requests.payment_transaction_id (example-specific FK)
+ALTER TABLE public.reservation_requests
+  ADD COLUMN payment_transaction_id UUID
+    REFERENCES payments.transactions(id) ON DELETE SET NULL;
+
+-- Helper function (example-specific)
+CREATE FUNCTION public.calculate_reservation_cost(
+  p_resource_id INT,
+  p_time_slot time_slot
+) RETURNS NUMERIC(10,2);
+
+-- Payment initiation RPC (example-specific)
+CREATE FUNCTION public.initiate_reservation_request_payment(
+  p_request_id BIGINT
+) RETURNS UUID;
+```
+
+### 2. Payment Property Type
+
+**SchemaService Detection:**
+
+```typescript
+// src/app/services/schema.service.ts
+if (col.column_name.endsWith('_transaction_id') &&
+    col.join_table === 'payment_transactions') {
+  return EntityPropertyType.Payment;
+}
+```
+
+**Display Component:**
+
+Uses `PaymentBadgeComponent` to show status with colored badge:
+- ✅ `succeeded` → Green badge with check icon
+- ⏱️ `pending`/`pending_intent` → Yellow badge with clock icon
+- ❌ `failed` → Red badge with error icon
+- 🚫 `canceled` → Gray badge with cancel icon
+
+**Edit Component:**
+
+Payment is read-only on Edit pages - uses same `PaymentBadgeComponent` for consistent display.
+
+### 3. Payment Flow
+
+**User initiates payment:**
+
+1. User creates `reservation_request` (unpaid, `payment_transaction_id` = NULL)
+2. User views detail page, sees "Pay Now" button
+3. Clicks "Pay Now" → calls `initiate_reservation_request_payment(request_id)`
+4. RPC:
+   - Calculates cost from `resource.hourly_rate` × `time_slot` duration
+   - Creates new `payments.transactions` record (status='pending_intent')
+   - Updates `reservation_requests.payment_transaction_id` = new payment ID
+   - Returns payment ID to frontend
+5. Trigger fires → enqueues River job `create_payment_intent`
+6. Worker processes job:
+   - Calls Stripe API to create PaymentIntent
+   - Updates transaction with `provider_payment_id` and `provider_client_secret`
+   - Sets status='pending'
+7. Frontend polls `payment_transactions` view until `client_secret` available
+8. Opens `PaymentCheckoutComponent` modal with Stripe Elements
+9. User enters card details → confirms payment via Stripe.js
+10. Stripe webhook arrives → webhook handler updates status='succeeded'
+11. Frontend polls for status change → closes modal, refreshes detail page
+
+**Retry Logic (NEW - 2025-11-22):**
+
+If payment fails and user retries:
+- RPC creates **NEW** transaction record
+- Updates `reservation_requests.payment_transaction_id` to new ID
+- Old transaction remains in DB as audit trail (status='failed')
+- Webhook handler gracefully ignores webhooks for orphaned PaymentIntents
+
+### 4. Frontend Components
+
+**PaymentCheckoutComponent** (`src/app/components/payment-checkout/`)
+- Standalone modal component
+- Polls for `client_secret` (worker creates PaymentIntent async)
+- Embeds Stripe Payment Element
+- Handles payment confirmation
+- Polls for webhook status update after Stripe confirms
+- Emits `paymentSuccess` event to trigger parent refresh
+
+**PaymentBadgeComponent** (`src/app/components/payment-badge/`) **NEW**
+- Reusable status badge
+- Used by both `DisplayPropertyComponent` and `EditPropertyComponent`
+- Consistent payment status display across all pages
+
+**DetailPage Integration:**
+- `canInitiatePayment$` observable checks:
+  - Entity is 'reservation_requests' (hardcoded for POC)
+  - Record status is 'Pending'
+  - Payment is null OR failed/canceled
+- "Pay Now" button calls domain-specific RPC
+- Modal opens on success, polls until client_secret ready
+- Refreshes record when modal closes (successful or not)
+
+### 5. Webhook Processing
+
+**Idempotency Pattern:**
+
+```go
+// Insert webhook record (deduplicate by provider_event_id)
+_, err = tx.Exec(ctx, `
+  INSERT INTO metadata.webhooks (provider, provider_event_id, event_type, payload)
+  VALUES ($1, $2, $3, $4)
+  ON CONFLICT (provider, provider_event_id) DO NOTHING
+  RETURNING id
+`, "stripe", event.ID, event.Type, eventJSON)
+
+if err == pgx.ErrNoRows {
+  // Duplicate - already processed
+  return nil  // Return 200 to Stripe
+}
+```
+
+**Orphaned PaymentIntent Handling:**
+
+When user retries failed payment, old PaymentIntent may still complete (if user had form open). Webhook handler now gracefully handles this:
+
+```go
+// handlePaymentIntentSucceeded
+result, err := tx.Exec(ctx, `
+  UPDATE payments.transactions
+  SET status = 'succeeded', updated_at = NOW()
+  WHERE provider_payment_id = $1
+`, paymentIntent.ID)
+
+if result.RowsAffected() == 0 {
+  // Payment not found - likely orphaned from retry
+  log.Printf("[Webhook] ⚠ Payment %s not found (likely orphaned from retry)", paymentIntent.ID)
+  return nil  // Return 200 to avoid Stripe retries
+}
+```
+
+---
+
+## What's Implemented vs Full Design
+
+### ✅ Implemented (POC Complete)
+
+- [x] Core `payments.transactions` table with RLS
+- [x] `Payment` property type detection and display
+- [x] `PaymentCheckoutComponent` with Stripe Elements
+- [x] `PaymentBadgeComponent` for consistent status display
+- [x] Payment initiation via domain-specific RPC
+- [x] River-based job queue for Stripe API calls
+- [x] Webhook processing with idempotency
+- [x] Retry logic with new transaction creation
+- [x] Orphaned PaymentIntent handling
+- [x] Frontend polling for async operations
+- [x] Edit page payment display (read-only)
+- [x] Detail page "Pay Now" button with conditional logic
+
+### ❌ Not Implemented (Deferred)
+
+- [ ] Polymorphic `entity_type` + `entity_id` pattern
+- [ ] Metadata-driven payment initiation (no `payment_initiation_rpc` column)
+- [ ] Generic `canInitiatePayment$` logic (currently hardcoded for reservations)
+- [ ] Automatic entity `payment_status` sync via triggers
+- [ ] Email notifications (SMTP worker)
+- [ ] Refund processing
+- [ ] Capture timing configuration (immediate vs deferred)
+- [ ] Admin payment management UI (SystemListPage/SystemDetailPage)
+- [ ] Multiple payment providers (only Stripe implemented)
+- [ ] Recurring payments / subscriptions
+- [ ] Multi-currency support
+
+---
+
+## Testing the POC
+
+**Prerequisites:**
+1. Stripe account with test mode API keys
+2. Stripe CLI installed (`stripe listen --forward-to http://localhost:8081/webhooks/stripe`)
+3. Community Center example running (`examples/community-center/`)
+
+**Test Flow:**
+
+```bash
+# 1. Start services
+cd examples/community-center
+docker-compose up -d
+
+# 2. Start Stripe webhook listener
+stripe listen --forward-to http://localhost:8081/webhooks/stripe
+
+# 3. Test payment flow
+# - Create reservation request
+# - Click "Pay Now"
+# - Use test card: 4242 4242 4242 4242
+# - Verify status updates to "succeeded"
+
+# 4. Test failed payment retry
+# - Use test card: 4000 0000 0000 0341 (declined)
+# - Verify status = "failed"
+# - Click "Pay Now" again
+# - Verify NEW transaction created
+# - Complete payment successfully
+# - Check database: SELECT * FROM payments.transactions;
+#   Should show 2 records (failed + succeeded)
+```
+
+**Database Verification:**
+
+```sql
+-- Check transactions
+SELECT id, provider_payment_id, status, amount, created_at
+FROM payments.transactions
+ORDER BY created_at DESC;
+
+-- Check entity link
+SELECT id, display_name, payment_transaction_id
+FROM reservation_requests
+WHERE payment_transaction_id IS NOT NULL;
+
+-- Check webhooks processed
+SELECT provider_event_id, event_type, processed, created_at
+FROM metadata.webhooks
+ORDER BY created_at DESC;
+```
+
+---
+
+## Key Files
+
+### Core Framework (v0.13.0 Migration)
+
+- `postgres/migrations/deploy/v0-13-0-add-payments.sql` - Core payment schema
+- `postgres/migrations/revert/v0-13-0-add-payments.sql` - Rollback script
+- `services/payment-worker/` - Go microservice (CreateIntentWorker, WebhookHandler)
+
+### Frontend Components
+
+- `src/app/components/payment-checkout/payment-checkout.component.ts` - Stripe checkout modal
+- `src/app/components/payment-badge/payment-badge.component.ts` - **NEW** - Reusable status badge
+- `src/app/components/display-property/display-property.component.html` - Uses PaymentBadgeComponent
+- `src/app/components/edit-property/edit-property.component.html` - Uses PaymentBadgeComponent
+- `src/app/pages/detail/detail.page.ts` - "Pay Now" button logic
+
+### Example Integration (Community Center)
+
+- `examples/community-center/init-scripts/10_payment_integration.sql` - Example-specific setup
+  - `reservation_requests.payment_transaction_id` FK
+  - `calculate_reservation_cost()` function
+  - `initiate_reservation_request_payment()` RPC
+  - Sample hourly rates for resources
+
+### Configuration
+
+- `.env` files:
+  - `STRIPE_SECRET_KEY` - Stripe API key (test mode)
+  - `STRIPE_PUBLISHABLE_KEY` - Frontend Stripe.js key
+  - `STRIPE_WEBHOOK_SECRET` - Webhook signature verification
+
+---
+
+## Known Limitations & Future Work
+
+### 1. Hardcoded Logic
+
+**Problem:** DetailPage has hardcoded check for 'reservation_requests' entity type.
+
+**Future:** Add `payment_initiation_rpc` column to `metadata.entities` for metadata-driven configuration.
+
+```sql
+-- Future enhancement
+ALTER TABLE metadata.entities
+  ADD COLUMN payment_initiation_rpc VARCHAR(255);
+
+UPDATE metadata.entities
+SET payment_initiation_rpc = 'initiate_reservation_request_payment'
+WHERE table_name = 'reservation_requests';
+```
+
+### 2. Single Transaction Per Entity
+
+**Problem:** Current FK pattern only allows one active payment per entity.
+
+**Future:** Switch to polymorphic pattern with `entity_type` + `entity_id` for multiple payments (deposits, final payment, etc.).
+
+### 3. No Refund UI
+
+**Problem:** No admin interface for processing refunds.
+
+**Future:** Implement SystemListPage/SystemDetailPage for payment management with refund capabilities.
+
+### 4. Limited Error Handling
+
+**Problem:** Payment failures don't provide detailed error messages to users.
+
+**Future:** Surface Stripe decline codes and suggest next steps (try different card, contact bank, etc.).
+
+### 5. No Email Notifications
+
+**Problem:** Users don't receive payment confirmation emails.
+
+**Future:** Implement SendEmailWorker with templates for payment_succeeded, payment_failed events.
+
+---
+
+## Migration Path to Full Design
+
+When ready to productionize:
+
+1. **Add polymorphic columns** to `payments.transactions`:
+   ```sql
+   ALTER TABLE payments.transactions
+     ADD COLUMN entity_type VARCHAR(50),
+     ADD COLUMN entity_id VARCHAR(50);
+   ```
+
+2. **Create generic RPC** `initiate_payment(entity_type, entity_id, amount, description)`:
+   - Replaces domain-specific RPCs
+   - Uses metadata to determine which entities support payments
+
+3. **Add metadata columns** to `metadata.entities`:
+   - `payment_initiation_rpc` - Custom RPC name (optional override)
+   - `payment_capture_mode` - 'immediate' or 'deferred'
+
+4. **Implement entity sync trigger** `update_entity_payment_status()`:
+   - Automatically updates `entity.payment_status` when payment succeeds/fails
+   - Requires standardized `payment_status` column on payable entities
+
+5. **Build admin UI** with SystemListPage/SystemDetailPage:
+   - Payment history with search/filter
+   - Refund processing
+   - Transaction export
+
+6. **Add email notifications** via consolidated-worker SendEmailWorker:
+   - Payment confirmation emails
+   - Failed payment notifications
+   - Refund confirmations
+
+---
+
+## Changelog
+
+- **v1.0 (2025-11-22)**: Initial POC implementation summary
+  - Property Type approach with direct FK pattern
+  - Core payment flow working (create → pay → webhook → status update)
+  - Retry logic with new transaction creation
+  - Orphaned PaymentIntent handling in webhooks
+  - PaymentBadgeComponent refactoring for code reuse
+  - Edit page payment display (read-only)

@@ -15,3 +15,5 @@ v0-11-0-add-user-roles [v0-11-0-add-notifications] 2025-11-08T02:00:00Z Daniel K
 v0-12-0-add-map-widget-type [v0-11-0-add-user-roles] 2025-01-15T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Dashboard Phase 2: Add map widget type with clustering support
 v0-12-2-add-navigation-widget-type [v0-12-0-add-map-widget-type] 2025-11-19T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add dashboard_navigation widget type for storymap navigation
 v0-12-3-add-calendar-widget-type [v0-12-2-add-navigation-widget-type] 2025-11-21T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Dashboard Phase 2: Add calendar widget type for time_slot visualization
+v0-13-0-add-payments-poc [v0-12-3-add-calendar-widget-type] 2025-01-22T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Payment Processing POC: Minimal vertical slice with sync RPC, River jobs, and Stripe integration
+v0-13-0-fix-dashboards-cascade [v0-13-0-add-payments-poc] 2025-11-23T00:20:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix dashboards.created_by constraint to allow user deletion

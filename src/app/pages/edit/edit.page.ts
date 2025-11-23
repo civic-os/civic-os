@@ -84,45 +84,53 @@ export class EditPage {
       return of([]);
     }
   }));
-  public data$: Observable<any> = this.properties$.pipe(mergeMap(props => {
-    if(props && props.length > 0 && this.entityKey) {
-      let columns = props
-        .map(x => SchemaService.propertyToSelectStringForEdit(x));
-      return this.data.getData({key: this.entityKey, entityId: this.entityId, fields: columns})
-        .pipe(map(x => x[0]));
-    } else {
-      return of(undefined);
-    }
-  }),
-  tap(data => {
-    if (data && this.currentProps.length > 0) {
-      // Create form with actual data values, not defaults
-      // M:M properties are filtered out, so just map regular properties
-      const formConfig = Object.fromEntries(
-        this.currentProps.map(p => [
-          p.column_name,
-          new FormControl(
-            this.transformValueForControl(p, (data as any)[p.column_name]),
-            SchemaService.getFormValidatorsForProperty(p)
-          )
-        ])
-      );
+  public data$: Observable<any> = this.properties$.pipe(
+    tap((props) => {
+      this.dataLoading.set(true);
+      this.loading.set(true);
+    }),  // Set loading state at start
+    mergeMap(props => {
+      if(props && props.length > 0 && this.entityKey) {
+        let columns = props
+          .map(x => SchemaService.propertyToSelectStringForEdit(x));
+        return this.data.getData({key: this.entityKey, entityId: this.entityId, fields: columns})
+          .pipe(map(x => x[0]));
+      } else {
+        this.dataLoading.set(false);  // Clear loading if no data to fetch
+        return of(undefined);
+      }
+    }),
+    tap(data => {
+      if (data && this.currentProps.length > 0) {
+        // Create form with actual data values, not defaults
+        // M:M properties are filtered out, so just map regular properties
+        const formConfig = Object.fromEntries(
+          this.currentProps.map(p => [
+            p.column_name,
+            new FormControl(
+              this.transformValueForControl(p, (data as any)[p.column_name]),
+              SchemaService.getFormValidatorsForProperty(p)
+            )
+          ])
+        );
 
-      this.editForm = new FormGroup(formConfig);
+        this.editForm = new FormGroup(formConfig);
 
-      // Subscribe to form status changes to reactively hide error banner
-      this.editForm.statusChanges.subscribe(status => {
-        if (status === 'VALID' && this.showValidationError()) {
-          this.showValidationError.set(false);
-        }
-      });
-    }
-    this.loading.set(false);
-  })
+        // Subscribe to form status changes to reactively hide error banner
+        this.editForm.statusChanges.subscribe(status => {
+          if (status === 'VALID' && this.showValidationError()) {
+            this.showValidationError.set(false);
+          }
+        });
+      }
+      this.loading.set(false);  // Clear loading state after data loads
+      this.dataLoading.set(false);  // Clear data loading state
+    })
   );
 
   public editForm?: FormGroup;
   public loading = signal(true);
+  public dataLoading = signal(true);  // Track data fetch state
   public showValidationError = signal(false);
   private currentProps: SchemaEntityProperty[] = [];
 

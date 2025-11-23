@@ -41,6 +41,13 @@ Civic OS uses a containerized architecture with six main components:
 5. **S3 Signer** - Go microservice that generates presigned upload URLs via River job queue
 6. **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails via River job queue
 
+**Optional Components** (feature-specific):
+7. **Payment Worker** - Go microservice for Stripe payment processing with HTTP webhook endpoint (port 8080)
+   - Only required if using payment processing features
+   - Handles payment intent creation via River job queue
+   - Exposes HTTP endpoint for Stripe webhook callbacks with signature verification
+   - Requires `STRIPE_API_KEY` and `STRIPE_WEBHOOK_SECRET` environment variables
+
 All components are configured via environment variables, enabling the same container images to run across dev, staging, and production environments.
 
 **Version Compatibility**: The migrations container version MUST match the frontend/postgrest versions to ensure schema compatibility with the application.
@@ -97,7 +104,7 @@ GRANT CONNECT ON DATABASE civic_os_prod TO authenticator;
 
 ```
 ┌─────────────────────────────────────┐
-│  Internet                           │
+│  Internet / Stripe Webhooks         │
 └──────────────┬──────────────────────┘
                │
          ┌─────▼─────┐
@@ -105,18 +112,28 @@ GRANT CONNECT ON DATABASE civic_os_prod TO authenticator;
          │  Port 443 │
          └─────┬─────┘
                │
-      ┌────────┴────────┐
-      │                 │
-┌─────▼─────┐    ┌─────▼─────┐
-│ Frontend  │    │ PostgREST │
-│ Port 80   │    │ Port 3000 │
-└───────────┘    └─────┬─────┘
+      ┌────────┴────────────────┐
+      │                 │       │
+┌─────▼─────┐    ┌─────▼─────┐ │
+│ Frontend  │    │ PostgREST │ │
+│ Port 80   │    │ Port 3000 │ │
+└───────────┘    └─────┬─────┘ │
+                       │       │
+                ┌──────▼───────▼──────┐
+                │ PostgreSQL          │
+                │ Port 5432           │
+                └──────┬──────────────┘
                        │
-                ┌──────▼──────┐
-                │ PostgreSQL  │
-                │ Port 5432   │
-                └─────────────┘
+              ┌────────┴────────┐
+              │                 │
+        ┌─────▼─────┐    ┌─────▼──────────┐
+        │Consolidated│   │Payment Worker  │
+        │Worker (Go) │   │(Go + HTTP)     │
+        │           │    │Port 8080       │
+        └───────────┘    │(Optional)      │
+                         └────────────────┘
 ```
+**Note**: Payment Worker is optional and only required if using payment processing features.
 
 ### High-Availability Architecture (Kubernetes)
 
@@ -126,19 +143,26 @@ GRANT CONNECT ON DATABASE civic_os_prod TO authenticator;
 │  SSL Termination                       │
 └────────────┬───────────────────────────┘
              │
-    ┌────────┴─────────┐
-    │                  │
-┌───▼────┐       ┌────▼────┐
-│Frontend│       │PostgREST│
-│ (3x)   │       │  (3x)   │
-└────────┘       └────┬────┘
-                      │
-               ┌──────▼──────┐
-               │ PostgreSQL  │
-               │ (StatefulSet│
-               │  + PVC)     │
-               └─────────────┘
+    ┌────────┴────────────────┐
+    │         │                │
+┌───▼────┐  ┌▼────────┐  ┌───▼────────┐
+│Frontend│  │PostgREST│  │Payment HTTP│
+│ (3x)   │  │  (3x)   │  │  (2x)      │
+└────────┘  └────┬────┘  └─────┬──────┘
+                 │              │
+          ┌──────▼──────────────▼──────┐
+          │ PostgreSQL                 │
+          │ (StatefulSet + PVC)        │
+          └──────┬─────────────────────┘
+                 │
+        ┌────────┴────────┐
+        │                 │
+  ┌─────▼─────┐    ┌─────▼─────┐
+  │Consolidated│   │Payment     │
+  │Worker (3x) │   │Worker (2x) │
+  └────────────┘   └────────────┘
 ```
+**Note**: Payment Worker components are optional and only required if using payment processing features.
 
 ---
 
@@ -199,6 +223,22 @@ S3_ENDPOINT=  # Leave empty for real AWS S3, set for MinIO/S3-compatible storage
 # Thumbnail Worker Configuration
 THUMBNAIL_MAX_WORKERS=5  # Concurrent workers (tune based on CPU/memory)
 # Tuning: Low memory (512Mi)=2-3, Medium (1Gi)=5-7, High (2Gi)=10-12
+
+# ======================================
+# Payment Worker Configuration (Optional)
+# Required only if using payment processing features
+# ======================================
+# Stripe API credentials (get from https://dashboard.stripe.com/apikeys)
+STRIPE_API_KEY=sk_live_your_secret_key  # CRITICAL: Use live keys in production
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret  # From Stripe webhook configuration
+
+# Payment processing configuration
+PAYMENT_CURRENCY=USD  # Default: USD
+PAYMENT_WORKER_COUNT=1  # River workers for payment intent creation
+PAYMENT_WORKER_DB_MAX_CONNS=4  # Database connection pool size
+
+# Webhook HTTP server configuration
+WEBHOOK_PORT=8080  # Internal port for Stripe webhook callbacks
 
 # ======================================
 # Container Registry
@@ -327,6 +367,12 @@ data:
 kubectl create secret generic postgres-credentials \
   --from-literal=password='YOUR_SECURE_PASSWORD' \
   -n civic-os-prod
+
+# Create Stripe credentials (only if using payment processing)
+kubectl create secret generic stripe-credentials \
+  --from-literal=api-key='sk_live_YOUR_STRIPE_SECRET_KEY' \
+  --from-literal=webhook-secret='whsec_YOUR_WEBHOOK_SECRET' \
+  -n civic-os-prod
 ```
 
 ### Step 4: Deploy PostgreSQL
@@ -448,7 +494,116 @@ spec:
         - containerPort: 80
 ```
 
-### Step 7: Create Ingress
+### Step 7: Deploy Payment Worker (Optional)
+
+**IMPORTANT**: Only deploy if using payment processing features. Requires Stripe credentials.
+
+**payment-worker-deployment.yaml:**
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-worker
+  namespace: civic-os-prod
+spec:
+  replicas: 2  # For high availability
+  selector:
+    matchLabels:
+      app: payment-worker
+      component: payment-worker
+  template:
+    metadata:
+      labels:
+        app: payment-worker
+        component: payment-worker
+    spec:
+      containers:
+      - name: payment-worker
+        image: ghcr.io/civic-os/payment-worker:v0.3.0
+        env:
+        # Database Configuration
+        - name: DATABASE_URL
+          value: postgres://postgres:$(POSTGRES_PASSWORD)@postgres:5432/civic_os_prod
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+        - name: DB_MAX_CONNS
+          value: "4"
+        - name: DB_MIN_CONNS
+          value: "1"
+
+        # Stripe Configuration (REQUIRED)
+        - name: STRIPE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-credentials
+              key: api-key
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: stripe-credentials
+              key: webhook-secret
+
+        # Payment Configuration
+        - name: PAYMENT_CURRENCY
+          value: "USD"
+        - name: RIVER_WORKER_COUNT
+          value: "1"
+        - name: WEBHOOK_PORT
+          value: "8080"
+
+        ports:
+        - name: webhook
+          containerPort: 8080
+          protocol: TCP
+
+        # Resource limits (tune based on traffic)
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: webhook
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: webhook
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-worker
+  namespace: civic-os-prod
+spec:
+  selector:
+    app: payment-worker
+  ports:
+  - name: webhook
+    port: 8080
+    targetPort: webhook
+    protocol: TCP
+  type: ClusterIP
+```
+
+**Apply payment worker:**
+```bash
+kubectl apply -f payment-worker-deployment.yaml
+```
+
+### Step 8: Create Ingress
 
 **ingress.yaml:**
 ```yaml
@@ -460,6 +615,8 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Increase body size limit for webhook payloads (default 1m)
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
 spec:
   tls:
   - hosts:
@@ -480,6 +637,15 @@ spec:
   - host: api.yourdomain.com
     http:
       paths:
+      # Stripe webhook endpoint (must be BEFORE /rpc catch-all)
+      - path: /webhooks/stripe
+        pathType: Exact
+        backend:
+          service:
+            name: payment-worker
+            port:
+              number: 8080
+      # PostgREST API (all other requests)
       - path: /
         pathType: Prefix
         backend:
@@ -489,6 +655,12 @@ spec:
               number: 3000
 ```
 
+**SECURITY NOTE**: The webhook endpoint is publicly accessible (required for Stripe to deliver events). Security is enforced through:
+1. **Signature verification** - Only requests with valid HMAC signatures are processed
+2. **TLS termination** - Ingress enforces HTTPS (Stripe requires TLS 1.2+)
+3. **Request size limits** - 1MB max payload size prevents abuse
+4. **Idempotency protection** - Duplicate events are rejected at database level
+
 ### Apply Manifests
 
 ```bash
@@ -496,8 +668,47 @@ kubectl apply -f configmap.yaml
 kubectl apply -f postgres-statefulset.yaml
 kubectl apply -f postgrest-deployment.yaml
 kubectl apply -f frontend-deployment.yaml
+kubectl apply -f payment-worker-deployment.yaml  # Optional: Only if using payments
 kubectl apply -f ingress.yaml
 ```
+
+### Stripe Webhook Configuration (Production)
+
+After deploying the payment-worker service, configure Stripe to send webhooks to your production endpoint:
+
+**Step 1: Create Webhook Endpoint in Stripe Dashboard**
+1. Go to https://dashboard.stripe.com/webhooks
+2. Click "Add endpoint"
+3. Enter URL: `https://api.yourdomain.com/webhooks/stripe`
+4. Select events to listen for:
+   - `payment_intent.succeeded`
+   - `payment_intent.payment_failed`
+   - `payment_intent.canceled`
+5. Click "Add endpoint"
+
+**Step 2: Update Webhook Secret**
+
+Stripe will generate a webhook signing secret (starts with `whsec_`). Update your Kubernetes secret:
+
+```bash
+# Update webhook secret with production value
+kubectl create secret generic stripe-credentials \
+  --from-literal=api-key='sk_live_YOUR_STRIPE_SECRET_KEY' \
+  --from-literal=webhook-secret='whsec_YOUR_PRODUCTION_WEBHOOK_SECRET' \
+  --dry-run=client -o yaml | kubectl apply -n civic-os-prod -f -
+
+# Restart payment-worker to pick up new secret
+kubectl rollout restart deployment/payment-worker -n civic-os-prod
+```
+
+**Step 3: Test Webhook Delivery**
+
+After deployment, use Stripe Dashboard to send a test webhook:
+1. Go to your webhook endpoint in Stripe Dashboard
+2. Click "Send test webhook"
+3. Select `payment_intent.succeeded`
+4. Check payment-worker logs: `kubectl logs -l app=payment-worker -n civic-os-prod`
+5. Verify 200 OK response in Stripe Dashboard
 
 ---
 
@@ -844,6 +1055,67 @@ services:
 - **Read-only filesystems** where possible
 - **Resource limits** on all containers
 
+### 6. Payment Webhook Security (if using payment-worker)
+
+**CRITICAL**: The payment webhook endpoint is publicly accessible by design (Stripe must be able to send events). Security is enforced through multiple layers:
+
+**Signature Verification (Primary Defense):**
+- All webhook requests **MUST** have valid HMAC-SHA256 signatures
+- Signatures are verified using `STRIPE_WEBHOOK_SECRET` before processing
+- Requests with invalid/missing signatures are rejected with 400 Bad Request
+- Prevents unauthorized webhook submissions and replay attacks
+
+**TLS/HTTPS Requirements:**
+- Stripe requires TLS 1.2 or higher for all webhook deliveries
+- Configure TLS termination at ingress/load balancer level
+- Never expose HTTP webhook endpoints (port 8080) directly to internet
+- Use cert-manager or similar for automatic certificate renewal
+
+**Request Size Limits:**
+- Webhook payloads are limited to 64KB (enforced by payment-worker)
+- Ingress should enforce 1MB limit to prevent abuse
+- Prevents memory exhaustion attacks
+
+**Idempotency Protection:**
+- Duplicate webhook events are rejected at database level
+- `UNIQUE (provider, provider_event_id)` constraint in `metadata.webhooks` table
+- Prevents double-processing of events from Stripe retries
+
+**Network Isolation:**
+- Payment-worker should NOT have direct internet access (only database + Stripe API)
+- Use egress firewall rules to restrict outbound connections
+- Only allow connections to Stripe API endpoints (api.stripe.com)
+
+**Monitoring & Alerting:**
+- Monitor failed signature verifications (potential attack indicator)
+- Alert on high volume of webhook requests (DDoS/abuse detection)
+- Track webhook processing errors in application logs
+- Set up alerts for Stripe API errors
+
+**Example nginx configuration for webhook endpoint:**
+```nginx
+location /webhooks/stripe {
+    # Rate limiting (100 requests/minute per IP)
+    limit_req zone=webhook_limit burst=10 nodelay;
+
+    # Size limits
+    client_max_body_size 1m;
+
+    # Timeouts
+    proxy_connect_timeout 5s;
+    proxy_send_timeout 5s;
+    proxy_read_timeout 10s;
+
+    # Forward to payment-worker
+    proxy_pass http://payment-worker:8080;
+}
+```
+
+**Stripe IP Whitelisting (Optional):**
+- Stripe publishes webhook IP ranges: https://stripe.com/files/ips/ips_webhooks.txt
+- Can configure ingress to only allow requests from Stripe IPs
+- Adds defense-in-depth but signature verification is still required
+
 ---
 
 ## Troubleshooting
@@ -993,6 +1265,76 @@ spec:
 -- Enable query logging
 ALTER SYSTEM SET log_min_duration_statement = 1000;  -- Log queries > 1s
 SELECT pg_reload_conf();
+```
+
+### Payment Worker Issues (if deployed)
+
+**Webhook 400 errors in Stripe Dashboard:**
+```bash
+# Check payment-worker logs for signature verification failures
+docker logs payment-worker
+# OR for Kubernetes:
+kubectl logs -l app=payment-worker -n civic-os-prod
+
+# Common causes:
+# 1. Wrong webhook secret (test vs live mode mismatch)
+# 2. API version mismatch (check IgnoreAPIVersionMismatch setting)
+# 3. Missing Stripe-Signature header
+```
+
+**Webhook 500 errors:**
+```bash
+# Check for database connection issues
+docker exec -it payment-worker /bin/sh -c 'echo "SELECT 1" | psql $DATABASE_URL'
+
+# Check for missing payment records (webhook received for non-existent payment)
+docker exec -it postgres_db psql -U postgres -d civic_os_prod -c \
+  "SELECT id, stripe_payment_intent_id, status FROM public.payment_transactions ORDER BY created_at DESC LIMIT 10;"
+```
+
+**Payment intent creation timing out:**
+```bash
+# Check River job queue for stalled jobs
+docker exec -it postgres_db psql -U postgres -d civic_os_prod -c \
+  "SELECT id, kind, state, errors FROM metadata.river_job WHERE kind = 'create_payment_intent' ORDER BY created_at DESC LIMIT 10;"
+
+# Check Stripe API connectivity
+docker exec -it payment-worker /bin/sh -c 'curl -s https://api.stripe.com/healthcheck'
+```
+
+**Health check failing:**
+```bash
+# Test health endpoint directly
+curl http://localhost:8081/health
+# OR for Kubernetes:
+kubectl port-forward svc/payment-worker 8080:8080 -n civic-os-prod
+curl http://localhost:8080/health
+
+# Expected: {"status":"healthy"}
+```
+
+**Monitoring payment processing:**
+```sql
+-- View recent payment transactions
+SELECT id, user_id, amount, currency, status,
+       stripe_payment_intent_id, created_at
+FROM public.payment_transactions
+WHERE created_at > NOW() - INTERVAL '1 hour'
+ORDER BY created_at DESC;
+
+-- View recent webhook events
+SELECT id, provider, event_type, signature_verified,
+       processed, created_at, error_message
+FROM metadata.webhooks
+WHERE created_at > NOW() - INTERVAL '1 hour'
+ORDER BY created_at DESC;
+
+-- Check for failed webhooks
+SELECT event_type, COUNT(*) as failed_count,
+       MAX(created_at) as last_failure
+FROM metadata.webhooks
+WHERE processed = FALSE AND error_message IS NOT NULL
+GROUP BY event_type;
 ```
 
 ---

@@ -193,6 +193,11 @@
     </div>
   }
 
+  @if (propType() == EntityPropertyType.Payment) {
+    <!-- Payment is display-only (not editable), show status badge -->
+    <app-payment-badge [payment]="form().controls[prop().column_name].value"></app-payment-badge>
+  }
+
   @if (propType() == EntityPropertyType.Unknown) {
   }
 

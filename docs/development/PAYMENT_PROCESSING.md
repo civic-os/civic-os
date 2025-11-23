@@ -1,12 +1,24 @@
 # Payment Processing Microservice - Design Document
 
-**Version:** 2.2
+**Version:** 2.3
 **Target Release:** Phase 0 - Phase 5 (initial implementation)
-**Status:** Design Phase
+**Status:** POC Complete (see [PAYMENT_POC_IMPLEMENTATION.md](./PAYMENT_POC_IMPLEMENTATION.md))
 **Author:** Civic OS Development Team
-**Last Updated:** 2025-11-21
+**Last Updated:** 2025-11-22
+
+**📋 Quick Links:**
+- ✅ **[POC Implementation Summary](./PAYMENT_POC_IMPLEMENTATION.md)** - What's been built (Property Type approach)
+- 📊 **[Payment State Diagram](./PAYMENT_STATE_DIAGRAM.md)** - Status flow visualization
+- 📘 **This Document** - Full design specification (polymorphic approach for production)
 
 **Changelog:**
+- v2.3 (2025-11-22): POC completion status update
+  - Property Type approach implemented (direct FK pattern)
+  - Core payment flow working (create → pay → webhook → status update)
+  - PaymentBadgeComponent for consistent UI display
+  - Retry logic with new transaction creation + orphaned PaymentIntent handling
+  - See [PAYMENT_POC_IMPLEMENTATION.md](./PAYMENT_POC_IMPLEMENTATION.md) for details
+  - Full polymorphic design (this doc) deferred to production implementation
 - v2.2 (2025-11-21): Schema and service architecture revision
   - Moved payment tables to separate `payments` schema (prevents metadata pollution)
   - Separated payment-worker from consolidated-worker (optionality, bounded context)

@@ -47,6 +47,9 @@ declare global {
         endpoint: string;
         bucket: string;
       };
+      stripe: {
+        publishableKey: string;
+      };
       matomo?: {
         url: string;
         siteId: string;
@@ -60,10 +63,15 @@ declare global {
  * Get PostgREST API base URL.
  * Used by all data services for HTTP requests.
  *
- * @returns PostgREST URL (e.g., "http://localhost:3000/" or "https://api.example.com/")
+ * IMPORTANT: This function guarantees the URL WILL have a trailing slash.
+ * Call sites should concatenate without leading slashes: getPostgrestUrl() + 'rpc/function_name'
+ *
+ * @returns PostgREST URL WITH trailing slash (e.g., "http://localhost:3000/" or "https://api.example.com/")
  */
 export function getPostgrestUrl(): string {
-  return window.civicOsConfig?.postgrestUrl || environment.postgrestUrl;
+  const url = window.civicOsConfig?.postgrestUrl || environment.postgrestUrl;
+  // Normalize: ensure trailing slash to allow call sites to concatenate without leading slashes
+  return url.endsWith('/') ? url : url + '/';
 }
 
 /**
@@ -143,4 +151,19 @@ export function getMatomoConfig(): { url: string | null; siteId: string | null; 
  */
 export function getApiDocsUrl(): string {
   return window.civicOsConfig?.swaggerUrl || environment.swaggerUrl;
+}
+
+/**
+ * Get Stripe publishable key for client-side initialization.
+ * Used by PaymentCheckoutComponent to initialize Stripe.js.
+ *
+ * IMPORTANT: This is the PUBLISHABLE key (pk_test_... or pk_live_...), not the secret key.
+ * The publishable key is safe to expose in client-side code.
+ *
+ * @returns Stripe publishable key
+ * @example
+ * const stripe = Stripe(getStripePublishableKey());
+ */
+export function getStripePublishableKey(): string {
+  return window.civicOsConfig?.stripe.publishableKey || environment.stripe.publishableKey;
 }

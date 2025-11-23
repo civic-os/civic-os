@@ -121,13 +121,36 @@ export enum EntityPropertyType {
     File,
     FileImage,
     FilePDF,
+    Payment,
 }
+
+/**
+ * Payment transaction value from payments.transactions view.
+ * Returned when a Payment property type is embedded in entity data.
+ */
+export interface PaymentValue {
+    id: string;  // UUID
+    status: 'pending_intent' | 'pending' | 'succeeded' | 'failed' | 'canceled';
+    amount: number;
+    currency: string;
+    display_name: string;
+    provider_client_secret?: string;
+    error_message?: string;
+    created_at: string;
+}
+
+/**
+ * Valid types for entity property values.
+ * Entities can have various column types that map to these TypeScript types.
+ */
+export type EntityPropertyValue = string | number | boolean | null | object;
 
 export interface EntityData {
     id: number,
     created_at: string,
     updated_at: string,
     display_name: string,
+    [key: string]: EntityPropertyValue; // Allow dynamic properties for entity-specific columns
 }
 
 /**

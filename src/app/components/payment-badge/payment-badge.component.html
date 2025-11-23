@@ -1,0 +1,16 @@
+<div class="badge gap-2 whitespace-normal h-auto min-h-[2rem]"
+     [class.badge-success]="payment()?.status === 'succeeded'"
+     [class.badge-warning]="payment()?.status === 'pending' || payment()?.status === 'pending_intent'"
+     [class.badge-error]="payment()?.status === 'failed'"
+     [class.badge-ghost]="payment()?.status === 'canceled'">
+  @if (payment()?.status === 'succeeded') {
+    <span class="material-symbols-outlined text-xs shrink-0">check_circle</span>
+  } @else if (payment()?.status === 'pending' || payment()?.status === 'pending_intent') {
+    <span class="material-symbols-outlined text-xs shrink-0">schedule</span>
+  } @else if (payment()?.status === 'failed') {
+    <span class="material-symbols-outlined text-xs shrink-0">error</span>
+  } @else if (payment()?.status === 'canceled') {
+    <span class="material-symbols-outlined text-xs shrink-0">cancel</span>
+  }
+  {{ payment()?.display_name || 'No payment' }}
+</div>

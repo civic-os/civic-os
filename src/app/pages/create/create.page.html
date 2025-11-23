@@ -48,6 +48,7 @@
     }
     <app-dialog #successDialog>
       <div class="flex flex-col gap-2 w-full">
+        <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToDetail()">View created {{entity.display_name}}</button>
         <button class="btn whitespace-normal h-auto min-h-12" (click)="navToCreate(entity.table_name)">Create another {{entity.display_name}}</button>
         <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
       </div>

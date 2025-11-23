@@ -33,6 +33,9 @@ export interface Environment {
         endpoint: string,  // Public S3 endpoint (browser-accessible)
         bucket: string
     },
+    stripe: {
+        publishableKey: string  // Stripe publishable key (pk_test_... or pk_live_...)
+    },
     matomo?: {
         url: string,
         siteId: string,

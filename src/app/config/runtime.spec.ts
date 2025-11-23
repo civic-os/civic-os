@@ -50,7 +50,8 @@ describe('Runtime Configuration Helpers', () => {
         swaggerUrl: '',
         keycloak: { url: '', realm: '', clientId: '' },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
-        s3: { endpoint: '', bucket: '' }
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       expect(getPostgrestUrl()).toBe('https://api.example.com/');
@@ -76,7 +77,8 @@ describe('Runtime Configuration Helpers', () => {
           clientId: 'my-client'
         },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
-        s3: { endpoint: '', bucket: '' }
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       const config = getKeycloakConfig();
@@ -108,7 +110,8 @@ describe('Runtime Configuration Helpers', () => {
           defaultCenter: [42.5, -83.0],
           defaultZoom: 12
         },
-        s3: { endpoint: '', bucket: '' }
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       const config = getMapConfig();
@@ -130,7 +133,8 @@ describe('Runtime Configuration Helpers', () => {
         s3: {
           endpoint: 'https://s3.example.com',
           bucket: 'my-bucket'
-        }
+        },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       const config = getS3Config();
@@ -151,7 +155,8 @@ describe('Runtime Configuration Helpers', () => {
           clientId: 'myclient'
         },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
-        s3: { endpoint: '', bucket: '' }
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       const accountUrl = getKeycloakAccountUrl();
@@ -171,7 +176,8 @@ describe('Runtime Configuration Helpers', () => {
           clientId: 'test-client'
         },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
-        s3: { endpoint: '', bucket: '' }
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       const accountUrl = getKeycloakAccountUrl();
@@ -202,7 +208,8 @@ describe('Runtime Configuration Helpers', () => {
           clientId: 'my-client-id'
         },
         map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
-        s3: { endpoint: '', bucket: '' }
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' }
       };
 
       const accountUrl = getKeycloakAccountUrl();

@@ -83,9 +83,19 @@ describe('SchemaEditorPage - System Type Filtering', () => {
       expect(result.has('civic_os_users')).toBe(true);
     });
 
-    it('should return exactly 2 system types', () => {
+    it('should return payment_transactions as system type', () => {
       const result = detectSystemTypes();
-      expect(result.size).toBe(2);
+      expect(result.has('payment_transactions')).toBe(true);
+    });
+
+    it('should return transactions as system type', () => {
+      const result = detectSystemTypes();
+      expect(result.has('transactions')).toBe(true);
+    });
+
+    it('should return exactly 4 system types', () => {
+      const result = detectSystemTypes();
+      expect(result.size).toBe(4);
     });
 
     it('should not include domain tables', () => {

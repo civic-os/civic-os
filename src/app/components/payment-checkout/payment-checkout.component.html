@@ -1,0 +1,79 @@
+<!-- Payment Checkout Modal -->
+@if (isOpen()) {
+  <div class="modal modal-open">
+    <div class="modal-box max-w-lg">
+      <h3 class="font-bold text-lg mb-4">
+        <span class="material-symbols-outlined align-middle mr-2">payment</span>
+        Complete Payment
+      </h3>
+
+      <!-- Amount Display -->
+      @if (amount()) {
+        <div class="alert alert-info mb-4">
+          <span class="material-symbols-outlined">info</span>
+          <span>Amount: ${{ amount()?.toFixed(2) }}</span>
+        </div>
+      }
+
+      <!-- Error Alert -->
+      @if (error()) {
+        <div class="alert alert-error mb-4">
+          <span class="material-symbols-outlined">error</span>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="flex flex-col items-center justify-center py-8">
+          <span class="loading loading-spinner loading-lg mb-4"></span>
+          <p class="text-base-content/60">Initializing payment...</p>
+          <p class="text-xs text-base-content/40 mt-2">This usually takes a few seconds</p>
+        </div>
+      }
+
+      <!-- Payment Form -->
+      @if (!loading() && !error()) {
+        <!-- Stripe Payment Element Mount Point -->
+        <div class="mb-6">
+          <div #paymentElement class="p-4 border border-base-300 rounded-lg bg-base-100"></div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex gap-2 justify-end">
+          <button
+            class="btn"
+            (click)="handleClose()"
+            [disabled]="processing()">
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            (click)="handleSubmit()"
+            [disabled]="processing()">
+            @if (processing()) {
+              <span class="loading loading-spinner loading-sm"></span>
+              Processing...
+            } @else {
+              <span class="material-symbols-outlined">credit_card</span>
+              Pay ${{ amount()?.toFixed(2) }}
+            }
+          </button>
+        </div>
+      }
+
+      <!-- Error State Actions -->
+      @if (error() && !loading()) {
+        <div class="flex justify-end">
+          <button class="btn" (click)="handleClose()">Close</button>
+        </div>
+      }
+
+      <!-- Security Notice -->
+      <div class="mt-4 text-xs text-base-content/60 text-center">
+        <span class="material-symbols-outlined text-sm align-middle">lock</span>
+        Payments processed securely by Stripe
+      </div>
+    </div>
+  </div>
+}

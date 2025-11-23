@@ -17,8 +17,15 @@
 
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
-import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType, InverseRelationshipData } from '../../interfaces/entity';
+import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take } from 'rxjs';
+import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType, InverseRelationshipData, EntityData, PaymentValue } from '../../interfaces/entity';
+
+/**
+ * Type guard to check if a value is a PaymentValue object.
+ */
+function isPaymentValue(value: any): value is PaymentValue {
+  return value != null && typeof value === 'object' && 'id' in value && 'status' in value;
+}
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
@@ -29,6 +36,7 @@ import { DisplayPropertyComponent } from '../../components/display-property/disp
 import { ManyToManyEditorComponent } from '../../components/many-to-many-editor/many-to-many-editor.component';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { PaymentCheckoutComponent } from '../../components/payment-checkout/payment-checkout.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -53,7 +61,8 @@ export interface CalendarSection {
     RouterModule,
     DisplayPropertyComponent,
     ManyToManyEditorComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    PaymentCheckoutComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -75,6 +84,15 @@ export class DetailPage {
   showDeleteModal = signal(false);
   deleteLoading = signal(false);
   deleteError = signal<string | undefined>(undefined);
+
+  // Payment initiation state
+  paymentLoading = signal(false);
+  paymentError = signal<string | undefined>(undefined);
+  showCheckoutModal = signal(false);
+  currentPaymentId = signal<string | undefined>(undefined);
+
+  // Data loading state
+  dataLoading = signal(true);
 
   public entityKey?: string;
   public entityId?: string;
@@ -108,18 +126,21 @@ export class DetailPage {
   public data$: Observable<any> = combineLatest([this.properties$, this.refreshTrigger$.pipe(startWith(null))]).pipe(
     // Batch synchronous emissions during initialization
     debounceTime(0),
-    // Skip emissions when properties haven't changed (ignore refresh trigger changes)
-    distinctUntilChanged((prev, curr) => {
-      const [prevProps, _] = prev;
-      const [currProps, __] = curr;
-      return prevProps?.length === currProps?.length;
+    tap(([props, trigger]) => {
+      console.log('[DetailPage] data$ pipeline triggered', { propsCount: props?.length, triggerValue: trigger, dataLoading: this.dataLoading() });
+      this.dataLoading.set(true);
     }),
     mergeMap(([props, _]) => {
     if(props && props.length > 0 && this.entityKey) {
       let columns = props
         .map(x => SchemaService.propertyToSelectString(x));
       return this.data.getData({key: this.entityKey, fields: columns, entityId: this.entityId})
-        .pipe(map(results => {
+        .pipe(
+          tap((results) => {
+            console.log('[DetailPage] getData returned', { resultsCount: results?.length, entityKey: this.entityKey });
+            this.dataLoading.set(false);
+          }),
+          map(results => {
           const data = results[0];
 
           // Transform M:M junction data to flat arrays of related entities
@@ -137,9 +158,86 @@ export class DetailPage {
           return data;
         }));
     } else {
+      this.dataLoading.set(false);
       return of(undefined);
     }
   }));
+
+  // Check if payment can be initiated
+  // TODO: Generalize with metadata (payment_initiation_rpc column)
+  public canInitiatePayment$: Observable<boolean> = combineLatest([
+    this.properties$,
+    this.data$,
+    this.entity$
+  ]).pipe(
+    map(([props, data, entity]) => {
+      console.log('[Payment Debug] Checking payment eligibility:', {
+        entityTable: entity?.table_name,
+        hasData: !!data,
+        propsCount: props?.length
+      });
+
+      // Must have Payment property type
+      const hasPaymentProp = props.some(p => p.type === EntityPropertyType.Payment);
+      console.log('[Payment Debug] Has payment property:', hasPaymentProp);
+
+      if (!hasPaymentProp || !data || !entity) {
+        console.log('[Payment Debug] Early return: missing requirements');
+        return false;
+      }
+
+      // Find payment property
+      const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
+      console.log('[Payment Debug] Payment property:', paymentProp);
+
+      if (!paymentProp) {
+        console.log('[Payment Debug] No payment property found');
+        return false;
+      }
+
+      // Check payment status
+      const paymentValue = data[paymentProp.column_name];
+      console.log('[Payment Debug] Payment value:', paymentValue);
+
+      // If payment exists, check if it's completed
+      if (isPaymentValue(paymentValue)) {
+        console.log('[Payment Debug] Payment status:', paymentValue.status);
+
+        // Hide button if payment succeeded (completed)
+        // Show button if payment is pending/pending_intent/failed (allow retry)
+        if (paymentValue.status === 'succeeded') {
+          console.log('[Payment Debug] Payment already succeeded');
+          return false;
+        }
+        // For pending/pending_intent/failed/canceled, allow retry
+        console.log('[Payment Debug] Payment incomplete, allow retry');
+      }
+
+      // TODO: Remove hardcoded check - use metadata configuration
+      // For now, only support reservation_requests (payment before approval)
+      const canPay = entity.table_name === 'reservation_requests';
+      console.log('[Payment Debug] Can initiate payment:', canPay, 'for table:', entity.table_name);
+      return canPay;
+    })
+  );
+
+  // Payment button text (changes based on whether payment exists)
+  public paymentButtonText$: Observable<string> = combineLatest([
+    this.properties$,
+    this.data$
+  ]).pipe(
+    map(([props, data]) => {
+      const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
+      const existingPayment = data?.[paymentProp?.column_name || ''];
+
+      // If payment exists but isn't completed, show "Complete Payment"
+      if (isPaymentValue(existingPayment) && existingPayment.status !== 'succeeded') {
+        return 'Complete Payment';
+      }
+
+      return 'Pay Now';
+    })
+  );
 
   // Fetch inverse relationships (entities that reference this entity)
   public inverseRelationships$: Observable<InverseRelationshipData[]> =
@@ -270,6 +368,7 @@ export class DetailPage {
 
   // Refresh data after M:M changes
   refreshData() {
+    console.log('[DetailPage] refreshData() called - emitting refreshTrigger');
     this.refreshTrigger$.next();
   }
 
@@ -304,6 +403,128 @@ export class DetailPage {
         this.deleteError.set('Failed to delete record. Please try again.');
       }
     });
+  }
+
+  /**
+   * Initiate payment for entities with Payment property type.
+   *
+   * TODO: Generalize this with metadata configuration (payment_initiation_rpc column).
+   * For now, this is domain-specific to reservation_requests POC.
+   *
+   * Pattern for other domains:
+   * 1. Add payment_transaction_id column (UUID FK to payment_transactions)
+   * 2. Create initiate_{entity}_payment(entity_id) RPC
+   * 3. Configure metadata: payment_initiation_rpc = 'initiate_{entity}_payment'
+   * 4. Framework calls configured RPC when "Pay Now" clicked
+   */
+  initiatePayment() {
+    if (!this.entityKey || !this.entityId) return;
+
+    // TODO: Remove hardcoded check - use metadata configuration
+    if (this.entityKey !== 'reservation_requests') {
+      console.error('Payment initiation not configured for entity:', this.entityKey);
+      return;
+    }
+
+    this.paymentError.set(undefined);
+    this.paymentLoading.set(true);
+
+    // Check if payment already exists (from embedded data)
+    combineLatest([this.properties$, this.data$]).pipe(
+      take(1)
+    ).subscribe(([props, data]: [SchemaEntityProperty[], EntityData | undefined]) => {
+      const paymentProp = props.find((p: SchemaEntityProperty) => p.type === EntityPropertyType.Payment);
+      const existingPayment = data?.[paymentProp?.column_name || ''];
+
+      // IMPORTANT: Distinguish between "reuse" and "retry" based on payment status
+      // - Reuse (pending_intent/pending): Skip RPC, open modal with existing PaymentIntent
+      // - Retry (failed/canceled): Call RPC to create NEW PaymentIntent (old one can't be reused)
+      if (isPaymentValue(existingPayment)) {
+        console.log('[Payment] Found existing payment:', existingPayment.id, 'status:', existingPayment.status);
+
+        // For pending_intent/pending: Reuse existing PaymentIntent
+        if (existingPayment.status === 'pending_intent' || existingPayment.status === 'pending') {
+          console.log('[Payment] Reusing existing payment (same PaymentIntent)');
+          this.paymentLoading.set(false);
+          this.currentPaymentId.set(existingPayment.id);
+          this.showCheckoutModal.set(true);
+          return;
+        }
+
+        // For failed/canceled: Call RPC to create NEW PaymentIntent (worker will generate fresh intent)
+        console.log('[Payment] Retrying failed/canceled payment (will create new PaymentIntent)');
+        // Fall through to RPC call below
+      }
+
+      // No existing payment OR payment is failed/canceled - call RPC
+      console.log('[Payment] Calling RPC to initiate payment');
+      this.data.callRpc('initiate_reservation_request_payment', {
+        p_request_id: this.entityId
+      }).subscribe({
+      next: (response: any) => {
+        this.paymentLoading.set(false);
+
+        console.log('[Payment RPC] Raw response:', response);
+        console.log('[Payment RPC] Response type:', typeof response);
+        console.log('[Payment RPC] Is array?:', Array.isArray(response));
+
+        // PostgREST returns scalar values as strings directly, not wrapped in arrays
+        // But for functions returning SETOF or TABLE, it returns an array
+        const paymentId = typeof response === 'string' ? response : response[0];
+        console.log('Payment initiated:', paymentId);
+
+        if (paymentId) {
+          // Open PaymentCheckoutComponent modal
+          this.currentPaymentId.set(paymentId);
+          this.showCheckoutModal.set(true);
+        } else {
+          this.paymentError.set('Failed to initiate payment');
+        }
+      },
+        error: (err: any) => {
+          this.paymentLoading.set(false);
+          const errorMessage = err.error?.message || 'Failed to initiate payment. Please try again.';
+          this.paymentError.set(errorMessage);
+        }
+      });
+    });
+  }
+
+  /**
+   * Handle successful payment (or any status change)
+   */
+  handlePaymentSuccess(paymentId: string) {
+    console.log('[DetailPage] handlePaymentSuccess called', {
+      paymentId,
+      showCheckoutModal: this.showCheckoutModal(),
+      currentPaymentId: this.currentPaymentId()
+    });
+    this.showCheckoutModal.set(false);
+    this.currentPaymentId.set(undefined);
+
+    // Refresh data to show updated payment status
+    // (PaymentCheckoutComponent already waits 500ms before emitting to ensure DB consistency)
+    console.log('[DetailPage] Calling refreshData() from handlePaymentSuccess');
+    this.refreshData();
+    console.log('[DetailPage] refreshData() called, refreshTrigger emitted');
+  }
+
+  /**
+   * Handle checkout modal close (user clicked X button)
+   * Refresh data to show any payment status changes that occurred before close
+   */
+  handleCheckoutClose() {
+    console.log('[DetailPage] handleCheckoutClose called', {
+      showCheckoutModal: this.showCheckoutModal(),
+      currentPaymentId: this.currentPaymentId()
+    });
+    this.showCheckoutModal.set(false);
+    this.currentPaymentId.set(undefined);
+
+    // Refresh data in case payment status changed before user closed modal
+    console.log('[DetailPage] Calling refreshData() from handleCheckoutClose');
+    this.refreshData();
+    console.log('[DetailPage] refreshData() called, refreshTrigger emitted');
   }
 
   /**

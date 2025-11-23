@@ -815,4 +815,15 @@ export class DataService {
       catchError(err => this.parseApiError(err))
     );
   }
+
+  /**
+   * Call a PostgREST RPC function
+   *
+   * @param functionName - Name of the PostgreSQL function to call
+   * @param params - Parameters to pass to the function
+   * @returns Observable of the RPC result
+   */
+  public callRpc(functionName: string, params: Record<string, any>): Observable<any> {
+    return this.http.post(getPostgrestUrl() + 'rpc/' + functionName, params);
+  }
 }

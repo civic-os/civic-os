@@ -130,6 +130,14 @@ export class EditTimeSlotComponent implements ControlValueAccessor {
   onStartChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.startLocal.set(input.value);
+
+    // Auto-populate end date if empty
+    // UX improvement: When user selects start date, pre-fill end with same date
+    // This saves clicks for same-day reservations (most common case)
+    if (input.value && !this.endLocal()) {
+      this.endLocal.set(input.value);
+    }
+
     this.onTouched();
   }
 
