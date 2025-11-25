@@ -53,18 +53,16 @@ SELECT 1/COUNT(*) FROM pg_catalog.pg_trigger
 WHERE tgname = 'enqueue_create_intent_job_trigger'
 AND tgrelid = 'payments.transactions'::regclass;
 
-SELECT 1/COUNT(*) FROM pg_catalog.pg_trigger
-WHERE tgname = 'enqueue_process_webhook_job_trigger'
-AND tgrelid = 'metadata.webhooks'::regclass;
+-- NOTE: enqueue_process_webhook_job_trigger removed (PostgREST webhook approach abandoned)
+-- Webhooks processed via HTTP endpoint, not PostgREST RPC
 
 -- Verify RPC functions exist
 SELECT 1/COUNT(*) FROM pg_catalog.pg_proc
 WHERE proname = 'create_payment_intent_sync'
 AND pronargs = 2;  -- Takes 2 arguments (amount, description)
 
-SELECT 1/COUNT(*) FROM pg_catalog.pg_proc
-WHERE proname = 'process_payment_webhook'
-AND pronargs = 2;  -- Takes 2 arguments (provider, payload)
+-- NOTE: process_payment_webhook RPC removed (PostgREST webhook approach abandoned)
+-- Webhooks processed via HTTP endpoint at payment-worker:8080/webhooks/stripe
 
 -- Verify RLS is enabled
 SELECT 1/COUNT(*) FROM pg_catalog.pg_class
