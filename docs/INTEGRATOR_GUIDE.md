@@ -1400,6 +1400,392 @@ SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;
 
 See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, AWS SES setup, and Phase 2 roadmap (SMS, bounce handling, unsubscribe mechanism).
 
+### Payment System
+
+**Version**: v0.13.0+
+
+Enable secure payment processing for any entity using metadata-driven configuration with Stripe integration. Payments are displayed as badges on List pages and detailed payment flows on Detail pages.
+
+**Features**:
+- Metadata-driven payment initiation (no hardcoded table names)
+- Domain-specific payment logic via RPC functions
+- Stripe payment intent creation via River-based Go microservice
+- Payment status tracking (`pending_intent`, `pending`, `succeeded`, `failed`, `canceled`)
+- Automatic retry on failed payments
+- Webhook-based status updates
+- Support for immediate or deferred capture
+
+**Requirements**:
+- Civic OS v0.13.0+ (payment metadata + schema)
+- Stripe account with API keys
+- PostgreSQL database with River queue (`metadata.river_job`)
+- Payment worker service (part of consolidated-worker-go)
+
+#### How It Works
+
+The payment system uses **metadata-driven configuration** to enable payments on any entity without hardcoding table names in the frontend.
+
+**Architecture Overview**:
+
+1. **Payment Infrastructure** (v0.13.0 migrations):
+   - `payments.transactions` table - Stores all payment records
+   - `payments.payment_transactions` view - Public view with user data joined
+   - `metadata.entities.payment_initiation_rpc` column - Stores RPC function name
+   - `metadata.entities.payment_capture_mode` column - Stores capture timing
+   - `public.schema_entities` view - **Exposes payment metadata to frontend**
+
+2. **Domain-Specific Integration** (your init scripts):
+   - Add `payment_transaction_id UUID` FK column to your entity table
+   - Create payment initiation RPC with domain-specific cost calculation
+   - Configure `payment_initiation_rpc` and `payment_capture_mode` in `metadata.entities`
+
+3. **Frontend Detection** (automatic):
+   - Frontend reads `schema_entities` view via PostgREST
+   - Detects `Payment` property type from `payment_transaction_id` column
+   - Checks `entity.payment_initiation_rpc` to enable "Pay Now" button
+   - Calls configured RPC when user clicks button
+
+**Critical: View vs Table Distinction**
+
+The frontend queries `public.schema_entities` **VIEW**, not `metadata.entities` **TABLE** directly. This separation provides:
+- **Security**: Views enforce RLS and filter sensitive data
+- **Abstraction**: View definitions can change without altering frontend code
+- **Performance**: Views aggregate data from multiple tables in one query
+
+The v0.13.0 migration updates BOTH:
+- `metadata.entities` table (adds `payment_initiation_rpc`, `payment_capture_mode` columns)
+- `public.schema_entities` view (exposes new columns to frontend)
+
+**Without the view update**, the frontend would never receive payment metadata even if it exists in the database table.
+
+#### Adding Payments to an Entity
+
+Follow this pattern to enable payments for any entity (e.g., `reservation_requests`, `orders`, `invoices`):
+
+**Step 1: Add payment_transaction_id column**
+
+```sql
+-- Add UUID FK to payments.transactions
+ALTER TABLE public.reservation_requests
+  ADD COLUMN payment_transaction_id UUID
+    REFERENCES payments.transactions(id) ON DELETE SET NULL;
+
+COMMENT ON COLUMN public.reservation_requests.payment_transaction_id IS
+'Link to payment record in payments.transactions. Null if payment not yet initiated.';
+
+-- Create index for payment lookups (required for performance)
+CREATE INDEX idx_reservation_requests_payment_id
+  ON public.reservation_requests(payment_transaction_id)
+  WHERE payment_transaction_id IS NOT NULL;
+```
+
+**Step 2: Create domain-specific payment initiation RPC**
+
+All payment RPCs **must follow this standardized pattern**:
+- **Parameter**: `p_entity_id` (BIGINT or TEXT depending on entity PK type)
+- **Return**: UUID (payment_id from `payments.transactions`)
+- **Security**: `SECURITY DEFINER` with proper authorization checks
+- **Helpers**: Use `payments.check_existing_payment()` and `payments.create_and_link_payment()` to reduce boilerplate
+
+**Helper Functions** (provided by v0.13.0 migration):
+
+1. **`payments.check_existing_payment(payment_id UUID) RETURNS TEXT`**
+   - Returns: `'create_new'`, `'reuse'`, or `'duplicate'`
+   - Handles all idempotency logic (prevents duplicate charges, allows retry on failures)
+   - Replaces ~28 lines of boilerplate per RPC
+
+2. **`payments.create_and_link_payment(...) RETURNS UUID`**
+   - Creates payment record + links to entity atomically
+   - Ensures correct status, currency, provider values
+   - Prevents forgetting entity link or using wrong parameters
+   - Replaces ~20 lines of boilerplate per RPC
+
+**Example RPC (using helpers)**:
+
+```sql
+CREATE OR REPLACE FUNCTION public.initiate_reservation_request_payment(
+  p_entity_id BIGINT  -- Standardized parameter name
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_request RECORD;
+  v_cost NUMERIC(10,2);
+  v_idempotency_status TEXT;
+  v_description TEXT;
+BEGIN
+  -- 1. Fetch entity data with row lock (prevent race conditions)
+  SELECT rr.*, res.display_name AS resource_name, res.hourly_rate
+  INTO v_request
+  FROM public.reservation_requests rr
+  JOIN public.resources res ON rr.resource_id = res.id
+  WHERE rr.id = p_entity_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Reservation request not found: %', p_entity_id;
+  END IF;
+
+  -- 2. Authorize: Only entity owner can initiate payment
+  IF v_request.requested_by != current_user_id() THEN
+    RAISE EXCEPTION 'You can only make payments for your own reservation requests';
+  END IF;
+
+  -- 3. Check for existing payment (GENERALIZED HELPER)
+  v_idempotency_status := payments.check_existing_payment(v_request.payment_transaction_id);
+
+  IF v_idempotency_status = 'reuse' THEN
+    RETURN v_request.payment_transaction_id;  -- Payment in progress
+  END IF;
+
+  IF v_idempotency_status = 'duplicate' THEN
+    RAISE EXCEPTION 'Payment already succeeded for this request';
+  END IF;
+  -- v_idempotency_status = 'create_new', fall through
+
+  -- 4. Business validation (domain-specific)
+  IF v_request.status_id != 1 THEN
+    RAISE EXCEPTION 'Can only pay for pending requests';
+  END IF;
+
+  -- 5. Calculate cost (domain-specific logic)
+  v_cost := public.calculate_reservation_cost(v_request.resource_id, v_request.time_slot);
+
+  IF v_cost <= 0 THEN
+    RAISE EXCEPTION 'Request does not require payment (cost: $%)', v_cost;
+  END IF;
+
+  -- 6. Create and link payment (GENERALIZED HELPER)
+  v_description := format('Reservation Request for %s - %s',
+    v_request.resource_name, v_request.purpose);
+
+  RETURN payments.create_and_link_payment(
+    'reservation_requests',      -- Entity table
+    'id',                         -- Entity PK column
+    p_entity_id,                  -- Entity PK value
+    'payment_transaction_id',     -- Payment FK column
+    v_cost,                       -- Amount
+    v_description                 -- Description
+    -- user_id defaults to current_user_id()
+    -- currency defaults to 'USD'
+  );
+END;
+$$;
+
+COMMENT ON FUNCTION public.initiate_reservation_request_payment IS
+'Initiate payment for reservation request. Uses helper functions to reduce boilerplate
+and prevent common errors. Only request owner can initiate. Follows standardized payment
+RPC pattern: accepts p_entity_id parameter, returns UUID.';
+
+GRANT EXECUTE ON FUNCTION public.initiate_reservation_request_payment TO authenticated;
+```
+
+**Step 3: Configure payment metadata**
+
+This enables the "Pay Now" button on Detail pages:
+
+```sql
+-- Configure payment initiation for reservation_requests entity
+UPDATE metadata.entities
+SET
+  payment_initiation_rpc = 'initiate_reservation_request_payment',
+  payment_capture_mode = 'immediate'  -- or 'deferred' for manual capture later
+WHERE table_name = 'reservation_requests';
+
+-- Configure payment property display (optional - customize labels/visibility)
+INSERT INTO metadata.properties (
+  table_name, column_name,
+  display_name, description,
+  sort_order,
+  show_on_list, show_on_create, show_on_edit, show_on_detail
+) VALUES (
+  'reservation_requests', 'payment_transaction_id',
+  'Payment', 'Payment transaction for this reservation request',
+  100,  -- Show at bottom
+  TRUE, FALSE, FALSE, TRUE  -- List + Detail only (not create/edit)
+) ON CONFLICT (table_name, column_name) DO UPDATE SET
+  display_name = EXCLUDED.display_name,
+  description = EXCLUDED.description;
+```
+
+**Step 4: Grant permissions**
+
+```sql
+-- Allow authenticated users to view their own payment transactions
+GRANT SELECT ON payments.transactions TO authenticated;
+
+-- RLS policy: Users can only see their own payments
+CREATE POLICY "Users see own payments" ON payments.transactions
+  FOR SELECT TO authenticated
+  USING (user_id = current_user_id());
+```
+
+#### Payment Workflow
+
+1. **User creates entity** (e.g., reservation_request) - `payment_transaction_id` is NULL
+2. **User clicks "Pay Now"** on Detail page - Framework calls configured RPC (`payment_initiation_rpc`)
+3. **RPC validates and creates payment** - Record inserted with `status = 'pending_intent'`
+4. **Trigger enqueues River job** - Payment worker creates Stripe PaymentIntent
+5. **Worker updates with client_secret** - Status changes to `pending`, UI opens payment modal
+6. **User completes payment** - Stripe Elements collects card details
+7. **Stripe webhook updates status** - `succeeded`, `failed`, or `canceled`
+8. **Domain logic runs** - Your app approves request, sends confirmation, etc.
+
+#### Payment Capture Modes
+
+**Immediate Capture** (default):
+```sql
+payment_capture_mode = 'immediate'
+```
+- Funds captured immediately when payment succeeds
+- Best for: Digital goods, instant services, non-refundable items
+
+**Deferred Capture**:
+```sql
+payment_capture_mode = 'deferred'
+```
+- Funds authorized but not captured (held for up to 7 days)
+- Manual capture via Stripe Dashboard or API
+- Best for: Reservations that may be canceled, pre-orders, hotel bookings
+
+#### Monitoring & Troubleshooting
+
+**Check payment status**:
+```sql
+-- View recent payments with user details
+SELECT
+  p.id,
+  p.created_at,
+  u.display_name AS user_name,
+  u.email,
+  p.amount,
+  p.currency,
+  p.status,
+  p.description,
+  p.error_message
+FROM payments.transactions p
+JOIN metadata.civic_os_users u ON p.user_id = u.id
+ORDER BY p.created_at DESC
+LIMIT 20;
+
+-- Count payments by status
+SELECT status, COUNT(*), SUM(amount) AS total_amount
+FROM payments.transactions
+GROUP BY status;
+```
+
+**Check River job queue**:
+```sql
+-- Queue depth (pending payment intent creation)
+SELECT COUNT(*)
+FROM metadata.river_job
+WHERE kind = 'create_payment_intent' AND state = 'available';
+
+-- Failed jobs
+SELECT id, state, errors, attempt, max_attempts, args
+FROM metadata.river_job
+WHERE kind IN ('create_payment_intent', 'handle_payment_webhook')
+  AND state = 'retryable'
+ORDER BY scheduled_at DESC
+LIMIT 10;
+```
+
+**Worker logs**:
+```bash
+# View payment worker logs
+docker logs -f civic-os-consolidated-worker | grep -i payment
+
+# Check worker is running
+docker ps | grep consolidated-worker
+```
+
+**Common Issues**:
+- **Payment stuck in `pending_intent`**: Worker not running or Stripe API key invalid
+- **`provider_client_secret` is NULL**: CreateIntentJob failed (check worker logs and Stripe API errors)
+- **Payment modal doesn't open**: Check browser console for errors, verify Stripe publishable key
+- **Webhook events not processed**: Verify webhook endpoint URL and signing secret
+
+See `docs/development/PAYMENT_POC_IMPLEMENTATION.md` for complete architecture, testing guide, and Phase 2 roadmap (polymorphic payments, multiple payments per entity).
+
+#### Example: Complete Payment Setup
+
+Full example for "Community Center" reservation system:
+
+```sql
+-- 1. Add payment column to reservation_requests (already done in 01_reservations_schema.sql)
+ALTER TABLE public.reservation_requests
+  ADD COLUMN payment_transaction_id UUID
+    REFERENCES payments.transactions(id) ON DELETE SET NULL;
+
+-- 2. Create cost calculation helper (domain logic)
+CREATE FUNCTION public.calculate_reservation_cost(
+  p_resource_id INT,
+  p_time_slot time_slot
+) RETURNS NUMERIC(10,2) AS $$
+DECLARE
+  v_hourly_rate MONEY;
+  v_duration_hours NUMERIC;
+BEGIN
+  SELECT hourly_rate INTO v_hourly_rate
+  FROM public.resources WHERE id = p_resource_id;
+
+  IF v_hourly_rate IS NULL OR v_hourly_rate::numeric <= 0 THEN
+    RETURN 0.00;  -- Free resource
+  END IF;
+
+  v_duration_hours := EXTRACT(EPOCH FROM (
+    upper(p_time_slot::tstzrange) - lower(p_time_slot::tstzrange)
+  )) / 3600.0;
+
+  RETURN ROUND(v_hourly_rate::numeric * v_duration_hours, 2);
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+-- 3. Create payment initiation RPC (see Step 2 above for full implementation)
+CREATE FUNCTION public.initiate_reservation_request_payment(p_entity_id BIGINT)
+RETURNS UUID AS $$ ... $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 4. Configure metadata
+UPDATE metadata.entities
+SET
+  payment_initiation_rpc = 'initiate_reservation_request_payment',
+  payment_capture_mode = 'immediate'
+WHERE table_name = 'reservation_requests';
+
+-- 5. Test payment flow
+-- (a) Create test resource with hourly rate
+INSERT INTO resources (display_name, hourly_rate) VALUES ('Test Room', 50.00);
+
+-- (b) Create reservation request
+INSERT INTO reservation_requests (resource_id, requested_by, time_slot, purpose)
+VALUES (
+  (SELECT id FROM resources WHERE display_name = 'Test Room'),
+  current_user_id(),
+  '[2025-03-15 14:00:00-05, 2025-03-15 16:00:00-05)'::time_slot,
+  'Team Meeting'
+);
+
+-- (c) Initiate payment (simulates "Pay Now" button click)
+SELECT public.initiate_reservation_request_payment(
+  (SELECT id FROM reservation_requests ORDER BY created_at DESC LIMIT 1)
+);
+
+-- (d) Verify payment created
+SELECT * FROM payments.transactions ORDER BY created_at DESC LIMIT 1;
+```
+
+**Production Deployment**:
+1. Apply v0.13.0 migration: `sqitch deploy v0-13-0-add-payment-metadata`
+2. Configure environment variables (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`)
+3. Deploy consolidated worker service (includes payment workers)
+4. Configure Stripe webhook endpoint: `https://your-domain.com/rpc/process_payment_webhook`
+5. Test with Stripe test mode before going live
+6. Monitor payment success rate and failed jobs
+
+See `examples/community-center/init-scripts/10_payment_integration.sql` for working reference implementation.
+
 ---
 
 ## Database Patterns

@@ -17,7 +17,7 @@
 
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take } from 'rxjs';
+import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize } from 'rxjs';
 import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType, InverseRelationshipData, EntityData, PaymentValue } from '../../interfaces/entity';
 
 /**
@@ -138,7 +138,6 @@ export class DetailPage {
         .pipe(
           tap((results) => {
             console.log('[DetailPage] getData returned', { resultsCount: results?.length, entityKey: this.entityKey });
-            this.dataLoading.set(false);
           }),
           map(results => {
           const data = results[0];
@@ -156,15 +155,22 @@ export class DetailPage {
           });
 
           return data;
-        }));
+        }),
+          catchError(err => {
+            console.error('[DetailPage] getData failed', err);
+            return of(undefined);
+          }),
+          finalize(() => {
+            this.dataLoading.set(false);
+          })
+        );
     } else {
       this.dataLoading.set(false);
       return of(undefined);
     }
   }));
 
-  // Check if payment can be initiated
-  // TODO: Generalize with metadata (payment_initiation_rpc column)
+  // Check if payment can be initiated (metadata-driven via payment_initiation_rpc)
   public canInitiatePayment$: Observable<boolean> = combineLatest([
     this.properties$,
     this.data$,
@@ -213,10 +219,11 @@ export class DetailPage {
         console.log('[Payment Debug] Payment incomplete, allow retry');
       }
 
-      // TODO: Remove hardcoded check - use metadata configuration
-      // For now, only support reservation_requests (payment before approval)
-      const canPay = entity.table_name === 'reservation_requests';
-      console.log('[Payment Debug] Can initiate payment:', canPay, 'for table:', entity.table_name);
+      // Check if entity has payment_initiation_rpc configured in metadata
+      const canPay = hasPaymentProp &&
+        entity.payment_initiation_rpc != null &&
+        entity.payment_initiation_rpc !== '';
+      console.log('[Payment Debug] Can initiate payment:', canPay, 'for table:', entity.table_name, 'RPC:', entity.payment_initiation_rpc);
       return canPay;
     })
   );
@@ -407,32 +414,31 @@ export class DetailPage {
 
   /**
    * Initiate payment for entities with Payment property type.
+   * Uses metadata-driven configuration (payment_initiation_rpc) to call domain-specific RPC.
    *
-   * TODO: Generalize this with metadata configuration (payment_initiation_rpc column).
-   * For now, this is domain-specific to reservation_requests POC.
-   *
-   * Pattern for other domains:
+   * Pattern for adding payments to entities:
    * 1. Add payment_transaction_id column (UUID FK to payment_transactions)
-   * 2. Create initiate_{entity}_payment(entity_id) RPC
+   * 2. Create initiate_{entity}_payment(p_entity_id) RPC with domain logic
    * 3. Configure metadata: payment_initiation_rpc = 'initiate_{entity}_payment'
    * 4. Framework calls configured RPC when "Pay Now" clicked
    */
   initiatePayment() {
     if (!this.entityKey || !this.entityId) return;
 
-    // TODO: Remove hardcoded check - use metadata configuration
-    if (this.entityKey !== 'reservation_requests') {
-      console.error('Payment initiation not configured for entity:', this.entityKey);
-      return;
-    }
-
     this.paymentError.set(undefined);
     this.paymentLoading.set(true);
 
-    // Check if payment already exists (from embedded data)
-    combineLatest([this.properties$, this.data$]).pipe(
+    // Check if payment already exists (from embedded data) and get entity metadata
+    combineLatest([this.properties$, this.data$, this.entity$]).pipe(
       take(1)
-    ).subscribe(([props, data]: [SchemaEntityProperty[], EntityData | undefined]) => {
+    ).subscribe(([props, data, entity]: [SchemaEntityProperty[], EntityData | undefined, SchemaEntityTable | undefined]) => {
+      // Validate entity has payment_initiation_rpc configured
+      if (!entity?.payment_initiation_rpc) {
+        console.error('[Payment] Payment initiation RPC not configured for entity:', this.entityKey);
+        this.paymentError.set('Payment not configured for this entity');
+        this.paymentLoading.set(false);
+        return;
+      }
       const paymentProp = props.find((p: SchemaEntityProperty) => p.type === EntityPropertyType.Payment);
       const existingPayment = data?.[paymentProp?.column_name || ''];
 
@@ -457,9 +463,9 @@ export class DetailPage {
       }
 
       // No existing payment OR payment is failed/canceled - call RPC
-      console.log('[Payment] Calling RPC to initiate payment');
-      this.data.callRpc('initiate_reservation_request_payment', {
-        p_request_id: this.entityId
+      console.log('[Payment] Calling RPC to initiate payment:', entity.payment_initiation_rpc);
+      this.data.callRpc(entity.payment_initiation_rpc, {
+        p_entity_id: this.entityId
       }).subscribe({
       next: (response: any) => {
         this.paymentLoading.set(false);

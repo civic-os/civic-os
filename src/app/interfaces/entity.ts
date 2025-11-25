@@ -30,6 +30,8 @@ export interface SchemaEntityTable {
     select: boolean,
     update: boolean,
     delete: boolean,
+    payment_initiation_rpc?: string | null,
+    payment_capture_mode?: 'immediate' | 'deferred' | null,
 }
 
 export interface ValidationRule {

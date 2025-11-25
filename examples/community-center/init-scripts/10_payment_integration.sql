@@ -169,7 +169,7 @@ GRANT SELECT ON public.reservation_requests_with_payments TO authenticated;
 \echo 'Creating initiate_reservation_request_payment() RPC...'
 
 CREATE OR REPLACE FUNCTION public.initiate_reservation_request_payment(
-  p_request_id BIGINT
+  p_entity_id BIGINT  -- Standardized parameter name for metadata-driven payment RPCs
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -178,108 +178,95 @@ AS $$
 DECLARE
   v_request RECORD;
   v_cost NUMERIC(10,2);
-  v_payment_id UUID;
+  v_idempotency_status TEXT;
   v_description TEXT;
 BEGIN
-  -- Get reservation request details (with row lock to prevent race conditions)
+  -- ============================================================================
+  -- 1. Fetch and lock entity (domain-specific)
+  -- ============================================================================
   SELECT rr.*, res.display_name AS resource_name, res.hourly_rate
   INTO v_request
   FROM public.reservation_requests rr
   JOIN public.resources res ON rr.resource_id = res.id
-  WHERE rr.id = p_request_id
+  WHERE rr.id = p_entity_id
   FOR UPDATE;  -- Lock row during payment creation
 
-  -- Check request exists
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'Reservation request not found: %', p_request_id;
+    RAISE EXCEPTION 'Reservation request not found: %', p_entity_id;
   END IF;
 
-  -- Check user owns request
+  -- ============================================================================
+  -- 2. Authorization check (domain-specific)
+  -- ============================================================================
   IF v_request.requested_by != current_user_id() THEN
-    RAISE EXCEPTION 'Permission denied: can only pay for own requests';
+    RAISE EXCEPTION 'You can only make payments for your own reservation requests';
   END IF;
 
-  -- If payment already exists, handle based on status
-  IF v_request.payment_transaction_id IS NOT NULL THEN
-    DECLARE
-      v_payment_status TEXT;
-    BEGIN
-      -- Get current payment status
-      SELECT status INTO v_payment_status
-      FROM payments.transactions
-      WHERE id = v_request.payment_transaction_id;
+  -- ============================================================================
+  -- 3. Idempotency check (GENERALIZED HELPER)
+  -- ============================================================================
+  -- Replaces ~28 lines of boilerplate with 3-line helper call
+  v_idempotency_status := payments.check_existing_payment(v_request.payment_transaction_id);
 
-      -- For pending_intent/pending: return existing payment (reuse PaymentIntent)
-      IF v_payment_status IN ('pending_intent', 'pending') THEN
-        RETURN v_request.payment_transaction_id;
-      END IF;
-
-      -- For failed/canceled: CREATE NEW TRANSACTION (don't modify old one)
-      -- Old transaction stays in DB as audit trail with failed/canceled status
-      -- Fall through to create new transaction below
-      IF v_payment_status IN ('failed', 'canceled') THEN
-        -- Don't modify old transaction - just fall through to create new one
-        NULL;  -- Explicit no-op, fall through to transaction creation
-      END IF;
-
-      -- For succeeded: payment already completed
-      IF v_payment_status = 'succeeded' THEN
-        RAISE EXCEPTION 'Payment already succeeded for this request';
-      END IF;
-    END;
+  -- If payment already in progress, return existing payment_id
+  IF v_idempotency_status = 'reuse' THEN
+    RETURN v_request.payment_transaction_id;
   END IF;
 
+  -- If payment already succeeded, prevent duplicate charge
+  IF v_idempotency_status = 'duplicate' THEN
+    RAISE EXCEPTION 'Payment already succeeded for this request';
+  END IF;
+
+  -- v_idempotency_status = 'create_new', fall through to create new payment
+
+  -- ============================================================================
+  -- 4. Business state validation (domain-specific)
+  -- ============================================================================
   -- Check request is still pending (can't pay for approved/denied requests)
-  -- Assuming status_id = 1 is 'Pending'
   IF v_request.status_id != 1 THEN
     RAISE EXCEPTION 'Can only pay for pending requests (current status: %)', v_request.status_id;
   END IF;
 
-  -- Calculate cost
+  -- ============================================================================
+  -- 5. Cost calculation and validation (domain-specific)
+  -- ============================================================================
   v_cost := public.calculate_reservation_cost(v_request.resource_id, v_request.time_slot);
 
-  -- Check payment is required
   IF v_cost <= 0 THEN
     RAISE EXCEPTION 'Request does not require payment (cost: $%)', v_cost;
   END IF;
 
-  -- Build description
+  -- ============================================================================
+  -- 6. Payment creation and linking (GENERALIZED HELPER)
+  -- ============================================================================
+  -- Replaces ~20 lines of INSERT + UPDATE with single helper call
+  -- Helper ensures correct status, currency, provider, and atomic linking
   v_description := format('Reservation Request for %s - %s',
     v_request.resource_name,
     v_request.purpose
   );
 
-  -- Create payment record directly (POC schema - no entity_type/entity_id)
-  INSERT INTO payments.transactions (
-    user_id,
-    amount,
-    currency,
-    status,
-    description,
-    provider
-  ) VALUES (
-    current_user_id(),
-    v_cost,
-    'USD',
-    'pending_intent',  -- Trigger will enqueue CreateIntentJob
-    v_description,
-    'stripe'
-  ) RETURNING id INTO v_payment_id;
-
-  -- Link payment to reservation request
-  UPDATE public.reservation_requests
-  SET payment_transaction_id = v_payment_id
-  WHERE id = p_request_id;
-
-  RETURN v_payment_id;
+  RETURN payments.create_and_link_payment(
+    'reservation_requests',      -- Entity table name
+    'id',                         -- Entity PK column name
+    p_entity_id,                  -- Entity PK value
+    'payment_transaction_id',     -- Payment FK column name
+    v_cost,                       -- Payment amount
+    v_description                 -- Payment description
+    -- user_id defaults to current_user_id()
+    -- currency defaults to 'USD'
+  );
 END;
 $$;
 
 COMMENT ON FUNCTION public.initiate_reservation_request_payment IS
-'Initiate payment for a reservation REQUEST (before approval). Creates payment record
-in payments.transactions, which triggers River job to create Stripe payment intent.
-Links payment to reservation_requests. Only request owner can initiate payment.
-Returns payment_id (UUID) for tracking.';
+'Initiate payment for a reservation REQUEST (before approval). Uses generalized helper
+functions (payments.check_existing_payment, payments.create_and_link_payment) to reduce
+boilerplate and prevent common errors. Domain-specific logic includes authorization checks,
+cost calculation, and business state validation. Only request owner can initiate payment.
+Returns payment_id (UUID) for tracking. Follows standardized payment RPC pattern: accepts
+p_entity_id parameter.';
 
 GRANT EXECUTE ON FUNCTION public.initiate_reservation_request_payment TO authenticated;
 
@@ -339,7 +326,17 @@ INSERT INTO metadata.entities (
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description;
 
-\echo 'Configured metadata'
+-- Configure payment initiation metadata for reservation_requests
+-- This enables metadata-driven payment flow (v0.13.0+)
+-- NOTE: The v0-13-0-add-payment-metadata migration adds the columns to metadata.entities
+-- and updates the schema_entities view. This init script sets the domain-specific values.
+UPDATE metadata.entities
+SET
+  payment_initiation_rpc = 'initiate_reservation_request_payment',
+  payment_capture_mode = 'immediate'
+WHERE table_name = 'reservation_requests';
+
+\echo 'Configured metadata (including payment initiation RPC)'
 
 \echo '============================================================================'
 \echo 'Payment integration setup complete (Property Type Approach)!'
@@ -349,13 +346,14 @@ INSERT INTO metadata.entities (
 \echo '  - Added payment_transaction_id column to reservation_requests (domain-specific FK)'
 \echo '  - Created calculate_reservation_cost() helper function (domain logic)'
 \echo '  - Created reservation_requests_with_payments view (domain convenience)'
-\echo '  - Created initiate_reservation_request_payment() RPC (domain payment flow)'
-\echo '  - Updated resources with sample hourly rates ($10-$30)'
+\echo '  - Created initiate_reservation_request_payment(p_entity_id) RPC (domain payment flow)'
+\echo '  - Configured metadata-driven payment initiation (payment_initiation_rpc, capture mode)'
+\echo '  - Updated resources with sample hourly rates ($25-$50)'
 \echo '  - Configured Payment property type metadata'
 \echo ''
 \echo 'Workflow:'
 \echo '  1. User creates reservation_request (unpaid)'
-\echo '  2. User clicks "Pay Now" on request detail page'
+\echo '  2. User clicks "Pay Now" on request detail page (framework calls configured RPC)'
 \echo '  3. Payment succeeds → payment_transaction_id updated'
 \echo '  4. Admin approves paid request → creates finalized reservation'
 \echo '============================================================================'

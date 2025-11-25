@@ -35,6 +35,9 @@ export const environment: Environment = {
         endpoint: 'http://localhost:9000',
         bucket: 'civic-os-files'
     },
+    stripe: {
+        publishableKey: 'pk_test_51SWJGIJIyHwQArdYwrsvleBcSjD4ZwVVkKq9kqP5fUnMaEBopjPxjNiCwKnBL45z3JoxUblOcD5qVOcuYS5JCeR900pEwyWZBQ'
+    },
     matomo: {
         url: 'https://stats.civic-os.org',
         siteId: '7',

@@ -24,8 +24,11 @@ BEGIN
     IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'create_payment_intent_sync') THEN
         REVOKE EXECUTE ON FUNCTION create_payment_intent_sync(NUMERIC, TEXT) FROM authenticated;
     END IF;
-    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'process_payment_webhook') THEN
-        EXECUTE 'REVOKE EXECUTE ON FUNCTION process_payment_webhook(TEXT, JSONB) FROM authenticated, web_anon';
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'check_existing_payment') THEN
+        REVOKE EXECUTE ON FUNCTION payments.check_existing_payment(UUID) FROM authenticated;
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'create_and_link_payment') THEN
+        REVOKE EXECUTE ON FUNCTION payments.create_and_link_payment(NAME, NAME, ANYELEMENT, NAME, NUMERIC, TEXT, UUID, TEXT) FROM authenticated;
     END IF;
 END $$;
 
@@ -38,15 +41,15 @@ DROP VIEW IF EXISTS public.payment_transactions;
 DROP POLICY IF EXISTS "Users create own payments" ON payments.transactions;
 DROP POLICY IF EXISTS "Users see own payments" ON payments.transactions;
 
--- Drop webhook trigger
-DROP TRIGGER IF EXISTS enqueue_process_webhook_job_trigger ON metadata.webhooks;
-
--- Drop webhook trigger function
-DROP FUNCTION IF EXISTS payments.enqueue_process_webhook_job();
-
 -- Drop RPC functions
-DROP FUNCTION IF EXISTS process_payment_webhook(TEXT, JSONB);
 DROP FUNCTION IF EXISTS create_payment_intent_sync(NUMERIC, TEXT);
+
+-- Drop helper functions (added in v0.13.0)
+DROP FUNCTION IF EXISTS payments.create_and_link_payment(NAME, NAME, ANYELEMENT, NAME, NUMERIC, TEXT, UUID, TEXT);
+DROP FUNCTION IF EXISTS payments.check_existing_payment(UUID);
+
+-- NOTE: Removed stale PostgREST webhook infrastructure (process_payment_webhook RPC, trigger, trigger function)
+-- Webhooks are processed via HTTP endpoint (payment-worker:8080) not PostgREST
 
 -- Drop webhooks table (only if created by this migration, check if exists)
 -- Note: Other services may use this table, only drop if empty

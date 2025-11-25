@@ -146,6 +146,178 @@ CREATE TRIGGER enqueue_create_intent_job_trigger
 
 
 -- ===========================================================================
+-- Helper Function: Check Existing Payment for Idempotency
+-- ===========================================================================
+-- Standardized idempotency logic for payment initiation RPCs
+-- Eliminates ~28 lines of boilerplate per domain RPC
+--
+-- Returns:
+--   'create_new' - No payment exists or previous failed/canceled (proceed with new payment)
+--   'reuse'      - Payment in progress (return existing payment_id to user)
+--   'duplicate'  - Payment succeeded (raise exception - don't charge twice)
+--
+-- Usage in domain RPC:
+--   v_status := payments.check_existing_payment(v_entity.payment_transaction_id);
+--   IF v_status = 'reuse' THEN RETURN v_entity.payment_transaction_id; END IF;
+--   IF v_status = 'duplicate' THEN RAISE EXCEPTION 'Payment already succeeded'; END IF;
+--   -- v_status = 'create_new', fall through to create new payment
+
+CREATE OR REPLACE FUNCTION payments.check_existing_payment(
+    p_payment_id UUID
+)
+RETURNS TEXT
+LANGUAGE plpgsql
+STABLE
+AS $$
+DECLARE
+    v_payment_status TEXT;
+BEGIN
+    -- No existing payment - create new
+    IF p_payment_id IS NULL THEN
+        RETURN 'create_new';
+    END IF;
+
+    -- Get status of existing payment
+    SELECT status INTO v_payment_status
+    FROM payments.transactions
+    WHERE id = p_payment_id;
+
+    -- Payment not found (shouldn't happen if FK constraint exists, but be defensive)
+    IF NOT FOUND THEN
+        RETURN 'create_new';
+    END IF;
+
+    -- Payment in progress - reuse existing PaymentIntent
+    IF v_payment_status IN ('pending_intent', 'pending') THEN
+        RETURN 'reuse';
+    END IF;
+
+    -- Payment failed or canceled - allow retry with NEW transaction
+    -- Important: Don't modify old transaction, it stays as audit trail
+    IF v_payment_status IN ('failed', 'canceled') THEN
+        RETURN 'create_new';
+    END IF;
+
+    -- Payment succeeded - prevent duplicate charge
+    IF v_payment_status = 'succeeded' THEN
+        RETURN 'duplicate';
+    END IF;
+
+    -- Unknown status - fail safe
+    RAISE EXCEPTION 'Unexpected payment status: %', v_payment_status;
+END;
+$$;
+
+COMMENT ON FUNCTION payments.check_existing_payment IS
+    'Check existing payment for idempotency. Returns: create_new, reuse, or duplicate. Prevents duplicate charges and ensures proper retry handling for failed payments.';
+
+GRANT EXECUTE ON FUNCTION payments.check_existing_payment TO authenticated;
+
+
+-- ===========================================================================
+-- Helper Function: Create and Link Payment to Entity
+-- ===========================================================================
+-- Atomic payment creation + entity linking to prevent common integrator errors
+-- Handles both INSERT and UPDATE in single transaction
+--
+-- Parameters:
+--   p_entity_table_name      - Table containing entity (e.g., 'reservation_requests')
+--   p_entity_id_column_name  - PK column name (e.g., 'id')
+--   p_entity_id_value        - PK value (supports BIGINT, UUID, TEXT)
+--   p_payment_column_name    - FK column to payments.transactions (e.g., 'payment_transaction_id')
+--   p_amount                 - Payment amount in USD (must be > 0)
+--   p_description            - Payment description for Stripe dashboard
+--   p_user_id                - User making payment (defaults to current_user_id())
+--   p_currency               - Currency code (defaults to 'USD', POC only supports USD)
+--
+-- Returns: payment_id (UUID)
+--
+-- Example:
+--   RETURN payments.create_and_link_payment(
+--       'reservation_requests', 'id', p_entity_id,
+--       'payment_transaction_id', v_cost,
+--       'Reservation for Main Hall'
+--   );
+
+CREATE OR REPLACE FUNCTION payments.create_and_link_payment(
+    p_entity_table_name NAME,
+    p_entity_id_column_name NAME,
+    p_entity_id_value ANYELEMENT,
+    p_payment_column_name NAME,
+    p_amount NUMERIC(10,2),
+    p_description TEXT,
+    p_user_id UUID DEFAULT current_user_id(),
+    p_currency TEXT DEFAULT 'USD'
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = payments, metadata, public
+AS $$
+DECLARE
+    v_payment_id UUID;
+    v_sql TEXT;
+BEGIN
+    -- Validate inputs
+    IF p_amount IS NULL OR p_amount <= 0 THEN
+        RAISE EXCEPTION 'Invalid payment amount: %. Amount must be greater than zero.', p_amount;
+    END IF;
+
+    IF p_user_id IS NULL THEN
+        RAISE EXCEPTION 'User ID required for payment creation';
+    END IF;
+
+    -- Validate currency (POC only supports USD)
+    IF p_currency != 'USD' THEN
+        RAISE EXCEPTION 'Only USD currency supported in POC (got: %)', p_currency;
+    END IF;
+
+    -- Create payment record
+    -- Trigger will automatically enqueue River job for Stripe intent creation
+    INSERT INTO payments.transactions (
+        user_id,
+        amount,
+        currency,
+        status,
+        description,
+        provider
+    ) VALUES (
+        p_user_id,
+        p_amount,
+        p_currency,
+        'pending_intent',  -- Worker will update to 'pending' after creating Stripe intent
+        p_description,
+        'stripe'
+    ) RETURNING id INTO v_payment_id;
+
+    -- Link payment to entity using dynamic SQL
+    -- Use format() with %I (identifier) to prevent SQL injection
+    v_sql := format(
+        'UPDATE %I SET %I = $1 WHERE %I = $2',
+        p_entity_table_name,
+        p_payment_column_name,
+        p_entity_id_column_name
+    );
+
+    EXECUTE v_sql USING v_payment_id, p_entity_id_value;
+
+    -- Verify update succeeded
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Failed to link payment to entity: % WHERE % = %',
+            p_entity_table_name, p_entity_id_column_name, p_entity_id_value;
+    END IF;
+
+    RETURN v_payment_id;
+END;
+$$;
+
+COMMENT ON FUNCTION payments.create_and_link_payment IS
+    'Create payment record and atomically link to entity. Prevents common errors: wrong status, missing entity link, incorrect currency. Uses format() with %I for safe dynamic SQL.';
+
+GRANT EXECUTE ON FUNCTION payments.create_and_link_payment TO authenticated;
+
+
+-- ===========================================================================
 -- RPC Function: Create Payment Intent (Synchronous)
 -- ===========================================================================
 -- Synchronous RPC that creates payment and polls until worker completes Stripe intent creation
@@ -331,148 +503,23 @@ CREATE INDEX IF NOT EXISTS idx_webhooks_processed ON metadata.webhooks(processed
 CREATE INDEX IF NOT EXISTS idx_webhooks_event_type ON metadata.webhooks(event_type);
 
 COMMENT ON TABLE metadata.webhooks IS
-    'Webhook events from payment providers. Deduplicated by (provider, provider_event_id).';
+    'Webhook events from payment providers. Deduplicated by (provider, provider_event_id). Processed by HTTP webhook server (payment-worker) not PostgREST RPC.';
 
 
 -- ===========================================================================
--- RPC Function: Process Payment Webhook
+-- NOTE: Webhook Processing
 -- ===========================================================================
--- Receives webhook events from Stripe via PostgREST endpoint
--- Inserts into metadata.webhooks with idempotency, then trigger enqueues processing job
-
-CREATE OR REPLACE FUNCTION process_payment_webhook(
-    p_provider TEXT,
-    p_payload JSONB
-)
-RETURNS JSONB
-SECURITY DEFINER
-SET search_path = metadata, payments, public
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_event_id TEXT;
-    v_event_type TEXT;
-    v_webhook_id UUID;
-BEGIN
-    -- Validate provider
-    IF p_provider IS NULL OR p_provider != 'stripe' THEN
-        RAISE EXCEPTION 'Invalid provider: %', p_provider
-            USING HINT = 'Only "stripe" provider is supported';
-    END IF;
-
-    -- Extract event ID and type from Stripe payload
-    v_event_id := p_payload->>'id';
-    v_event_type := p_payload->>'type';
-
-    IF v_event_id IS NULL THEN
-        RAISE EXCEPTION 'Missing event ID in webhook payload'
-            USING HINT = 'Stripe webhooks must include "id" field';
-    END IF;
-
-    -- Insert with idempotency (ON CONFLICT DO NOTHING)
-    -- Stripe may send duplicate webhooks, we only process once
-    INSERT INTO metadata.webhooks (
-        provider,
-        provider_event_id,
-        event_type,
-        payload,
-        signature_verified,
-        processed,
-        received_at
-    ) VALUES (
-        p_provider,
-        v_event_id,
-        v_event_type,
-        p_payload,
-        FALSE,  -- Signature verification happens in worker
-        FALSE,
-        NOW()
-    )
-    ON CONFLICT (provider, provider_event_id) DO NOTHING
-    RETURNING id INTO v_webhook_id;
-
-    -- If webhook was duplicate, return early
-    IF v_webhook_id IS NULL THEN
-        -- Fetch existing webhook ID for response
-        SELECT id INTO v_webhook_id
-        FROM metadata.webhooks
-        WHERE provider = p_provider AND provider_event_id = v_event_id;
-
-        RETURN jsonb_build_object(
-            'received', TRUE,
-            'duplicate', TRUE,
-            'event_id', v_event_id,
-            'webhook_id', v_webhook_id
-        );
-    END IF;
-
-    -- Return success response (Stripe expects 200 OK)
-    RETURN jsonb_build_object(
-        'received', TRUE,
-        'duplicate', FALSE,
-        'event_id', v_event_id,
-        'event_type', v_event_type,
-        'webhook_id', v_webhook_id
-    );
-END;
-$$;
-
-COMMENT ON FUNCTION process_payment_webhook(TEXT, JSONB) IS
-    'Webhook endpoint for Stripe payment events. Called via PostgREST at /rpc/process_payment_webhook. Stores webhook with idempotency and enqueues processing job.';
-
-
--- ===========================================================================
--- Trigger Function: Enqueue Process Webhook Job
--- ===========================================================================
--- Automatically enqueues River job when webhook is inserted
-
-CREATE OR REPLACE FUNCTION payments.enqueue_process_webhook_job()
-RETURNS TRIGGER
-SECURITY DEFINER
-SET search_path = payments, metadata, public
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    -- Only enqueue job for new, unprocessed webhooks
-    IF NEW.processed = FALSE THEN
-        INSERT INTO metadata.river_job (
-            kind,
-            args,
-            priority,
-            queue,
-            max_attempts,
-            scheduled_at,
-            state
-        ) VALUES (
-            'process_payment_webhook',
-            jsonb_build_object('webhook_id', NEW.id),
-            1,  -- Normal priority
-            'default',
-            3,  -- Retry up to 3 times (webhooks are retried by Stripe anyway)
-            NOW(),
-            'available'
-        );
-
-        RAISE NOTICE 'Enqueued process_payment_webhook job for webhook %', NEW.id;
-    END IF;
-
-    RETURN NEW;
-END;
-$$;
-
-COMMENT ON FUNCTION payments.enqueue_process_webhook_job() IS
-    'Trigger function that enqueues River job to process webhook when inserted.';
-
-
--- ===========================================================================
--- Trigger: Enqueue Process Webhook Job on INSERT
--- ===========================================================================
-
-CREATE TRIGGER enqueue_process_webhook_job_trigger
-    AFTER INSERT ON metadata.webhooks
-    FOR EACH ROW
-    WHEN (NEW.processed = FALSE AND NEW.provider = 'stripe')
-    EXECUTE FUNCTION payments.enqueue_process_webhook_job();
+-- Webhooks are processed via HTTP endpoint (payment-worker:8080/webhooks/stripe)
+-- NOT via PostgREST RPC. The HTTP server handles signature verification and
+-- updates metadata.webhooks + payments.transactions directly.
+--
+-- We do NOT use:
+-- - PostgREST /rpc/process_payment_webhook endpoint (can't handle Stripe signatures)
+-- - Database triggers to enqueue River jobs for webhooks
+-- - River workers for webhook processing
+--
+-- This architecture ensures proper Stripe signature validation and atomic
+-- transaction handling.
 
 
 -- ===========================================================================
@@ -488,7 +535,6 @@ GRANT SELECT ON public.payment_transactions TO authenticated, web_anon;
 
 -- Grant EXECUTE on RPC functions
 GRANT EXECUTE ON FUNCTION create_payment_intent_sync(NUMERIC, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION process_payment_webhook(TEXT, JSONB) TO authenticated, web_anon;  -- Webhooks can come from unauthenticated Stripe
 
 -- Anonymous users cannot access payments at all
 -- Note: anon role might be named web_anon in some setups

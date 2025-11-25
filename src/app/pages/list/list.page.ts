@@ -379,7 +379,17 @@ export class ListPage implements OnInit, OnDestroy {
   // Check if calendar should be shown
   public showCalendar = computed(() => {
     const entity = this.entitySignal();
-    return entity?.show_calendar && entity?.calendar_property_name;
+
+    // Don't show calendar if entity doesn't have calendar configured
+    if (!entity?.show_calendar || !entity?.calendar_property_name) {
+      return false;
+    }
+
+    // Only show calendar if user has SELECT permission
+    // NOTE: We don't check data.length here because the calendar needs to remain
+    // visible for navigation even when the current time period is empty.
+    // The calendar component itself handles empty states within the view.
+    return entity.select === true;
   });
 
   // Build calendar events from main data

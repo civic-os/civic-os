@@ -35,6 +35,9 @@ export const environment: Environment = {
         endpoint: 'http://localhost:9000',
         bucket: 'civic-os-files'
     },
+    stripe: {
+        publishableKey: 'pk_test_51QSGd7BAu8FLlQaYpEUPTIJwlCWDIx3AAgsgPyLdCu0hcIUoYdhXnFRJZC9xfPGb2tKOrzNpAYqHjUuYLObW83vF00kNIz2hnF'
+    },
     matomo: {
         url: '',  // Empty = disabled in base environment
         siteId: '',
