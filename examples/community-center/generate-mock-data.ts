@@ -864,7 +864,6 @@ class MockDataGenerator {
         this.generateSQLFile();
       } else {
         await this.insertData();
-        this.generateSQLFile();
       }
 
       console.log('✅ Mock data generation complete!');

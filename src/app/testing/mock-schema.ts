@@ -37,6 +37,8 @@ export function createMockEntity(overrides?: Partial<SchemaEntityTable>): Schema
     select: true,
     update: true,
     delete: true,
+    payment_initiation_rpc: null,
+    payment_capture_mode: null,
     ...overrides
   };
 }

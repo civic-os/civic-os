@@ -1489,16 +1489,94 @@ All payment RPCs **must follow this standardized pattern**:
 
 **Helper Functions** (provided by v0.13.0 migration):
 
+These helper functions reduce boilerplate code (~50 lines per RPC) and prevent common integration errors like duplicate charges or orphaned payment records. **All payment RPCs should use these helpers** instead of implementing idempotency and linking logic manually.
+
 1. **`payments.check_existing_payment(payment_id UUID) RETURNS TEXT`**
-   - Returns: `'create_new'`, `'reuse'`, or `'duplicate'`
-   - Handles all idempotency logic (prevents duplicate charges, allows retry on failures)
-   - Replaces ~28 lines of boilerplate per RPC
+
+   Handles idempotency logic for payment creation. Returns status indicating whether to create new payment, reuse existing, or reject as duplicate.
+
+   **Parameters**:
+   - `payment_id` - Existing `payment_transaction_id` from entity (may be NULL)
+
+   **Return Values**:
+   - `'create_new'` - No existing payment or previous payment failed/canceled, safe to create new payment
+   - `'reuse'` - Payment exists in `pending_intent` or `pending` status, return existing payment_id to user (payment in progress)
+   - `'duplicate'` - Payment already succeeded, raise exception to prevent double-charging
+
+   **Usage**:
+   ```sql
+   v_idempotency_status := payments.check_existing_payment(v_entity.payment_transaction_id);
+
+   IF v_idempotency_status = 'reuse' THEN
+     RETURN v_entity.payment_transaction_id;  -- Payment already in progress
+   END IF;
+
+   IF v_idempotency_status = 'duplicate' THEN
+     RAISE EXCEPTION 'Payment already succeeded for this entity';
+   END IF;
+   -- v_idempotency_status = 'create_new', proceed to create payment
+   ```
+
+   **Why This Matters**: Without proper idempotency checks, users clicking "Pay Now" multiple times could be charged twice. This helper ensures:
+   - In-progress payments are reused (prevents duplicate Stripe PaymentIntents)
+   - Succeeded payments cannot be retried (prevents double-charging)
+   - Failed/canceled payments can be retried (allows recovery from errors)
 
 2. **`payments.create_and_link_payment(...) RETURNS UUID`**
-   - Creates payment record + links to entity atomically
-   - Ensures correct status, currency, provider values
-   - Prevents forgetting entity link or using wrong parameters
-   - Replaces ~20 lines of boilerplate per RPC
+
+   Creates payment record in `payments.transactions` and atomically links it to your entity table. Handles all boilerplate for status, currency, provider, and user_id initialization.
+
+   **Full Signature**:
+   ```sql
+   payments.create_and_link_payment(
+     entity_table_name NAME,           -- Entity table name (e.g., 'reservation_requests')
+     entity_pk_column NAME,             -- Entity PK column name (e.g., 'id')
+     entity_pk_value ANYELEMENT,        -- Entity PK value (e.g., 123 or '550e8400-e29b-41d4-a716-446655440000')
+     payment_fk_column NAME,            -- Payment FK column name (e.g., 'payment_transaction_id')
+     amount NUMERIC,                    -- Payment amount in dollars (e.g., 50.00)
+     description TEXT,                  -- Payment description for Stripe (e.g., 'Reservation for Main Hall')
+     user_id UUID DEFAULT current_user_id(),  -- User making payment (defaults to current user)
+     currency TEXT DEFAULT 'USD'        -- Currency code (defaults to USD)
+   ) RETURNS UUID                       -- Returns payment_id from payments.transactions
+   ```
+
+   **Parameters Explained**:
+   - `entity_table_name` - Your entity's table name (qualified with schema if not `public`)
+   - `entity_pk_column` - Primary key column of your entity (usually `'id'`)
+   - `entity_pk_value` - The specific entity ID (BIGINT, INT, UUID, or TEXT depending on your PK type)
+   - `payment_fk_column` - Name of the UUID FK column linking to `payments.transactions` (usually `'payment_transaction_id'`)
+   - `amount` - Payment amount as NUMERIC (e.g., `50.00` for $50.00)
+   - `description` - Human-readable description shown in Stripe Dashboard and receipts
+   - `user_id` - (Optional) Override user making payment (defaults to `current_user_id()`)
+   - `currency` - (Optional) Currency code (defaults to `'USD'`)
+
+   **Usage Example**:
+   ```sql
+   RETURN payments.create_and_link_payment(
+     'reservation_requests',           -- Table name
+     'id',                              -- PK column
+     p_entity_id,                       -- PK value (from RPC parameter)
+     'payment_transaction_id',          -- FK column
+     v_cost,                            -- Amount (calculated earlier)
+     format('Reservation for %s', v_resource_name)  -- Description
+     -- user_id defaults to current_user_id()
+     -- currency defaults to 'USD'
+   );
+   ```
+
+   **What It Does Atomically**:
+   - Inserts payment record with `status = 'pending_intent'`, `provider = 'stripe'`
+   - Updates entity table to link payment: `UPDATE {table} SET {fk_column} = payment_id WHERE {pk_column} = {pk_value}`
+   - Returns payment UUID for RPC to return to frontend
+   - Trigger automatically enqueues River job for Stripe PaymentIntent creation
+
+   **Why This Matters**: Manual payment creation requires careful attention to:
+   - Setting correct initial status (`pending_intent`, not `pending`)
+   - Atomically linking payment to entity (prevents orphaned payments)
+   - Using correct user_id (prevents payments attributed to wrong user)
+   - Handling different PK types (BIGINT, UUID, etc.) without SQL injection
+
+   This helper handles all edge cases correctly and prevents common errors like orphaned payments or wrong user attribution.
 
 **Example RPC (using helpers)**:
 
@@ -1650,6 +1728,127 @@ payment_capture_mode = 'deferred'
 - Manual capture via Stripe Dashboard or API
 - Best for: Reservations that may be canceled, pre-orders, hotel bookings
 
+#### Webhook Architecture
+
+Stripe webhooks update payment status after user completes payment. The webhook flow uses **HTTP endpoints** (not PostgREST RPC) due to Stripe's signature verification requirements.
+
+**Why HTTP Instead of PostgREST?**
+
+Stripe webhooks require access to the **raw request body** for signature verification using HMAC-SHA256. PostgREST processes JSON payloads and doesn't expose the raw body to RPC functions, making signature verification impossible. The payment worker runs a dedicated HTTP server to handle webhook requests directly.
+
+**Webhook Flow**:
+
+1. **Stripe sends webhook** → HTTP POST to `https://your-domain.com/webhooks/stripe`
+2. **Worker verifies signature** → Uses `STRIPE_WEBHOOK_SECRET` to verify request authenticity
+3. **Worker updates database** → Transaction: insert `metadata.webhooks` + update `payments.transactions` status
+4. **Worker responds 200 OK** → Stripe marks webhook as delivered
+
+**Architecture Components**:
+
+```
+Stripe → [HTTP: /webhooks/stripe] → Payment Worker → PostgreSQL
+                                     - Signature verification
+                                     - Idempotent processing
+                                     - Transactional updates
+```
+
+**Setting Up Webhooks**:
+
+**1. Configure Webhook URL in Stripe Dashboard**
+
+Production:
+- URL: `https://your-domain.com/webhooks/stripe`
+- Events to send: `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`
+- Copy the **Signing secret** (starts with `whsec_`)
+
+Development:
+- Use Stripe CLI for local testing: `stripe listen --forward-to http://localhost:8081/webhooks/stripe`
+- CLI prints signing secret to console
+
+**2. Set Environment Variable**
+
+```bash
+# Production (from Stripe Dashboard webhook settings)
+STRIPE_WEBHOOK_SECRET=whsec_abc123...
+
+# Development (from Stripe CLI output)
+STRIPE_WEBHOOK_SECRET=whsec_xyz789...
+```
+
+**3. Verify Worker Configuration**
+
+Check payment worker logs on startup:
+```
+[Init] Stripe Webhook Secret: whsec_***xyz789
+[Init] ✓ Webhook server initialized
+[Init] Starting HTTP webhook server...
+HTTP Server: Listening on :8080/webhooks/stripe
+```
+
+**Testing Webhooks Locally**:
+
+Use Stripe CLI to forward webhooks from Stripe's test environment to your local worker:
+
+```bash
+# Start Stripe listener (forwards webhooks to local worker)
+stripe listen --forward-to http://localhost:8081/webhooks/stripe
+
+# In another terminal, trigger test webhook events
+stripe trigger payment_intent.succeeded
+stripe trigger payment_intent.payment_failed
+
+# Check worker logs for webhook processing
+docker logs -f civic-os-consolidated-worker | grep Webhook
+```
+
+**Expected output** (successful webhook):
+```
+[Webhook] Processing event: id=evt_abc123, type=payment_intent.succeeded
+[Webhook] Created webhook record: abc-123-def-456
+[Webhook] Marking payment pi_xyz789 as succeeded
+[Webhook] ✓ Payment pi_xyz789 marked as succeeded
+[Webhook] ✓ Event evt_abc123 processed successfully
+```
+
+**Webhook Idempotency**:
+
+The webhook handler automatically prevents duplicate processing:
+- `metadata.webhooks` table has unique constraint on `(provider, provider_event_id)`
+- Duplicate webhooks return 200 OK without processing (Stripe requires 200 for idempotency)
+- Check `metadata.webhooks.processed = TRUE` to see which events succeeded
+
+**Verifying Webhook Delivery**:
+
+```sql
+-- Check recent webhook events
+SELECT
+  id,
+  event_type,
+  signature_verified,
+  processed,
+  processed_at,
+  error_message,
+  created_at
+FROM metadata.webhooks
+WHERE provider = 'stripe'
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- Find unprocessed webhooks (should be empty in healthy system)
+SELECT * FROM metadata.webhooks
+WHERE provider = 'stripe' AND processed = FALSE;
+```
+
+**Stripe Dashboard**:
+- Go to Developers → Webhooks → [Your endpoint]
+- View webhook delivery history and retry failed deliveries
+- Check response codes (200 = success, 500 = error)
+
+**Common Webhook Issues**:
+- **Webhooks not arriving**: Verify endpoint URL in Stripe Dashboard (must be publicly accessible)
+- **Signature verification fails**: `STRIPE_WEBHOOK_SECRET` doesn't match webhook signing secret
+- **"Payment not found" warnings**: Orphaned PaymentIntent from retry (safe to ignore - see Troubleshooting)
+
 #### Monitoring & Troubleshooting
 
 **Check payment status**:
@@ -1701,11 +1900,305 @@ docker logs -f civic-os-consolidated-worker | grep -i payment
 docker ps | grep consolidated-worker
 ```
 
-**Common Issues**:
-- **Payment stuck in `pending_intent`**: Worker not running or Stripe API key invalid
-- **`provider_client_secret` is NULL**: CreateIntentJob failed (check worker logs and Stripe API errors)
-- **Payment modal doesn't open**: Check browser console for errors, verify Stripe publishable key
-- **Webhook events not processed**: Verify webhook endpoint URL and signing secret
+**Troubleshooting Guide**:
+
+**Issue 1: Payment Stuck in `pending_intent` Status**
+
+**Symptom**: Payment record created but `provider_client_secret` remains NULL, modal never opens
+
+**Root Causes**:
+- Payment worker not running
+- Invalid Stripe API key
+- River job failed to enqueue
+- Job stuck in retry queue
+
+**Diagnostic Steps**:
+
+1. Check if payment worker is running:
+```bash
+docker ps | grep consolidated-worker
+# Should show container with "Up" status
+
+# Check worker logs for errors
+docker logs civic-os-consolidated-worker | tail -50
+```
+
+2. Query River job queue for stuck jobs:
+```sql
+-- Check if job was created for this payment
+SELECT
+  j.id,
+  j.state,
+  j.attempt,
+  j.max_attempts,
+  j.errors,
+  j.scheduled_at,
+  j.args->>'payment_id' AS payment_id
+FROM metadata.river_job j
+WHERE j.kind = 'create_payment_intent'
+  AND j.args->>'payment_id' = 'YOUR_PAYMENT_UUID'  -- Replace with actual payment_id
+ORDER BY j.created_at DESC;
+
+-- State meanings:
+-- 'available' = waiting to be picked up by worker
+-- 'running' = currently processing
+-- 'completed' = successfully processed
+-- 'retryable' = failed but will retry
+-- 'discarded' = failed max attempts
+```
+
+3. Check Stripe API key configuration:
+```bash
+# Verify environment variable is set
+docker exec civic-os-consolidated-worker printenv STRIPE_API_KEY
+# Should print: sk_test_... or sk_live_...
+```
+
+4. Examine job errors:
+```sql
+-- View error details from failed jobs
+SELECT
+  id,
+  state,
+  errors,  -- JSON array of error messages
+  attempt,
+  max_attempts,
+  created_at,
+  scheduled_at
+FROM metadata.river_job
+WHERE kind = 'create_payment_intent'
+  AND state IN ('retryable', 'discarded')
+ORDER BY created_at DESC
+LIMIT 5;
+```
+
+**Fix**:
+- Worker not running → Start worker: `docker-compose up -d civic-os-consolidated-worker`
+- Invalid API key → Update `STRIPE_API_KEY` environment variable and restart worker
+- Job discarded → Check `errors` column for Stripe API error, fix root cause, then manually retry payment (user clicks "Pay Now" again)
+
+---
+
+**Issue 2: Payment Modal Doesn't Open (Client Secret NULL)**
+
+**Symptom**: User clicks "Pay Now" but nothing happens, or error appears in browser console
+
+**Root Cause**: CreateIntentJob succeeded but didn't update `provider_client_secret` (should never happen with helper functions)
+
+**Diagnostic Steps**:
+
+1. Check payment record:
+```sql
+-- Verify client secret was populated
+SELECT
+  id,
+  status,
+  provider_payment_id,  -- Stripe PaymentIntent ID (pi_...)
+  provider_client_secret,  -- Client secret for Stripe Elements (should NOT be NULL)
+  created_at,
+  updated_at
+FROM payments.transactions
+WHERE id = 'YOUR_PAYMENT_UUID';
+```
+
+2. Check browser console (F12):
+```
+Error: Missing clientSecret
+  or
+Error: Invalid publishable key
+```
+
+3. Verify Stripe publishable key:
+```typescript
+// Check src/environments/environment.ts
+stripe: {
+  publishableKey: 'pk_test_...'  // Should match your Stripe account
+}
+```
+
+**Fix**:
+- `provider_client_secret` NULL → Check worker logs for CreateIntentJob errors, Stripe API may have rejected intent creation
+- "Invalid publishable key" → Update `environment.ts` with correct Stripe publishable key (must match secret key's account)
+
+---
+
+**Issue 3: Webhook Events Not Processing**
+
+**Symptom**: Payment completes in Stripe UI but status never updates to `succeeded` in database
+
+**Root Causes**:
+- Webhook URL not configured in Stripe Dashboard
+- Incorrect `STRIPE_WEBHOOK_SECRET`
+- Worker HTTP server not accessible from internet (production) or Stripe CLI not running (development)
+
+**Diagnostic Steps**:
+
+1. Check if webhook record was created:
+```sql
+-- Check recent webhook events
+SELECT
+  id,
+  event_type,
+  signature_verified,
+  processed,
+  error_message,
+  created_at
+FROM metadata.webhooks
+WHERE provider = 'stripe'
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- If no records → webhooks not reaching worker
+-- If signature_verified = FALSE → wrong STRIPE_WEBHOOK_SECRET
+-- If processed = FALSE → check error_message column
+```
+
+2. Check Stripe Dashboard webhook delivery:
+- Go to Developers → Webhooks → [Your endpoint]
+- Click on recent events to see response codes
+- 200 = success, 401 = signature verification failed, 500 = worker error
+
+3. Verify webhook endpoint configuration:
+```bash
+# Production: Check environment variable
+docker exec civic-os-consolidated-worker printenv STRIPE_WEBHOOK_SECRET
+# Should print: whsec_...
+
+# Development: Verify Stripe CLI is running
+ps aux | grep "stripe listen"
+```
+
+4. Test webhook processing manually:
+```bash
+# Trigger test webhook
+stripe trigger payment_intent.succeeded
+
+# Check worker logs immediately
+docker logs -f civic-os-consolidated-worker | grep Webhook
+```
+
+**Fix**:
+- No webhook records → Configure webhook URL in Stripe Dashboard (production) or start `stripe listen` (development)
+- Signature verification fails → Copy correct signing secret from Stripe Dashboard webhook settings
+- Worker error → Check `error_message` in `metadata.webhooks` table, worker logs for stack trace
+
+---
+
+**Issue 4: Orphaned PaymentIntent Warning in Logs**
+
+**Symptom**: Worker logs show "⚠ Payment pi_xyz789 not found (likely orphaned from retry)"
+
+**Root Cause**: User retried failed payment, creating new payment record with new Stripe PaymentIntent. Old PaymentIntent may still complete if user had payment form open.
+
+**Is This Normal?** YES - This is expected behavior and safe to ignore.
+
+**Why It Happens**:
+1. User initiates payment → Creates payment record A with PaymentIntent A
+2. Payment fails (card declined, network error, etc.)
+3. User clicks "Retry Payment" → Creates NEW payment record B with NEW PaymentIntent B
+4. Stripe webhook for OLD PaymentIntent A still arrives (user had form open, finally submitted)
+5. Worker can't find payment record for PaymentIntent A (it was replaced by B)
+6. Worker logs warning and returns 200 OK (tells Stripe "handled successfully, don't retry")
+
+**Diagnostic Query**:
+```sql
+-- Find abandoned payment records (replaced by retries)
+SELECT
+  p1.id AS old_payment_id,
+  p1.provider_payment_id AS old_payment_intent,
+  p1.status AS old_status,
+  p1.created_at AS old_created_at,
+  p2.id AS new_payment_id,
+  p2.provider_payment_id AS new_payment_intent,
+  p2.status AS new_status,
+  p2.created_at AS new_created_at
+FROM payments.transactions p1
+JOIN payments.transactions p2 ON p1.user_id = p2.user_id
+WHERE p1.status IN ('failed', 'canceled')
+  AND p2.status IN ('succeeded', 'pending')
+  AND p2.created_at > p1.created_at
+  AND p1.description = p2.description  -- Same entity
+ORDER BY p1.created_at DESC;
+```
+
+**Fix**: No action required - this is intentional audit trail preservation.
+
+---
+
+**Issue 5: Payment Already Succeeded Error**
+
+**Symptom**: User clicks "Pay Now" but gets error "Payment already succeeded for this request"
+
+**Root Cause**: Idempotency check detected completed payment, preventing duplicate charge (CORRECT BEHAVIOR)
+
+**Is This an Error?** NO - This is the helper function protecting against double-charging.
+
+**Diagnostic Query**:
+```sql
+-- Verify payment succeeded
+SELECT
+  id,
+  status,
+  amount,
+  description,
+  provider_payment_id,
+  created_at,
+  updated_at
+FROM payments.transactions
+WHERE id = (
+  SELECT payment_transaction_id
+  FROM reservation_requests  -- Replace with your entity table
+  WHERE id = YOUR_ENTITY_ID
+);
+```
+
+**Fix**:
+- If status = 'succeeded' → Payment completed successfully, no action needed
+- If status = 'failed'/'canceled' → This shouldn't happen (indicates bug in `check_existing_payment` logic)
+
+---
+
+**General Debugging Tips**:
+
+1. **Enable debug logging** in worker (if available):
+```bash
+# Set log level to debug
+docker-compose exec civic-os-consolidated-worker sh -c 'export LOG_LEVEL=debug'
+```
+
+2. **Query payment timeline**:
+```sql
+-- See full lifecycle of a payment
+SELECT
+  'Payment Created' AS event,
+  p.created_at AS timestamp,
+  p.status
+FROM payments.transactions p
+WHERE p.id = 'YOUR_PAYMENT_UUID'
+
+UNION ALL
+
+SELECT
+  'Job Enqueued' AS event,
+  j.created_at AS timestamp,
+  j.state AS status
+FROM metadata.river_job j
+WHERE j.kind = 'create_payment_intent'
+  AND j.args->>'payment_id' = 'YOUR_PAYMENT_UUID'
+
+UNION ALL
+
+SELECT
+  'Webhook Received' AS event,
+  w.created_at AS timestamp,
+  w.event_type AS status
+FROM metadata.webhooks w
+WHERE w.payload->>'data'->>'object'->>'id' = 'YOUR_STRIPE_PAYMENT_INTENT_ID'
+
+ORDER BY timestamp;
+```
+
+3. **Check Stripe Dashboard** for payment details, error messages, and webhook delivery status
 
 See `docs/development/PAYMENT_POC_IMPLEMENTATION.md` for complete architecture, testing guide, and Phase 2 roadmap (polymorphic payments, multiple payments per entity).
 
