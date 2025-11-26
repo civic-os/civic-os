@@ -178,7 +178,7 @@ Civic OS automatically detects property types based on PostgreSQL data types. He
 | `TEXT`, `VARCHAR` (short) | `TextShort` | Single-line input |
 | `TEXT`, `VARCHAR` (long) | `TextLong` | Textarea |
 | `INT4`, `INT8`, `SERIAL`, `BIGSERIAL` | `IntegerNumber` | Number input |
-| `NUMERIC`, `DECIMAL` | `DecimalNumber` | Number input with decimals |
+| `NUMERIC`, `DECIMAL` | `DecimalNumber`* | Number input with decimals |
 | `MONEY` | `Money` | Currency input |
 | `BOOL`, `BOOLEAN` | `Boolean` | Checkbox |
 | `DATE` | `Date` | Date picker |
@@ -188,6 +188,8 @@ Civic OS automatically detects property types based on PostgreSQL data types. He
 | `INT`/`BIGINT` (with FK) | `ForeignKeyName` | Dropdown with related entity |
 | `geography(Point, 4326)` | `GeoPoint` | Interactive Leaflet map |
 | `hex_color` domain | `Color` | Color picker with swatch |
+
+*`DecimalNumber`: Partial support - display works but type detection from PostgreSQL schema not yet implemented. Use `money` type for currency or `int4`/`int8` for integers.
 
 #### Geography (GeoPoint) Pattern
 

@@ -105,7 +105,7 @@ WHERE table_name = 'reservations';
 
 See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide and `examples/community-center/` for working example.
 
-**Status Type** (`Status`): Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with composite FK pattern for type safety. Uses generated column for entity_type discriminator and supports workflow transitions via `metadata.status_transitions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design specification. **Status**: Design phase - not yet implemented.
+🚧 **Status Type** (`Status`): **NOT YET IMPLEMENTED** - Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators will use the centralized `metadata.statuses` table with composite FK pattern for type safety. Uses generated column for entity_type discriminator and supports workflow transitions via `metadata.status_transitions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for design specification.
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
@@ -427,8 +427,8 @@ The CreatePage supports pre-filling form fields via query parameters, enabling c
    ```
 
 **Implementation Details:**
-- CreatePage.applyQueryParamDefaults() (`src/app/pages/create/create.page.ts:258`)
-- DetailPage.navigateToCreateRelated() (`src/app/pages/detail/detail.page.ts:236`)
+- `CreatePage.applyQueryParamDefaults()` in `src/app/pages/create/create.page.ts`
+- `DetailPage.navigateToCreateRelated()` in `src/app/pages/detail/detail.page.ts`
 
 ### Form Validation
 

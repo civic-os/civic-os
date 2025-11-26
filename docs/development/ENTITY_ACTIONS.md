@@ -1,8 +1,8 @@
 # Entity Action Buttons - Design & Implementation Guide
 
 **Status**: Design Phase (Not Yet Implemented)
-**Target Version**: v0.10.0
-**Last Updated**: 2025-11-03
+**Target Version**: Future (TBD)
+**Last Updated**: 2025-11-26
 
 ## Overview
 

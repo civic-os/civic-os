@@ -1,8 +1,8 @@
 # Payment Processing POC - Implementation Summary
 
-**Version:** 1.1
-**Status:** Phase 2 Complete (Admin & Refunds)
-**Date:** 2025-11-25
+**Version:** 1.2
+**Status:** Phase 2 Complete (Admin, Refunds, Generic Payments, Notifications)
+**Date:** 2025-11-26
 **Related Docs:** [PAYMENT_PROCESSING.md](./PAYMENT_PROCESSING.md) (Full Design), [PAYMENT_STATE_DIAGRAM.md](./PAYMENT_STATE_DIAGRAM.md)
 
 ---
@@ -214,10 +214,10 @@ If payment fails and user retries:
 
 **DetailPage Integration:**
 - `canInitiatePayment$` observable checks:
-  - Entity is 'reservation_requests' (hardcoded for POC)
-  - Record status is 'Pending'
+  - Entity has `payment_initiation_rpc` configured in metadata (generic, not hardcoded)
+  - Record status allows payment (entity-specific logic)
   - Payment is null OR failed/canceled
-- "Pay Now" button calls domain-specific RPC
+- "Pay Now" button calls the RPC specified in `entity.payment_initiation_rpc`
 - Modal opens on success, polls until client_secret ready
 - Refreshes record when modal closes (successful or not)
 
@@ -263,8 +263,9 @@ if result.RowsAffected() == 0 {
 
 ## What's Implemented vs Full Design
 
-### ✅ Implemented (POC Complete)
+### ✅ Implemented (Phase 1 + Phase 2 Complete)
 
+**Phase 1 (v0.13.0) - Core Payment Processing:**
 - [x] Core `payments.transactions` table with RLS
 - [x] `Payment` property type detection and display
 - [x] `PaymentCheckoutComponent` with Stripe Elements
@@ -278,16 +279,19 @@ if result.RowsAffected() == 0 {
 - [x] Edit page payment display (read-only)
 - [x] Detail page "Pay Now" button with conditional logic
 
-### ❌ Not Implemented (Deferred)
+**Phase 2 (v0.14.0) - Admin, Refunds & Generic Payments:**
+- [x] Polymorphic `entity_type` + `entity_id` pattern
+- [x] Metadata-driven payment initiation (`payment_initiation_rpc` column)
+- [x] Generic `canInitiatePayment$` logic (metadata-driven, not hardcoded)
+- [x] Email notifications (`payment_succeeded`, `payment_refunded` templates)
+- [x] Refund processing (1:M refund support with multiple partial refunds)
+- [x] Admin payment management UI (`/admin/payments`)
+- [x] Permission-based RLS for payment administration
 
-- [ ] Polymorphic `entity_type` + `entity_id` pattern
-- [ ] Metadata-driven payment initiation (no `payment_initiation_rpc` column)
-- [ ] Generic `canInitiatePayment$` logic (currently hardcoded for reservations)
+### ❌ Not Implemented (Future Work)
+
 - [ ] Automatic entity `payment_status` sync via triggers
-- [ ] Email notifications (SMTP worker)
-- [ ] Refund processing
 - [ ] Capture timing configuration (immediate vs deferred)
-- [ ] Admin payment management UI (SystemListPage/SystemDetailPage)
 - [ ] Multiple payment providers (only Stripe implemented)
 - [ ] Recurring payments / subscriptions
 - [ ] Multi-currency support
@@ -352,9 +356,14 @@ ORDER BY created_at DESC;
 
 ### Core Framework (v0.13.0 Migration)
 
-- `postgres/migrations/deploy/v0-13-0-add-payments.sql` - Core payment schema
-- `postgres/migrations/revert/v0-13-0-add-payments.sql` - Rollback script
+- `postgres/migrations/deploy/v0-13-0-add-payments-poc.sql` - Core payment schema
+- `postgres/migrations/deploy/v0-13-0-add-payment-metadata.sql` - Payment metadata columns
 - `services/payment-worker/` - Go microservice (CreateIntentWorker, WebhookHandler)
+
+> **Architecture Note:** The `payment-worker` is intentionally separate from `consolidated-worker` (which handles files, thumbnails, and notifications). This separation provides:
+> - Independent scaling based on payment volume
+> - Clearer bounded context for payment processing
+> - Optional deployment (only needed if accepting payments)
 
 ### Frontend Components
 
@@ -383,33 +392,20 @@ ORDER BY created_at DESC;
 
 ## Known Limitations & Future Work
 
-### 1. Hardcoded Logic
+### ~~1. Hardcoded Logic~~ ✅ Implemented in Phase 2 (v0.14.0)
 
-**Problem:** DetailPage has hardcoded check for 'reservation_requests' entity type.
+**Resolved:** `payment_initiation_rpc` column now exists in `metadata.entities`. DetailPage dynamically reads this metadata to determine if an entity supports payments, which RPC to call, and handles payment initiation generically.
 
-**Future:** Add `payment_initiation_rpc` column to `metadata.entities` for metadata-driven configuration.
+### ~~2. Single Transaction Per Entity~~ ✅ Implemented in Phase 2 (v0.14.0)
 
-```sql
--- Future enhancement
-ALTER TABLE metadata.entities
-  ADD COLUMN payment_initiation_rpc VARCHAR(255);
+**Resolved:** Polymorphic `entity_type` + `entity_id` pattern implemented. Multiple payments can reference the same entity. The `payment_transactions` view includes entity tracking, and the admin UI can navigate to any entity type.
 
-UPDATE metadata.entities
-SET payment_initiation_rpc = 'initiate_reservation_request_payment'
-WHERE table_name = 'reservation_requests';
-```
+### ~~3. No Refund UI~~ ✅ Implemented in Phase 2 (v0.14.0)
 
-### 2. Single Transaction Per Entity
-
-**Problem:** Current FK pattern only allows one active payment per entity.
-
-**Future:** Switch to polymorphic pattern with `entity_type` + `entity_id` for multiple payments (deposits, final payment, etc.).
-
-### 3. ~~No Refund UI~~ ✅ Implemented in Phase 2 (v0.14.0)
-
-**Resolved:** Admin payments page with refund capabilities implemented in v0.14.0 migration.
-
-See [Phase 2: Admin & Refunds](#phase-2-admin--refunds-v0140) section below.
+**Resolved:** Admin payments page with full refund capabilities:
+- 1:M refund support (multiple partial refunds per transaction)
+- Over-refund validation in RPC
+- Refund history modal with Stripe IDs for cross-reference
 
 ### 4. Limited Error Handling
 
@@ -417,46 +413,41 @@ See [Phase 2: Admin & Refunds](#phase-2-admin--refunds-v0140) section below.
 
 **Future:** Surface Stripe decline codes and suggest next steps (try different card, contact bank, etc.).
 
-### 5. No Email Notifications
+### ~~5. No Email Notifications~~ ✅ Implemented in Phase 2 (v0.14.0)
 
-**Problem:** Users don't receive payment confirmation emails.
-
-**Future:** Implement SendEmailWorker with templates for payment_succeeded, payment_failed events.
+**Resolved:** Notification templates exist for `payment_succeeded` and `payment_refunded`. Triggers automatically fire on payment/refund completion, sending email confirmations via the consolidated notification worker.
 
 ---
 
 ## Migration Path to Full Design
 
-When ready to productionize:
+~~When ready to productionize:~~ **Most items completed in v0.14.0!**
 
-1. **Add polymorphic columns** to `payments.transactions`:
-   ```sql
-   ALTER TABLE payments.transactions
-     ADD COLUMN entity_type VARCHAR(50),
-     ADD COLUMN entity_id VARCHAR(50);
-   ```
+1. ✅ **Add polymorphic columns** to `payments.transactions` - DONE (v0.14.0)
+   - `entity_type` and `entity_id` columns added
+   - `payment_transactions` view includes entity reference and display name
 
 2. **Create generic RPC** `initiate_payment(entity_type, entity_id, amount, description)`:
-   - Replaces domain-specific RPCs
-   - Uses metadata to determine which entities support payments
+   - ⏳ Deferred: Domain-specific RPCs still used (e.g., `initiate_reservation_request_payment`)
+   - Generic RPC pattern available if needed for future entities
 
-3. **Add metadata columns** to `metadata.entities`:
-   - `payment_initiation_rpc` - Custom RPC name (optional override)
-   - `payment_capture_mode` - 'immediate' or 'deferred'
+3. ✅ **Add metadata columns** to `metadata.entities` - DONE (v0.14.0)
+   - `payment_initiation_rpc` - Custom RPC name (implemented)
+   - `payment_capture_mode` - Deferred (immediate capture only for now)
 
 4. **Implement entity sync trigger** `update_entity_payment_status()`:
-   - Automatically updates `entity.payment_status` when payment succeeds/fails
-   - Requires standardized `payment_status` column on payable entities
+   - ⏳ Deferred: Entities update their own status in domain-specific RPCs
+   - Standardized trigger approach not yet implemented
 
-5. **Build admin UI** with SystemListPage/SystemDetailPage:
-   - Payment history with search/filter
-   - Refund processing
-   - Transaction export
+5. ✅ **Build admin UI** - DONE (v0.14.0)
+   - `/admin/payments` with search, filter, sort
+   - Refund processing (1:M support)
+   - Entity navigation and Stripe ID cross-reference
 
-6. **Add email notifications** via consolidated-worker SendEmailWorker:
-   - Payment confirmation emails
-   - Failed payment notifications
-   - Refund confirmations
+6. ✅ **Add email notifications** - DONE (v0.11.0 + v0.14.0)
+   - `payment_succeeded` template
+   - `payment_refunded` template
+   - Triggers fire on transaction/refund completion
 
 ---
 
@@ -592,6 +583,12 @@ services/payment-worker/
 
 ## Changelog
 
+- **v1.2 (2025-11-26)**: Documentation accuracy update
+  - Corrected "Not Implemented" section - many features were already built in code but docs were outdated
+  - Confirmed generic payment initiation is implemented (not hardcoded to reservation_requests)
+  - Updated "Known Limitations" section - 4 of 5 items now resolved
+  - Updated "Migration Path" section - most items completed in v0.14.0
+  - Payment system is now fully metadata-driven via `payment_initiation_rpc`
 - **v1.1 (2025-11-25)**: Phase 2 - Admin & Refunds implementation
   - Admin payments page (`/admin/payments`) with permission-based access
   - RefundWorker for async Stripe refund processing

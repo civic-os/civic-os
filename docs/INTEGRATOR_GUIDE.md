@@ -2461,10 +2461,12 @@ See `postgres/migrations/README.md` for complete documentation.
 ### Deployment
 
 Civic OS provides production-ready Docker containers for all components:
-- **Frontend** (Angular app): `ghcr.io/civic-os/frontend:v0.10.0`
-- **PostgREST** API: `ghcr.io/civic-os/postgrest:v0.10.0`
-- **Migrations** (Sqitch): `ghcr.io/civic-os/migrations:v0.10.0`
-- **Consolidated Worker** (Go + River): `ghcr.io/civic-os/consolidated-worker:v0.11.0` - Handles S3 presigning, thumbnail generation, and notifications in a single service
+- **Frontend** (Angular app): `ghcr.io/civic-os/frontend:latest`
+- **PostgREST** API: `ghcr.io/civic-os/postgrest:latest`
+- **Migrations** (Sqitch): `ghcr.io/civic-os/migrations:latest`
+- **Consolidated Worker** (Go + River): `ghcr.io/civic-os/consolidated-worker:latest` - Handles S3 presigning, thumbnail generation, and notifications in a single service
+
+> **Note:** For production deployments, pin to specific versions (e.g., `v0.14.0`) to ensure reproducible builds. Check [GitHub Releases](https://github.com/civic-os/civic-os-frontend/releases) for available versions.
 
 **Runtime Configuration**: All instances use environment variables for configuration (PostgREST URL, Keycloak settings, S3 credentials, etc.). No rebuild required for deployment.
 

@@ -264,6 +264,8 @@ openssl rand -base64 32
 
 ## Docker Compose Deployment
 
+> **Version Note:** Examples in this guide use placeholder versions (e.g., `v0.X.0`). Replace with the [latest release version](https://github.com/civic-os/civic-os-frontend/releases) or use `latest` tag for non-production environments.
+
 ### Step 1: Prepare Environment
 
 ```bash
@@ -294,12 +296,12 @@ cp your-permissions.sql production/init-scripts/02_permissions.sql
 
 ```bash
 # Pull specific version (recommended for production)
-docker pull ghcr.io/civic-os/frontend:v0.3.0
-docker pull ghcr.io/civic-os/postgrest:v0.3.0
+docker pull ghcr.io/civic-os/frontend:latest
+docker pull ghcr.io/civic-os/postgrest:latest
 
 # Or build locally
-docker build -t civic-os-frontend:v0.3.0 -f docker/frontend/Dockerfile .
-docker build -t civic-os-postgrest:v0.3.0 -f docker/postgrest/Dockerfile .
+docker build -t civic-os-frontend:latest -f docker/frontend/Dockerfile .
+docker build -t civic-os-postgrest:latest -f docker/postgrest/Dockerfile .
 ```
 
 ### Step 4: Start Services
@@ -724,11 +726,11 @@ The migrations container (`ghcr.io/civic-os/migrations`) is automatically run as
 ```yaml
 services:
   migrations:
-    image: ghcr.io/civic-os/migrations:v0.4.0
+    image: ghcr.io/civic-os/migrations:latest  # or pin to specific version
   postgrest:
-    image: ghcr.io/civic-os/postgrest:v0.4.0
+    image: ghcr.io/civic-os/postgrest:latest
   frontend:
-    image: ghcr.io/civic-os/frontend:v0.4.0
+    image: ghcr.io/civic-os/frontend:latest
 ```
 
 ### Initial Deployment
@@ -736,10 +738,10 @@ services:
 For first-time deployments, the migration container will set up the complete schema:
 
 ```bash
-# Pull versioned images
-docker pull ghcr.io/civic-os/migrations:v0.4.0
-docker pull ghcr.io/civic-os/postgrest:v0.4.0
-docker pull ghcr.io/civic-os/frontend:v0.4.0
+# Pull versioned images (use latest or specific version)
+docker pull ghcr.io/civic-os/migrations:latest
+docker pull ghcr.io/civic-os/postgrest:latest
+docker pull ghcr.io/civic-os/frontend:latest
 
 # Start database
 docker-compose -f docker-compose.prod.yml up -d postgres
@@ -757,7 +759,7 @@ When upgrading Civic OS to a new version:
 
 ```bash
 # 1. Update docker-compose.prod.yml with new version
-# Change VERSION=v0.4.0 to VERSION=v0.5.0 in .env
+# Change VERSION=v0.13.0 to VERSION=v0.14.0 in .env (example versions)
 
 # 2. Pull new images
 docker-compose -f docker-compose.prod.yml pull
@@ -774,20 +776,20 @@ docker-compose -f docker-compose.prod.yml up -d postgrest frontend
 For manual control or non-Docker Compose deployments:
 
 ```bash
-# Deploy migrations
-./scripts/migrate-production.sh v0.5.0 postgres://user:pass@host:5432/civic_os
+# Deploy migrations (replace VERSION with your target version)
+./scripts/migrate-production.sh VERSION postgres://user:pass@host:5432/civic_os
 
 # Check migration status
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.5.0 \
+  ghcr.io/civic-os/migrations:latest \
   status
 
 # Run with full verification (recommended for production)
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
   -e CIVIC_OS_VERIFY_FULL="true" \
-  ghcr.io/civic-os/migrations:v0.5.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ### Rollback Procedure
@@ -798,14 +800,14 @@ If issues arise after upgrading:
 # 1. Stop application services
 docker-compose -f docker-compose.prod.yml stop postgrest frontend
 
-# 2. Revert database migrations
+# 2. Revert database migrations (use the NEW version's container for revert)
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.5.0 \
+  ghcr.io/civic-os/migrations:latest \
   revert --to @HEAD^
 
 # 3. Downgrade container versions in docker-compose.prod.yml
-# Change VERSION=v0.5.0 back to VERSION=v0.4.0
+# Change VERSION to previous version (e.g., v0.14.0 back to v0.13.0)
 
 # 4. Restart with old versions
 docker-compose -f docker-compose.prod.yml up -d postgrest frontend
