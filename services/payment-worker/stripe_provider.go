@@ -7,12 +7,13 @@ import (
 
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/paymentintent"
+	"github.com/stripe/stripe-go/v81/refund"
 )
 
 // PaymentProvider defines the interface for payment processors
-// POC version only implements CreateIntent for Stripe
 type PaymentProvider interface {
 	CreateIntent(ctx context.Context, params CreateIntentParams) (*PaymentIntentResult, error)
+	CreateRefund(ctx context.Context, params RefundParams) (*RefundResult, error)
 }
 
 // CreateIntentParams contains parameters for creating a payment intent
@@ -28,6 +29,19 @@ type PaymentIntentResult struct {
 	PaymentIntentID string // Stripe PaymentIntent ID (pi_...)
 	ClientSecret    string // client_secret for Stripe Elements
 	Status          string // Payment intent status (e.g., "requires_payment_method")
+}
+
+// RefundParams contains parameters for creating a refund
+type RefundParams struct {
+	PaymentIntentID string // Stripe PaymentIntent ID to refund (pi_...)
+	AmountCents     int64  // Amount to refund in cents (partial refunds supported)
+	Reason          string // Reason for refund (shown in Stripe dashboard)
+}
+
+// RefundResult contains the result of creating a refund
+type RefundResult struct {
+	RefundID string // Stripe Refund ID (re_...)
+	Status   string // Refund status (e.g., "succeeded", "pending")
 }
 
 // StripeProvider implements PaymentProvider for Stripe
@@ -112,4 +126,45 @@ func maskSecret(secret string) string {
 		return "***"
 	}
 	return secret[:12] + "..."
+}
+
+// CreateRefund creates a Stripe Refund for a PaymentIntent
+func (s *StripeProvider) CreateRefund(ctx context.Context, params RefundParams) (*RefundResult, error) {
+	log.Printf("[Stripe] Creating Refund: payment_intent=%s, amount=%d cents",
+		params.PaymentIntentID, params.AmountCents)
+
+	// Validate params
+	if params.PaymentIntentID == "" {
+		return nil, fmt.Errorf("payment_intent_id is required")
+	}
+	if params.AmountCents <= 0 {
+		return nil, fmt.Errorf("invalid amount: %d (must be > 0)", params.AmountCents)
+	}
+
+	// Create Stripe Refund
+	refundParams := &stripe.RefundParams{
+		PaymentIntent: stripe.String(params.PaymentIntentID),
+		Amount:        stripe.Int64(params.AmountCents),
+	}
+
+	// Add reason as metadata if provided
+	if params.Reason != "" {
+		refundParams.Reason = stripe.String("requested_by_customer")
+		refundParams.AddMetadata("reason", params.Reason)
+	}
+
+	// Call Stripe API
+	stripeRefund, err := refund.New(refundParams)
+	if err != nil {
+		log.Printf("[Stripe] Error creating Refund: %v", err)
+		return nil, fmt.Errorf("stripe API error: %w", err)
+	}
+
+	log.Printf("[Stripe] ✓ Refund created: id=%s, status=%s",
+		stripeRefund.ID, stripeRefund.Status)
+
+	return &RefundResult{
+		RefundID: stripeRefund.ID,
+		Status:   string(stripeRefund.Status),
+	}, nil
 }

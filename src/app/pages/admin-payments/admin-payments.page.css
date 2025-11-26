@@ -1,0 +1,16 @@
+/* AdminPaymentsPage styles */
+
+/* Sortable column headers */
+th.cursor-pointer:hover {
+  background-color: oklch(var(--b2));
+}
+
+/* Badge adjustments for status */
+.badge {
+  text-transform: capitalize;
+}
+
+/* Refund modal backdrop */
+.modal-backdrop {
+  background-color: oklch(0 0 0 / 0.5);
+}

@@ -31,6 +31,17 @@ interface FilterOption {
   display_name: string;
 }
 
+// Static payment status options for filtering
+const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
+  { id: 'pending_intent', display_name: 'Pending Intent' },
+  { id: 'pending', display_name: 'Pending' },
+  { id: 'succeeded', display_name: 'Succeeded' },
+  { id: 'failed', display_name: 'Failed' },
+  { id: 'canceled', display_name: 'Canceled' },
+  { id: 'refunded', display_name: 'Refunded' },
+  { id: 'partially_refunded', display_name: 'Partially Refunded' },
+];
+
 @Component({
   selector: 'app-filter-bar',
   imports: [CommonModule, FormsModule],
@@ -116,7 +127,7 @@ export class FilterBarComponent {
     return `repeat(${columns}, 250px)`;
   });
 
-  // Load FK and User filter options when properties change
+  // Load FK, User, and Payment filter options when properties change
   private _loadOptionsEffect = effect(() => {
     const props = this.properties(); // Read signal value
     if (props && props.length > 0) {
@@ -125,6 +136,11 @@ export class FilterBarComponent {
           this.loadFilterOptions(prop.column_name, prop.join_table);
         } else if (prop.type === EntityPropertyType.User) {
           this.loadFilterOptions(prop.column_name, 'civic_os_users');
+        } else if (prop.type === EntityPropertyType.Payment) {
+          // Payment type uses static status options (not from database)
+          const options = this.filterOptions();
+          options.set(prop.column_name, PAYMENT_STATUS_OPTIONS);
+          this.filterOptions.set(new Map(options));
         }
       });
     }
@@ -199,6 +215,18 @@ export class FilterBarComponent {
           }
           break;
 
+        case EntityPropertyType.Payment:
+          // Reverse transformation for embedded resource filter
+          // Filter column is "column.effective_status", need to extract base column
+          if (filter.column === `${prop.column_name}.effective_status` && filter.operator === 'in') {
+            const match = filter.value.match(/\(([^)]+)\)/);
+            if (match) {
+              const statuses = match[1].split(',').map((s: string) => s.trim());
+              newState[prop.column_name] = statuses;
+            }
+          }
+          break;
+
         case EntityPropertyType.Boolean:
           // Reverse transformation: is:true → 'true', is:false → 'false'
           if (filter.operator === 'is') {
@@ -244,6 +272,19 @@ export class FilterBarComponent {
               column: prop.column_name,
               operator: 'in',
               value: `(${value.join(',')})`
+            });
+          }
+          break;
+
+        case EntityPropertyType.Payment:
+          // Payment status filter: use embedded resource filtering
+          // PostgREST syntax: column.effective_status=in.(value1,value2)
+          const paymentStatuses = state[prop.column_name];
+          if (Array.isArray(paymentStatuses) && paymentStatuses.length > 0) {
+            criteria.push({
+              column: `${prop.column_name}.effective_status`,
+              operator: 'in',
+              value: `(${paymentStatuses.join(',')})`
             });
           }
           break;

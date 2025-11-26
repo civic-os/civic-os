@@ -148,6 +148,14 @@
                 Notifications
               </a>
             </li>
+            <li (click)="navigateToPaymentsAdmin()">
+              <a [class.menu-active]="isRouteActive('/admin/payments')"
+                 [class.font-bold]="isRouteActive('/admin/payments')"
+                 [class.opacity-85]="!isRouteActive('/admin/payments')">
+                <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                Payments
+              </a>
+            </li>
           }
         </ul>
       </div>

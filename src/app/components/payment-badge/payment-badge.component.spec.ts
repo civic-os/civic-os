@@ -40,16 +40,31 @@ describe('PaymentBadgeComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // Helper to create PaymentValue with required fields
+  function createPayment(overrides: Partial<PaymentValue> & { status: PaymentValue['status'] }): PaymentValue {
+    const { status, effective_status, ...rest } = overrides;
+    return {
+      id: 'pay_123',
+      status: status,
+      effective_status: effective_status ?? status, // Default to same as status
+      amount: 50.00,
+      currency: 'USD',
+      display_name: `$50.00 (${status})`,
+      created_at: '2025-11-22T10:00:00Z',
+      // Aggregated refund data (1:M support)
+      total_refunded: 0,
+      refund_count: 0,
+      pending_refund_count: 0,
+      ...rest
+    };
+  }
+
   describe('Succeeded Status', () => {
     it('should render green badge with check icon for succeeded payment', () => {
-      const payment: PaymentValue = {
-        id: 'pay_123',
+      const payment = createPayment({
         status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$50.00 (succeeded)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -67,15 +82,11 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle succeeded payment with error_message field (should be ignored)', () => {
-      const payment: PaymentValue = {
-        id: 'pay_123',
+      const payment = createPayment({
         status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
         display_name: '$50.00 (succeeded)',
-        error_message: 'Previous error', // Should be ignored for succeeded
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        error_message: 'Previous error' // Should be ignored for succeeded
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -87,15 +98,13 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Pending Statuses', () => {
     it('should render yellow badge with clock icon for pending payment', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_456',
         status: 'pending',
         amount: 75.00,
-        currency: 'USD',
         display_name: '$75.00 (pending)',
-        provider_client_secret: 'pi_secret_123',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        provider_client_secret: 'pi_secret_123'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -113,14 +122,12 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should render yellow badge with clock icon for pending_intent payment', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_789',
         status: 'pending_intent',
         amount: 100.00,
-        currency: 'USD',
-        display_name: '$100.00 (pending_intent)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$100.00 (pending_intent)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -135,15 +142,13 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Failed Status', () => {
     it('should render red badge with error icon for failed payment', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_fail_123',
         status: 'failed',
         amount: 25.00,
-        currency: 'USD',
         display_name: '$25.00 (failed)',
-        error_message: 'Card declined',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        error_message: 'Card declined'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -161,14 +166,12 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle failed payment without error_message', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_fail_456',
         status: 'failed',
         amount: 30.00,
-        currency: 'USD',
-        display_name: '$30.00 (failed)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$30.00 (failed)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -180,14 +183,12 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Canceled Status', () => {
     it('should render gray badge with cancel icon for canceled payment', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_cancel_123',
         status: 'canceled',
         amount: 60.00,
-        currency: 'USD',
-        display_name: '$60.00 (canceled)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$60.00 (canceled)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -202,6 +203,42 @@ describe('PaymentBadgeComponent', () => {
 
       const textContent = badge.nativeElement.textContent.trim();
       expect(textContent).toContain('$60.00 (canceled)');
+    });
+  });
+
+  describe('Refunded Statuses', () => {
+    it('should render info badge with undo icon for refunded payment', () => {
+      const payment = createPayment({
+        status: 'succeeded',
+        effective_status: 'refunded',
+        display_name: '$50.00 (refunded)'
+      });
+
+      fixture.componentRef.setInput('payment', payment);
+      fixture.detectChanges();
+
+      const badge = fixture.debugElement.query(By.css('.badge'));
+      expect(badge.nativeElement.classList.contains('badge-info')).toBe(true);
+
+      const icon = badge.query(By.css('.material-symbols-outlined'));
+      expect(icon.nativeElement.textContent.trim()).toBe('undo');
+    });
+
+    it('should render accent badge with undo icon for partially_refunded payment', () => {
+      const payment = createPayment({
+        status: 'succeeded',
+        effective_status: 'partially_refunded',
+        display_name: '$50.00 (partially refunded)'
+      });
+
+      fixture.componentRef.setInput('payment', payment);
+      fixture.detectChanges();
+
+      const badge = fixture.debugElement.query(By.css('.badge'));
+      expect(badge.nativeElement.classList.contains('badge-accent')).toBe(true);
+
+      const icon = badge.query(By.css('.material-symbols-outlined'));
+      expect(icon.nativeElement.textContent.trim()).toBe('undo');
     });
   });
 
@@ -239,14 +276,7 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Badge Structure and Styling', () => {
     it('should always render badge with gap-2 class', () => {
-      const payment: PaymentValue = {
-        id: 'pay_123',
-        status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+      const payment = createPayment({ status: 'succeeded' });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -256,14 +286,7 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should render badge with whitespace-normal class for text wrapping', () => {
-      const payment: PaymentValue = {
-        id: 'pay_123',
-        status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+      const payment = createPayment({ status: 'succeeded' });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -273,14 +296,7 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should render badge with min-height for consistent sizing', () => {
-      const payment: PaymentValue = {
-        id: 'pay_123',
-        status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+      const payment = createPayment({ status: 'succeeded' });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -291,14 +307,7 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should render icon with shrink-0 class to prevent icon distortion', () => {
-      const payment: PaymentValue = {
-        id: 'pay_123',
-        status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+      const payment = createPayment({ status: 'succeeded' });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -311,14 +320,12 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Currency and Amount Variations', () => {
     it('should handle large amount values', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_large',
         status: 'succeeded',
         amount: 9999.99,
-        currency: 'USD',
-        display_name: '$9,999.99 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$9,999.99 (succeeded)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -328,14 +335,12 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle small amount values', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_small',
         status: 'succeeded',
         amount: 0.01,
-        currency: 'USD',
-        display_name: '$0.01 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$0.01 (succeeded)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -345,14 +350,12 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle zero amount values', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_zero',
         status: 'succeeded',
         amount: 0.00,
-        currency: 'USD',
-        display_name: '$0.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$0.00 (succeeded)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -362,14 +365,12 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle different currency codes in display_name', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_eur',
         status: 'succeeded',
-        amount: 50.00,
         currency: 'EUR',
-        display_name: '€50.00 (succeeded)',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '€50.00 (succeeded)'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -381,14 +382,11 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle payment with very long display_name', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_long',
         status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded) - This is a very long payment description that might wrap to multiple lines',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$50.00 (succeeded) - This is a very long payment description that might wrap to multiple lines'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -399,14 +397,11 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle payment with special characters in display_name', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_special',
         status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '$50.00 (succeeded) - Payment #12345 <Test>',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: '$50.00 (succeeded) - Payment #12345 <Test>'
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -416,14 +411,11 @@ describe('PaymentBadgeComponent', () => {
     });
 
     it('should handle payment with empty display_name', () => {
-      const payment: PaymentValue = {
+      const payment = createPayment({
         id: 'pay_empty',
         status: 'succeeded',
-        amount: 50.00,
-        currency: 'USD',
-        display_name: '',
-        created_at: '2025-11-22T10:00:00Z'
-      };
+        display_name: ''
+      });
 
       fixture.componentRef.setInput('payment', payment);
       fixture.detectChanges();
@@ -437,19 +429,16 @@ describe('PaymentBadgeComponent', () => {
 
   describe('Status Validation', () => {
     it('should handle all valid payment statuses consistently', () => {
-      const statuses: Array<'pending_intent' | 'pending' | 'succeeded' | 'failed' | 'canceled'> = [
+      const statuses: Array<PaymentValue['status']> = [
         'pending_intent', 'pending', 'succeeded', 'failed', 'canceled'
       ];
 
       statuses.forEach(status => {
-        const payment: PaymentValue = {
+        const payment = createPayment({
           id: `pay_${status}`,
           status: status,
-          amount: 50.00,
-          currency: 'USD',
-          display_name: `$50.00 (${status})`,
-          created_at: '2025-11-22T10:00:00Z'
-        };
+          display_name: `$50.00 (${status})`
+        });
 
         fixture.componentRef.setInput('payment', payment);
         fixture.detectChanges();
@@ -462,6 +451,29 @@ describe('PaymentBadgeComponent', () => {
 
         const textContent = badge.nativeElement.textContent.trim();
         expect(textContent).toContain(`$50.00 (${status})`);
+      });
+    });
+
+    it('should handle all effective_status values correctly', () => {
+      const effectiveStatuses: Array<PaymentValue['effective_status']> = [
+        'pending_intent', 'pending', 'succeeded', 'failed', 'canceled', 'refunded', 'partially_refunded', 'refund_pending'
+      ];
+
+      effectiveStatuses.forEach(effectiveStatus => {
+        const payment = createPayment({
+          status: 'succeeded', // Original status preserved
+          effective_status: effectiveStatus,
+          display_name: `$50.00 (${effectiveStatus})`
+        });
+
+        fixture.componentRef.setInput('payment', payment);
+        fixture.detectChanges();
+
+        const badge = fixture.debugElement.query(By.css('.badge'));
+        expect(badge).toBeTruthy();
+
+        const icon = badge.query(By.css('.material-symbols-outlined'));
+        expect(icon).toBeTruthy();
       });
     });
   });

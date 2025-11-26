@@ -54,6 +54,22 @@
                 </div>
               }
 
+              <!-- Payment: Status checkbox list (effective_status) -->
+              @if (prop.type === EntityPropertyType.Payment) {
+                <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
+                  @for (option of getFilterOptions(prop.column_name); track option.id) {
+                    <label class="label cursor-pointer justify-start gap-2 py-1 pr-4">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        [checked]="isOptionSelected(prop.column_name, option.id)"
+                        (change)="toggleOption(prop.column_name, option.id)" />
+                      <span class="label-text text-sm">{{ option.display_name }}</span>
+                    </label>
+                  }
+                </div>
+              }
+
               <!-- Boolean: Dropdown (All/Yes/No) -->
               @if (prop.type === EntityPropertyType.Boolean) {
                 <select

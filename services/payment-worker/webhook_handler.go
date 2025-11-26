@@ -73,6 +73,8 @@ func (h *WebhookHandler) ProcessStripeWebhook(ctx context.Context, event stripe.
 		processingErr = h.handlePaymentIntentFailed(ctx, tx, event)
 	case "payment_intent.canceled":
 		processingErr = h.handlePaymentIntentCanceled(ctx, tx, event)
+	case "charge.refunded":
+		processingErr = h.handleChargeRefunded(ctx, tx, event)
 	default:
 		// Unknown event type - just mark as processed
 		log.Printf("[Webhook] Unknown event type '%s', marking as processed", event.Type)
@@ -186,6 +188,65 @@ func (h *WebhookHandler) handlePaymentIntentCanceled(ctx context.Context, tx pgx
 	}
 
 	log.Printf("[Webhook] ✓ Payment %s marked as canceled", paymentIntent.ID)
+	return nil
+}
+
+// handleChargeRefunded updates refund status based on Stripe webhook
+// This serves as confirmation that Stripe processed the refund
+//
+// Design note: With 1:M refund support, there could be multiple refunds per payment.
+// However, the initiate_payment_refund RPC blocks concurrent refunds (only one pending
+// at a time), so this handler should only ever update one refund per webhook.
+// The RefundWorker is the primary mechanism for updating refund status; this webhook
+// is belt-and-suspenders confirmation.
+func (h *WebhookHandler) handleChargeRefunded(ctx context.Context, tx pgx.Tx, event stripe.Event) error {
+	var charge stripe.Charge
+	if err := json.Unmarshal(event.Data.Raw, &charge); err != nil {
+		return fmt.Errorf("unmarshal charge: %w", err)
+	}
+
+	// Get the payment intent ID from the charge
+	paymentIntentID := ""
+	if charge.PaymentIntent != nil {
+		paymentIntentID = charge.PaymentIntent.ID
+	}
+
+	log.Printf("[Webhook] Processing refund for charge %s (payment_intent=%s)", charge.ID, paymentIntentID)
+
+	if paymentIntentID == "" {
+		log.Printf("[Webhook] ⚠ Charge %s has no payment_intent, skipping", charge.ID)
+		return nil
+	}
+
+	// Update any pending refunds for this payment to succeeded
+	// With the concurrent refund block in the RPC, there should be at most one pending refund
+	result, err := tx.Exec(ctx, `
+		UPDATE payments.refunds r
+		SET
+			status = 'succeeded',
+			processed_at = COALESCE(r.processed_at, NOW())
+		FROM payments.transactions t
+		WHERE r.transaction_id = t.id
+		AND t.provider_payment_id = $1
+		AND r.status = 'pending'
+	`, paymentIntentID)
+
+	if err != nil {
+		return fmt.Errorf("update refund status: %w", err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected > 0 {
+		log.Printf("[Webhook] ✓ Updated %d pending refund(s) to succeeded for payment %s", rowsAffected, paymentIntentID)
+		if rowsAffected > 1 {
+			// This shouldn't happen with the RPC's concurrent refund block
+			log.Printf("[Webhook] ⚠ WARNING: Multiple pending refunds updated. This indicates a possible race condition.")
+		}
+	} else {
+		// No pending refunds found - either already processed by RefundWorker or refund initiated externally
+		log.Printf("[Webhook] No pending refunds found for payment %s (already processed or refund initiated externally)", paymentIntentID)
+	}
+
 	return nil
 }
 

@@ -129,16 +129,24 @@ export enum EntityPropertyType {
 /**
  * Payment transaction value from payments.transactions view.
  * Returned when a Payment property type is embedded in entity data.
+ *
+ * @property status - Original payment status (for auditing)
+ * @property effective_status - Display status accounting for refunds (use this for UI)
  */
 export interface PaymentValue {
     id: string;  // UUID
     status: 'pending_intent' | 'pending' | 'succeeded' | 'failed' | 'canceled';
+    effective_status: 'pending_intent' | 'pending' | 'succeeded' | 'failed' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
     amount: number;
     currency: string;
     display_name: string;
     provider_client_secret?: string;
     error_message?: string;
     created_at: string;
+    // Aggregated refund data (supports multiple refunds per transaction)
+    total_refunded: number;  // Sum of succeeded refund amounts
+    refund_count: number;    // Number of succeeded refunds
+    pending_refund_count: number;  // Number of pending refunds
 }
 
 /**

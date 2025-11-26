@@ -294,8 +294,10 @@ export class SchemaService {
     }
 
     // Payment type: Embed payment data from payment_transactions view (system type)
+    // Includes effective_status computed field for refund-aware status display
+    // Includes aggregated refund data for tooltip showing refund breakdown (1:M support)
     if (prop.type === EntityPropertyType.Payment) {
-      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,display_name,created_at)`;
+      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
     }
 
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
@@ -341,8 +343,10 @@ export class SchemaService {
     }
 
     // Payment fields are read-only (show embedded data, not editable)
+    // Includes effective_status computed field for refund-aware status display
+    // Includes aggregated refund data for tooltip showing refund breakdown (1:M support)
     if (prop.type === EntityPropertyType.Payment) {
-      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,display_name,created_at)`;
+      return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
     }
 
     // Everything else uses the column name directly

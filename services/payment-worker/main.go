@@ -116,6 +116,11 @@ func main() {
 	river.AddWorker(workers, createIntentWorker)
 	log.Println("[Init] ✓ Registered CreateIntentWorker")
 
+	// Register RefundWorker (for async refund processing)
+	refundWorker := NewRefundWorker(dbPool, stripeProvider)
+	river.AddWorker(workers, refundWorker)
+	log.Println("[Init] ✓ Registered RefundWorker")
+
 	// Create River client
 	riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 		Queues: map[string]river.QueueConfig{
@@ -160,7 +165,9 @@ func main() {
 	log.Println("========================================")
 	log.Println("  ✓ Payment Worker Running")
 	log.Println("========================================")
-	log.Println("River Worker: Listening for 'create_payment_intent' jobs...")
+	log.Println("River Worker: Listening for jobs:")
+	log.Println("  - create_payment_intent")
+	log.Println("  - process_refund")
 	log.Printf("HTTP Server: Listening on :%s/webhooks/stripe", webhookPort)
 	log.Println("Press Ctrl+C to shutdown")
 	log.Println("")

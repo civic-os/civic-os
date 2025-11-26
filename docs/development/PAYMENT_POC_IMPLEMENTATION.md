@@ -1,8 +1,8 @@
 # Payment Processing POC - Implementation Summary
 
-**Version:** 1.0
-**Status:** POC Complete (Property Type Approach)
-**Date:** 2025-11-22
+**Version:** 1.1
+**Status:** Phase 2 Complete (Admin & Refunds)
+**Date:** 2025-11-25
 **Related Docs:** [PAYMENT_PROCESSING.md](./PAYMENT_PROCESSING.md) (Full Design), [PAYMENT_STATE_DIAGRAM.md](./PAYMENT_STATE_DIAGRAM.md)
 
 ---
@@ -405,11 +405,11 @@ WHERE table_name = 'reservation_requests';
 
 **Future:** Switch to polymorphic pattern with `entity_type` + `entity_id` for multiple payments (deposits, final payment, etc.).
 
-### 3. No Refund UI
+### 3. ~~No Refund UI~~ ✅ Implemented in Phase 2 (v0.14.0)
 
-**Problem:** No admin interface for processing refunds.
+**Resolved:** Admin payments page with refund capabilities implemented in v0.14.0 migration.
 
-**Future:** Implement SystemListPage/SystemDetailPage for payment management with refund capabilities.
+See [Phase 2: Admin & Refunds](#phase-2-admin--refunds-v0140) section below.
 
 ### 4. Limited Error Handling
 
@@ -460,8 +460,146 @@ When ready to productionize:
 
 ---
 
+## Phase 2: Admin & Refunds (v0.14.0)
+
+Phase 2 adds system-wide payment management with refund capabilities, resolving the "No Refund UI" limitation from Phase 1.
+
+### New Features
+
+#### 1. Admin Payments Page (`/admin/payments`)
+
+System-wide payment management interface with:
+- **Permission-based access**: Requires `payment_transactions:select` permission to view
+- **Filterable by status**: pending, succeeded, failed, refunded, partially_refunded
+- **Search**: By description, user email, or Stripe payment ID
+- **Sortable columns**: Date, amount, status
+- **User info display**: Shows user display name and email for each payment
+- **Refund initiation**: Users with `payment_refunds:insert` permission can issue refunds
+
+#### 2. Refund Processing
+
+Complete refund workflow with:
+- **RefundWorker**: Go worker processes `process_refund` River jobs
+- **Stripe API integration**: `StripeProvider.CreateRefund()` method
+- **Database tracking**: `payments.refunds` table tracks all refund operations
+- **Webhook handling**: `charge.refunded` webhook confirms Stripe refund completion
+- **Email notifications**: Refund confirmation email via notification worker
+
+#### 3. Effective Status (Computed Field)
+
+The `effective_status` field provides refund-aware status display:
+- **Original status preserved**: `status` column maintains audit trail
+- **Computed display**: `effective_status` returns 'refunded' or 'partially_refunded' when refund exists
+- **PostgREST integration**: Available via computed field function `payments.effective_status()`
+- **Filter support**: Can filter embedded payments by `column.effective_status=in.(...)` syntax
+
+#### 4. Payment Type Filtering
+
+FilterBar now supports Payment type properties:
+- **Status checkboxes**: All payment statuses available as filter options
+- **Embedded resource filtering**: Uses PostgREST `column.effective_status` syntax
+- **URL persistence**: Filters persist in URL query params
+
+### Database Schema (v0.14.0 Migration)
+
+```sql
+-- New permissions for payment management
+INSERT INTO metadata.permissions (table_name, permission_type, description)
+VALUES
+  ('payment_transactions', 'select', 'View all payment transactions'),
+  ('payment_refunds', 'select', 'View refund records'),
+  ('payment_refunds', 'insert', 'Initiate payment refunds');
+
+-- Refunds table
+CREATE TABLE payments.refunds (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  transaction_id UUID NOT NULL REFERENCES payments.transactions(id),
+  amount NUMERIC(10,2) NOT NULL,
+  reason TEXT,
+  initiated_by UUID REFERENCES metadata.civic_os_users(id),
+  provider_refund_id VARCHAR(255),
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',  -- pending, succeeded, failed
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  processed_at TIMESTAMPTZ
+);
+
+-- Computed field for refund-aware status
+CREATE FUNCTION payments.effective_status(t payments.transactions)
+RETURNS TEXT AS $$
+  SELECT CASE
+    WHEN EXISTS (
+      SELECT 1 FROM payments.refunds r
+      WHERE r.transaction_id = t.id AND r.status = 'succeeded'
+    ) THEN
+      CASE WHEN (
+        SELECT SUM(r.amount) FROM payments.refunds r
+        WHERE r.transaction_id = t.id AND r.status = 'succeeded'
+      ) >= t.amount THEN 'refunded' ELSE 'partially_refunded' END
+    ELSE t.status
+  END;
+$$ LANGUAGE SQL STABLE;
+
+-- Updated payment_transactions view includes effective_status
+CREATE VIEW public.payment_transactions AS
+SELECT
+  t.*, u.display_name AS user_display_name, u.email AS user_email,
+  payments.effective_status(t) AS effective_status,
+  r.id AS refund_id, r.amount AS refund_amount, r.reason AS refund_reason
+FROM payments.transactions t
+LEFT JOIN metadata.civic_os_users u ON t.user_id = u.id
+LEFT JOIN payments.refunds r ON t.id = r.transaction_id;
+```
+
+### Go Worker Updates
+
+```
+services/payment-worker/
+├── main.go              # Updated to register RefundWorker
+├── stripe_provider.go   # Added CreateRefund() method + RefundParams/RefundResult types
+├── refund_worker.go     # NEW: RefundWorker processes 'process_refund' jobs
+└── webhook_handler.go   # Added charge.refunded handler
+```
+
+**RefundWorker Flow:**
+1. Fetch refund record from database
+2. Validate status is 'pending' (idempotent)
+3. Call `StripeProvider.CreateRefund()` with PaymentIntent ID and amount
+4. Update refund record with Stripe refund ID and 'succeeded' status
+5. Enqueue notification job for user email
+
+### Frontend Updates
+
+| Component | Changes |
+|-----------|---------|
+| `AdminPaymentsPage` | NEW: System-wide payment management at `/admin/payments` |
+| `PaymentBadgeComponent` | Uses `effective_status` instead of `status` for display |
+| `PaymentValue` interface | Added `effective_status` field |
+| `SchemaService` | Select string includes `effective_status` and `error_message` |
+| `FilterBarComponent` | Added Payment type with status checkboxes |
+
+### Route
+
+```typescript
+{
+  path: 'admin/payments',
+  component: AdminPaymentsPage,
+  canActivate: [schemaVersionGuard, authGuard]
+}
+```
+
+---
+
 ## Changelog
 
+- **v1.1 (2025-11-25)**: Phase 2 - Admin & Refunds implementation
+  - Admin payments page (`/admin/payments`) with permission-based access
+  - RefundWorker for async Stripe refund processing
+  - `effective_status` computed field for refund-aware display
+  - `charge.refunded` webhook handler
+  - FilterBar support for Payment type properties
+  - PaymentBadge uses effective_status
+  - Permission-based RLS (payment_transactions:select, payment_refunds:select/insert)
 - **v1.0 (2025-11-22)**: Initial POC implementation summary
   - Property Type approach with direct FK pattern
   - Core payment flow working (create → pay → webhook → status update)

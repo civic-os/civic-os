@@ -1,0 +1,462 @@
+<div class="container mx-auto p-6">
+  <h1 class="text-3xl font-bold mb-6">Payment Management</h1>
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+    <div class="alert alert-success mb-4 relative">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ successMessage() }}</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Permission Check -->
+  @if (!canViewPayments()) {
+    <div class="alert alert-warning">
+      <span class="material-symbols-outlined">lock</span>
+      <span>You do not have permission to view payments. Contact an administrator to request access.</span>
+    </div>
+  } @else {
+    <!-- Filters and Search -->
+    <div class="flex flex-wrap items-end gap-4 mb-6">
+      <!-- Status Filter -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">Status</span>
+        </label>
+        <select
+          class="select select-bordered select-sm"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="onStatusFilterChange($event)">
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">Date Range</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            type="date"
+            class="input input-bordered input-sm w-36"
+            [ngModel]="dateFrom()"
+            (ngModelChange)="onDateFromChange($event)"
+            title="From date" />
+          <span class="text-base-content/50">—</span>
+          <input
+            type="date"
+            class="input input-bordered input-sm w-36"
+            [ngModel]="dateTo()"
+            (ngModelChange)="onDateToChange($event)"
+            title="To date" />
+        </div>
+      </div>
+
+      <!-- Search + Refresh -->
+      <div class="flex items-end gap-1">
+        <div class="form-control w-72">
+          <label class="label py-1">
+            <span class="label-text font-semibold">&nbsp;</span>
+          </label>
+          <label class="input input-bordered input-sm flex items-center gap-2">
+            <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+            <input
+              type="text"
+              placeholder="Search description or email..."
+              class="grow bg-transparent border-none outline-none"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchChange($event)" />
+          </label>
+        </div>
+        <button
+          class="btn btn-sm btn-square btn-ghost"
+          (click)="refresh()"
+          [disabled]="loading()"
+          title="Refresh">
+          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    @if (loading()) {
+      <div class="flex justify-center items-center min-h-[400px]">
+        <span class="loading loading-spinner loading-lg"></span>
+      </div>
+    } @else {
+      <!-- Payments Table -->
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
+                <div class="flex items-center gap-1">
+                  Date
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
+                </div>
+              </th>
+              <th>User</th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('description')">
+                <div class="flex items-center gap-1">
+                  Description
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('description') }}</span>
+                </div>
+              </th>
+              <th>Entity</th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('effective_status')">
+                <div class="flex items-center gap-1">
+                  Status
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('effective_status') }}</span>
+                </div>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('amount')">
+                <div class="flex items-center gap-1">
+                  Amount
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('amount') }}</span>
+                </div>
+              </th>
+              <th>Refund</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of payments(); track payment.id) {
+              <tr>
+                <!-- Date -->
+                <td class="whitespace-nowrap">
+                  {{ payment.created_at | date:'short' }}
+                </td>
+                <!-- User -->
+                <td>
+                  <div class="flex flex-col">
+                    <span class="font-medium">{{ payment.user_full_name || payment.user_display_name || 'Unknown' }}</span>
+                    @if (payment.user_email) {
+                      <span class="text-xs text-base-content/60">{{ payment.user_email }}</span>
+                    }
+                  </div>
+                </td>
+                <!-- Description -->
+                <td>
+                  <div class="max-w-sm" [title]="payment.description">
+                    {{ payment.description }}
+                  </div>
+                </td>
+                <!-- Entity -->
+                <td>
+                  @if (payment.entity_type && payment.entity_id) {
+                    <a
+                      [routerLink]="getEntityRoute(payment)"
+                      class="link link-primary text-sm flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs">open_in_new</span>
+                      {{ payment.entity_display_name }}
+                    </a>
+                  } @else {
+                    <span class="text-base-content/40">-</span>
+                  }
+                </td>
+                <!-- Status -->
+                <td>
+                  <div class="badge gap-1 whitespace-normal h-auto min-h-[1.5rem] text-center" [ngClass]="getStatusBadgeClass(payment.effective_status)">
+                    <span class="material-symbols-outlined text-xs shrink-0">{{ getStatusIcon(payment.effective_status) }}</span>
+                    {{ getStatusLabel(payment.effective_status) }}
+                  </div>
+                </td>
+                <!-- Amount -->
+                <td class="text-right font-mono">
+                  {{ payment.amount | currency:payment.currency:'symbol':'1.2-2' }}
+                </td>
+                <!-- Refund -->
+                <td>
+                  @if (payment.refund_count > 0 || payment.pending_refund_count > 0) {
+                    <div class="flex flex-col text-sm">
+                      <span class="text-error font-medium">
+                        -{{ payment.total_refunded | currency:payment.currency:'symbol':'1.2-2' }}
+                      </span>
+                      @if (payment.effective_status === 'partially_refunded') {
+                        <span class="text-xs text-success font-medium">
+                          Net: {{ payment.amount - payment.total_refunded | currency:payment.currency:'symbol':'1.2-2' }}
+                        </span>
+                      }
+                      <button
+                        class="link link-primary text-xs mt-1 text-left"
+                        (click)="openRefundHistoryModal(payment)">
+                        {{ payment.refund_count }} refund{{ payment.refund_count !== 1 ? 's' : '' }}
+                        @if (payment.pending_refund_count > 0) {
+                          <span class="text-warning">({{ payment.pending_refund_count }} pending)</span>
+                        }
+                      </button>
+                    </div>
+                  } @else {
+                    <span class="text-base-content/40">-</span>
+                  }
+                </td>
+                <!-- Actions -->
+                <td>
+                  @if (canRefund(payment)) {
+                    <button
+                      class="btn btn-sm btn-outline btn-error"
+                      (click)="openRefundModal(payment)">
+                      <span class="material-symbols-outlined text-sm">undo</span>
+                      Refund
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="text-center py-8 text-base-content/60">
+                  No payments found
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="flex justify-between items-center mt-4">
+          <div class="text-sm text-base-content/60">
+            Showing {{ paginationStart() }} - {{ paginationEnd() }} of {{ totalCount() }}
+          </div>
+          <div class="join">
+            <button
+              class="join-item btn btn-sm"
+              [disabled]="!hasPrevPage()"
+              (click)="prevPage()">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button class="join-item btn btn-sm">
+              Page {{ currentPage() }} of {{ totalPages() }}
+            </button>
+            <button
+              class="join-item btn btn-sm"
+              [disabled]="!hasNextPage()"
+              (click)="nextPage()">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- Refund Modal -->
+  @if (showRefundModal() && refundForm()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-md">
+        <h3 class="font-bold text-lg mb-4">Initiate Refund</h3>
+
+        <!-- Payment Summary -->
+        <div class="bg-base-200 rounded-lg p-4 mb-4 text-sm">
+          <div class="font-medium mb-2">{{ refundForm()!.payment.description }}</div>
+          <div class="flex justify-between">
+            <span class="text-base-content/60">Original Amount</span>
+            <span class="font-semibold">{{ refundForm()!.payment.amount | currency:refundForm()!.payment.currency:'symbol':'1.2-2' }}</span>
+          </div>
+          @if (refundForm()!.payment.total_refunded > 0) {
+            <div class="flex justify-between text-error">
+              <span>Already Refunded</span>
+              <span>-{{ refundForm()!.payment.total_refunded | currency:refundForm()!.payment.currency:'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between font-semibold border-t border-base-300 pt-1 mt-1">
+              <span>Available to Refund</span>
+              <span class="text-success">{{ refundForm()!.payment.amount - refundForm()!.payment.total_refunded | currency:refundForm()!.payment.currency:'symbol':'1.2-2' }}</span>
+            </div>
+          }
+          <div class="flex justify-between mt-2">
+            <span class="text-base-content/60">User</span>
+            <span>{{ refundForm()!.payment.user_full_name || refundForm()!.payment.user_display_name || refundForm()!.payment.user_email }}</span>
+          </div>
+        </div>
+
+        <!-- Error Alert -->
+        @if (refundError()) {
+          <div class="alert alert-error mb-4 text-sm">
+            <span class="material-symbols-outlined text-base">error</span>
+            <span>{{ refundError() }}</span>
+          </div>
+        }
+
+        <!-- Refund Form -->
+        <div class="form-control mb-3">
+          <label class="label py-1">
+            <span class="label-text font-semibold">Refund Amount</span>
+            <span class="label-text-alt text-base-content/60">
+              Max: {{ refundForm()!.payment.amount - refundForm()!.payment.total_refunded | currency:refundForm()!.payment.currency:'symbol':'1.2-2' }}
+            </span>
+          </label>
+          <input
+            type="text"
+            currencyMask
+            class="input input-bordered w-full"
+            [ngModel]="refundForm()!.amount"
+            (ngModelChange)="updateRefundAmount($event)"
+            [disabled]="refundLoading()" />
+        </div>
+
+        <div class="mb-4">
+          <div class="label py-1">
+            <span class="label-text font-semibold">Reason</span>
+          </div>
+          <textarea
+            class="textarea textarea-bordered text-sm w-full"
+            placeholder="Explain why this refund is being issued (min 10 characters)..."
+            rows="3"
+            [ngModel]="refundForm()!.reason"
+            (ngModelChange)="updateRefundReason($event)"
+            [disabled]="refundLoading()"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-action">
+          <button
+            class="btn btn-sm"
+            (click)="closeRefundModal()"
+            [disabled]="refundLoading()">
+            Cancel
+          </button>
+          <button
+            class="btn btn-sm btn-error"
+            (click)="submitRefund()"
+            [disabled]="refundLoading()">
+            @if (refundLoading()) {
+              <span class="loading loading-spinner loading-xs"></span>
+              Processing...
+            } @else {
+              <span class="material-symbols-outlined text-base">undo</span>
+              Issue Refund
+            }
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" (click)="closeRefundModal()"></div>
+    </div>
+  }
+
+  <!-- Refund History Modal -->
+  @if (showRefundHistoryModal() && refundHistoryPayment()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-2">Refund History</h3>
+        <p class="text-sm text-base-content/60 mb-4">{{ refundHistoryPayment()!.description }}</p>
+
+        <!-- Payment Summary -->
+        <div class="bg-base-200 rounded-lg p-4 mb-4 text-sm">
+          <div class="flex justify-between">
+            <span class="text-base-content/60">Original Amount</span>
+            <span class="font-semibold">{{ refundHistoryPayment()!.amount | currency:refundHistoryPayment()!.currency:'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between text-error">
+            <span>Total Refunded</span>
+            <span>-{{ refundHistoryPayment()!.total_refunded | currency:refundHistoryPayment()!.currency:'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between font-semibold border-t border-base-300 pt-1 mt-1">
+            <span>Net Amount</span>
+            <span class="text-success">{{ refundHistoryPayment()!.amount - refundHistoryPayment()!.total_refunded | currency:refundHistoryPayment()!.currency:'symbol':'1.2-2' }}</span>
+          </div>
+          @if (refundHistoryPayment()!.provider_payment_id) {
+            <div class="flex justify-between mt-2 pt-2 border-t border-base-300">
+              <span class="text-base-content/60">Stripe PaymentIntent</span>
+              <code class="text-xs bg-base-300 px-2 py-0.5 rounded font-mono">{{ refundHistoryPayment()!.provider_payment_id }}</code>
+            </div>
+          }
+        </div>
+
+        <!-- Refunds List -->
+        @if (refundHistoryLoading()) {
+          <div class="flex justify-center py-8">
+            <span class="loading loading-spinner loading-md"></span>
+          </div>
+        } @else if (refundHistory().length === 0) {
+          <div class="text-center py-8 text-base-content/60">
+            No refunds found
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Reason</th>
+                  <th>Stripe Refund ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (refund of refundHistory(); track refund.id) {
+                  <tr>
+                    <td class="whitespace-nowrap">{{ refund.created_at | date:'short' }}</td>
+                    <td class="font-mono text-error">
+                      -{{ refund.amount | currency:refundHistoryPayment()!.currency:'symbol':'1.2-2' }}
+                    </td>
+                    <td>
+                      <div class="badge gap-1" [ngClass]="{
+                        'badge-success': refund.status === 'succeeded',
+                        'badge-warning': refund.status === 'pending',
+                        'badge-error': refund.status === 'failed'
+                      }">
+                        @if (refund.status === 'succeeded') {
+                          <span class="material-symbols-outlined text-xs">check_circle</span>
+                        } @else if (refund.status === 'pending') {
+                          <span class="material-symbols-outlined text-xs">schedule</span>
+                        } @else {
+                          <span class="material-symbols-outlined text-xs">error</span>
+                        }
+                        {{ refund.status }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="max-w-[200px] truncate" [title]="refund.reason">
+                        {{ refund.reason }}
+                      </div>
+                      @if (refund.initiated_by_name) {
+                        <div class="text-xs text-base-content/60">by {{ refund.initiated_by_name }}</div>
+                      }
+                    </td>
+                    <td>
+                      @if (refund.provider_refund_id) {
+                        <code class="text-xs bg-base-200 px-2 py-0.5 rounded font-mono">{{ refund.provider_refund_id }}</code>
+                      } @else {
+                        <span class="text-base-content/40">-</span>
+                      }
+                    </td>
+                  </tr>
+                  @if (refund.error_message) {
+                    <tr class="bg-error/10">
+                      <td colspan="5" class="text-xs text-error">
+                        <span class="material-symbols-outlined text-xs align-middle mr-1">error</span>
+                        {{ refund.error_message }}
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="modal-action">
+          <button class="btn btn-sm" (click)="closeRefundHistoryModal()">Close</button>
+        </div>
+      </div>
+      <div class="modal-backdrop" (click)="closeRefundHistoryModal()"></div>
+    </div>
+  }
+</div>

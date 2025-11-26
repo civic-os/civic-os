@@ -167,7 +167,14 @@ export class PermissionsPage {
   }
 
   private buildPermissionMatrix(tables: string[], permissions: RolePermission[]): PermissionMatrix[] {
-    return tables.map(tableName => {
+    // Get unique table names from permissions that may not be in schema entities
+    // (e.g., payment_transactions, payment_refunds are views with permissions)
+    const permissionTableNames = [...new Set(permissions.map(p => p.table_name))];
+
+    // Merge schema entities with permission tables, removing duplicates
+    const allTables = [...new Set([...tables, ...permissionTableNames])].sort();
+
+    return allTables.map(tableName => {
       const tablePerms = permissions.filter(p => p.table_name === tableName);
       return {
         tableName,

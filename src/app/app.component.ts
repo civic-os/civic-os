@@ -146,6 +146,11 @@ export class AppComponent {
     this.drawerOpen = false;
   }
 
+  public navigateToPaymentsAdmin() {
+    this.router.navigate(['admin', 'payments']);
+    this.drawerOpen = false;
+  }
+
   /**
    * Open the settings modal
    */

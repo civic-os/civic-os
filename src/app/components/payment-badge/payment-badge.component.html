@@ -1,16 +1,27 @@
+<!-- Payment badge using effective_status for refund-aware display -->
+<!-- Tooltip shows breakdown for refunded/partially_refunded statuses -->
 <div class="badge gap-2 whitespace-normal h-auto min-h-[2rem]"
-     [class.badge-success]="payment()?.status === 'succeeded'"
-     [class.badge-warning]="payment()?.status === 'pending' || payment()?.status === 'pending_intent'"
-     [class.badge-error]="payment()?.status === 'failed'"
-     [class.badge-ghost]="payment()?.status === 'canceled'">
-  @if (payment()?.status === 'succeeded') {
+     [class.badge-success]="payment()?.effective_status === 'succeeded'"
+     [class.badge-warning]="payment()?.effective_status === 'pending' || payment()?.effective_status === 'pending_intent' || payment()?.effective_status === 'refund_pending'"
+     [class.badge-error]="payment()?.effective_status === 'failed'"
+     [class.badge-ghost]="payment()?.effective_status === 'canceled'"
+     [class.badge-info]="payment()?.effective_status === 'refunded'"
+     [class.badge-accent]="payment()?.effective_status === 'partially_refunded'"
+     [class.tooltip]="hasTooltip()"
+     [class.tooltip-bottom]="hasTooltip()"
+     [attr.data-tip]="hasTooltip() ? tooltip() : null">
+  @if (payment()?.effective_status === 'succeeded') {
     <span class="material-symbols-outlined text-xs shrink-0">check_circle</span>
-  } @else if (payment()?.status === 'pending' || payment()?.status === 'pending_intent') {
+  } @else if (payment()?.effective_status === 'pending' || payment()?.effective_status === 'pending_intent') {
     <span class="material-symbols-outlined text-xs shrink-0">schedule</span>
-  } @else if (payment()?.status === 'failed') {
+  } @else if (payment()?.effective_status === 'refund_pending') {
+    <span class="material-symbols-outlined text-xs shrink-0">hourglass_top</span>
+  } @else if (payment()?.effective_status === 'failed') {
     <span class="material-symbols-outlined text-xs shrink-0">error</span>
-  } @else if (payment()?.status === 'canceled') {
+  } @else if (payment()?.effective_status === 'canceled') {
     <span class="material-symbols-outlined text-xs shrink-0">cancel</span>
+  } @else if (payment()?.effective_status === 'refunded' || payment()?.effective_status === 'partially_refunded') {
+    <span class="material-symbols-outlined text-xs shrink-0">undo</span>
   }
-  {{ payment()?.display_name || 'No payment' }}
+  {{ displayText() }}
 </div>
