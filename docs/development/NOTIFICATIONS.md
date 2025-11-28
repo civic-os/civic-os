@@ -3470,7 +3470,7 @@ func (w *NotificationWorker) getTemplate(name string) (*ParsedTemplate, error) {
    # docker-compose.yml
    services:
      notification-worker:
-       image: ghcr.io/civic-os/notification-worker-go:v0.11.0
+       image: ghcr.io/civic-os/consolidated-worker:latest  # Notifications run in consolidated-worker
        # Or build from source:
        # build:
        #   context: ./services/notification-worker-go

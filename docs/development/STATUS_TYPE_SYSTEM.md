@@ -1030,6 +1030,8 @@ Delete transition.
 
 ## Migration Strategy
 
+> **Note:** The phase numbers and version references below were from the original implementation plan. The Status Type System was completed in **v0.15.0**. This section is preserved for historical reference.
+
 ### Phase 1: Core Infrastructure (v0.10.0)
 
 **Sqitch Migration: `v0-10-0-add-status-framework`**

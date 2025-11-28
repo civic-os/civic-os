@@ -1,7 +1,7 @@
 # Calendar in Related Records - UX Issues and TODO
 
 **Status**: Disabled (2025-11-04)
-**Location**: `src/app/pages/detail/detail.page.html` lines 125-164 (commented out)
+**Location**: `src/app/pages/detail/detail.page.html` (calendar sections template, commented out)
 
 ## Problem
 
@@ -59,7 +59,7 @@ ALTER TABLE metadata.entities
 Only show calendar sections when there are 2+ related events:
 
 ```typescript
-// In detail.page.ts, line 261
+// In detail.page.ts, calendarSections$ pipe
 map(sections => sections.filter(s => s.events.length >= 2))
 ```
 
@@ -116,14 +116,14 @@ const calendarRelationships = relationships
 
 ## Related Files
 
-- `src/app/pages/detail/detail.page.ts` - Calendar sections observable (lines 187-262)
-- `src/app/pages/detail/detail.page.html` - Calendar sections template (lines 125-164, commented out)
+- `src/app/pages/detail/detail.page.ts` - Calendar sections observable (`calendarSections$`)
+- `src/app/pages/detail/detail.page.html` - Calendar sections template (commented out)
 - `docs/development/CALENDAR_INTEGRATION.md` - Main calendar documentation
 - `examples/community-center/` - Example with Reservations and Reservation Requests
 
 ## Testing Notes
 
 To re-enable for testing:
-1. Uncomment lines 125-164 in `detail.page.html`
+1. Uncomment the calendar sections template in `detail.page.html`
 2. Navigate to a Detail page where the entity has inverse relationships to calendar-enabled entities
 3. Example: `/view/reservations/1` should show calendar for related Reservation Requests (if any)

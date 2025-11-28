@@ -86,7 +86,7 @@ KEYCLOAK_REALM=civic-os-dev
 KEYCLOAK_CLIENT_ID=myclient
 ```
 
-Edit `src/app/app.config.ts` (lines 36-39):
+Edit `src/app/app.config.ts`:
 
 ```typescript
 provideKeycloak({

@@ -2527,7 +2527,7 @@ Metro router was chosen over Manhattan router because it produces more natural-l
 
 - **Design Document**: `docs/notes/GEOMETRIC_PORT_ORDERING.md` (detailed algorithm explanation)
 - **Unit Tests**: `src/app/pages/schema-editor-poc/schema-editor-poc.page.spec.ts`
-- **Implementation**: `src/app/pages/schema-editor-poc/schema-editor-poc.page.ts` (lines 400-439, 1051-1257)
+- **Implementation**: `src/app/pages/schema-editor-poc/schema-editor-poc.page.ts` (see `getEntityCenter`, `determineSideFromAngle`, `recalculatePortsByGeometry` methods)
 
 ---
 

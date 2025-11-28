@@ -444,7 +444,7 @@ spec:
     spec:
       containers:
       - name: postgrest
-        image: ghcr.io/civic-os/postgrest:v0.3.0
+        image: ghcr.io/civic-os/postgrest:latest  # Pin to specific version for reproducible builds
         env:
         - name: PGRST_DB_URI
           value: postgres://authenticator:$(POSTGRES_PASSWORD)@postgres:5432/civic_os_prod
@@ -488,7 +488,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ghcr.io/civic-os/frontend:v0.3.0
+        image: ghcr.io/civic-os/frontend:latest  # Pin to specific version for reproducible builds
         envFrom:
         - configMapRef:
             name: civic-os-config
@@ -521,7 +521,7 @@ spec:
     spec:
       containers:
       - name: payment-worker
-        image: ghcr.io/civic-os/payment-worker:v0.3.0
+        image: ghcr.io/civic-os/payment-worker:latest  # Pin to specific version for reproducible builds
         env:
         # Database Configuration
         - name: DATABASE_URL

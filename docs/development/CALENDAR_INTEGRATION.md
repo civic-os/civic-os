@@ -665,9 +665,7 @@ npm install @fullcalendar/core @fullcalendar/angular @fullcalendar/daygrid @full
 
 **Theme Integration**: Subscribe to `ThemeService.isDark$` and swap event colors.
 
-**TODO**: Full implementation pending Phase 1 completion.
-
-**Status**: ⬜ Not started
+**Status**: ✅ Implemented (v0.9.0)
 
 ---
 

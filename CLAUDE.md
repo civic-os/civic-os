@@ -340,7 +340,7 @@ See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters a
 - Keycloak URL: `https://auth.civic-os.org`
 - Realm: `civic-os-dev`
 - Client ID: `myclient`
-- Configuration: `src/app/app.config.ts` (lines 36-39)
+- Configuration: `src/app/app.config.ts` (Keycloak configuration section)
 
 **RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
 

@@ -213,7 +213,7 @@ The services require the following S3 permissions:
 ```yaml
 services:
   consolidated-worker:
-    image: ghcr.io/civic-os/consolidated-worker:0.11.0
+    image: ghcr.io/civic-os/consolidated-worker:latest  # Pin to specific version for reproducible builds
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DB_MAX_CONNS=4  # Shared pool for all workers
@@ -238,7 +238,7 @@ spec:
     spec:
       containers:
       - name: consolidated-worker
-        image: ghcr.io/civic-os/consolidated-worker:0.11.0
+        image: ghcr.io/civic-os/consolidated-worker:latest  # Pin to specific version for reproducible builds
         env:
         - name: DATABASE_URL
           valueFrom:

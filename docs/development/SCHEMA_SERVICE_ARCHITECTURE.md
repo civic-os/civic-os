@@ -85,7 +85,7 @@ public refreshEntitiesCache() {
 The AuthService does NOT call `refreshCache()` on Keycloak's `Ready` event. Schema cache is loaded on-demand when components first request it. This prevents duplicate HTTP requests during app initialization.
 
 **When schema cache IS refreshed:**
-- User logout (`AuthService` line 67) - Clear all cached data when user changes
+- User logout (`AuthService` logout handler) - Clear all cached data when user changes
 - Schema version change (`schemaVersionGuard`) - Selective refresh when database metadata updates
 - Manual refresh via `refreshCache()` method
 
