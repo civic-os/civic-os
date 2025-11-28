@@ -60,6 +60,25 @@
     }
   }
 
+  @if (propType() == EntityPropertyType.Status) {
+    @if (statusOptions$ | async; as statusOptions) {
+      <select
+        class="select w-full"
+        [id]="prop().column_name"
+        [formControlName]="prop().column_name"
+        [style.border-color]="getSelectedStatusColor(statusOptions)"
+        [style.border-width]="getSelectedStatusColor(statusOptions) ? '2px' : null"
+        [style.background-color]="getSelectedStatusBackgroundColor(statusOptions)">
+        @if (prop().is_nullable) {
+          <option [value]="null">Select a Status</option>
+        }
+        @for (option of statusOptions; track option.id) {
+          <option [value]="option.id">{{ option.text }}</option>
+        }
+      </select>
+    }
+  }
+
   @if (propType() == EntityPropertyType.GeoPoint) {
     <app-geo-point-map
       mode="edit"

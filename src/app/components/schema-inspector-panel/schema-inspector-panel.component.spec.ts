@@ -239,9 +239,23 @@ describe('SchemaInspectorPanelComponent', () => {
 
     it('should return default info for unknown table', () => {
       const info = component.getSystemTypeInfo('unknown_table');
-      expect(info.icon).toBe('label');
+      expect(info.icon).toBe('link');
       expect(info.name).toBe('Reference');
       expect(info.color).toBe('text-secondary');
+    });
+
+    it('should return Payment info for payment_transactions', () => {
+      const info = component.getSystemTypeInfo('payment_transactions');
+      expect(info.icon).toBe('payments');
+      expect(info.name).toBe('Payment');
+      expect(info.color).toBe('text-success');
+    });
+
+    it('should return Status info for statuses', () => {
+      const info = component.getSystemTypeInfo('statuses');
+      expect(info.icon).toBe('label');
+      expect(info.name).toBe('Status');
+      expect(info.color).toBe('text-warning');
     });
   });
 

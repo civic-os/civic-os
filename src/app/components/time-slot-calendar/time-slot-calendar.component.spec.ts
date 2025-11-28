@@ -307,4 +307,152 @@ describe('TimeSlotCalendarComponent', () => {
       }, 0);
     });
   });
+
+  /**
+   * Timezone-Safe Date Parsing Tests
+   *
+   * These tests verify that date strings are parsed correctly in the user's
+   * local timezone, not UTC.
+   *
+   * BUG CONTEXT:
+   * When parsing "2025-11-28" without a time component, JavaScript interprets
+   * it as UTC midnight. In timezones west of UTC (e.g., EST = UTC-5), this
+   * becomes Nov 27 at 7pm local time - the PREVIOUS day!
+   *
+   * SOLUTION:
+   * Append 'T00:00:00' when parsing to force local timezone interpretation.
+   *
+   * NOTE: These tests verify the date parsing logic in isolation, not the
+   * component's interaction with FullCalendar (which has complex lifecycle).
+   *
+   * @see TimeSlotCalendarComponent.ngAfterViewInit() - gotoDate() call
+   */
+  describe('Timezone-Safe Date Parsing', () => {
+    /**
+     * The correct way to parse a YYYY-MM-DD string for local display.
+     * This mirrors the fix applied in ngAfterViewInit.
+     */
+    function parseLocalDate(dateStr: string): Date {
+      return new Date(dateStr + 'T00:00:00');
+    }
+
+    /**
+     * The INCORRECT way - parses as UTC, which shifts the date in western timezones.
+     */
+    function parseAsUTC(dateStr: string): Date {
+      return new Date(dateStr); // Without time, parsed as UTC
+    }
+
+    it('should parse date in local timezone (not UTC) when T00:00:00 suffix is used', () => {
+      const dateStr = '2025-11-28';
+      const localDate = parseLocalDate(dateStr);
+
+      // The date should be Nov 28 in local timezone (not shifted)
+      expect(localDate.getDate()).toBe(28);
+      expect(localDate.getMonth()).toBe(10); // November (0-indexed)
+      expect(localDate.getFullYear()).toBe(2025);
+
+      // Hours should be 0 (midnight local time)
+      expect(localDate.getHours()).toBe(0);
+    });
+
+    it('should handle first day of month correctly (no shift to previous month)', () => {
+      const dateStr = '2025-12-01';
+      const localDate = parseLocalDate(dateStr);
+
+      // Should be Dec 1, not Nov 30
+      expect(localDate.getDate()).toBe(1);
+      expect(localDate.getMonth()).toBe(11); // December
+      expect(localDate.getFullYear()).toBe(2025);
+    });
+
+    it('should handle first day of year correctly (no shift to previous year)', () => {
+      const dateStr = '2026-01-01';
+      const localDate = parseLocalDate(dateStr);
+
+      // Should be Jan 1, 2026, not Dec 31, 2025
+      expect(localDate.getDate()).toBe(1);
+      expect(localDate.getMonth()).toBe(0); // January
+      expect(localDate.getFullYear()).toBe(2026);
+    });
+
+    it('should demonstrate the UTC parsing bug (without T00:00:00)', () => {
+      const dateStr = '2025-11-28';
+
+      // This parses as UTC midnight
+      const utcDate = parseAsUTC(dateStr);
+
+      // Verify it's UTC midnight
+      expect(utcDate.getTime()).toBe(Date.UTC(2025, 10, 28, 0, 0, 0));
+
+      // The LOCAL date may differ depending on timezone
+      // In UTC-5 (EST): Nov 28 00:00 UTC = Nov 27 19:00 EST
+      // We don't assert the local date here since it depends on test runner timezone
+    });
+
+    it('should calculate correct week containing a Friday', () => {
+      // Nov 28, 2025 is a Friday
+      const friday = parseLocalDate('2025-11-28');
+      expect(friday.getDay()).toBe(5); // Friday = 5
+
+      // Week starts on Sunday - go back dayOfWeek days
+      const sunday = new Date(friday);
+      sunday.setDate(friday.getDate() - friday.getDay());
+
+      expect(sunday.getDate()).toBe(23); // Sunday Nov 23
+      expect(sunday.getMonth()).toBe(10); // November
+    });
+  });
+
+  /**
+   * calculateExpectedRange() Tests
+   *
+   * Verifies the range calculation logic used to detect programmatic vs user navigation.
+   */
+  describe('calculateExpectedRange()', () => {
+    it('should calculate day view range correctly', () => {
+      const range = (component as any).calculateExpectedRange('timeGridDay', '2025-11-28');
+
+      // Day view: start at midnight, end at midnight next day
+      expect(range.start.getDate()).toBe(28);
+      expect(range.start.getHours()).toBe(0);
+      expect(range.end.getDate()).toBe(29);
+      expect(range.end.getHours()).toBe(0);
+    });
+
+    it('should calculate week view range correctly (Sunday start)', () => {
+      // Nov 28, 2025 is a Friday
+      const range = (component as any).calculateExpectedRange('timeGridWeek', '2025-11-28');
+
+      // Week should start on Sunday Nov 23
+      expect(range.start.getDate()).toBe(23);
+      expect(range.start.getMonth()).toBe(10); // November
+
+      // Week should end on Sunday Nov 30 (start of next week)
+      expect(range.end.getDate()).toBe(30);
+    });
+
+    it('should calculate month view range correctly (includes overflow weeks)', () => {
+      // November 2025: Nov 1 is Saturday, Nov 30 is Sunday
+      const range = (component as any).calculateExpectedRange('dayGridMonth', '2025-11-15');
+
+      // Month view extends to show complete weeks
+      // First displayed Sunday should be Oct 26 (before Nov 1)
+      expect(range.start.getMonth()).toBe(9); // October
+      expect(range.start.getDate()).toBe(26);
+
+      // Last displayed day should be after Nov 30
+      expect(range.end.getMonth()).toBe(11); // December
+    });
+
+    it('should parse date string in local timezone', () => {
+      // This tests that the T00:00:00 suffix is used internally
+      const range = (component as any).calculateExpectedRange('timeGridDay', '2025-11-28');
+
+      // The date should be Nov 28 local, not shifted
+      expect(range.start.getFullYear()).toBe(2025);
+      expect(range.start.getMonth()).toBe(10); // November
+      expect(range.start.getDate()).toBe(28);
+    });
+  });
 });

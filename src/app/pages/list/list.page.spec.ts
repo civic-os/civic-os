@@ -876,4 +876,136 @@ describe('ListPage', () => {
     });
   });
 
+  /**
+   * Timezone-Safe Date Formatting Tests
+   *
+   * These tests document the correct behavior for formatting dates as YYYY-MM-DD
+   * in the user's local timezone, NOT in UTC.
+   *
+   * BUG CONTEXT:
+   * The calendar was showing the wrong week because dates were being formatted
+   * using toISOString().split('T')[0], which converts to UTC first:
+   * - Nov 28 at 11pm EST → Nov 29 at 4am UTC → "2025-11-29" (WRONG!)
+   *
+   * SOLUTION:
+   * Use formatLocalDate() which extracts year/month/day directly from the Date
+   * object without UTC conversion, preserving the local date.
+   *
+   * @see ListPage.formatLocalDate() - src/app/pages/list/list.page.ts
+   */
+  describe('Timezone-Safe Date Formatting', () => {
+    /**
+     * Helper to format date in local timezone (mirrors ListPage.formatLocalDate())
+     */
+    function formatLocalDate(date: Date): string {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * BAD approach - converts to UTC first, shifting the date
+     */
+    function formatWithISOString(date: Date): string {
+      return date.toISOString().split('T')[0];
+    }
+
+    describe('formatLocalDate() vs toISOString()', () => {
+      it('should preserve local date when time is late evening (before midnight local, after midnight UTC)', () => {
+        // Nov 28 at 11:30 PM in EST (UTC-5)
+        // This is Nov 29 at 4:30 AM in UTC
+        const lateEvening = new Date(2025, 10, 28, 23, 30, 0); // Month is 0-indexed
+
+        // formatLocalDate() should preserve the LOCAL date (Nov 28)
+        expect(formatLocalDate(lateEvening)).toBe('2025-11-28');
+
+        // toISOString() would give UTC date (Nov 29) - THIS IS THE BUG
+        // Note: This test demonstrates the problem, actual result depends on timezone
+        // In UTC+0, both would return the same value
+      });
+
+      it('should preserve local date when time is early morning', () => {
+        // Nov 28 at 1:00 AM local time
+        const earlyMorning = new Date(2025, 10, 28, 1, 0, 0);
+
+        expect(formatLocalDate(earlyMorning)).toBe('2025-11-28');
+      });
+
+      it('should preserve local date when time is noon', () => {
+        // Nov 28 at 12:00 PM local time
+        const noon = new Date(2025, 10, 28, 12, 0, 0);
+
+        expect(formatLocalDate(noon)).toBe('2025-11-28');
+      });
+
+      it('should handle month boundaries correctly', () => {
+        // Last day of month at 11:59 PM
+        const endOfMonth = new Date(2025, 10, 30, 23, 59, 0); // Nov 30
+
+        expect(formatLocalDate(endOfMonth)).toBe('2025-11-30');
+      });
+
+      it('should handle year boundaries correctly', () => {
+        // Dec 31, 2025 at 11:59 PM
+        const endOfYear = new Date(2025, 11, 31, 23, 59, 0);
+
+        expect(formatLocalDate(endOfYear)).toBe('2025-12-31');
+      });
+
+      it('should zero-pad single-digit months and days', () => {
+        // Jan 5, 2025
+        const earlyYear = new Date(2025, 0, 5, 12, 0, 0);
+
+        expect(formatLocalDate(earlyYear)).toBe('2025-01-05');
+      });
+    });
+
+    describe('Date parsing for calendar navigation', () => {
+      /**
+       * When parsing YYYY-MM-DD from URL params, we must add 'T00:00:00'
+       * to ensure parsing in local timezone, not UTC.
+       */
+      it('should parse YYYY-MM-DD in local timezone with T00:00:00 suffix', () => {
+        const dateStr = '2025-11-28';
+
+        // CORRECT: Parse with explicit time in local timezone
+        const correctParsing = new Date(dateStr + 'T00:00:00');
+
+        // The local date should be Nov 28 regardless of timezone
+        expect(correctParsing.getDate()).toBe(28);
+        expect(correctParsing.getMonth()).toBe(10); // November
+        expect(correctParsing.getFullYear()).toBe(2025);
+      });
+
+      it('should NOT parse YYYY-MM-DD without time suffix (UTC interpretation)', () => {
+        const dateStr = '2025-11-28';
+
+        // INCORRECT: Parses as UTC midnight
+        const utcParsing = new Date(dateStr);
+
+        // In timezones west of UTC (e.g., EST = UTC-5), this becomes Nov 27!
+        // This test documents the problematic behavior
+        const utcMidnight = Date.UTC(2025, 10, 28, 0, 0, 0);
+        expect(utcParsing.getTime()).toBe(utcMidnight);
+
+        // The local date may differ from the input date string
+        // In EST: Nov 28 00:00 UTC = Nov 27 19:00 EST (getDate() returns 27!)
+      });
+
+      it('should calculate correct week start for calendar', () => {
+        // If today is Friday Nov 28, 2025
+        const friday = new Date(2025, 10, 28, 15, 0, 0); // 3 PM Friday
+
+        // Week starts on Sunday (getDay() = 0)
+        const dayOfWeek = friday.getDay(); // 5 (Friday)
+        const sunday = new Date(friday);
+        sunday.setDate(friday.getDate() - dayOfWeek); // Go back 5 days
+
+        expect(sunday.getDate()).toBe(23); // Sunday Nov 23
+        expect(formatLocalDate(sunday)).toBe('2025-11-23');
+      });
+    });
+  });
+
 });

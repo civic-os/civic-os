@@ -21,6 +21,7 @@ import { FormsModule } from '@angular/forms';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
 import { DataService } from '../../services/data.service';
+import { SchemaService } from '../../services/schema.service';
 
 interface FilterState {
   [column: string]: any;
@@ -51,6 +52,7 @@ const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
 })
 export class FilterBarComponent {
   private dataService = inject(DataService);
+  private schemaService = inject(SchemaService);
 
   properties = input<SchemaEntityProperty[]>([]);
   entityKey = input<string | undefined>(undefined);
@@ -127,7 +129,7 @@ export class FilterBarComponent {
     return `repeat(${columns}, 250px)`;
   });
 
-  // Load FK, User, and Payment filter options when properties change
+  // Load FK, User, Status, and Payment filter options when properties change
   private _loadOptionsEffect = effect(() => {
     const props = this.properties(); // Read signal value
     if (props && props.length > 0) {
@@ -136,6 +138,9 @@ export class FilterBarComponent {
           this.loadFilterOptions(prop.column_name, prop.join_table);
         } else if (prop.type === EntityPropertyType.User) {
           this.loadFilterOptions(prop.column_name, 'civic_os_users');
+        } else if (prop.type === EntityPropertyType.Status && prop.status_entity_type) {
+          // Status type: load options via RPC filtered by entity_type
+          this.loadStatusOptions(prop.column_name, prop.status_entity_type);
         } else if (prop.type === EntityPropertyType.Payment) {
           // Payment type uses static status options (not from database)
           const options = this.filterOptions();
@@ -202,15 +207,16 @@ export class FilterBarComponent {
 
         case EntityPropertyType.ForeignKeyName:
         case EntityPropertyType.User:
+        case EntityPropertyType.Status:
           // Reverse transformation: in:(1,2,3) → [1, 2, 3] or ["uuid1", "uuid2"]
           if (filter.operator === 'in') {
             const match = filter.value.match(/\(([^)]+)\)/);
             if (match) {
               const ids = match[1].split(',');
-              // For FK, convert to numbers; for User (UUID), keep as strings
-              newState[filter.column] = prop.type === EntityPropertyType.ForeignKeyName
-                ? ids.map((id: string) => Number(id.trim()))
-                : ids.map((id: string) => id.trim());
+              // For FK and Status, convert to numbers; for User (UUID), keep as strings
+              newState[filter.column] = prop.type === EntityPropertyType.User
+                ? ids.map((id: string) => id.trim())
+                : ids.map((id: string) => Number(id.trim()));
             }
           }
           break;
@@ -252,6 +258,18 @@ export class FilterBarComponent {
     });
   }
 
+  private loadStatusOptions(columnName: string, entityType: string) {
+    // Use SchemaService's cached status retrieval
+    this.schemaService.getStatusesForEntity(entityType).subscribe(statusOptions => {
+      const options = this.filterOptions();
+      options.set(columnName, statusOptions.map(s => ({
+        id: s.id,
+        display_name: s.display_name
+      })));
+      this.filterOptions.set(new Map(options));
+    });
+  }
+
   public toggleExpanded() {
     this.isExpanded.set(!this.isExpanded());
   }
@@ -265,6 +283,7 @@ export class FilterBarComponent {
       switch (prop.type) {
         case EntityPropertyType.ForeignKeyName:
         case EntityPropertyType.User:
+        case EntityPropertyType.Status:
           // Checkbox multi-select: use 'in' operator
           const value = state[prop.column_name];
           if (Array.isArray(value) && value.length > 0) {

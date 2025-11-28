@@ -17,6 +17,8 @@
 
 /// <reference lib="webworker" />
 
+import * as chrono from 'chrono-node';
+
 /**
  * CRITICAL: EntityPropertyType Enum Duplication
  *
@@ -61,7 +63,13 @@ const EntityPropertyType = {
   Color: 13,
   Email: 14,
   Telephone: 15,
-  ManyToMany: 16
+  TimeSlot: 16,
+  ManyToMany: 17,
+  File: 18,
+  FileImage: 19,
+  FilePDF: 20,
+  Payment: 21,
+  Status: 22
 };
 
 interface ImportError {
@@ -162,8 +170,16 @@ function validateData(params: any): void {
 
     // Validate each property
     for (const prop of properties) {
-      // Skip M:M properties
+      // Skip M:M properties (not supported for import)
       if (prop.type === EntityPropertyType.ManyToMany) {
+        continue;
+      }
+
+      // Skip File/Payment properties (system-managed, require upload/payment workflows)
+      if (prop.type === EntityPropertyType.File ||
+          prop.type === EntityPropertyType.FileImage ||
+          prop.type === EntityPropertyType.FilePDF ||
+          prop.type === EntityPropertyType.Payment) {
         continue;
       }
 
@@ -173,6 +189,63 @@ function validateData(params: any): void {
       }
 
       const displayName = prop.display_name;
+
+      // TimeSlot properties read from TWO columns: (Start) and (End)
+      if (prop.type === EntityPropertyType.TimeSlot) {
+        const startCol = displayName + ' (Start)';
+        const endCol = displayName + ' (End)';
+        const startValue = row[startCol];
+        const endValue = row[endCol];
+
+        // NULL handling for TimeSlot
+        const startEmpty = startValue === null || startValue === undefined || startValue === '';
+        const endEmpty = endValue === null || endValue === undefined || endValue === '';
+
+        if (startEmpty && endEmpty) {
+          if (!prop.is_nullable) {
+            rowErrors.push({
+              row: rowNumber,
+              column: startCol,
+              value: '',
+              error: 'This field is required',
+              errorType: 'Required field missing'
+            });
+          } else {
+            validatedRow[prop.column_name] = null;
+          }
+          continue;
+        }
+
+        // Both must be provided if either is
+        if (startEmpty || endEmpty) {
+          rowErrors.push({
+            row: rowNumber,
+            column: startEmpty ? startCol : endCol,
+            value: startEmpty ? startValue : endValue,
+            error: 'Both start and end times are required for a time slot',
+            errorType: 'TimeSlot incomplete'
+          });
+          continue;
+        }
+
+        // Validate and combine TimeSlot
+        try {
+          const validatedValue = validateTimeSlot(startValue, endValue, rowNumber, displayName, rowErrors);
+          if (validatedValue !== undefined) {
+            validatedRow[prop.column_name] = validatedValue;
+          }
+        } catch (error) {
+          rowErrors.push({
+            row: rowNumber,
+            column: displayName,
+            value: `${startValue} - ${endValue}`,
+            error: error instanceof Error ? error.message : 'TimeSlot validation error',
+            errorType: 'TimeSlot error'
+          });
+        }
+        continue;
+      }
+
       const value = row[displayName];
 
       // NULL handling
@@ -300,6 +373,7 @@ function validateProperty(
 
     case EntityPropertyType.ForeignKeyName:
     case EntityPropertyType.User:
+    case EntityPropertyType.Status:
       return validateForeignKey(prop, value, fkLookups, rowNumber, displayName, rowErrors);
 
     case EntityPropertyType.GeoPoint:
@@ -432,17 +506,120 @@ function validateBoolean(value: any, rowNumber: number, displayName: string, row
   return false;
 }
 
+/**
+ * Convert Excel serial date number to JavaScript Date.
+ *
+ * Excel stores dates as floating-point numbers representing days since
+ * January 1, 1900 (with a leap year bug for 1900). The decimal portion
+ * represents the time of day.
+ *
+ * Examples:
+ * - 45991.729166666664 = Nov 30, 2025 5:30 PM
+ * - 45991.833333333333 = Nov 30, 2025 8:00 PM
+ *
+ * @param serial Excel serial date number
+ * @returns JavaScript Date object
+ */
+function excelSerialToDate(serial: number): Date {
+  // Excel epoch is January 1, 1900, but Excel incorrectly treats 1900 as a leap year
+  // Days 1-59 are Jan 1 - Feb 28, 1900
+  // Day 60 is the phantom Feb 29, 1900 (doesn't exist)
+  // Days 61+ need adjustment
+  // JavaScript epoch is January 1, 1970
+
+  // Excel serial 1 = Jan 1, 1900
+  // But we need to account for the Excel leap year bug (day 60 = Feb 29, 1900 which doesn't exist)
+  const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // Dec 30, 1899 (Excel day 0)
+
+  // Split into days and fractional time
+  const days = Math.floor(serial);
+  const timeFraction = serial - days;
+
+  // Calculate the date
+  const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
+
+  // Add the time component (fraction of day in milliseconds)
+  const timeMs = Math.round(timeFraction * 24 * 60 * 60 * 1000);
+  date.setTime(date.getTime() + timeMs);
+
+  return date;
+}
+
+/**
+ * Check if a string looks like an Excel serial date number.
+ *
+ * Excel serial dates are positive numbers, typically in the range:
+ * - 1 = Jan 1, 1900
+ * - 44197 = Jan 1, 2021
+ * - 45658 = Jan 1, 2025
+ * - 73050 = Dec 31, 2099
+ *
+ * We check for numbers in a reasonable range (1900-2100) to avoid
+ * misinterpreting other numeric values.
+ */
+function isExcelSerialDate(value: string): boolean {
+  const num = parseFloat(value);
+  if (isNaN(num)) return false;
+
+  // Check if it's a pure number (no letters or special chars except decimal point)
+  if (!/^\d+(\.\d+)?$/.test(value.trim())) return false;
+
+  // Excel serial dates for years 1900-2100 are roughly 1 to 73415
+  // We use a slightly wider range to be safe
+  return num >= 1 && num <= 100000;
+}
+
+/**
+ * Parse date/time with flexible format support using chrono-node.
+ *
+ * Accepts many human-readable date formats:
+ * - ISO: 2025-11-30T20:00:00, 2025-11-30 20:00:00
+ * - US: 11/30/2025 8:00 PM, 11/30/25 8pm
+ * - Natural: Nov 30, 2025 8pm, November 30 at 8pm
+ * - Relative: tomorrow 3pm, next Monday 9am
+ * - Excel serial: 45991.729166666664 (Nov 30, 2025 5:30 PM)
+ *
+ * Uses chrono-node library for natural language parsing with fallback
+ * to native Date for standard ISO formats, and Excel serial date conversion.
+ *
+ * @param input Raw date/time string from Excel cell
+ * @returns Parsed Date object, or null if parsing failed
+ */
+function parseFlexibleDate(input: string): Date | null {
+  const trimmed = input.trim();
+
+  // Check for Excel serial date format FIRST (before chrono misinterprets it)
+  if (isExcelSerialDate(trimmed)) {
+    const serial = parseFloat(trimmed);
+    return excelSerialToDate(serial);
+  }
+
+  // Try chrono-node for natural language and various formats
+  const chronoResult = chrono.parseDate(trimmed);
+  if (chronoResult) {
+    return chronoResult;
+  }
+
+  // Fallback to native Date for ISO formats chrono might miss
+  const nativeDate = new Date(trimmed);
+  if (!isNaN(nativeDate.getTime())) {
+    return nativeDate;
+  }
+
+  return null;
+}
+
 function validateDateTime(prop: any, value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
   const str = String(value).trim();
 
-  // Try to parse as Date
-  const date = new Date(str);
-  if (isNaN(date.getTime())) {
+  // Try flexible parsing with chrono-node
+  const date = parseFlexibleDate(str);
+  if (!date) {
     rowErrors.push({
       row: rowNumber,
       column: displayName,
       value: value,
-      error: 'Invalid date/time format',
+      error: 'Could not parse date/time. Examples: "2025-11-30 20:00", "11/30/25 8pm", "Nov 30, 2025 8:00 PM"',
       errorType: 'Invalid datetime'
     });
     return str;
@@ -457,6 +634,86 @@ function validateDateTime(prop: any, value: any, rowNumber: number, displayName:
     // DateTime - no timezone
     return date.toISOString().replace('Z', '').replace('.000', '');
   }
+}
+
+/**
+ * Validate TimeSlot (tstzrange) by combining start and end datetimes.
+ *
+ * Accepts two datetime values (from split columns) and combines them into
+ * PostgreSQL tstzrange format: ["start","end")
+ *
+ * Uses flexible date parsing via chrono-node to accept various formats:
+ * - ISO: 2025-11-30T20:00:00, 2025-11-30 20:00:00
+ * - US: 11/30/2025 8:00 PM, 11/30/25 8pm
+ * - Natural: Nov 30, 2025 8pm, November 30 at 8pm
+ *
+ * Validation:
+ * 1. Both values must parse as valid dates
+ * 2. End must be after start
+ *
+ * @param startValue Start datetime from Excel
+ * @param endValue End datetime from Excel
+ * @param rowNumber Excel row number (for error reporting)
+ * @param displayName Property display name (for error messages)
+ * @param rowErrors Array to collect validation errors
+ * @returns PostgreSQL tstzrange string, or undefined if validation failed
+ */
+function validateTimeSlot(
+  startValue: any,
+  endValue: any,
+  rowNumber: number,
+  displayName: string,
+  rowErrors: ImportError[]
+): string | undefined {
+  const startStr = String(startValue).trim();
+  const endStr = String(endValue).trim();
+
+  // Parse dates with flexible format support
+  const startDate = parseFlexibleDate(startStr);
+  const endDate = parseFlexibleDate(endStr);
+
+  // Validate start
+  if (!startDate) {
+    rowErrors.push({
+      row: rowNumber,
+      column: displayName + ' (Start)',
+      value: startValue,
+      error: 'Could not parse start date/time. Examples: "2025-11-30 20:00", "11/30/25 8pm", "Nov 30, 2025 8:00 PM"',
+      errorType: 'Invalid datetime'
+    });
+    return undefined;
+  }
+
+  // Validate end
+  if (!endDate) {
+    rowErrors.push({
+      row: rowNumber,
+      column: displayName + ' (End)',
+      value: endValue,
+      error: 'Could not parse end date/time. Examples: "2025-11-30 20:00", "11/30/25 8pm", "Nov 30, 2025 8:00 PM"',
+      errorType: 'Invalid datetime'
+    });
+    return undefined;
+  }
+
+  // Validate end > start
+  if (endDate <= startDate) {
+    rowErrors.push({
+      row: rowNumber,
+      column: displayName + ' (End)',
+      value: endValue,
+      error: 'End time must be after start time',
+      errorType: 'TimeSlot range error'
+    });
+    return undefined;
+  }
+
+  // Format as PostgreSQL tstzrange: ["start","end")
+  // Use ISO format with timezone for proper storage
+  const startISO = startDate.toISOString();
+  const endISO = endDate.toISOString();
+
+  return `["${startISO}","${endISO}")`;
 }
 
 /**
@@ -496,7 +753,18 @@ function validateForeignKey(
   displayName: string,
   rowErrors: ImportError[]
 ): any {
-  const tableName = prop.type === EntityPropertyType.User ? 'civic_os_users' : prop.join_table;
+  // Determine lookup table name based on property type:
+  // - User: always 'civic_os_users'
+  // - Status: 'status_<entity_type>' (e.g., 'status_issues') for entity-specific statuses
+  // - FK: the join_table directly
+  let tableName: string;
+  if (prop.type === EntityPropertyType.User) {
+    tableName = 'civic_os_users';
+  } else if (prop.type === EntityPropertyType.Status) {
+    tableName = `status_${prop.status_entity_type}`;
+  } else {
+    tableName = prop.join_table;
+  }
   const lookup = fkLookups[tableName];
 
   if (!lookup) {

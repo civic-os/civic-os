@@ -93,15 +93,19 @@ describe('SchemaEditorPage - System Type Filtering', () => {
       expect(result.has('transactions')).toBe(true);
     });
 
-    it('should return exactly 4 system types', () => {
+    it('should return exactly 5 system types', () => {
       const result = detectSystemTypes();
-      expect(result.size).toBe(4);
+      expect(result.size).toBe(5);
+    });
+
+    it('should return statuses as system type', () => {
+      const result = detectSystemTypes();
+      expect(result.has('statuses')).toBe(true);
     });
 
     it('should not include domain tables', () => {
       const result = detectSystemTypes();
       expect(result.has('issues')).toBe(false);
-      expect(result.has('statuses')).toBe(false);
       expect(result.has('tags')).toBe(false);
     });
   });

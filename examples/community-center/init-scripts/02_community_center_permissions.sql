@@ -13,11 +13,8 @@
 -- =====================================================
 
 -- Create permissions for all community center tables
+-- NOTE: Request statuses use Status Type System (metadata.statuses) with its own RLS
 INSERT INTO metadata.permissions (table_name, permission) VALUES
-  ('request_statuses', 'read'),
-  ('request_statuses', 'create'),
-  ('request_statuses', 'update'),
-  ('request_statuses', 'delete'),
   ('resources', 'read'),
   ('resources', 'create'),
   ('resources', 'update'),
@@ -36,24 +33,15 @@ ON CONFLICT (table_name, permission) DO NOTHING;
 -- MAP PERMISSIONS TO ROLES
 -- =====================================================
 
--- Grant read permission to all roles for request_statuses, resources, and reservations
+-- Grant read permission to all roles for resources and reservations
+-- NOTE: metadata.statuses is readable by all authenticated users via RLS
 INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
-WHERE p.table_name IN ('request_statuses', 'resources', 'reservations')
+WHERE p.table_name IN ('resources', 'reservations')
   AND p.permission = 'read'
   AND r.display_name IN ('anonymous', 'user', 'editor', 'admin')
-ON CONFLICT DO NOTHING;
-
--- Grant CUD on request_statuses to admins only (lookup table)
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name = 'request_statuses'
-  AND p.permission IN ('create', 'update', 'delete')
-  AND r.display_name = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Grant read permission to reservation_requests for authenticated users (they see own via RLS)

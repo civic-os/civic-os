@@ -7,14 +7,8 @@
 -- =====================================================
 -- ENTITY METADATA (Display Names, Descriptions, Sort Order)
 -- =====================================================
-
--- Request Statuses entity (lookup table)
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
-VALUES ('request_statuses', 'Request Statuses', 'Status values for reservation requests (pending, approved, denied, cancelled)', 0)
-ON CONFLICT (table_name) DO UPDATE SET
-  display_name = EXCLUDED.display_name,
-  description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order;
+-- NOTE: Request statuses are now in metadata.statuses (Status Type System)
+-- No separate entity needed - statuses are accessed via get_statuses_for_entity RPC
 
 -- Resources entity
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
@@ -119,22 +113,14 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
   show_on_edit = EXCLUDED.show_on_edit;
 
 -- =====================================================
--- PROPERTY METADATA (Request Statuses Table)
+-- STATUS ENTITY TYPE CONFIGURATION
 -- =====================================================
+-- Configure status_id column to use Status Type System
+-- This tells the frontend to render status dropdown and use get_statuses_for_entity RPC
 
-INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order, show_on_list, show_on_create, show_on_edit)
-VALUES
-  ('request_statuses', 'display_name', 'Status Name', 'Name of the status (Pending, Approved, Denied, Cancelled)', 1, TRUE, TRUE, TRUE),
-  ('request_statuses', 'emoji', 'Emoji', 'Visual icon for this status', 2, TRUE, TRUE, TRUE),
-  ('request_statuses', 'color', 'Color', 'Badge color for this status', 3, TRUE, TRUE, TRUE),
-  ('request_statuses', 'description', 'Description', 'Explanation of what this status means', 4, FALSE, TRUE, TRUE)
-ON CONFLICT (table_name, column_name) DO UPDATE SET
-  display_name = EXCLUDED.display_name,
-  description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order,
-  show_on_list = EXCLUDED.show_on_list,
-  show_on_create = EXCLUDED.show_on_create,
-  show_on_edit = EXCLUDED.show_on_edit;
+UPDATE metadata.properties
+SET status_entity_type = 'reservation_request'
+WHERE table_name = 'reservation_requests' AND column_name = 'status_id';
 
 -- =====================================================
 -- CUSTOM DASHBOARD
@@ -144,9 +130,13 @@ DO $$
 DECLARE
   v_dashboard_id INT;
   v_user_id UUID;
+  v_pending_status_id INT;
 BEGIN
   -- Get first user (or could use a specific admin user)
   SELECT id INTO v_user_id FROM metadata.civic_os_users LIMIT 1;
+  -- Get Pending status ID from metadata.statuses
+  SELECT id INTO v_pending_status_id FROM metadata.statuses
+  WHERE entity_type = 'reservation_request' AND display_name = 'Pending';
 
   -- Only create dashboard if we have a user
   IF v_user_id IS NOT NULL THEN
@@ -217,7 +207,7 @@ BEGIN
       'Pending Approval',
       jsonb_build_object(
         'filters', jsonb_build_array(
-          jsonb_build_object('column', 'status_id', 'operator', 'eq', 'value', 1)
+          jsonb_build_object('column', 'status_id', 'operator', 'eq', 'value', v_pending_status_id)
         ),
         'orderBy', 'created_at',
         'orderDirection', 'desc',

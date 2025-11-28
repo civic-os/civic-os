@@ -1,9 +1,11 @@
 # Status Type System Design
 
-**Version:** 0.10.0
-**Status:** Design Specification
+**Version:** 0.15.0
+**Status:** ✅ Implemented
 **Author:** Civic OS Core Team
-**Last Updated:** 2025-01-02
+**Last Updated:** 2025-11-26
+
+> **Implementation Notes:** Core Status Type System is implemented in v0.15.0. The Admin UI for status management and workflow transitions (state machine) are planned for future releases.
 
 ## Table of Contents
 1. [Overview](#overview)

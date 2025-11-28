@@ -33,7 +33,7 @@ describe('EditPropertyComponent', () => {
   let mockDataService: jasmine.SpyObj<DataService>;
 
   beforeEach(async () => {
-    mockDataService = jasmine.createSpyObj('DataService', ['getData']);
+    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'callRpc']);
 
     await TestBed.configureTestingModule({
       imports: [EditPropertyComponent, ReactiveFormsModule],
@@ -972,6 +972,150 @@ describe('EditPropertyComponent', () => {
 
       const labelSpan = fixture.nativeElement.querySelector('label span');
       expect(labelSpan.classList.contains('font-semibold')).toBe(true);
+    });
+  });
+
+  describe('Status Type', () => {
+    const mockStatusOptions = [
+      { id: 1, text: 'Pending', color: '#F59E0B' },
+      { id: 2, text: 'Approved', color: '#22C55E' },
+      { id: 3, text: 'Denied', color: '#EF4444' },
+      { id: 4, text: 'No Color', color: null }
+    ];
+
+    beforeEach(() => {
+      // Mock callRpc for Status type tests
+      mockDataService.callRpc.and.returnValue(of([
+        { id: 1, display_name: 'Pending', color: '#F59E0B' },
+        { id: 2, display_name: 'Approved', color: '#22C55E' },
+        { id: 3, display_name: 'Denied', color: '#EF4444' },
+        { id: 4, display_name: 'No Color', color: null }
+      ]));
+    });
+
+    describe('getSelectedStatusColor()', () => {
+      it('should return color of selected status', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl(2) // Approved
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedStatusColor(mockStatusOptions);
+        expect(color).toBe('#22C55E');
+      });
+
+      it('should return null when no status selected', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl(null)
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedStatusColor(mockStatusOptions);
+        expect(color).toBeNull();
+      });
+
+      it('should return null when selected status has no color', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl(4) // No Color status
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedStatusColor(mockStatusOptions);
+        expect(color).toBeNull();
+      });
+
+      it('should handle string status_id (from select element)', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl('1') // String value from select
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedStatusColor(mockStatusOptions);
+        expect(color).toBe('#F59E0B');
+      });
+    });
+
+    describe('getSelectedStatusBackgroundColor()', () => {
+      it('should return rgba color with 15% opacity', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl(1) // Pending - #F59E0B
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const bgColor = component.getSelectedStatusBackgroundColor(mockStatusOptions);
+        // #F59E0B = rgb(245, 158, 11)
+        expect(bgColor).toBe('rgba(245, 158, 11, 0.15)');
+      });
+
+      it('should return null when no status selected', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl(null)
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const bgColor = component.getSelectedStatusBackgroundColor(mockStatusOptions);
+        expect(bgColor).toBeNull();
+      });
+
+      it('should correctly convert different hex colors', () => {
+        const statusProp = createMockProperty({
+          column_name: 'status_id',
+          type: EntityPropertyType.Status,
+          status_entity_type: 'test_status'
+        });
+        const formGroup = new FormGroup({
+          status_id: new FormControl(2) // Approved - #22C55E
+        });
+        fixture.componentRef.setInput('property', statusProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const bgColor = component.getSelectedStatusBackgroundColor(mockStatusOptions);
+        // #22C55E = rgb(34, 197, 94)
+        expect(bgColor).toBe('rgba(34, 197, 94, 0.15)');
+      });
     });
   });
 });

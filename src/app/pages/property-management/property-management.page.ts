@@ -330,7 +330,17 @@ export class PropertyManagementPage {
       9: 'Decimal',
       10: 'Foreign Key',
       11: 'User',
-      12: 'Geo Point'
+      12: 'Geo Point',
+      13: 'Color',
+      14: 'Email',
+      15: 'Telephone',
+      16: 'Time Slot',
+      17: 'Many-to-Many',
+      18: 'File',
+      19: 'Image',
+      20: 'PDF',
+      21: 'Payment',
+      22: 'Status'
     };
     return typeLabels[property.type] || 'Unknown';
   }
@@ -359,7 +369,8 @@ export class PropertyManagementPage {
       3,  // Boolean
       8,  // IntegerNumber
       7,  // Money
-      11  // User
+      11, // User
+      22  // Status
     ];
     return filterableTypes.includes(property.type);
   }

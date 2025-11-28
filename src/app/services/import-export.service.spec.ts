@@ -482,7 +482,9 @@ describe('ImportExportService', () => {
 
       const hint = (service as any).getHintForProperty(prop);
 
-      expect(hint).toBe('Format: YYYY-MM-DD');
+      // Flexible format hint showing examples
+      expect(hint).toContain('Date');
+      expect(hint).toContain('2025-11-30');
     });
 
     it('should generate hint for Boolean', () => {
@@ -638,6 +640,216 @@ describe('ImportExportService', () => {
 
       // Format: YYYY-MM-DD_HHmmss
       expect(timestamp).toMatch(/^\d{4}-\d{2}-\d{2}_\d{6}$/);
+    });
+  });
+
+  /**
+   * EntityPropertyType Enum Synchronization Tests
+   *
+   * These tests ensure the EntityPropertyType enum in entity.ts stays in sync with
+   * the duplicated enum in import-validation.worker.ts.
+   *
+   * Web Workers run in isolated contexts and cannot import TypeScript enums, so
+   * the worker has a manual copy. If someone adds a new type to EntityPropertyType
+   * and forgets to update the worker, these tests will fail.
+   *
+   * When adding a new EntityPropertyType:
+   * 1. Add it to src/app/interfaces/entity.ts (source of truth)
+   * 2. Add it to src/app/workers/import-validation.worker.ts (worker copy)
+   * 3. Update EXPECTED_WORKER_ENUM_VALUES below to match
+   *
+   * @see src/app/workers/import-validation.worker.ts
+   */
+  describe('EntityPropertyType Worker Sync', () => {
+    /**
+     * Expected values that MUST exist in both:
+     * - EntityPropertyType enum (entity.ts)
+     * - Worker's EntityPropertyType const (import-validation.worker.ts)
+     *
+     * UPDATE THIS when adding new property types!
+     */
+    const EXPECTED_WORKER_ENUM_VALUES: { [key: string]: number } = {
+      Unknown: 0,
+      TextShort: 1,
+      TextLong: 2,
+      Boolean: 3,
+      Date: 4,
+      DateTime: 5,
+      DateTimeLocal: 6,
+      Money: 7,
+      IntegerNumber: 8,
+      DecimalNumber: 9,
+      ForeignKeyName: 10,
+      User: 11,
+      GeoPoint: 12,
+      Color: 13,
+      Email: 14,
+      Telephone: 15,
+      TimeSlot: 16,
+      ManyToMany: 17,
+      File: 18,
+      FileImage: 19,
+      FilePDF: 20,
+      Payment: 21,
+      Status: 22
+    };
+
+    it('should have matching enum keys', () => {
+      const enumKeys = Object.keys(EntityPropertyType)
+        .filter(key => isNaN(Number(key))); // Filter out reverse mappings
+
+      const expectedKeys = Object.keys(EXPECTED_WORKER_ENUM_VALUES);
+
+      expect(enumKeys.sort()).toEqual(expectedKeys.sort());
+    });
+
+    it('should have matching enum values', () => {
+      const enumKeys = Object.keys(EntityPropertyType)
+        .filter(key => isNaN(Number(key)));
+
+      for (const key of enumKeys) {
+        const enumValue = EntityPropertyType[key as keyof typeof EntityPropertyType];
+        const expectedValue = EXPECTED_WORKER_ENUM_VALUES[key];
+
+        expect(enumValue)
+          .withContext(`EntityPropertyType.${key} should equal ${expectedValue} (worker expects this value)`)
+          .toBe(expectedValue);
+      }
+    });
+
+    it('should fail if a new type is added without updating worker', () => {
+      // This test documents the expected count - update when adding types
+      const enumKeys = Object.keys(EntityPropertyType)
+        .filter(key => isNaN(Number(key)));
+
+      expect(enumKeys.length)
+        .withContext(
+          'New EntityPropertyType detected! Update:\n' +
+          '  1. import-validation.worker.ts\n' +
+          '  2. EXPECTED_WORKER_ENUM_VALUES in this test'
+        )
+        .toBe(23); // Unknown(0) through Status(22) = 23 types
+    });
+  });
+
+  /**
+   * Excel Serial Date Conversion Tests
+   *
+   * These tests document the expected behavior for Excel serial date handling
+   * in the import validation worker. Excel stores dates as floating-point numbers
+   * representing days since January 1, 1900.
+   *
+   * IMPORTANT: When Excel formats a cell as a date/time, the xlsx library returns
+   * the raw serial number (e.g., 45991.729166666664) instead of a string.
+   * The worker must detect and convert these values correctly.
+   *
+   * @see src/app/workers/import-validation.worker.ts - excelSerialToDate()
+   */
+  describe('Excel Serial Date Format Documentation', () => {
+    /**
+     * Helper to convert Excel serial date to JavaScript Date.
+     * This mirrors the worker's excelSerialToDate() function for testing.
+     */
+    function excelSerialToDate(serial: number): Date {
+      const excelEpoch = new Date(Date.UTC(1899, 11, 30)); // Dec 30, 1899 (Excel day 0)
+      const days = Math.floor(serial);
+      const timeFraction = serial - days;
+      const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
+      const timeMs = Math.round(timeFraction * 24 * 60 * 60 * 1000);
+      date.setTime(date.getTime() + timeMs);
+      return date;
+    }
+
+    /**
+     * Helper to check if a string looks like an Excel serial date.
+     * Mirrors the worker's isExcelSerialDate() function.
+     */
+    function isExcelSerialDate(value: string): boolean {
+      const num = parseFloat(value);
+      if (isNaN(num)) return false;
+      if (!/^\d+(\.\d+)?$/.test(value.trim())) return false;
+      return num >= 1 && num <= 100000;
+    }
+
+    describe('isExcelSerialDate() detection', () => {
+      it('should detect valid Excel serial dates', () => {
+        expect(isExcelSerialDate('45991.729166666664')).toBe(true); // Nov 30, 2025 5:30 PM
+        expect(isExcelSerialDate('45991')).toBe(true); // Nov 30, 2025 midnight
+        expect(isExcelSerialDate('44197')).toBe(true); // Jan 1, 2021
+        expect(isExcelSerialDate('1')).toBe(true); // Jan 1, 1900
+      });
+
+      it('should reject non-serial date values', () => {
+        expect(isExcelSerialDate('11/30/25 5:30PM')).toBe(false); // Date string
+        expect(isExcelSerialDate('2025-11-30')).toBe(false); // ISO date
+        expect(isExcelSerialDate('Nov 30, 2025')).toBe(false); // Natural language
+        expect(isExcelSerialDate('hello')).toBe(false); // Text
+        expect(isExcelSerialDate('')).toBe(false); // Empty
+      });
+
+      it('should reject out-of-range numbers', () => {
+        expect(isExcelSerialDate('0')).toBe(false); // Before Excel epoch
+        expect(isExcelSerialDate('-1')).toBe(false); // Negative
+        expect(isExcelSerialDate('100001')).toBe(false); // Too far in future
+      });
+    });
+
+    describe('excelSerialToDate() conversion', () => {
+      it('should convert Nov 30, 2025 5:30 PM correctly', () => {
+        // This is the exact value from the user's bug report
+        const serial = 45991.729166666664;
+        const date = excelSerialToDate(serial);
+
+        // Should be Nov 30, 2025 at 5:30 PM UTC
+        expect(date.getUTCFullYear()).toBe(2025);
+        expect(date.getUTCMonth()).toBe(10); // November (0-indexed)
+        expect(date.getUTCDate()).toBe(30);
+        expect(date.getUTCHours()).toBe(17); // 5 PM
+        expect(date.getUTCMinutes()).toBe(30);
+      });
+
+      it('should convert Nov 30, 2025 8:00 PM correctly', () => {
+        // 8 PM = 20/24 = 0.833... of a day
+        const serial = 45991 + (20 / 24);
+        const date = excelSerialToDate(serial);
+
+        expect(date.getUTCFullYear()).toBe(2025);
+        expect(date.getUTCMonth()).toBe(10);
+        expect(date.getUTCDate()).toBe(30);
+        expect(date.getUTCHours()).toBe(20); // 8 PM
+        expect(date.getUTCMinutes()).toBe(0);
+      });
+
+      it('should convert Jan 1, 2021 midnight correctly', () => {
+        const serial = 44197; // Known reference date
+        const date = excelSerialToDate(serial);
+
+        expect(date.getUTCFullYear()).toBe(2021);
+        expect(date.getUTCMonth()).toBe(0); // January
+        expect(date.getUTCDate()).toBe(1);
+        expect(date.getUTCHours()).toBe(0);
+      });
+
+      it('should handle dates near Excel epoch correctly', () => {
+        // Serial 1 = Jan 1, 1900
+        const date = excelSerialToDate(1);
+
+        expect(date.getUTCFullYear()).toBe(1899);
+        expect(date.getUTCMonth()).toBe(11); // December
+        expect(date.getUTCDate()).toBe(31);
+      });
+
+      it('should preserve time ordering for TimeSlot validation', () => {
+        // This was the core bug: start time appeared after end time due to parsing
+        const startSerial = 45991.729166666664; // 5:30 PM
+        const endSerial = 45991 + (20 / 24); // 8:00 PM
+
+        const startDate = excelSerialToDate(startSerial);
+        const endDate = excelSerialToDate(endSerial);
+
+        // End should be AFTER start (this was failing before the fix)
+        expect(endDate.getTime()).toBeGreaterThan(startDate.getTime());
+      });
     });
   });
 });

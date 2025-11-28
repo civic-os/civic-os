@@ -105,7 +105,34 @@ WHERE table_name = 'reservations';
 
 See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide and `examples/community-center/` for working example.
 
-🚧 **Status Type** (`Status`): **NOT YET IMPLEMENTED** - Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators will use the centralized `metadata.statuses` table with composite FK pattern for type safety. Uses generated column for entity_type discriminator and supports workflow transitions via `metadata.status_transitions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for design specification.
+**Status Type** (`Status`): Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with `entity_type` discriminator for type safety. Frontend detects Status columns via `status_entity_type` in `metadata.properties` and renders colored status badges/dropdowns. Requires Civic OS v0.15.0+.
+
+**Quick Setup**:
+```sql
+-- 1. Register entity type
+INSERT INTO metadata.status_types (entity_type, description)
+VALUES ('issue', 'Status values for issue tracking');
+
+-- 2. Add status values
+INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
+VALUES
+  ('issue', 'Open', '#F59E0B', 1, TRUE, FALSE),
+  ('issue', 'In Progress', '#3B82F6', 2, FALSE, FALSE),
+  ('issue', 'Resolved', '#22C55E', 3, FALSE, TRUE);
+
+-- 3. Create table with FK (use helper function for default)
+CREATE TABLE issues (
+  id SERIAL PRIMARY KEY,
+  status_id INT NOT NULL DEFAULT public.get_initial_status('issue') REFERENCES metadata.statuses(id),
+  -- other columns...
+);
+
+-- 4. Configure column for frontend detection
+UPDATE metadata.properties SET status_entity_type = 'issue'
+WHERE table_name = 'issues' AND column_name = 'status_id';
+```
+
+**Features**: Colored badges with `hex_color`, `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, cache invalidation via `schema_cache_versions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for design and `examples/community-center/` for working example.
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 

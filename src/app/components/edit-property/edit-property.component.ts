@@ -21,6 +21,7 @@ import { SchemaEntityProperty, EntityPropertyType, FileReference } from '../../i
 import { Observable, map } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { FileUploadService } from '../../services/file-upload.service';
+import { SchemaService } from '../../services/schema.service';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -51,6 +52,7 @@ import { getS3Config } from '../../config/runtime';
 export class EditPropertyComponent {
   private data = inject(DataService);
   private fileUpload = inject(FileUploadService);
+  private schema = inject(SchemaService);
 
   prop = input.required<SchemaEntityProperty>({ alias: 'property' });
   form = input.required<FormGroup>({ alias: 'formGroup' });
@@ -58,6 +60,7 @@ export class EditPropertyComponent {
   entityId = input<string>('');
 
   public selectOptions$?: Observable<{id: number, text: string}[]>;
+  public statusOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
 
   propType = computed(() => this.prop().type);
 
@@ -109,6 +112,19 @@ export class EditPropertyComponent {
       }));
     }
 
+    // Load Status options from cached SchemaService
+    // Uses get_statuses_for_entity RPC with caching to avoid redundant calls
+    if(this.propType() == EntityPropertyType.Status && prop.status_entity_type) {
+      this.statusOptions$ = this.schema.getStatusesForEntity(prop.status_entity_type)
+        .pipe(map(statuses => {
+          return statuses.map(s => ({
+            id: s.id,
+            text: s.display_name,
+            color: s.color
+          }));
+        }));
+    }
+
     // Load existing file reference if this is a file field
     // This is a one-time load on init, similar to loading FK options above
     if (this.propType() === EntityPropertyType.File ||
@@ -146,6 +162,33 @@ export class EditPropertyComponent {
     const form = this.form();
     form.get(prop.column_name)?.setValue(ewkt);
     form.get(prop.column_name)?.markAsDirty();
+  }
+
+  /**
+   * Get the color of the currently selected status option
+   * Used to style the select border
+   */
+  getSelectedStatusColor(options: {id: number, text: string, color: string | null}[]): string | null {
+    const selectedId = this.form().get(this.prop().column_name)?.value;
+    if (!selectedId) return null;
+    const selected = options.find(o => o.id === +selectedId);
+    return selected?.color || null;
+  }
+
+  /**
+   * Get a semi-transparent background color based on the selected status
+   * Converts hex color to rgba with 15% opacity
+   */
+  getSelectedStatusBackgroundColor(options: {id: number, text: string, color: string | null}[]): string | null {
+    const color = this.getSelectedStatusColor(options);
+    if (!color) return null;
+
+    // Convert hex to RGB and add transparency
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.15)`;
   }
 
   // Format phone number for display: 5551234567 → (555) 123-4567

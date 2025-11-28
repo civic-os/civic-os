@@ -364,8 +364,13 @@ export class SchemaInspectorPanelComponent {
         return { icon: 'description', name: 'File', color: 'text-info' };
       case 'civic_os_users':
         return { icon: 'person', name: 'User', color: 'text-primary' };
+      case 'payment_transactions':
+      case 'transactions':
+        return { icon: 'payments', name: 'Payment', color: 'text-success' };
+      case 'statuses':
+        return { icon: 'label', name: 'Status', color: 'text-warning' };
       default:
-        return { icon: 'label', name: 'Reference', color: 'text-secondary' };
+        return { icon: 'link', name: 'Reference', color: 'text-secondary' };
     }
   }
 

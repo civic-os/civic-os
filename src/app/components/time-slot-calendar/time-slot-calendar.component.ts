@@ -207,9 +207,11 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
       }
 
       // Set initial date if provided
+      // IMPORTANT: Parse with explicit time to avoid UTC vs local timezone confusion
+      // "2025-11-28" alone is interpreted as UTC midnight, which in EST becomes Nov 27 7pm (previous day!)
       const date = this.initialDate();
       if (date) {
-        calendar.gotoDate(new Date(date));
+        calendar.gotoDate(new Date(date + 'T00:00:00'));
       }
 
       // Add initial events manually (effect will handle subsequent updates)

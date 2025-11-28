@@ -107,7 +107,7 @@ const DEFAULT_CONFIG: MockDataConfig = {
     minLng: -83.0558,
     maxLng: -83.0458,
   },
-  excludeTables: ['civic_os_users', 'civic_os_users_private', 'reservations', 'request_statuses', 'dashboards', 'dashboard_widgets'],
+  excludeTables: ['civic_os_users', 'civic_os_users_private', 'reservations', 'dashboards', 'dashboard_widgets'],
   outputFormat: 'insert',
   outputPath: './community-center-mock-data.sql',
   generateUsers: true,

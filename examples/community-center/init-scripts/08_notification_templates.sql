@@ -716,8 +716,8 @@ DECLARE
   v_request_data JSONB;
   v_approved_status_id INT;
 BEGIN
-  -- Get Approved status ID
-  SELECT id INTO v_approved_status_id FROM request_statuses WHERE display_name = 'Approved';
+  -- Get Approved status ID from metadata.statuses
+  SELECT id INTO v_approved_status_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved';
 
   -- Only send if status changed TO approved
   IF NEW.status_id = v_approved_status_id AND (OLD IS NULL OR OLD.status_id != v_approved_status_id) THEN
@@ -786,8 +786,8 @@ DECLARE
   v_request_data JSONB;
   v_denied_status_id INT;
 BEGIN
-  -- Get Denied status ID
-  SELECT id INTO v_denied_status_id FROM request_statuses WHERE display_name = 'Denied';
+  -- Get Denied status ID from metadata.statuses
+  SELECT id INTO v_denied_status_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Denied';
 
   -- Only send if status changed TO denied
   IF NEW.status_id = v_denied_status_id AND (OLD IS NULL OR OLD.status_id != v_denied_status_id) THEN
@@ -855,8 +855,8 @@ DECLARE
   v_cancelled_status_id INT;
   v_staff_user RECORD;
 BEGIN
-  -- Get Cancelled status ID
-  SELECT id INTO v_cancelled_status_id FROM request_statuses WHERE display_name = 'Cancelled';
+  -- Get Cancelled status ID from metadata.statuses
+  SELECT id INTO v_cancelled_status_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Cancelled';
 
   -- Only send if status changed TO cancelled
   IF NEW.status_id = v_cancelled_status_id AND (OLD IS NULL OR OLD.status_id != v_cancelled_status_id) THEN

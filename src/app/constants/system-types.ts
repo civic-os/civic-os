@@ -16,7 +16,7 @@
  */
 
 /**
- * System types are metadata/public schema tables (Files, Users, Payments) that appear as property types
+ * System types are metadata/public schema tables (Files, Users, Payments, Statuses) that appear as property types
  * rather than entity relationships in the schema diagram and inspector panel.
  *
  * These tables are intentionally filtered from:
@@ -24,15 +24,15 @@
  * - Relations tab (belongsTo, hasMany, M:M)
  * - Relationship link lines on the diagram
  *
- * They appear instead in the Properties tab with icons (e.g., "📄 File", "👤 User", "💳 Payment")
+ * They appear instead in the Properties tab with icons (e.g., "📄 File", "👤 User", "💳 Payment", "🏷️ Status")
  * to indicate that foreign keys to these tables represent property types like Color or Email.
  *
  * NOTE: These are unqualified table names (without schema prefix). The system assumes
- * 'files' and 'civic_os_users' exist in the metadata schema, while 'payment_transactions'
+ * 'files', 'civic_os_users', and 'statuses' exist in the metadata schema, while 'payment_transactions'
  * is a public view (backed by payments.transactions). The 'transactions' table name is also
  * included to handle the payments.transactions schema-qualified reference.
  */
-export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions'] as const;
+export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses'] as const;
 
 /**
  * Type representing valid system table names.

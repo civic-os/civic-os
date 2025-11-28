@@ -141,6 +141,9 @@ export class ImportExportService {
     if (property.type === EntityPropertyType.User) {
       return `${property.column_name}(display_name)`;
     }
+    if (property.type === EntityPropertyType.Status) {
+      return `${property.column_name}(display_name)`;
+    }
     return property.column_name;
   }
 
@@ -173,6 +176,15 @@ export class ImportExportService {
             exportRow[prop.display_name] = value;
           }
         }
+        // Status columns - identical to FK (has id, display_name, and color)
+        else if (prop.type === EntityPropertyType.Status) {
+          if (value && typeof value === 'object' && 'id' in value) {
+            exportRow[prop.display_name] = value.id;
+            exportRow[prop.display_name + ' (Name)'] = value.display_name;
+          } else {
+            exportRow[prop.display_name] = value;
+          }
+        }
         // GeoPoint - export as lat,lng
         else if (prop.type === EntityPropertyType.GeoPoint) {
           if (value && typeof value === 'string') {
@@ -193,6 +205,12 @@ export class ImportExportService {
           } else {
             exportRow[prop.display_name] = '';
           }
+        }
+        // TimeSlot - export as two columns (Start/End) for easier editing
+        else if (prop.type === EntityPropertyType.TimeSlot) {
+          const { start, end } = this.parseTimeSlotRange(value);
+          exportRow[prop.display_name + ' (Start)'] = start;
+          exportRow[prop.display_name + ' (End)'] = end;
         }
         // All other types - copy as-is
         else {
@@ -220,6 +238,50 @@ export class ImportExportService {
   }
 
   /**
+   * Parse PostgreSQL tstzrange into start and end timestamps.
+   * Input: '["2025-12-22 14:00:00+00","2025-12-22 19:00:00+00")'
+   * Output: { start: "2025-12-22 14:00:00", end: "2025-12-22 19:00:00" }
+   *
+   * Handles both inclusive/exclusive bounds: [), (], [], ()
+   */
+  private parseTimeSlotRange(value: string | null): { start: string; end: string } {
+    if (!value || typeof value !== 'string') {
+      return { start: '', end: '' };
+    }
+
+    // PostgreSQL range format: ["start","end") or ["start","end"] etc.
+    // Regex captures the two timestamp values between quotes
+    const match = value.match(/[\[\(]"([^"]+)","([^"]+)"[\]\)]/);
+    if (!match) {
+      return { start: '', end: '' };
+    }
+
+    // Format timestamps for spreadsheet (remove timezone for cleaner display)
+    const formatTimestamp = (ts: string): string => {
+      try {
+        const date = new Date(ts);
+        if (isNaN(date.getTime())) return ts;
+        // Format as YYYY-MM-DD HH:mm:ss in local time
+        return date.toLocaleString('sv-SE', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(' ', ' ');
+      } catch {
+        return ts;
+      }
+    };
+
+    return {
+      start: formatTimestamp(match[1]),
+      end: formatTimestamp(match[2])
+    };
+  }
+
+  /**
    * Generate timestamp for filename.
    * Format: YYYY-MM-DD_HHmmss
    */
@@ -243,10 +305,14 @@ export class ImportExportService {
     entity: SchemaEntityTable,
     properties: SchemaEntityProperty[]
   ): Promise<void> {
-    // Sort and filter properties (exclude generated columns and M:M)
+    // Sort and filter properties (exclude generated columns and system-managed types)
     const templateProperties = properties
       .filter(p => p.column_name !== 'civic_os_text_search') // Exclude generated tsvector column
       .filter(p => p.type !== EntityPropertyType.ManyToMany) // M:M import not yet supported
+      .filter(p => p.type !== EntityPropertyType.File) // Files require S3 upload workflow
+      .filter(p => p.type !== EntityPropertyType.FileImage)
+      .filter(p => p.type !== EntityPropertyType.FilePDF)
+      .filter(p => p.type !== EntityPropertyType.Payment) // Payments created via Stripe workflow
       .sort((a, b) => a.sort_order - b.sort_order);
 
     // Build hint and header rows
@@ -256,8 +322,18 @@ export class ImportExportService {
     const headers: any = {};
 
     templateProperties.forEach(prop => {
-      hints[prop.display_name] = this.getHintForProperty(prop);
-      headers[prop.display_name] = prop.display_name; // Actual column name
+      // TimeSlot properties get TWO columns: Start and End
+      if (prop.type === EntityPropertyType.TimeSlot) {
+        const startCol = prop.display_name + ' (Start)';
+        const endCol = prop.display_name + ' (End)';
+        hints[startCol] = 'Date/time (e.g., "2025-11-30 14:00", "11/30/25 2pm")';
+        hints[endCol] = 'Date/time - must be after start';
+        headers[startCol] = startCol;
+        headers[endCol] = endCol;
+      } else {
+        hints[prop.display_name] = this.getHintForProperty(prop);
+        headers[prop.display_name] = prop.display_name;
+      }
     });
 
     // Create data sheet: hints first, then headers
@@ -267,10 +343,11 @@ export class ImportExportService {
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, dataSheet, 'Import Data');
 
-    // Add reference sheets for FK and User fields
+    // Add reference sheets for FK, User, and Status fields
     const referenceProps = templateProperties.filter(p =>
       p.type === EntityPropertyType.ForeignKeyName ||
-      p.type === EntityPropertyType.User
+      p.type === EntityPropertyType.User ||
+      p.type === EntityPropertyType.Status
     );
 
     for (const prop of referenceProps) {
@@ -302,14 +379,15 @@ export class ImportExportService {
 
       case EntityPropertyType.ForeignKeyName:
       case EntityPropertyType.User:
+      case EntityPropertyType.Status:
         return `Select from "${prop.display_name} Options" sheet or use ID`;
 
       case EntityPropertyType.Date:
-        return 'Format: YYYY-MM-DD';
+        return 'Date (e.g., "2025-11-30", "11/30/25", "Nov 30, 2025")';
 
       case EntityPropertyType.DateTime:
       case EntityPropertyType.DateTimeLocal:
-        return 'Format: YYYY-MM-DD HH:mm:ss';
+        return 'Date/time (e.g., "2025-11-30 14:00", "11/30/25 2pm")';
 
       case EntityPropertyType.Boolean:
         return 'Enter: true/false or yes/no';
@@ -326,21 +404,35 @@ export class ImportExportService {
   }
 
   /**
-   * Fetch reference data for FK or User field.
+   * Fetch reference data for FK, User, or Status field.
    */
   private async fetchReferenceData(prop: SchemaEntityProperty): Promise<any[]> {
     try {
-      const tableName = prop.type === EntityPropertyType.User
-        ? 'civic_os_users'
-        : prop.join_table;
+      let tableName: string;
+      let columnName: string;
+      let filters: FilterCriteria[] | undefined;
 
-      const columnName = prop.type === EntityPropertyType.User
-        ? 'id'
-        : prop.join_column;
+      if (prop.type === EntityPropertyType.User) {
+        tableName = 'civic_os_users';
+        columnName = 'id';
+      } else if (prop.type === EntityPropertyType.Status) {
+        tableName = 'statuses';
+        columnName = 'id';
+        // Filter statuses by entity_type to only show relevant options
+        filters = [{
+          column: 'entity_type',
+          operator: 'eq',
+          value: prop.status_entity_type || ''
+        }];
+      } else {
+        tableName = prop.join_table;
+        columnName = prop.join_column;
+      }
 
       const data = await this.data.getData({
         key: tableName,
-        fields: [columnName, 'display_name']
+        fields: [columnName, 'display_name'],
+        filters: filters
       }).toPromise() || [];
 
       return data.map(item => ({
@@ -354,7 +446,7 @@ export class ImportExportService {
   }
 
   /**
-   * Fetch all FK and User reference data for validation (FK Hybrid Lookup).
+   * Fetch all FK, User, and Status reference data for validation (FK Hybrid Lookup).
    *
    * Builds comprehensive lookup maps to enable both ID-based and name-based
    * foreign key validation during import. This allows users to use either:
@@ -362,14 +454,17 @@ export class ImportExportService {
    * - Display names (user-friendly but requires case-insensitive lookup)
    *
    * Process:
-   * 1. Filter properties to FK and User types only
+   * 1. Filter properties to FK, User, and Status types only
    * 2. For each FK property, fetch all records (id + display_name)
    * 3. Build ForeignKeyLookup structure with three maps:
    *    - displayNameToIds: Map<lowercase_name, id[]> for name→ID lookup
    *    - validIds: Set<id> for direct ID validation
    *    - idsToDisplayName: Map<id, name> for error messages
    * 4. Use forkJoin to fetch all FK data in parallel (performance optimization)
-   * 5. Return Map<table_name, ForeignKeyLookup> keyed by join_table or 'civic_os_users'
+   * 5. Return Map<table_name, ForeignKeyLookup> keyed by:
+   *    - FK: join_table
+   *    - User: 'civic_os_users'
+   *    - Status: 'status_<entity_type>' (e.g., 'status_issues')
    *
    * Example ForeignKeyLookup structure:
    * ```typescript
@@ -386,8 +481,8 @@ export class ImportExportService {
    * }
    * ```
    *
-   * @param properties Array of entity properties (only FK and User types processed)
-   * @returns Observable<Map<table_name, ForeignKeyLookup>> - Lookup maps keyed by table name
+   * @param properties Array of entity properties (only FK, User, and Status types processed)
+   * @returns Observable<Map<table_name, ForeignKeyLookup>> - Lookup maps keyed by table/status name
    *
    * @see buildForeignKeyLookup() - Constructs the ForeignKeyLookup structure
    * @see import-validation.worker.ts:validateForeignKey() - Uses these lookups
@@ -397,28 +492,53 @@ export class ImportExportService {
   ): Observable<Map<string, ForeignKeyLookup>> {
     const referenceProps = properties.filter(p =>
       p.type === EntityPropertyType.ForeignKeyName ||
-      p.type === EntityPropertyType.User
+      p.type === EntityPropertyType.User ||
+      p.type === EntityPropertyType.Status
     );
 
     if (referenceProps.length === 0) {
       return of(new Map());
     }
 
-    const requests = referenceProps.map(prop =>
-      this.data.getData({
-        key: prop.type === EntityPropertyType.User ? 'civic_os_users' : prop.join_table,
-        fields: [
-          prop.type === EntityPropertyType.User ? 'id' : prop.join_column,
-          'display_name'
-        ]
+    const requests = referenceProps.map(prop => {
+      // Determine table, column, and lookup key based on property type
+      let tableName: string;
+      let columnName: string;
+      let lookupKey: string;
+      let filters: FilterCriteria[] | undefined;
+
+      if (prop.type === EntityPropertyType.User) {
+        tableName = 'civic_os_users';
+        columnName = 'id';
+        lookupKey = 'civic_os_users';
+      } else if (prop.type === EntityPropertyType.Status) {
+        tableName = 'statuses';
+        columnName = 'id';
+        // Use entity_type-specific key so different entities have separate lookups
+        lookupKey = `status_${prop.status_entity_type}`;
+        filters = [{
+          column: 'entity_type',
+          operator: 'eq',
+          value: prop.status_entity_type || ''
+        }];
+      } else {
+        tableName = prop.join_table;
+        columnName = prop.join_column;
+        lookupKey = prop.join_table;
+      }
+
+      return this.data.getData({
+        key: tableName,
+        fields: [columnName, 'display_name'],
+        filters: filters
       }).pipe(
         map(data => ({
           property: prop,
           data: data,
-          tableName: prop.type === EntityPropertyType.User ? 'civic_os_users' : prop.join_table
+          tableName: lookupKey
         }))
-      )
-    );
+      );
+    });
 
     return forkJoin(requests).pipe(
       map(results => {

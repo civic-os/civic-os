@@ -35,8 +35,8 @@
                 <span class="label-text font-semibold">{{ prop.display_name }}</span>
               </label>
 
-              <!-- Foreign Key / User: Checkbox list -->
-              @if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.User) {
+              <!-- Foreign Key / User / Status: Checkbox list -->
+              @if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.User || prop.type === EntityPropertyType.Status) {
                 <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
                   @if (getFilterOptions(prop.column_name).length === 0) {
                     <div class="text-sm text-base-content/60">Loading options...</div>

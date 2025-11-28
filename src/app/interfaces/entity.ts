@@ -99,6 +99,10 @@ export interface SchemaEntityProperty {
 
     // Validation rules from metadata
     validation_rules?: ValidationRule[];
+
+    // Status type configuration (v0.15.0)
+    // When present, indicates this is a Status type column
+    status_entity_type?: string;
 }
 
 export enum EntityPropertyType {
@@ -124,6 +128,17 @@ export enum EntityPropertyType {
     FileImage,
     FilePDF,
     Payment,
+    Status,
+}
+
+/**
+ * Status value from metadata.statuses table.
+ * Returned when a Status property type is embedded in entity data via PostgREST.
+ */
+export interface StatusValue {
+    id: number;
+    display_name: string;
+    color: string | null;  // hex_color, nullable
 }
 
 /**

@@ -2,27 +2,27 @@
 -- COMMUNITY CENTER RESERVATIONS EXAMPLE
 -- Demonstrates: TimeSlot property type, calendar views, approval workflows
 -- ============================================================================
--- NOTE: Requires Civic OS v0.9.0+ (includes time_slot domain and btree_gist extension)
+-- NOTE: Requires Civic OS v0.15.0+ (includes Status Type System, time_slot domain, btree_gist)
 -- ============================================================================
 
--- Request Statuses lookup table
-CREATE TABLE request_statuses (
-  id SERIAL PRIMARY KEY,
-  display_name VARCHAR(50) NOT NULL UNIQUE,
-  description TEXT,
-  color hex_color NOT NULL,
-  emoji VARCHAR(10),
-  sort_order INT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- ============================================================================
+-- STATUS TYPE SYSTEM CONFIGURATION
+-- Uses centralized metadata.statuses instead of per-entity lookup tables
+-- ============================================================================
 
--- Insert standard statuses
-INSERT INTO request_statuses (display_name, description, color, emoji, sort_order) VALUES
-  ('Pending', 'Awaiting review by staff', '#F59E0B', '⏳', 1),
-  ('Approved', 'Approved and reservation created', '#22C55E', '✓', 2),
-  ('Denied', 'Request denied by staff', '#EF4444', '✗', 3),
-  ('Cancelled', 'Cancelled by requester', '#6B7280', '🚫', 4);
+-- Register 'reservation_request' as a valid status entity type
+INSERT INTO metadata.status_types (entity_type, description)
+VALUES ('reservation_request', 'Status values for community center reservation requests')
+ON CONFLICT (entity_type) DO NOTHING;
+
+-- Insert statuses for reservation requests
+INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal)
+VALUES
+  ('reservation_request', 'Pending', 'Awaiting review by staff', '#F59E0B', 1, TRUE, FALSE),
+  ('reservation_request', 'Approved', 'Approved and reservation created', '#22C55E', 2, FALSE, TRUE),
+  ('reservation_request', 'Denied', 'Request denied by staff', '#EF4444', 3, FALSE, TRUE),
+  ('reservation_request', 'Cancelled', 'Cancelled by requester', '#6B7280', 4, FALSE, TRUE)
+ON CONFLICT DO NOTHING;
 
 -- Resources table (facilities available for reservation)
 CREATE TABLE resources (
@@ -59,7 +59,7 @@ CREATE TABLE reservation_requests (
   resource_id INT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
   requested_by UUID NOT NULL DEFAULT public.current_user_id() REFERENCES metadata.civic_os_users(id) ON DELETE CASCADE,
   time_slot time_slot NOT NULL,
-  status_id INT NOT NULL DEFAULT 1 REFERENCES request_statuses(id),  -- Default to 'Pending' (id=1)
+  status_id INT NOT NULL DEFAULT public.get_initial_status('reservation_request') REFERENCES metadata.statuses(id),  -- Default to initial status ('Pending')
   purpose TEXT NOT NULL,
   attendee_count INT NOT NULL,
   notes TEXT,
@@ -96,16 +96,6 @@ CREATE TRIGGER set_updated_at_trigger
   EXECUTE FUNCTION public.set_updated_at();
 
 CREATE TRIGGER set_created_at_trigger
-  BEFORE INSERT ON request_statuses
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_created_at();
-
-CREATE TRIGGER set_updated_at_trigger
-  BEFORE INSERT OR UPDATE ON request_statuses
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_updated_at();
-
-CREATE TRIGGER set_created_at_trigger
   BEFORE INSERT ON reservations
   FOR EACH ROW
   EXECUTE FUNCTION public.set_created_at();
@@ -130,9 +120,6 @@ CREATE TRIGGER set_updated_at_trigger
 -- ============================================================================
 -- NOTE: Fine-grained RBAC (admin, editor, user roles) is handled by
 -- metadata.permissions system in 02_community_center_permissions.sql
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON request_statuses TO web_anon, authenticated;
-GRANT USAGE, SELECT ON SEQUENCE request_statuses_id_seq TO web_anon, authenticated;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON resources TO web_anon, authenticated;
 GRANT USAGE, SELECT ON SEQUENCE resources_id_seq TO web_anon, authenticated;
@@ -235,8 +222,9 @@ DECLARE
   v_reservation_id BIGINT;
   v_approved_status_id INT;
 BEGIN
-  -- Get the 'Approved' status ID (should be 2)
-  SELECT id INTO v_approved_status_id FROM request_statuses WHERE display_name = 'Approved';
+  -- Get the 'Approved' status ID from metadata.statuses
+  SELECT id INTO v_approved_status_id FROM metadata.statuses
+  WHERE entity_type = 'reservation_request' AND display_name = 'Approved';
 
   -- CASE 1: Status changed TO approved (create reservation)
   IF NEW.status_id = v_approved_status_id AND (OLD IS NULL OR OLD.status_id != v_approved_status_id) THEN
@@ -287,10 +275,10 @@ DECLARE
   v_approved_status_id INT;
   v_denied_status_id INT;
 BEGIN
-  -- Get status IDs
-  SELECT id INTO v_pending_status_id FROM request_statuses WHERE display_name = 'Pending';
-  SELECT id INTO v_approved_status_id FROM request_statuses WHERE display_name = 'Approved';
-  SELECT id INTO v_denied_status_id FROM request_statuses WHERE display_name = 'Denied';
+  -- Get status IDs from metadata.statuses
+  SELECT id INTO v_pending_status_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Pending';
+  SELECT id INTO v_approved_status_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved';
+  SELECT id INTO v_denied_status_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Denied';
 
   -- If status changed from pending to approved/denied, set reviewed_at
   IF (OLD IS NULL OR OLD.status_id = v_pending_status_id) AND
@@ -335,9 +323,10 @@ DECLARE
 BEGIN
   SELECT id INTO v_user_id FROM metadata.civic_os_users LIMIT 1;
   SELECT id INTO v_resource_id FROM resources WHERE display_name = 'Club House';
-  SELECT id INTO v_pending_id FROM request_statuses WHERE display_name = 'Pending';
-  SELECT id INTO v_approved_id FROM request_statuses WHERE display_name = 'Approved';
-  SELECT id INTO v_denied_id FROM request_statuses WHERE display_name = 'Denied';
+  -- Get status IDs from metadata.statuses
+  SELECT id INTO v_pending_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Pending';
+  SELECT id INTO v_approved_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved';
+  SELECT id INTO v_denied_id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Denied';
 
   IF v_user_id IS NOT NULL AND v_resource_id IS NOT NULL THEN
     -- Approved request (auto-creates reservation via trigger)

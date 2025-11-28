@@ -918,11 +918,12 @@ export class ListPage implements OnInit, OnDestroy {
     }
 
     // Update URL query params with new calendar state
+    // Use formatLocalDate() to preserve local date (not UTC conversion)
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
         cal_view: view,
-        cal_date: focusDate.toISOString().split('T')[0], // YYYY-MM-DD
+        cal_date: this.formatLocalDate(focusDate),
         page: 1  // Reset pagination when calendar navigates
       },
       queryParamsHandling: 'merge',
@@ -958,7 +959,24 @@ export class ListPage implements OnInit, OnDestroy {
     const dayOfWeek = now.getDay();
     const sunday = new Date(now);
     sunday.setDate(now.getDate() - dayOfWeek);
-    return sunday.toISOString().split('T')[0]; // YYYY-MM-DD
+    return this.formatLocalDate(sunday);
+  }
+
+  /**
+   * Format a Date as YYYY-MM-DD in LOCAL timezone.
+   *
+   * IMPORTANT: Do NOT use toISOString().split('T')[0] for this purpose!
+   * toISOString() converts to UTC first, which can shift the date:
+   * - Nov 28 at 11pm EST → Nov 29 at 4am UTC → "2025-11-29" (wrong!)
+   * - Nov 28 at 7pm EST → Nov 29 at 12am UTC → "2025-11-29" (wrong!)
+   *
+   * This function preserves the local date regardless of timezone.
+   */
+  private formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   /**

@@ -19,11 +19,21 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
 import { ConstraintMessage } from '../interfaces/api';
+
+/**
+ * Status option for dropdowns and filters.
+ * Simplified version of StatusValue for UI components.
+ */
+export interface StatusOption {
+  id: number;
+  display_name: string;
+  color: string | null;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +49,11 @@ export class SchemaService {
   private schemaCache$?: Observable<SchemaEntityTable[]>;
   private propertiesCache$?: Observable<SchemaEntityProperty[]>;
   private constraintMessagesCache$?: Observable<ConstraintMessage[]>;
+
+  // Status cache: keyed by entity_type (e.g., 'reservation_request', 'issue')
+  // Each entity_type has its own set of statuses from metadata.statuses
+  private statusesCache = new Map<string, Observable<StatusOption[]>>();
+  private loadingStatuses = new Set<string>();
 
   // In-flight request tracking to prevent duplicate concurrent requests
   private loadingEntities = false;
@@ -82,6 +97,9 @@ export class SchemaService {
     this.constraintMessagesCache$ = undefined;
     // Clear processed cache
     this.constraintMessages = undefined;
+    // Clear status cache (keyed by entity_type)
+    this.statusesCache.clear();
+    this.loadingStatuses.clear();
     // Reset loading flags to allow new fetches
     this.loadingEntities = false;
     this.loadingProperties = false;
@@ -90,6 +108,15 @@ export class SchemaService {
     this.getSchema().subscribe();
     this.getProperties().subscribe();
     this.getConstraintMessages().subscribe();
+  }
+
+  /**
+   * Refresh only the statuses cache.
+   * Use when metadata.statuses or metadata.status_types change.
+   */
+  public refreshStatusesCache(): void {
+    this.statusesCache.clear();
+    this.loadingStatuses.clear();
   }
 
   /**
@@ -216,6 +243,56 @@ export class SchemaService {
     return this.constraintMessagesCache$ || of([]);
   }
 
+  /**
+   * Get statuses for a specific entity type from metadata.statuses.
+   * Results are cached per entity_type to avoid redundant RPC calls.
+   *
+   * @param entityType The status_entity_type value (e.g., 'reservation_request', 'issue')
+   * @returns Observable of StatusOption array sorted by sort_order
+   */
+  public getStatusesForEntity(entityType: string): Observable<StatusOption[]> {
+    // Return cached observable if available
+    const cached = this.statusesCache.get(entityType);
+    if (cached) {
+      return cached;
+    }
+
+    // Skip if already loading to prevent duplicate concurrent requests
+    if (this.loadingStatuses.has(entityType)) {
+      // Return empty observable that will be replaced when cache is populated
+      // Callers should subscribe after a short delay or use the cached observable
+      return of([]);
+    }
+
+    // Mark as loading
+    this.loadingStatuses.add(entityType);
+
+    // Call RPC to get statuses filtered by entity_type
+    const status$ = this.http.post<StatusOption[]>(
+      getPostgrestUrl() + 'rpc/get_statuses_for_entity',
+      { p_entity_type: entityType }
+    ).pipe(
+      map(statuses => statuses.map(s => ({
+        id: s.id,
+        display_name: s.display_name,
+        color: s.color
+      }))),
+      catchError(err => {
+        console.error(`Failed to load statuses for entity type '${entityType}':`, err);
+        return of([]);
+      }),
+      finalize(() => {
+        this.loadingStatuses.delete(entityType);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+
+    // Cache the observable
+    this.statusesCache.set(entityType, status$);
+
+    return status$;
+  }
+
   public getPropertiesForEntity(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getProperties().pipe(map(props => {
       return props.filter(p => p.table_name == table.table_name);
@@ -236,6 +313,12 @@ export class SchemaService {
       );
   }
   private getPropertyType(val: SchemaEntityProperty): EntityPropertyType {
+    // Status type detection: Integer FK with status_entity_type configured in metadata.properties
+    // This takes precedence over generic ForeignKeyName to show status badges instead of plain text
+    if (val.status_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
+      return EntityPropertyType.Status;
+    }
+
     // System type detection: UUID foreign keys to metadata tables (File, User, Payment types)
     // Uses centralized isSystemType() for consistency with Schema Editor/Inspector filtering
     if (val.udt_name === 'uuid' && val.join_table && isSystemType(val.join_table)) {
@@ -300,6 +383,12 @@ export class SchemaService {
       return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
     }
 
+    // Status type: Embed status data from metadata.statuses table
+    // Uses FK hint to metadata schema since statuses live in metadata, not public
+    if (prop.type === EntityPropertyType.Status) {
+      return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color)`;
+    }
+
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
     return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
       (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '(' + prop.join_column + ',display_name)' :
@@ -329,6 +418,11 @@ export class SchemaService {
 
     // For FK fields in edit forms, we only need the raw ID value
     if (prop.type === EntityPropertyType.ForeignKeyName) {
+      return prop.column_name;
+    }
+
+    // Status fields also need just the ID for edit forms (dropdown value)
+    if (prop.type === EntityPropertyType.Status) {
       return prop.column_name;
     }
 
@@ -430,7 +524,8 @@ export class SchemaService {
               EntityPropertyType.Boolean,
               EntityPropertyType.IntegerNumber,
               EntityPropertyType.Money,
-              EntityPropertyType.User
+              EntityPropertyType.User,
+              EntityPropertyType.Status  // Status uses same filter pattern as ForeignKeyName
             ];
             return supportedTypes.includes(p.type);
           })

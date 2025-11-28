@@ -201,6 +201,13 @@
     @if (propType() == EntityPropertyType.Payment) {
       <app-payment-badge [payment]="datum()"></app-payment-badge>
     }
+    @if (propType() == EntityPropertyType.Status) {
+      <span
+        class="badge badge-lg text-white font-medium"
+        [style.background-color]="datum()?.color || '#3B82F6'">
+        {{ datum()?.display_name }}
+      </span>
+    }
     @if (propType() == EntityPropertyType.Unknown) {
       {{ datum() }}
     }
