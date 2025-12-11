@@ -25,6 +25,7 @@ import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
+import { NotesService } from '../../services/notes.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
@@ -37,6 +38,7 @@ describe('ListPage', () => {
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAnalyticsService: jasmine.SpyObj<AnalyticsService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockNotesService: jasmine.SpyObj<NotesService>;
   let routeParams: BehaviorSubject<any>;
   let queryParams: BehaviorSubject<any>;
 
@@ -54,6 +56,13 @@ describe('ListPage', () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
       authenticated: signal(false)
     });
+    mockNotesService = jasmine.createSpyObj('NotesService', [
+      'getNotes',
+      'getNotesForEntities',
+      'createNote',
+      'updateNote',
+      'deleteNote'
+    ]);
 
     // Set default return values to prevent errors when component observables initialize
     mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
@@ -71,7 +80,8 @@ describe('ListPage', () => {
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },
         { provide: AnalyticsService, useValue: mockAnalyticsService },
-        { provide: AuthService, useValue: mockAuthService }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: NotesService, useValue: mockNotesService }
       ]
     })
     .compileComponents();

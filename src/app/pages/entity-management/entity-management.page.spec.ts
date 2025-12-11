@@ -287,7 +287,8 @@ describe('EntityManagementPage', () => {
             null,
             false,
             null,
-            null
+            null,
+            undefined  // enable_notes
           );
           done();
         }, 10);

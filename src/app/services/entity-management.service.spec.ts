@@ -74,7 +74,8 @@ describe('EntityManagementService', () => {
         p_map_property_name: null,
         p_show_calendar: false,
         p_calendar_property_name: null,
-        p_calendar_color_property: null
+        p_calendar_color_property: null,
+        p_enable_notes: false
       });
       req.flush({});
     });
@@ -95,7 +96,8 @@ describe('EntityManagementService', () => {
         p_map_property_name: null,
         p_show_calendar: false,
         p_calendar_property_name: null,
-        p_calendar_color_property: null
+        p_calendar_color_property: null,
+        p_enable_notes: false
       });
       req.flush({});
     });

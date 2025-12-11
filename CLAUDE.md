@@ -246,6 +246,14 @@ npm test -- --no-watch --include='**/schema.service.spec.ts'  # Run specific fil
 
 **CRITICAL**: Always use `--no-watch` or `npm run test:headless` when running tests as Claude Code. Watch mode keeps the process running indefinitely, which blocks the tool and wastes resources. The `test:headless` script is specifically configured to run once and exit cleanly.
 
+**EFFICIENT DEBUGGING**: When debugging test failures, save output to a file for quick searching:
+```bash
+npm run test:headless 2>&1 | tee /tmp/test-output.txt  # Run tests, save output
+grep "FAILED" /tmp/test-output.txt                      # Find all failures
+grep -B 5 -A 10 "FAILED" /tmp/test-output.txt          # Get failure context
+```
+This avoids re-running the full test suite (30+ seconds) when investigating multiple failures.
+
 **KNOWN ISSUE**: FilterBarComponent cannot be unit tested due to Angular effects creating unmanaged subscriptions in `loadFilterOptions()`. The effect triggers on property changes and calls `dataService.getData().subscribe()` without cleanup, causing subscription leaks in tests. The component works correctly in production but causes test hangs when created/destroyed repeatedly. Fix requires refactoring to use `takeUntilDestroyed()` or converting to signal-based data loading.
 
 See `docs/development/TESTING.md` for comprehensive testing guidelines, best practices, and troubleshooting.

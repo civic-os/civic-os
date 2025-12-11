@@ -445,6 +445,30 @@ ng test --include='**/schema.service.spec.ts'
 ng test --code-coverage
 ```
 
+### Efficient Debugging
+
+When debugging test failures, save output to a file to avoid re-running the full suite (30+ seconds) for each investigation:
+
+```bash
+# Run tests and save output for analysis
+npm run test:headless 2>&1 | tee /tmp/test-output.txt
+
+# Find all failures quickly
+grep "FAILED" /tmp/test-output.txt
+
+# Get failure context (5 lines before, 10 after)
+grep -B 5 -A 10 "FAILED" /tmp/test-output.txt
+
+# Find specific error types
+grep -A 5 "No provider found" /tmp/test-output.txt
+grep -A 5 "Expected.*to equal" /tmp/test-output.txt
+```
+
+**Pro Tips:**
+- Use `tee` to see output in real-time while also saving to file
+- Chain `grep` commands to narrow down specific issues
+- Save output from multiple runs with timestamps for comparison
+
 ### Coverage Guidelines
 
 **Target Coverage by Layer:**
