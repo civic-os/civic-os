@@ -53,6 +53,47 @@ export class PermissionsPage {
 
   permissionTypes = ['create', 'read', 'update', 'delete'];
 
+  /**
+   * Determines which permission types are applicable for a given table/entity name.
+   * Virtual permissions (containing ':') have restricted permission sets.
+   *
+   * Examples:
+   * - 'issues' → ['create', 'read', 'update', 'delete'] (full CRUD)
+   * - 'reservations:notes' → ['create', 'read'] (notes only need read/create)
+   * - 'payments:refund' → future action permission example
+   *
+   * @param tableName Table or virtual entity name
+   * @returns Array of applicable permission types
+   */
+  getApplicablePermissions(tableName: string): string[] {
+    // Check for virtual permissions (contain ':')
+    if (tableName.includes(':')) {
+      const suffix = tableName.split(':').pop();
+
+      // Notes only need read and create (update/delete handled by RLS at author level)
+      if (suffix === 'notes') {
+        return ['create', 'read'];
+      }
+
+      // Future: Add other virtual permission patterns here
+      // e.g., 'payments:refund' → ['create'] (just the action)
+
+      // Default for unknown virtual permissions: just the permission that exists
+      return ['create', 'read'];
+    }
+
+    // Regular tables get full CRUD
+    return this.permissionTypes;
+  }
+
+  /**
+   * Check if a permission type is applicable for a given table.
+   * Used in template to conditionally show/hide checkboxes.
+   */
+  isPermissionApplicable(tableName: string, permissionType: string): boolean {
+    return this.getApplicablePermissions(tableName).includes(permissionType);
+  }
+
   // Modal state for creating roles
   showCreateModal = signal(false);
   newRoleName = signal('');

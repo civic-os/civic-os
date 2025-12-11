@@ -47,7 +47,8 @@ export class EntityManagementService {
     mapPropertyName: string | null = null,
     showCalendar: boolean = false,
     calendarPropertyName: string | null = null,
-    calendarColorProperty: string | null = null
+    calendarColorProperty: string | null = null,
+    enableNotes: boolean = false
   ): Observable<ApiResponse> {
     return this.http.post(
       getPostgrestUrl() + 'rpc/upsert_entity_metadata',
@@ -60,7 +61,8 @@ export class EntityManagementService {
         p_map_property_name: mapPropertyName,
         p_show_calendar: showCalendar,
         p_calendar_property_name: calendarPropertyName,
-        p_calendar_color_property: calendarColorProperty
+        p_calendar_color_property: calendarColorProperty,
+        p_enable_notes: enableNotes
       }
     ).pipe(
       map((response: any) => <ApiResponse>{ success: true, body: response }),

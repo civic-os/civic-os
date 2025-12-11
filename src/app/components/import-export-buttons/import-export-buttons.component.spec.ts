@@ -22,6 +22,7 @@ import { ImportExportButtonsComponent } from './import-export-buttons.component'
 import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { NotesService } from '../../services/notes.service';
 import {
   SchemaEntityTable,
   SchemaEntityProperty,
@@ -35,6 +36,7 @@ describe('ImportExportButtonsComponent', () => {
   let mockImportExportService: jasmine.SpyObj<ImportExportService>;
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
   let mockDataService: jasmine.SpyObj<DataService>;
+  let mockNotesService: jasmine.SpyObj<NotesService>;
 
   // Helper function to create mock properties
   const createMockProperty = (overrides: Partial<SchemaEntityProperty>): SchemaEntityProperty => ({
@@ -104,6 +106,13 @@ describe('ImportExportButtonsComponent', () => {
       'getPropsForCreate'
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['bulkInsert']);
+    mockNotesService = jasmine.createSpyObj('NotesService', [
+      'getNotes',
+      'getNotesForEntities',
+      'createNote',
+      'updateNote',
+      'deleteNote'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [ImportExportButtonsComponent],
@@ -111,7 +120,8 @@ describe('ImportExportButtonsComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ImportExportService, useValue: mockImportExportService },
         { provide: SchemaService, useValue: mockSchemaService },
-        { provide: DataService, useValue: mockDataService }
+        { provide: DataService, useValue: mockDataService },
+        { provide: NotesService, useValue: mockNotesService }
       ]
     }).compileComponents();
 
@@ -133,16 +143,20 @@ describe('ImportExportButtonsComponent', () => {
     it('should initialize with default signal values', () => {
       expect(component.isExporting()).toBe(false);
       expect(component.showImportModal()).toBe(false);
+      expect(component.showExportModal()).toBe(false);
+      expect(component.includeNotes()).toBe(true);
     });
   });
 
   describe('Export Functionality', () => {
-    it('should export successfully', async () => {
+    it('should export directly when entity does not have notes enabled', async () => {
+      // Entity without enable_notes should export directly (no modal)
       mockSchemaService.getPropertiesForEntity.and.returnValue(of(mockProperties));
       mockImportExportService.exportToExcel.and.returnValue(Promise.resolve({ success: true }));
 
       await component.onExport();
 
+      expect(component.showExportModal()).toBe(false);
       expect(mockSchemaService.getPropertiesForEntity).toHaveBeenCalledWith(mockEntity);
       expect(mockImportExportService.exportToExcel).toHaveBeenCalledWith(
         mockEntity,
@@ -150,7 +164,8 @@ describe('ImportExportButtonsComponent', () => {
         undefined,
         undefined,
         undefined,
-        undefined
+        undefined,
+        undefined // no notes service passed
       );
       expect(component.isExporting()).toBe(false);
     });
@@ -172,6 +187,7 @@ describe('ImportExportButtonsComponent', () => {
         filters,
         undefined,
         undefined,
+        undefined,
         undefined
       );
     });
@@ -189,6 +205,7 @@ describe('ImportExportButtonsComponent', () => {
         mockProperties,
         undefined,
         'test search',
+        undefined,
         undefined,
         undefined
       );
@@ -209,7 +226,8 @@ describe('ImportExportButtonsComponent', () => {
         undefined,
         undefined,
         'created_at',
-        'desc'
+        'desc',
+        undefined
       );
     });
 
@@ -393,6 +411,95 @@ describe('ImportExportButtonsComponent', () => {
 
       expect(component.sortColumn).toBe('created_at');
       expect(component.sortDirection).toBe('desc');
+    });
+  });
+
+  describe('Export Modal (Notes-Enabled Entities)', () => {
+    const entityWithNotes: SchemaEntityTable = {
+      ...mockEntity,
+      table_name: 'reservations',
+      display_name: 'Reservations',
+      enable_notes: true
+    };
+
+    beforeEach(() => {
+      component.entity = entityWithNotes;
+      fixture.detectChanges();
+    });
+
+    it('should show export modal when entity has notes enabled', () => {
+      component.onExport();
+
+      expect(component.showExportModal()).toBe(true);
+      expect(component.includeNotes()).toBe(true); // Default to checked
+    });
+
+    it('should close export modal', () => {
+      component.showExportModal.set(true);
+
+      component.closeExportModal();
+
+      expect(component.showExportModal()).toBe(false);
+    });
+
+    it('should export with notes when includeNotes is checked', async () => {
+      mockSchemaService.getPropertiesForEntity.and.returnValue(of(mockProperties));
+      mockImportExportService.exportToExcel.and.returnValue(Promise.resolve({ success: true }));
+
+      component.includeNotes.set(true);
+      await component.confirmExport();
+
+      expect(component.showExportModal()).toBe(false);
+      expect(mockImportExportService.exportToExcel).toHaveBeenCalledWith(
+        entityWithNotes,
+        mockProperties,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        mockNotesService // notes service passed when includeNotes is true
+      );
+    });
+
+    it('should export without notes when includeNotes is unchecked', async () => {
+      mockSchemaService.getPropertiesForEntity.and.returnValue(of(mockProperties));
+      mockImportExportService.exportToExcel.and.returnValue(Promise.resolve({ success: true }));
+
+      component.includeNotes.set(false);
+      await component.confirmExport();
+
+      expect(mockImportExportService.exportToExcel).toHaveBeenCalledWith(
+        entityWithNotes,
+        mockProperties,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined // no notes service when unchecked
+      );
+    });
+
+    it('should not start export if already exporting', () => {
+      component.isExporting.set(true);
+
+      component.onExport();
+
+      expect(component.showExportModal()).toBe(false);
+      expect(mockSchemaService.getPropertiesForEntity).not.toHaveBeenCalled();
+    });
+
+    it('should reset includeNotes to true each time modal opens', () => {
+      // First open - should default to true
+      component.onExport();
+      expect(component.includeNotes()).toBe(true);
+
+      // User unchecks it
+      component.includeNotes.set(false);
+      component.closeExportModal();
+
+      // Open again - should reset to true
+      component.onExport();
+      expect(component.includeNotes()).toBe(true);
     });
   });
 });

@@ -20,3 +20,4 @@ v0-13-0-fix-dashboards-cascade [v0-13-0-add-payments-poc] 2025-11-23T00:20:00Z D
 v0-13-0-add-payment-metadata [v0-13-0-add-payments-poc] 2025-11-23T17:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add payment_initiation_rpc and payment_capture_mode columns to metadata.entities
 v0-14-0-add-payment-admin [v0-13-0-add-payment-metadata] 2025-11-25T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Payment Admin: Refund support, admin permissions, effective_status computed field
 v0-15-0-add-status-type [v0-14-0-add-payment-admin] 2025-11-26T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Status Type System: centralized statuses table with validation trigger
+v0-16-0-add-entity-notes [v0-15-0-add-status-type] 2025-12-11T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Entity Notes: polymorphic notes system for any entity

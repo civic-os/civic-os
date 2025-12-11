@@ -566,6 +566,57 @@ describe('ImportExportService', () => {
       expect(result[0]['Status (Name)']).toBe('Open');
     });
 
+    it('should prefer full_name over display_name for User columns', () => {
+      const data = [
+        {
+          id: 1,
+          assigned_to: {
+            id: 'abc-123',
+            display_name: 'jdoe',
+            full_name: 'John Doe'
+          }
+        }
+      ];
+
+      const properties = [
+        createMockProperty({
+          column_name: 'assigned_to',
+          display_name: 'Assigned To',
+          type: EntityPropertyType.User
+        })
+      ];
+
+      const result = (service as any).transformForExport(data, properties);
+
+      expect(result[0]['Assigned To']).toBe('abc-123');
+      expect(result[0]['Assigned To (Name)']).toBe('John Doe'); // full_name preferred
+    });
+
+    it('should fall back to display_name when full_name is null for User columns', () => {
+      const data = [
+        {
+          id: 1,
+          assigned_to: {
+            id: 'abc-123',
+            display_name: 'jdoe',
+            full_name: null
+          }
+        }
+      ];
+
+      const properties = [
+        createMockProperty({
+          column_name: 'assigned_to',
+          display_name: 'Assigned To',
+          type: EntityPropertyType.User
+        })
+      ];
+
+      const result = (service as any).transformForExport(data, properties);
+
+      expect(result[0]['Assigned To (Name)']).toBe('jdoe'); // falls back to display_name
+    });
+
     it('should convert GeoPoint WKT to lat,lng format', () => {
       const data = [
         { id: 1, location: 'POINT(-71.0589 42.3601)' }
@@ -850,6 +901,152 @@ describe('ImportExportService', () => {
         // End should be AFTER start (this was failing before the fix)
         expect(endDate.getTime()).toBeGreaterThan(startDate.getTime());
       });
+    });
+  });
+
+  /**
+   * transformNotesForExport() Tests
+   *
+   * Tests for the notes export transformation added in v0.16.0.
+   * Verifies that notes are properly formatted for Excel export.
+   */
+  describe('transformNotesForExport() - Direct Method Tests', () => {
+    it('should transform notes with correct column names', () => {
+      const notes = [
+        {
+          id: 1,
+          entity_type: 'reservations',
+          entity_id: '5',
+          author_id: 'abc-123',
+          author: { id: 'abc-123', display_name: 'jdoe', full_name: 'John Doe' },
+          content: 'Test note content',
+          note_type: 'note' as const,
+          is_internal: true,
+          created_at: '2025-01-15T10:30:00Z',
+          updated_at: '2025-01-15T10:30:00Z'
+        }
+      ];
+
+      const result = service.transformNotesForExport(notes);
+
+      expect(result.length).toBe(1);
+      expect(result[0]['Record ID']).toBe('5'); // Renamed from Entity ID
+      expect(result[0]['Note ID']).toBe(1);
+      expect(result[0]['Author']).toBe('John Doe'); // full_name preferred
+      expect(result[0]['Type']).toBe('Note');
+      expect(result[0]['Content']).toBe('Test note content');
+    });
+
+    it('should prefer full_name over display_name for author', () => {
+      const notes = [
+        {
+          id: 1,
+          entity_type: 'reservations',
+          entity_id: '5',
+          author_id: 'abc-123',
+          author: { id: 'abc-123', display_name: 'jdoe', full_name: 'John Doe' },
+          content: 'Test',
+          note_type: 'note' as const,
+          is_internal: true,
+          created_at: '2025-01-15T10:30:00Z',
+          updated_at: '2025-01-15T10:30:00Z'
+        }
+      ];
+
+      const result = service.transformNotesForExport(notes);
+
+      expect(result[0]['Author']).toBe('John Doe');
+    });
+
+    it('should fall back to display_name when full_name is null', () => {
+      const notes = [
+        {
+          id: 1,
+          entity_type: 'reservations',
+          entity_id: '5',
+          author_id: 'abc-123',
+          author: { id: 'abc-123', display_name: 'jdoe', full_name: null },
+          content: 'Test',
+          note_type: 'note' as const,
+          is_internal: true,
+          created_at: '2025-01-15T10:30:00Z',
+          updated_at: '2025-01-15T10:30:00Z'
+        }
+      ];
+
+      const result = service.transformNotesForExport(notes);
+
+      expect(result[0]['Author']).toBe('jdoe');
+    });
+
+    it('should show System for notes without author', () => {
+      const notes = [
+        {
+          id: 1,
+          entity_type: 'reservations',
+          entity_id: '5',
+          author_id: 'abc-123',
+          author: undefined,
+          content: 'System generated note',
+          note_type: 'system' as const,
+          is_internal: true,
+          created_at: '2025-01-15T10:30:00Z',
+          updated_at: '2025-01-15T10:30:00Z'
+        }
+      ];
+
+      const result = service.transformNotesForExport(notes);
+
+      expect(result[0]['Author']).toBe('System');
+    });
+
+    it('should label system notes as System type', () => {
+      const notes = [
+        {
+          id: 1,
+          entity_type: 'reservations',
+          entity_id: '5',
+          author_id: 'abc-123',
+          author: { id: 'abc-123', display_name: 'system', full_name: null },
+          content: 'Status changed',
+          note_type: 'system' as const,
+          is_internal: true,
+          created_at: '2025-01-15T10:30:00Z',
+          updated_at: '2025-01-15T10:30:00Z'
+        }
+      ];
+
+      const result = service.transformNotesForExport(notes);
+
+      expect(result[0]['Type']).toBe('System');
+    });
+
+    it('should strip markdown from content', () => {
+      const notes = [
+        {
+          id: 1,
+          entity_type: 'reservations',
+          entity_id: '5',
+          author_id: 'abc-123',
+          author: { id: 'abc-123', display_name: 'jdoe', full_name: 'John Doe' },
+          content: 'Status changed from **Pending** to **Approved**',
+          note_type: 'system' as const,
+          is_internal: true,
+          created_at: '2025-01-15T10:30:00Z',
+          updated_at: '2025-01-15T10:30:00Z'
+        }
+      ];
+
+      const result = service.transformNotesForExport(notes);
+
+      // stripMarkdown should remove ** formatting
+      expect(result[0]['Content']).toBe('Status changed from Pending to Approved');
+    });
+
+    it('should handle empty notes array', () => {
+      const result = service.transformNotesForExport([]);
+
+      expect(result).toEqual([]);
     });
   });
 });

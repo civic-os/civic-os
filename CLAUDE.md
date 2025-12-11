@@ -134,6 +134,34 @@ WHERE table_name = 'issues' AND column_name = 'status_id';
 
 **Features**: Colored badges with `hex_color`, `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, cache invalidation via `schema_cache_versions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for design and `examples/community-center/` for working example.
 
+**Entity Notes** (v0.16.0+): Framework-level notes system that any entity can opt into via metadata configuration. Notes are polymorphic (one `metadata.entity_notes` table serves all entities) and support both human-authored and trigger-generated content. Notes section appears on Detail pages with simple Markdown formatting (bold, italic, links).
+
+**Quick Setup**:
+```sql
+-- Enable notes for an entity (creates permissions automatically)
+SELECT enable_entity_notes('reservation_requests');
+
+-- Optional: Add status change notes trigger
+CREATE TRIGGER myentity_status_change_note
+    AFTER UPDATE OF status_id ON myentity
+    FOR EACH ROW
+    WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
+    EXECUTE FUNCTION add_status_change_note();
+```
+
+**Features**:
+- **Permission-isolated**: Notes have dedicated `{entity}:notes:read` and `{entity}:notes:create` permissions (virtual permissions pattern - Permissions page automatically shows only Read/Create checkboxes for `:notes` entries)
+- **System notes**: Triggers can add notes with `note_type='system'` for audit trails (displayed with "Auto" badge)
+- **Markdown**: Supports `**bold**`, `*italic*`, and `[links](url)` formatting
+- **Export**: Detail pages export notes directly; List pages show "Include notes" checkbox modal for bulk export with Notes worksheet
+
+**RPC Functions**:
+- `enable_entity_notes(entity_type)` - Enable notes and create default permissions
+- `create_entity_note(entity_type, entity_id, content, note_type, is_internal, author_id)` - Create a note
+- `add_status_change_note()` - Trigger function for automatic status change notes
+
+See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete implementation guide and `examples/community-center/init-scripts/12_enable_notes.sql` for working example.
+
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
 **Payment Type** (`Payment`): UUID foreign key to `payments.transactions` table for Stripe-based payment processing. Metadata-driven architecture enables payments on any entity via `payment_initiation_rpc` configuration in `metadata.entities`. Frontend automatically displays payment badges on List pages and "Pay Now" button on Detail pages when configured. Payment workflow: user clicks "Pay Now" → framework calls configured RPC → RPC validates and creates payment record → River job creates Stripe PaymentIntent → modal displays Stripe Elements → webhook updates status. Requires Civic OS v0.13.0+ with consolidated worker service. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete implementation guide and `examples/community-center/init-scripts/10_payment_integration.sql` for working example.

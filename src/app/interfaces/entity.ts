@@ -32,6 +32,8 @@ export interface SchemaEntityTable {
     delete: boolean,
     payment_initiation_rpc?: string | null,
     payment_capture_mode?: 'immediate' | 'deferred' | null,
+    // Notes configuration (v0.16.0)
+    enable_notes?: boolean,
 }
 
 export interface ValidationRule {
@@ -139,6 +141,25 @@ export interface StatusValue {
     id: number;
     display_name: string;
     color: string | null;  // hex_color, nullable
+}
+
+/**
+ * Entity note from metadata.entity_notes table.
+ * Notes are polymorphic - one table serves all entities.
+ * Added in v0.16.0.
+ */
+export interface EntityNote {
+    id: number;
+    entity_type: string;
+    entity_id: string;
+    author_id: string;
+    author?: { id: string; display_name: string; full_name?: string | null };  // Embedded via PostgREST select
+    content: string;
+    note_type: 'note' | 'system';
+    is_internal: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
 }
 
 /**

@@ -35,3 +35,49 @@
     (importSuccess)="onImportSuccess($event)">
   </app-import-modal>
 }
+
+<!-- Export Options Modal (shown when entity has notes enabled) -->
+@if (showExportModal()) {
+  <div class="modal modal-open">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg mb-4">Export {{ entity.display_name }}</h3>
+
+      <div class="form-control mb-4">
+        <label class="label cursor-pointer justify-start gap-3">
+          <input
+            type="checkbox"
+            class="checkbox checkbox-primary"
+            [ngModel]="includeNotes()"
+            (ngModelChange)="includeNotes.set($event)" />
+          <div>
+            <span class="label-text font-medium">Include notes</span>
+            <p class="text-xs text-base-content/60 mt-0.5">
+              Export notes as a separate worksheet
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <div class="modal-action">
+        <button
+          class="btn btn-ghost"
+          (click)="closeExportModal()"
+          [disabled]="isExporting()">
+          Cancel
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="confirmExport()"
+          [disabled]="isExporting()">
+          @if (isExporting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+            Exporting...
+          } @else {
+            <span class="material-symbols-outlined">download</span>
+            Export
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

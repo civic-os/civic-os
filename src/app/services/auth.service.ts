@@ -115,6 +115,16 @@ export class AuthService {
   }
 
   /**
+   * Get the current user's ID from the Keycloak token.
+   *
+   * @returns Observable<string | null> - The user's UUID or null if not authenticated
+   */
+  getCurrentUserId(): Observable<string | null> {
+    const tokenParsed = this.keycloak.tokenParsed;
+    return of(tokenParsed?.sub || null);
+  }
+
+  /**
    * Check if the current user has a specific permission on a table.
    * Calls the PostgreSQL has_permission RPC function.
    *

@@ -49,6 +49,12 @@ This document specifies the implementation of Excel import/export functionality 
 - ✅ Cancellation support during validation
 - ✅ UUID validation for User fields
 
+**Entity Notes Export (v0.16.0 - December 2025):**
+- ✅ **Notes Worksheet Export**: Entities with `enable_notes=true` show "Include notes" checkbox modal on export
+- ✅ **Author Full Name**: Notes export displays author's `full_name` with fallback to `display_name`
+- ✅ **User Column Full Name**: All User columns now export `full_name` (previously only `display_name`)
+- ✅ **Markdown Stripping**: Note content is stripped of markdown formatting for clean Excel output
+
 **Recent Bug Fixes (October 2025):**
 - ✅ **PGRST102 Fix**: Nullable fields now set to null instead of being skipped, ensuring all rows have identical keys for PostgREST bulk insert
 - ✅ **Error Display**: Fixed error handling to show user-friendly messages when import fails after validation

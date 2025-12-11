@@ -37,6 +37,7 @@ import { ManyToManyEditorComponent } from '../../components/many-to-many-editor/
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PaymentCheckoutComponent } from '../../components/payment-checkout/payment-checkout.component';
+import { EntityNotesComponent } from '../../components/entity-notes/entity-notes.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -62,7 +63,8 @@ export interface CalendarSection {
     DisplayPropertyComponent,
     ManyToManyEditorComponent,
     EmptyStateComponent,
-    PaymentCheckoutComponent
+    PaymentCheckoutComponent,
+    EntityNotesComponent
     // TimeSlotCalendarComponent
   ]
 })

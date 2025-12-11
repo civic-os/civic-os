@@ -16,18 +16,21 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map, of } from 'rxjs';
+import { Observable, forkJoin, map, of, firstValueFrom } from 'rxjs';
 import { read, utils, writeFileXLSX } from 'xlsx';
 import { DataService } from './data.service';
 import { SchemaService } from './schema.service';
+import { NotesService } from './notes.service';
 import {
   EntityPropertyType,
   SchemaEntityProperty,
   SchemaEntityTable,
   ForeignKeyLookup,
   ValidationErrorSummary,
-  ImportError
+  ImportError,
+  EntityNote
 } from '../interfaces/entity';
+import { stripMarkdown } from '../pipes/simple-markdown.pipe';
 import { FilterCriteria } from '../interfaces/query';
 
 /**
@@ -55,6 +58,7 @@ export class ImportExportService {
    * @param searchQuery Active search
    * @param sortColumn Sort column
    * @param sortDirection Sort direction
+   * @param notesService If provided, notes will be fetched and added as a second worksheet
    * @returns Promise that resolves when export completes
    */
   async exportToExcel(
@@ -63,7 +67,8 @@ export class ImportExportService {
     filters?: FilterCriteria[],
     searchQuery?: string,
     sortColumn?: string,
-    sortDirection?: 'asc' | 'desc'
+    sortDirection?: 'asc' | 'desc',
+    notesService?: NotesService
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // 1. Check row count (safety limit)
@@ -116,7 +121,30 @@ export class ImportExportService {
       const workbook = utils.book_new();
       utils.book_append_sheet(workbook, worksheet, entity.display_name);
 
-      // 6. Trigger download
+      // 6. If notes service provided, fetch notes and add as second worksheet
+      if (notesService && allData.length > 0) {
+        try {
+          // Extract entity IDs from exported data
+          const entityIds = allData.map(row => String(row.id));
+
+          // Fetch notes for all exported entities
+          const notes = await firstValueFrom(
+            notesService.getNotesForEntities(entity.table_name, entityIds)
+          );
+
+          if (notes && notes.length > 0) {
+            // Transform notes for export
+            const notesExportData = this.transformNotesForExport(notes);
+            const notesWorksheet = utils.json_to_sheet(notesExportData);
+            utils.book_append_sheet(workbook, notesWorksheet, 'Notes');
+          }
+        } catch (notesError) {
+          // Log but don't fail the export if notes fetch fails
+          console.warn('Failed to fetch notes for export:', notesError);
+        }
+      }
+
+      // 7. Trigger download
       const timestamp = this.getTimestamp();
       const filename = `${entity.display_name}_${timestamp}.xlsx`;
       writeFileXLSX(workbook, filename);
@@ -133,6 +161,8 @@ export class ImportExportService {
 
   /**
    * Build PostgREST order field for sorting.
+   * Note: For User columns, we sort by display_name (not full_name) since
+   * display_name is always available while full_name may be null for privacy.
    */
   private buildOrderField(property: SchemaEntityProperty): string {
     if (property.type === EntityPropertyType.ForeignKeyName) {
@@ -167,11 +197,12 @@ export class ImportExportService {
             exportRow[prop.display_name] = value; // Just the ID
           }
         }
-        // User columns - identical to FK (UUID instead of int)
+        // User columns - prefer full_name over display_name for exports
         else if (prop.type === EntityPropertyType.User) {
           if (value && typeof value === 'object' && 'id' in value) {
             exportRow[prop.display_name] = value.id;
-            exportRow[prop.display_name + ' (Name)'] = value.display_name;
+            // Prefer full_name if available (may be null for privacy reasons)
+            exportRow[prop.display_name + ' (Name)'] = value.full_name || value.display_name;
           } else {
             exportRow[prop.display_name] = value;
           }
@@ -703,5 +734,83 @@ export class ImportExportService {
     // Download
     const timestamp = this.getTimestamp();
     writeFileXLSX(workbook, `import_errors_${timestamp}.xlsx`);
+  }
+
+  // ============================================================
+  // NOTES EXPORT (v0.16.0)
+  // ============================================================
+
+  /**
+   * Export notes for a single entity to Excel.
+   * Used on Detail pages when user clicks "Export Notes" button.
+   *
+   * @param entityType Table name (e.g., 'issues', 'reservations')
+   * @param entityId Entity ID
+   * @param notes Array of notes to export
+   */
+  exportEntityNotes(
+    entityType: string,
+    entityId: string,
+    notes: EntityNote[]
+  ): void {
+    if (notes.length === 0) {
+      console.warn('No notes to export');
+      return;
+    }
+
+    // Transform notes for export (prefer full_name over display_name)
+    const exportData = notes.map(note => ({
+      'Note ID': note.id,
+      'Author': note.author?.full_name || note.author?.display_name || 'System',
+      'Date': this.formatDateForExport(note.created_at),
+      'Type': note.note_type === 'system' ? 'System' : 'Note',
+      'Content': stripMarkdown(note.content)
+    }));
+
+    // Create workbook
+    const worksheet = utils.json_to_sheet(exportData);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Notes');
+
+    // Download
+    const timestamp = this.getTimestamp();
+    const filename = `${entityType}_${entityId}_notes_${timestamp}.xlsx`;
+    writeFileXLSX(workbook, filename);
+  }
+
+  /**
+   * Transform notes for bulk export (used in List page export).
+   * Returns data suitable for adding as a second worksheet.
+   *
+   * Column naming:
+   * - "Record ID" = the ID of the parent entity record (e.g., reservation #5)
+   * - "Note ID" = the unique ID of the note itself
+   *
+   * @param notes Array of notes to transform
+   * @returns Array of objects for Excel export
+   */
+  transformNotesForExport(notes: EntityNote[]): any[] {
+    return notes.map(note => ({
+      'Record ID': note.entity_id,
+      'Note ID': note.id,
+      'Author': note.author?.full_name || note.author?.display_name || 'System',
+      'Date': this.formatDateForExport(note.created_at),
+      'Type': note.note_type === 'system' ? 'System' : 'Note',
+      'Content': stripMarkdown(note.content)
+    }));
+  }
+
+  /**
+   * Format date for export in a readable format.
+   */
+  private formatDateForExport(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

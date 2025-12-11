@@ -1,0 +1,234 @@
+<div class="entity-notes mt-8">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="flex justify-between items-center">
+        <h2 class="card-title text-xl">Notes</h2>
+        <div class="flex gap-2">
+          @if (canCreate() && !showAddForm()) {
+            <button
+              class="btn btn-sm btn-outline gap-1"
+              (click)="showAddForm.set(true)">
+              <span class="material-symbols-outlined text-lg">add</span>
+              Add Note
+            </button>
+          }
+          @if (hasNotes() && canRead()) {
+            <button
+              class="btn btn-sm btn-ghost gap-1"
+              (click)="exportNotes()"
+              title="Export notes to Excel">
+              <span class="material-symbols-outlined text-lg">download</span>
+              Export
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Error message -->
+      @if (error()) {
+        <div class="alert alert-error mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ error() }}</span>
+          <button class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
+        </div>
+      }
+
+      <!-- Loading state -->
+      @if (loading()) {
+        <div class="flex justify-center py-8">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      } @else if (!canRead()) {
+        <!-- No read permission -->
+        <div class="text-center py-8 text-base-content/60">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <p>You don't have permission to view notes.</p>
+        </div>
+      } @else {
+        <!-- Add note form (when expanded) -->
+        @if (canCreate() && showAddForm()) {
+          <div class="mb-2">
+            <div class="form-control">
+              <!-- Formatting toolbar -->
+              <div class="flex gap-1 mb-1">
+                <button
+                  type="button"
+                  class="btn btn-xs btn-ghost font-bold"
+                  title="Bold (**text**)"
+                  (click)="insertFormatting('bold')">
+                  B
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-xs btn-ghost italic"
+                  title="Italic (*text*)"
+                  (click)="insertFormatting('italic')">
+                  I
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-xs btn-ghost"
+                  title="Link ([text](url))"
+                  (click)="insertFormatting('link')">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </button>
+              </div>
+              <textarea
+                class="textarea textarea-bordered w-full new-note-textarea"
+                rows="3"
+                placeholder="Write a note... (supports **bold**, *italic*, and [links](url))"
+                [ngModel]="newNoteContent()"
+                (ngModelChange)="newNoteContent.set($event)"
+                [disabled]="submitting()">
+              </textarea>
+            </div>
+            <div class="flex justify-end gap-2 mt-2">
+              <button
+                class="btn btn-ghost btn-sm"
+                (click)="showAddForm.set(false); newNoteContent.set('')"
+                [disabled]="submitting()">
+                Cancel
+              </button>
+              <button
+                class="btn btn-primary btn-sm"
+                (click)="addNote()"
+                [disabled]="!newNoteContent().trim() || submitting()">
+                @if (submitting()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                }
+                Add Note
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Notes list -->
+        @if (hasNotes()) {
+          <div class="divider my-1"></div>
+          <div class="space-y-3">
+            @for (note of displayedNotes(); track note.id) {
+              <div
+                class="rounded-lg p-4"
+                [class.bg-base-200]="note.note_type === 'note'"
+                [class.bg-base-300]="note.note_type === 'system'"
+                [class.bg-opacity-50]="note.note_type === 'system'">
+
+                @if (editingNoteId() === note.id) {
+                  <!-- Edit mode -->
+                  <div class="form-control">
+                    <textarea
+                      class="textarea textarea-bordered w-full"
+                      rows="3"
+                      [ngModel]="editingContent()"
+                      (ngModelChange)="editingContent.set($event)"
+                      [disabled]="saving()">
+                    </textarea>
+                    <div class="flex gap-2 mt-2">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        (click)="saveEdit()"
+                        [disabled]="!editingContent().trim() || saving()">
+                        @if (saving()) {
+                          <span class="loading loading-spinner loading-sm"></span>
+                        }
+                        Save
+                      </button>
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        (click)="cancelEditing()"
+                        [disabled]="saving()">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Display mode -->
+                  <div class="flex items-start gap-2">
+                    <!-- Note content -->
+                    <div class="flex-grow min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        @if (note.author?.full_name || note.author?.display_name; as authorName) {
+                          <span class="font-semibold text-sm">{{ authorName }}</span>
+                          @if (note.note_type === 'system') {
+                            <span class="badge badge-ghost badge-xs">Auto</span>
+                          }
+                        } @else {
+                          <!-- Fallback for notes without author (e.g., cron-triggered) -->
+                          <span class="material-symbols-outlined text-base text-base-content/60">computer</span>
+                          <span class="font-semibold text-sm text-base-content/60">System</span>
+                        }
+                        <span class="text-xs text-base-content/60" [title]="note.created_at">
+                          {{ formatRelativeTime(note.created_at) }}
+                        </span>
+                      </div>
+                      <div class="prose prose-sm max-w-none break-words" [innerHTML]="note.content | simpleMarkdown"></div>
+                    </div>
+
+                    <!-- Edit/Delete buttons -->
+                    @if (canEditNote(note) || canDeleteNote(note)) {
+                      <div class="flex-shrink-0 flex gap-1">
+                        @if (canEditNote(note)) {
+                          <button
+                            class="btn btn-ghost btn-xs"
+                            title="Edit"
+                            (click)="startEditing(note)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        }
+                        @if (canDeleteNote(note)) {
+                          <button
+                            class="btn btn-ghost btn-xs text-error"
+                            title="Delete"
+                            (click)="deleteNote(note)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Show more / Show less button -->
+          @if (hiddenNotesCount() > 0) {
+            <button
+              class="btn btn-ghost btn-sm w-full mt-2"
+              (click)="showAllNotes()">
+              Show {{ hiddenNotesCount() }} more note{{ hiddenNotesCount() === 1 ? '' : 's' }}
+            </button>
+          } @else if (notes().length > INITIAL_DISPLAY_LIMIT) {
+            <button
+              class="btn btn-ghost btn-sm w-full mt-2"
+              (click)="collapseNotes()">
+              Show less
+            </button>
+          }
+        } @else {
+          <!-- Empty state -->
+          <div class="text-center py-8 text-base-content/60">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            <p>No notes yet.</p>
+            @if (canCreate()) {
+              <p class="text-sm mt-1">Add the first note above.</p>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

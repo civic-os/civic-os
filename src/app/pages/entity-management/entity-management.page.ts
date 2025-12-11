@@ -203,6 +203,10 @@ export class EntityManagementPage {
     this.saveEntityMetadata(entity);
   }
 
+  onEnableNotesChange(entity: EntityRow) {
+    this.saveEntityMetadata(entity);
+  }
+
   hasGeoPointProperties(entity: EntityRow): boolean {
     return (entity.geoPointProperties?.length ?? 0) > 0;
   }
@@ -255,7 +259,8 @@ export class EntityManagementPage {
       entity.map_property_name,
       entity.show_calendar,
       entity.calendar_property_name,
-      entity.calendar_color_property
+      entity.calendar_color_property,
+      entity.enable_notes
     ).subscribe({
       next: (response) => {
         // Clear saving state

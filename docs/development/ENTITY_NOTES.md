@@ -1,7 +1,7 @@
 # First-Class Notes System
 
-**Status**: Preliminary Design
-**Proposed Version**: v0.17.0 or later
+**Status**: Implemented
+**Version**: v0.16.0
 **Related**: [Entity Actions](./ENTITY_ACTIONS.md), [Notifications](./NOTIFICATIONS.md)
 
 ## Overview

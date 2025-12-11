@@ -74,6 +74,14 @@
           }
         }
 
+        <!-- Entity Notes Section -->
+        @if (entity.enable_notes) {
+          <app-entity-notes
+            [entityType]="entity.table_name"
+            [entityId]="data.id.toString()">
+          </app-entity-notes>
+        }
+
         <!-- Inverse Relationships Section -->
         @if (inverseRelationships$ | async; as relationships) {
           @if (relationships.length > 0) {

@@ -17,15 +17,18 @@
 
 import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SchemaEntityTable, SchemaEntityProperty } from '../../interfaces/entity';
+import { FormsModule } from '@angular/forms';
+import { SchemaEntityTable, SchemaEntityProperty, EntityNote } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
 import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
+import { NotesService } from '../../services/notes.service';
 import { ImportModalComponent } from '../import-modal/import-modal.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-import-export-buttons',
-  imports: [CommonModule, ImportModalComponent],
+  imports: [CommonModule, FormsModule, ImportModalComponent],
   templateUrl: './import-export-buttons.component.html',
   styleUrl: './import-export-buttons.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,6 +36,7 @@ import { ImportModalComponent } from '../import-modal/import-modal.component';
 export class ImportExportButtonsComponent {
   private importExportService = inject(ImportExportService);
   private schemaService = inject(SchemaService);
+  private notesService = inject(NotesService);
 
   @Input({ required: true }) entity!: SchemaEntityTable;
   @Input() entityKey?: string;
@@ -46,13 +50,50 @@ export class ImportExportButtonsComponent {
   public isExporting = signal<boolean>(false);
   public showImportModal = signal<boolean>(false);
 
+  // Export options modal state
+  public showExportModal = signal<boolean>(false);
+  public includeNotes = signal<boolean>(true);
+
   /**
    * Handle export button click.
-   * Fetches properties and triggers export.
+   * If entity has notes enabled, show options modal.
+   * Otherwise, export directly.
+   * @returns Promise that resolves when export completes (for direct exports)
    */
-  async onExport() {
+  onExport(): Promise<void> | void {
     if (this.isExporting()) return;
 
+    // If entity has notes enabled, show modal with options
+    if (this.entity.enable_notes) {
+      this.includeNotes.set(true); // Default to checked
+      this.showExportModal.set(true);
+    } else {
+      // No notes, export directly
+      return this.executeExport(false);
+    }
+  }
+
+  /**
+   * Close export options modal.
+   */
+  closeExportModal() {
+    this.showExportModal.set(false);
+  }
+
+  /**
+   * Confirm export from modal and start the export process.
+   * @returns Promise that resolves when export completes
+   */
+  confirmExport(): Promise<void> {
+    this.showExportModal.set(false);
+    return this.executeExport(this.includeNotes());
+  }
+
+  /**
+   * Execute the export process with optional notes.
+   * @param includeNotes Whether to include notes as a second worksheet
+   */
+  private async executeExport(includeNotes: boolean) {
     this.isExporting.set(true);
 
     try {
@@ -69,7 +110,8 @@ export class ImportExportButtonsComponent {
         this.currentFilters,
         this.searchQuery,
         this.sortColumn,
-        this.sortDirection
+        this.sortDirection,
+        includeNotes ? this.notesService : undefined
       );
 
       if (!result.success) {

@@ -1400,6 +1400,160 @@ SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;
 
 See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, AWS SES setup, and Phase 2 roadmap (SMS, bounce handling, unsubscribe mechanism).
 
+### Entity Notes System
+
+**Version**: v0.16.0+
+
+Add first-class notes/comments to any entity via metadata configuration. Supports both human-authored notes and system-generated notes (e.g., status change audit trail).
+
+**Features**:
+- Opt-in per entity via `enable_notes` flag in `metadata.entities`
+- Virtual permissions pattern (`{entity}:notes`) for fine-grained access control
+- Markdown support (bold, italic, links) with sanitized rendering
+- System notes with "Auto" badge for trigger-generated content
+- User display with full name and avatar
+- Excel export with optional "Notes" worksheet
+- RLS-enforced edit/delete (own notes only)
+
+**Requirements**:
+- Civic OS v0.16.0+ (notes schema + migrations)
+- Entity must exist in `metadata.entities`
+
+#### Enabling Notes for an Entity
+
+```sql
+-- 1. Enable notes for the entity
+UPDATE metadata.entities
+SET enable_notes = TRUE
+WHERE table_name = 'reservations';
+
+-- 2. Grant permissions to roles (virtual permission pattern)
+SELECT set_role_permission('editor', 'reservations:notes', 'create', TRUE);
+SELECT set_role_permission('editor', 'reservations:notes', 'read', TRUE);
+SELECT set_role_permission('user', 'reservations:notes', 'read', TRUE);
+```
+
+After enabling, the Notes section appears on Detail pages for that entity. Users with `read` permission can view notes; users with `create` permission can add notes and edit/delete their own.
+
+#### Permission Model
+
+Notes use virtual permissions with restricted operations:
+
+| Permission | Effect |
+|------------|--------|
+| `{entity}:notes:read` | View all notes for entity records |
+| `{entity}:notes:create` | Add new notes, edit/delete own notes |
+
+**Note**: `update` and `delete` are not separate permissions. Users with `create` permission can edit/delete only their own notes (enforced by RLS).
+
+The Permissions admin page (`/permissions`) automatically shows only Read/Create checkboxes for `:notes` permissions.
+
+#### System Notes (Audit Trail)
+
+Create automatic notes when entity state changes using PostgreSQL triggers:
+
+```sql
+-- Generic status change note function (reusable)
+CREATE OR REPLACE FUNCTION add_status_change_note()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_old_status TEXT;
+    v_new_status TEXT;
+BEGIN
+    SELECT display_name INTO v_old_status FROM metadata.statuses WHERE id = OLD.status_id;
+    SELECT display_name INTO v_new_status FROM metadata.statuses WHERE id = NEW.status_id;
+
+    PERFORM create_entity_note(
+        p_entity_type := TG_TABLE_NAME::NAME,
+        p_entity_id := NEW.id::TEXT,
+        p_content := format('Status changed from **%s** to **%s**', v_old_status, v_new_status),
+        p_note_type := 'system',
+        p_author_id := current_user_id()
+    );
+
+    RETURN NEW;
+END;
+$$;
+
+-- Attach to specific entity
+CREATE TRIGGER reservations_status_change_note
+    AFTER UPDATE OF status_id ON reservations
+    FOR EACH ROW
+    WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
+    EXECUTE FUNCTION add_status_change_note();
+```
+
+System notes display with an "Auto" badge and distinct styling to differentiate from human notes.
+
+#### Excel Export with Notes
+
+When exporting entities with notes enabled:
+1. User clicks Export button
+2. Modal appears with "Include notes" checkbox (checked by default)
+3. If checked, export includes a second "Notes" worksheet
+
+Notes worksheet columns:
+| Column | Description |
+|--------|-------------|
+| Record ID | The entity record ID (e.g., reservation ID) |
+| Note ID | Unique note identifier |
+| Author | User's full name (falls back to display name) |
+| Date | Note creation timestamp |
+| Type | "Note" for human notes, "System" for auto-generated |
+| Content | Note text (markdown stripped for Excel) |
+
+#### NotesService API
+
+```typescript
+import { NotesService } from './services/notes.service';
+
+// Get notes for a single entity record
+notesService.getNotes('reservations', '123')
+  .subscribe(notes => console.log(notes));
+
+// Get notes for multiple entity records (batch)
+notesService.getNotesForEntities('reservations', ['123', '456', '789'])
+  .subscribe(notes => console.log(notes));
+
+// Create a note
+notesService.createNote('reservations', '123', 'This is my note')
+  .subscribe(response => console.log(response));
+
+// Update own note
+notesService.updateNote(noteId, 'Updated content')
+  .subscribe(response => console.log(response));
+
+// Delete own note
+notesService.deleteNote(noteId)
+  .subscribe(response => console.log(response));
+```
+
+#### EntityNote Interface
+
+```typescript
+interface EntityNote {
+  id: number;
+  entity_type: string;
+  entity_id: string;
+  author_id: string;
+  author?: {
+    id: string;
+    display_name: string;
+    full_name?: string;
+  };
+  content: string;
+  note_type: 'note' | 'system';
+  is_internal: boolean;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+See `examples/community-center/init-scripts/12_enable_notes.sql` for a complete working example with status change triggers.
+
 ### Payment System
 
 **Version**: v0.13.0+
