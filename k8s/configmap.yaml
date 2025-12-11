@@ -46,3 +46,15 @@ data:
   # Higher values = faster processing but more memory usage (~100MB per worker)
   # Scale based on your workload and available resources
   THUMBNAIL_MAX_WORKERS: "5"
+
+  # Notification Configuration (v0.11.0+)
+  # Public URL for links in notification emails
+  SITE_URL: "https://app.yourdomain.com"
+  # Email address for notification sender (must be verified with your SMTP provider)
+  SMTP_FROM: "notifications@yourdomain.com"
+  # Timezone for notification timestamps (default: UTC)
+  # NOTIFICATION_TIMEZONE: "America/New_York"
+
+  # Payment Configuration (v0.13.0+, optional)
+  # Currency code for Stripe payments (default: USD)
+  # PAYMENT_CURRENCY: "USD"

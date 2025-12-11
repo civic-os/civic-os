@@ -1,0 +1,124 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+# Payment Worker Service - Stripe payment processing via River queue
+#
+# OPTIONAL: Only deploy if using payment processing features.
+# Requires Stripe credentials configured in civic-os-secrets.
+#
+# Features:
+# - Stripe PaymentIntent creation and management
+# - Webhook endpoint for Stripe events (payment_intent.succeeded, etc.)
+# - River job queue for reliable, transactional payment processing
+# - Automatic retries with exponential backoff
+#
+# See docs/INTEGRATOR_GUIDE.md for setting up payments on your entities.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-worker
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: payment-worker
+spec:
+  replicas: 1  # Scale to 2+ for high availability in production
+  selector:
+    matchLabels:
+      app: civic-os
+      component: payment-worker
+  template:
+    metadata:
+      labels:
+        app: civic-os
+        component: payment-worker
+    spec:
+      containers:
+      - name: payment-worker
+        image: ghcr.io/civic-os/payment-worker:latest
+        imagePullPolicy: Always
+        env:
+        # Database Configuration
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: DATABASE_URL
+        - name: DB_MAX_CONNS
+          value: "4"
+        - name: DB_MIN_CONNS
+          value: "1"
+
+        # Stripe Configuration (REQUIRED)
+        - name: STRIPE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: STRIPE_API_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: civic-os-secrets
+              key: STRIPE_WEBHOOK_SECRET
+
+        # Payment Configuration
+        - name: PAYMENT_CURRENCY
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PAYMENT_CURRENCY
+              optional: true  # Defaults to USD
+        - name: RIVER_WORKER_COUNT
+          value: "1"
+        - name: WEBHOOK_PORT
+          value: "8080"
+
+        ports:
+        - name: webhook
+          containerPort: 8080
+          protocol: TCP
+
+        # Resource limits
+        # Payment worker is lightweight - mainly I/O bound (Stripe API calls)
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: webhook
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: webhook
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: civic-os-payment-worker
+  namespace: civic-os
+  labels:
+    app: civic-os
+    component: payment-worker
+spec:
+  selector:
+    app: civic-os
+    component: payment-worker
+  ports:
+  - name: webhook
+    port: 8080
+    targetPort: webhook
+    protocol: TCP
+  type: ClusterIP

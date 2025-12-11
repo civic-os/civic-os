@@ -8,7 +8,7 @@ This directory contains example Kubernetes manifests for deploying Civic OS. The
 
 ## Architecture Overview
 
-Civic OS uses a three-subdomain architecture with six containerized components:
+Civic OS uses a three-subdomain architecture with containerized components:
 
 ### Public-Facing Services (via Ingress)
 - **app.yourdomain.com** - Frontend (Angular SPA)
@@ -17,9 +17,13 @@ Civic OS uses a three-subdomain architecture with six containerized components:
 
 ### Backend Services (internal)
 - **PostgREST** - REST API layer with JWT authentication
-- **S3 Signer** - Go microservice that generates presigned upload URLs via River job queue
-- **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails via River job queue
+- **Consolidated Worker** - Go microservice combining S3 presigned URLs, thumbnail generation, and email notifications
 - **PostgreSQL** - Managed database (recommended) or in-cluster StatefulSet
+
+### Optional Services
+- **Payment Worker** - Go microservice for Stripe payment processing (only if using payments)
+  - Exposes HTTP webhook endpoint at `/webhooks/stripe` on port 8080
+  - Requires routing via Ingress for Stripe webhook delivery
 
 The frontend is a Single Page Application (SPA) that makes API calls from the browser to the public API endpoint. This means configuration must use **public HTTPS URLs**, not internal Kubernetes service URLs.
 
@@ -74,21 +78,36 @@ kubectl get svc -n ingress-nginx ingress-nginx-controller
 
 ### 4. Create Secrets
 
-**For managed external database and S3 storage (recommended):**
+**For managed external database, S3 storage, and SMTP (recommended):**
 
 ```bash
 kubectl create secret generic civic-os-secrets \
   --from-literal=DATABASE_URL='postgresql://user:pass@host:port/dbname?sslmode=require' \
-  --from-literal=AWS_ACCESS_KEY_ID='your-access-key-id' \
-  --from-literal=AWS_SECRET_ACCESS_KEY='your-secret-access-key' \
+  --from-literal=S3_ACCESS_KEY_ID='your-access-key-id' \
+  --from-literal=S3_SECRET_ACCESS_KEY='your-secret-access-key' \
+  --from-literal=SMTP_HOST='smtp.example.com' \
+  --from-literal=SMTP_PORT='587' \
+  --from-literal=SMTP_USERNAME='your-smtp-username' \
+  --from-literal=SMTP_PASSWORD='your-smtp-password' \
   --namespace civic-os
 ```
 
-**Example for Digital Ocean managed PostgreSQL + AWS S3:**
+**For payment processing (optional):**
+```bash
+# Add these if deploying payment-worker
+  --from-literal=STRIPE_API_KEY='sk_live_your_secret_key' \
+  --from-literal=STRIPE_WEBHOOK_SECRET='whsec_your_webhook_secret'
+```
+
+**Example for Digital Ocean managed PostgreSQL + AWS S3/SES:**
 ```bash
 DATABASE_URL='postgresql://doadmin:password@db-postgresql-nyc3-12345.ondigitalocean.com:25060/defaultdb?sslmode=require'
-AWS_ACCESS_KEY_ID='AKIAIOSFODNN7EXAMPLE'
-AWS_SECRET_ACCESS_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+S3_ACCESS_KEY_ID='AKIAIOSFODNN7EXAMPLE'
+S3_SECRET_ACCESS_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+SMTP_HOST='email-smtp.us-east-1.amazonaws.com'
+SMTP_PORT='587'
+SMTP_USERNAME='AKIAIOSFODNN7EXAMPLE'  # SES SMTP credentials
+SMTP_PASSWORD='your-ses-smtp-password'
 ```
 
 See `secrets.yaml` for production secret management options (Sealed Secrets recommended).
@@ -111,6 +130,10 @@ kubectl apply -f frontend-service.yaml
 
 # Deploy optional services
 kubectl apply -f swagger-ui.yaml
+
+# Optional: Payment processing (requires Stripe credentials in secrets)
+# Uncomment webhook route in ingress.yaml before applying
+# kubectl apply -f payment-worker-deployment.yaml
 
 # Configure ingress (external access)
 kubectl apply -f ingress.yaml
@@ -411,16 +434,22 @@ These examples use **version latest** for development purposes. For production d
 # Development (use latest)
 image: ghcr.io/civic-os/frontend:latest
 image: ghcr.io/civic-os/postgrest:latest
+image: ghcr.io/civic-os/consolidated-worker:latest
+image: ghcr.io/civic-os/payment-worker:latest  # Optional
 
 # Production (pin to specific version)
-image: ghcr.io/civic-os/frontend:0.3.2
-image: ghcr.io/civic-os/postgrest:0.3.2
+image: ghcr.io/civic-os/frontend:0.15.0
+image: ghcr.io/civic-os/postgrest:0.15.0
+image: ghcr.io/civic-os/consolidated-worker:0.15.0
+image: ghcr.io/civic-os/payment-worker:0.15.0  # Optional
 ```
 
 **Recent versions:**
-- **0.3.2** - Fixed SSO blank page issue
-- **0.3.1** - Improved config injection (inline HTML vs separate config.js)
-- **0.3.0** - Initial stable release
+- **0.15.0** - Status type system for workflow states
+- **0.14.0** - Excel import improvements, timezone handling
+- **0.13.0** - Payment processing with Stripe integration
+- **0.11.0** - Consolidated worker, notification system
+- **0.10.0** - File storage with S3 and thumbnails
 
 ---
 

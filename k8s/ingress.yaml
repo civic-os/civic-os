@@ -58,6 +58,17 @@ spec:
   - host: api.yourdomain.com
     http:
       paths:
+      # Stripe webhook endpoint (OPTIONAL - only if using payment-worker)
+      # IMPORTANT: Must be listed BEFORE the / catch-all path
+      # Uncomment below if deploying payment-worker for payment processing
+      # - path: /webhooks/stripe
+      #   pathType: Exact
+      #   backend:
+      #     service:
+      #       name: civic-os-payment-worker
+      #       port:
+      #         number: 8080
+      # PostgREST API (all other requests)
       - path: /
         pathType: Prefix
         backend:

@@ -32,17 +32,19 @@ This guide covers deploying Civic OS to production environments using Docker con
 
 ## Overview
 
-Civic OS uses a containerized architecture with six main components:
+Civic OS uses a containerized architecture with five main components:
 
 1. **Frontend** - Angular SPA served by nginx
 2. **PostgREST** - REST API layer with JWT authentication
 3. **Migrations** - Sqitch-based database schema migrations (runs before PostgREST)
 4. **PostgreSQL** - Database with PostGIS extensions
-5. **S3 Signer** - Go microservice that generates presigned upload URLs via River job queue
-6. **Thumbnail Worker** - Go microservice that generates image/PDF thumbnails via River job queue
+5. **Consolidated Worker** - Go microservice combining:
+   - S3 presigned URL generation for file uploads
+   - Thumbnail generation for images and PDFs
+   - Email notification delivery via SMTP
 
 **Optional Components** (feature-specific):
-7. **Payment Worker** - Go microservice for Stripe payment processing with HTTP webhook endpoint (port 8080)
+6. **Payment Worker** - Go microservice for Stripe payment processing with HTTP webhook endpoint (port 8080)
    - Only required if using payment processing features
    - Handles payment intent creation via River job queue
    - Exposes HTTP endpoint for Stripe webhook callbacks with signature verification
@@ -225,6 +227,18 @@ THUMBNAIL_MAX_WORKERS=5  # Concurrent workers (tune based on CPU/memory)
 # Tuning: Low memory (512Mi)=2-3, Medium (1Gi)=5-7, High (2Gi)=10-12
 
 # ======================================
+# Notification Configuration
+# (Required for v0.11.0+ notification features)
+# ======================================
+SITE_URL=https://app.yourdomain.com  # Public URL for notification email links
+SMTP_HOST=email-smtp.us-east-1.amazonaws.com  # AWS SES or your SMTP provider
+SMTP_PORT=587
+SMTP_USERNAME=your-ses-smtp-username
+SMTP_PASSWORD=your-ses-smtp-password
+SMTP_FROM=notifications@yourdomain.com  # Must be verified with your SMTP provider
+NOTIFICATION_TIMEZONE=America/New_York  # Optional, default: UTC
+
+# ======================================
 # Payment Worker Configuration (Optional)
 # Required only if using payment processing features
 # ======================================
@@ -244,7 +258,7 @@ WEBHOOK_PORT=8080  # Internal port for Stripe webhook callbacks
 # Container Registry
 # ======================================
 GITHUB_ORG=your-github-org
-VERSION=0.3.0  # Pin to specific version for stability
+VERSION=0.15.0  # Pin to specific version for stability
 ```
 
 ### Security Considerations

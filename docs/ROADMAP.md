@@ -50,6 +50,14 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Frontend integration (DetailPage buttons, confirmation modals, loading states)
   - [ ] Example implementation in pothole domain (approve/reject actions)
 
+- [ ] **First-Class Notes System** - Polymorphic notes for any entity (see `docs/development/ENTITY_NOTES.md`)
+  - [ ] Database schema (`metadata.entity_notes` table, polymorphic design)
+  - [ ] `create_entity_note()` RPC for manual and trigger-generated notes
+  - [ ] Metadata configuration (`enable_notes` on `metadata.entities`)
+  - [ ] RLS policies (read access follows entity, edit own notes, admin override)
+  - [ ] Frontend component (notes section on Detail pages, simple formatting)
+  - [ ] Example trigger for status change notes
+
 ### Dashboards (Phased Development)
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
 - [x] **Phase 2 - Dynamic Widgets**: Filtered list widget, map widget with clustering, calendar widget, auto-refresh infrastructure
@@ -121,6 +129,20 @@ This document outlines the development roadmap for Civic OS, organized by phases
 ### Utilities
 - [x] Build notification service (v0.11.0 - database templates, River-based worker, email via AWS SES)
 
+- [ ] **Activity/Audit Log** - Track who changed what and when
+  - [ ] Database schema (`metadata.audit_log` table, polymorphic design)
+  - [ ] PostgreSQL trigger function for automatic change capture
+  - [ ] JSONB diff format (`{"field": {"old": X, "new": Y}}`)
+  - [ ] UI component (Activity tab on Detail pages, timeline view)
+  - [ ] Filter by user, field, date range
+  - [ ] RLS policies (entity-level read permissions)
+
+- [ ] **Due Date / SLA Property Type** - Time-based prioritization
+  - [ ] `due_at` property type with DateTimeLocal handling
+  - [ ] Overdue highlighting on List pages (visual indicator)
+  - [ ] "Overdue Items" dashboard widget
+  - [ ] Optional: SLA calculation from entity creation
+
 ## Phase 3: Graphical Editing Tools
 
 ### Schema
@@ -157,6 +179,13 @@ This document outlines the development roadmap for Civic OS, organized by phases
 ## Phase 4: Extension Modules
 - [ ] Financial Tools (Accounting)
 - [x] **Payments Integration** (v0.13.0/v0.14.0 - Stripe, metadata-driven, refunds, admin UI, notifications)
+
+- [ ] **Assignment Queue / Load Balancing** - Work distribution for teams
+  - [ ] Work queue concept (entities with `assigned_user_id` column)
+  - [ ] Round-robin assignment algorithm
+  - [ ] Load-based assignment (items per user)
+  - [ ] Workload visibility dashboard widget
+  - [ ] Manual reassignment via Entity Actions
 
 
 ---
