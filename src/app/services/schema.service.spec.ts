@@ -1522,4 +1522,162 @@ describe('SchemaService', () => {
       expectPostgrestRequest(httpMock, 'constraint_messages', firstMessages);
     });
   });
+
+  // =========================================================================
+  // STATIC TEXT TESTS (v0.17.0+)
+  // =========================================================================
+  describe('Static Text Methods', () => {
+    const mockStaticTexts = [
+      {
+        itemType: 'static_text' as const,
+        id: 1,
+        table_name: 'Issue',
+        content: '# Instructions\n\nPlease fill out the form.',
+        sort_order: 5,
+        column_width: 2,
+        show_on_detail: true,
+        show_on_create: true,
+        show_on_edit: false
+      },
+      {
+        itemType: 'static_text' as const,
+        id: 2,
+        table_name: 'Issue',
+        content: '---\n\n## Terms and Conditions',
+        sort_order: 999,
+        column_width: 2,
+        show_on_detail: true,
+        show_on_create: false,
+        show_on_edit: false
+      },
+      {
+        itemType: 'static_text' as const,
+        id: 3,
+        table_name: 'Status',
+        content: '# Status Help',
+        sort_order: 10,
+        column_width: 1,
+        show_on_detail: true,
+        show_on_create: false,
+        show_on_edit: false
+      }
+    ];
+
+    describe('getStaticText()', () => {
+      it('should fetch static text from PostgREST', (done) => {
+        service.getStaticText().subscribe(staticTexts => {
+          expect(staticTexts).toEqual(mockStaticTexts);
+          expect(staticTexts.length).toBe(3);
+          done();
+        });
+
+        expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+      });
+
+      it('should cache static text on subsequent calls', (done) => {
+        // First call - fetches from HTTP
+        service.getStaticText().subscribe(() => {
+          // Second call - should return from cache
+          service.getStaticText().subscribe(cachedStaticTexts => {
+            expect(cachedStaticTexts).toEqual(mockStaticTexts);
+            done();
+          });
+        });
+
+        expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+      });
+    });
+
+    describe('getStaticTextForEntity()', () => {
+      it('should filter static text by table_name', (done) => {
+        service.getStaticTextForEntity('Issue').subscribe(staticTexts => {
+          expect(staticTexts.length).toBe(2);
+          expect(staticTexts.every(st => st.table_name === 'Issue')).toBe(true);
+          done();
+        });
+
+        expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+      });
+
+      it('should return empty array for entity with no static text', (done) => {
+        service.getStaticTextForEntity('NonExistentEntity').subscribe(staticTexts => {
+          expect(staticTexts.length).toBe(0);
+          done();
+        });
+
+        expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+      });
+    });
+
+    describe('refreshStaticTextCache()', () => {
+      it('should clear cached static text and fetch fresh data', (done) => {
+        const updatedStaticTexts = [
+          { ...mockStaticTexts[0], content: 'Updated content' }
+        ];
+
+        // First load
+        service.getStaticText().subscribe(() => {
+          // Refresh cache
+          service.refreshStaticTextCache();
+
+          // Next call should fetch fresh data
+          service.getStaticText().subscribe(refreshedStaticTexts => {
+            expect(refreshedStaticTexts).toEqual(updatedStaticTexts);
+            done();
+          });
+
+          expectPostgrestRequest(httpMock, 'static_text', updatedStaticTexts);
+        });
+
+        expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+      });
+    });
+
+    // Note: getDetailRenderables, getCreateRenderables, and getEditRenderables
+    // have complex dependencies on entity caching and property filtering.
+    // These are implicitly tested through integration tests in page specs.
+    // Direct unit tests would require extensive mocking of all dependencies.
+  });
+
+  describe('getRenderableColumnSpan()', () => {
+    it('should return column_width for static text', () => {
+      const staticText = {
+        itemType: 'static_text' as const,
+        id: 1,
+        table_name: 'Issue',
+        content: 'Test',
+        sort_order: 10,
+        column_width: 1,
+        show_on_detail: true,
+        show_on_create: false,
+        show_on_edit: false
+      };
+
+      expect(SchemaService.getRenderableColumnSpan(staticText)).toBe(1);
+    });
+
+    it('should return full width (2) for static text with column_width=2', () => {
+      const staticText = {
+        itemType: 'static_text' as const,
+        id: 1,
+        table_name: 'Issue',
+        content: 'Test',
+        sort_order: 10,
+        column_width: 2,
+        show_on_detail: true,
+        show_on_create: false,
+        show_on_edit: false
+      };
+
+      expect(SchemaService.getRenderableColumnSpan(staticText)).toBe(2);
+    });
+
+    it('should return property column span for property items', () => {
+      const property = createMockProperty({ column_name: 'title', column_width: 1 });
+      const propertyItem = { ...property, itemType: 'property' as const };
+
+      // Properties with column_width should use that value
+      expect(SchemaService.getRenderableColumnSpan(propertyItem)).toBe(1);
+    });
+  });
 });

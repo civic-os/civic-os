@@ -23,14 +23,45 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
 import { PropertyManagementService } from '../../services/property-management.service';
-import { SchemaEntityTable, SchemaEntityProperty } from '../../interfaces/entity';
-import { debounceTime, Subject, switchMap, of, map, catchError, Observable } from 'rxjs';
+import { SchemaEntityTable, SchemaEntityProperty, StaticText } from '../../interfaces/entity';
+import { ApiResponse } from '../../interfaces/api';
+import { debounceTime, Subject, switchMap, of, map, catchError, Observable, combineLatest } from 'rxjs';
 
 interface PropertyRow extends SchemaEntityProperty {
+  itemType: 'property';
   customDisplayName: string | null;
   customDescription: string | null;
   customColumnWidth: number | null;
   expanded: boolean;
+}
+
+/**
+ * Static text row for display in the Property Management page.
+ * Allows sort_order arrangement alongside properties.
+ * @since v0.17.0
+ */
+interface StaticTextRow extends StaticText {
+  expanded: boolean;
+}
+
+/**
+ * Union type for items in the Property Management list.
+ * Includes both properties and static text for unified sort_order management.
+ */
+type ManageableItem = PropertyRow | StaticTextRow;
+
+/**
+ * Type guard to check if item is a property row.
+ */
+function isPropertyRow(item: ManageableItem): item is PropertyRow {
+  return item.itemType === 'property';
+}
+
+/**
+ * Type guard to check if item is a static text row.
+ */
+function isStaticTextRow(item: ManageableItem): item is StaticTextRow {
+  return item.itemType === 'static_text';
 }
 
 interface PropertyData {
@@ -58,11 +89,20 @@ export class PropertyManagementPage {
 
   // Mutable signals for user interactions
   selectedEntity = signal<SchemaEntityTable | undefined>(undefined);
-  properties = signal<PropertyRow[]>([]);
+  /**
+   * Combined list of properties and static text items.
+   * Both types can be drag-dropped to reorder by sort_order.
+   * @since v0.17.0 - Extended to include static text
+   */
+  items = signal<ManageableItem[]>([]);
   error = signal<string | undefined>(undefined);
   savingStates = signal<Map<string, boolean>>(new Map());
   savedStates = signal<Map<string, boolean>>(new Map());
   fadingStates = signal<Map<string, boolean>>(new Map());
+
+  // Expose type guards to template
+  protected readonly isPropertyRow = isPropertyRow;
+  protected readonly isStaticTextRow = isStaticTextRow;
 
   private saveSubjects = new Map<string, Subject<void>>();
 
@@ -107,53 +147,96 @@ export class PropertyManagementPage {
   onEntityChange() {
     const entity = this.selectedEntity();
     if (!entity) {
-      this.properties.set([]);
+      this.items.set([]);
       return;
     }
 
     this.loading.set(true);
     this.error.set(undefined);
 
-    this.schemaService.getPropertiesForEntityFresh(entity).subscribe({
-      next: (props) => {
+    // Fetch both properties and static text in parallel
+    combineLatest([
+      this.schemaService.getPropertiesForEntityFresh(entity),
+      this.schemaService.getStaticTextForEntity(entity.table_name)
+    ]).subscribe({
+      next: ([props, staticTexts]) => {
+        // Map properties to PropertyRow
         const propertyRows: PropertyRow[] = props.map(p => ({
           ...p,
+          itemType: 'property' as const,
           customDisplayName: p.display_name !== this.getDefaultDisplayName(p.column_name) ? p.display_name : null,
           customDescription: p.description || null,
           customColumnWidth: p.column_width || null,
           expanded: false
         }));
-        // Sort by sort_order
-        propertyRows.sort((a, b) => a.sort_order - b.sort_order);
-        this.properties.set(propertyRows);
+
+        // Map static texts to StaticTextRow
+        const staticTextRows: StaticTextRow[] = staticTexts.map(st => ({
+          ...st,
+          expanded: false
+        }));
+
+        // Combine and sort by sort_order
+        const allItems: ManageableItem[] = [...propertyRows, ...staticTextRows];
+        allItems.sort((a, b) => a.sort_order - b.sort_order);
+
+        this.items.set(allItems);
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Failed to load properties');
+        this.error.set('Failed to load items');
         this.loading.set(false);
       }
     });
   }
 
-  onDrop(event: CdkDragDrop<PropertyRow[]>) {
-    const properties = [...this.properties()];
-    moveItemInArray(properties, event.previousIndex, event.currentIndex);
-    this.properties.set(properties);
+  onDrop(event: CdkDragDrop<ManageableItem[]>) {
+    const items = [...this.items()];
+    moveItemInArray(items, event.previousIndex, event.currentIndex);
+    this.items.set(items);
 
-    // Update sort_order for all properties based on new positions
-    const updates = properties.map((property, index) => ({
-      table_name: property.table_name,
-      column_name: property.column_name,
-      sort_order: index
-    }));
+    // Separate updates by type
+    const propertyUpdates = items
+      .filter(isPropertyRow)
+      .map((property, _index) => {
+        // Find actual index in combined array for sort_order
+        const actualIndex = items.indexOf(property);
+        return {
+          table_name: property.table_name,
+          column_name: property.column_name,
+          sort_order: actualIndex
+        };
+      });
 
-    this.propertyManagementService.updatePropertiesOrder(updates).subscribe({
-      next: (response) => {
-        if (response.success) {
+    const staticTextUpdates = items
+      .filter(isStaticTextRow)
+      .map((staticText, _index) => {
+        // Find actual index in combined array for sort_order
+        const actualIndex = items.indexOf(staticText);
+        return {
+          id: staticText.id,
+          sort_order: actualIndex
+        };
+      });
+
+    // Update both tables
+    const propertyUpdate$ = propertyUpdates.length > 0
+      ? this.propertyManagementService.updatePropertiesOrder(propertyUpdates)
+      : of({ success: true } as ApiResponse);
+
+    const staticTextUpdate$ = staticTextUpdates.length > 0
+      ? this.propertyManagementService.updateStaticTextOrder(staticTextUpdates)
+      : of({ success: true } as ApiResponse);
+
+    combineLatest([propertyUpdate$, staticTextUpdate$]).subscribe({
+      next: ([propResponse, staticResponse]) => {
+        if (propResponse.success && staticResponse.success) {
           // Refresh schema cache to update forms
           this.schemaService.refreshCache();
+          this.schemaService.refreshStaticTextCache();
         } else {
-          this.error.set(response.error?.humanMessage || 'Failed to update order');
+          const errorMsg = propResponse.error?.humanMessage || staticResponse.error?.humanMessage || 'Failed to update order';
+          this.error.set(errorMsg);
         }
       },
       error: () => {
@@ -162,16 +245,16 @@ export class PropertyManagementPage {
     });
   }
 
-  toggleExpanded(property: PropertyRow) {
-    const properties = this.properties();
-    const index = properties.findIndex(p =>
-      p.table_name === property.table_name && p.column_name === property.column_name
-    );
+  toggleExpanded(item: ManageableItem) {
+    const items = this.items();
+    const index = isPropertyRow(item)
+      ? items.findIndex(i => isPropertyRow(i) && i.table_name === item.table_name && i.column_name === item.column_name)
+      : items.findIndex(i => isStaticTextRow(i) && i.id === item.id);
 
     if (index !== -1) {
-      const updated = [...properties];
+      const updated = [...items];
       updated[index] = { ...updated[index], expanded: !updated[index].expanded };
-      this.properties.set(updated);
+      this.items.set(updated);
     }
   }
 
@@ -289,20 +372,32 @@ export class PropertyManagementPage {
     });
   }
 
+  /**
+   * Generate a unique key for any manageable item.
+   * Properties use table.column, static text uses st_id.
+   */
+  private getItemKey(item: ManageableItem): string {
+    if (isPropertyRow(item)) {
+      return `${item.table_name}.${item.column_name}`;
+    } else {
+      return `st_${item.id}`;
+    }
+  }
+
   private getPropertyKey(property: PropertyRow): string {
     return `${property.table_name}.${property.column_name}`;
   }
 
-  isSaving(property: PropertyRow): boolean {
-    return this.savingStates().get(this.getPropertyKey(property)) || false;
+  isSaving(item: ManageableItem): boolean {
+    return this.savingStates().get(this.getItemKey(item)) || false;
   }
 
-  isSaved(property: PropertyRow): boolean {
-    return this.savedStates().get(this.getPropertyKey(property)) || false;
+  isSaved(item: ManageableItem): boolean {
+    return this.savedStates().get(this.getItemKey(item)) || false;
   }
 
-  isFading(property: PropertyRow): boolean {
-    return this.fadingStates().get(this.getPropertyKey(property)) || false;
+  isFading(item: ManageableItem): boolean {
+    return this.fadingStates().get(this.getItemKey(item)) || false;
   }
 
   getDisplayNamePlaceholder(property: PropertyRow): string {
@@ -377,5 +472,107 @@ export class PropertyManagementPage {
 
   compareEntities(entity1: SchemaEntityTable, entity2: SchemaEntityTable): boolean {
     return entity1 && entity2 ? entity1.table_name === entity2.table_name : entity1 === entity2;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Static Text Save Methods (v0.17.0)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  onStaticTextVisibilityChange(staticText: StaticTextRow) {
+    this.saveStaticTextMetadata(staticText);
+  }
+
+  onStaticTextColumnWidthChange(staticText: StaticTextRow) {
+    this.saveStaticTextMetadata(staticText);
+  }
+
+  onStaticTextFieldBlur(staticText: StaticTextRow) {
+    this.performStaticTextSave(staticText);
+  }
+
+  private saveStaticTextMetadata(staticText: StaticTextRow) {
+    const key = this.getItemKey(staticText);
+
+    // Get or create debounce subject for this static text
+    if (!this.saveSubjects.has(key)) {
+      const subject = new Subject<void>();
+      this.saveSubjects.set(key, subject);
+
+      subject.pipe(debounceTime(1000)).subscribe(() => {
+        this.performStaticTextSave(staticText);
+      });
+    }
+
+    // Trigger debounced save
+    this.saveSubjects.get(key)!.next();
+  }
+
+  private performStaticTextSave(staticText: StaticTextRow) {
+    const key = this.getItemKey(staticText);
+
+    // Set saving state
+    const savingStates = new Map(this.savingStates());
+    savingStates.set(key, true);
+    this.savingStates.set(savingStates);
+
+    // Clear any existing saved and fading states
+    const savedStates = new Map(this.savedStates());
+    savedStates.delete(key);
+    this.savedStates.set(savedStates);
+
+    const fadingStates = new Map(this.fadingStates());
+    fadingStates.delete(key);
+    this.fadingStates.set(fadingStates);
+
+    this.propertyManagementService.updateStaticText(
+      staticText.id,
+      staticText.column_width,
+      staticText.show_on_detail,
+      staticText.show_on_create,
+      staticText.show_on_edit
+    ).subscribe({
+      next: (response) => {
+        // Clear saving state
+        const savingStates = new Map(this.savingStates());
+        savingStates.delete(key);
+        this.savingStates.set(savingStates);
+
+        if (response.success) {
+          // Show checkmark
+          const savedStates = new Map(this.savedStates());
+          savedStates.set(key, true);
+          this.savedStates.set(savedStates);
+
+          // Start fading after 4 seconds
+          setTimeout(() => {
+            const fadingStates = new Map(this.fadingStates());
+            fadingStates.set(key, true);
+            this.fadingStates.set(fadingStates);
+          }, 4000);
+
+          // Remove checkmark completely after 5 seconds
+          setTimeout(() => {
+            const savedStates = new Map(this.savedStates());
+            savedStates.delete(key);
+            this.savedStates.set(savedStates);
+
+            const fadingStates = new Map(this.fadingStates());
+            fadingStates.delete(key);
+            this.fadingStates.set(fadingStates);
+          }, 5000);
+
+          // Refresh static text cache to update forms
+          this.schemaService.refreshStaticTextCache();
+        } else {
+          this.error.set(response.error?.humanMessage || 'Failed to save');
+        }
+      },
+      error: () => {
+        const savingStates = new Map(this.savingStates());
+        savingStates.delete(key);
+        this.savingStates.set(savingStates);
+        this.error.set('Failed to save static text settings');
+      }
+    });
   }
 }

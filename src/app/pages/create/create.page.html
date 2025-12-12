@@ -23,10 +23,18 @@
             </div>
           }
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
-            @for (prop of props; track prop) {
-              <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getColumnSpan(prop), 3) + ' lg:col-span-' + Math.min(SchemaService.getColumnSpan(prop), 6) + ' 2xl:col-span-' + SchemaService.getColumnSpan(prop)">
-                <app-edit-property [property]="prop" [formGroup]="createForm"></app-edit-property>
-              </div>
+            @if (createRenderables$ | async; as renderables) {
+              @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
+                @if (isStaticText(item)) {
+                  <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                    <app-static-text [staticText]="item"></app-static-text>
+                  </div>
+                } @else if (isProperty(item)) {
+                  <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                    <app-edit-property [property]="item" [formGroup]="createForm"></app-edit-property>
+                  </div>
+                }
+              }
             }
           </div>
           <div class="divider"></div>

@@ -43,10 +43,10 @@
         </div>
       }
 
-      @if (!loading() && properties().length > 0) {
+      @if (!loading() && items().length > 0) {
         <div class="mb-4">
           <p class="text-sm text-base-content/70">
-            Drag properties to reorder them. Click a row to expand and edit details. Changes are saved automatically.
+            Drag items to reorder them. Click a row to expand and edit details. Changes are saved automatically.
           </p>
         </div>
 
@@ -54,193 +54,323 @@
           class="space-y-2"
           cdkDropList
           (cdkDropListDropped)="onDrop($event)">
-          @for (property of properties(); track property.column_name) {
-            <div
-              class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
-              cdkDrag>
-              <!-- Main Row -->
-              <div class="card-body p-4">
-                <div class="flex items-center gap-4">
-                  <!-- Drag Handle -->
-                  <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                    <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
-                  </div>
-
-                  <!-- Property Info (condensed) -->
-                  <div class="flex-grow grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                    <!-- Column Name (read-only) -->
-                    <div>
-                      <label class="label label-text text-xs">Column Name</label>
-                      <div class="font-mono text-sm font-semibold">{{ property.column_name }}</div>
+          @for (item of items(); track isStaticTextRow(item) ? 'st_' + item.id : item.column_name) {
+            <!-- Static Text Row -->
+            @if (isStaticTextRow(item)) {
+              <div
+                class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow border-l-4 border-info"
+                cdkDrag>
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-4">
+                    <!-- Drag Handle -->
+                    <div class="cursor-move flex-shrink-0" cdkDragHandle>
+                      <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
                     </div>
 
-                    <!-- Type (read-only) -->
-                    <div>
-                      <label class="label label-text text-xs">Type</label>
-                      <div class="text-sm">{{ getPropertyTypeLabel(property) }}</div>
-                    </div>
+                    <!-- Static Text Info -->
+                    <div class="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                      <!-- Type indicator -->
+                      <div>
+                        <label class="label label-text text-xs">Type</label>
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-info">description</span>
+                          <span class="text-sm font-semibold text-info">Static Text</span>
+                        </div>
+                      </div>
 
-                    <!-- Default Value (read-only) -->
-                    <div>
-                      <label class="label label-text text-xs">Default</label>
-                      <div class="text-sm text-base-content/60">
-                        {{ property.column_default || '-' }}
+                      <!-- Content preview -->
+                      <div class="md:col-span-2">
+                        <label class="label label-text text-xs">Content Preview</label>
+                        <div class="text-sm text-base-content/70 line-clamp-1">
+                          {{ item.content.substring(0, 100) }}{{ item.content.length > 100 ? '...' : '' }}
+                        </div>
+                      </div>
+
+                      <!-- Expand Button -->
+                      <div class="flex items-center gap-2 justify-end">
+                        <button
+                          class="btn btn-sm btn-ghost"
+                          (click)="toggleExpanded(item)">
+                          <span class="material-symbols-outlined">
+                            {{ item.expanded ? 'expand_less' : 'expand_more' }}
+                          </span>
+                        </button>
                       </div>
                     </div>
 
-                    <!-- Display Name (editable) -->
-                    <div>
-                      <label class="label label-text text-xs">Display Name</label>
-                      <input
-                        type="text"
-                        class="input input-sm input-bordered w-full"
-                        [(ngModel)]="property.customDisplayName"
-                        (ngModelChange)="onDisplayNameChange(property)"
-                        (blur)="onFieldBlur(property)"
-                        [placeholder]="getDisplayNamePlaceholder(property)" />
-                    </div>
-
-                    <!-- Sortable & Filterable (editable) -->
-                    <div>
-                      <label class="label cursor-pointer justify-start gap-2">
-                        <input
-                          type="checkbox"
-                          class="checkbox checkbox-sm"
-                          [(ngModel)]="property.sortable"
-                          (ngModelChange)="onVisibilityChange(property)" />
-                        <span class="label-text text-xs">Sortable</span>
-                      </label>
-                      @if (isFilterableType(property)) {
-                        <label class="label cursor-pointer justify-start gap-2 ml-2">
-                          <input
-                            type="checkbox"
-                            class="checkbox checkbox-sm"
-                            [(ngModel)]="property.filterable"
-                            (ngModelChange)="onVisibilityChange(property)" />
-                          <span class="label-text text-xs">Filterable</span>
-                        </label>
+                    <!-- Status Indicator -->
+                    <div class="flex-shrink-0 w-6 flex items-center justify-center">
+                      @if (isSaving(item)) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                      } @else if (isSaved(item)) {
+                        <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
+                              [class.opacity-0]="isFading(item)"
+                              [class.opacity-100]="!isFading(item)">check_circle</span>
                       }
                     </div>
-
-                    <!-- Expand Button -->
-                    <div class="flex items-center gap-2 justify-end">
-                      <button
-                        class="btn btn-sm btn-ghost"
-                        (click)="toggleExpanded(property)">
-                        <span class="material-symbols-outlined">
-                          {{ property.expanded ? 'expand_less' : 'expand_more' }}
-                        </span>
-                      </button>
-                    </div>
                   </div>
 
-                  <!-- Status Indicator -->
-                  <div class="flex-shrink-0 w-6 flex items-center justify-center">
-                    @if (isSaving(property)) {
-                      <span class="loading loading-spinner loading-sm"></span>
-                    } @else if (isSaved(property)) {
-                      <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
-                            [class.opacity-0]="isFading(property)"
-                            [class.opacity-100]="!isFading(property)">check_circle</span>
-                    }
-                  </div>
-                </div>
-
-                <!-- Expanded Details -->
-                @if (property.expanded) {
-                  <div class="mt-4 pt-4 border-t border-base-300">
-                    <div class="grid grid-cols-1 gap-4">
-                      <!-- Description -->
-                      <div>
-                        <label class="label label-text text-xs">Description</label>
-                        <textarea
-                          class="textarea textarea-bordered w-full"
-                          rows="3"
-                          [(ngModel)]="property.customDescription"
-                          (ngModelChange)="onDescriptionChange(property)"
-                          (blur)="onFieldBlur(property)"
-                          placeholder="Optional description for tooltips"></textarea>
-                      </div>
-
-                      <!-- Column Width -->
-                      <div>
-                        <label class="label label-text text-xs">Grid Width (columns)</label>
-                        <input
-                          type="number"
-                          class="input input-sm input-bordered w-full max-w-xs"
-                          [(ngModel)]="property.customColumnWidth"
-                          (ngModelChange)="onColumnWidthChange(property)"
-                          (blur)="onFieldBlur(property)"
-                          placeholder="Auto (1 or 2 based on type)"
-                          min="1"
-                          max="2" />
-                        <label class="label">
-                          <span class="label-text-alt text-xs text-base-content/60">Controls width in create/edit forms (1 or 2 columns)</span>
-                        </label>
-                      </div>
-
-                      <!-- Visibility Toggles -->
-                      <div>
-                        <label class="label label-text text-xs font-semibold">Visibility</label>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2">
-                              <input
-                                type="checkbox"
-                                class="checkbox checkbox-sm"
-                                [(ngModel)]="property.show_on_list"
-                                (ngModelChange)="onVisibilityChange(property)" />
-                              <span class="label-text text-xs">Show on List</span>
-                            </label>
+                  <!-- Expanded Details for Static Text -->
+                  @if (item.expanded) {
+                    <div class="mt-4 pt-4 border-t border-base-300">
+                      <div class="grid grid-cols-1 gap-4">
+                        <!-- Full Content Preview -->
+                        <div>
+                          <label class="label label-text text-xs">Full Content</label>
+                          <div class="prose prose-sm max-w-none bg-base-100 p-4 rounded-lg">
+                            {{ item.content }}
                           </div>
-                          <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2"
-                                   [class.opacity-50]="isSystemTimestamp(property)"
-                                   [class.cursor-not-allowed]="isSystemTimestamp(property)">
-                              <input
-                                type="checkbox"
-                                class="checkbox checkbox-sm"
-                                [(ngModel)]="property.show_on_create"
-                                (ngModelChange)="onVisibilityChange(property)"
-                                [disabled]="isSystemTimestamp(property)" />
-                              <span class="label-text text-xs">Show on Create</span>
-                            </label>
-                          </div>
-                          <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2"
-                                   [class.opacity-50]="isSystemTimestamp(property)"
-                                   [class.cursor-not-allowed]="isSystemTimestamp(property)">
-                              <input
-                                type="checkbox"
-                                class="checkbox checkbox-sm"
-                                [(ngModel)]="property.show_on_edit"
-                                (ngModelChange)="onVisibilityChange(property)"
-                                [disabled]="isSystemTimestamp(property)" />
-                              <span class="label-text text-xs">Show on Edit</span>
-                            </label>
-                          </div>
-                          <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2">
-                              <input
-                                type="checkbox"
-                                class="checkbox checkbox-sm"
-                                [(ngModel)]="property.show_on_detail"
-                                (ngModelChange)="onVisibilityChange(property)" />
-                              <span class="label-text text-xs">Show on Detail</span>
-                            </label>
+                        </div>
+
+                        <!-- Column Width -->
+                        <div>
+                          <label class="label label-text text-xs">Grid Width (columns)</label>
+                          <input
+                            type="number"
+                            class="input input-sm input-bordered w-full max-w-xs"
+                            [(ngModel)]="item.column_width"
+                            (ngModelChange)="onStaticTextColumnWidthChange(item)"
+                            (blur)="onStaticTextFieldBlur(item)"
+                            placeholder="8 (full width)"
+                            min="1"
+                            max="8" />
+                          <label class="label">
+                            <span class="label-text-alt text-xs text-base-content/60">1-8 columns (8 = full width on large screens)</span>
+                          </label>
+                        </div>
+
+                        <!-- Visibility Toggles -->
+                        <div>
+                          <label class="label label-text text-xs font-semibold">Visibility</label>
+                          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_detail"
+                                  (ngModelChange)="onStaticTextVisibilityChange(item)" />
+                                <span class="label-text text-xs">Show on Detail</span>
+                              </label>
+                            </div>
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_create"
+                                  (ngModelChange)="onStaticTextVisibilityChange(item)" />
+                                <span class="label-text text-xs">Show on Create</span>
+                              </label>
+                            </div>
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_edit"
+                                  (ngModelChange)="onStaticTextVisibilityChange(item)" />
+                                <span class="label-text text-xs">Show on Edit</span>
+                              </label>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                }
+                  }
+                </div>
               </div>
-            </div>
+            }
+
+            <!-- Property Row -->
+            @if (isPropertyRow(item)) {
+              <div
+                class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
+                cdkDrag>
+                <!-- Main Row -->
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-4">
+                    <!-- Drag Handle -->
+                    <div class="cursor-move flex-shrink-0" cdkDragHandle>
+                      <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
+                    </div>
+
+                    <!-- Property Info (condensed) -->
+                    <div class="flex-grow grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
+                      <!-- Column Name (read-only) -->
+                      <div>
+                        <label class="label label-text text-xs">Column Name</label>
+                        <div class="font-mono text-sm font-semibold">{{ item.column_name }}</div>
+                      </div>
+
+                      <!-- Type (read-only) -->
+                      <div>
+                        <label class="label label-text text-xs">Type</label>
+                        <div class="text-sm">{{ getPropertyTypeLabel(item) }}</div>
+                      </div>
+
+                      <!-- Default Value (read-only) -->
+                      <div>
+                        <label class="label label-text text-xs">Default</label>
+                        <div class="text-sm text-base-content/60">
+                          {{ item.column_default || '-' }}
+                        </div>
+                      </div>
+
+                      <!-- Display Name (editable) -->
+                      <div>
+                        <label class="label label-text text-xs">Display Name</label>
+                        <input
+                          type="text"
+                          class="input input-sm input-bordered w-full"
+                          [(ngModel)]="item.customDisplayName"
+                          (ngModelChange)="onDisplayNameChange(item)"
+                          (blur)="onFieldBlur(item)"
+                          [placeholder]="getDisplayNamePlaceholder(item)" />
+                      </div>
+
+                      <!-- Sortable & Filterable (editable) -->
+                      <div>
+                        <label class="label cursor-pointer justify-start gap-2">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-sm"
+                            [(ngModel)]="item.sortable"
+                            (ngModelChange)="onVisibilityChange(item)" />
+                          <span class="label-text text-xs">Sortable</span>
+                        </label>
+                        @if (isFilterableType(item)) {
+                          <label class="label cursor-pointer justify-start gap-2 ml-2">
+                            <input
+                              type="checkbox"
+                              class="checkbox checkbox-sm"
+                              [(ngModel)]="item.filterable"
+                              (ngModelChange)="onVisibilityChange(item)" />
+                            <span class="label-text text-xs">Filterable</span>
+                          </label>
+                        }
+                      </div>
+
+                      <!-- Expand Button -->
+                      <div class="flex items-center gap-2 justify-end">
+                        <button
+                          class="btn btn-sm btn-ghost"
+                          (click)="toggleExpanded(item)">
+                          <span class="material-symbols-outlined">
+                            {{ item.expanded ? 'expand_less' : 'expand_more' }}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Status Indicator -->
+                    <div class="flex-shrink-0 w-6 flex items-center justify-center">
+                      @if (isSaving(item)) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                      } @else if (isSaved(item)) {
+                        <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
+                              [class.opacity-0]="isFading(item)"
+                              [class.opacity-100]="!isFading(item)">check_circle</span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Expanded Details -->
+                  @if (item.expanded) {
+                    <div class="mt-4 pt-4 border-t border-base-300">
+                      <div class="grid grid-cols-1 gap-4">
+                        <!-- Description -->
+                        <div>
+                          <label class="label label-text text-xs">Description</label>
+                          <textarea
+                            class="textarea textarea-bordered w-full"
+                            rows="3"
+                            [(ngModel)]="item.customDescription"
+                            (ngModelChange)="onDescriptionChange(item)"
+                            (blur)="onFieldBlur(item)"
+                            placeholder="Optional description for tooltips"></textarea>
+                        </div>
+
+                        <!-- Column Width -->
+                        <div>
+                          <label class="label label-text text-xs">Grid Width (columns)</label>
+                          <input
+                            type="number"
+                            class="input input-sm input-bordered w-full max-w-xs"
+                            [(ngModel)]="item.customColumnWidth"
+                            (ngModelChange)="onColumnWidthChange(item)"
+                            (blur)="onFieldBlur(item)"
+                            placeholder="Auto (1 or 2 based on type)"
+                            min="1"
+                            max="8" />
+                          <label class="label">
+                            <span class="label-text-alt text-xs text-base-content/60">1-8 columns (8 = full width on large screens)</span>
+                          </label>
+                        </div>
+
+                        <!-- Visibility Toggles -->
+                        <div>
+                          <label class="label label-text text-xs font-semibold">Visibility</label>
+                          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_list"
+                                  (ngModelChange)="onVisibilityChange(item)" />
+                                <span class="label-text text-xs">Show on List</span>
+                              </label>
+                            </div>
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2"
+                                     [class.opacity-50]="isSystemTimestamp(item)"
+                                     [class.cursor-not-allowed]="isSystemTimestamp(item)">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_create"
+                                  (ngModelChange)="onVisibilityChange(item)"
+                                  [disabled]="isSystemTimestamp(item)" />
+                                <span class="label-text text-xs">Show on Create</span>
+                              </label>
+                            </div>
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2"
+                                     [class.opacity-50]="isSystemTimestamp(item)"
+                                     [class.cursor-not-allowed]="isSystemTimestamp(item)">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_edit"
+                                  (ngModelChange)="onVisibilityChange(item)"
+                                  [disabled]="isSystemTimestamp(item)" />
+                                <span class="label-text text-xs">Show on Edit</span>
+                              </label>
+                            </div>
+                            <div class="form-control">
+                              <label class="label cursor-pointer justify-start gap-2">
+                                <input
+                                  type="checkbox"
+                                  class="checkbox checkbox-sm"
+                                  [(ngModel)]="item.show_on_detail"
+                                  (ngModelChange)="onVisibilityChange(item)" />
+                                <span class="label-text text-xs">Show on Detail</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           }
         </div>
       }
 
-      @if (!loading() && properties().length === 0) {
+      @if (!loading() && items().length === 0) {
         <div class="alert">
           <span>No properties found for this entity.</span>
         </div>

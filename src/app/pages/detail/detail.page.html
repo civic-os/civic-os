@@ -46,10 +46,19 @@
 
         <h2 class="text-2xl font-bold mt-6 mb-4">Details</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
-          @for (prop of regularProps; track prop.column_name) {
-            <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getColumnSpan(prop), 3) + ' lg:col-span-' + Math.min(SchemaService.getColumnSpan(prop), 6) + ' 2xl:col-span-' + SchemaService.getColumnSpan(prop)">
-              <app-display-property [datum]="data[prop.column_name]" [property]="prop"></app-display-property>
-            </div>
+          @if (detailRenderables$ | async; as renderables) {
+            @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
+              @if (isStaticText(item)) {
+                <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                  <app-static-text [staticText]="item"></app-static-text>
+                </div>
+              } @else if (isProperty(item) && item.type !== 17) {
+                <!-- Render properties (excluding ManyToMany type=17) -->
+                <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                  <app-display-property [datum]="data[item.column_name]" [property]="item"></app-display-property>
+                </div>
+              }
+            }
           }
         </div>
 

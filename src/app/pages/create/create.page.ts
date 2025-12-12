@@ -18,7 +18,14 @@
 
 import { Component, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, mergeMap, of, tap, map, take } from 'rxjs';
-import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType } from '../../interfaces/entity';
+import {
+  SchemaEntityProperty,
+  SchemaEntityTable,
+  EntityPropertyType,
+  RenderableItem,
+  isStaticText,
+  isProperty
+} from '../../interfaces/entity';
 import { ActivatedRoute, Router, RouterModule, Params } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { AuthService } from '../../services/auth.service';
@@ -26,6 +33,7 @@ import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from "../../components/edit-property/edit-property.component";
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -40,6 +48,7 @@ import { DialogComponent } from "../../components/dialog/dialog.component";
     imports: [
     EditPropertyComponent,
     EmptyStateComponent,
+    StaticTextComponent,
     CommonModule,
     ReactiveFormsModule,
     DialogComponent,
@@ -116,6 +125,20 @@ export class CreatePage {
       return of([]);
     }
   }));
+
+  /**
+   * Combined renderables (properties + static text) for unified display.
+   * Static text blocks are interspersed with properties based on sort_order.
+   * Note: properties$ is still used for form building; this is for template display.
+   * @since v0.17.0
+   */
+  public createRenderables$: Observable<RenderableItem[]> = this.entity$.pipe(
+    mergeMap(e => e ? this.schema.getCreateRenderables(e) : of([]))
+  );
+
+  // Expose type guards to template
+  protected readonly isStaticText = isStaticText;
+  protected readonly isProperty = isProperty;
 
   public createForm?: FormGroup;
   public showValidationError = false;

@@ -47,7 +47,8 @@ describe('EditPage', () => {
 
     mockSchemaService = jasmine.createSpyObj('SchemaService', [
       'getEntity',
-      'getPropsForEdit'
+      'getPropsForEdit',
+      'getEditRenderables'
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['getData', 'editData']);
     mockAnalyticsService = jasmine.createSpyObj('AnalyticsService', ['trackEvent']);
@@ -59,6 +60,9 @@ describe('EditPage', () => {
 
     // Setup updateToken to return resolved promise by default (for form submission)
     mockKeycloak.updateToken.and.returnValue(Promise.resolve(true));
+
+    // Setup default for renderables (most tests use properties$ directly)
+    mockSchemaService.getEditRenderables.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [EditPage],

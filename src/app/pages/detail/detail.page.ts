@@ -18,7 +18,17 @@
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize } from 'rxjs';
-import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType, InverseRelationshipData, EntityData, PaymentValue } from '../../interfaces/entity';
+import {
+  SchemaEntityProperty,
+  SchemaEntityTable,
+  EntityPropertyType,
+  InverseRelationshipData,
+  EntityData,
+  PaymentValue,
+  RenderableItem,
+  isStaticText,
+  isProperty
+} from '../../interfaces/entity';
 
 /**
  * Type guard to check if a value is a PaymentValue object.
@@ -38,6 +48,7 @@ import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PaymentCheckoutComponent } from '../../components/payment-checkout/payment-checkout.component';
 import { EntityNotesComponent } from '../../components/entity-notes/entity-notes.component';
+import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -64,7 +75,8 @@ export interface CalendarSection {
     ManyToManyEditorComponent,
     EmptyStateComponent,
     PaymentCheckoutComponent,
-    EntityNotesComponent
+    EntityNotesComponent,
+    StaticTextComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -124,6 +136,19 @@ export class DetailPage {
   public manyToManyProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
     map(props => props.filter(p => p.type === EntityPropertyType.ManyToMany))
   );
+
+  /**
+   * Combined renderables (properties + static text) for unified display.
+   * Static text blocks are interspersed with properties based on sort_order.
+   * @since v0.17.0
+   */
+  public detailRenderables$: Observable<RenderableItem[]> = this.entity$.pipe(
+    mergeMap(e => e ? this.schema.getDetailRenderables(e) : of([]))
+  );
+
+  // Expose type guards to template
+  protected readonly isStaticText = isStaticText;
+  protected readonly isProperty = isProperty;
 
   public data$: Observable<any> = combineLatest([this.properties$, this.refreshTrigger$.pipe(startWith(null))]).pipe(
     // Batch synchronous emissions during initialization

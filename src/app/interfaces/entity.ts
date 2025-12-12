@@ -331,3 +331,82 @@ export interface ValidationError {
     type: 'error';
     error: string;
 }
+
+// ============================================================================
+// STATIC TEXT SYSTEM (v0.17.0)
+// ============================================================================
+
+/**
+ * Static text block from metadata.static_text table.
+ * Displayed on Detail/Edit/Create pages alongside regular properties.
+ * Uses full markdown rendering via ngx-markdown.
+ *
+ * Added in v0.17.0.
+ */
+export interface StaticText {
+    /** Discriminator for type guards in RenderableItem union */
+    itemType: 'static_text';
+
+    /** Primary key */
+    id: number;
+
+    /** Target entity table name */
+    table_name: string;
+
+    /** Markdown content (full markdown support) */
+    content: string;
+
+    /** Position relative to properties (lower = earlier) */
+    sort_order: number;
+
+    /** Width in grid columns: 1 = half, 2 = full */
+    column_width: number;
+
+    /** Show on Detail pages */
+    show_on_detail: boolean;
+
+    /** Show on Create pages */
+    show_on_create: boolean;
+
+    /** Show on Edit pages */
+    show_on_edit: boolean;
+}
+
+/**
+ * Property with itemType discriminator added for RenderableItem union.
+ * Used when merging properties with static text for unified rendering.
+ */
+export type PropertyItem = SchemaEntityProperty & { itemType: 'property' };
+
+/**
+ * Union type for items that can be rendered on Detail/Edit/Create pages.
+ * Includes both database properties and static text blocks.
+ *
+ * Use type guards `isStaticText()` and `isProperty()` to discriminate.
+ */
+export type RenderableItem = PropertyItem | StaticText;
+
+/**
+ * Type guard to check if a renderable item is static text.
+ *
+ * @example
+ * ```typescript
+ * @for (item of renderables; track trackRenderable(item)) {
+ *   @if (isStaticText(item)) {
+ *     <app-static-text [staticText]="item"></app-static-text>
+ *   } @else {
+ *     <app-display-property [property]="item"></app-display-property>
+ *   }
+ * }
+ * ```
+ */
+export function isStaticText(item: RenderableItem): item is StaticText {
+    return item.itemType === 'static_text';
+}
+
+/**
+ * Type guard to check if a renderable item is a property.
+ */
+export function isProperty(item: RenderableItem): item is PropertyItem {
+    return item.itemType === 'property';
+}

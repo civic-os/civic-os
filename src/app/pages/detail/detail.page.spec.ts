@@ -42,6 +42,7 @@ describe('DetailPage', () => {
     mockSchemaService = jasmine.createSpyObj('SchemaService', [
       'getEntity',
       'getPropsForDetail',
+      'getDetailRenderables',
       'getInverseRelationships',
       'getEntities'
     ]);
@@ -56,6 +57,9 @@ describe('DetailPage', () => {
       MOCK_ENTITIES.issue,
       MOCK_ENTITIES.status
     ]));
+
+    // Setup default for renderables (most tests use properties$ directly)
+    mockSchemaService.getDetailRenderables.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [DetailPage],

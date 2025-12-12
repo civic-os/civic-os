@@ -122,6 +122,68 @@ export class PropertyManagementService {
   }
 
   /**
+   * Update static text metadata (visibility, column width, content).
+   * Uses direct PATCH to static_text view.
+   * @since v0.17.0
+   */
+  updateStaticText(
+    id: number,
+    columnWidth: number,
+    showOnDetail: boolean,
+    showOnCreate: boolean,
+    showOnEdit: boolean
+  ): Observable<ApiResponse> {
+    return this.http.patch(
+      getPostgrestUrl() + `static_text?id=eq.${id}`,
+      {
+        column_width: columnWidth,
+        show_on_detail: showOnDetail,
+        show_on_create: showOnCreate,
+        show_on_edit: showOnEdit
+      }
+    ).pipe(
+      map(() => <ApiResponse>{ success: true }),
+      catchError((error) => {
+        console.error('Error updating static text:', error);
+        return of(<ApiResponse>{
+          success: false,
+          error: { message: error.message, humanMessage: 'Failed to save static text settings' }
+        });
+      })
+    );
+  }
+
+  /**
+   * Batch update static text order after drag-drop.
+   * Updates sort_order for multiple static text items using direct PATCH.
+   * @since v0.17.0
+   */
+  updateStaticTextOrder(items: { id: number, sort_order: number }[]): Observable<ApiResponse> {
+    if (items.length === 0) {
+      return of(<ApiResponse>{ success: true });
+    }
+
+    // Use individual PATCH requests for each static text item
+    const updates = items.map(item =>
+      this.http.patch(
+        getPostgrestUrl() + `static_text?id=eq.${item.id}`,
+        { sort_order: item.sort_order }
+      )
+    );
+
+    return forkJoin(updates).pipe(
+      map(() => <ApiResponse>{ success: true }),
+      catchError((error) => {
+        console.error('Error updating static text order:', error);
+        return of(<ApiResponse>{
+          success: false,
+          error: { message: error.message, humanMessage: 'Failed to update static text order' }
+        });
+      })
+    );
+  }
+
+  /**
    * Check if current user is admin (reuse from EntityManagementService pattern)
    */
   isAdmin(): Observable<boolean> {

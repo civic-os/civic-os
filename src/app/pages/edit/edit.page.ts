@@ -23,12 +23,20 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
-import { SchemaEntityProperty, SchemaEntityTable, EntityPropertyType } from '../../interfaces/entity';
+import {
+  SchemaEntityProperty,
+  SchemaEntityTable,
+  EntityPropertyType,
+  RenderableItem,
+  isStaticText,
+  isProperty
+} from '../../interfaces/entity';
 import { DialogComponent } from '../../components/dialog/dialog.component';
 import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CommonModule } from '@angular/common';
 
@@ -38,6 +46,7 @@ import { CommonModule } from '@angular/common';
     imports: [
     EditPropertyComponent,
     EmptyStateComponent,
+    StaticTextComponent,
     CommonModule,
     ReactiveFormsModule,
     DialogComponent,
@@ -127,6 +136,20 @@ export class EditPage {
       this.dataLoading.set(false);  // Clear data loading state
     })
   );
+
+  /**
+   * Combined renderables (properties + static text) for unified display.
+   * Static text blocks are interspersed with properties based on sort_order.
+   * Note: properties$ is still used for form building; this is for template display.
+   * @since v0.17.0
+   */
+  public editRenderables$: Observable<RenderableItem[]> = this.entity$.pipe(
+    mergeMap(e => e ? this.schema.getEditRenderables(e) : of([]))
+  );
+
+  // Expose type guards to template
+  protected readonly isStaticText = isStaticText;
+  protected readonly isProperty = isProperty;
 
   public editForm?: FormGroup;
   public loading = signal(true);

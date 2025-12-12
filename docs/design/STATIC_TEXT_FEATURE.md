@@ -166,7 +166,65 @@ Template pattern:
 **Edit Page** (`src/app/pages/edit/edit.page.ts`, `edit.page.html`):
 - Same pattern as Create page
 
-### Phase 6: Tests
+### Phase 6: Property Editor Integration
+
+**Goal:** Display static text items in Property Management page for sort_order arrangement.
+
+**Files to modify:**
+- `src/app/pages/property-management/property-management.page.ts`
+- `src/app/pages/property-management/property-management.page.html`
+- `src/app/services/property-management.service.ts`
+
+**Changes:**
+
+1. **Create unified row type:**
+```typescript
+type ManageableItem = PropertyRow | StaticTextRow;
+
+interface StaticTextRow extends StaticText {
+  expanded: boolean;
+  // Future: editing fields
+}
+```
+
+2. **Fetch both on entity change** - Properties AND static text in parallel, merge and sort by sort_order
+
+3. **Update onDrop() for dual-table updates** - Separate updates by type, update both tables via forkJoin
+
+4. **Add PropertyManagementService method:**
+```typescript
+updateStaticTextOrder(updates: { id: number; sort_order: number }[]): Observable<ApiResponse>
+```
+
+5. **Template changes:**
+- Static text rows get colored left border (`border-info`)
+- Show document icon and content preview (truncated)
+- No "Column Name" or "Type" fields
+- Future: expand to show full content and edit button
+
+### Phase 7: Community Center Example
+
+**Goal:** Demonstrate the static text feature with a rental agreement on reservation requests.
+
+**File to create:** `examples/community-center/init-scripts/13_static_text_example.sql`
+
+**What this demonstrates:**
+- Rental agreement at bottom of detail/create pages (sort_order: 999)
+- Submission guidelines at top of create page only (sort_order: 5)
+- Full markdown with headers, numbered lists, bold, italic
+- Different visibility settings per page type
+
+```sql
+-- Rental agreement (bottom of detail/create)
+INSERT INTO metadata.static_text (table_name, content, sort_order, show_on_detail, show_on_create, show_on_edit)
+VALUES ('reservation_requests', '## Rental Agreement ...', 999, TRUE, TRUE, FALSE);
+
+-- Submission guidelines (top of create only)
+INSERT INTO metadata.static_text (table_name, content, sort_order, show_on_detail, show_on_create, show_on_edit)
+VALUES ('reservation_requests', '### Before You Submit ...', 5, FALSE, TRUE, FALSE);
+```
+
+### Phase 8: Tests
 
 **New test file:** `src/app/components/static-text/static-text.component.spec.ts`
 
@@ -174,6 +232,11 @@ Template pattern:
 - Test `getStaticText()` caching
 - Test `getDetailRenderables()` merging and sorting
 - Test type guards
+
+**Update:** `src/app/pages/property-management/property-management.page.spec.ts`
+- Test unified item rendering
+- Test drag-drop with mixed types
+- Test dual-table order updates
 
 ---
 
@@ -196,6 +259,10 @@ Template pattern:
 | `src/app/pages/edit/edit.page.html` | Update property loop |
 | `src/app/services/schema.service.spec.ts` | Add tests |
 | `src/app/components/static-text/static-text.component.spec.ts` | **Create** - Component tests |
+| `src/app/pages/property-management/property-management.page.ts` | Add unified item handling, dual-table updates |
+| `src/app/pages/property-management/property-management.page.html` | Add static text row template |
+| `src/app/services/property-management.service.ts` | Add `updateStaticTextOrder()` method |
+| `examples/community-center/init-scripts/13_static_text_example.sql` | **Create** - Rental agreement demo |
 
 ---
 

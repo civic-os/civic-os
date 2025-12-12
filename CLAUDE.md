@@ -356,6 +356,18 @@ All API calls use PostgREST conventions:
 
 The `SchemaService.propertyToSelectString()` method builds PostgREST-compatible select strings for foreign keys and user references.
 
+**API Testing with JWT Generation**: For full-loop API testing with different roles, permissions, and users, you can generate JWTs by reading the secret from the example's `.env` file (e.g., `examples/community-center/.env`). This allows testing:
+- RLS policies with different user IDs
+- Permission checks for different roles (`user`, `editor`, `admin`)
+- Anonymous vs authenticated access
+- Multi-tenant scenarios
+
+Example workflow:
+1. Read `PGRST_JWT_SECRET` from `.env`
+2. Generate JWT with desired claims (`sub`, `role`, `civic_os_roles`)
+3. Call PostgREST API with `Authorization: Bearer <token>`
+4. Verify RLS enforcement and permission checks
+
 ## Built-in PostgreSQL Functions
 
 Civic OS provides helper functions for JWT data extraction (`current_user_id()`, `current_user_email()`), RBAC checks (`has_permission()`, `is_admin()`), and programmatic metadata configuration (`upsert_entity_metadata()`, `set_role_permission()`).

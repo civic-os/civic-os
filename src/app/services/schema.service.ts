@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
@@ -54,6 +54,10 @@ export class SchemaService {
   // Each entity_type has its own set of statuses from metadata.statuses
   private statusesCache = new Map<string, Observable<StatusOption[]>>();
   private loadingStatuses = new Set<string>();
+
+  // Static text cache (v0.17.0)
+  private staticTextCache$?: Observable<StaticText[]>;
+  private loadingStaticText = false;
 
   // In-flight request tracking to prevent duplicate concurrent requests
   private loadingEntities = false;
@@ -95,6 +99,7 @@ export class SchemaService {
     this.schemaCache$ = undefined;
     this.propertiesCache$ = undefined;
     this.constraintMessagesCache$ = undefined;
+    this.staticTextCache$ = undefined;
     // Clear processed cache
     this.constraintMessages = undefined;
     // Clear status cache (keyed by entity_type)
@@ -104,6 +109,7 @@ export class SchemaService {
     this.loadingEntities = false;
     this.loadingProperties = false;
     this.loadingConstraintMessages = false;
+    this.loadingStaticText = false;
     // Refresh schema in background - new values will emit to subscribers
     this.getSchema().subscribe();
     this.getProperties().subscribe();
@@ -917,5 +923,160 @@ export class SchemaService {
         return allTables.filter(t => !junctions.has(t.table_name));
       })
     );
+  }
+
+  // ===========================================================================
+  // STATIC TEXT SYSTEM (v0.17.0)
+  // ===========================================================================
+
+  /**
+   * Fetch all static text entries from the database.
+   * Results are cached with shareReplay to avoid redundant HTTP requests.
+   *
+   * @returns Observable of all StaticText entries with itemType discriminator
+   */
+  public getStaticText(): Observable<StaticText[]> {
+    if (!this.staticTextCache$ && !this.loadingStaticText) {
+      this.loadingStaticText = true;
+      this.staticTextCache$ = this.http.get<Omit<StaticText, 'itemType'>[]>(
+        getPostgrestUrl() + 'static_text'
+      ).pipe(
+        map(items => items.map(item => ({
+          ...item,
+          itemType: 'static_text' as const  // Add discriminator for union type
+        }))),
+        catchError(err => {
+          console.error('Failed to load static text:', err);
+          return of([]);  // Graceful degradation
+        }),
+        finalize(() => {
+          this.loadingStaticText = false;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+    return this.staticTextCache$ || of([]);
+  }
+
+  /**
+   * Get static text entries for a specific entity.
+   *
+   * @param tableName The entity table name (e.g., 'reservation_requests')
+   * @returns Observable of StaticText entries for that table
+   */
+  public getStaticTextForEntity(tableName: string): Observable<StaticText[]> {
+    return this.getStaticText().pipe(
+      map(items => items.filter(item => item.table_name === tableName))
+    );
+  }
+
+  /**
+   * Refresh only the static text cache.
+   * Use when metadata.static_text changes.
+   */
+  public refreshStaticTextCache(): void {
+    this.staticTextCache$ = undefined;
+    this.loadingStaticText = false;
+  }
+
+  /**
+   * Get all renderable items (properties + static text) for Detail page.
+   * Merges properties and static text, then sorts by sort_order.
+   *
+   * @param table The entity to get renderables for
+   * @returns Observable of RenderableItem[] sorted by sort_order
+   */
+  public getDetailRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
+    return combineLatest([
+      this.getPropsForDetail(table),
+      this.getStaticTextForEntity(table.table_name)
+    ]).pipe(
+      map(([props, staticTexts]) => {
+        // Add itemType discriminator to properties
+        const taggedProps: PropertyItem[] = props.map(p => ({
+          ...p,
+          itemType: 'property' as const
+        }));
+
+        // Filter static text for detail page
+        const filteredStaticText = staticTexts.filter(st => st.show_on_detail);
+
+        // Merge and sort by sort_order
+        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
+        return merged.sort((a, b) => a.sort_order - b.sort_order);
+      })
+    );
+  }
+
+  /**
+   * Get all renderable items (properties + static text) for Create page.
+   * Merges properties and static text, then sorts by sort_order.
+   *
+   * @param table The entity to get renderables for
+   * @returns Observable of RenderableItem[] sorted by sort_order
+   */
+  public getCreateRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
+    return combineLatest([
+      this.getPropsForCreate(table),
+      this.getStaticTextForEntity(table.table_name)
+    ]).pipe(
+      map(([props, staticTexts]) => {
+        // Add itemType discriminator to properties
+        const taggedProps: PropertyItem[] = props.map(p => ({
+          ...p,
+          itemType: 'property' as const
+        }));
+
+        // Filter static text for create page
+        const filteredStaticText = staticTexts.filter(st => st.show_on_create);
+
+        // Merge and sort by sort_order
+        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
+        return merged.sort((a, b) => a.sort_order - b.sort_order);
+      })
+    );
+  }
+
+  /**
+   * Get all renderable items (properties + static text) for Edit page.
+   * Merges properties and static text, then sorts by sort_order.
+   *
+   * @param table The entity to get renderables for
+   * @returns Observable of RenderableItem[] sorted by sort_order
+   */
+  public getEditRenderables(table: SchemaEntityTable): Observable<RenderableItem[]> {
+    return combineLatest([
+      this.getPropsForEdit(table),
+      this.getStaticTextForEntity(table.table_name)
+    ]).pipe(
+      map(([props, staticTexts]) => {
+        // Add itemType discriminator to properties
+        const taggedProps: PropertyItem[] = props.map(p => ({
+          ...p,
+          itemType: 'property' as const
+        }));
+
+        // Filter static text for edit page
+        const filteredStaticText = staticTexts.filter(st => st.show_on_edit);
+
+        // Merge and sort by sort_order
+        const merged: RenderableItem[] = [...taggedProps, ...filteredStaticText];
+        return merged.sort((a, b) => a.sort_order - b.sort_order);
+      })
+    );
+  }
+
+  /**
+   * Get the column span for any renderable item (property or static text).
+   * Static text uses column_width directly; properties use type-based defaults.
+   *
+   * @param item The renderable item
+   * @returns Column span (1 = half width, 2 = full width)
+   */
+  public static getRenderableColumnSpan(item: RenderableItem): number {
+    if (isStaticText(item)) {
+      return item.column_width;
+    }
+    return SchemaService.getColumnSpan(item);
   }
 }

@@ -99,12 +99,28 @@ describe('PropertyManagementPage', () => {
     }
   ];
 
+  /**
+   * Helper to extract property items from the items signal.
+   * Filters out static text items and returns only property rows.
+   */
+  function getPropertyItems(component: PropertyManagementPage) {
+    return component.items().filter(item => item.itemType === 'property');
+  }
+
   beforeEach(async () => {
-    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getEntitiesForMenu', 'getPropertiesForEntityFresh', 'refreshCache']);
+    mockSchemaService = jasmine.createSpyObj('SchemaService', [
+      'getEntitiesForMenu',
+      'getPropertiesForEntityFresh',
+      'getStaticTextForEntity',
+      'refreshCache',
+      'refreshStaticTextCache'
+    ]);
     mockPropertyManagementService = jasmine.createSpyObj('PropertyManagementService', [
       'isAdmin',
       'upsertPropertyMetadata',
-      'updatePropertiesOrder'
+      'updatePropertiesOrder',
+      'updateStaticTextOrder',
+      'updateStaticText'
     ]);
 
     await TestBed.configureTestingModule({
@@ -134,6 +150,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -152,6 +169,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -196,10 +214,11 @@ describe('PropertyManagementPage', () => {
   });
 
   describe('Entity Selection', () => {
-    it('should load properties when entity is selected', (done) => {
+    it('should load items when entity is selected', (done) => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -210,15 +229,16 @@ describe('PropertyManagementPage', () => {
         component.onEntityChange();
 
         setTimeout(() => {
-          expect(component.properties().length).toBe(2);
-          expect(component.properties()[0].column_name).toBe('title');
+          const properties = getPropertyItems(component);
+          expect(properties.length).toBe(2);
+          expect(properties[0].column_name).toBe('title');
           expect(component.loading()).toBe(false);
           done();
         }, 10);
       }, 100);
     });
 
-    it('should clear properties when no entity is selected', () => {
+    it('should clear items when no entity is selected', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
 
@@ -228,13 +248,14 @@ describe('PropertyManagementPage', () => {
       component.selectedEntity.set(undefined);
       component.onEntityChange();
 
-      expect(component.properties().length).toBe(0);
+      expect(component.items().length).toBe(0);
     });
 
-    it('should handle property loading error', (done) => {
+    it('should handle item loading error', (done) => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(throwError(() => new Error('Load error')));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -245,7 +266,7 @@ describe('PropertyManagementPage', () => {
         component.onEntityChange();
 
         setTimeout(() => {
-          expect(component.error()).toBe('Failed to load properties');
+          expect(component.error()).toBe('Failed to load items');
           expect(component.loading()).toBe(false);
           done();
         }, 10);
@@ -258,6 +279,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -268,14 +290,16 @@ describe('PropertyManagementPage', () => {
         component.onEntityChange();
 
         setTimeout(() => {
-          const property = component.properties()[0];
-          expect(property.expanded).toBe(false);
+          const properties = getPropertyItems(component);
+          expect(properties[0].expanded).toBe(false);
 
-          component.toggleExpanded(property);
-          expect(component.properties()[0].expanded).toBe(true);
+          component.toggleExpanded(properties[0]);
+          const updatedProperties = getPropertyItems(component);
+          expect(updatedProperties[0].expanded).toBe(true);
 
-          component.toggleExpanded(property);
-          expect(component.properties()[0].expanded).toBe(false);
+          component.toggleExpanded(updatedProperties[0]);
+          const finalProperties = getPropertyItems(component);
+          expect(finalProperties[0].expanded).toBe(false);
           done();
         }, 10);
       }, 100);
@@ -283,11 +307,13 @@ describe('PropertyManagementPage', () => {
   });
 
   describe('Drag and Drop', () => {
-    it('should reorder properties and update sort order', (done) => {
+    it('should reorder items and update sort order', (done) => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
       mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
+      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -312,8 +338,9 @@ describe('PropertyManagementPage', () => {
 
           component.onDrop(event);
 
-          expect(component.properties()[0].column_name).toBe('description');
-          expect(component.properties()[1].column_name).toBe('title');
+          const properties = getPropertyItems(component);
+          expect(properties[0].column_name).toBe('description');
+          expect(properties[1].column_name).toBe('title');
 
           expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
             { table_name: 'Issue', column_name: 'description', sort_order: 0 },
@@ -328,7 +355,9 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
       mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
+      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -355,6 +384,7 @@ describe('PropertyManagementPage', () => {
 
           setTimeout(() => {
             expect(mockSchemaService.refreshCache).toHaveBeenCalled();
+            expect(mockSchemaService.refreshStaticTextCache).toHaveBeenCalled();
             done();
           }, 10);
         }, 10);
@@ -367,6 +397,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
       mockPropertyManagementService.upsertPropertyMetadata.and.returnValue(of({ success: true }));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
@@ -378,7 +409,8 @@ describe('PropertyManagementPage', () => {
         component.onEntityChange();
 
         setTimeout(() => {
-          const property = component.properties()[0];
+          const properties = getPropertyItems(component);
+          const property = properties[0] as any;
           property.customDisplayName = 'Updated Title';
           component.onFieldBlur(property);
 
@@ -407,6 +439,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
       mockPropertyManagementService.upsertPropertyMetadata.and.returnValue(of({ success: true }));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
@@ -418,7 +451,8 @@ describe('PropertyManagementPage', () => {
         component.onEntityChange();
 
         setTimeout(() => {
-          const property = component.properties()[0];
+          const properties = getPropertyItems(component);
+          const property = properties[0] as any;
           component.onFieldBlur(property);
 
           setTimeout(() => {
@@ -430,10 +464,11 @@ describe('PropertyManagementPage', () => {
       }, 100);
     });
 
-    it('should refresh schema cache but NOT reload properties after save', (done) => {
+    it('should refresh schema cache but NOT reload items after save', (done) => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
       mockPropertyManagementService.upsertPropertyMetadata.and.returnValue(of({ success: true }));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
@@ -449,7 +484,8 @@ describe('PropertyManagementPage', () => {
           mockSchemaService.refreshCache.calls.reset();
           (mockSchemaService.getPropertiesForEntityFresh as jasmine.Spy).calls.reset();
 
-          const property = component.properties()[0];
+          const properties = getPropertyItems(component);
+          const property = properties[0] as any;
           property.customDisplayName = 'New Name';
           component.onFieldBlur(property);
 
@@ -457,11 +493,12 @@ describe('PropertyManagementPage', () => {
             // Should call refreshCache
             expect(mockSchemaService.refreshCache).toHaveBeenCalled();
 
-            // Should NOT reload properties (no additional call to getPropertiesForEntityFresh)
+            // Should NOT reload items (no additional call to getPropertiesForEntityFresh)
             expect(mockSchemaService.getPropertiesForEntityFresh).not.toHaveBeenCalled();
 
             // Local state should still have the updated value via ngModel
-            expect(component.properties()[0].customDisplayName).toBe('New Name');
+            const updatedProperties = getPropertyItems(component);
+            expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
             done();
           }, 10);
         }, 10);
@@ -474,6 +511,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -483,7 +521,7 @@ describe('PropertyManagementPage', () => {
         // Should auto-select first entity
         expect(component.selectedEntity()).toBeDefined();
         expect(component.selectedEntity()?.table_name).toBe('Issue');
-        expect(component.properties().length).toBe(2);
+        expect(getPropertyItems(component).length).toBe(2);
         done();
       }, 150);
     });
@@ -492,6 +530,7 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
@@ -518,14 +557,14 @@ describe('PropertyManagementPage', () => {
 
       setTimeout(() => {
         expect(component.selectedEntity()).toBeUndefined();
-        expect(component.properties().length).toBe(0);
+        expect(component.items().length).toBe(0);
         done();
       }, 150);
     });
   });
 
   describe('Property Sorting', () => {
-    it('should sort properties by sort_order in ascending order', (done) => {
+    it('should sort items by sort_order in ascending order', (done) => {
       const unsortedProperties = [
         { ...mockProperties[1], sort_order: 2 },  // description with sort_order 2
         { ...mockProperties[0], sort_order: 1 }   // title with sort_order 1
@@ -534,13 +573,14 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(unsortedProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
       fixture.detectChanges();
 
       setTimeout(() => {
-        const properties = component.properties();
+        const properties = getPropertyItems(component);
         expect(properties.length).toBe(2);
         // Should be sorted by sort_order
         expect(properties[0].column_name).toBe('title');      // sort_order 1
@@ -549,7 +589,7 @@ describe('PropertyManagementPage', () => {
       }, 150);
     });
 
-    it('should maintain sort after properties are loaded', (done) => {
+    it('should maintain sort after items are loaded', (done) => {
       const unsortedProperties = [
         { ...mockProperties[1], sort_order: 5 },
         { ...mockProperties[0], sort_order: 3 }
@@ -558,13 +598,14 @@ describe('PropertyManagementPage', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
       mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(unsortedProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
 
       fixture = TestBed.createComponent(PropertyManagementPage);
       component = fixture.componentInstance;
       fixture.detectChanges();
 
       setTimeout(() => {
-        const properties = component.properties();
+        const properties = getPropertyItems(component);
         expect(properties[0].sort_order).toBe(3);
         expect(properties[1].sort_order).toBe(5);
         expect(properties[0].sort_order).toBeLessThan(properties[1].sort_order);
@@ -621,6 +662,7 @@ describe('PropertyManagementPage', () => {
 
       const property = {
         ...mockProperties[0],
+        itemType: 'property' as const,
         customDisplayName: null,
         customDescription: null,
         customColumnWidth: null,
@@ -641,12 +683,103 @@ describe('PropertyManagementPage', () => {
 
       const property = {
         ...mockProperties[0],
+        itemType: 'property' as const,
         customDisplayName: null,
         customDescription: null,
         customColumnWidth: null,
         expanded: false
       };
       expect(component.getDisplayNamePlaceholder(property)).toBe('Title');
+    });
+  });
+
+  describe('Static Text Integration', () => {
+    it('should load and display static text items alongside properties', (done) => {
+      const mockStaticTexts = [
+        {
+          itemType: 'static_text' as const,
+          id: 1,
+          table_name: 'Issue',
+          content: '## Instructions\nPlease fill out the form below.',
+          sort_order: -1,  // Lower than properties (0, 1) to ensure it comes first
+          column_width: 2,
+          show_on_detail: true,
+          show_on_create: true,
+          show_on_edit: false
+        }
+      ];
+
+      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
+      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of(mockStaticTexts));
+
+      fixture = TestBed.createComponent(PropertyManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        // Should have both properties and static text
+        expect(component.items().length).toBe(3);
+
+        // First item should be static text (sort_order 0)
+        expect(component.items()[0].itemType).toBe('static_text');
+
+        // Properties should follow
+        const properties = getPropertyItems(component);
+        expect(properties.length).toBe(2);
+        done();
+      }, 150);
+    });
+
+    it('should call updateStaticTextOrder when static text is reordered', (done) => {
+      const mockStaticTexts = [
+        {
+          itemType: 'static_text' as const,
+          id: 1,
+          table_name: 'Issue',
+          content: 'Static text content',
+          sort_order: 5,
+          column_width: 2,
+          show_on_detail: true,
+          show_on_create: true,
+          show_on_edit: false
+        }
+      ];
+
+      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
+      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of(mockStaticTexts));
+      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
+      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
+
+      fixture = TestBed.createComponent(PropertyManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        const event: CdkDragDrop<any> = {
+          previousIndex: 2,  // Move static text from last position
+          currentIndex: 0,   // to first position
+          item: null as any,
+          container: null as any,
+          previousContainer: null as any,
+          isPointerOverContainer: true,
+          distance: { x: 0, y: 0 },
+          dropPoint: { x: 0, y: 0 },
+          event: null as any
+        };
+
+        component.onDrop(event);
+
+        setTimeout(() => {
+          expect(mockPropertyManagementService.updateStaticTextOrder).toHaveBeenCalledWith([
+            { id: 1, sort_order: 0 }
+          ]);
+          done();
+        }, 10);
+      }, 150);
     });
   });
 });
