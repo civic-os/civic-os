@@ -1475,6 +1475,253 @@ status_id INT NOT NULL DEFAULT public.get_initial_status('issue')
 
 See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design documentation and `examples/community-center/` for working example.
 
+### Entity Action Buttons
+
+**Version**: v0.18.0+
+
+Add metadata-driven action buttons to Detail pages that execute PostgreSQL RPC functions. Perfect for workflow transitions (Approve/Deny), status changes, or any custom business logic.
+
+**Features**:
+- Buttons appear in the Detail page action bar alongside Edit/Delete
+- Conditional visibility (hide buttons based on record state)
+- Conditional enablement (disable with tooltip when not applicable)
+- Confirmation modals before execution
+- Role-based permissions (managed via Permissions page)
+- Customizable icons, colors, and messages
+- Responsive overflow to "More" dropdown on small screens
+
+**Requirements**:
+- Civic OS v0.18.0+ (entity_actions schema + migrations)
+- PostgreSQL RPC function that accepts `p_entity_id BIGINT` and returns `JSONB`
+
+#### Quick Setup
+
+**1. Create your RPC function:**
+
+```sql
+CREATE OR REPLACE FUNCTION public.approve_request(p_entity_id BIGINT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Your business logic here
+  UPDATE my_requests SET status = 'approved' WHERE id = p_entity_id;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'message', 'Request approved successfully!',
+    'refresh', true  -- Reload the page after action
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.approve_request(BIGINT) TO authenticated;
+```
+
+**2. Register the action in metadata:**
+
+```sql
+INSERT INTO metadata.entity_actions (
+  table_name,
+  action_name,
+  display_name,
+  description,
+  rpc_function,
+  icon,
+  button_style,
+  sort_order,
+  requires_confirmation,
+  confirmation_message
+) VALUES (
+  'my_requests',
+  'approve',
+  'Approve',
+  'Approve this request',
+  'approve_request',
+  'check_circle',
+  'primary',
+  10,
+  TRUE,
+  'Are you sure you want to approve this request?'
+);
+```
+
+**3. Grant permission to roles:**
+
+```sql
+-- Grant to editor and admin roles
+INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
+SELECT ea.id, r.id
+FROM metadata.entity_actions ea
+CROSS JOIN metadata.roles r
+WHERE ea.table_name = 'my_requests'
+  AND ea.action_name = 'approve'
+  AND r.display_name IN ('editor', 'admin')
+ON CONFLICT DO NOTHING;
+```
+
+#### RPC Function Requirements
+
+Your RPC function must:
+- Accept `p_entity_id BIGINT` as the first parameter
+- Return `JSONB` with at least `success` (boolean) and `message` (string)
+- Use `SECURITY DEFINER` if it needs elevated privileges
+
+**Return Object Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Whether the action succeeded |
+| `message` | string | Message to display to user |
+| `refresh` | boolean | If true, reload the page after action |
+| `navigate` | string | URL to navigate to after action (optional) |
+
+**Example with validation:**
+
+```sql
+CREATE OR REPLACE FUNCTION public.cancel_order(p_entity_id BIGINT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_order RECORD;
+BEGIN
+  SELECT * INTO v_order FROM orders WHERE id = p_entity_id;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'message', 'Order not found');
+  END IF;
+
+  IF v_order.status = 'shipped' THEN
+    RETURN jsonb_build_object('success', false, 'message', 'Cannot cancel shipped orders');
+  END IF;
+
+  UPDATE orders SET status = 'cancelled' WHERE id = p_entity_id;
+
+  RETURN jsonb_build_object('success', true, 'message', 'Order cancelled', 'refresh', true);
+END;
+$$;
+```
+
+#### Visibility and Enabled Conditions
+
+Control when buttons appear and when they're clickable using JSONB condition expressions.
+
+**Condition Format:**
+```json
+{
+  "field": "status_id",
+  "operator": "eq",
+  "value": 1
+}
+```
+
+**Supported Operators:**
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `eq` | Equals | `{"field": "status_id", "operator": "eq", "value": 1}` |
+| `ne` | Not equals | `{"field": "status_id", "operator": "ne", "value": 3}` |
+| `in` | In array | `{"field": "status_id", "operator": "in", "value": [1, 2]}` |
+| `gt`, `lt`, `gte`, `lte` | Comparisons | `{"field": "amount", "operator": "gt", "value": 100}` |
+| `is_null` | Is null | `{"field": "cancelled_at", "operator": "is_null"}` |
+| `is_not_null` | Is not null | `{"field": "approved_at", "operator": "is_not_null"}` |
+
+**Example with conditions:**
+
+```sql
+INSERT INTO metadata.entity_actions (
+  table_name, action_name, display_name, rpc_function,
+  icon, button_style, sort_order,
+  visibility_condition,    -- When to SHOW the button
+  enabled_condition,       -- When button is CLICKABLE
+  disabled_tooltip         -- Tooltip when disabled
+) VALUES (
+  'reservation_requests',
+  'approve',
+  'Approve',
+  'approve_reservation_request',
+  'check_circle',
+  'primary',
+  10,
+  -- Hide button if already approved (status_id = 2)
+  '{"field": "status_id", "operator": "ne", "value": 2}'::jsonb,
+  -- Only enable if pending (status_id = 1)
+  '{"field": "status_id", "operator": "eq", "value": 1}'::jsonb,
+  'Only pending requests can be approved'
+);
+```
+
+#### Button Styling
+
+Available `button_style` values (DaisyUI 5):
+
+| Style | Use Case | Color |
+|-------|----------|-------|
+| `primary` | Main/recommended actions | Theme primary |
+| `secondary` | Alternative actions | Theme secondary |
+| `accent` | Highlighted actions | Theme accent |
+| `success` | Positive outcomes | Green |
+| `warning` | Caution actions | Yellow/Orange |
+| `error` | Destructive actions | Red |
+| `ghost` | Subtle/minimal | Transparent |
+| `neutral` | Neutral actions | Gray |
+| `info` | Informational | Blue |
+
+**Icons**: Use any [Material Symbols](https://fonts.google.com/icons) name (e.g., `check_circle`, `cancel`, `event_busy`).
+
+#### Schema Reference
+
+**`metadata.entity_actions`** - Action definitions
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | SERIAL | Primary key |
+| `table_name` | VARCHAR | Entity this action applies to |
+| `action_name` | VARCHAR | Unique identifier (e.g., 'approve') |
+| `display_name` | VARCHAR | Button label |
+| `description` | TEXT | Tooltip when enabled |
+| `rpc_function` | VARCHAR | PostgreSQL function to call |
+| `icon` | VARCHAR | Material Symbols icon name |
+| `button_style` | VARCHAR | DaisyUI button color |
+| `sort_order` | INT | Display order (lower = first) |
+| `requires_confirmation` | BOOLEAN | Show confirmation modal |
+| `confirmation_message` | TEXT | Modal message |
+| `visibility_condition` | JSONB | When to show button |
+| `enabled_condition` | JSONB | When button is clickable |
+| `disabled_tooltip` | TEXT | Tooltip when disabled |
+| `default_success_message` | TEXT | Fallback success message |
+| `refresh_after_action` | BOOLEAN | Reload page after action |
+| `show_on_detail` | BOOLEAN | Show on Detail page (default: true) |
+
+**`metadata.entity_action_roles`** - Permission grants
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `entity_action_id` | INT | FK to entity_actions |
+| `role_id` | SMALLINT | FK to roles |
+| `created_at` | TIMESTAMPTZ | Grant timestamp |
+
+**Note**: Admins can execute any action regardless of role grants.
+
+#### Managing Permissions via UI
+
+Entity action permissions can be managed on the **Permissions page** (`/permissions`):
+
+1. Select a role from the dropdown
+2. Click the "Entity Actions" tab
+3. Check/uncheck actions to grant/revoke permission
+
+#### Complete Example
+
+See `examples/community-center/init-scripts/13_entity_actions.sql` for a complete implementation with:
+- Approve/Deny/Cancel workflow for reservation requests
+- Status-based visibility and enabled conditions
+- Triggers that create/delete reservations on approval/cancellation
+- Role permission grants
+
 ### Entity Notes System
 
 **Version**: v0.16.0+

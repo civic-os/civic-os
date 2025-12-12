@@ -42,13 +42,14 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Set up Record Defaults (On Create)
 
 ### Logic
-- [ ] **Entity Action Buttons** - Manually triggerable logic via buttons on Entity detail pages (see `docs/development/ENTITY_ACTIONS.md`)
-  - [ ] Database schema (entity_actions, protected_rpcs tables) and migration
-  - [ ] Per-RPC permission system with role mapping
-  - [ ] Conditional visibility and disabled state (JSONB expressions evaluated client-side)
-  - [ ] RPC-driven post-action behavior (messages, navigation, refresh controlled by return value)
-  - [ ] Frontend integration (DetailPage buttons, confirmation modals, loading states)
-  - [ ] Example implementation in pothole domain (approve/reject actions)
+- [x] **Entity Action Buttons** (v0.18.0) - Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions
+  - [x] Database schema (`metadata.entity_actions`, `metadata.entity_action_roles` tables) and migration
+  - [x] Per-action permission system with role mapping (v0.18.1 refactor, managed via Permissions page)
+  - [x] Conditional visibility and disabled state (JSONB expressions evaluated client-side)
+  - [x] RPC-driven post-action behavior (messages, navigation, refresh controlled by return value)
+  - [x] Frontend integration (ActionBarComponent with overflow, confirmation modals, loading states)
+  - [x] Example implementation in community-center (Approve/Deny/Cancel reservation workflow)
+  - [ ] User context in visibility/enabled conditions (e.g., `$user.role`, `$user.id` for ownership checks)
 
 - [x] **First-Class Notes System** - Polymorphic notes for any entity (v0.16.0, see `docs/development/ENTITY_NOTES.md`)
   - [x] Database schema (`metadata.entity_notes` table, polymorphic design)
@@ -125,6 +126,10 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Logic
 - [ ] Build automatic generation of Block Diagrams showing how Logic works
+- [ ] **Entity Actions Management Page** - Read-only view of all configured entity actions
+  - [ ] List all actions grouped by entity
+  - [ ] Show action configuration (visibility/enabled conditions, RPC function, button style)
+  - [ ] Show role permissions for each action
 
 ### Utilities
 - [x] Build notification service (v0.11.0 - database templates, River-based worker, email via AWS SES)
@@ -165,6 +170,11 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Logic
 - [ ] Build GUI editor for Block Diagrams showing how Logic works
+- [ ] **Entity Actions Editor** - Full CRUD for entity actions via UI
+  - [ ] Create new actions (select entity, configure RPC, set conditions)
+  - [ ] Edit existing actions (update visibility/enabled conditions, button style, messages)
+  - [ ] Delete actions with confirmation
+  - [ ] Manage role permissions inline
 
 ### Analytics & Observability
 - [ ] Build integrated analytics engine (no external servers required)

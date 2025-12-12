@@ -37,6 +37,18 @@ export interface RolePermission {
   has_permission: boolean;
 }
 
+/**
+ * Entity action with permission info for a specific role
+ */
+export interface EntityActionPermission {
+  id: number;
+  table_name: string;
+  action_name: string;
+  display_name: string;
+  description?: string;
+  has_permission: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -141,6 +153,84 @@ export class PermissionsService {
         return of({
           success: false,
           error: { message: error.message, humanMessage: 'Failed to create role' }
+        });
+      })
+    );
+  }
+
+  // =========================================================================
+  // ENTITY ACTION PERMISSIONS (v0.18.1)
+  // =========================================================================
+
+  /**
+   * Get all entity actions with permission status for a specific role.
+   * Uses the schema_entity_actions view (public schema) which is accessible via PostgREST.
+   */
+  getEntityActionPermissions(roleId: number): Observable<EntityActionPermission[]> {
+    // Fetch all entity actions from the public view
+    return this.http.get<any[]>(
+      getPostgrestUrl() + 'schema_entity_actions?select=id,table_name,action_name,display_name,description&order=table_name,sort_order'
+    ).pipe(
+      map(actions => {
+        // We'll check permissions in a separate call and merge
+        return actions.map(a => ({
+          id: a.id,
+          table_name: a.table_name,
+          action_name: a.action_name,
+          display_name: a.display_name,
+          description: a.description,
+          has_permission: false // Will be updated by getEntityActionRoles
+        }));
+      }),
+      catchError((error) => {
+        console.error('Error fetching entity actions:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Get entity action role assignments for a specific role.
+   * Returns action IDs that the role has permission to execute.
+   * Uses RPC function since entity_action_roles is in metadata schema.
+   */
+  getEntityActionRoles(roleId: number): Observable<number[]> {
+    return this.http.post<any[]>(
+      getPostgrestUrl() + 'rpc/get_entity_action_roles',
+      { p_role_id: roleId }
+    ).pipe(
+      map(rows => rows.map(r => r.entity_action_id)),
+      catchError((error) => {
+        console.error('Error fetching entity action roles:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Grant or revoke entity action permission for a role.
+   * Uses RPC functions since entity_action_roles is in metadata schema.
+   */
+  setEntityActionPermission(actionId: number, roleId: number, enabled: boolean): Observable<ApiResponse> {
+    const rpcName = enabled ? 'grant_entity_action_permission' : 'revoke_entity_action_permission';
+
+    return this.http.post<any>(
+      getPostgrestUrl() + `rpc/${rpcName}`,
+      { p_action_id: actionId, p_role_id: roleId }
+    ).pipe(
+      map((response) => {
+        if (response?.success === false) {
+          return <ApiResponse>{
+            success: false,
+            error: { message: response.error, humanMessage: response.error }
+          };
+        }
+        return <ApiResponse>{ success: true };
+      }),
+      catchError((error) => {
+        return of(<ApiResponse>{
+          success: false,
+          error: { message: error.message, humanMessage: enabled ? 'Failed to grant permission' : 'Failed to revoke permission' }
         });
       })
     );

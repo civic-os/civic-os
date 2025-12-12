@@ -410,3 +410,127 @@ export function isStaticText(item: RenderableItem): item is StaticText {
 export function isProperty(item: RenderableItem): item is PropertyItem {
     return item.itemType === 'property';
 }
+
+// ============================================================================
+// ENTITY ACTIONS SYSTEM (v0.18.0)
+// ============================================================================
+
+/**
+ * Condition for evaluating visibility or enablement of an action button.
+ * Evaluated against the current record data.
+ *
+ * @example
+ * ```typescript
+ * // Button enabled only when status_id equals 1 (Pending)
+ * { field: 'status_id', operator: 'eq', value: 1 }
+ *
+ * // Button visible when status is NOT Cancelled
+ * { field: 'status_id', operator: 'ne', value: 4 }
+ *
+ * // Button enabled when status is one of [1, 2]
+ * { field: 'status_id', operator: 'in', value: [1, 2] }
+ * ```
+ */
+export interface ActionCondition {
+    /** Field name to evaluate from the record data */
+    field: string;
+    /** Comparison operator */
+    operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'is_null' | 'is_not_null';
+    /** Value to compare against (not used for is_null/is_not_null) */
+    value?: any;
+}
+
+/**
+ * Entity action configuration from metadata.entity_actions table.
+ * Represents a button on the Detail page that executes an RPC.
+ *
+ * Added in v0.18.0.
+ */
+export interface EntityAction {
+    /** Primary key */
+    id: number;
+
+    /** Target entity table name */
+    table_name: string;
+
+    /** Unique action identifier within the entity */
+    action_name: string;
+
+    /** Button label */
+    display_name: string;
+
+    /** Optional description (shown in tooltips) */
+    description?: string;
+
+    /** PostgreSQL RPC function to call */
+    rpc_function: string;
+
+    /** Material icon name */
+    icon?: string;
+
+    /** DaisyUI 5 button style (color modifier) */
+    button_style: 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'ghost';
+
+    /** Display order (lower = earlier) */
+    sort_order: number;
+
+    /** Whether to show confirmation modal before executing */
+    requires_confirmation: boolean;
+
+    /** Message shown in confirmation modal */
+    confirmation_message?: string;
+
+    /** Condition for button visibility (null = always visible) */
+    visibility_condition?: ActionCondition;
+
+    /** Condition for button enablement (null = always enabled, true = enabled) */
+    enabled_condition?: ActionCondition;
+
+    /** Tooltip shown when button is disabled */
+    disabled_tooltip?: string;
+
+    /** Default success message (RPC can override) */
+    default_success_message?: string;
+
+    /** Path to navigate to after success (RPC can override) */
+    default_navigate_to?: string;
+
+    /** Whether to refresh data after action completes */
+    refresh_after_action: boolean;
+
+    /** Whether this action appears on Detail pages */
+    show_on_detail: boolean;
+
+    /** Whether current user can execute this action (from view) */
+    can_execute: boolean;
+}
+
+/**
+ * Result returned from an entity action RPC.
+ * RPCs should return JSONB matching this structure.
+ *
+ * @example
+ * ```sql
+ * RETURN jsonb_build_object(
+ *   'success', true,
+ *   'message', 'Request approved!',
+ *   'refresh', true
+ * );
+ * ```
+ */
+export interface EntityActionResult {
+    /** Whether the action succeeded */
+    success: boolean;
+
+    /** Message to display (overrides default_success_message) */
+    message?: string;
+
+    /** Path to navigate to (overrides default_navigate_to) */
+    navigate_to?: string;
+
+    /** Whether to refresh data (overrides refresh_after_action) */
+    refresh?: boolean;
+
+    /** Additional data returned by the RPC */
+    data?: any;
+}

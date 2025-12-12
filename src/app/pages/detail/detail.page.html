@@ -2,45 +2,39 @@
   @if (entity$ | async; as entity) {
     @if (regularProps$ | async; as regularProps) {
       @if (data$ | async; as data) {
-        <div class="flex items-center gap-4 mb-4 mt-4">
+        <!-- Header row (clean, just back button + title) -->
+        <div class="flex items-center gap-4 mb-2 mt-4">
           <button class="btn btn-ghost btn-circle" [routerLink]="'/view/' + entity.table_name" type="button">
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
-          <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}
-            <span class="ml-8 inline-flex gap-2">
-              @if (canInitiatePayment$ | async) {
-                <button
-                  class="btn btn-primary"
-                  (click)="initiatePayment()"
-                  [disabled]="paymentLoading()">
-                  @if (paymentLoading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
-                    Processing...
-                  } @else {
-                    <span class="material-symbols-outlined">payment</span>
-                    {{ paymentButtonText$ | async }}
-                  }
-                </button>
-              }
-              @if (entity.update) {
-                <button class="btn btn-accent" [routerLink]="'/edit/' + entityKey + '/' + data.id">
-                  <span class="material-symbols-outlined">edit</span> Edit
-                </button>
-              }
-              @if (entity.delete) {
-                <button class="btn btn-error" (click)="openDeleteModal()">
-                  <span class="material-symbols-outlined">delete</span> Delete
-                </button>
-              }
-            </span>
-          </h1>
+          <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}</h1>
         </div>
+
+        <!-- Action Bar (separate row, left-aligned) -->
+        @if (actionButtons$ | async; as buttons) {
+          @if (buttons.length > 0) {
+            <div class="mb-4">
+              <app-action-bar
+                [buttons]="buttons"
+                (buttonClick)="onActionButtonClick($event)">
+              </app-action-bar>
+            </div>
+          }
+        }
 
         <!-- Payment Error Alert -->
         @if (paymentError()) {
           <div class="alert alert-error mb-4">
             <span class="material-symbols-outlined">error</span>
             <span>{{ paymentError() }}</span>
+          </div>
+        }
+
+        <!-- Action Error Alert (for non-modal actions) -->
+        @if (actionError() && !showActionModal()) {
+          <div class="alert alert-error mb-4">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ actionError() }}</span>
           </div>
         }
 
@@ -253,6 +247,65 @@
             (paymentSuccess)="handlePaymentSuccess($event)"
             (close)="handleCheckoutClose()">
           </app-payment-checkout>
+        }
+
+        <!-- Entity Action Confirmation Modal -->
+        @if (showActionModal()) {
+          <div class="modal modal-open">
+            <div class="modal-box">
+              @if (currentAction(); as action) {
+                <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
+
+                <!-- Error Alert -->
+                @if (actionError()) {
+                  <div class="alert alert-error mb-4">
+                    <span class="material-symbols-outlined">error</span>
+                    <span>{{ actionError() }}</span>
+                  </div>
+                }
+
+                <!-- Success Alert -->
+                @if (actionSuccess()) {
+                  <div class="alert alert-success mb-4">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>{{ actionSuccess() }}</span>
+                  </div>
+                } @else {
+                  <p class="mb-6">{{ action.confirmation_message || 'Are you sure you want to proceed?' }}</p>
+
+                  <!-- Actions -->
+                  <div class="modal-action">
+                    <button
+                      class="btn"
+                      (click)="closeActionModal()"
+                      [disabled]="actionLoading()">
+                      Cancel
+                    </button>
+                    <button
+                      [class]="'btn btn-' + action.button_style"
+                      (click)="confirmEntityAction()"
+                      [disabled]="actionLoading()">
+                      @if (actionLoading()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                      }
+                      Confirm
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+            <div class="modal-backdrop bg-base-300/50" (click)="closeActionModal()"></div>
+          </div>
+        }
+
+        <!-- Action Loading Overlay (for non-confirmation actions) -->
+        @if (actionOverlayLoading()) {
+          <div class="fixed inset-0 bg-base-100/50 flex items-center justify-center z-50">
+            <div class="flex flex-col items-center gap-2">
+              <span class="loading loading-spinner loading-lg"></span>
+              <span class="text-sm opacity-70">Processing...</span>
+            </div>
+          </div>
         }
       } @else {
         <!-- Loading or error state when data is not available -->

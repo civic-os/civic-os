@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
@@ -1078,5 +1078,39 @@ export class SchemaService {
       return item.column_width;
     }
     return SchemaService.getColumnSpan(item);
+  }
+
+  // ===========================================================================
+  // ENTITY ACTIONS SYSTEM (v0.18.0)
+  // ===========================================================================
+
+  /**
+   * Get entity actions for a specific table.
+   * Returns actions that the current user has permission to see (can_execute = true).
+   * Actions are sorted by sort_order.
+   *
+   * NOTE: This method does NOT cache results because:
+   * 1. Actions include can_execute which depends on current user's JWT
+   * 2. JWT roles can change between requests (login/logout)
+   * 3. Actions are only fetched on Detail page load (low frequency)
+   *
+   * @param tableName The entity table name (e.g., 'reservation_requests')
+   * @returns Observable of EntityAction[] sorted by sort_order
+   */
+  public getEntityActions(tableName: string): Observable<EntityAction[]> {
+    return this.http.get<EntityAction[]>(
+      getPostgrestUrl() + 'schema_entity_actions',
+      {
+        params: {
+          table_name: `eq.${tableName}`,
+          order: 'sort_order.asc'
+        }
+      }
+    ).pipe(
+      catchError(err => {
+        console.error('Failed to load entity actions:', err);
+        return of([]);  // Graceful degradation
+      })
+    );
   }
 }

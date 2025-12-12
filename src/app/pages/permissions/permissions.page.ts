@@ -15,15 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { PermissionsService, Role, RolePermission } from '../../services/permissions.service';
+import { PermissionsService, Role, RolePermission, EntityActionPermission } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+type PermissionTab = 'tables' | 'actions';
 
 interface PermissionMatrix {
   tableName: string;
@@ -52,6 +54,9 @@ export class PermissionsPage {
   public auth = inject(AuthService);
 
   permissionTypes = ['create', 'read', 'update', 'delete'];
+
+  // Tab state
+  activeTab = signal<PermissionTab>('tables');
 
   /**
    * Determines which permission types are applicable for a given table/entity name.
@@ -205,6 +210,11 @@ export class PermissionsPage {
   onRoleChange(newRoleId: number) {
     this.selectedRoleId.set(newRoleId);
     this.selectedRoleIdSubject.next(newRoleId);
+
+    // Also reload entity actions if on that tab
+    if (this.activeTab() === 'actions') {
+      this.loadEntityActionPermissions();
+    }
   }
 
   private buildPermissionMatrix(tables: string[], permissions: RolePermission[]): PermissionMatrix[] {
@@ -327,5 +337,81 @@ export class PermissionsPage {
   dismissSuccess() {
     this.successMessage.set(undefined);
     this.newlyCreatedRoleName.set(undefined);
+  }
+
+  // =========================================================================
+  // ENTITY ACTION PERMISSIONS (v0.18.1)
+  // =========================================================================
+
+  // Entity action permissions state
+  entityActionPermissions = signal<EntityActionPermission[]>([]);
+  entityActionLoading = signal(false);
+
+  /**
+   * Load entity action permissions for the selected role.
+   * Called when switching to the Actions tab or when role changes.
+   */
+  loadEntityActionPermissions() {
+    const roleId = this.selectedRoleId();
+    if (roleId === undefined) return;
+
+    this.entityActionLoading.set(true);
+
+    // Load actions and role grants in parallel
+    forkJoin({
+      actions: this.permissionsService.getEntityActionPermissions(roleId).pipe(take(1)),
+      grants: this.permissionsService.getEntityActionRoles(roleId).pipe(take(1))
+    }).subscribe({
+      next: ({ actions, grants }) => {
+        // Merge grant status into actions
+        const withPermissions = actions.map(action => ({
+          ...action,
+          has_permission: grants.includes(action.id)
+        }));
+        this.entityActionPermissions.set(withPermissions);
+        this.entityActionLoading.set(false);
+      },
+      error: () => {
+        this.entityActionLoading.set(false);
+      }
+    });
+  }
+
+  /**
+   * Switch to a tab. Loads entity actions if switching to actions tab.
+   */
+  switchTab(tab: PermissionTab) {
+    this.activeTab.set(tab);
+    if (tab === 'actions') {
+      this.loadEntityActionPermissions();
+    }
+  }
+
+  /**
+   * Toggle entity action permission for current role.
+   */
+  toggleEntityActionPermission(action: EntityActionPermission) {
+    const roleId = this.selectedRoleId();
+    if (roleId === undefined) return;
+
+    const newValue = !action.has_permission;
+
+    this.permissionsService.setEntityActionPermission(action.id, roleId, newValue).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Update local state optimistically
+          this.entityActionPermissions.update(actions =>
+            actions.map(a =>
+              a.id === action.id ? { ...a, has_permission: newValue } : a
+            )
+          );
+        } else {
+          console.error('Failed to update entity action permission:', response.error);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to update entity action permission:', err);
+      }
+    });
   }
 }

@@ -826,4 +826,51 @@ export class DataService {
   public callRpc(functionName: string, params: Record<string, any>): Observable<any> {
     return this.http.post(getPostgrestUrl() + 'rpc/' + functionName, params);
   }
+
+  /**
+   * Execute an RPC function with ApiResponse wrapping for Entity Actions.
+   *
+   * Unlike callRpc(), this method:
+   * - Wraps successful responses in ApiResponse format
+   * - Handles RPC-level success/error indicators in the response body
+   * - Parses HTTP errors into friendly messages
+   *
+   * Entity action RPCs should return JSONB with:
+   * - success: boolean
+   * - message: string (optional)
+   * - navigate_to: string (optional)
+   * - refresh: boolean (optional)
+   *
+   * @param functionName - Name of the PostgreSQL function to call
+   * @param params - Parameters to pass to the function
+   * @returns Observable of ApiResponse
+   */
+  public executeRpc(functionName: string, params: Record<string, any>): Observable<ApiResponse> {
+    return this.http.post(getPostgrestUrl() + 'rpc/' + functionName, params).pipe(
+      catchError((err) => this.parseApiError(err)),
+      map((response: any) => {
+        // If parseApiError already converted to error response, return as-is
+        if (response && typeof response === 'object' && 'success' in response && response.success === false && 'error' in response) {
+          return response as ApiResponse;
+        }
+
+        // Check if RPC returned an explicit failure indicator in its response body
+        // Entity action RPCs return {success: false, message: "..."} when they fail
+        if (response && typeof response === 'object' && 'success' in response && response.success === false) {
+          const rpcMessage = response.message || 'Action failed';
+          return {
+            success: false,
+            error: {
+              httpCode: 400,
+              message: rpcMessage,
+              humanMessage: rpcMessage
+            }
+          } as ApiResponse;
+        }
+
+        // Successful response - wrap in ApiResponse
+        return { success: true, body: response } as ApiResponse;
+      })
+    );
+  }
 }

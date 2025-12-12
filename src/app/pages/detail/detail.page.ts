@@ -17,7 +17,7 @@
 
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize } from 'rxjs';
+import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap } from 'rxjs';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
@@ -27,8 +27,12 @@ import {
   PaymentValue,
   RenderableItem,
   isStaticText,
-  isProperty
+  isProperty,
+  EntityAction,
+  EntityActionResult
 } from '../../interfaces/entity';
+import { evaluateCondition } from '../../utils/condition-evaluator';
+import { ActionBarComponent, ActionButton } from '../../components/action-bar/action-bar.component';
 
 /**
  * Type guard to check if a value is a PaymentValue object.
@@ -76,7 +80,8 @@ export interface CalendarSection {
     EmptyStateComponent,
     PaymentCheckoutComponent,
     EntityNotesComponent,
-    StaticTextComponent
+    StaticTextComponent,
+    ActionBarComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -104,6 +109,15 @@ export class DetailPage {
   paymentError = signal<string | undefined>(undefined);
   showCheckoutModal = signal(false);
   currentPaymentId = signal<string | undefined>(undefined);
+
+  // Entity action state (v0.18.0)
+  entityActions = signal<EntityAction[]>([]);
+  showActionModal = signal(false);
+  currentAction = signal<EntityAction | undefined>(undefined);
+  actionLoading = signal(false);
+  actionOverlayLoading = signal(false);  // For non-confirmation actions
+  actionError = signal<string | undefined>(undefined);
+  actionSuccess = signal<string | undefined>(undefined);
 
   // Data loading state
   dataLoading = signal(true);
@@ -270,6 +284,113 @@ export class DetailPage {
       }
 
       return 'Pay Now';
+    })
+  );
+
+  // =========================================================================
+  // ENTITY ACTIONS (v0.18.0)
+  // =========================================================================
+
+  /**
+   * Fetch entity actions for the current entity.
+   * Actions are filtered by permission (can_execute) on the server side.
+   */
+  public actions$: Observable<EntityAction[]> = this.entity$.pipe(
+    switchMap(entity => entity ? this.schema.getEntityActions(entity.table_name) : of([]))
+  );
+
+  /**
+   * Filter actions by permission and visibility condition.
+   *
+   * Actions are hidden (not just disabled) when:
+   * 1. can_execute is false (user lacks RPC permission based on roles)
+   * 2. visibility_condition evaluates to false against record data
+   *
+   * This provides clean UX - users only see actions they can actually perform.
+   *
+   * Note: visibility_condition currently only supports entity field checks.
+   * TODO: Future enhancement - support user context in conditions for scenarios like:
+   *   - Role-based visibility: {"field": "$user.role", "operator": "in", "value": ["admin"]}
+   *   - Ownership checks: {"field": "$user.id", "operator": "eq", "value": "$record.requested_by"}
+   *   See: docs/ROADMAP.md (Entity Action Buttons section)
+   */
+  public visibleActions$: Observable<EntityAction[]> = combineLatest([
+    this.actions$,
+    this.data$
+  ]).pipe(
+    map(([actions, data]) => {
+      if (!data) return [];
+      return actions.filter(action =>
+        action.can_execute &&
+        evaluateCondition(action.visibility_condition, data)
+      );
+    })
+  );
+
+  /**
+   * Combined action buttons for the action bar.
+   * Includes: Edit, Delete, Payment, and Entity Actions.
+   * All buttons flow through ActionBarComponent for responsive overflow handling.
+   */
+  public actionButtons$: Observable<ActionButton[]> = combineLatest([
+    this.entity$,
+    this.data$,
+    this.visibleActions$,
+    this.canInitiatePayment$,
+    this.paymentButtonText$
+  ]).pipe(
+    map(([entity, data, actions, canPay, paymentText]) => {
+      const buttons: ActionButton[] = [];
+
+      if (!entity || !data) return buttons;
+
+      // Edit button
+      if (entity.update) {
+        buttons.push({
+          id: 'edit',
+          label: 'Edit',
+          icon: 'edit',
+          style: 'btn-accent',
+          disabled: false
+        });
+      }
+
+      // Delete button
+      if (entity.delete) {
+        buttons.push({
+          id: 'delete',
+          label: 'Delete',
+          icon: 'delete',
+          style: 'btn-error',
+          disabled: false
+        });
+      }
+
+      // Payment button
+      if (canPay) {
+        buttons.push({
+          id: 'payment',
+          label: paymentText,
+          icon: 'payment',
+          style: 'btn-primary',
+          disabled: this.paymentLoading()
+        });
+      }
+
+      // Entity actions (sorted by sort_order from metadata)
+      actions.forEach(action => {
+        const isEnabled = evaluateCondition(action.enabled_condition, data);
+        buttons.push({
+          id: `action:${action.action_name}`,
+          label: action.display_name,
+          icon: action.icon,
+          style: `btn-${action.button_style}`,
+          disabled: !isEnabled,
+          tooltip: !isEnabled ? action.disabled_tooltip : action.description
+        });
+      });
+
+      return buttons;
     })
   );
 
@@ -621,5 +742,118 @@ export class DetailPage {
       start: new Date(match[1]),
       end: new Date(match[2])
     };
+  }
+
+  // =========================================================================
+  // ENTITY ACTION METHODS (v0.18.0)
+  // =========================================================================
+
+  /**
+   * Handle clicks from the action bar.
+   * Routes to appropriate handler based on button ID.
+   */
+  onActionButtonClick(buttonId: string): void {
+    if (buttonId === 'edit') {
+      this.data$.pipe(take(1)).subscribe(data => {
+        if (data) {
+          this.router.navigate(['/edit', this.entityKey, data.id]);
+        }
+      });
+    } else if (buttonId === 'delete') {
+      this.openDeleteModal();
+    } else if (buttonId === 'payment') {
+      this.initiatePayment();
+    } else if (buttonId.startsWith('action:')) {
+      const actionName = buttonId.substring(7);
+      this.visibleActions$.pipe(take(1)).subscribe(actions => {
+        const action = actions.find(a => a.action_name === actionName);
+        if (action) {
+          this.onEntityActionClick(action);
+        }
+      });
+    }
+  }
+
+  /**
+   * Handle entity action button click.
+   * Shows confirmation modal if required, otherwise executes immediately with overlay.
+   */
+  onEntityActionClick(action: EntityAction): void {
+    this.currentAction.set(action);
+    this.actionError.set(undefined);
+    this.actionSuccess.set(undefined);
+
+    if (action.requires_confirmation) {
+      this.showActionModal.set(true);
+    } else {
+      // Show loading overlay and execute immediately
+      this.actionOverlayLoading.set(true);
+      this.executeEntityAction(action);
+    }
+  }
+
+  /**
+   * Confirm action from modal.
+   */
+  confirmEntityAction(): void {
+    const action = this.currentAction();
+    if (!action) return;
+
+    this.actionLoading.set(true);
+    this.executeEntityAction(action);
+  }
+
+  /**
+   * Close action modal and reset state.
+   */
+  closeActionModal(): void {
+    this.showActionModal.set(false);
+    this.currentAction.set(undefined);
+    this.actionError.set(undefined);
+    this.actionSuccess.set(undefined);
+  }
+
+  /**
+   * Execute the entity action RPC.
+   * Handles response processing, success messages, navigation, and data refresh.
+   */
+  private executeEntityAction(action: EntityAction): void {
+    this.data.executeRpc(action.rpc_function, { p_entity_id: this.entityId }).subscribe({
+      next: (response) => {
+        this.actionLoading.set(false);
+        this.actionOverlayLoading.set(false);
+
+        if (response.success) {
+          const result = response.body as EntityActionResult | undefined;
+
+          // Determine message, navigation, and refresh behavior
+          // RPC response can override metadata defaults
+          const message = result?.message || action.default_success_message || 'Action completed';
+          const navigateTo = result?.navigate_to || action.default_navigate_to;
+          const shouldRefresh = result?.refresh ?? action.refresh_after_action;
+
+          this.actionSuccess.set(message);
+
+          // Auto-close modal and handle navigation/refresh after brief delay
+          setTimeout(() => {
+            this.closeActionModal();
+
+            if (navigateTo) {
+              this.router.navigate([navigateTo]);
+            } else if (shouldRefresh) {
+              this.refreshData();
+            }
+          }, 1500);
+        } else {
+          // RPC returned an error
+          this.actionError.set(response.error?.humanMessage || 'Action failed');
+        }
+      },
+      error: () => {
+        this.actionLoading.set(false);
+        this.actionOverlayLoading.set(false);
+        this.actionError.set('An unexpected error occurred');
+      }
+    });
   }
 }

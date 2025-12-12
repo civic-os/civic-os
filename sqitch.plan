@@ -22,3 +22,5 @@ v0-14-0-add-payment-admin [v0-13-0-add-payment-metadata] 2025-11-25T12:00:00Z Da
 v0-15-0-add-status-type [v0-14-0-add-payment-admin] 2025-11-26T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Status Type System: centralized statuses table with validation trigger
 v0-16-0-add-entity-notes [v0-15-0-add-status-type] 2025-12-11T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Entity Notes: polymorphic notes system for any entity
 v0-17-0-add-static-text [v0-16-0-add-entity-notes] 2025-12-11T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Static Text: markdown content blocks for Detail/Edit/Create pages
+v0-18-0-entity-actions [v0-17-0-add-static-text] 2025-12-12T15:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Entity Actions: metadata-driven action buttons for Detail pages
+v0-18-1-refactor-entity-action-permissions [v0-18-0-entity-actions] 2025-12-12T17:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Refactor: entity_actions as source of truth, entity_action_roles for permissions

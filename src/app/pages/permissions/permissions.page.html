@@ -38,7 +38,7 @@
 
   @if (!loading() && isAdmin() && !error()) {
     <div>
-      <!-- Role Selector with New Role Button -->
+      <!-- Role Selector with New Role Button (applies to both tabs) -->
       <div class="flex items-end gap-4 mb-6">
         <div class="w-full max-w-xs">
           <label class="label" for="role-selector">
@@ -46,7 +46,7 @@
           </label>
           <select
             id="role-selector"
-            class="select"
+            class="select select-bordered"
             [ngModel]="selectedRoleId()"
             (ngModelChange)="onRoleChange($event)">
             @for (role of roles(); track role) {
@@ -62,71 +62,138 @@
           + New Role
         </button>
       </div>
-      <!-- Permissions Table -->
-      <div class="overflow-x-auto">
-        <table class="table table-zebra">
-          <thead>
-            <tr>
-              <th class="font-bold">Table</th>
-              <th class="text-center font-bold">Create</th>
-              <th class="text-center font-bold">Read</th>
-              <th class="text-center font-bold">Update</th>
-              <th class="text-center font-bold">Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of permissionMatrix(); track row) {
-              <tr>
-                <td class="font-semibold">{{ row.tableName }}</td>
-                <td class="text-center">
-                  @if (isPermissionApplicable(row.tableName, 'create')) {
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-primary checkbox-sm"
-                      [checked]="row.create"
-                      (change)="togglePermission(row.tableName, 'create', row.create)" />
-                  } @else {
-                    <span class="text-base-content/30">—</span>
-                  }
-                </td>
-                <td class="text-center">
-                  @if (isPermissionApplicable(row.tableName, 'read')) {
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-primary checkbox-sm"
-                      [checked]="row.read"
-                      (change)="togglePermission(row.tableName, 'read', row.read)" />
-                  } @else {
-                    <span class="text-base-content/30">—</span>
-                  }
-                </td>
-                <td class="text-center">
-                  @if (isPermissionApplicable(row.tableName, 'update')) {
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-primary checkbox-sm"
-                      [checked]="row.update"
-                      (change)="togglePermission(row.tableName, 'update', row.update)" />
-                  } @else {
-                    <span class="text-base-content/30">—</span>
-                  }
-                </td>
-                <td class="text-center">
-                  @if (isPermissionApplicable(row.tableName, 'delete')) {
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-primary checkbox-sm"
-                      [checked]="row.delete"
-                      (change)="togglePermission(row.tableName, 'delete', row.delete)" />
-                  } @else {
-                    <span class="text-base-content/30">—</span>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+
+      <!-- Tabs (DaisyUI 5 syntax) -->
+      <div role="tablist" class="tabs tabs-lift tabs-lg mb-6">
+        <button
+          role="tab"
+          class="tab"
+          [class.tab-active]="activeTab() === 'tables'"
+          (click)="switchTab('tables')">
+          Table Permissions
+        </button>
+        <button
+          role="tab"
+          class="tab"
+          [class.tab-active]="activeTab() === 'actions'"
+          (click)="switchTab('actions')">
+          Entity Actions
+        </button>
       </div>
+
+      <!-- Table Permissions Tab -->
+      @if (activeTab() === 'tables') {
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th class="font-bold">Table</th>
+                <th class="text-center font-bold">Create</th>
+                <th class="text-center font-bold">Read</th>
+                <th class="text-center font-bold">Update</th>
+                <th class="text-center font-bold">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of permissionMatrix(); track row) {
+                <tr>
+                  <td class="font-semibold">{{ row.tableName }}</td>
+                  <td class="text-center">
+                    @if (isPermissionApplicable(row.tableName, 'create')) {
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm"
+                        [checked]="row.create"
+                        (change)="togglePermission(row.tableName, 'create', row.create)" />
+                    } @else {
+                      <span class="text-base-content/30">—</span>
+                    }
+                  </td>
+                  <td class="text-center">
+                    @if (isPermissionApplicable(row.tableName, 'read')) {
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm"
+                        [checked]="row.read"
+                        (change)="togglePermission(row.tableName, 'read', row.read)" />
+                    } @else {
+                      <span class="text-base-content/30">—</span>
+                    }
+                  </td>
+                  <td class="text-center">
+                    @if (isPermissionApplicable(row.tableName, 'update')) {
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm"
+                        [checked]="row.update"
+                        (change)="togglePermission(row.tableName, 'update', row.update)" />
+                    } @else {
+                      <span class="text-base-content/30">—</span>
+                    }
+                  </td>
+                  <td class="text-center">
+                    @if (isPermissionApplicable(row.tableName, 'delete')) {
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm"
+                        [checked]="row.delete"
+                        (change)="togglePermission(row.tableName, 'delete', row.delete)" />
+                    } @else {
+                      <span class="text-base-content/30">—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- Entity Actions Tab -->
+      @if (activeTab() === 'actions') {
+        @if (entityActionLoading()) {
+          <div class="flex justify-center items-center min-h-[200px]">
+            <span class="loading loading-spinner loading-lg"></span>
+          </div>
+        } @else if (entityActionPermissions().length === 0) {
+          <div class="alert alert-info">
+            <span class="material-symbols-outlined">info</span>
+            <span>No entity actions have been configured yet. Entity actions are defined in the database via the <code>metadata.entity_actions</code> table.</span>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th class="font-bold">Entity</th>
+                  <th class="font-bold">Action</th>
+                  <th class="text-center font-bold">Can Execute</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (action of entityActionPermissions(); track action.id) {
+                  <tr>
+                    <td class="font-semibold">{{ action.table_name }}</td>
+                    <td>
+                      <div>{{ action.display_name }}</div>
+                      @if (action.description) {
+                        <div class="text-xs opacity-60">{{ action.description }}</div>
+                      }
+                    </td>
+                    <td class="text-center">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm"
+                        [checked]="action.has_permission"
+                        (change)="toggleEntityActionPermission(action)" />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
     </div>
   }
 
