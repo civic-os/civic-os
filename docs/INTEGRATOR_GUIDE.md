@@ -1400,6 +1400,81 @@ SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;
 
 See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, AWS SES setup, and Phase 2 roadmap (SMS, bounce handling, unsubscribe mechanism).
 
+### Status Type System
+
+**Version**: v0.15.0+
+
+Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with `entity_type` discriminator for type safety.
+
+**Features**:
+- Colored badges with `hex_color` for visual status identification
+- `is_initial` flag for default status on new records
+- `is_terminal` flag for workflow end states
+- `sort_order` for dropdown ordering
+- Cache invalidation via `schema_cache_versions`
+- Frontend auto-detects via `status_entity_type` in `metadata.properties`
+
+**Requirements**:
+- Civic OS v0.15.0+ (status schema + migrations)
+
+#### Quick Setup
+
+```sql
+-- 1. Register entity type
+INSERT INTO metadata.status_types (entity_type, description)
+VALUES ('issue', 'Status values for issue tracking');
+
+-- 2. Add status values
+INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
+VALUES
+  ('issue', 'Open', '#F59E0B', 1, TRUE, FALSE),
+  ('issue', 'In Progress', '#3B82F6', 2, FALSE, FALSE),
+  ('issue', 'Resolved', '#22C55E', 3, FALSE, TRUE);
+
+-- 3. Create table with FK (use helper function for default)
+CREATE TABLE issues (
+  id SERIAL PRIMARY KEY,
+  status_id INT NOT NULL DEFAULT public.get_initial_status('issue') REFERENCES metadata.statuses(id),
+  display_name VARCHAR(255) NOT NULL,
+  -- other columns...
+);
+
+-- 4. Configure column for frontend detection
+UPDATE metadata.properties SET status_entity_type = 'issue'
+WHERE table_name = 'issues' AND column_name = 'status_id';
+```
+
+#### Schema Reference
+
+**`metadata.status_types`** - Registers valid entity types for statuses
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `entity_type` | NAME | Entity type identifier (PK) |
+| `description` | TEXT | Human-readable description |
+
+**`metadata.statuses`** - Status values per entity type
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | SERIAL | auto | Primary key |
+| `entity_type` | NAME | required | FK to status_types |
+| `display_name` | VARCHAR(100) | required | Status label shown in UI |
+| `color` | hex_color | '#6B7280' | Badge color (#RRGGBB) |
+| `sort_order` | INT | 100 | Dropdown ordering |
+| `is_initial` | BOOLEAN | FALSE | Default for new records |
+| `is_terminal` | BOOLEAN | FALSE | Workflow end state |
+
+#### Helper Functions
+
+**`get_initial_status(entity_type)`** - Returns the status ID where `is_initial = TRUE` for the given entity type. Use as column default:
+
+```sql
+status_id INT NOT NULL DEFAULT public.get_initial_status('issue')
+```
+
+See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design documentation and `examples/community-center/` for working example.
+
 ### Entity Notes System
 
 **Version**: v0.16.0+
@@ -1552,7 +1627,95 @@ interface EntityNote {
 }
 ```
 
-See `examples/community-center/init-scripts/12_enable_notes.sql` for a complete working example with status change triggers.
+See `examples/community-center/init-scripts/11_enable_notes.sql` for a complete working example with status change triggers.
+
+### Static Text Blocks
+
+**Version**: v0.17.0+
+
+Add static markdown content to Detail, Create, and Edit pages without database columns. Useful for rental agreements, terms of service, section headers, submission guidelines, help text, and contact information.
+
+**Features**:
+- Full Markdown support (headers, lists, bold, italic, links)
+- Sort order integration with properties (interspersed positioning)
+- Per-page visibility (`show_on_detail`, `show_on_create`, `show_on_edit`)
+- Column width control (1-8 grid columns, 8 = full width)
+- Drag-and-drop reordering in Property Management UI
+
+**Requirements**:
+- Civic OS v0.17.0+ (static text schema + migrations)
+
+#### Adding Static Text
+
+```sql
+-- Add rental agreement at bottom of detail/create pages
+INSERT INTO metadata.static_text (
+  table_name, content, sort_order, column_width,
+  show_on_detail, show_on_create, show_on_edit
+) VALUES (
+  'reservation_requests',
+  '## Rental Agreement
+
+By submitting this reservation request, you agree to:
+1. Pay all associated fees on time
+2. Follow facility rules and guidelines
+3. Leave the space in its original condition
+
+*Contact staff with questions.*',
+  999,    -- High sort_order = appears after properties
+  2,      -- Column width: 2 = full width (default)
+  TRUE,   -- Show on detail pages
+  TRUE,   -- Show on create forms
+  FALSE   -- Hide on edit forms
+);
+
+-- Add submission guidelines at TOP of create form only
+INSERT INTO metadata.static_text (
+  table_name, content, sort_order, column_width,
+  show_on_detail, show_on_create, show_on_edit
+) VALUES (
+  'reservation_requests',
+  '### Before You Submit
+
+Please have the following ready:
+- Preferred date and time slot
+- Purpose of reservation
+- Contact phone number',
+  5,      -- Low sort_order = appears before properties
+  2,
+  FALSE,  -- Don't show on detail
+  TRUE,   -- Show on create
+  FALSE   -- Don't show on edit
+);
+```
+
+#### Schema Reference
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | SERIAL | auto | Primary key |
+| `table_name` | NAME | required | Target entity table name |
+| `content` | TEXT | required | Markdown content (max 10,000 chars) |
+| `sort_order` | INT | 100 | Position relative to properties |
+| `column_width` | SMALLINT | 2 | Width: 1-8 (8 = full width) |
+| `show_on_detail` | BOOLEAN | TRUE | Show on detail pages |
+| `show_on_create` | BOOLEAN | FALSE | Show on create forms |
+| `show_on_edit` | BOOLEAN | FALSE | Show on edit forms |
+
+#### Column Width Examples
+
+| Width | Grid Columns | Use Case |
+|-------|--------------|----------|
+| 1 | 1/8 | Narrow hint |
+| 2 | 2/8 (quarter) | Short text |
+| 4 | 4/8 (half) | Side-by-side with property |
+| 8 | 8/8 (full) | Full agreements, section dividers |
+
+#### Managing via Property Management UI
+
+Static text blocks appear in the Property Management page (`/property-management`) alongside entity properties. They are styled with a distinct background and can be reordered via drag-and-drop. Sort order changes are saved to the database in real-time.
+
+See `docs/design/STATIC_TEXT_FEATURE.md` for complete implementation details and `examples/community-center/init-scripts/12_static_text_example.sql` for a working example.
 
 ### Payment System
 

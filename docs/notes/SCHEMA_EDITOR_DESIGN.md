@@ -1,5 +1,7 @@
 # Schema Editor Design Document
 
+> **Note**: This is a historical design document. File paths and line numbers may have changed since implementation. The POC was renamed from `schema-editor-poc` to `schema-editor`. See `src/app/pages/schema-editor/` for current implementation.
+
 **Status:** 📋 Design Phase
 **Created:** 2025-10-22
 **Author:** System Design Document

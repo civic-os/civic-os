@@ -50,13 +50,13 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Frontend integration (DetailPage buttons, confirmation modals, loading states)
   - [ ] Example implementation in pothole domain (approve/reject actions)
 
-- [ ] **First-Class Notes System** - Polymorphic notes for any entity (see `docs/development/ENTITY_NOTES.md`)
-  - [ ] Database schema (`metadata.entity_notes` table, polymorphic design)
-  - [ ] `create_entity_note()` RPC for manual and trigger-generated notes
-  - [ ] Metadata configuration (`enable_notes` on `metadata.entities`)
-  - [ ] RLS policies (read access follows entity, edit own notes, admin override)
-  - [ ] Frontend component (notes section on Detail pages, simple formatting)
-  - [ ] Example trigger for status change notes
+- [x] **First-Class Notes System** - Polymorphic notes for any entity (v0.16.0, see `docs/development/ENTITY_NOTES.md`)
+  - [x] Database schema (`metadata.entity_notes` table, polymorphic design)
+  - [x] `create_entity_note()` RPC for manual and trigger-generated notes
+  - [x] Metadata configuration (`enable_notes` on `metadata.entities`)
+  - [x] RLS policies (read access follows entity, edit own notes, admin override)
+  - [x] Frontend component (notes section on Detail pages, simple formatting)
+  - [x] Example trigger for status change notes
 
 ### Dashboards (Phased Development)
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
@@ -111,7 +111,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
     - [ ] Export diagram as image (PNG/SVG)
     - [ ] Minimap for navigation in large schemas
 - [ ] Advanced Form Validation by use of RPCs
-- [ ] Add static helper text fields (display-only metadata.properties entries for form guidance, no database column)
+- [x] Add Static Text blocks (v0.17.0 - markdown content via `metadata.static_text`, see `docs/design/STATIC_TEXT_FEATURE.md`)
 - [ ] Add customizable template pages (primarily for PDF)
 - [ ] Research safe database schema editing, sandboxing
 - [ ] One-to-One relationship created as child record

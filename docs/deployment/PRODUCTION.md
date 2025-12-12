@@ -841,7 +841,7 @@ spec:
     spec:
       initContainers:
         - name: migrations
-          image: ghcr.io/civic-os/migrations:v0.5.0
+          image: ghcr.io/civic-os/migrations:latest  # Pin to specific version for reproducible builds
           env:
             - name: PGRST_DB_URI
               valueFrom:
@@ -852,7 +852,7 @@ spec:
               value: "true"
       containers:
         - name: postgrest
-          image: ghcr.io/civic-os/postgrest:v0.5.0
+          image: ghcr.io/civic-os/postgrest:latest  # Pin to specific version for reproducible builds
           # ... postgrest configuration
 ```
 
@@ -867,13 +867,13 @@ docker logs civic_os_migrations
 # Check migration status after deployment
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.5.0 \
+  ghcr.io/civic-os/migrations:latest \
   status
 
 # View migration history
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.5.0 \
+  ghcr.io/civic-os/migrations:latest \
   log
 ```
 

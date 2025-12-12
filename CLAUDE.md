@@ -105,34 +105,9 @@ WHERE table_name = 'reservations';
 
 See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide and `examples/community-center/` for working example.
 
-**Status Type** (`Status`): Framework-provided status and workflow system. Instead of creating separate status lookup tables (e.g., `issue_statuses`, `workpackage_statuses`), integrators use the centralized `metadata.statuses` table with `entity_type` discriminator for type safety. Frontend detects Status columns via `status_entity_type` in `metadata.properties` and renders colored status badges/dropdowns. Requires Civic OS v0.15.0+.
+**Status Type** (`Status`): Framework-provided status and workflow system using centralized `metadata.statuses` table with `entity_type` discriminator. Frontend detects via `status_entity_type` in `metadata.properties` and renders colored badges/dropdowns. Features: `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering. Use `get_initial_status('entity_type')` helper for column defaults. Requires v0.15.0+.
 
-**Quick Setup**:
-```sql
--- 1. Register entity type
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('issue', 'Status values for issue tracking');
-
--- 2. Add status values
-INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
-VALUES
-  ('issue', 'Open', '#F59E0B', 1, TRUE, FALSE),
-  ('issue', 'In Progress', '#3B82F6', 2, FALSE, FALSE),
-  ('issue', 'Resolved', '#22C55E', 3, FALSE, TRUE);
-
--- 3. Create table with FK (use helper function for default)
-CREATE TABLE issues (
-  id SERIAL PRIMARY KEY,
-  status_id INT NOT NULL DEFAULT public.get_initial_status('issue') REFERENCES metadata.statuses(id),
-  -- other columns...
-);
-
--- 4. Configure column for frontend detection
-UPDATE metadata.properties SET status_entity_type = 'issue'
-WHERE table_name = 'issues' AND column_name = 'status_id';
-```
-
-**Features**: Colored badges with `hex_color`, `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, cache invalidation via `schema_cache_versions`. See `docs/development/STATUS_TYPE_SYSTEM.md` for design and `examples/community-center/` for working example.
+See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) for Quick Setup SQL, `docs/development/STATUS_TYPE_SYSTEM.md` for design, and `examples/community-center/` for working example.
 
 **Entity Notes** (v0.16.0+): Framework-level notes system that any entity can opt into via metadata configuration. Notes are polymorphic (one `metadata.entity_notes` table serves all entities) and support both human-authored and trigger-generated content. Notes section appears on Detail pages with simple Markdown formatting (bold, italic, links).
 
@@ -160,7 +135,11 @@ CREATE TRIGGER myentity_status_change_note
 - `create_entity_note(entity_type, entity_id, content, note_type, is_internal, author_id)` - Create a note
 - `add_status_change_note()` - Trigger function for automatic status change notes
 
-See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete implementation guide and `examples/community-center/init-scripts/12_enable_notes.sql` for working example.
+See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete implementation guide and `examples/community-center/init-scripts/11_enable_notes.sql` for working example.
+
+**Static Text Blocks** (v0.17.0+): Display-only markdown content blocks on Detail, Create, and Edit pages. Blocks are stored in `metadata.static_text` table and interspersed with properties by `sort_order`. Supports full markdown (headers, lists, bold, italic, links) via `ngx-markdown`, configurable visibility (`show_on_detail`, `show_on_create`, `show_on_edit`), and 1-8 column width.
+
+See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and `examples/community-center/init-scripts/12_static_text_example.sql` for working example.
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
@@ -507,158 +486,17 @@ The CreatePage supports pre-filling form fields via query parameters, enabling c
 
 ### Form Validation
 
-Civic OS provides a flexible validation system with **dual enforcement**: frontend validation for UX and backend CHECK constraints for security.
+Civic OS provides **dual enforcement** validation: frontend validation via `metadata.validations` for UX and backend CHECK constraints for security. Supported types: `required`, `min`, `max`, `minLength`, `maxLength`, `pattern`. The `SchemaService.getFormValidatorsForProperty()` maps rules to Angular validators, and `ErrorService.parseToHuman()` translates CHECK constraint errors to friendly messages.
 
-**Supported Validation Types**: `required`, `min`, `max`, `minLength`, `maxLength`, `pattern`
-
-**Adding Validation to a Property:**
-
-```sql
--- 1. Add CHECK constraint (backend enforcement)
-ALTER TABLE products
-  ADD CONSTRAINT price_positive CHECK (price > 0);
-
--- 2. Add validation metadata (frontend UX)
-INSERT INTO metadata.validations (table_name, column_name, validation_type, validation_value, error_message, sort_order)
-VALUES ('products', 'price', 'min', '0.01', 'Price must be greater than zero', 1);
-
--- 3. Map CHECK constraint to friendly error message (for when frontend is bypassed)
-INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
-VALUES ('price_positive', 'products', 'price', 'Price must be greater than zero');
-```
-
-**How It Works:**
-- `metadata.validations` → Frontend validators (Angular `Validators.min()`, `.max()`, `.pattern()`, etc.)
-- `schema_properties` view → Aggregates validation rules as JSONB array
-- `SchemaService.getFormValidatorsForProperty()` → Maps rules to Angular validators
-- `EditPropertyComponent` → Displays custom error messages in real-time
-- `ErrorService.parseToHuman()` → Translates CHECK constraint errors (code '23514') to friendly messages
-
-**Example Validation Patterns:**
-```sql
--- Numeric range (1-5 scale)
-INSERT INTO metadata.validations VALUES
-  ('issues', 'severity', 'min', '1', 'Severity must be between 1 and 5', 1),
-  ('issues', 'severity', 'max', '5', 'Severity must be between 1 and 5', 2);
-
--- String length
-INSERT INTO metadata.validations VALUES
-  ('issues', 'description', 'minLength', '10', 'Description must be at least 10 characters', 1);
-
--- Pattern validation (phone number)
-INSERT INTO metadata.validations VALUES
-  ('users', 'phone', 'pattern', '^\d{10}$', 'Phone must be 10 digits (no dashes)', 1);
-```
-
-**See Also:** `examples/pothole/init-scripts/02_validation_examples.sql` for complete examples in the Pot Hole domain.
-
-**Future Enhancement:** Async/RPC validators for database lookups (uniqueness checks, cross-field validation). See `docs/development/ADVANCED_VALIDATION.md`.
+See `docs/INTEGRATOR_GUIDE.md` (Validation System section) for SQL examples and patterns, and `examples/pothole/init-scripts/02_validation_examples.sql` for complete examples. Future async/RPC validators: `docs/development/ADVANCED_VALIDATION.md`.
 
 ### Notification System
 
 **Version**: v0.11.0+
 
-Send multi-channel notifications (email, SMS) to users using database-managed templates and a River-based Go microservice.
+Send multi-channel notifications (email, SMS) to users using database-managed templates with Go template syntax and a River-based Go microservice. Features include: template management UI at `/notifications/templates`, real-time validation, HTML preview, polymorphic entity references, and automatic retries with exponential backoff.
 
-**Key Features**:
-- Database-managed templates with Go template syntax (`{{.Entity.field}}`, conditionals, loops)
-- Multi-channel delivery (email via AWS SES Phase 1, SMS Phase 2)
-- Template management UI at `/notifications/templates` (admin-only)
-- Real-time template validation with 500ms debouncing
-- HTML preview in sandboxed iframe
-- User notification preferences per channel
-- Polymorphic entity references (link notifications to any entity)
-- Automatic retries with exponential backoff
-
-**Quick Start** (create template + trigger):
-
-```sql
--- 1. Create notification template
-INSERT INTO metadata.notification_templates (
-    name, description, entity_type,
-    subject_template, html_template, text_template
-) VALUES (
-    'issue_created',
-    'Notify assigned user when issue created',
-    'issues',
-    'New issue: {{.Entity.display_name}}',
-    '<h2>New Issue</h2><p>{{.Entity.display_name}}</p><a href="{{.Metadata.site_url}}/view/issues/{{.Entity.id}}">View Issue</a>',
-    'New Issue: {{.Entity.display_name}}\nView: {{.Metadata.site_url}}/view/issues/{{.Entity.id}}'
-);
-
--- 2. Create trigger to send notification automatically
-CREATE OR REPLACE FUNCTION notify_issue_created()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
-DECLARE v_issue_data JSONB;
-BEGIN
-    IF NEW.assigned_user_id IS NOT NULL THEN
-        -- Build entity data with embedded relationships
-        SELECT jsonb_build_object(
-            'id', NEW.id,
-            'display_name', NEW.display_name,
-            'severity', NEW.severity,
-            'status', jsonb_build_object(
-                'id', s.id,
-                'display_name', s.display_name
-            )
-        )
-        INTO v_issue_data
-        FROM statuses s WHERE s.id = NEW.status_id;
-
-        -- Create notification (auto-enqueues River job)
-        PERFORM create_notification(
-            p_user_id := NEW.assigned_user_id,
-            p_template_name := 'issue_created',
-            p_entity_type := 'issues',
-            p_entity_id := NEW.id::text,
-            p_entity_data := v_issue_data,
-            p_channels := ARRAY['email']
-        );
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER issue_created_notification_trigger
-    AFTER INSERT ON issues FOR EACH ROW
-    EXECUTE FUNCTION notify_issue_created();
-```
-
-**Template Context**:
-- `Entity` - Entity data passed as JSONB (your custom fields)
-- `Metadata.site_url` - Application URL for generating links
-
-**Go Template Syntax**:
-- `{{.Entity.field}}` - Access entity data
-- `{{if .Entity.field}}...{{end}}` - Conditionals
-- `{{range .Entity.items}}...{{end}}` - Loops
-- `{{.Entity.status.display_name}}` - Nested relationships (manually joined in trigger)
-
-**Deployment Requirements**:
-1. Apply v0.11.0 migration: `sqitch deploy v0-11-0-add-notifications`
-2. Configure environment: `AWS_SES_FROM_EMAIL`, `SITE_URL`, AWS credentials
-3. Deploy notification worker service (see `docker-compose.yml` examples)
-4. Verify AWS SES sender email and move out of sandbox mode
-5. Configure SPF/DKIM DNS records for deliverability
-
-**Monitoring**:
-```sql
--- Check notification status
-SELECT user_id, template_name, status, error_message, sent_at
-FROM metadata.notifications
-WHERE created_at > NOW() - INTERVAL '1 hour'
-ORDER BY created_at DESC;
-
--- Check River queue depth
-SELECT COUNT(*) FROM metadata.river_job
-WHERE kind = 'send_notification' AND state = 'available';
-```
-
-**See Also**:
-- `docs/development/NOTIFICATIONS.md` - Complete architecture, troubleshooting, AWS SES setup
-- `docs/INTEGRATOR_GUIDE.md` (Notification System section) - Template creation patterns, embedded relationships
-- `examples/pothole/init-scripts/08_notification_templates.sql` - Complete working examples
-- `services/consolidated-worker-go/` - Go microservice source code
+See `docs/INTEGRATOR_GUIDE.md` (Notification System section) for Quick Start SQL examples and template patterns, `docs/development/NOTIFICATIONS.md` for complete architecture and AWS SES setup, and `examples/pothole/init-scripts/08_notification_templates.sql` for working examples.
 
 ### Visual Diagramming with JointJS
 
