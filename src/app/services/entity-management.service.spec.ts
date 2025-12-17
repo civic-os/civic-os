@@ -75,7 +75,9 @@ describe('EntityManagementService', () => {
         p_show_calendar: false,
         p_calendar_property_name: null,
         p_calendar_color_property: null,
-        p_enable_notes: false
+        p_enable_notes: false,
+        p_supports_recurring: false,
+        p_recurring_property_name: null
       });
       req.flush({});
     });
@@ -97,7 +99,9 @@ describe('EntityManagementService', () => {
         p_show_calendar: false,
         p_calendar_property_name: null,
         p_calendar_color_property: null,
-        p_enable_notes: false
+        p_enable_notes: false,
+        p_supports_recurring: false,
+        p_recurring_property_name: null
       });
       req.flush({});
     });

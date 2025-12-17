@@ -125,6 +125,13 @@
     <app-edit-time-slot [formControl]="$any(form().controls[prop().column_name])" />
   }
 
+  @if (propType() == EntityPropertyType.RecurringTimeSlot) {
+    <app-edit-recurring-time-slot
+      [formControl]="$any(form().controls[prop().column_name])"
+      [entityTable]="entityType()"
+    />
+  }
+
   @if (propType() == EntityPropertyType.File || propType() == EntityPropertyType.FileImage || propType() == EntityPropertyType.FilePDF) {
     <div class="space-y-2">
       <input

@@ -69,7 +69,8 @@ const EntityPropertyType = {
   FileImage: 19,
   FilePDF: 20,
   Payment: 21,
-  Status: 22
+  Status: 22,
+  RecurringTimeSlot: 23
 };
 
 interface ImportError {

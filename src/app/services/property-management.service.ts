@@ -34,6 +34,7 @@ export interface PropertyMetadata {
   show_on_create: boolean;
   show_on_edit: boolean;
   show_on_detail: boolean;
+  is_recurring: boolean;
 }
 
 @Injectable({
@@ -45,6 +46,7 @@ export class PropertyManagementService {
   /**
    * Upsert property metadata (insert or update)
    * Uses RPC function in public schema
+   * @param isRecurring - For time_slot properties, enables recurring schedules (v0.19.0+)
    */
   upsertPropertyMetadata(
     tableName: string,
@@ -58,7 +60,8 @@ export class PropertyManagementService {
     showOnList: boolean,
     showOnCreate: boolean,
     showOnEdit: boolean,
-    showOnDetail: boolean
+    showOnDetail: boolean,
+    isRecurring: boolean | null = null
   ): Observable<ApiResponse> {
     return this.http.post(
       getPostgrestUrl() + 'rpc/upsert_property_metadata',
@@ -74,7 +77,8 @@ export class PropertyManagementService {
         p_show_on_list: showOnList,
         p_show_on_create: showOnCreate,
         p_show_on_edit: showOnEdit,
-        p_show_on_detail: showOnDetail
+        p_show_on_detail: showOnDetail,
+        p_is_recurring: isRecurring
       }
     ).pipe(
       map((response: any) => <ApiResponse>{ success: true, body: response }),

@@ -18,7 +18,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError } from 'rxjs';
+import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
@@ -191,9 +191,11 @@ export class SchemaService {
       return of([]);
     }
 
+    // Note: getEntities() returns a signal-derived observable that never completes.
+    // We use take(1) to complete after first emission, enabling use with forkJoin/combineLatest.
     return combineLatest([
       this.propertiesCache$,
-      this.getEntities()
+      this.getEntities().pipe(take(1))
     ]).pipe(
       map(([props, tables]) => {
         // First, set property types
@@ -360,6 +362,7 @@ export class SchemaService {
       ['hex_color'].includes(val.udt_name) ? EntityPropertyType.Color :
       ['email_address'].includes(val.udt_name) ? EntityPropertyType.Email :
       ['phone_number'].includes(val.udt_name) ? EntityPropertyType.Telephone :
+      (['time_slot'].includes(val.udt_name) && val.is_recurring) ? EntityPropertyType.RecurringTimeSlot :
       ['time_slot'].includes(val.udt_name) ? EntityPropertyType.TimeSlot :
       ['varchar'].includes(val.udt_name) ? EntityPropertyType.TextShort :
       ['text'].includes(val.udt_name) ? EntityPropertyType.TextLong :

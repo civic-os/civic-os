@@ -565,8 +565,29 @@ export class MyPageComponent {
 ## Styling
 
 - **Tailwind CSS** for utility classes
-- **DaisyUI** component library (themes: light, dark, corporate, nord, emerald)
+- **DaisyUI 5** component library (themes: light, dark, corporate, nord, emerald)
 - Global styles in `src/styles.css`
+
+**IMPORTANT: This project uses DaisyUI 5, not DaisyUI 4.** Many class names changed between versions. Common differences:
+
+| DaisyUI 4 | DaisyUI 5 |
+|-----------|-----------|
+| `tabs-lifted` | `tabs-lift` |
+| `tabs-bordered` | `tabs-border` |
+| `tabs-boxed` | `tabs-box` |
+| `card-bordered` | `card-border` |
+| `card-compact` | `card-sm` |
+| `btn-group` | `join` (+ `join-item` on children) |
+| `btn-group-vertical` | `join-vertical` |
+| `input-group` | `join` |
+| `<li class="disabled">` (menu) | `<li class="menu-disabled">` |
+| `<tr class="hover">` (table) | `<tr class="hover:bg-base-200">` |
+| `form-control` | `fieldset` (structural change) |
+| `label-text` | `label` |
+
+**Note:** `form-control` and `label-text` are widely used in this codebase but don't exist in DaisyUI 5. The forms still render acceptably due to Tailwind defaults, but this is technical debt to address.
+
+When adding DaisyUI components, always verify class names against the [DaisyUI 5 documentation](https://daisyui.com/components/). The v5 docs use the pattern `$$class` in examples to indicate the actual class name.
 
 ## TypeScript Configuration
 

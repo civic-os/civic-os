@@ -14,6 +14,12 @@
               </div>
             }
           </h1>
+          @if (seriesMembership()?.is_member) {
+            <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
+              <span class="material-symbols-outlined text-sm">repeat</span>
+              {{ seriesMembership()?.group_name || 'Recurring' }}
+            </a>
+          }
         </div>
         @if (loading()) {
           <div class="flex justify-center my-8">
@@ -87,5 +93,14 @@
         <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
       </div>
     </app-dialog>
+
+    <!-- Series Scope Dialog -->
+    <app-exception-editor
+      [isOpen]="showScopeDialog()"
+      [membership]="seriesMembership()"
+      [operation]="'edit'"
+      (confirm)="onScopeConfirm($event)"
+      (cancel)="onScopeCancel()"
+    ></app-exception-editor>
   }
 </div>

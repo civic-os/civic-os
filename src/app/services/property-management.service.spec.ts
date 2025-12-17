@@ -90,7 +90,8 @@ describe('PropertyManagementService', () => {
         p_show_on_list: true,
         p_show_on_create: true,
         p_show_on_edit: true,
-        p_show_on_detail: true
+        p_show_on_detail: true,
+        p_is_recurring: null
       });
       req.flush({});
     });
@@ -127,7 +128,8 @@ describe('PropertyManagementService', () => {
         p_show_on_list: false,
         p_show_on_create: false,
         p_show_on_edit: false,
-        p_show_on_detail: false
+        p_show_on_detail: false,
+        p_is_recurring: null
       });
       req.flush({});
     });

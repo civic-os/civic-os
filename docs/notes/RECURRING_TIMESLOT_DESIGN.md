@@ -265,77 +265,57 @@ CREATE INDEX idx_instances_occurrence ON metadata.time_slot_instances(occurrence
 CREATE INDEX idx_instances_exceptions ON metadata.time_slot_instances(series_id) WHERE is_exception = TRUE;
 ```
 
-### Metadata Property Configuration (Explicit Opt-In)
+### Metadata Entity Configuration (Explicit Opt-In)
 
-**IMPORTANT**: Recurring time slot functionality is **explicitly opt-in** per entity/property. The framework does NOT assume all `time_slot` columns support recurrence. Integrators must explicitly enable it for specific columns.
+**IMPORTANT**: Recurring time slot functionality is **explicitly opt-in** per entity. The framework does NOT assume all entities with `time_slot` columns support recurrence. Integrators must explicitly enable it for specific entities via `metadata.entities`.
 
 ```sql
--- Add column to metadata.properties to mark time_slot columns as recurring-enabled
-ALTER TABLE metadata.properties
-  ADD COLUMN is_recurring BOOLEAN DEFAULT FALSE;
+-- Add columns to metadata.entities to enable recurring for an entity
+ALTER TABLE metadata.entities
+  ADD COLUMN supports_recurring BOOLEAN DEFAULT FALSE,
+  ADD COLUMN recurring_property_name NAME;
 
-COMMENT ON COLUMN metadata.properties.is_recurring IS
-  'For time_slot columns: enables recurring series UI and behavior. Default FALSE - must be explicitly enabled.';
+COMMENT ON COLUMN metadata.entities.supports_recurring IS
+  'Enables recurring series UI and behavior for this entity. Default FALSE - must be explicitly enabled.';
 
--- Enable recurring for a specific column
-UPDATE metadata.properties
-SET is_recurring = TRUE
-WHERE table_name = 'reservations' AND column_name = 'time_slot';
+COMMENT ON COLUMN metadata.entities.recurring_property_name IS
+  'The time_slot column to use for recurring schedules. Required when supports_recurring = TRUE.';
+
+-- Enable recurring for a specific entity
+INSERT INTO metadata.entities (table_name, supports_recurring, recurring_property_name)
+VALUES ('reservations', TRUE, 'time_slot')
+ON CONFLICT (table_name) DO UPDATE SET
+  supports_recurring = TRUE,
+  recurring_property_name = 'time_slot';
 ```
 
 **Configuration Flow:**
 
 1. Integrator creates entity with `time_slot` column (as before)
 2. Entity works immediately for one-time bookings (default behavior)
-3. To enable recurring, integrator explicitly sets `is_recurring = TRUE`
-4. Frontend then shows "Make this recurring" toggle in Create/Edit forms
+3. To enable recurring, integrator sets `supports_recurring = TRUE` and `recurring_property_name`
+4. Admin can also enable via Entity Management page UI (same as calendar toggle)
 5. Series management UI becomes available for this entity
 
-**Why Explicit Opt-In?**
+**Why Entity-Level (Not Property-Level)?**
 
+- **One recurring schedule per entity**: Each entity can only have one time slot configured for recurring
+- **Consistent with calendar config**: Follows the same pattern as `show_calendar` + `calendar_property_name`
+- **Simpler admin UX**: Calendar and recurring settings are in the same place (Entity Management)
 - **Business logic varies**: Some time slots don't make sense as recurring (one-off appointments)
 - **GIST constraint requirements**: Recurring requires proper exclusion constraints
 - **Permission considerations**: Series management may need different permissions than single records
-- **Data complexity**: Not all entities need the junction table overhead
 
 **Validation on Enable:**
 
-When setting `is_recurring = TRUE`, the migration/RPC should verify:
+The `upsert_entity_metadata` RPC validates that the specified property exists and is a time_slot type:
 
 ```sql
-CREATE OR REPLACE FUNCTION validate_recurring_enablement(
-  p_table_name TEXT,
-  p_column_name TEXT
-) RETURNS BOOLEAN
-LANGUAGE plpgsql AS $$
-DECLARE
-  v_property RECORD;
-  v_has_gist BOOLEAN;
-BEGIN
-  -- 1. Verify column is time_slot type
-  SELECT * INTO v_property
-  FROM metadata.properties
-  WHERE table_name = p_table_name AND column_name = p_column_name;
-
-  IF v_property.udt_name != 'time_slot' AND v_property.udt_name != 'tstzrange' THEN
-    RAISE EXCEPTION 'is_recurring can only be enabled on time_slot/tstzrange columns';
-  END IF;
-
-  -- 2. Recommend GIST exclusion constraint (warning, not error)
-  SELECT EXISTS (
-    SELECT 1 FROM pg_constraint c
-    JOIN pg_class t ON t.oid = c.conrelid
-    WHERE t.relname = p_table_name
-      AND c.contype = 'x'  -- exclusion constraint
-  ) INTO v_has_gist;
-
-  IF NOT v_has_gist THEN
-    RAISE WARNING 'Table % has no exclusion constraint. Consider adding GIST constraint for conflict prevention.', p_table_name;
-  END IF;
-
-  RETURN TRUE;
-END;
-$$;
+-- Validation is built into upsert_entity_metadata RPC
+-- When supports_recurring = TRUE:
+-- 1. recurring_property_name must be provided
+-- 2. The property must exist for that entity
+-- 3. The property must be of type time_slot/tstzrange
 ```
 
 ### Key Design Decision: No Entity Schema Changes
@@ -1382,7 +1362,7 @@ export class SeriesGroupManagementPage {
   }
 
   private loadFilters() {
-    // Load entities that have is_recurring=true
+    // Load entities that have supports_recurring=true
     this.schemaService.getRecurringEntities().subscribe(entities => {
       this.availableEntities.set(entities);
     });
@@ -1479,13 +1459,20 @@ export class SeriesGroupManagementPage {
 ```typescript
 // src/app/services/schema.service.ts
 
+// NOTE: Property type detection is unchanged - all time_slot columns are TimeSlot type.
+// Recurring behavior is determined by entity.supports_recurring, not property type.
 private getPropertyType(val: SchemaPropertyTable): EntityPropertyType {
   if (val.udt_name === 'time_slot') {
-    return val.is_recurring
-      ? EntityPropertyType.RecurringTimeSlot
-      : EntityPropertyType.TimeSlot;
+    return EntityPropertyType.TimeSlot;  // Recurring is entity-level config
   }
   // ... rest
+}
+
+// Check for recurring-enabled entities
+getRecurringEntities(): Observable<SchemaEntityTable[]> {
+  return this.getEntities().pipe(
+    map(entities => entities.filter(e => e.supports_recurring === true))
+  );
 }
 ```
 
@@ -1538,7 +1525,7 @@ export class RecurringService {
 
   /**
    * Check if an entity record belongs to a recurring series.
-   * Called when loading Detail or Edit pages for entities with is_recurring=true.
+   * Called when loading Detail or Edit pages for entities with supports_recurring=true.
    */
   getSeriesMembership(entityTable: string, entityId: number): Observable<SeriesMembership> {
     // Query junction + series + group in one call
@@ -1678,8 +1665,8 @@ export class EditPage implements OnInit {
   async ngOnInit() {
     // Existing init logic...
 
-    // If entity has is_recurring=true property, check membership
-    if (this.hasRecurringProperty()) {
+    // If entity has supports_recurring=true, check membership
+    if (this.entity.supports_recurring) {
       const membership = await firstValueFrom(
         this.recurringService.getSeriesMembership(this.entityName, this.entityId)
       );
@@ -2005,18 +1992,21 @@ Response:
 ### Migration: v0.16.0-add-recurring-timeslot
 
 ```sql
--- deploy/v0-16-0-add-recurring-timeslot.sql
+-- deploy/v0-19-0-add-recurring-timeslot.sql
 
 -- 1. Core tables
 CREATE TABLE metadata.time_slot_series_groups ( ... );
 CREATE TABLE metadata.time_slot_series ( ... );
 CREATE TABLE metadata.time_slot_instances ( ... );
 
--- 2. Metadata extension
-ALTER TABLE metadata.properties ADD COLUMN is_recurring BOOLEAN DEFAULT FALSE;
+-- 2. Metadata extension (entity-level, not property-level)
+ALTER TABLE metadata.entities
+  ADD COLUMN supports_recurring BOOLEAN DEFAULT FALSE,
+  ADD COLUMN recurring_property_name NAME;
 
 -- 3. Views
 CREATE VIEW metadata.series_groups_summary AS ...;
+-- Update schema_entities to include supports_recurring, recurring_property_name
 
 -- 4. RPCs
 CREATE FUNCTION preview_recurring_conflicts(...);
@@ -2027,9 +2017,10 @@ CREATE FUNCTION split_series_from_date(...);
 CREATE FUNCTION delete_series_with_instances(...);
 CREATE FUNCTION delete_series_group(...);
 CREATE FUNCTION update_series_template(...);
+-- Update upsert_entity_metadata to accept supports_recurring, recurring_property_name
 
 -- 5. Cache invalidation
--- Update schema_cache_versions when is_recurring changes
+-- Update schema_cache_versions when supports_recurring changes
 ```
 
 ---
@@ -2122,10 +2113,11 @@ This section summarizes all key design decisions for quick reference.
 
 | Component | Change Required |
 |-----------|-----------------|
-| `SchemaService` | Detect `is_recurring=true` → `RecurringTimeSlot` type |
+| `SchemaService` | `getRecurringEntities()` filters by `supports_recurring=true` |
 | `RecurringService` (new) | Junction table lookups, series membership (privileged only) |
 | `EditPage` | Scope dialog for privileged users; regular users get auto-exception |
 | `DetailPage` | Series badge for privileged users only |
+| `EntityManagementPage` | UI for enabling/configuring recurring per entity |
 | `SeriesGroupManagementPage` (new) | Privileged-only page for managing recurring schedules |
 | `Navbar` | "Manage Recurring Schedules" menu item (manager/admin only) |
 
@@ -2276,7 +2268,7 @@ USING (
 When a user without series permissions edits an entity record that's part of a series:
 
 ```sql
--- Trigger on entity tables with is_recurring=true
+-- Trigger on entity tables with supports_recurring=true
 CREATE OR REPLACE FUNCTION auto_mark_series_exception()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -2376,10 +2368,12 @@ VALUES
 ### Configuration Checklist
 
 ```sql
--- 1. Enable recurring for entity property
-UPDATE metadata.properties
-SET is_recurring = TRUE
-WHERE table_name = 'reservations' AND column_name = 'time_slot';
+-- 1. Enable recurring for entity (can also be done via Entity Management UI)
+INSERT INTO metadata.entities (table_name, supports_recurring, recurring_property_name)
+VALUES ('reservations', TRUE, 'time_slot')
+ON CONFLICT (table_name) DO UPDATE SET
+  supports_recurring = TRUE,
+  recurring_property_name = 'time_slot';
 
 -- 2. (Optional) Customize expansion settings
 INSERT INTO metadata.settings (key, value) VALUES

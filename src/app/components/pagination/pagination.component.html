@@ -1,14 +1,17 @@
-@if (showResultCount()) {
-  <div class="pagination-container">
-    <!-- Single compact row with all pagination controls -->
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-      <!-- Results summary (always shown when there are results) -->
-      <div class="text-sm flex items-center gap-2">
+<div class="pagination-container">
+  <!-- Single compact row with all pagination controls -->
+  <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+    <!-- Results summary (always shown to prevent layout shift) -->
+    <div class="text-sm flex items-center gap-2">
+      @if (totalCountSignal() > 0) {
         <span class="font-medium">Showing {{ startItem() }}-{{ endItem() }} of {{ totalCountSignal() }} results</span>
-        @if (loading) {
-          <span class="loading loading-spinner loading-sm"></span>
-        }
-      </div>
+      } @else {
+        <span class="font-medium">0 results</span>
+      }
+      @if (loading) {
+        <span class="loading loading-spinner loading-sm"></span>
+      }
+    </div>
 
       <!-- Pagination controls (only shown when multiple pages exist) -->
       @if (showNavigationControls()) {
@@ -73,4 +76,4 @@
       }
     </div>
   </div>
-}
+

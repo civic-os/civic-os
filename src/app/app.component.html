@@ -148,14 +148,26 @@
                 Notifications
               </a>
             </li>
-            <li (click)="navigateToPaymentsAdmin()">
-              <a [class.menu-active]="isRouteActive('/admin/payments')"
-                 [class.font-bold]="isRouteActive('/admin/payments')"
-                 [class.opacity-85]="!isRouteActive('/admin/payments')">
-                <span class="material-symbols-outlined" aria-hidden="true">payments</span>
-                Payments
-              </a>
-            </li>
+            @if (hasRecurringEntities()) {
+              <li (click)="navigateToRecurringSchedules()">
+                <a [class.menu-active]="isRouteActive('/admin/recurring-schedules')"
+                   [class.font-bold]="isRouteActive('/admin/recurring-schedules')"
+                   [class.opacity-85]="!isRouteActive('/admin/recurring-schedules')">
+                  <span class="material-symbols-outlined" aria-hidden="true">event_repeat</span>
+                  Recurring Schedules
+                </a>
+              </li>
+            }
+            @if (hasPaymentEntities()) {
+              <li (click)="navigateToPaymentsAdmin()">
+                <a [class.menu-active]="isRouteActive('/admin/payments')"
+                   [class.font-bold]="isRouteActive('/admin/payments')"
+                   [class.opacity-85]="!isRouteActive('/admin/payments')">
+                  <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                  Payments
+                </a>
+              </li>
+            }
           }
         </ul>
       </div>

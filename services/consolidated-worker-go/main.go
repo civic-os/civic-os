@@ -32,6 +32,7 @@ func main() {
 	log.Println("    - S3 Signer")
 	log.Println("    - Thumbnail Worker")
 	log.Println("    - Notification Worker")
+	log.Println("    - Recurring Series Worker")
 	log.Println("========================================")
 
 	ctx := context.Background()
@@ -200,6 +201,12 @@ func main() {
 	})
 	log.Println("[Init] ✓ PreviewWorker registered (queue: notifications, priority 4)")
 
+	// Expand Recurring Series Worker (recurring queue)
+	river.AddWorker(workers, &ExpandRecurringSeriesWorker{
+		dbPool: dbPool,
+	})
+	log.Println("[Init] ✓ ExpandRecurringSeriesWorker registered (queue: recurring)")
+
 	// ===========================================================================
 	// 7. Create River Client (SINGLE CLIENT WITH MULTIPLE QUEUES)
 	// ===========================================================================
@@ -209,6 +216,7 @@ func main() {
 			"s3_signer":     {MaxWorkers: 20},                  // I/O-bound, many workers
 			"thumbnails":    {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
 			"notifications": {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
+			"recurring":     {MaxWorkers: 5},                   // Series expansion jobs
 		},
 		Workers: workers,
 		Logger:  slog.Default(),
@@ -237,6 +245,7 @@ func main() {
 	log.Println("  - send_notification (queue: notifications, 30 workers)")
 	log.Println("  - validate_template_parts (queue: notifications)")
 	log.Println("  - preview_template_parts (queue: notifications)")
+	log.Println("  - expand_recurring_series (queue: recurring, 5 workers)")
 	log.Println("")
 	log.Printf("Database connections: %d max, %d min", dbMaxConns, dbMinConns)
 	log.Println("Press Ctrl+C to shutdown gracefully...")

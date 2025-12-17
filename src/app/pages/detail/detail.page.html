@@ -8,6 +8,12 @@
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
           <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}</h1>
+          @if (seriesMembership()?.is_member) {
+            <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
+              <span class="material-symbols-outlined text-sm">repeat</span>
+              {{ seriesMembership()?.group_name || 'Recurring' }}
+            </a>
+          }
         </div>
 
         <!-- Action Bar (separate row, left-aligned) -->
@@ -248,6 +254,15 @@
             (close)="handleCheckoutClose()">
           </app-payment-checkout>
         }
+
+        <!-- Delete Scope Dialog (for recurring series members) -->
+        <app-exception-editor
+          [isOpen]="showDeleteScopeDialog()"
+          [membership]="seriesMembership()"
+          [operation]="'delete'"
+          (confirm)="onDeleteScopeConfirm($event)"
+          (cancel)="onDeleteScopeCancel()"
+        ></app-exception-editor>
 
         <!-- Entity Action Confirmation Modal -->
         @if (showActionModal()) {

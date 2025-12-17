@@ -34,6 +34,9 @@ export interface SchemaEntityTable {
     payment_capture_mode?: 'immediate' | 'deferred' | null,
     // Notes configuration (v0.16.0)
     enable_notes?: boolean,
+    // Recurring configuration (v0.19.0)
+    supports_recurring?: boolean,
+    recurring_property_name?: string | null,
 }
 
 export interface ValidationRule {
@@ -105,6 +108,10 @@ export interface SchemaEntityProperty {
     // Status type configuration (v0.15.0)
     // When present, indicates this is a Status type column
     status_entity_type?: string;
+
+    // Recurring time slot configuration (v0.19.0)
+    // When true and udt_name is 'time_slot', enables recurring series UI
+    is_recurring?: boolean;
 }
 
 export enum EntityPropertyType {
@@ -131,6 +138,7 @@ export enum EntityPropertyType {
     FilePDF,
     Payment,
     Status,
+    RecurringTimeSlot,  // v0.19.0 - TimeSlot with recurring series support
 }
 
 /**
@@ -533,4 +541,194 @@ export interface EntityActionResult {
 
     /** Additional data returned by the RPC */
     data?: any;
+}
+
+// ============================================================================
+// RECURRING TIME SLOT SYSTEM (v0.19.0)
+// ============================================================================
+
+/**
+ * Series group - logical container for recurring schedule versions.
+ * What users see as "one recurring event" in the UI.
+ * Added in v0.19.0.
+ */
+export interface SeriesGroup {
+    id: number;
+    display_name: string;
+    description?: string | null;
+    color?: string | null;
+    created_by?: string | null;
+    created_at: string;
+    updated_at: string;
+
+    // Summary stats (from view)
+    version_count?: number;
+    started_on?: string;
+    entity_table?: string;
+    current_version?: SeriesVersionSummary;
+    active_instance_count?: number;
+    exception_count?: number;
+    status?: 'active' | 'needs_attention' | 'ended';
+
+    // Expanded detail data (from detail endpoint)
+    versions?: SeriesVersionSummary[];
+    total_instances?: number;
+    upcoming_instances?: Array<{
+        id: number;
+        entity_id?: number;
+        occurrence_date: string;
+        is_exception: boolean;
+    }>;
+
+    // Embedded instances from view (added in v0.19.0)
+    instances?: SeriesInstanceSummary[];
+}
+
+/**
+ * Summary of a series instance embedded in the group view.
+ * Added in v0.19.0.
+ */
+export interface SeriesInstanceSummary {
+    id: number;
+    series_id: number;
+    occurrence_date: string;
+    entity_table: string;
+    entity_id: number | null;
+    is_exception: boolean;
+    exception_type?: string | null;
+    exception_reason?: string | null;
+}
+
+/**
+ * Summary of the current series version (embedded in SeriesGroup).
+ */
+export interface SeriesVersionSummary {
+    series_id: number;
+    rrule: string;
+    rrule_description?: string;
+    dtstart: string;
+    duration: string;
+    status: string;
+    expanded_until?: string;
+    terminated_at?: string;
+    instance_count?: number;
+    /** Entity template (JSONB from database) - included in current_version from view */
+    entity_template?: Record<string, any>;
+}
+
+/**
+ * Series - RRULE definition and entity template.
+ * Multiple series can belong to one group (after splits).
+ * Added in v0.19.0.
+ */
+export interface Series {
+    id: number;
+    group_id?: number | null;
+    version_number: number;
+    effective_from: string;
+    effective_until?: string | null;
+    entity_table: string;
+    entity_template: Record<string, any>;
+    rrule: string;
+    dtstart: string;
+    duration: string;
+    timezone?: string | null;
+    time_slot_property: string;
+    status: 'active' | 'paused' | 'needs_attention' | 'ended';
+    expanded_until?: string | null;
+    created_by?: string | null;
+    created_at: string;
+    template_updated_at?: string | null;
+    template_updated_by?: string | null;
+}
+
+/**
+ * Series instance - junction record mapping series to entity.
+ * Tracks exceptions and cancellations.
+ * Added in v0.19.0.
+ */
+export interface SeriesInstance {
+    id: number;
+    series_id: number;
+    occurrence_date: string;
+    entity_table: string;
+    entity_id?: number | null;
+    is_exception: boolean;
+    exception_type?: 'modified' | 'rescheduled' | 'cancelled' | 'conflict_skipped' | null;
+    original_time_slot?: string | null;
+    exception_reason?: string | null;
+    exception_at?: string | null;
+    exception_by?: string | null;
+    created_at: string;
+}
+
+/**
+ * Series membership info returned by get_series_membership RPC.
+ * Used to detect if an entity record is part of a series.
+ * Added in v0.19.0.
+ */
+export interface SeriesMembership {
+    is_member: boolean;
+    series_id?: number;
+    group_id?: number;
+    group_name?: string;
+    group_color?: string;
+    occurrence_date?: string;
+    is_exception?: boolean;
+    exception_type?: string;
+    original_template?: Record<string, any>;
+}
+
+/**
+ * Conflict info returned by preview_recurring_conflicts RPC.
+ * Shows which occurrences have conflicts before creating a series.
+ * Added in v0.19.0.
+ */
+export interface ConflictInfo {
+    occurrence_index: number;
+    occurrence_start: string;
+    occurrence_end: string;
+    has_conflict: boolean;
+    conflicting_id?: number;
+    conflicting_display?: string;
+}
+
+/**
+ * Result returned by create_recurring_series RPC.
+ */
+export interface CreateSeriesResult {
+    success: boolean;
+    group_id?: number;
+    series_id?: number;
+    message: string;
+}
+
+/**
+ * Edit scope options for series members.
+ * Determines how edits/deletes affect the series.
+ */
+export type SeriesEditScope = 'this_only' | 'this_and_future' | 'all';
+
+/**
+ * RRULE frequency options for UI.
+ */
+export type RRuleFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+
+/**
+ * Day of week constants for RRULE BYDAY parameter.
+ */
+export type RRuleDayOfWeek = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
+
+/**
+ * RRULE configuration for UI builder component.
+ */
+export interface RRuleConfig {
+    frequency: RRuleFrequency;
+    interval: number;
+    byDay?: RRuleDayOfWeek[];
+    byMonthDay?: number[];
+    byMonth?: number[];
+    bySetPos?: number[];  // Position in set: 1-5 (1st-5th), -1 (last). Used with BYDAY for "2nd Tuesday" patterns.
+    count?: number;
+    until?: string;
 }

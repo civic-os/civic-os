@@ -427,7 +427,8 @@ describe('PropertyManagementPage', () => {
               true,
               true,
               true,
-              true
+              true,
+              null    // is_recurring defaults to null when undefined
             );
             done();
           }, 10);

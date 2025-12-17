@@ -207,6 +207,14 @@ export class EntityManagementPage {
     this.saveEntityMetadata(entity);
   }
 
+  onSupportsRecurringChange(entity: EntityRow) {
+    this.saveEntityMetadata(entity);
+  }
+
+  onRecurringPropertyChange(entity: EntityRow) {
+    this.saveEntityMetadata(entity);
+  }
+
   hasGeoPointProperties(entity: EntityRow): boolean {
     return (entity.geoPointProperties?.length ?? 0) > 0;
   }
@@ -260,7 +268,9 @@ export class EntityManagementPage {
       entity.show_calendar,
       entity.calendar_property_name,
       entity.calendar_color_property,
-      entity.enable_notes
+      entity.enable_notes,
+      entity.supports_recurring,
+      entity.recurring_property_name
     ).subscribe({
       next: (response) => {
         // Clear saving state

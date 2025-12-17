@@ -23,13 +23,16 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { RecurringService } from '../../services/recurring.service';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
   EntityPropertyType,
   RenderableItem,
   isStaticText,
-  isProperty
+  isProperty,
+  SeriesMembership,
+  SeriesEditScope
 } from '../../interfaces/entity';
 import { DialogComponent } from '../../components/dialog/dialog.component';
 import Keycloak from 'keycloak-js';
@@ -37,6 +40,7 @@ import Keycloak from 'keycloak-js';
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
+import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CommonModule } from '@angular/common';
 
@@ -47,6 +51,7 @@ import { CommonModule } from '@angular/common';
     EditPropertyComponent,
     EmptyStateComponent,
     StaticTextComponent,
+    ExceptionEditorComponent,
     CommonModule,
     ReactiveFormsModule,
     DialogComponent,
@@ -62,6 +67,7 @@ export class EditPage {
   private router = inject(Router);
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
+  private recurringService = inject(RecurringService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -131,6 +137,9 @@ export class EditPage {
             this.showValidationError.set(false);
           }
         });
+
+        // Check if this entity is part of a recurring series
+        this.checkSeriesMembership();
       }
       this.loading.set(false);  // Clear loading state after data loads
       this.dataLoading.set(false);  // Clear data loading state
@@ -156,6 +165,11 @@ export class EditPage {
   public dataLoading = signal(true);  // Track data fetch state
   public showValidationError = signal(false);
   private currentProps: SchemaEntityProperty[] = [];
+
+  // Series membership (for recurring time slots)
+  public seriesMembership = signal<SeriesMembership | undefined>(undefined);
+  public showScopeDialog = signal(false);
+  private pendingFormData: any = null;
 
   @ViewChild('successDialog') successDialog!: DialogComponent;
   @ViewChild('errorDialog') errorDialog!: DialogComponent;
@@ -185,16 +199,71 @@ export class EditPage {
     // Form is valid, hide error banner and proceed
     this.showValidationError.set(false);
 
+    // Transform values for API
+    const formData = form.value;
+    const transformedData = this.transformValuesForApi(formData);
+
+    // Check if this is a series member - show scope dialog
+    const membership = this.seriesMembership();
+    if (membership?.is_member) {
+      this.pendingFormData = transformedData;
+      this.showScopeDialog.set(true);
+      return;
+    }
+
+    // Not a series member - proceed with normal edit
+    this.performEdit(transformedData);
+  }
+
+  /**
+   * Handle scope selection from ExceptionEditorComponent.
+   * Called when user selects scope for series member edit.
+   */
+  onScopeConfirm(result: ExceptionEditorResult): void {
+    this.showScopeDialog.set(false);
+
+    if (!this.pendingFormData || !this.entityKey || !this.entityId) return;
+
+    const membership = this.seriesMembership();
+    if (!membership) return;
+
+    switch (result.scope) {
+      case 'this_only':
+        // Edit just this occurrence (normal edit - it becomes an exception)
+        this.performEdit(this.pendingFormData);
+        break;
+
+      case 'this_and_future':
+        // Split series and apply changes to new version
+        this.performSeriesSplit(membership, this.pendingFormData);
+        break;
+
+      case 'all':
+        // Update series template (propagate to all non-exception instances)
+        this.performSeriesTemplateUpdate(membership, this.pendingFormData);
+        break;
+    }
+
+    this.pendingFormData = null;
+  }
+
+  /**
+   * Cancel scope selection.
+   */
+  onScopeCancel(): void {
+    this.showScopeDialog.set(false);
+    this.pendingFormData = null;
+  }
+
+  /**
+   * Perform standard edit operation.
+   */
+  private performEdit(transformedData: any): void {
     // Refresh token before submission (if expires in < 60 seconds)
     this.keycloak.updateToken(60)
       .then(() => {
         // Token is fresh, proceed with submission
-        if(this.entityKey && this.entityId && form) {
-          const formData = form.value;
-
-          // Transform values back to database format before submission
-          const transformedData = this.transformValuesForApi(formData);
-
+        if(this.entityKey && this.entityId) {
           // M:M properties are filtered out, so just edit the entity directly
           this.data.editData(this.entityKey, this.entityId, transformedData)
             .subscribe({
@@ -250,6 +319,135 @@ export class EditPage {
           });
         }
       });
+  }
+
+  /**
+   * Split series at current occurrence and apply changes to new version.
+   * Used for "this and future" scope.
+   */
+  private performSeriesSplit(membership: SeriesMembership, formData: any): void {
+    if (!membership.series_id || !membership.occurrence_date) {
+      // Fall back to normal edit
+      this.performEdit(formData);
+      return;
+    }
+
+    // First, edit this occurrence
+    this.performEdit(formData);
+
+    // Then split the series (this happens async)
+    this.recurringService.splitSeries({
+      seriesId: membership.series_id,
+      splitDate: membership.occurrence_date,
+      newDtstart: formData.time_slot ? this.extractStartFromTimeSlot(formData.time_slot) : membership.occurrence_date,
+      newTemplate: formData
+    }).subscribe({
+      next: (result) => {
+        if (!result.success) {
+          console.warn('Series split completed with warning:', result.message);
+        }
+      },
+      error: (err) => {
+        console.error('Error splitting series:', err);
+      }
+    });
+  }
+
+  /**
+   * Update series template (propagate to all non-exception instances).
+   * Used for "all" scope.
+   */
+  private performSeriesTemplateUpdate(membership: SeriesMembership, formData: any): void {
+    if (!membership.series_id) {
+      // Fall back to normal edit
+      this.performEdit(formData);
+      return;
+    }
+
+    this.keycloak.updateToken(60)
+      .then(() => {
+        this.recurringService.updateSeriesTemplate(membership.series_id!, formData)
+          .subscribe({
+            next: (result) => {
+              if (result.success !== false) {
+                // Track successful series edit
+                if (this.entityKey) {
+                  this.analytics.trackEvent('Entity', 'EditSeriesAll', this.entityKey);
+                }
+
+                if (this.successDialog) {
+                  this.successDialog.open();
+                }
+              } else {
+                console.error('[SERIES UPDATE] API returned error:', result.message);
+                if (this.errorDialog) {
+                  this.errorDialog.open({
+                    httpCode: 400,
+                    message: result.message || 'Failed to update series',
+                    humanMessage: 'Series Update Failed'
+                  });
+                }
+              }
+            },
+            error: (err) => {
+              console.error('Error updating series template:', err);
+              if (this.errorDialog) {
+                this.errorDialog.open({
+                  httpCode: 500,
+                  message: 'An unexpected error occurred',
+                  humanMessage: 'System Error'
+                });
+              }
+            }
+          });
+      })
+      .catch(() => {
+        if (this.errorDialog) {
+          this.errorDialog.open({
+            httpCode: 401,
+            message: "Session expired",
+            humanMessage: "Session Expired",
+            hint: "Your login session has expired. Please refresh the page to log in again."
+          });
+        }
+      });
+  }
+
+  /**
+   * Check if this entity is part of a recurring series.
+   */
+  private checkSeriesMembership(): void {
+    if (!this.entityKey || !this.entityId) return;
+
+    // Check if entity has a time_slot property (could be recurring)
+    const hasTimeSlot = this.currentProps.some(p =>
+      p.type === EntityPropertyType.TimeSlot ||
+      p.type === EntityPropertyType.RecurringTimeSlot
+    );
+
+    if (!hasTimeSlot) return;
+
+    this.recurringService.getSeriesMembership(this.entityKey, this.entityId)
+      .subscribe({
+        next: (membership) => {
+          this.seriesMembership.set(membership);
+        },
+        error: () => {
+          // Silent fail - membership check is optional
+          this.seriesMembership.set(undefined);
+        }
+      });
+  }
+
+  /**
+   * Extract start timestamp from time_slot range.
+   */
+  private extractStartFromTimeSlot(timeSlot: string): string {
+    const match = timeSlot.match(/[\[\(](.+?),/);
+    if (match) {
+      return match[1].trim();
+    }
+    return new Date().toISOString();
   }
 
   private scrollToFirstError(): void {

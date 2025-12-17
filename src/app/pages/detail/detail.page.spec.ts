@@ -24,6 +24,7 @@ import { DetailPage } from './detail.page';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { RecurringService } from '../../services/recurring.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -34,6 +35,7 @@ describe('DetailPage', () => {
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockRecurringService: jasmine.SpyObj<RecurringService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -50,6 +52,15 @@ describe('DetailPage', () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
       authenticated: signal(false)
     });
+    mockRecurringService = jasmine.createSpyObj('RecurringService', [
+      'getSeriesMembership',
+      'cancelOccurrence',
+      'splitSeries',
+      'deleteSeriesGroup'
+    ]);
+
+    // Default mock for series membership - not a member
+    mockRecurringService.getSeriesMembership.and.returnValue(of({ is_member: false }));
 
     // Default mocks for inverse relationships
     mockSchemaService.getInverseRelationships.and.returnValue(of([]));
@@ -69,7 +80,8 @@ describe('DetailPage', () => {
         { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },
-        { provide: AuthService, useValue: mockAuthService }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: RecurringService, useValue: mockRecurringService }
       ]
     })
     .compileComponents();

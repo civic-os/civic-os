@@ -325,7 +325,8 @@ export class PropertyManagementPage {
       property.show_on_list ?? true,
       property.show_on_create ?? true,
       property.show_on_edit ?? true,
-      property.show_on_detail ?? true
+      property.show_on_detail ?? true,
+      property.is_recurring ?? null
     ).subscribe({
       next: (response) => {
         // Clear saving state

@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, ElementRef, HostListener } from '@angular/core';
-
+import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { SchemaService } from './services/schema.service';
@@ -75,6 +75,21 @@ export class AppComponent {
 
   // Menu items exclude detected junction tables (accessible via direct URL)
   public menuItems$: Observable<SchemaEntityTable[] | undefined> = this.schema.getEntitiesForMenu();
+
+  // Convert entities to signal for computed checks
+  private entities = toSignal(this.schema.getEntities());
+
+  // Check if any entity supports recurring schedules
+  public hasRecurringEntities = computed(() => {
+    const entities = this.entities();
+    return entities?.some(e => e.supports_recurring) ?? false;
+  });
+
+  // Check if any entity has payments enabled
+  public hasPaymentEntities = computed(() => {
+    const entities = this.entities();
+    return entities?.some(e => e.payment_initiation_rpc) ?? false;
+  });
 
   constructor() {
     // Check initial route
@@ -148,6 +163,11 @@ export class AppComponent {
 
   public navigateToPaymentsAdmin() {
     this.router.navigate(['admin', 'payments']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToRecurringSchedules() {
+    this.router.navigate(['admin', 'recurring-schedules']);
     this.drawerOpen = false;
   }
 

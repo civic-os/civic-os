@@ -26,6 +26,7 @@ import { PropertyManagementPage } from './pages/property-management/property-man
 import { TemplateManagementPage } from './pages/template-management/template-management.page';
 import { AdminPaymentsPage } from './pages/admin-payments/admin-payments.page';
 import { DashboardPage } from './pages/dashboard/dashboard.page';
+import { SeriesGroupManagementPage } from './pages/series-group-management/series-group-management.page';
 import { schemaVersionGuard } from './guards/schema-version.guard';
 import { authGuard } from './guards/auth.guard';
 
@@ -69,6 +70,16 @@ export const routes: Routes = [
     {
         path: 'admin/payments',
         component: AdminPaymentsPage,
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
+        path: 'admin/recurring-schedules',
+        component: SeriesGroupManagementPage,
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
+        path: 'admin/recurring-schedules/:groupId',
+        component: SeriesGroupManagementPage,
         canActivate: [schemaVersionGuard, authGuard]
     },
     {

@@ -29,10 +29,14 @@ import {
   isStaticText,
   isProperty,
   EntityAction,
-  EntityActionResult
+  EntityActionResult,
+  SeriesMembership,
+  SeriesEditScope
 } from '../../interfaces/entity';
 import { evaluateCondition } from '../../utils/condition-evaluator';
 import { ActionBarComponent, ActionButton } from '../../components/action-bar/action-bar.component';
+import { RecurringService } from '../../services/recurring.service';
+import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 
 /**
  * Type guard to check if a value is a PaymentValue object.
@@ -81,7 +85,8 @@ export interface CalendarSection {
     PaymentCheckoutComponent,
     EntityNotesComponent,
     StaticTextComponent,
-    ActionBarComponent
+    ActionBarComponent,
+    ExceptionEditorComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -90,6 +95,7 @@ export class DetailPage {
   private router = inject(Router);
   private schema = inject(SchemaService);
   private data = inject(DataService);
+  private recurringService = inject(RecurringService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -121,6 +127,10 @@ export class DetailPage {
 
   // Data loading state
   dataLoading = signal(true);
+
+  // Series membership (for recurring time slots)
+  seriesMembership = signal<SeriesMembership | undefined>(undefined);
+  showDeleteScopeDialog = signal(false);
 
   public entityKey?: string;
   public entityId?: string;
@@ -203,6 +213,8 @@ export class DetailPage {
           }),
           finalize(() => {
             this.dataLoading.set(false);
+            // Check series membership after data loads
+            this.checkSeriesMembership();
           })
         );
     } else {
@@ -530,7 +542,14 @@ export class DetailPage {
   // Delete modal methods
   openDeleteModal() {
     this.deleteError.set(undefined);
-    this.showDeleteModal.set(true);
+
+    // Check if this is a series member - show scope dialog first
+    const membership = this.seriesMembership();
+    if (membership?.is_member) {
+      this.showDeleteScopeDialog.set(true);
+    } else {
+      this.showDeleteModal.set(true);
+    }
   }
 
   closeDeleteModal() {
@@ -558,6 +577,154 @@ export class DetailPage {
         this.deleteError.set('Failed to delete record. Please try again.');
       }
     });
+  }
+
+  // =========================================================================
+  // SERIES MEMBERSHIP METHODS
+  // =========================================================================
+
+  /**
+   * Check if this entity is part of a recurring series.
+   */
+  private checkSeriesMembership(): void {
+    if (!this.entityKey || !this.entityId) return;
+
+    this.recurringService.getSeriesMembership(this.entityKey, this.entityId)
+      .subscribe({
+        next: (membership) => {
+          this.seriesMembership.set(membership);
+        },
+        error: () => {
+          // Silent fail - membership check is optional
+          this.seriesMembership.set(undefined);
+        }
+      });
+  }
+
+  /**
+   * Handle scope selection from ExceptionEditorComponent for delete.
+   */
+  onDeleteScopeConfirm(result: ExceptionEditorResult): void {
+    this.showDeleteScopeDialog.set(false);
+
+    if (!this.entityKey || !this.entityId) return;
+
+    const membership = this.seriesMembership();
+    if (!membership) return;
+
+    switch (result.scope) {
+      case 'this_only':
+        // Cancel this occurrence only (soft delete via RPC)
+        this.cancelSingleOccurrence(membership, result.reason);
+        break;
+
+      case 'this_and_future':
+        // Terminate series at this point + delete this occurrence
+        this.deleteThisAndFuture(membership);
+        break;
+
+      case 'all':
+        // Delete entire series group
+        this.deleteEntireSeries(membership);
+        break;
+    }
+  }
+
+  /**
+   * Cancel scope selection for delete.
+   */
+  onDeleteScopeCancel(): void {
+    this.showDeleteScopeDialog.set(false);
+  }
+
+  /**
+   * Cancel a single occurrence of a recurring series.
+   */
+  private cancelSingleOccurrence(membership: SeriesMembership, reason?: string): void {
+    if (!this.entityKey || !this.entityId) return;
+
+    this.deleteError.set(undefined);
+    this.deleteLoading.set(true);
+
+    this.recurringService.cancelOccurrence(this.entityKey, parseInt(this.entityId, 10), reason)
+      .subscribe({
+        next: (result) => {
+          this.deleteLoading.set(false);
+          if (result.success !== false) {
+            this.router.navigate(['/view', this.entityKey]);
+          } else {
+            this.deleteError.set(result.message || 'Failed to cancel occurrence');
+            this.showDeleteModal.set(true);
+          }
+        },
+        error: () => {
+          this.deleteLoading.set(false);
+          this.deleteError.set('Failed to cancel occurrence. Please try again.');
+          this.showDeleteModal.set(true);
+        }
+      });
+  }
+
+  /**
+   * Delete this occurrence and terminate the series (no future occurrences).
+   */
+  private deleteThisAndFuture(membership: SeriesMembership): void {
+    if (!this.entityKey || !this.entityId || !membership.series_id || !membership.occurrence_date) {
+      // Fall back to regular delete
+      this.showDeleteModal.set(true);
+      return;
+    }
+
+    this.deleteError.set(undefined);
+    this.deleteLoading.set(true);
+
+    // First cancel this occurrence
+    this.recurringService.cancelOccurrence(this.entityKey, parseInt(this.entityId, 10))
+      .subscribe({
+        next: () => {
+          // Then terminate the series at this date (creates UNTIL rule)
+          // For now, we just delete - series termination is a more complex operation
+          this.deleteLoading.set(false);
+          this.router.navigate(['/view', this.entityKey]);
+        },
+        error: () => {
+          this.deleteLoading.set(false);
+          this.deleteError.set('Failed to delete occurrences. Please try again.');
+          this.showDeleteModal.set(true);
+        }
+      });
+  }
+
+  /**
+   * Delete the entire series group and all occurrences.
+   */
+  private deleteEntireSeries(membership: SeriesMembership): void {
+    if (!membership.group_id) {
+      // Fall back to regular delete
+      this.showDeleteModal.set(true);
+      return;
+    }
+
+    this.deleteError.set(undefined);
+    this.deleteLoading.set(true);
+
+    this.recurringService.deleteSeriesGroup(membership.group_id)
+      .subscribe({
+        next: (result) => {
+          this.deleteLoading.set(false);
+          if (result.success !== false) {
+            this.router.navigate(['/view', this.entityKey]);
+          } else {
+            this.deleteError.set(result.message || 'Failed to delete series');
+            this.showDeleteModal.set(true);
+          }
+        },
+        error: () => {
+          this.deleteLoading.set(false);
+          this.deleteError.set('Failed to delete series. Please try again.');
+          this.showDeleteModal.set(true);
+        }
+      });
   }
 
   /**

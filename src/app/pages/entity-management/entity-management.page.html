@@ -135,6 +135,39 @@
                   </div>
                 }
 
+                <!-- Recurring Schedules Settings (only show if entity has TimeSlot properties) -->
+                @if (hasTimeSlotProperties(entity)) {
+                  <div class="border-t border-base-300 pt-4">
+                    <h3 class="text-xs font-semibold text-base-content/70 mb-2">Recurring Schedules</h3>
+                    <div class="flex flex-wrap items-center gap-4">
+                      <!-- Supports Recurring Toggle -->
+                      <label class="label cursor-pointer justify-start gap-2 py-0">
+                        <input
+                          type="checkbox"
+                          class="checkbox checkbox-sm"
+                          [(ngModel)]="entity.supports_recurring"
+                          (ngModelChange)="onSupportsRecurringChange(entity)" />
+                        <span class="label-text text-xs">Allow recurring schedules</span>
+                      </label>
+
+                      <!-- Recurring Property Selector (inline when enabled) -->
+                      @if (entity.supports_recurring) {
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs text-base-content/70">using</span>
+                          <select
+                            class="select select-sm select-bordered"
+                            [(ngModel)]="entity.recurring_property_name"
+                            (ngModelChange)="onRecurringPropertyChange(entity)">
+                            @for (prop of entity.timeSlotProperties; track prop) {
+                              <option [value]="prop">{{ prop }}</option>
+                            }
+                          </select>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
                 <!-- Notes Settings (always available) -->
                 <div class="border-t border-base-300 pt-4">
                   <h3 class="text-xs font-semibold text-base-content/70 mb-2">Notes Settings</h3>

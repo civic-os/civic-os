@@ -288,7 +288,9 @@ describe('EntityManagementPage', () => {
             false,
             null,
             null,
-            undefined  // enable_notes
+            undefined,  // enable_notes
+            undefined,  // supports_recurring
+            undefined   // recurring_property_name
           );
           done();
         }, 10);
