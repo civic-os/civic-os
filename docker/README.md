@@ -21,13 +21,13 @@ Civic OS provides two production-ready container images:
 ### Pull Pre-Built Images
 
 ```bash
-# Pull latest images from GitHub Container Registry
+# Pull images from GitHub Container Registry
 docker pull ghcr.io/civic-os/frontend:latest
 docker pull ghcr.io/civic-os/postgrest:latest
+docker pull ghcr.io/civic-os/consolidated-worker:latest
 
-# Or pin to specific version (recommended for production)
-docker pull ghcr.io/civic-os/frontend:v0.3.0
-docker pull ghcr.io/civic-os/postgrest:v0.3.0
+# For production, pin to specific version tags (e.g., v0.19.0)
+# See releases: https://github.com/civic-os/civic-os-frontend/releases
 ```
 
 ### Deploy with Docker Compose

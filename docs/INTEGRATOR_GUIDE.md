@@ -1722,6 +1722,132 @@ See `examples/community-center/init-scripts/13_entity_actions.sql` for a complet
 - Triggers that create/delete reservations on approval/cancellation
 - Role permission grants
 
+### Recurring Time Slots
+
+**Version**: v0.19.0+
+
+Enable RFC 5545 RRULE-compliant recurring schedules for time-slotted entities. Supports patterns like "Every Tuesday and Thursday at 6pm", "First Monday of each month", or "Daily for 10 occurrences".
+
+**Features**:
+- Entity-level configuration via `supports_recurring` and `recurring_property_name`
+- RRULE validation with DoS prevention (max 1000 occurrences, 5-year horizon)
+- Series management UI at `/admin/recurring-schedules` (editor/admin only)
+- Conflict preview before series creation
+- Edit scope dialogs: "This only", "This and future", "All"
+- Exception handling (cancel, reschedule, modify individual occurrences)
+- Go worker for background instance expansion
+
+**Requirements**:
+- Civic OS v0.19.0+ (recurring schema + migrations)
+- Entity must have a `time_slot` column
+- `btree_gist` extension (included in Civic OS)
+
+#### Enabling Recurring for an Entity
+
+```sql
+-- 1. Enable recurring in metadata.entities
+UPDATE metadata.entities SET
+  supports_recurring = TRUE,
+  recurring_property_name = 'time_slot'
+WHERE table_name = 'reservation_requests';
+
+-- Or via upsert_entity_metadata RPC
+SELECT upsert_entity_metadata(
+  p_table_name := 'reservation_requests',
+  p_display_name := 'Reservation Requests',
+  p_description := 'Requests for resource reservations',
+  p_sort_order := 10,
+  p_supports_recurring := TRUE,
+  p_recurring_property_name := 'time_slot'
+);
+```
+
+#### Granting Series Permissions
+
+Series management requires permissions on the metadata tables:
+
+```sql
+-- Grant to editor role
+DO $$
+DECLARE
+  v_editor_id SMALLINT;
+BEGIN
+  SELECT id INTO v_editor_id FROM metadata.roles WHERE display_name = 'editor';
+
+  -- Series groups (containers)
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series_groups', 'read', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series_groups', 'create', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series_groups', 'update', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series_groups', 'delete', TRUE);
+
+  -- Series (RRULE definitions)
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series', 'read', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series', 'create', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series', 'update', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_series', 'delete', TRUE);
+
+  -- Instances (junction to entities)
+  PERFORM set_role_permission(v_editor_id, 'time_slot_instances', 'read', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_instances', 'create', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_instances', 'update', TRUE);
+  PERFORM set_role_permission(v_editor_id, 'time_slot_instances', 'delete', TRUE);
+END $$;
+```
+
+#### Creating a Recurring Series
+
+```sql
+-- Create weekly yoga class (Tuesdays and Thursdays, 6-7pm)
+SELECT create_recurring_series(
+  p_group_name := 'Weekly Yoga Class',
+  p_group_description := 'Community yoga sessions',
+  p_group_color := '#10B981',
+  p_entity_table := 'reservation_requests',
+  p_entity_template := jsonb_build_object(
+    'resource_id', 1,
+    'purpose', 'Weekly Yoga Class',
+    'requested_by', 'user-uuid-here',
+    'attendee_count', 15
+  ),
+  p_rrule := 'FREQ=WEEKLY;BYDAY=TU,TH;COUNT=12',
+  p_dtstart := '2025-01-07T18:00:00'::timestamptz,
+  p_duration := 'PT1H',  -- 1 hour duration
+  p_timezone := 'America/New_York',
+  p_time_slot_property := 'time_slot',
+  p_expand_now := TRUE,
+  p_skip_conflicts := TRUE
+);
+```
+
+#### Core Tables
+
+| Table | Purpose |
+|-------|---------|
+| `metadata.time_slot_series_groups` | User-facing containers with name, description, color |
+| `metadata.time_slot_series` | RRULE definitions, entity templates, version tracking |
+| `metadata.time_slot_instances` | Junction mapping series occurrences to entity records |
+
+#### Key RPCs
+
+| Function | Purpose |
+|----------|---------|
+| `create_recurring_series()` | Create group + series + expand instances |
+| `expand_series_instances()` | On-demand expansion with conflict detection |
+| `preview_recurring_conflicts()` | Check conflicts before creation |
+| `split_series_from_date()` | "This and future" edits |
+| `update_series_template()` | "All" edits |
+| `cancel_series_occurrence()` | Mark single instance as cancelled |
+
+#### Complete Example
+
+See `examples/community-center/init-scripts/14_recurring_reservations.sql` for a complete implementation with:
+- Entity configuration for recurring reservation requests
+- Permission grants for editor role
+- Sample series (Weekly Yoga, Monthly Board Meeting)
+- RRULE patterns for weekly and monthly recurrence
+
+See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture documentation.
+
 ### Entity Notes System
 
 **Version**: v0.16.0+

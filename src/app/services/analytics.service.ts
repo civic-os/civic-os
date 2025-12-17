@@ -16,7 +16,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { MatomoTracker } from '@ngx-matomo/tracker';
+import { MatomoTracker } from 'ngx-matomo-client';
 import { getMatomoConfig } from '../config/runtime';
 
 /**

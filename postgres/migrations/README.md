@@ -265,15 +265,15 @@ Update `docker-compose.prod.yml` to use the new version:
 ```yaml
 services:
   migrations:
-    image: ghcr.io/civic-os/migrations:v0.4.0  # Update version
+    image: ghcr.io/civic-os/migrations:latest  # Update version
     # ...
 
   postgrest:
-    image: ghcr.io/civic-os/postgrest:v0.4.0   # Update version
+    image: ghcr.io/civic-os/postgrest:latest   # Update version
     # ...
 
   frontend:
-    image: ghcr.io/civic-os/frontend:v0.4.0    # Update version
+    image: ghcr.io/civic-os/frontend:latest    # Update version
     # ...
 ```
 
@@ -298,7 +298,7 @@ Run migrations directly:
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ## Rollback Procedure
@@ -314,7 +314,7 @@ Or using Docker directly:
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   revert --to @HEAD^
 ```
 

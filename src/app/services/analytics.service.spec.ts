@@ -18,7 +18,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { AnalyticsService } from './analytics.service';
-import { MatomoTracker } from '@ngx-matomo/tracker';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;

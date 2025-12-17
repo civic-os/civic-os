@@ -7,7 +7,7 @@ Versioned Docker container for running Sqitch database migrations against Postgr
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/dbname" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ## Published Images
@@ -18,9 +18,11 @@ Images are automatically published to GitHub Container Registry:
 
 **Tags:**
 - `latest` - Most recent build from main branch
-- `v0.4.0` - Semantic version (with 'v' prefix)
-- `0.4.0` - Semantic version (without 'v')
+- `vX.Y.Z` - Semantic version (with 'v' prefix, e.g., `v0.19.0`)
+- `X.Y.Z` - Semantic version (without 'v', e.g., `0.19.0`)
 - `sha-abc1234` - Git commit SHA (for precise rollback)
+
+See [releases](https://github.com/civic-os/civic-os-frontend/releases) for available versions.
 
 ## Environment Variables
 
@@ -48,7 +50,7 @@ Set to `false` to skip verification:
 docker run --rm \
   -e PGRST_DB_URI="..." \
   -e SQITCH_VERIFY="false" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 **`CIVIC_OS_VERIFY_FULL`** - Enable comprehensive schema verification (default: `false`)
@@ -58,7 +60,7 @@ Set to `true` for full schema comparison (recommended for production):
 docker run --rm \
   -e PGRST_DB_URI="..." \
   -e CIVIC_OS_VERIFY_FULL="true" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ## Commands
@@ -70,14 +72,14 @@ The container accepts Sqitch commands as arguments.
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 Or explicitly:
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   deploy --verify
 ```
 
@@ -86,7 +88,7 @@ docker run --rm \
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   status
 ```
 
@@ -96,7 +98,7 @@ Rollback to previous migration:
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   revert --to @HEAD^
 ```
 
@@ -104,7 +106,7 @@ Rollback to specific migration:
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   revert --to v0-3-0-baseline
 ```
 
@@ -113,7 +115,7 @@ docker run --rm \
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   verify
 ```
 
@@ -128,7 +130,7 @@ services:
     # ... database config
 
   migrations:
-    image: ghcr.io/civic-os/migrations:v0.4.0
+    image: ghcr.io/civic-os/migrations:latest
     environment:
       PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/civic_os
     depends_on:
@@ -137,7 +139,7 @@ services:
     restart: on-failure
 
   postgrest:
-    image: ghcr.io/civic-os/postgrest:v0.4.0
+    image: ghcr.io/civic-os/postgrest:latest
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -156,7 +158,7 @@ spec:
     spec:
       initContainers:
         - name: migrations
-          image: ghcr.io/civic-os/migrations:v0.4.0
+          image: ghcr.io/civic-os/migrations:latest
           env:
             - name: PGRST_DB_URI
               valueFrom:
@@ -168,7 +170,7 @@ spec:
 
       containers:
         - name: postgrest
-          image: ghcr.io/civic-os/postgrest:v0.4.0
+          image: ghcr.io/civic-os/postgrest:latest
           # ... postgrest config
 ```
 
@@ -189,20 +191,20 @@ spec:
 
 ```bash
 # Pull specific version
-docker pull ghcr.io/civic-os/migrations:v0.4.0
+docker pull ghcr.io/civic-os/migrations:latest
 
 # Run migrations
 docker run --rm \
   --network host \
   -e PGRST_DB_URI="postgres://user:pass@prod-db:5432/civic_os" \
   -e CIVIC_OS_VERIFY_FULL="true" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 
 # Verify deployment
 docker run --rm \
   --network host \
   -e PGRST_DB_URI="postgres://user:pass@prod-db:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.4.0 \
+  ghcr.io/civic-os/migrations:latest \
   status
 ```
 
@@ -212,14 +214,14 @@ docker run --rm \
 
 ```bash
 # ✅ Correct - all same version
-ghcr.io/civic-os/migrations:v0.4.0
-ghcr.io/civic-os/postgrest:v0.4.0
-ghcr.io/civic-os/frontend:v0.4.0
+ghcr.io/civic-os/migrations:latest
+ghcr.io/civic-os/postgrest:latest
+ghcr.io/civic-os/frontend:latest
 
 # ❌ Wrong - version mismatch
 ghcr.io/civic-os/migrations:v0.3.0  # Old migrations
-ghcr.io/civic-os/postgrest:v0.4.0   # New API
-ghcr.io/civic-os/frontend:v0.4.0    # New UI
+ghcr.io/civic-os/postgrest:latest   # New API
+ghcr.io/civic-os/frontend:latest    # New UI
 # Result: Schema mismatch, application breaks
 ```
 
@@ -247,14 +249,14 @@ Use host network for local databases:
 docker run --rm \
   --network host \
   -e PGRST_DB_URI="postgres://localhost:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 Or connect to external database:
 ```bash
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@external-host:5432/civic_os" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ## Troubleshooting
@@ -315,12 +317,12 @@ docker run --rm \
 # ✅ Good - password masked in logs
 docker run --rm \
   -e PGRST_DB_URI="$(cat /secrets/db_uri)" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 
 # ❌ Bad - password visible in logs/history
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:MySecretPassword@host:5432/db" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ### Production Safety
@@ -329,15 +331,15 @@ Use read-only verification before destructive operations:
 ```bash
 # 1. Check status
 docker run --rm -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 status
+  ghcr.io/civic-os/migrations:latest status
 
 # 2. Dry-run (if supported)
 docker run --rm -e PGRST_DB_URI="..." \
-  ghcr.io/civic-os/migrations:v0.4.0 deploy --dry-run
+  ghcr.io/civic-os/migrations:latest deploy --dry-run
 
 # 3. Deploy with full verification
 docker run --rm -e PGRST_DB_URI="..." -e CIVIC_OS_VERIFY_FULL="true" \
-  ghcr.io/civic-os/migrations:v0.4.0
+  ghcr.io/civic-os/migrations:latest
 ```
 
 ## Building Locally

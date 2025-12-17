@@ -435,13 +435,15 @@ These examples use **version latest** for development purposes. For production d
 image: ghcr.io/civic-os/frontend:latest
 image: ghcr.io/civic-os/postgrest:latest
 image: ghcr.io/civic-os/consolidated-worker:latest
-image: ghcr.io/civic-os/payment-worker:latest  # Optional
 
 # Production (pin to specific version)
-image: ghcr.io/civic-os/frontend:0.15.0
-image: ghcr.io/civic-os/postgrest:0.15.0
-image: ghcr.io/civic-os/consolidated-worker:0.15.0
-image: ghcr.io/civic-os/payment-worker:0.15.0  # Optional
+image: ghcr.io/civic-os/frontend:0.19.0
+image: ghcr.io/civic-os/postgrest:0.19.0
+image: ghcr.io/civic-os/consolidated-worker:0.19.0
+
+# Payment worker (optional - must be built locally, not published to ghcr.io)
+# docker build -t your-registry/payment-worker:latest ./services/payment-worker
+image: your-registry/payment-worker:latest
 ```
 
 **Recent versions:**

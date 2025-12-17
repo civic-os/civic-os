@@ -145,6 +145,41 @@ See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and 
 
 See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) for complete implementation guide and `examples/community-center/init-scripts/13_entity_actions.sql` for working example.
 
+**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedule system for time-slotted entities. Enables patterns like "Every Tuesday and Thursday at 6pm" or "First Monday of each month". Configuration is entity-level via `supports_recurring=true` and `recurring_property_name` in `metadata.entities`. Series are managed by editors/admins via `/admin/recurring-schedules` page.
+
+**Quick Setup**:
+```sql
+-- Enable recurring for an entity
+UPDATE metadata.entities SET
+  supports_recurring = TRUE,
+  recurring_property_name = 'time_slot'
+WHERE table_name = 'reservations';
+
+-- Grant series management permissions to editor role
+SELECT set_role_permission(
+  (SELECT id FROM metadata.roles WHERE display_name = 'editor'),
+  'time_slot_series_groups', 'read', TRUE);
+-- Repeat for create/update/delete on series_groups, series, instances
+```
+
+**Architecture**:
+- **Series Groups**: User-facing containers ("Weekly Yoga Class") with color and description
+- **Series**: RRULE definitions + entity templates (immutable after creation, new versions created on splits)
+- **Instances**: Junction table mapping series occurrences to entity records
+
+**Key RPCs**:
+- `create_recurring_series()` - Create group + series + expand instances
+- `expand_series_instances()` - On-demand expansion with conflict detection
+- `split_series_from_date()` - "This and future" edits create new series version
+- `update_series_template()` - "All" edits modify template for non-exception instances
+
+**Edit Scope Dialogs**: When editing a recurring entity record, users see scope options:
+- **This only** - Marks instance as exception, edits only this occurrence
+- **This and future** - Splits series at this point, creates new version
+- **All** - Updates template, regenerates non-exception instances
+
+See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture and `examples/community-center/init-scripts/14_recurring_reservations.sql` for working example.
+
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
 **Payment Type** (`Payment`): UUID foreign key to `payments.transactions` table for Stripe-based payment processing. Metadata-driven architecture enables payments on any entity via `payment_initiation_rpc` configuration in `metadata.entities`. Frontend automatically displays payment badges on List pages and "Pay Now" button on Detail pages when configured. Payment workflow: user clicks "Pay Now" → framework calls configured RPC → RPC validates and creates payment record → River job creates Stripe PaymentIntent → modal displays Stripe Elements → webhook updates status. Requires Civic OS v0.13.0+ with consolidated worker service. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete implementation guide and `examples/community-center/init-scripts/10_payment_integration.sql` for working example.
@@ -306,7 +341,7 @@ sqitch revert dev --to @HEAD^  # Rollback
 sqitch deploy dev --verify      # Re-deploy
 
 # Deploy to production (using versioned container)
-./scripts/migrate-production.sh v0.4.0 $DATABASE_URL
+./scripts/migrate-production.sh latest $DATABASE_URL
 ```
 
 **Important Notes:**

@@ -29,9 +29,7 @@ import { DashboardNavigationWidgetComponent } from './components/widgets/dashboa
 import { CalendarWidgetComponent } from './components/widgets/calendar-widget/calendar-widget.component';
 import { provideMarkdown } from 'ngx-markdown';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
-import { importProvidersFrom } from '@angular/core';
-import { NgxMatomoTrackerModule } from '@ngx-matomo/tracker';
-import { MatomoRouterTrackerService } from './services/matomo-router-tracker.service';
+import { provideMatomo, withRouter } from 'ngx-matomo-client';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -67,12 +65,13 @@ export const appConfig: ApplicationConfig = {
       const matomoConfig = getMatomoConfig();
       if (matomoConfig.url && matomoConfig.siteId && matomoConfig.enabled) {
         return [
-          importProvidersFrom(
-            NgxMatomoTrackerModule.forRoot({
+          provideMatomo(
+            {
               siteId: matomoConfig.siteId,
               trackerUrl: `${matomoConfig.url}/matomo.php`,
               scriptUrl: `${matomoConfig.url}/matomo.js`
-            })
+            },
+            withRouter()  // Automatic router tracking (replaces MatomoRouterTrackerService)
           )
         ];
       }
@@ -89,15 +88,6 @@ export const appConfig: ApplicationConfig = {
       registry.register('map', MapWidgetComponent);                     // Phase 2
       registry.register('dashboard_navigation', DashboardNavigationWidgetComponent); // Phase 2
       registry.register('calendar', CalendarWidgetComponent);           // Phase 2
-    }),
-
-    // Initialize Matomo router tracking (if analytics enabled)
-    provideAppInitializer(() => {
-      const matomoConfig = getMatomoConfig();
-      if (matomoConfig.url && matomoConfig.siteId && matomoConfig.enabled) {
-        // Inject the router tracker service to start listening to navigation events
-        inject(MatomoRouterTrackerService);
-      }
     })
   ]
 };

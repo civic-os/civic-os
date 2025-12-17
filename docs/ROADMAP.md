@@ -59,6 +59,15 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Frontend component (notes section on Detail pages, simple formatting)
   - [x] Example trigger for status change notes
 
+- [x] **Recurring Time Slots** (v0.19.0) - RFC 5545 RRULE-based recurring schedules for time-slotted entities
+  - [x] Database schema (`time_slot_series_groups`, `time_slot_series`, `time_slot_instances` tables)
+  - [x] RRULE validation with DoS prevention (max occurrences, horizon limits)
+  - [x] Series management UI (`/admin/recurring-schedules`) for editors/admins
+  - [x] Go worker for background instance expansion
+  - [x] Edit scope dialogs (this only, this and future, all)
+  - [x] Conflict preview before series creation
+  - [ ] Calendar integration showing recurring series badges
+
 ### Dashboards (Phased Development)
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
 - [x] **Phase 2 - Dynamic Widgets**: Filtered list widget, map widget with clustering, calendar widget, auto-refresh infrastructure
