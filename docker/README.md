@@ -4,17 +4,27 @@ This directory contains Docker configurations for building and deploying Civic O
 
 ## Container Images
 
-Civic OS provides two production-ready container images:
+Civic OS provides five production-ready container images:
 
 1. **Frontend Container** (`ghcr.io/civic-os/frontend`)
    - Angular SPA with nginx
    - Runtime configuration via environment variables
-   - Multi-architecture support (amd64, arm64)
 
 2. **PostgREST Container** (`ghcr.io/civic-os/postgrest`)
    - PostgREST API with automatic Keycloak JWKS fetching
    - Built on official PostgREST image
-   - Multi-architecture support (amd64, arm64)
+
+3. **Migrations Container** (`ghcr.io/civic-os/migrations`)
+   - Sqitch-based database schema migrations
+   - Must match frontend/postgrest versions for compatibility
+
+4. **Consolidated Worker Container** (`ghcr.io/civic-os/consolidated-worker`)
+   - Go microservice for S3 presigned URLs, thumbnail generation, and notifications
+   - Uses River job queue for reliable background processing
+
+5. **Payment Worker Container** (`ghcr.io/civic-os/payment-worker`) - Optional
+   - Go microservice for Stripe payment processing
+   - Only required if using payment features (v0.13.0+)
 
 ## Quick Start
 
@@ -24,7 +34,9 @@ Civic OS provides two production-ready container images:
 # Pull images from GitHub Container Registry
 docker pull ghcr.io/civic-os/frontend:latest
 docker pull ghcr.io/civic-os/postgrest:latest
+docker pull ghcr.io/civic-os/migrations:latest
 docker pull ghcr.io/civic-os/consolidated-worker:latest
+docker pull ghcr.io/civic-os/payment-worker:latest  # Optional: for Stripe payments
 
 # For production, pin to specific version tags (e.g., v0.19.0)
 # See releases: https://github.com/civic-os/civic-os-frontend/releases
@@ -164,14 +176,15 @@ curl http://localhost:3000/
 
 ## GitHub Actions CI/CD
 
-On every push to `main`, GitHub Actions automatically:
-1. Extracts version from `package.json` (e.g., `0.3.0`)
-2. Builds both containers for amd64 and arm64
+On every version tag push (e.g., `v0.19.0`), GitHub Actions automatically:
+1. Runs unit tests and migration tests
+2. Builds all 5 containers for amd64
 3. Publishes to GitHub Container Registry with tags:
    - `latest`
-   - `v0.3.0`
-   - `0.3.0`
+   - `v0.19.0`
+   - `0.19.0`
    - `sha-<git-sha>`
+4. Creates a GitHub Release with container pull commands
 
 ### Version Bumps
 
