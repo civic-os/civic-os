@@ -15,130 +15,16 @@ env:
   IMAGE_BASE: ${{ github.repository_owner }}
 
 jobs:
-  test:
-    name: Run Unit Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: 'true'
-
-      - name: Run tests
-        run: npm run test:headless
-
-  test-migrations:
-    name: Test Database Migrations
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgis/postgis:17-3.5
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: civic_os_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Sqitch and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libdbd-pg-perl \
-            libmodule-build-perl \
-            postgresql-client \
-            cpanminus
-
-          # Install Sqitch
-          sudo cpanm --notest App::Sqitch
-
-      - name: Verify Sqitch installation
-        run: sqitch --version
-
-      - name: Create authenticator role
-        run: |
-          psql -h localhost -U postgres -d civic_os_test -c "CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD 'test-password';"
-        env:
-          PGPASSWORD: postgres
-
-      - name: Test migration deployment
-        run: |
-          sqitch deploy db:pg://postgres:postgres@localhost:5432/civic_os_test --verify
-        env:
-          PGPASSWORD: postgres
-
-      - name: Show migration status
-        run: |
-          sqitch status db:pg://postgres:postgres@localhost:5432/civic_os_test
-        env:
-          PGPASSWORD: postgres
-
-      - name: Test rollback to previous migration
-        run: |
-          # Get list of migrations
-          MIGRATION_COUNT=$(sqitch plan --format '%n' | wc -l)
-
-          if [ "$MIGRATION_COUNT" -gt 1 ]; then
-            echo "Testing rollback to previous migration"
-            sqitch revert db:pg://postgres:postgres@localhost:5432/civic_os_test --to @HEAD^ -y
-
-            # Show status after revert
-            sqitch status db:pg://postgres:postgres@localhost:5432/civic_os_test
-          else
-            echo "Only one migration found, skipping rollback test"
-          fi
-        env:
-          PGPASSWORD: postgres
-
-      - name: Re-deploy migrations (test idempotency)
-        run: |
-          sqitch deploy db:pg://postgres:postgres@localhost:5432/civic_os_test --verify
-        env:
-          PGPASSWORD: postgres
-
-      - name: Run full schema verification
-        run: |
-          # Get the latest migration name
-          LATEST_MIGRATION=$(sqitch plan --format '%n' | tail -1)
-
-          if [ -n "$LATEST_MIGRATION" ]; then
-            echo "Testing full verification for: $LATEST_MIGRATION"
-
-            # Check if verify-full script exists
-            if [ -f "postgres/migrations/scripts/verify-full.sh" ]; then
-              CIVIC_OS_VERIFY_FULL=true \
-              SQITCH_TARGET="db:pg://postgres:postgres@localhost:5432/civic_os_test" \
-              ./postgres/migrations/scripts/verify-full.sh "$LATEST_MIGRATION"
-            else
-              echo "Full verification script not found, skipping"
-            fi
-          fi
-        env:
-          PGPASSWORD: postgres
+  # Call the reusable test workflow - runs Angular tests, Go tests, migrations, and lint
+  run-tests:
+    name: Run All Tests
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
 
   build-frontend:
     name: Build Frontend Container
     runs-on: ubuntu-latest
-    needs: test
+    needs: run-tests
     permissions:
       contents: read
       packages: write
@@ -190,7 +76,7 @@ jobs:
   build-postgrest:
     name: Build PostgREST Container
     runs-on: ubuntu-latest
-    needs: test
+    needs: run-tests
     permissions:
       contents: read
       packages: write
@@ -244,7 +130,7 @@ jobs:
   build-migrations:
     name: Build Migrations Container
     runs-on: ubuntu-latest
-    needs: [test, test-migrations]
+    needs: run-tests
     permissions:
       contents: read
       packages: write
@@ -298,7 +184,7 @@ jobs:
   build-consolidated-worker:
     name: Build Consolidated Worker Container
     runs-on: ubuntu-latest
-    needs: test
+    needs: run-tests
     permissions:
       contents: read
       packages: write
@@ -356,7 +242,7 @@ jobs:
   build-payment-worker:
     name: Build Payment Worker Container
     runs-on: ubuntu-latest
-    needs: test
+    needs: run-tests
     permissions:
       contents: read
       packages: write
