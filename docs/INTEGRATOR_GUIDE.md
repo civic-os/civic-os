@@ -394,6 +394,9 @@ Pre-populated types:
 - `markdown` - Static content with markdown formatting (Phase 1, ✅ implemented)
 - `filtered_list` - Dynamic entity lists with filters (Phase 2, ✅ implemented)
 - `map` - Interactive maps with filtered geographic data (Phase 2, ✅ implemented)
+- `calendar` - Interactive calendar for time_slot entities (Phase 2, ✅ implemented)
+- `dashboard_navigation` - Sequential prev/next navigation for storymaps (Phase 2, ✅ implemented)
+- `nav_buttons` - Flexible navigation buttons with icons and styles (Phase 2, ✅ implemented)
 - `stat_card` - Single metric display with sparklines (Phase 5, planned)
 - `query_result` - Results from database views or RPCs (Phase 5, planned)
 
@@ -497,6 +500,24 @@ BEGIN
       'showColumns', jsonb_build_array('display_name', 'resource_id', 'status')
     ),
     4, 2, 2  -- Full-width, double height
+  );
+
+  -- 6. Add navigation buttons widget
+  INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+  VALUES (
+    v_dashboard_id,
+    'nav_buttons',
+    NULL,  -- Header is in config
+    jsonb_build_object(
+      'header', 'Quick Actions',
+      'description', 'Navigate to commonly used areas',
+      'buttons', jsonb_build_array(
+        jsonb_build_object('text', 'New Issue', 'url', '/create/issues', 'icon', 'add_circle', 'variant', 'primary'),
+        jsonb_build_object('text', 'View All', 'url', '/view/issues', 'icon', 'list'),
+        jsonb_build_object('text', 'Reports', 'url', '/dashboard/2', 'icon', 'bar_chart', 'variant', 'ghost')
+      )
+    ),
+    5, 2, 1  -- Full-width, single height
   );
 END $$;
 ```

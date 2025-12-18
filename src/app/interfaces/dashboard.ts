@@ -205,3 +205,24 @@ export interface FilterCondition {
   operator: string;  // 'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'in'
   value: any;
 }
+
+/**
+ * Configuration for navigation buttons widget.
+ * Displays a flexible set of navigation buttons with optional header and description.
+ * Stored in dashboard_widgets.config as JSONB.
+ */
+export interface NavButtonsWidgetConfig {
+  // Optional header text displayed above the buttons
+  header?: string;
+
+  // Optional description/instructions text
+  description?: string;
+
+  // Array of navigation buttons (required)
+  buttons: Array<{
+    text: string;      // Button label (required)
+    url: string;       // Internal route URL (required)
+    icon?: string;     // Material Symbol name (optional, e.g., 'home', 'settings')
+    variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link';  // Button style (default: 'outline')
+  }>;
+}

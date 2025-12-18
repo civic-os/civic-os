@@ -143,7 +143,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [consolidated-worker-go]
+        service: [consolidated-worker-go, payment-worker]
 
     steps:
       - name: Checkout code
@@ -154,7 +154,7 @@ jobs:
         with:
           go-version: '1.24'
 
-      - name: Install system dependencies
+      - name: Install system dependencies (consolidated-worker)
         if: matrix.service == 'consolidated-worker-go'
         run: |
           sudo apt-get update
@@ -197,7 +197,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [consolidated-worker-go]
+        service: [consolidated-worker-go, payment-worker]
 
     steps:
       - name: Checkout code
@@ -245,6 +245,15 @@ jobs:
 
       - name: Check Go formatting (consolidated-worker)
         working-directory: services/consolidated-worker-go
+        run: |
+          if [ "$(gofmt -l .)" != "" ]; then
+            echo "Go files are not formatted. Run 'gofmt -w .' to fix."
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Check Go formatting (payment-worker)
+        working-directory: services/payment-worker
         run: |
           if [ "$(gofmt -l .)" != "" ]; then
             echo "Go files are not formatted. Run 'gofmt -w .' to fix."

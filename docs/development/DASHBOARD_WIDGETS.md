@@ -426,6 +426,135 @@ Previous implementations used markdown widgets with HTML links (`<a href="...">`
 - Preserved application state
 - Better user experience for narrative flows
 
+## NavButtonsWidgetConfig
+
+Displays a flexible set of navigation buttons with optional header and description. More general-purpose than the sequential `dashboard_navigation` widget—ideal for quick action panels, link collections, or navigation hubs.
+
+### Complete Configuration Reference
+
+```typescript
+interface NavButtonsWidgetConfig {
+  // Optional header text displayed above the buttons
+  header?: string;
+
+  // Optional description/instructions text
+  description?: string;
+
+  // Array of navigation buttons (required)
+  buttons: Array<{
+    text: string;      // Button label (required)
+    url: string;       // Internal route URL (required)
+    icon?: string;     // Material Symbol name (optional, e.g., 'home', 'settings')
+    variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link';  // Default: 'outline'
+  }>;
+}
+```
+
+### SQL Example
+
+```sql
+INSERT INTO metadata.dashboard_widgets (
+  dashboard_id, widget_type, title, config, sort_order, width, height
+) VALUES (
+  v_dashboard_id,
+  'nav_buttons',
+  NULL,  -- Header is in config, title usually not needed
+  jsonb_build_object(
+    'header', 'Quick Actions',
+    'description', 'Navigate to commonly used areas',
+    'buttons', jsonb_build_array(
+      jsonb_build_object('text', 'View Issues', 'url', '/view/issues', 'icon', 'bug_report', 'variant', 'primary'),
+      jsonb_build_object('text', 'Add User', 'url', '/create/users', 'icon', 'person_add', 'variant', 'outline'),
+      jsonb_build_object('text', 'Reports', 'url', '/dashboard/5', 'icon', 'bar_chart'),
+      jsonb_build_object('text', 'Settings', 'url', '/settings', 'icon', 'settings', 'variant', 'ghost')
+    )
+  ),
+  1,    -- sort_order
+  2,    -- Full width
+  1     -- Minimal height
+);
+```
+
+### Features
+
+- **Flexible button array**: Add as many navigation buttons as needed
+- **Optional header/description**: Provide context for the navigation options
+- **Icon support**: Uses Material Symbols Outlined (same as rest of Civic OS)
+- **Style variants**: Match button importance with DaisyUI button styles
+- **Client-side navigation**: Uses Angular `routerLink` for instant transitions
+- **Responsive layout**: Buttons wrap on smaller screens using flexbox
+
+### Button Variants
+
+| Variant | DaisyUI Class | Use Case |
+|---------|---------------|----------|
+| `primary` | `btn-primary` | Main action, call-to-action |
+| `secondary` | `btn-secondary` | Important but not primary |
+| `accent` | `btn-accent` | Highlight or special action |
+| `outline` | `btn-outline` | Default, subtle buttons |
+| `ghost` | `btn-ghost` | Minimal, text-like buttons |
+| `link` | `btn-link` | Link-style, underlined on hover |
+
+### Common Icon Names
+
+Use Material Symbols Outlined names:
+- Navigation: `home`, `arrow_back`, `arrow_forward`, `menu`
+- Actions: `add_circle`, `edit`, `delete`, `settings`
+- Content: `bug_report`, `bar_chart`, `person`, `group`
+- Files: `folder`, `description`, `upload`, `download`
+
+Browse all icons at: https://fonts.google.com/icons
+
+### Use Cases
+
+**Quick Actions Panel:**
+```sql
+jsonb_build_object(
+  'header', 'Quick Actions',
+  'buttons', jsonb_build_array(
+    jsonb_build_object('text', 'New Issue', 'url', '/create/issues', 'icon', 'add_circle', 'variant', 'primary'),
+    jsonb_build_object('text', 'My Tasks', 'url', '/view/tasks?assigned_to=me', 'icon', 'task_alt')
+  )
+)
+```
+
+**Admin Navigation Hub:**
+```sql
+jsonb_build_object(
+  'header', 'Administration',
+  'description', 'System configuration and management',
+  'buttons', jsonb_build_array(
+    jsonb_build_object('text', 'Users', 'url', '/view/users', 'icon', 'group'),
+    jsonb_build_object('text', 'Roles', 'url', '/permissions', 'icon', 'admin_panel_settings'),
+    jsonb_build_object('text', 'Entities', 'url', '/entity-management', 'icon', 'table_chart'),
+    jsonb_build_object('text', 'Properties', 'url', '/property-management', 'icon', 'list')
+  )
+)
+```
+
+**Dashboard Switcher (without sequential prev/next):**
+```sql
+jsonb_build_object(
+  'header', 'View By',
+  'buttons', jsonb_build_array(
+    jsonb_build_object('text', 'Overview', 'url', '/', 'variant', 'primary'),
+    jsonb_build_object('text', 'By Region', 'url', '/dashboard/2'),
+    jsonb_build_object('text', 'By Status', 'url', '/dashboard/3'),
+    jsonb_build_object('text', 'Timeline', 'url', '/dashboard/4')
+  )
+)
+```
+
+### nav_buttons vs dashboard_navigation
+
+| Feature | `nav_buttons` | `dashboard_navigation` |
+|---------|---------------|------------------------|
+| Layout | Horizontal button row | Prev/Next with progress chips |
+| Icons | Yes | No |
+| Button styles | Configurable per-button | Fixed (outline/primary) |
+| Header/Description | Yes | No |
+| Best for | Quick actions, link hubs | Sequential storymap flows |
+
 ## Widget Grid Layout
 
 Widgets use a 2-column grid system:

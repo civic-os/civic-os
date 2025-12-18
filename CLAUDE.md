@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **⚠️ MAINTENANCE GUIDELINES FOR THIS FILE**
+>
+> This file is an **index**, not a tutorial. When updating CLAUDE.md:
+> - **DO NOT add code samples** (SQL, TypeScript, bash) - put them in `docs/` files instead
+> - **DO** add brief descriptions of features with doc references
+> - **DO** keep essential bash commands for development (npm scripts, docker commands)
+> - **DO** keep critical warnings that prevent common mistakes (e.g., FK index requirement)
+> - **EXCEPTION**: Angular patterns (Signals, OnPush) stay here as they're project-wide conventions
+>
+> Pattern to follow: `**Feature Name** (version): Brief description. See \`docs/path/FILE.md\` for details.`
+
 ## Project Overview
 
 Civic OS is a meta-application framework that automatically generates CRUD (Create, Read, Update, Delete) views for any PostgreSQL database schema. The Angular frontend dynamically creates list, detail, create, and edit pages based on database metadata stored in custom PostgreSQL views.
@@ -50,92 +61,23 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `Telephone`: `phone_number` → Clickable tel: link with formatted display, masked input (XXX) XXX-XXXX
 - `TimeSlot`: `time_slot` (tstzrange) → Formatted date range display, dual datetime-local inputs with validation, optional calendar visualization
 
-**Color Type**: Use the `hex_color` domain for RGB color values. The domain enforces `#RRGGBB` format validation at the database level. UI displays colors as badges with colored swatches, and provides both a visual color picker and text input for editing. Example:
-```sql
-CREATE TABLE tags (
-  id SERIAL PRIMARY KEY,
-  display_name VARCHAR(50) NOT NULL,
-  color hex_color NOT NULL DEFAULT '#3B82F6'
-);
-```
+**Color Type** (`hex_color`): RGB color values with `#RRGGBB` validation. UI shows color chip + picker.
 
-**Email Type**: Use the `email_address` domain for email addresses. The domain enforces simplified RFC 5322 validation at the database level. UI displays emails as clickable mailto: links and provides HTML5 email input with mobile keyboard optimization. Pattern: `^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$`
+**Email Type** (`email_address`): RFC 5322 validation. UI shows clickable mailto: links.
 
-**Telephone Type**: Use the `phone_number` domain for US phone numbers. The domain enforces 10-digit format (no dashes or formatting) at the database level. UI displays formatted as (XXX) XXX-XXXX and renders as clickable tel: links. Input uses masked entry with automatic formatting as user types. Storage format: 10 digits (e.g., "5551234567").
-
-Example:
-```sql
-CREATE TABLE contacts (
-  id SERIAL PRIMARY KEY,
-  display_name VARCHAR(100) NOT NULL,
-  email email_address NOT NULL,
-  phone phone_number,
-  alternate_email email_address
-);
-```
+**Telephone Type** (`phone_number`): US 10-digit format. UI shows formatted (XXX) XXX-XXXX with masked input.
 
 **TimeSlot Type** (`TimeSlot`): Use the `time_slot` domain for appointment scheduling, reservations, and time-based bookings. The domain wraps PostgreSQL's `tstzrange` (timestamp range with timezone). Database stores UTC timestamps, UI displays in user's local timezone. Display component formats ranges intelligently (same-day: "Mar 15, 2025 2:00 PM - 4:00 PM" vs multi-day: "Mar 15, 2025 2:00 PM - Mar 17, 2025 11:00 AM"). Edit component provides two datetime-local inputs with validation (end must be after start).
 
 **Calendar Integration**: Entities with `time_slot` columns can enable calendar visualization. Set `show_calendar=true` and `calendar_property_name` in `metadata.entities` to show calendar view on List pages. Detail pages automatically display calendar sections for related entities with TimeSlot properties. Requires Civic OS v0.9.0+ (includes `time_slot` domain and `btree_gist` extension).
 
-**Overlap Prevention**: Use GIST exclusion constraints to prevent double-booking at database level. Requires `btree_gist` extension (included in v0.9.0+). Frontend async validation (Phase 5) is deferred - overlaps are caught on submit.
-
-Example:
-```sql
-CREATE TABLE reservations (
-  id BIGSERIAL PRIMARY KEY,
-  resource_id INT NOT NULL REFERENCES resources(id),
-  time_slot time_slot NOT NULL,
-  purpose TEXT NOT NULL,
-
-  -- Prevent overlapping reservations for same resource
-  CONSTRAINT no_overlaps EXCLUDE USING GIST (resource_id WITH =, time_slot WITH &&)
-);
-
--- REQUIRED: GiST index for efficient range queries and constraint enforcement
-CREATE INDEX idx_reservations_time_slot ON reservations USING GIST(time_slot);
-
--- Enable calendar view on List page
-UPDATE metadata.entities SET
-  show_calendar = TRUE,
-  calendar_property_name = 'time_slot',
-  calendar_color_property = NULL  -- Optional: hex_color column for event colors
-WHERE table_name = 'reservations';
-```
-
-See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide and `examples/community-center/` for working example.
+**Overlap Prevention**: Use GIST exclusion constraints to prevent double-booking at database level. Requires `btree_gist` extension (v0.9.0+). See `docs/development/CALENDAR_INTEGRATION.md` for SQL examples and `examples/community-center/` for working example.
 
 **Status Type** (`Status`): Framework-provided status and workflow system using centralized `metadata.statuses` table with `entity_type` discriminator. Frontend detects via `status_entity_type` in `metadata.properties` and renders colored badges/dropdowns. Features: `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering. Use `get_initial_status('entity_type')` helper for column defaults. Requires v0.15.0+.
 
 See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) for Quick Setup SQL, `docs/development/STATUS_TYPE_SYSTEM.md` for design, and `examples/community-center/` for working example.
 
-**Entity Notes** (v0.16.0+): Framework-level notes system that any entity can opt into via metadata configuration. Notes are polymorphic (one `metadata.entity_notes` table serves all entities) and support both human-authored and trigger-generated content. Notes section appears on Detail pages with simple Markdown formatting (bold, italic, links).
-
-**Quick Setup**:
-```sql
--- Enable notes for an entity (creates permissions automatically)
-SELECT enable_entity_notes('reservation_requests');
-
--- Optional: Add status change notes trigger
-CREATE TRIGGER myentity_status_change_note
-    AFTER UPDATE OF status_id ON myentity
-    FOR EACH ROW
-    WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
-    EXECUTE FUNCTION add_status_change_note();
-```
-
-**Features**:
-- **Permission-isolated**: Notes have dedicated `{entity}:notes:read` and `{entity}:notes:create` permissions (virtual permissions pattern - Permissions page automatically shows only Read/Create checkboxes for `:notes` entries)
-- **System notes**: Triggers can add notes with `note_type='system'` for audit trails (displayed with "Auto" badge)
-- **Markdown**: Supports `**bold**`, `*italic*`, and `[links](url)` formatting
-- **Export**: Detail pages export notes directly; List pages show "Include notes" checkbox modal for bulk export with Notes worksheet
-
-**RPC Functions**:
-- `enable_entity_notes(entity_type)` - Enable notes and create default permissions
-- `create_entity_note(entity_type, entity_id, content, note_type, is_internal, author_id)` - Create a note
-- `add_status_change_note()` - Trigger function for automatic status change notes
-
-See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete implementation guide and `examples/community-center/init-scripts/11_enable_notes.sql` for working example.
+**Entity Notes** (v0.16.0+): Polymorphic notes system any entity can opt into. Features permission-isolated notes (`{entity}:notes:read/create`), system notes for audit trails, Markdown formatting, and export support. Enable via `SELECT enable_entity_notes('entity_type')`. See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete guide.
 
 **Static Text Blocks** (v0.17.0+): Display-only markdown content blocks on Detail, Create, and Edit pages. Blocks are stored in `metadata.static_text` table and interspersed with properties by `sort_order`. Supports full markdown (headers, lists, bold, italic, links) via `ngx-markdown`, configurable visibility (`show_on_detail`, `show_on_create`, `show_on_edit`), and 1-8 column width.
 
@@ -145,40 +87,7 @@ See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and 
 
 See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) for complete implementation guide and `examples/community-center/init-scripts/13_entity_actions.sql` for working example.
 
-**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedule system for time-slotted entities. Enables patterns like "Every Tuesday and Thursday at 6pm" or "First Monday of each month". Configuration is entity-level via `supports_recurring=true` and `recurring_property_name` in `metadata.entities`. Series are managed by editors/admins via `/admin/recurring-schedules` page.
-
-**Quick Setup**:
-```sql
--- Enable recurring for an entity
-UPDATE metadata.entities SET
-  supports_recurring = TRUE,
-  recurring_property_name = 'time_slot'
-WHERE table_name = 'reservations';
-
--- Grant series management permissions to editor role
-SELECT set_role_permission(
-  (SELECT id FROM metadata.roles WHERE display_name = 'editor'),
-  'time_slot_series_groups', 'read', TRUE);
--- Repeat for create/update/delete on series_groups, series, instances
-```
-
-**Architecture**:
-- **Series Groups**: User-facing containers ("Weekly Yoga Class") with color and description
-- **Series**: RRULE definitions + entity templates (immutable after creation, new versions created on splits)
-- **Instances**: Junction table mapping series occurrences to entity records
-
-**Key RPCs**:
-- `create_recurring_series()` - Create group + series + expand instances
-- `expand_series_instances()` - On-demand expansion with conflict detection
-- `split_series_from_date()` - "This and future" edits create new series version
-- `update_series_template()` - "All" edits modify template for non-exception instances
-
-**Edit Scope Dialogs**: When editing a recurring entity record, users see scope options:
-- **This only** - Marks instance as exception, edits only this occurrence
-- **This and future** - Splits series at this point, creates new version
-- **All** - Updates template, regenerates non-exception instances
-
-See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture and `examples/community-center/init-scripts/14_recurring_reservations.sql` for working example.
+**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedule system. Enable via `supports_recurring=true` and `recurring_property_name` in `metadata.entities`. Architecture: Series Groups → Series (RRULE + template) → Instances. Edit scope dialogs support "This only", "This and future", and "All" modifications. Managed at `/admin/recurring-schedules`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture.
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
@@ -207,19 +116,7 @@ These two timestamp types have fundamentally different timezone behaviors:
 
 **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions. Modifying this code can cause data integrity issues. See extensive inline comments and tests for implementation details.
 
-**Many-to-Many Relationships**: Automatically detected from junction tables with foreign keys. Junction tables MUST use composite primary keys (NOT surrogate IDs) to prevent duplicate key errors. The system detects M:M relationships via metadata analysis and renders them with `ManyToManyEditorComponent` on Detail pages only (not Create/Edit). Changes are saved immediately using direct REST operations (POST/DELETE). Junction table structure:
-```sql
-CREATE TABLE issue_tags (
-  issue_id BIGINT NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
-  tag_id INT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (issue_id, tag_id)  -- Composite key, NOT surrogate id
-);
--- REQUIRED: Index the foreign keys for performance
-CREATE INDEX idx_issue_tags_issue_id ON issue_tags(issue_id);
-CREATE INDEX idx_issue_tags_tag_id ON issue_tags(tag_id);
-```
-The UI displays in display mode by default (read-only badges) with an "Edit" button to enter edit mode (checkboxes with pending changes preview). Users need CREATE and DELETE permissions on the junction table to edit relationships. See `ManyToManyEditorComponent` and `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details.
+**Many-to-Many Relationships**: Auto-detected from junction tables. **CRITICAL**: Junction tables MUST use composite primary keys (NOT surrogate IDs). Renders on Detail pages with `ManyToManyEditorComponent`. Requires CREATE/DELETE permissions on junction table. See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details and SQL examples.
 
 **Full-Text Search**: Add `civic_os_text_search` tsvector column (generated, indexed) and configure `metadata.entities.search_fields` array. Frontend automatically displays search input on List pages. See example tables for implementation pattern.
 
@@ -244,6 +141,8 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 - `filtered_list` - Entity records in table format with filters, sorting, pagination
 - `map` - Geographic data on interactive map with optional clustering
 - `calendar` - Time-slotted events on interactive calendar with month/week/day views
+- `dashboard_navigation` - Sequential prev/next navigation for storymap flows
+- `nav_buttons` - Flexible navigation buttons with header, description, icons, and configurable styles
 
 See `docs/development/DASHBOARD_WIDGETS.md` for complete widget configuration reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
 
@@ -445,29 +344,7 @@ See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters a
 
 ### Custom Property Display
 
-Override property metadata to customize UI behavior:
-- **`display_name`**: Custom label (default: column_name)
-- **`sort_order`**: Field ordering in forms/tables
-- **`column_width`**: Form field width - 1 (half) or 2 (full, default)
-- **`sortable`**: Enable/disable column sorting on List pages
-- **`filterable`**: Enable/disable property in filter bar (supports ForeignKeyName, User, DateTime, DateTimeLocal, Date, Boolean, Money, IntegerNumber)
-- **`show_on_list`**: Show property in List page table (default: true)
-- **`show_on_create`**: Show property in Create form (default: true)
-- **`show_on_edit`**: Show property in Edit form (default: true)
-- **`show_on_detail`**: Show property in Detail page (default: true)
-
-**Example**: Configure issue status filtering and hide system fields from forms
-```sql
--- Enable filtering on status dropdown
-INSERT INTO metadata.properties (table_name, column_name, filterable)
-VALUES ('issues', 'status_id', TRUE)
-ON CONFLICT (table_name, column_name) DO UPDATE SET filterable = TRUE;
-
--- Hide timestamps from create/edit forms (keep on detail)
-UPDATE metadata.properties
-SET show_on_create = FALSE, show_on_edit = FALSE
-WHERE column_name IN ('created_at', 'updated_at');
-```
+Override property metadata in `metadata.properties` to customize UI: `display_name`, `sort_order`, `column_width` (1=half, 2=full), `sortable`, `filterable`, `show_on_list/create/edit/detail`. Use Properties Management page (`/property-management`) or SQL. See `docs/INTEGRATOR_GUIDE.md` for examples.
 
 ### Handling New Property Types
 1. Add new type to `EntityPropertyType` enum
@@ -487,41 +364,7 @@ See `docs/INTEGRATOR_GUIDE.md` for complete metadata architecture, field descrip
 
 ### Creating Records with Pre-filled Fields (Query Param Pattern)
 
-The CreatePage supports pre-filling form fields via query parameters, enabling contextual record creation from Detail pages, calendars, or other views.
-
-**How It Works:**
-- Query params are applied AFTER the form is built
-- Only empty fields are pre-filled (existing values are preserved)
-- Fields remain editable (no special UI treatment)
-- Invalid param names are silently ignored
-- Invalid param values are caught by standard validation
-
-**Example Use Cases:**
-
-1. **Pre-fill foreign key from Detail page:**
-   ```typescript
-   // In DetailPage template or component:
-   navigateToCreateRelated('appointments', 'resource_id')
-   // Result: /create/appointments?resource_id=5
-   ```
-
-2. **Pre-fill multiple fields:**
-   ```typescript
-   navigateToCreateRelated('appointments', 'resource_id', {
-     time_slot: '[2025-03-15T14:00:00Z,2025-03-15T16:00:00Z)',
-     status: 'pending'
-   })
-   // Result: /create/appointments?resource_id=5&time_slot=[...]&status=pending
-   ```
-
-3. **Direct URL with query params:**
-   ```
-   /create/issues?assigned_user_id=abc-123&status_id=1&priority=high
-   ```
-
-**Implementation Details:**
-- `CreatePage.applyQueryParamDefaults()` in `src/app/pages/create/create.page.ts`
-- `DetailPage.navigateToCreateRelated()` in `src/app/pages/detail/detail.page.ts`
+CreatePage supports pre-filling form fields via query parameters (e.g., `/create/appointments?resource_id=5`). Use `DetailPage.navigateToCreateRelated()` to link from Detail pages. Query params are applied after form build, only to empty fields. See `CreatePage.applyQueryParamDefaults()` for implementation.
 
 ### Form Validation
 

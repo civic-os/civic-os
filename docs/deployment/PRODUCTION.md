@@ -512,14 +512,7 @@ spec:
 
 ### Step 7: Deploy Payment Worker (Optional)
 
-**IMPORTANT**: Only deploy if using payment processing features. Requires Stripe credentials.
-
-> **Note**: The `payment-worker` container is not published to ghcr.io as it's optional. You must build and push it to your own registry:
-> ```bash
-> docker build -t your-registry/payment-worker:latest ./services/payment-worker
-> docker push your-registry/payment-worker:latest
-> ```
-> Then update the image reference below to point to your registry.
+**IMPORTANT**: Only deploy if using payment processing features (v0.13.0+). Requires Stripe credentials.
 
 **payment-worker-deployment.yaml:**
 ```yaml
