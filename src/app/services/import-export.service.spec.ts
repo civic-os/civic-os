@@ -34,6 +34,7 @@ describe('ImportExportService', () => {
   let service: ImportExportService;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
+  let saveWorkbookSpy: jasmine.Spy;
 
   // Helper function to create mock properties with all required fields
   const createMockProperty = (overrides: Partial<SchemaEntityProperty>): SchemaEntityProperty => ({
@@ -95,6 +96,10 @@ describe('ImportExportService', () => {
     });
 
     service = TestBed.inject(ImportExportService);
+
+    // Spy on saveWorkbook to prevent actual file downloads during tests
+    // This must be done AFTER service is created since saveWorkbook is a method on the instance
+    saveWorkbookSpy = spyOn(service as any, 'saveWorkbook').and.stub();
   });
 
   describe('Service Creation', () => {
@@ -661,7 +666,7 @@ describe('ImportExportService', () => {
   });
 
   describe('downloadErrorReport()', () => {
-    it('should be callable without errors', () => {
+    it('should generate error report and call saveWorkbook', () => {
       const originalData = [
         { Title: 'Test', Status: 'Open' }
       ];
@@ -678,10 +683,39 @@ describe('ImportExportService', () => {
         ]
       };
 
-      // Should not throw
-      expect(() => {
-        service.downloadErrorReport(originalData, errorSummary);
-      }).not.toThrow();
+      service.downloadErrorReport(originalData, errorSummary);
+
+      // Verify saveWorkbook was called (not actually writing to disk due to spy)
+      expect(saveWorkbookSpy).toHaveBeenCalledTimes(1);
+
+      // Verify filename format
+      const [, filename] = saveWorkbookSpy.calls.mostRecent().args;
+      expect(filename).toMatch(/^import_errors_\d{4}-\d{2}-\d{2}_\d{6}\.xlsx$/);
+    });
+
+    it('should include workbook with Error Rows and Summary sheets', () => {
+      const originalData = [
+        { Title: 'Test', Status: 'Open' }
+      ];
+
+      const errorSummary: ValidationErrorSummary = {
+        totalErrors: 1,
+        errorsByType: new Map([['Required field', 1]]),
+        errorsByColumn: new Map([['Title', 1]]),
+        firstNErrors: [
+          { row: 3, column: 'Title', value: '', error: 'Required field', errorType: 'Required' }
+        ],
+        allErrors: [
+          { row: 3, column: 'Title', value: '', error: 'Required field', errorType: 'Required' }
+        ]
+      };
+
+      service.downloadErrorReport(originalData, errorSummary);
+
+      // Verify workbook structure
+      const [workbook] = saveWorkbookSpy.calls.mostRecent().args;
+      expect(workbook.SheetNames).toContain('Data with Errors');
+      expect(workbook.SheetNames).toContain('Summary');
     });
   });
 

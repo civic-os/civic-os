@@ -17,7 +17,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { Observable, forkJoin, map, of, firstValueFrom } from 'rxjs';
-import { read, utils, writeFileXLSX } from 'xlsx';
+import { read, utils, writeFileXLSX, WorkBook } from 'xlsx';
 import { DataService } from './data.service';
 import { SchemaService } from './schema.service';
 import { NotesService } from './notes.service';
@@ -147,7 +147,7 @@ export class ImportExportService {
       // 7. Trigger download
       const timestamp = this.getTimestamp();
       const filename = `${entity.display_name}_${timestamp}.xlsx`;
-      writeFileXLSX(workbook, filename);
+      this.saveWorkbook(workbook, filename);
 
       return { success: true };
     } catch (error) {
@@ -389,7 +389,7 @@ export class ImportExportService {
 
     // Download
     const filename = `${entity.table_name}_template.xlsx`;
-    writeFileXLSX(workbook, filename);
+    this.saveWorkbook(workbook, filename);
   }
 
   /**
@@ -733,7 +733,7 @@ export class ImportExportService {
 
     // Download
     const timestamp = this.getTimestamp();
-    writeFileXLSX(workbook, `import_errors_${timestamp}.xlsx`);
+    this.saveWorkbook(workbook, `import_errors_${timestamp}.xlsx`);
   }
 
   // ============================================================
@@ -775,7 +775,7 @@ export class ImportExportService {
     // Download
     const timestamp = this.getTimestamp();
     const filename = `${entityType}_${entityId}_notes_${timestamp}.xlsx`;
-    writeFileXLSX(workbook, filename);
+    this.saveWorkbook(workbook, filename);
   }
 
   /**
@@ -812,5 +812,14 @@ export class ImportExportService {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  /**
+   * Save workbook to file.
+   * This is a protected wrapper around xlsx's writeFileXLSX to enable testing
+   * without actual file system writes.
+   */
+  protected saveWorkbook(workbook: WorkBook, filename: string): void {
+    writeFileXLSX(workbook, filename);
   }
 }
