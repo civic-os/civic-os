@@ -32,7 +32,9 @@
     <input type="number" placeholder="Type here" step=1 mask="0*" [allowNegativeNumbers]="true" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
   }
   @if (propType() == EntityPropertyType.Boolean) {
-    <input type="checkbox" class="toggle" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <div class="pt-2">
+      <input type="checkbox" class="toggle" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    </div>
   }
   @if (propType() == EntityPropertyType.ForeignKeyName) {
     @if (selectOptions$ | async; as selectOptions) {
