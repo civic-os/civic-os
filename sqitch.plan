@@ -29,4 +29,3 @@ v0-20-2-auto-create-permissions [v0-19-0-add-recurring-timeslot] 2025-12-19T12:0
 v0-20-3-fix-permission-type-cast [v0-20-2-auto-create-permissions] 2025-12-19T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix type cast: metadata.permission_type -> metadata.permission
 v0-20-4-fix-upsert-null-handling [v0-20-3-fix-permission-type-cast] 2025-12-19T19:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix upsert_property_metadata to allow explicit NULL values
 v0-21-0-add-processing-fees [v0-20-4-fix-upsert-null-handling] 2025-12-19T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add configurable processing fees for payment transactions
-v0-21-1-fix-processing-fees-view-order [v0-21-0-add-processing-fees] 2025-12-19T21:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix view dependency order for processing fees migration

@@ -6,6 +6,13 @@
 BEGIN;
 
 -- ============================================================================
+-- 0. DROP DEPENDENT VIEW FIRST
+-- ============================================================================
+-- The payment_transactions view depends on payments.transactions columns.
+-- We must drop it BEFORE modifying the table, then recreate it at the end.
+DROP VIEW IF EXISTS public.payment_transactions;
+
+-- ============================================================================
 -- 1. ADD PROCESSING FEE COLUMNS TO payments.transactions
 -- ============================================================================
 -- Add columns for fee tracking, auditing, and refund control
@@ -61,12 +68,10 @@ COMMENT ON COLUMN payments.transactions.max_refundable IS
 
 
 -- ============================================================================
--- 2. UPDATE payment_transactions VIEW
+-- 2. RECREATE payment_transactions VIEW
 -- ============================================================================
 -- Add fee columns to the public API view
--- Must DROP and recreate because we're changing columns
-
-DROP VIEW IF EXISTS public.payment_transactions;
+-- (View was dropped at the beginning of this migration)
 
 CREATE VIEW public.payment_transactions AS
 SELECT
