@@ -83,7 +83,8 @@ spec:
               key: MAP_DEFAULT_ZOOM
 
         # S3 configuration (for file storage - v0.10.0+)
-        - name: S3_PUBLIC_ENDPOINT
+        # Note: Container expects S3_ENDPOINT, configmap key is S3_PUBLIC_ENDPOINT
+        - name: S3_ENDPOINT
           valueFrom:
             configMapKeyRef:
               name: civic-os-config
@@ -94,6 +95,14 @@ spec:
             configMapKeyRef:
               name: civic-os-config
               key: S3_BUCKET
+              optional: true
+
+        # Stripe configuration (for payments - v0.13.0+)
+        - name: STRIPE_PUBLISHABLE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: STRIPE_PUBLISHABLE_KEY
               optional: true
 
         resources:

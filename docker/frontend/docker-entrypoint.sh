@@ -19,6 +19,7 @@ echo "  MAP_DEFAULT_LNG: $MAP_DEFAULT_LNG"
 echo "  MAP_DEFAULT_ZOOM: $MAP_DEFAULT_ZOOM"
 echo "  S3_ENDPOINT: $S3_ENDPOINT"
 echo "  S3_BUCKET: $S3_BUCKET"
+echo "  STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:+pk_***${STRIPE_PUBLISHABLE_KEY: -4}}"
 echo "  MATOMO_URL: $MATOMO_URL"
 echo "  MATOMO_SITE_ID: $MATOMO_SITE_ID"
 echo "  MATOMO_ENABLED: $MATOMO_ENABLED"
@@ -47,6 +48,9 @@ window.civicOsConfig = {
   s3: {
     endpoint: '${S3_ENDPOINT}',
     bucket: '${S3_BUCKET}'
+  },
+  stripe: {
+    publishableKey: '${STRIPE_PUBLISHABLE_KEY}'
   },
   matomo: {
     url: '${MATOMO_URL}',

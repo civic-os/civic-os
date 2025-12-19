@@ -56,6 +56,9 @@ data:
   # NOTIFICATION_TIMEZONE: "America/New_York"
 
   # Payment Configuration (v0.13.0+, optional)
+  # Stripe publishable key (required for payment checkout UI)
+  # This is a PUBLIC key (pk_...) - safe to include in configmap
+  STRIPE_PUBLISHABLE_KEY: "pk_test_your_key_here"
   # Currency code for Stripe payments (default: USD)
   # PAYMENT_CURRENCY: "USD"
 
