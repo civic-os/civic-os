@@ -216,6 +216,10 @@ export class EditPropertyComponent {
     const input = event.target as HTMLInputElement;
     const cursorPos = input.selectionStart || 0;
 
+    // Calculate digits before cursor BEFORE we change input.value
+    // This fixes cursor jumping when formatting adds/removes characters
+    const digitsBeforeCursor = input.value.slice(0, cursorPos).replace(/\D/g, '').length;
+
     // Extract only digits
     const digits = input.value.replace(/\D/g, '').slice(0, 10);
 
@@ -226,8 +230,7 @@ export class EditPropertyComponent {
     const formatted = this.getFormattedPhone(controlName);
     input.value = formatted;
 
-    // Restore cursor position (adjust for formatting characters)
-    const digitsBeforeCursor = input.value.slice(0, cursorPos).replace(/\D/g, '').length;
+    // Restore cursor position (find position after same number of digits)
     let newCursorPos = 0;
     let digitCount = 0;
 

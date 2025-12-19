@@ -54,6 +54,7 @@ import { CommonModule } from '@angular/common';
           type="datetime-local"
           class="input input-bordered w-full"
           [value]="endLocal()"
+          (focus)="onEndFocus()"
           (input)="onEndChange($event)"
           [disabled]="disabled()"
         />
@@ -130,15 +131,22 @@ export class EditTimeSlotComponent implements ControlValueAccessor {
   onStartChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.startLocal.set(input.value);
-
-    // Auto-populate end date if empty
-    // UX improvement: When user selects start date, pre-fill end with same date
-    // This saves clicks for same-day reservations (most common case)
-    if (input.value && !this.endLocal()) {
-      this.endLocal.set(input.value);
-    }
-
     this.onTouched();
+  }
+
+  /**
+   * Auto-populate end date when user focuses the End field.
+   * Deferred from onStartChange to fix Firefox AM/PM selection bug:
+   * Firefox fires 'input' before AM/PM is finalized, causing wrong time to be copied.
+   * By waiting for focus on End field, we ensure Start has the complete value.
+   */
+  onEndFocus(): void {
+    if (this.startLocal() && !this.endLocal()) {
+      // Pre-fill end with start + 1 hour
+      const startDate = new Date(this.startLocal());
+      startDate.setHours(startDate.getHours() + 1);
+      this.endLocal.set(this.toDatetimeLocal(startDate));
+    }
   }
 
   onEndChange(event: Event): void {
