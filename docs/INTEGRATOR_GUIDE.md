@@ -2990,6 +2990,83 @@ SELECT * FROM payments.transactions ORDER BY created_at DESC LIMIT 1;
 
 See `examples/community-center/init-scripts/10_payment_integration.sql` for working reference implementation.
 
+#### Processing Fees
+
+**Version**: v0.21.0+
+
+Enable transparent, configurable processing fees that pass credit card costs to customers. Fees are calculated in the payment worker, stored in the database for auditing, and displayed as a breakdown in the checkout UI.
+
+**Formula**: `total = base + (base × percent/100) + flat_cents/100`
+
+**Example**: $100 base + 2.9% + $0.30 = $103.20 total
+
+**Configuration** (Environment Variables):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PROCESSING_FEE_ENABLED` | `false` | Enable/disable fee pass-through |
+| `PROCESSING_FEE_PERCENT` | `0` | Percentage fee (e.g., `2.9` for 2.9%) |
+| `PROCESSING_FEE_FLAT_CENTS` | `0` | Flat fee in cents (e.g., `30` for $0.30) |
+| `PROCESSING_FEE_REFUNDABLE` | `false` | Whether fee is refundable |
+
+**Refund Behavior**:
+
+- `PROCESSING_FEE_REFUNDABLE=false` (default): Max refund = base amount only. Processing fee is retained even on full refund.
+- `PROCESSING_FEE_REFUNDABLE=true`: Max refund = total amount. Fee is included in refunds.
+
+**Database Columns** (added by v0.21.0 migration):
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `processing_fee` | NUMERIC(10,2) | Calculated fee amount |
+| `total_amount` | NUMERIC(10,2) | Generated: `amount + processing_fee` |
+| `fee_percent` | NUMERIC(5,3) | Rate applied (for audit trail) |
+| `fee_flat_cents` | INTEGER | Flat fee applied (for audit trail) |
+| `fee_refundable` | BOOLEAN | Whether fee was refundable at payment time |
+| `max_refundable` | NUMERIC(10,2) | Generated: max refundable amount |
+
+**Frontend Display**:
+
+When processing fees are enabled, the checkout modal automatically shows a fee breakdown:
+
+```
+Payment Summary
+─────────────────────
+Amount:           $100.00
+Processing Fee:     $3.20
+─────────────────────
+Total:            $103.20
+```
+
+If fees are disabled or zero, only the total is displayed (no breakdown).
+
+**Deployment**:
+
+1. **Deploy v0.21.0 migration** - Adds fee columns with safe defaults (`processing_fee = 0`)
+2. **Deploy payment worker** - With `PROCESSING_FEE_ENABLED=false` initially
+3. **Deploy frontend** - Handles both old and new payment data gracefully
+4. **Enable fees** - Set `PROCESSING_FEE_ENABLED=true` with desired rates
+
+**Rollback**: Set `PROCESSING_FEE_ENABLED=false` - new payments have no fee, existing fee data preserved.
+
+**Example Configuration** (Kubernetes ConfigMap):
+
+```yaml
+# k8s/configmap.yaml
+data:
+  PROCESSING_FEE_ENABLED: "true"
+  PROCESSING_FEE_PERCENT: "2.9"
+  PROCESSING_FEE_FLAT_CENTS: "30"
+  PROCESSING_FEE_REFUNDABLE: "false"
+```
+
+**Important Notes**:
+
+- Fee configuration is stored per-payment (`fee_percent`, `fee_flat_cents`, `fee_refundable`), so changing config doesn't affect past payments
+- The `max_refundable` computed column ensures refund validation respects the fee policy at time of payment
+- Stripe's minimum payment is $0.50 - verify your base amounts meet this after fees are added
+- Fee calculation uses banker's rounding for consistent cent-level precision
+
 ---
 
 ## Database Patterns

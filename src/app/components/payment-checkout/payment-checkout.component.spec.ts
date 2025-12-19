@@ -449,7 +449,9 @@ describe('PaymentCheckoutComponent', () => {
       component['stripe'] = mockStripe;
       component['elements'] = mockElements;
       component.clientSecret.set(mockClientSecret);
-      component.amount.set(50.00);
+      component.baseAmount.set(50.00);
+      component.processingFee.set(0);
+      component.totalAmount.set(50.00);
       component.error.set('Previous error');
       component.loading.set(false);
       component.processing.set(true);
@@ -463,7 +465,7 @@ describe('PaymentCheckoutComponent', () => {
       expect(component['stripe']).toBeNull();
       expect(component['elements']).toBeNull();
       expect(component.clientSecret()).toBeUndefined();
-      expect(component.amount()).toBeUndefined();
+      expect(component.totalAmount()).toBeUndefined();
       expect(component.error()).toBeUndefined();
       expect(component.loading()).toBe(true);
       expect(component.processing()).toBe(false);

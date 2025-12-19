@@ -58,3 +58,15 @@ data:
   # Payment Configuration (v0.13.0+, optional)
   # Currency code for Stripe payments (default: USD)
   # PAYMENT_CURRENCY: "USD"
+
+  # Processing Fee Configuration (v0.21.0+, optional)
+  # Enable to transparently pass credit card processing fees to customers
+  # Formula: total = base + (base * percent/100) + flat_cents/100
+  # Example: $100 base + 2.9% + $0.30 = $103.20 total
+  #
+  # PROCESSING_FEE_ENABLED: "true"       # Enable fee pass-through (default: false)
+  # PROCESSING_FEE_PERCENT: "2.9"        # Percentage fee (e.g., 2.9 for 2.9%)
+  # PROCESSING_FEE_FLAT_CENTS: "30"      # Flat fee in cents (e.g., 30 for $0.30)
+  # PROCESSING_FEE_REFUNDABLE: "false"   # Whether fee is refundable (default: false)
+  #                                      # false = max refund is base amount only
+  #                                      # true = max refund includes processing fee

@@ -7,11 +7,28 @@
         Complete Payment
       </h3>
 
-      <!-- Amount Display -->
-      @if (amount()) {
-        <div class="alert alert-info mb-4">
-          <span class="material-symbols-outlined">info</span>
-          <span>Amount: ${{ amount()?.toFixed(2) }}</span>
+      <!-- Amount Display with Fee Breakdown -->
+      @if (totalAmount()) {
+        <div class="bg-base-200 rounded-lg p-4 mb-4">
+          <div class="text-sm text-base-content/70 mb-2">Payment Summary</div>
+
+          @if (showFeeBreakdown()) {
+            <!-- Show breakdown when processing fee exists -->
+            <div class="flex justify-between mb-1">
+              <span>Amount:</span>
+              <span>${{ baseAmount()?.toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between mb-1 text-base-content/70">
+              <span>Processing Fee:</span>
+              <span>${{ processingFee()?.toFixed(2) }}</span>
+            </div>
+            <div class="divider my-1"></div>
+          }
+
+          <div class="flex justify-between font-bold">
+            <span>Total:</span>
+            <span>${{ totalAmount()?.toFixed(2) }}</span>
+          </div>
         </div>
       }
 
@@ -56,7 +73,7 @@
               Processing...
             } @else {
               <span class="material-symbols-outlined">credit_card</span>
-              Pay ${{ amount()?.toFixed(2) }}
+              Pay ${{ totalAmount()?.toFixed(2) }}
             }
           </button>
         </div>

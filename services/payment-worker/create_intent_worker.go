@@ -5,11 +5,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 )
+
+// FeeConfig holds processing fee configuration
+type FeeConfig struct {
+	Enabled    bool    // Whether processing fees are enabled
+	Percent    float64 // Fee percentage (e.g., 2.9 for 2.9%)
+	FlatCents  int     // Flat fee in cents (e.g., 30 for $0.30)
+	Refundable bool    // Whether the fee is refundable (default: false)
+}
+
+// CalculateFee computes the processing fee for a base amount
+// Formula: fee = (baseAmount * percent/100) + flatCents
+// Returns fee in cents, rounded to nearest cent
+func (fc *FeeConfig) CalculateFee(baseAmountCents int64) int64 {
+	if !fc.Enabled {
+		return 0
+	}
+
+	percentFee := float64(baseAmountCents) * (fc.Percent / 100.0)
+	totalFeeCents := int64(math.Round(percentFee)) + int64(fc.FlatCents)
+
+	return totalFeeCents
+}
 
 // CreateIntentWorkerArgs contains the arguments for CreateIntentWorker
 // This matches the JSON args inserted by the PostgreSQL trigger
@@ -25,15 +48,17 @@ func (CreateIntentWorkerArgs) Kind() string {
 // CreateIntentWorker processes payment intent creation jobs
 type CreateIntentWorker struct {
 	river.WorkerDefaults[CreateIntentWorkerArgs]
-	dbPool   *pgxpool.Pool
-	provider PaymentProvider
+	dbPool    *pgxpool.Pool
+	provider  PaymentProvider
+	feeConfig *FeeConfig
 }
 
 // NewCreateIntentWorker creates a new CreateIntentWorker
-func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider) *CreateIntentWorker {
+func NewCreateIntentWorker(dbPool *pgxpool.Pool, provider PaymentProvider, feeConfig *FeeConfig) *CreateIntentWorker {
 	return &CreateIntentWorker{
-		dbPool:   dbPool,
-		provider: provider,
+		dbPool:    dbPool,
+		provider:  provider,
+		feeConfig: feeConfig,
 	}
 }
 
@@ -91,17 +116,32 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 		return nil // Not an error - payment was already processed
 	}
 
-	// 3. Convert amount to cents (Stripe uses smallest currency unit)
-	amountCents := int64(payment.Amount * 100)
+	// 3. Convert base amount to cents (Stripe uses smallest currency unit)
+	baseAmountCents := int64(payment.Amount * 100)
+
+	// 4. Calculate processing fee
+	feeCents := w.feeConfig.CalculateFee(baseAmountCents)
+	totalAmountCents := baseAmountCents + feeCents
+
+	if feeCents > 0 {
+		log.Printf("[CreateIntent] Fee calculation: base=%d cents, fee=%d cents (%.2f%% + %d flat), total=%d cents",
+			baseAmountCents, feeCents, w.feeConfig.Percent, w.feeConfig.FlatCents, totalAmountCents)
+	}
+
+	// 5. Update payment record with fee details BEFORE calling Stripe
+	if err := w.updatePaymentFee(ctx, paymentID, feeCents); err != nil {
+		log.Printf("[CreateIntent] Error updating fee for payment %s: %v", paymentID, err)
+		return fmt.Errorf("failed to update fee: %w", err)
+	}
 
 	description := ""
 	if payment.Description != nil {
 		description = *payment.Description
 	}
 
-	// 4. Call Stripe to create PaymentIntent
+	// 6. Call Stripe to create PaymentIntent with TOTAL amount (base + fee)
 	result, err := w.provider.CreateIntent(ctx, CreateIntentParams{
-		Amount:      amountCents,
+		Amount:      totalAmountCents,
 		Currency:    payment.Currency,
 		Description: description,
 	})
@@ -120,7 +160,7 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 
 	log.Printf("[CreateIntent] ✓ Stripe PaymentIntent created: %s", result.PaymentIntentID)
 
-	// 5. Update payment record with Stripe details
+	// 7. Update payment record with Stripe details
 	err = w.updatePaymentSuccess(ctx, paymentID, result)
 	if err != nil {
 		log.Printf("[CreateIntent] Error updating payment %s: %v", paymentID, err)
@@ -129,6 +169,44 @@ func (w *CreateIntentWorker) Work(ctx context.Context, job *river.Job[CreateInte
 
 	log.Printf("[CreateIntent] ✓ Payment %s updated successfully", paymentID)
 	return nil
+}
+
+// updatePaymentFee updates the payment record with fee details
+// This is called BEFORE calling Stripe so we have an audit trail
+func (w *CreateIntentWorker) updatePaymentFee(ctx context.Context, paymentID string, feeCents int64) error {
+	// Convert fee cents to dollars for storage
+	feeDollars := float64(feeCents) / 100.0
+
+	// Store fee configuration at time of payment for auditing
+	// fee_percent and fee_flat_cents are only set if fees are enabled
+	var feePercent *float64
+	var feeFlatCents *int
+
+	if w.feeConfig.Enabled {
+		feePercent = &w.feeConfig.Percent
+		feeFlatCents = &w.feeConfig.FlatCents
+	}
+
+	query := `
+		UPDATE payments.transactions
+		SET
+			processing_fee = $1,
+			fee_percent = $2,
+			fee_flat_cents = $3,
+			fee_refundable = $4,
+			updated_at = NOW()
+		WHERE id = $5
+	`
+
+	_, err := w.dbPool.Exec(ctx, query,
+		feeDollars,
+		feePercent,
+		feeFlatCents,
+		w.feeConfig.Refundable,
+		paymentID,
+	)
+
+	return err
 }
 
 // updatePaymentSuccess updates the payment record with Stripe details

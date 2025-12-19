@@ -43,11 +43,16 @@ describe('PaymentBadgeComponent', () => {
   // Helper to create PaymentValue with required fields
   function createPayment(overrides: Partial<PaymentValue> & { status: PaymentValue['status'] }): PaymentValue {
     const { status, effective_status, ...rest } = overrides;
+    const amount = rest.amount ?? 50.00;
     return {
       id: 'pay_123',
       status: status,
       effective_status: effective_status ?? status, // Default to same as status
-      amount: 50.00,
+      amount: amount,
+      processing_fee: 0,
+      total_amount: amount,
+      max_refundable: amount,
+      fee_refundable: false,
       currency: 'USD',
       display_name: `$50.00 (${status})`,
       created_at: '2025-11-22T10:00:00Z',

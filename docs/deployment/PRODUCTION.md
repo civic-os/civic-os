@@ -254,6 +254,14 @@ PAYMENT_WORKER_DB_MAX_CONNS=4  # Database connection pool size
 # Webhook HTTP server configuration
 WEBHOOK_PORT=8080  # Internal port for Stripe webhook callbacks
 
+# Processing fee configuration (v0.21.0+, optional)
+# Enable to transparently pass credit card fees to customers
+# Formula: total = base + (base * percent/100) + flat_cents/100
+PROCESSING_FEE_ENABLED=false  # Set to true to enable fee pass-through
+PROCESSING_FEE_PERCENT=2.9    # Percentage fee (e.g., 2.9 for 2.9%)
+PROCESSING_FEE_FLAT_CENTS=30  # Flat fee in cents (e.g., 30 for $0.30)
+PROCESSING_FEE_REFUNDABLE=false  # false = fee kept on refund, true = fee refundable
+
 # ======================================
 # Container Registry
 # ======================================

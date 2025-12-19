@@ -74,6 +74,33 @@ spec:
         - name: WEBHOOK_PORT
           value: "8080"
 
+        # Processing Fee Configuration (optional - disabled by default)
+        # Enable to pass credit card processing fees to customers
+        - name: PROCESSING_FEE_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PROCESSING_FEE_ENABLED
+              optional: true  # Defaults to false
+        - name: PROCESSING_FEE_PERCENT
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PROCESSING_FEE_PERCENT
+              optional: true  # Defaults to 0 (e.g., 2.9 for 2.9%)
+        - name: PROCESSING_FEE_FLAT_CENTS
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PROCESSING_FEE_FLAT_CENTS
+              optional: true  # Defaults to 0 (e.g., 30 for $0.30)
+        - name: PROCESSING_FEE_REFUNDABLE
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: PROCESSING_FEE_REFUNDABLE
+              optional: true  # Defaults to false (fee kept on refund)
+
         ports:
         - name: webhook
           containerPort: 8080

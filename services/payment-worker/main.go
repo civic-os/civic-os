@@ -45,6 +45,12 @@ func main() {
 	dbMaxConns := getEnvInt("DB_MAX_CONNS", 4)
 	dbMinConns := getEnvInt("DB_MIN_CONNS", 1)
 
+	// Processing Fee Configuration
+	feeEnabled := getEnvBool("PROCESSING_FEE_ENABLED", false)
+	feePercent := getEnvFloat("PROCESSING_FEE_PERCENT", 0.0)
+	feeFlatCents := getEnvInt("PROCESSING_FEE_FLAT_CENTS", 0)
+	feeRefundable := getEnvBool("PROCESSING_FEE_REFUNDABLE", false)
+
 	log.Printf("[Init] Configuration loaded:")
 	log.Printf("[Init]   Database: %s", maskPassword(databaseURL))
 	log.Printf("[Init]   Stripe API Key: %s", maskAPIKey(stripeAPIKey))
@@ -54,6 +60,11 @@ func main() {
 	log.Printf("[Init]   Webhook HTTP Port: %s", webhookPort)
 	log.Printf("[Init]   DB Max Connections: %d", dbMaxConns)
 	log.Printf("[Init]   DB Min Connections: %d", dbMinConns)
+	log.Printf("[Init]   Processing Fee Enabled: %v", feeEnabled)
+	if feeEnabled {
+		log.Printf("[Init]   Processing Fee: %.2f%% + %d cents", feePercent, feeFlatCents)
+		log.Printf("[Init]   Processing Fee Refundable: %v", feeRefundable)
+	}
 
 	// Validate required configuration
 	if stripeAPIKey == "" {
@@ -111,8 +122,16 @@ func main() {
 
 	workers := river.NewWorkers()
 
+	// Create fee configuration for workers
+	feeConfig := &FeeConfig{
+		Enabled:    feeEnabled,
+		Percent:    feePercent,
+		FlatCents:  feeFlatCents,
+		Refundable: feeRefundable,
+	}
+
 	// Register CreateIntentWorker (for async payment intent creation)
-	createIntentWorker := NewCreateIntentWorker(dbPool, stripeProvider)
+	createIntentWorker := NewCreateIntentWorker(dbPool, stripeProvider, feeConfig)
 	river.AddWorker(workers, createIntentWorker)
 	log.Println("[Init] ✓ Registered CreateIntentWorker")
 
@@ -221,6 +240,26 @@ func getEnvInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
+		}
+	}
+	return defaultValue
+}
+
+// getEnvBool gets a boolean environment variable with a default value
+func getEnvBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
+		}
+	}
+	return defaultValue
+}
+
+// getEnvFloat gets a float64 environment variable with a default value
+func getEnvFloat(key string, defaultValue float64) float64 {
+	if value := os.Getenv(key); value != "" {
+		if floatValue, err := strconv.ParseFloat(value, 64); err == nil {
+			return floatValue
 		}
 	}
 	return defaultValue

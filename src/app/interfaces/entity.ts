@@ -181,12 +181,19 @@ export interface PaymentValue {
     id: string;  // UUID
     status: 'pending_intent' | 'pending' | 'succeeded' | 'failed' | 'canceled';
     effective_status: 'pending_intent' | 'pending' | 'succeeded' | 'failed' | 'canceled' | 'refunded' | 'partially_refunded' | 'refund_pending';
-    amount: number;
+    amount: number;           // Base amount (original pricing)
+    processing_fee: number;   // Processing fee amount
+    total_amount: number;     // Total charged to Stripe (amount + processing_fee)
+    max_refundable: number;   // Maximum refundable amount (respects fee_refundable)
     currency: string;
     display_name: string;
     provider_client_secret?: string;
     error_message?: string;
     created_at: string;
+    // Processing fee configuration at time of payment (for auditing/receipts)
+    fee_percent?: number;     // Fee percentage applied (e.g., 2.9 for 2.9%)
+    fee_flat_cents?: number;  // Flat fee in cents (e.g., 30 for $0.30)
+    fee_refundable: boolean;  // Whether fee was refundable at payment time
     // Aggregated refund data (supports multiple refunds per transaction)
     total_refunded: number;  // Sum of succeeded refund amounts
     refund_count: number;    // Number of succeeded refunds

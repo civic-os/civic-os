@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, signal, inject, input, output, effect, ChangeDetectionStrategy, ViewChild, ElementRef } from '@angular/core';
+import { Component, signal, computed, inject, input, output, effect, ChangeDetectionStrategy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { getStripePublishableKey } from '../../config/runtime';
@@ -76,7 +76,17 @@ export class PaymentCheckoutComponent {
   processing = signal(false);
   error = signal<string | undefined>(undefined);
   clientSecret = signal<string | undefined>(undefined);
-  amount = signal<number | undefined>(undefined);
+
+  // Amount breakdown (for fee display)
+  baseAmount = signal<number | undefined>(undefined);      // Original price
+  processingFee = signal<number | undefined>(undefined);   // Processing fee
+  totalAmount = signal<number | undefined>(undefined);     // Total charged to card
+
+  // Computed: whether to show fee breakdown
+  showFeeBreakdown = computed(() => (this.processingFee() ?? 0) > 0);
+
+  // Legacy: keep amount for backward compatibility
+  amount = computed(() => this.totalAmount());
 
   // Stripe instances
   private stripe: any;
@@ -108,9 +118,10 @@ export class PaymentCheckoutComponent {
    */
   private pollPaymentStatus(attempt: number = 0, maxAttempts: number = 60) {
     // Fetch payment transaction from public.payment_transactions view
+    // Include fee fields for breakdown display
     this.dataService.getData({
       key: 'payment_transactions',
-      fields: ['id', 'amount', 'provider_client_secret', 'status'],
+      fields: ['id', 'amount', 'processing_fee', 'total_amount', 'provider_client_secret', 'status'],
       entityId: this.paymentId()
     }).subscribe({
       next: (results) => {
@@ -151,7 +162,12 @@ export class PaymentCheckoutComponent {
 
         // Success - client_secret is available
         this.clientSecret.set(payment.provider_client_secret);
-        this.amount.set(payment.amount);
+
+        // Set amount breakdown for fee display
+        this.baseAmount.set(payment.amount);
+        this.processingFee.set(payment.processing_fee ?? 0);
+        this.totalAmount.set(payment.total_amount ?? payment.amount);
+
         this.loading.set(false);
 
         // Initialize Stripe Elements (wait for view to render)
@@ -305,7 +321,9 @@ export class PaymentCheckoutComponent {
     }
     this.stripe = null;
     this.clientSecret.set(undefined);
-    this.amount.set(undefined);
+    this.baseAmount.set(undefined);
+    this.processingFee.set(undefined);
+    this.totalAmount.set(undefined);
     this.error.set(undefined);
     this.loading.set(true);
     this.processing.set(false);
