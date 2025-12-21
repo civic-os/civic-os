@@ -3067,6 +3067,276 @@ data:
 - Stripe's minimum payment is $0.50 - verify your base amounts meet this after fees are added
 - Fee calculation uses banker's rounding for consistent cent-level precision
 
+### Scheduled Jobs System
+
+**Version**: v0.22.0+
+
+Execute SQL functions on a cron-based schedule using a metadata-driven job system. Perfect for daily cleanup tasks, periodic notifications, scheduled reports, or any recurring database operations.
+
+**Features**:
+- Metadata-driven job configuration (no code changes needed)
+- Cron expression scheduling (5-field format)
+- Per-job timezone support for DST handling
+- Automatic catch-up for missed jobs (worker downtime)
+- Run history with timing and results
+- RPC pattern for structured results
+
+**Requirements**:
+- Civic OS v0.22.0+ (scheduled jobs schema)
+- Consolidated worker service (includes scheduler)
+- PostgreSQL database with River queue (`metadata.river_job`)
+
+#### How It Works
+
+The scheduled jobs system uses a **Scheduler + Executor pattern**:
+
+1. **Scheduler** runs every minute via Go ticker (in consolidated-worker only)
+   - Reads all enabled jobs from `metadata.scheduled_jobs`
+   - Parses cron expressions with timezone awareness
+   - Finds any due or overdue jobs (not just jobs due that minute)
+   - Queues execution jobs for each due job in River queue
+
+2. **Executor Worker** (River job) receives queued jobs
+   - Executes the configured SQL function dynamically
+   - Records execution in `metadata.scheduled_job_runs`
+   - Updates `last_run_at` on the job configuration
+   - Logs success/failure with timing
+
+**Catch-up Behavior**: If the worker was down at 8 AM when a job was scheduled, it will run that job when it comes back up. Duplicate prevention via `unique_key` ensures the same scheduled time is never executed twice.
+
+> **Scaling Note**: The scheduled jobs scheduler runs in a single consolidated-worker instance. If you scale to multiple instances, the scheduler runs on each, but job deduplication prevents duplicate execution. For large-scale deployments, see `docs/notes/SCHEDULED_JOBS_DESIGN.md` for guidance on River leader election configuration.
+
+#### Quick Setup
+
+**Step 1: Create your scheduled function**
+
+All scheduled functions **must** return JSONB with `success` (boolean) and `message` (string):
+
+```sql
+CREATE OR REPLACE FUNCTION run_daily_cleanup()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = metadata, public
+AS $$
+DECLARE
+    v_deleted INT;
+BEGIN
+    -- Your cleanup logic
+    DELETE FROM some_temp_table
+    WHERE created_at < NOW() - INTERVAL '30 days';
+
+    GET DIAGNOSTICS v_deleted = ROW_COUNT;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'message', format('Deleted %s old records', v_deleted),
+        'details', jsonb_build_object('deleted_count', v_deleted)
+    );
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+        'success', false,
+        'message', SQLERRM,
+        'details', jsonb_build_object('sqlstate', SQLSTATE)
+    );
+END;
+$$;
+```
+
+**Function Contract:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `success` | boolean | Yes | Whether the job completed successfully |
+| `message` | string | Yes | Human-readable result description |
+| `details` | object | No | Additional structured data for debugging |
+
+**How Results Are Stored in `scheduled_job_runs`:**
+
+| Scenario | `success` | `message` | `details` |
+|----------|-----------|-----------|-----------|
+| Function returns normally | From function | From function | Entire function response |
+| Function throws exception | `false` | PostgreSQL error text | `NULL` |
+
+> **Best Practice**: Always wrap your function in an exception handler. This gives you control over error messages and allows you to populate `details` with debugging info. Without a handler, unhandled exceptions result in `details = NULL`.
+
+**Step 2: Register the job**
+
+```sql
+INSERT INTO metadata.scheduled_jobs (name, function_name, schedule, timezone, description)
+VALUES (
+    'daily_cleanup',
+    'run_daily_cleanup',
+    '0 3 * * *',           -- 3 AM daily
+    'America/New_York',    -- Eastern time
+    'Clean up temporary records older than 30 days'
+);
+```
+
+**Step 3: Monitor execution**
+
+```sql
+-- Quick status overview
+SELECT name, enabled, last_run_at, last_run_success, total_runs, success_rate_percent
+FROM scheduled_job_status;
+
+-- Recent run history
+SELECT started_at, completed_at, success, message, triggered_by
+FROM metadata.scheduled_job_runs
+WHERE job_id = (SELECT id FROM metadata.scheduled_jobs WHERE name = 'daily_cleanup')
+ORDER BY started_at DESC
+LIMIT 10;
+```
+
+#### Cron Expression Reference
+
+Standard 5-field cron format: `minute hour day-of-month month day-of-week`
+
+| Expression | Description |
+|------------|-------------|
+| `0 8 * * *` | Daily at 8:00 AM |
+| `*/15 * * * *` | Every 15 minutes |
+| `0 0 * * 0` | Weekly on Sunday at midnight |
+| `0 9 1 * *` | Monthly on the 1st at 9:00 AM |
+| `0 8 * * 1-5` | Weekdays at 8:00 AM |
+
+#### Function Contract
+
+Scheduled functions **MUST** follow this pattern:
+
+```sql
+CREATE OR REPLACE FUNCTION my_scheduled_job()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = metadata, public
+AS $$
+BEGIN
+    -- Do work...
+    RETURN jsonb_build_object(
+        'success', true,
+        'message', 'Processed N records',
+        'details', jsonb_build_object('key', 'value')  -- optional
+    );
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+        'success', false,
+        'message', SQLERRM
+    );
+END;
+$$;
+```
+
+**Key points**:
+- Function must return JSONB with at least `success` (boolean) and `message` (string)
+- Use `SECURITY DEFINER` to run with elevated privileges if needed
+- Use `SET search_path` to control schema resolution
+- Always wrap in exception handler to gracefully report errors
+- Return `success: false` with error details instead of raising exceptions
+
+#### Manual Trigger
+
+Admins can manually trigger any job via RPC:
+
+```sql
+SELECT trigger_scheduled_job('daily_cleanup');
+-- Returns: {"success": true, "run_id": 42, "job_name": "daily_cleanup", ...}
+```
+
+This is useful for testing or running jobs outside their normal schedule.
+
+#### Best Practices
+
+**Idempotency**: Design functions to be idempotent since the system provides at-least-once delivery:
+
+```sql
+-- Good: Uses INSERT ... ON CONFLICT
+INSERT INTO processed_items (item_id, processed_at)
+SELECT id, NOW() FROM items WHERE status = 'pending'
+ON CONFLICT (item_id) DO NOTHING;
+
+-- Good: Uses row-level locking to prevent double-processing
+UPDATE items SET status = 'processing'
+WHERE id IN (
+    SELECT id FROM items WHERE status = 'pending'
+    FOR UPDATE SKIP LOCKED
+    LIMIT 100
+);
+```
+
+**Execution Time**: Keep scheduled functions fast (< 30 seconds). For longer operations:
+- Break into smaller batches
+- Use River jobs for parallelization
+- Run more frequently with smaller workloads
+
+**Error Handling**: Always catch exceptions and return structured errors:
+
+```sql
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object(
+        'success', false,
+        'message', SQLERRM,
+        'details', jsonb_build_object(
+            'sqlstate', SQLSTATE,
+            'context', pg_exception_context()
+        )
+    );
+```
+
+#### Database Schema
+
+**`metadata.scheduled_jobs`** - Job configuration:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | SERIAL | Primary key |
+| `name` | VARCHAR(100) | Unique job identifier |
+| `description` | TEXT | Human-readable description |
+| `function_name` | VARCHAR(200) | SQL function to call |
+| `schedule` | VARCHAR(100) | Cron expression |
+| `timezone` | VARCHAR(100) | Timezone for schedule interpretation (default: UTC) |
+| `enabled` | BOOLEAN | Whether job is active (default: true) |
+| `last_run_at` | TIMESTAMPTZ | Last execution timestamp |
+
+**`metadata.scheduled_job_runs`** - Execution history:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | BIGSERIAL | Primary key |
+| `job_id` | INT | Foreign key to scheduled_jobs |
+| `started_at` | TIMESTAMPTZ | When execution started |
+| `completed_at` | TIMESTAMPTZ | When execution finished |
+| `duration_ms` | INT | Execution time in milliseconds |
+| `success` | BOOLEAN | Whether function returned success |
+| `message` | TEXT | Result message from function |
+| `details` | JSONB | Full result from function |
+| `scheduled_for` | TIMESTAMPTZ | When this run was supposed to happen |
+| `triggered_by` | VARCHAR(50) | `scheduler`, `manual`, or `catchup` |
+
+#### Observability
+
+```sql
+-- View pending/running scheduled job executions
+SELECT id, kind, args, state, attempt, created_at
+FROM metadata.river_job
+WHERE kind = 'scheduled_job_execute'
+ORDER BY created_at DESC;
+
+-- Average execution time by job (last 7 days)
+SELECT
+    sj.name,
+    COUNT(*) as total_runs,
+    AVG(duration_ms) as avg_duration_ms,
+    MAX(duration_ms) as max_duration_ms,
+    SUM(CASE WHEN success THEN 1 ELSE 0 END)::float / COUNT(*) * 100 as success_rate
+FROM metadata.scheduled_job_runs r
+JOIN metadata.scheduled_jobs sj ON r.job_id = sj.id
+WHERE r.started_at > NOW() - INTERVAL '7 days'
+GROUP BY sj.name;
+```
+
+See `docs/notes/SCHEDULED_JOBS_DESIGN.md` for complete architecture documentation.
+
 ---
 
 ## Database Patterns

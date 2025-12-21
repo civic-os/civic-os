@@ -1,10 +1,12 @@
 <div class="mb-4 w-full" [formGroup]="form()">
   <label class="label" [for]="prop().column_name">
-    <span class="font-semibold">
-      {{ prop().display_name }}{{ prop().is_nullable ? '' : '*'}}
+    <span class="font-semibold flex items-center min-w-0 max-w-full">
+      <span class="truncate" [title]="prop().display_name">
+        {{ prop().display_name }}{{ prop().is_nullable ? '' : '*'}}
+      </span>
       @if (prop().description) {
-        <div class="tooltip tooltip-right inline-block" [attr.data-tip]="prop().description">
-          <span class="material-symbols-outlined text-info cursor-help ml-1 text-base align-middle">help_outline</span>
+        <div class="tooltip tooltip-right flex-shrink-0" [attr.data-tip]="prop().description">
+          <span class="material-symbols-outlined text-info cursor-help ml-1 text-base">help_outline</span>
         </div>
       }
     </span>

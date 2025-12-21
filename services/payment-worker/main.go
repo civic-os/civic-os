@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -146,6 +147,8 @@ func main() {
 			river.QueueDefault: {MaxWorkers: workerCount},
 		},
 		Workers: workers,
+		Schema:  "metadata", // Use same schema as consolidated-worker
+		Logger:  slog.Default(),
 	})
 	if err != nil {
 		log.Fatalf("[Init] Failed to create River client: %v", err)

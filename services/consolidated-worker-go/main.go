@@ -33,6 +33,7 @@ func main() {
 	log.Println("    - Thumbnail Worker")
 	log.Println("    - Notification Worker")
 	log.Println("    - Recurring Series Worker")
+	log.Println("    - Scheduled Jobs Worker")
 	log.Println("========================================")
 
 	ctx := context.Background()
@@ -207,16 +208,31 @@ func main() {
 	})
 	log.Println("[Init] ✓ ExpandRecurringSeriesWorker registered (queue: recurring)")
 
+	// Scheduled Jobs Execute Worker (executes SQL functions)
+	river.AddWorker(workers, &ScheduledJobExecuteWorker{
+		dbPool: dbPool,
+	})
+	log.Println("[Init] ✓ ScheduledJobExecuteWorker registered (queue: scheduled_jobs)")
+
+	// Scheduled Jobs Scheduler - uses internal Go ticker, not River periodic jobs
+	// This ensures only consolidated-worker runs the scheduler (not payment-worker)
+	scheduledJobScheduler := &ScheduledJobScheduler{
+		dbPool: dbPool,
+	}
+	log.Println("[Init] ✓ ScheduledJobScheduler initialized (Go ticker, every minute)")
+
 	// ===========================================================================
 	// 7. Create River Client (SINGLE CLIENT WITH MULTIPLE QUEUES)
 	// ===========================================================================
 	log.Println("[Init] Starting River client...")
+
 	riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 		Queues: map[string]river.QueueConfig{
-			"s3_signer":     {MaxWorkers: 20},                  // I/O-bound, many workers
-			"thumbnails":    {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
-			"notifications": {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
-			"recurring":     {MaxWorkers: 5},                   // Series expansion jobs
+			"s3_signer":      {MaxWorkers: 20},                  // I/O-bound, many workers
+			"thumbnails":     {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
+			"notifications":  {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
+			"recurring":      {MaxWorkers: 5},                   // Series expansion jobs
+			"scheduled_jobs": {MaxWorkers: 5},                   // Scheduled SQL function execution
 		},
 		Workers: workers,
 		Logger:  slog.Default(),
@@ -227,12 +243,15 @@ func main() {
 	}
 
 	// ===========================================================================
-	// 8. Start River Client
+	// 8. Start River Client and Scheduled Job Scheduler
 	// ===========================================================================
 	if err := riverClient.Start(ctx); err != nil {
 		log.Fatalf("[Init] Failed to start River client: %v", err)
 	}
 	log.Println("[Init] ✓ River client started")
+
+	// Start the scheduled job scheduler (Go ticker, not River periodic)
+	scheduledJobScheduler.Start(ctx)
 
 	log.Println("")
 	log.Println("========================================")
@@ -246,6 +265,8 @@ func main() {
 	log.Println("  - validate_template_parts (queue: notifications)")
 	log.Println("  - preview_template_parts (queue: notifications)")
 	log.Println("  - expand_recurring_series (queue: recurring, 5 workers)")
+	log.Println("  - scheduled_job_scheduler (Go ticker, every minute)")
+	log.Println("  - scheduled_job_execute (queue: scheduled_jobs, 5 workers)")
 	log.Println("")
 	log.Printf("Database connections: %d max, %d min", dbMaxConns, dbMinConns)
 	log.Println("Press Ctrl+C to shutdown gracefully...")
@@ -260,6 +281,9 @@ func main() {
 
 	log.Println("")
 	log.Println("[Shutdown] Signal received, stopping gracefully...")
+
+	// Stop the scheduled job scheduler first
+	scheduledJobScheduler.Stop()
 
 	// Use 30 second timeout (thumbnail jobs can be slow)
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
