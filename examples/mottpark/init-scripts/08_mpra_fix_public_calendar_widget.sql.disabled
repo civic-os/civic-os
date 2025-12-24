@@ -1,0 +1,53 @@
+-- ============================================================================
+-- MOTT PARK - FIX PUBLIC CALENDAR WIDGET
+-- ============================================================================
+-- Updates the public dashboard calendar to use public_calendar_events
+-- instead of reservation_requests with status filters.
+--
+-- This is cleaner because:
+--   1. public_calendar_events only contains approved/completed events
+--   2. No complex status filters needed
+--   3. Private events show "Private Event" (data isolation at source)
+-- ============================================================================
+
+BEGIN;
+
+-- Find and update the public calendar widget
+UPDATE metadata.dashboard_widgets
+SET
+  entity_key = 'public_calendar_events',
+  config = jsonb_build_object(
+    'entityKey', 'public_calendar_events',
+    'timeSlotPropertyName', 'time_slot',
+    'defaultColor', '#22C55E',
+    'initialView', 'dayGridMonth',
+    'showCreateButton', false,  -- Users create via reservation_requests, not here
+    'maxEvents', 500,
+    -- No filters needed - public_calendar_events only contains approved/completed
+    'showColumns', jsonb_build_array('display_name', 'event_type')
+  )
+WHERE dashboard_id IN (
+  SELECT id FROM metadata.dashboards
+  WHERE display_name = 'Mott Park Clubhouse Reservations'
+)
+AND title = 'Clubhouse Availability'
+AND entity_key = 'reservation_requests';
+
+-- Report what was updated
+DO $$
+DECLARE
+  v_count INT;
+BEGIN
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  IF v_count > 0 THEN
+    RAISE NOTICE 'Updated % calendar widget(s) to use public_calendar_events', v_count;
+  ELSE
+    RAISE NOTICE 'No widgets needed updating (already using public_calendar_events or not found)';
+  END IF;
+END;
+$$;
+
+COMMIT;
+
+-- Notify PostgREST to refresh
+NOTIFY pgrst, 'reload schema';

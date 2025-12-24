@@ -3339,6 +3339,229 @@ See `docs/notes/SCHEDULED_JOBS_DESIGN.md` for complete architecture documentatio
 
 ---
 
+### System Introspection (v0.23.0+)
+
+System Introspection provides auto-generated documentation and dependency visualization for RPC functions, database triggers, and notification workflows. This enables end-users to understand what functions do without exposing source code.
+
+**Key Features**:
+- **RPC Registry**: Document public functions with descriptions, parameters, and return types
+- **Trigger Documentation**: Explain what happens automatically when data changes
+- **Entity Effects**: Track which entities each function/trigger modifies (auto-detected via static analysis)
+- **Notification Mapping**: Document when and to whom notifications are sent
+- **Dependency Graph**: Visualize FK relationships and behavioral dependencies
+- **Permission-Filtered**: Users only see documentation for entities they can access
+
+**Public Views** (permission-filtered, accessible via PostgREST):
+
+| View | Description | Access |
+|------|-------------|--------|
+| `schema_functions` | RPC function documentation with entity effects | All users (filtered) |
+| `schema_triggers` | Trigger documentation with affected entities | All users (filtered) |
+| `schema_entity_dependencies` | FK + behavioral relationships between entities | All users (filtered) |
+| `schema_notifications` | Notification trigger documentation | All users (filtered) |
+| `schema_cache_versions` | Cache versioning for frontend invalidation | All users |
+| `schema_permissions_matrix` | RBAC overview (all entities × all roles) | Admin only |
+| `schema_scheduled_functions` | Scheduled job execution status | Admin only |
+
+**Quick Start - Register an RPC Function**:
+
+```sql
+-- Auto-register with static analysis for entity effects
+SELECT metadata.auto_register_function(
+    'approve_request',           -- function_name
+    'Approve Request',           -- display_name
+    'Approves a pending request and notifies the user.', -- description
+    'workflow'                   -- category: workflow|crud|utility|payment|notification
+);
+
+-- Add parameter documentation
+UPDATE metadata.rpc_functions
+SET parameters = '[
+    {"name": "p_request_id", "type": "BIGINT", "description": "Request to approve"}
+]'::jsonb,
+    returns_type = 'JSONB',
+    returns_description = 'Object with success status and message',
+    minimum_role = 'manager'
+WHERE function_name = 'approve_request';
+```
+
+**Register a Database Trigger**:
+
+```sql
+INSERT INTO metadata.database_triggers
+    (trigger_name, table_name, schema_name, timing, events, function_name,
+     display_name, description, purpose)
+VALUES
+    ('validate_booking', 'reservations', 'public', 'BEFORE', ARRAY['INSERT', 'UPDATE'],
+     'validate_booking_fn', 'Validate Booking',
+     'Ensures booking time slots don''t overlap and are within business hours.',
+     'validation');
+```
+
+**Register Trigger Entity Effects** (for cross-table effects):
+
+```sql
+INSERT INTO metadata.trigger_entity_effects
+    (trigger_name, trigger_table, trigger_schema, affected_table, effect_type, description)
+VALUES
+    ('create_audit_note', 'orders', 'public', 'audit_log', 'create',
+     'Creates audit log entry when order status changes');
+```
+
+**Register Notification Triggers**:
+
+```sql
+INSERT INTO metadata.notification_triggers
+    (trigger_type, source_function, source_table, template_id,
+     trigger_condition, recipient_description, description)
+SELECT
+    'rpc',                              -- trigger_type: rpc|trigger|manual
+    'approve_request',                  -- source RPC function
+    'requests',                         -- source table
+    t.id,                               -- template ID (from notification_templates)
+    'When a request is approved',       -- human-readable condition
+    'The user who submitted the request',
+    'Sends approval confirmation email with next steps.'
+FROM metadata.notification_templates t
+WHERE t.name = 'request_approved';
+```
+
+**Bulk Register All Public Functions**:
+
+```sql
+-- Auto-discovers all public schema functions and analyzes their entity effects
+SELECT * FROM metadata.auto_register_all_rpcs();
+```
+
+**Static Analysis**: The `auto_register_function()` helper automatically parses function source code to detect entity effects (INSERT, UPDATE, DELETE, SELECT patterns). Manually add effects for complex cases:
+
+```sql
+INSERT INTO metadata.rpc_entity_effects
+    (function_name, entity_table, effect_type, description, is_auto_detected)
+VALUES
+    ('process_order', 'inventory', 'update',
+     'Decrements inventory counts for ordered items', false);
+```
+
+**Cache Invalidation**: The `introspection` cache version updates automatically when introspection tables change. Frontend can poll `schema_cache_versions` to detect when to refresh documentation.
+
+**API Response Reference** (for script writers and automation):
+
+`GET /schema_functions` - Returns array of function documentation:
+```json
+[{
+  "function_name": "approve_request",
+  "schema_name": "public",
+  "display_name": "Approve Request",
+  "description": "Approves a pending request and notifies the user.",
+  "category": "workflow",
+  "parameters": [
+    {"name": "p_request_id", "type": "BIGINT", "description": "Request to approve"}
+  ],
+  "returns_type": "JSONB",
+  "returns_description": "Object with success status and message",
+  "is_idempotent": false,
+  "minimum_role": "manager",
+  "entity_effects": [
+    {"table": "requests", "effect": "update", "auto_detected": true, "description": null},
+    {"table": "notifications", "effect": "create", "auto_detected": false, "description": "Sends approval email"}
+  ],
+  "hidden_effects_count": 0,
+  "has_active_schedule": false,
+  "can_execute": true
+}]
+```
+
+`GET /schema_triggers` - Returns array of trigger documentation:
+```json
+[{
+  "trigger_name": "validate_booking",
+  "table_name": "reservations",
+  "schema_name": "public",
+  "timing": "BEFORE",
+  "events": ["INSERT", "UPDATE"],
+  "function_name": "validate_booking_fn",
+  "display_name": "Validate Booking",
+  "description": "Ensures booking time slots don't overlap.",
+  "purpose": "validation",
+  "is_enabled": true,
+  "entity_effects": [
+    {"table": "audit_log", "effect": "create", "description": "Logs validation failures"}
+  ],
+  "hidden_effects_count": 0
+}]
+```
+
+`GET /schema_entity_dependencies` - Returns dependency graph edges:
+```json
+[{
+  "source_entity": "orders",
+  "target_entity": "products",
+  "relationship_type": "foreign_key",
+  "via_column": "product_id",
+  "via_object": null,
+  "category": "structural"
+},
+{
+  "source_entity": "orders",
+  "target_entity": "inventory",
+  "relationship_type": "rpc_modifies",
+  "via_column": null,
+  "via_object": "process_order",
+  "category": "behavioral"
+}]
+```
+
+`GET /schema_notifications` - Returns notification trigger documentation:
+```json
+[{
+  "trigger_name": "notify_on_approve",
+  "trigger_type": "rpc",
+  "source_function": "approve_request",
+  "source_table": "requests",
+  "template_name": "request_approved",
+  "template_entity_type": "requests",
+  "trigger_condition": "When a request is approved",
+  "recipient_description": "The user who submitted the request",
+  "description": "Sends approval confirmation email."
+}]
+```
+
+`GET /schema_permissions_matrix` (admin only) - Returns RBAC grid:
+```json
+[{
+  "table_name": "orders",
+  "entity_name": "Orders",
+  "role_id": 2,
+  "role_name": "user",
+  "can_create": true,
+  "can_read": true,
+  "can_update": false,
+  "can_delete": false
+}]
+```
+
+`GET /schema_scheduled_functions` (admin only) - Returns scheduled job info:
+```json
+[{
+  "function_name": "run_daily_tasks",
+  "display_name": "Daily Tasks",
+  "description": "Runs cleanup and reminder jobs.",
+  "category": "utility",
+  "job_name": "daily_tasks",
+  "cron_schedule": "0 8 * * *",
+  "timezone": "America/Detroit",
+  "schedule_enabled": true,
+  "last_run_at": "2025-01-15T08:00:00Z",
+  "last_run_success": true,
+  "success_rate_percent": 98.5
+}]
+```
+
+See `docs/notes/SYSTEM_INTROSPECTION_DESIGN.md` for complete architecture and `examples/mottpark/init-scripts/13_mpra_introspection.sql` for a complete working example.
+
+---
+
 ## Database Patterns
 
 ### Custom Domains

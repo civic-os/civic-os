@@ -1,0 +1,77 @@
+-- ============================================================================
+-- MOTT PARK - FIX PAYMENT DISPLAY NAME
+-- ============================================================================
+-- Adds a proper display_name column to reservation_payments, maintained by trigger.
+-- Cannot use generated column because MONEY type casts are locale-dependent (STABLE).
+--
+-- Result: "Security Deposit - $150.00 (Pending)"
+-- ============================================================================
+
+BEGIN;
+
+-- Drop the computed field function if it exists (we're replacing with column)
+DROP FUNCTION IF EXISTS public.reservation_payments_display_name(reservation_payments) CASCADE;
+
+-- Step 1: Drop existing display_name if it's a generated column (can't alter)
+ALTER TABLE reservation_payments
+  DROP COLUMN IF EXISTS display_name;
+
+-- Step 2: Add display_name as a regular column (trigger-maintained)
+ALTER TABLE reservation_payments
+  ADD COLUMN IF NOT EXISTS display_name VARCHAR(255);
+
+-- Step 3: Create trigger to maintain display_name
+-- Builds: "Security Deposit - $150.00 (Pending)"
+CREATE OR REPLACE FUNCTION set_payment_display_name()
+RETURNS TRIGGER
+LANGUAGE plpgsql AS $$
+DECLARE
+  v_type_name TEXT;
+  v_status_name TEXT;
+BEGIN
+  -- Get payment type name
+  SELECT display_name INTO v_type_name
+  FROM reservation_payment_types
+  WHERE id = NEW.payment_type_id;
+
+  -- Get status name
+  SELECT display_name INTO v_status_name
+  FROM metadata.statuses
+  WHERE id = NEW.status_id;
+
+  -- Build display name: "Type - $amount (Status)"
+  NEW.display_name := COALESCE(v_type_name, 'Payment') || ' - ' ||
+                      NEW.amount::TEXT ||
+                      ' (' || COALESCE(v_status_name, 'Unknown') || ')';
+
+  RETURN NEW;
+END;
+$$;
+
+-- Drop old triggers
+DROP TRIGGER IF EXISTS set_payment_type_name_trigger ON reservation_payments;
+DROP TRIGGER IF EXISTS set_payment_denormalized_trigger ON reservation_payments;
+DROP TRIGGER IF EXISTS set_payment_display_name_trigger ON reservation_payments;
+
+-- Create new trigger - fires on any change that affects display_name
+CREATE TRIGGER set_payment_display_name_trigger
+  BEFORE INSERT OR UPDATE OF payment_type_id, status_id, amount ON reservation_payments
+  FOR EACH ROW
+  EXECUTE FUNCTION set_payment_display_name();
+
+-- Step 4: Populate existing rows
+UPDATE reservation_payments SET
+  display_name = (
+    SELECT COALESCE(rpt.display_name, 'Payment') || ' - ' ||
+           reservation_payments.amount::TEXT ||
+           ' (' || COALESCE(s.display_name, 'Unknown') || ')'
+    FROM reservation_payment_types rpt, metadata.statuses s
+    WHERE rpt.id = reservation_payments.payment_type_id
+      AND s.id = reservation_payments.status_id
+  )
+WHERE display_name IS NULL;
+
+COMMIT;
+
+-- Notify PostgREST to refresh
+NOTIFY pgrst, 'reload schema';

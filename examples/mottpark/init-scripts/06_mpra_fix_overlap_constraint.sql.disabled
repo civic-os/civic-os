@@ -1,0 +1,133 @@
+-- ============================================================================
+-- MOTT PARK - FIX OVERLAP CONSTRAINT LOCATION
+-- ============================================================================
+-- Moves the overlap prevention from reservation_requests to public_calendar_events.
+--
+-- Design:
+--   - reservation_requests: Allow multiple overlapping requests (pending is fine)
+--   - public_calendar_events: Prevent overlapping approved events
+--
+-- Flow:
+--   1. Staff approves a reservation request
+--   2. Sync trigger tries to INSERT into public_calendar_events
+--   3. If time_slot overlaps → exclusion constraint fails → approval blocked
+--   4. Staff sees error and knows to check calendar for conflicts
+--
+-- ============================================================================
+
+BEGIN;
+
+-- ============================================================================
+-- SECTION 1: REMOVE OVERLAP CONSTRAINT FROM RESERVATION_REQUESTS
+-- ============================================================================
+
+-- Drop the exclusion constraint
+ALTER TABLE reservation_requests DROP CONSTRAINT IF EXISTS no_overlapping_reservations;
+
+-- Drop the trigger that maintained is_calendar_active
+DROP TRIGGER IF EXISTS update_calendar_active_trigger ON reservation_requests;
+DROP FUNCTION IF EXISTS update_calendar_active_status();
+
+-- Drop the index on is_calendar_active
+DROP INDEX IF EXISTS idx_reservation_requests_calendar_active;
+
+-- Remove the is_calendar_active column
+ALTER TABLE reservation_requests DROP COLUMN IF EXISTS is_calendar_active;
+
+-- ============================================================================
+-- SECTION 2: ADD OVERLAP CONSTRAINT TO PUBLIC_CALENDAR_EVENTS
+-- ============================================================================
+
+-- Add exclusion constraint to prevent overlapping approved events
+-- This is what actually enforces "no double-booking"
+ALTER TABLE public_calendar_events
+  ADD CONSTRAINT no_overlapping_approved_events
+  EXCLUDE USING GIST (time_slot WITH &&);
+
+-- Add friendly error message for the constraint
+INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
+VALUES (
+  'no_overlapping_approved_events',
+  'public_calendar_events',
+  'time_slot',
+  'Cannot approve this reservation: the requested time slot conflicts with an existing approved event. Please check the calendar for availability or contact the requestor to reschedule.'
+) ON CONFLICT (constraint_name) DO UPDATE SET
+  error_message = EXCLUDED.error_message;
+
+-- ============================================================================
+-- SECTION 3: UPDATE SYNC TRIGGER ERROR HANDLING
+-- ============================================================================
+
+-- Recreate the sync function with better error handling
+CREATE OR REPLACE FUNCTION sync_public_calendar_event()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata
+AS $$
+DECLARE
+  v_approved_ids INT[];
+BEGIN
+  -- Get approved/completed status IDs
+  SELECT ARRAY_AGG(id) INTO v_approved_ids
+  FROM metadata.statuses
+  WHERE entity_type = 'reservation_request'
+  AND display_name IN ('Approved', 'Completed');
+
+  -- DELETE: Remove from public calendar
+  IF TG_OP = 'DELETE' THEN
+    DELETE FROM public_calendar_events WHERE id = OLD.id;
+    RETURN OLD;
+  END IF;
+
+  -- INSERT or UPDATE: Sync if approved, remove if not
+  IF NEW.status_id = ANY(v_approved_ids) THEN
+    -- This INSERT will fail with exclusion constraint if time_slot overlaps
+    -- The error bubbles up and blocks the approval - exactly what we want!
+    INSERT INTO public_calendar_events (
+      id, time_slot, display_name, event_type, is_public_event,
+      organization_name, contact_name, contact_phone, attendee_ages,
+      is_admission_charged, synced_at
+    ) VALUES (
+      NEW.id,
+      NEW.time_slot,
+      -- Display name: show details for public, mask for private
+      CASE WHEN NEW.is_public_event
+        THEN COALESCE(NEW.organization_name, NEW.requestor_name) || ' - ' || NEW.event_type
+        ELSE 'Private Event'
+      END,
+      -- Event type: show for public, mask for private
+      CASE WHEN NEW.is_public_event THEN NEW.event_type ELSE 'Private Event' END,
+      NEW.is_public_event,
+      -- Contact info: only for public events
+      CASE WHEN NEW.is_public_event THEN NEW.organization_name END,
+      CASE WHEN NEW.is_public_event THEN NEW.requestor_name END,
+      CASE WHEN NEW.is_public_event THEN NEW.requestor_phone END,
+      CASE WHEN NEW.is_public_event THEN NEW.attendee_ages END,
+      CASE WHEN NEW.is_public_event THEN NEW.is_admission_charged END,
+      NOW()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      time_slot = EXCLUDED.time_slot,
+      display_name = EXCLUDED.display_name,
+      event_type = EXCLUDED.event_type,
+      is_public_event = EXCLUDED.is_public_event,
+      organization_name = EXCLUDED.organization_name,
+      contact_name = EXCLUDED.contact_name,
+      contact_phone = EXCLUDED.contact_phone,
+      attendee_ages = EXCLUDED.attendee_ages,
+      is_admission_charged = EXCLUDED.is_admission_charged,
+      synced_at = NOW();
+  ELSE
+    -- Not approved: remove from public calendar
+    DELETE FROM public_calendar_events WHERE id = NEW.id;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+COMMIT;
+
+-- Notify PostgREST to refresh
+NOTIFY pgrst, 'reload schema';

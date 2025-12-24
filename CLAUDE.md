@@ -89,6 +89,8 @@ See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) for complete impl
 
 **Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedule system. Enable via `supports_recurring=true` and `recurring_property_name` in `metadata.entities`. Architecture: Series Groups → Series (RRULE + template) → Instances. Edit scope dialogs support "This only", "This and future", and "All" modifications. Managed at `/admin/recurring-schedules`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture.
 
+**System Introspection** (v0.23.0+): Auto-generated documentation for RPC functions, database triggers, and notification workflows. Features permission-filtered views (`schema_functions`, `schema_triggers`, `schema_entity_dependencies`, `schema_notifications`), static code analysis for entity effect detection, and admin-only views (`schema_permissions_matrix`, `schema_scheduled_functions`). Register functions via `metadata.auto_register_function()`. See `docs/INTEGRATOR_GUIDE.md` (System Introspection section) for complete guide and `examples/mottpark/init-scripts/13_mpra_introspection.sql` for working example.
+
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
 **Payment Type** (`Payment`): UUID foreign key to `payments.transactions` table for Stripe-based payment processing. Metadata-driven architecture enables payments on any entity via `payment_initiation_rpc` configuration in `metadata.entities`. Frontend automatically displays payment badges on List pages and "Pay Now" button on Detail pages when configured. Payment workflow: user clicks "Pay Now" → framework calls configured RPC → RPC validates and creates payment record → River job creates Stripe PaymentIntent → modal displays Stripe Elements → webhook updates status. Requires Civic OS v0.13.0+ with consolidated worker service. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete implementation guide and `examples/community-center/init-scripts/10_payment_integration.sql` for working example.
@@ -202,7 +204,9 @@ npm run generate community-center     # Generate for Community Center example
 
 The mock data generator is **validation-aware**: it fetches validation rules from `metadata.validations` and generates compliant data (respects min/max, minLength/maxLength, pattern constraints). Each example has its own `mock-data-config.json` to control record counts and geography bounds.
 
-**Important**: Mock data should be generated AFTER database initialization (after `docker-compose up`), not during init scripts. This allows schema changes to flow smoothly without being blocked by stale static SQL files. Examples are located in the `examples/` directory (pothole, broader-impacts). All examples use the same port configuration - only run one example at a time.
+**Important**: Mock data should be generated AFTER database initialization (after `docker-compose up`), not during init scripts. This allows schema changes to flow smoothly without being blocked by stale static SQL files. Examples are located in the `examples/` directory (pothole, broader-impacts, community-center, mottpark, storymap). All examples use the same port configuration - only run one example at a time.
+
+**Examples Overview**: See `docs/EXAMPLES.md` for a comparison of all examples showing which features each demonstrates (calendar, payments, notifications, etc.) and recommended learning paths.
 
 ## Database Setup
 

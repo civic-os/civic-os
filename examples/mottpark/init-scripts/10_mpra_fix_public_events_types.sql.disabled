@@ -1,0 +1,26 @@
+-- ============================================================================
+-- MOTT PARK - FIX PUBLIC EVENTS COLUMN TYPES
+-- ============================================================================
+-- Updates public_calendar_events column types to match source table.
+-- This ensures proper UI formatting (phone mask, calendar display, etc.)
+--
+-- Changes:
+--   time_slot:     TSTZRANGE → time_slot domain (calendar integration)
+--   contact_phone: TEXT → phone_number (formatted display/input)
+-- ============================================================================
+
+BEGIN;
+
+-- Change time_slot from TSTZRANGE to time_slot domain
+-- This enables proper calendar widget integration
+ALTER TABLE public_calendar_events
+  ALTER COLUMN time_slot TYPE time_slot;
+
+-- Change contact_phone from TEXT to phone_number domain
+ALTER TABLE public_calendar_events
+  ALTER COLUMN contact_phone TYPE phone_number;
+
+COMMIT;
+
+-- Notify PostgREST to refresh
+NOTIFY pgrst, 'reload schema';
