@@ -258,8 +258,8 @@ CREATE POLICY "holiday_rules: read all" ON holiday_rules
 
 CREATE POLICY "holiday_rules: admin modify" ON holiday_rules
   FOR ALL TO authenticated
-  USING (public.is_admin())
-  WITH CHECK (public.is_admin());
+  USING (is_admin())
+  WITH CHECK (is_admin());
 
 -- Apply timestamp triggers
 CREATE TRIGGER set_created_at_trigger

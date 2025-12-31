@@ -539,9 +539,9 @@ postgrest:
     - "3000:3000"  # Change external port to avoid conflicts
   environment:
     PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    PGRST_DB_SCHEMA: public,metadata
+    PGRST_DB_SCHEMA: public
     PGRST_DB_ANON_ROLE: web_anon
-    PGRST_DB_PRE_REQUEST: "public.check_jwt"
+    PGRST_DB_PRE_REQUEST: "metadata.check_jwt"
     PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
     PGRST_JWT_AUD: "account"
   volumes:
@@ -549,8 +549,8 @@ postgrest:
 ```
 
 **Key Settings**:
-- `PGRST_DB_SCHEMA: public,metadata` - Exposes both schemas via API
-- `PGRST_DB_PRE_REQUEST: "public.check_jwt"` - Enables JWT validation
+- `PGRST_DB_SCHEMA: public` - Exposes public schema via API (internal helpers are in metadata, accessed via search_path)
+- `PGRST_DB_PRE_REQUEST: "metadata.check_jwt"` - Enables JWT validation
 - `PGRST_JWT_SECRET` - Path to Keycloak public key (JWKS format)
 
 #### File Storage Services (Optional - Required for File Uploads)

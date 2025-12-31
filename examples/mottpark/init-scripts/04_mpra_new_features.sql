@@ -51,8 +51,8 @@ BEGIN
   END IF;
 
   -- Check user has manager or admin role
-  IF NOT (public.has_permission('reservation_requests', 'update') AND 
-          ('manager' = ANY(public.get_user_roles()) OR public.is_admin())) THEN
+  IF NOT (has_permission('reservation_requests', 'update') AND 
+          ('manager' = ANY(get_user_roles()) OR is_admin())) THEN
     RETURN jsonb_build_object('success', false, 'message', 'You do not have permission to approve requests');
   END IF;
 
@@ -111,8 +111,8 @@ BEGIN
   END IF;
 
   -- Check user has manager or admin role
-  IF NOT (public.has_permission('reservation_requests', 'update') AND 
-          ('manager' = ANY(public.get_user_roles()) OR public.is_admin())) THEN
+  IF NOT (has_permission('reservation_requests', 'update') AND 
+          ('manager' = ANY(get_user_roles()) OR is_admin())) THEN
     RETURN jsonb_build_object('success', false, 'message', 'You do not have permission to deny requests');
   END IF;
 
@@ -168,8 +168,8 @@ BEGIN
   END IF;
 
   -- Check user has manager or admin role
-  IF NOT (public.has_permission('reservation_requests', 'update') AND 
-          ('manager' = ANY(public.get_user_roles()) OR public.is_admin())) THEN
+  IF NOT (has_permission('reservation_requests', 'update') AND 
+          ('manager' = ANY(get_user_roles()) OR is_admin())) THEN
     RETURN jsonb_build_object('success', false, 'message', 'You do not have permission to cancel requests');
   END IF;
 

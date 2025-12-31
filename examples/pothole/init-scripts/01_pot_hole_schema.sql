@@ -26,7 +26,7 @@ CREATE TABLE "public"."Issue" (
 	"updated_at" TIMESTAMP WITH TIME ZONE,
 	"display_name" TEXT NOT NULL,
 	"status" BIGINT NOT NULL DEFAULT '1'::BIGINT,
-	"created_user" UUID NOT NULL DEFAULT public.current_user_id(),
+	"created_user" UUID NOT NULL DEFAULT current_user_id(),
 	"work_package" BIGINT,
 	"location" postgis.geography(Point, 4326),
 	"contact_email" email_address,
@@ -186,171 +186,171 @@ ALTER TABLE "public"."issue_tags" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Bid: read permission" ON "public"."Bid"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('Bid', 'read'));
+  USING (has_permission('Bid', 'read'));
 
 CREATE POLICY "Bid: create permission" ON "public"."Bid"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('Bid', 'create'));
+  WITH CHECK (has_permission('Bid', 'create'));
 
 CREATE POLICY "Bid: update permission" ON "public"."Bid"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('Bid', 'update'))
-  WITH CHECK (public.has_permission('Bid', 'update'));
+  USING (has_permission('Bid', 'update'))
+  WITH CHECK (has_permission('Bid', 'update'));
 
 CREATE POLICY "Bid: delete permission" ON "public"."Bid"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('Bid', 'delete'));
+  USING (has_permission('Bid', 'delete'));
 
 -- RLS Policies for Issue
 CREATE POLICY "Issue: read permission" ON "public"."Issue"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('Issue', 'read'));
+  USING (has_permission('Issue', 'read'));
 
 CREATE POLICY "Issue: create permission" ON "public"."Issue"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('Issue', 'create'));
+  WITH CHECK (has_permission('Issue', 'create'));
 
 CREATE POLICY "Issue: update permission" ON "public"."Issue"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('Issue', 'update'))
-  WITH CHECK (public.has_permission('Issue', 'update'));
+  USING (has_permission('Issue', 'update'))
+  WITH CHECK (has_permission('Issue', 'update'));
 
 CREATE POLICY "Issue: delete permission" ON "public"."Issue"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('Issue', 'delete'));
+  USING (has_permission('Issue', 'delete'));
 
 -- RLS Policies for IssueStatus
 CREATE POLICY "IssueStatus: read permission" ON "public"."IssueStatus"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('IssueStatus', 'read'));
+  USING (has_permission('IssueStatus', 'read'));
 
 CREATE POLICY "IssueStatus: create permission" ON "public"."IssueStatus"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('IssueStatus', 'create'));
+  WITH CHECK (has_permission('IssueStatus', 'create'));
 
 CREATE POLICY "IssueStatus: update permission" ON "public"."IssueStatus"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('IssueStatus', 'update'))
-  WITH CHECK (public.has_permission('IssueStatus', 'update'));
+  USING (has_permission('IssueStatus', 'update'))
+  WITH CHECK (has_permission('IssueStatus', 'update'));
 
 CREATE POLICY "IssueStatus: delete permission" ON "public"."IssueStatus"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('IssueStatus', 'delete'));
+  USING (has_permission('IssueStatus', 'delete'));
 
 -- RLS Policies for WorkDetail
 CREATE POLICY "WorkDetail: read permission" ON "public"."WorkDetail"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('WorkDetail', 'read'));
+  USING (has_permission('WorkDetail', 'read'));
 
 CREATE POLICY "WorkDetail: create permission" ON "public"."WorkDetail"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('WorkDetail', 'create'));
+  WITH CHECK (has_permission('WorkDetail', 'create'));
 
 CREATE POLICY "WorkDetail: update permission" ON "public"."WorkDetail"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('WorkDetail', 'update'))
-  WITH CHECK (public.has_permission('WorkDetail', 'update'));
+  USING (has_permission('WorkDetail', 'update'))
+  WITH CHECK (has_permission('WorkDetail', 'update'));
 
 CREATE POLICY "WorkDetail: delete permission" ON "public"."WorkDetail"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('WorkDetail', 'delete'));
+  USING (has_permission('WorkDetail', 'delete'));
 
 -- RLS Policies for WorkPackage
 CREATE POLICY "WorkPackage: read permission" ON "public"."WorkPackage"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('WorkPackage', 'read'));
+  USING (has_permission('WorkPackage', 'read'));
 
 CREATE POLICY "WorkPackage: create permission" ON "public"."WorkPackage"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('WorkPackage', 'create'));
+  WITH CHECK (has_permission('WorkPackage', 'create'));
 
 CREATE POLICY "WorkPackage: update permission" ON "public"."WorkPackage"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('WorkPackage', 'update'))
-  WITH CHECK (public.has_permission('WorkPackage', 'update'));
+  USING (has_permission('WorkPackage', 'update'))
+  WITH CHECK (has_permission('WorkPackage', 'update'));
 
 CREATE POLICY "WorkPackage: delete permission" ON "public"."WorkPackage"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('WorkPackage', 'delete'));
+  USING (has_permission('WorkPackage', 'delete'));
 
 -- RLS Policies for WorkPackageStatus
 CREATE POLICY "WorkPackageStatus: read permission" ON "public"."WorkPackageStatus"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('WorkPackageStatus', 'read'));
+  USING (has_permission('WorkPackageStatus', 'read'));
 
 CREATE POLICY "WorkPackageStatus: create permission" ON "public"."WorkPackageStatus"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('WorkPackageStatus', 'create'));
+  WITH CHECK (has_permission('WorkPackageStatus', 'create'));
 
 CREATE POLICY "WorkPackageStatus: update permission" ON "public"."WorkPackageStatus"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('WorkPackageStatus', 'update'))
-  WITH CHECK (public.has_permission('WorkPackageStatus', 'update'));
+  USING (has_permission('WorkPackageStatus', 'update'))
+  WITH CHECK (has_permission('WorkPackageStatus', 'update'));
 
 CREATE POLICY "WorkPackageStatus: delete permission" ON "public"."WorkPackageStatus"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('WorkPackageStatus', 'delete'));
+  USING (has_permission('WorkPackageStatus', 'delete'));
 
 -- RLS Policies for Tag
 CREATE POLICY "Tag: read permission" ON "public"."Tag"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('Tag', 'read'));
+  USING (has_permission('Tag', 'read'));
 
 CREATE POLICY "Tag: create permission" ON "public"."Tag"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('Tag', 'create'));
+  WITH CHECK (has_permission('Tag', 'create'));
 
 CREATE POLICY "Tag: update permission" ON "public"."Tag"
   FOR UPDATE
   TO PUBLIC
-  USING (public.has_permission('Tag', 'update'))
-  WITH CHECK (public.has_permission('Tag', 'update'));
+  USING (has_permission('Tag', 'update'))
+  WITH CHECK (has_permission('Tag', 'update'));
 
 CREATE POLICY "Tag: delete permission" ON "public"."Tag"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('Tag', 'delete'));
+  USING (has_permission('Tag', 'delete'));
 
 -- RLS Policies for issue_tags (junction table)
 CREATE POLICY "issue_tags: read permission" ON "public"."issue_tags"
   FOR SELECT
   TO PUBLIC
-  USING (public.has_permission('issue_tags', 'read'));
+  USING (has_permission('issue_tags', 'read'));
 
 CREATE POLICY "issue_tags: create permission" ON "public"."issue_tags"
   FOR INSERT
   TO PUBLIC
-  WITH CHECK (public.has_permission('issue_tags', 'create'));
+  WITH CHECK (has_permission('issue_tags', 'create'));
 
 CREATE POLICY "issue_tags: delete permission" ON "public"."issue_tags"
   FOR DELETE
   TO PUBLIC
-  USING (public.has_permission('issue_tags', 'delete'));
+  USING (has_permission('issue_tags', 'delete'));
 
 -- Apply timestamp triggers
 CREATE TRIGGER set_created_at_trigger

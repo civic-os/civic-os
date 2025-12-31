@@ -57,9 +57,9 @@ CREATE TABLE reservations (
 CREATE TABLE reservation_requests (
   id BIGSERIAL PRIMARY KEY,
   resource_id INT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
-  requested_by UUID NOT NULL DEFAULT public.current_user_id() REFERENCES metadata.civic_os_users(id) ON DELETE CASCADE,
+  requested_by UUID NOT NULL DEFAULT current_user_id() REFERENCES metadata.civic_os_users(id) ON DELETE CASCADE,
   time_slot time_slot NOT NULL,
-  status_id INT NOT NULL DEFAULT public.get_initial_status('reservation_request') REFERENCES metadata.statuses(id),  -- Default to initial status ('Pending')
+  status_id INT NOT NULL DEFAULT get_initial_status('reservation_request') REFERENCES metadata.statuses(id),  -- Default to initial status ('Pending')
   purpose TEXT NOT NULL,
   attendee_count INT NOT NULL,
   notes TEXT,
@@ -135,15 +135,15 @@ ALTER TABLE reservation_requests ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY select_own_requests ON reservation_requests
   FOR SELECT
-  USING (requested_by = public.current_user_id() OR public.has_permission('reservation_requests', 'read'));
+  USING (requested_by = current_user_id() OR has_permission('reservation_requests', 'read'));
 
 CREATE POLICY insert_own_requests ON reservation_requests
   FOR INSERT
-  WITH CHECK (requested_by = public.current_user_id());
+  WITH CHECK (requested_by = current_user_id());
 
 CREATE POLICY update_requests_editors_only ON reservation_requests
   FOR UPDATE
-  USING (public.has_permission('reservation_requests', 'update'));
+  USING (has_permission('reservation_requests', 'update'));
 
 -- ============================================================================
 -- CONSTRAINTS

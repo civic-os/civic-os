@@ -198,6 +198,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 ## Phase 4: Extension Modules
 - [ ] Financial Tools (Accounting)
 - [x] **Payments Integration** (v0.13.0/v0.14.0 - Stripe, metadata-driven, refunds, admin UI, notifications)
+  - [ ] Conditional payment button visibility (`payment_show_condition` JSONB, like action buttons)
 
 - [ ] **Assignment Queue / Load Balancing** - Work distribution for teams
   - [ ] Work queue concept (entities with `assigned_user_id` column)

@@ -28,9 +28,9 @@ data:
   MAP_DEFAULT_ZOOM: "13"
 
   # PostgREST configuration
-  PGRST_DB_SCHEMA: "public,metadata"
+  PGRST_DB_SCHEMA: "public"
   PGRST_DB_ANON_ROLE: "web_anon"
-  PGRST_DB_PRE_REQUEST: "public.check_jwt"
+  PGRST_DB_PRE_REQUEST: "metadata.check_jwt"
   PGRST_JWT_AUD: "account"
   PGRST_LOG_LEVEL: "info"
 

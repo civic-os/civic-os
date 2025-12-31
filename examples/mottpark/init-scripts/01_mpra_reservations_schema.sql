@@ -93,7 +93,7 @@ CREATE TABLE reservation_requests (
   id BIGSERIAL PRIMARY KEY,
   
   -- Requestor Information (from form + SSO)
-  requestor_id UUID NOT NULL DEFAULT public.current_user_id() 
+  requestor_id UUID NOT NULL DEFAULT current_user_id() 
     REFERENCES metadata.civic_os_users(id) ON DELETE CASCADE,
   requestor_name VARCHAR(200) NOT NULL,         -- Full name (may differ from SSO)
   requestor_address TEXT NOT NULL,              -- Mailing address
@@ -120,7 +120,7 @@ CREATE TABLE reservation_requests (
   policy_agreed_at TIMESTAMPTZ,                 -- When they agreed
   
   -- Status Workflow (uses Status Type System)
-  status_id INT NOT NULL DEFAULT public.get_initial_status('reservation_request')
+  status_id INT NOT NULL DEFAULT get_initial_status('reservation_request')
     REFERENCES metadata.statuses(id),
   
   -- Review/Approval Tracking
@@ -191,7 +191,7 @@ CREATE TABLE reservation_payments (
   due_date DATE,                                -- When payment is due
 
   -- Payment Status (uses Status Type System for colored badges)
-  status_id INT NOT NULL DEFAULT public.get_initial_status('reservation_payment')
+  status_id INT NOT NULL DEFAULT get_initial_status('reservation_payment')
     REFERENCES metadata.statuses(id),
 
   -- Stripe Integration (links to payments.transactions)
@@ -478,7 +478,7 @@ BEGIN
   IF NEW.status_id = v_cancelled_status_id 
      AND (OLD IS NULL OR OLD.status_id != v_cancelled_status_id) THEN
     NEW.cancelled_at := NOW();
-    NEW.cancelled_by := public.current_user_id();
+    NEW.cancelled_by := current_user_id();
   END IF;
   
   RETURN NEW;
@@ -552,26 +552,26 @@ CREATE POLICY "reservation_requests: read own or staff" ON reservation_requests
   FOR SELECT TO authenticated
   USING (
     -- Own requests
-    requestor_id = public.current_user_id()
+    requestor_id = current_user_id()
     -- OR staff with read permission see all
-    OR public.has_permission('reservation_requests', 'read')
+    OR has_permission('reservation_requests', 'read')
   );
 
 -- INSERT: Any authenticated user can create a request (for themselves)
 CREATE POLICY "reservation_requests: create own" ON reservation_requests
   FOR INSERT TO authenticated
-  WITH CHECK (requestor_id = public.current_user_id());
+  WITH CHECK (requestor_id = current_user_id());
 
 -- UPDATE: Only managers can update (approve/deny/cancel)
 CREATE POLICY "reservation_requests: manager update" ON reservation_requests
   FOR UPDATE TO authenticated
-  USING (public.has_permission('reservation_requests', 'update'))
-  WITH CHECK (public.has_permission('reservation_requests', 'update'));
+  USING (has_permission('reservation_requests', 'update'))
+  WITH CHECK (has_permission('reservation_requests', 'update'));
 
 -- DELETE: Only admins can delete
 CREATE POLICY "reservation_requests: admin delete" ON reservation_requests
   FOR DELETE TO authenticated
-  USING (public.is_admin());
+  USING (is_admin());
 
 -- ---------------------------------------------------------------------------
 -- Reservation Payments: Users see own, managers see all, admins modify
@@ -584,17 +584,17 @@ CREATE POLICY "reservation_payments: read own or manager" ON reservation_payment
     EXISTS (
       SELECT 1 FROM reservation_requests rr 
       WHERE rr.id = reservation_request_id 
-      AND rr.requestor_id = public.current_user_id()
+      AND rr.requestor_id = current_user_id()
     )
     -- OR managers/admins
-    OR public.has_permission('reservation_payments', 'read')
+    OR has_permission('reservation_payments', 'read')
   );
 
 -- Only admins can modify payments (waive, refund, etc.)
 CREATE POLICY "reservation_payments: admin modify" ON reservation_payments
   FOR ALL TO authenticated
-  USING (public.is_admin())
-  WITH CHECK (public.is_admin());
+  USING (is_admin())
+  WITH CHECK (is_admin());
 
 -- ============================================================================
 -- SECTION 11: METADATA CONFIGURATION

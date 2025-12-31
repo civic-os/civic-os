@@ -1,24 +1,50 @@
-# Payment Processing Microservice - Design Document
+# Payment Processing System
 
-**Version:** 2.3
-**Target Release:** Phase 0 - Phase 5 (initial implementation)
-**Status:** POC Complete (see [PAYMENT_POC_IMPLEMENTATION.md](./PAYMENT_POC_IMPLEMENTATION.md))
+**Version:** 3.0
+**Status:** Production Ready (v0.13.0 Core, v0.14.0 Admin/Refunds)
 **Author:** Civic OS Development Team
-**Last Updated:** 2025-11-22
+**Last Updated:** 2025-12-31
 
 **📋 Quick Links:**
-- ✅ **[POC Implementation Summary](./PAYMENT_POC_IMPLEMENTATION.md)** - What's been built (Property Type approach)
 - 📊 **[Payment State Diagram](./PAYMENT_STATE_DIAGRAM.md)** - Status flow visualization
-- 📘 **This Document** - Full design specification (polymorphic approach for production)
+- 📘 **This Document** - Complete payment system documentation
+
+## Implementation Status
+
+| Feature | Status | Version | Notes |
+|---------|--------|---------|-------|
+| Core payment processing | ✅ Implemented | v0.13.0 | Stripe PaymentIntent, webhooks, River jobs |
+| Payment property type | ✅ Implemented | v0.13.0 | Auto-detected from FK to `payments.transactions` |
+| PaymentBadgeComponent | ✅ Implemented | v0.13.0 | Reusable status display |
+| PaymentCheckoutComponent | ✅ Implemented | v0.13.0 | Stripe Elements modal with polling |
+| Webhook idempotency | ✅ Implemented | v0.13.0 | Dedupe via `metadata.webhooks` table |
+| Retry with new transaction | ✅ Implemented | v0.13.0 | Failed payments create new records on retry |
+| Admin payments page | ✅ Implemented | v0.14.0 | `/admin/payments` with search, filter, sort |
+| Refund processing | ✅ Implemented | v0.14.0 | 1:M partial refunds, Stripe API integration |
+| Processing fees | ✅ Implemented | v0.14.0 | Configurable fee % + flat rate |
+| Email notifications | ✅ Implemented | v0.14.0 | `payment_succeeded`, `payment_refunded` templates |
+| Metadata-driven initiation | ✅ Implemented | v0.14.0 | `payment_initiation_rpc` column in `metadata.entities` |
+| Generic entity sync trigger | 🔜 Planned | — | Currently requires domain-specific triggers |
+| Deferred capture mode | 🔜 Planned | — | Only immediate capture implemented |
+| Conditional payment button | 🔜 Planned | — | `payment_show_condition` (like action buttons) |
+| PayPal integration | 🔜 Planned | — | Only Stripe implemented |
+| Multi-currency support | 🔜 Planned | — | Single currency per instance |
+
+> **Note on Entity Sync:** The generic `update_entity_payment_status()` trigger described in this document is not yet implemented. You must create domain-specific trigger functions to sync payment status to your entities. See `examples/mottpark/init-scripts/09_mpra_payment_status_sync.sql` for a working pattern.
 
 **Changelog:**
+- v3.0 (2025-12-31): Documentation consolidation
+  - Merged POC implementation summary into this document
+  - Added Implementation Status table with ✅/🔜 markers
+  - Added Processing Fees section (was undocumented)
+  - Clarified async payment intent creation (frontend polling, not sync RPC)
+  - Clarified entity sync requires domain-specific triggers
+  - Added Conditional Payment Button Visibility to Future Enhancements
 - v2.3 (2025-11-22): POC completion status update
   - Property Type approach implemented (direct FK pattern)
   - Core payment flow working (create → pay → webhook → status update)
   - PaymentBadgeComponent for consistent UI display
   - Retry logic with new transaction creation + orphaned PaymentIntent handling
-  - See [PAYMENT_POC_IMPLEMENTATION.md](./PAYMENT_POC_IMPLEMENTATION.md) for details
-  - Full polymorphic design (this doc) deferred to production implementation
 - v2.2 (2025-11-21): Schema and service architecture revision
   - Moved payment tables to separate `payments` schema (prevents metadata pollution)
   - Separated payment-worker from consolidated-worker (optionality, bounded context)
@@ -41,19 +67,21 @@
 2. [Architecture](#architecture)
 3. [Database Schema](#database-schema)
 4. [Entity Integration Pattern](#entity-integration-pattern)
-5. [Configurable Capture Timing](#configurable-capture-timing)
-6. [Go Microservice Design](#go-microservice-design)
-7. [Email Service Integration](#email-service-integration)
-8. [RPC Functions](#rpc-functions)
-9. [Webhook Architecture](#webhook-architecture)
-10. [Frontend Components](#frontend-components)
-11. [Security & Permissions](#security--permissions)
-12. [Configuration](#configuration)
-13. [Stripe Account Setup Guide](#stripe-account-setup-guide)
-14. [Design Patterns from Production Systems](#design-patterns-from-production-systems)
-15. [Implementation Roadmap](#implementation-roadmap)
-16. [Testing Strategy](#testing-strategy)
-17. [Integration Examples](#integration-examples)
+5. [Processing Fees](#processing-fees) ✅ NEW
+6. [Configurable Capture Timing](#configurable-capture-timing)
+7. [Go Microservice Design](#go-microservice-design)
+8. [Email Service Integration](#email-service-integration)
+9. [RPC Functions](#rpc-functions)
+10. [Webhook Architecture](#webhook-architecture)
+11. [Frontend Components](#frontend-components)
+12. [Security & Permissions](#security--permissions)
+13. [Configuration](#configuration)
+14. [Stripe Account Setup Guide](#stripe-account-setup-guide)
+15. [Testing the Payment System](#testing-the-payment-system) ✅ NEW
+16. [Design Patterns from Production Systems](#design-patterns-from-production-systems)
+17. [Implementation Roadmap](#implementation-roadmap)
+18. [Testing Strategy](#testing-strategy)
+19. [Integration Examples](#integration-examples)
 
 ---
 
@@ -68,12 +96,13 @@ The Payment Processing Microservice extends Civic OS with secure, provider-agnos
 - **Provider-Agnostic Design**: Abstract payment interface with Stripe implementation (PayPal planned)
 - **Polymorphic Payments**: Any entity can accept payments via `entity_type` + `entity_id` pattern
 - **Async Job Processing**: River-based queue for reliable payment operations with retries
-- **Automatic Entity Sync**: Database triggers automatically update entity `payment_status` when payments succeed/fail
+- **Automatic Entity Sync**: Database triggers update entity `payment_status` when payments succeed/fail *(currently requires domain-specific triggers)*
+- **Processing Fees**: Configurable fee calculation (percentage + flat rate) with fee-aware refund handling *(v0.14.0+)*
 - **Configurable Capture Timing**: Support both immediate and deferred capture flows per entity type
 - **Email Notifications**: SMTP-based email confirmations with customizable templates
 - **Webhook Idempotency**: Timestamp-based idempotency with event tracking, audit trail for all provider callbacks
 - **Permission-Based Access**: Integrates with Civic OS RBAC (admin + billing_staff roles)
-- **Synchronous Payment Creation**: No frontend polling - RPC waits for payment intent creation
+- **Async Payment Intent Creation**: Frontend polls for payment status while River worker creates Stripe PaymentIntent
 - **Specialized UI**: SystemListPage/SystemDetailPage for payment history with refund capabilities
 
 ### Design Constraints
@@ -338,6 +367,8 @@ CREATE TRIGGER enqueue_payment_event
 
 #### Trigger Function: Entity Payment Status Sync
 
+> **⚠️ Not Yet Implemented**: This generic trigger function is part of the future polymorphic design. Current implementations require **domain-specific triggers** that map payment status to entity-specific fields. See `examples/mottpark/init-scripts/09_mpra_payment_status_sync.sql` for the current pattern.
+
 This trigger automatically updates the entity's `payment_status` column when payment completes.
 
 ```sql
@@ -587,14 +618,16 @@ CREATE INDEX idx_event_registrations_payment_id ON event_registrations(payment_i
 
 ### Automatic Status Sync
 
-The `update_entity_payment_status()` trigger automatically updates these columns when payment status changes:
+> **⚠️ Current Implementation**: The generic `update_entity_payment_status()` trigger described below is **not yet implemented**. You must create domain-specific trigger functions. See `examples/mottpark/init-scripts/09_mpra_payment_status_sync.sql` for a working pattern.
+
+The target design would have `update_entity_payment_status()` trigger automatically update these columns when payment status changes:
 
 - `succeeded` → `payment_status = 'paid'`
 - `failed` → `payment_status = 'payment_failed'`
 - `refunded` → `payment_status = 'refunded'`
 - `canceled` → `payment_status = 'canceled'`
 
-**No additional code needed** - happens atomically in the same transaction as payment status update.
+**Future goal**: No additional code needed - happens atomically in the same transaction as payment status update.
 
 ### Integration Steps for New Payable Entity
 
@@ -617,6 +650,93 @@ The `update_entity_payment_status()` trigger automatically updates these columns
 3. **Add UI button** to trigger payment (see Integration Examples section)
 
 4. **Done!** Payment status syncs automatically.
+
+---
+
+## Processing Fees
+
+**Status:** ✅ Implemented (v0.14.0)
+
+Processing fees allow you to pass credit card processing costs to users. Fees are calculated by the payment worker and displayed transparently in the checkout UI.
+
+### Fee Configuration
+
+Fees are configured via environment variables in the payment-worker:
+
+```bash
+# Environment variables for payment-worker
+PAYMENT_FEE_PERCENT=2.9      # Percentage fee (e.g., 2.9%)
+PAYMENT_FEE_FLAT_CENTS=30    # Flat fee in cents (e.g., $0.30)
+PAYMENT_FEE_REFUNDABLE=false # Whether fees are refunded with the payment
+```
+
+**Fee Calculation Formula:**
+```
+processing_fee = (amount * fee_percent / 100) + (fee_flat_cents / 100)
+total_amount = amount + processing_fee
+```
+
+**Example:** For a $50.00 payment with 2.9% + $0.30 fees:
+- Base amount: $50.00
+- Processing fee: ($50.00 × 0.029) + $0.30 = $1.75
+- Total charged: $51.75
+
+### Database Schema
+
+The `payments.transactions` table stores fee details for auditing:
+
+```sql
+-- Fee columns in payments.transactions
+processing_fee NUMERIC(10,2),    -- Calculated fee amount
+fee_percent NUMERIC(5,2),        -- Fee % at time of payment (e.g., 2.90)
+fee_flat_cents INTEGER,          -- Flat fee in cents (e.g., 30)
+fee_refundable BOOLEAN,          -- Whether fee is included in refunds
+total_amount NUMERIC(10,2),      -- amount + processing_fee
+max_refundable NUMERIC(10,2)     -- Max refundable (respects fee_refundable)
+```
+
+### Frontend Display
+
+The `PaymentCheckoutComponent` automatically shows a fee breakdown when fees are configured:
+
+```
+┌─────────────────────────────────────┐
+│ Payment Summary                     │
+├─────────────────────────────────────┤
+│ Amount:              $50.00         │
+│ Processing Fee:       $1.75         │
+│ ─────────────────────────────       │
+│ Total:               $51.75         │
+└─────────────────────────────────────┘
+```
+
+### Refund Behavior
+
+When `PAYMENT_FEE_REFUNDABLE=false`:
+- `max_refundable` = `amount` (original price only)
+- Full refund returns base amount; processing fee is retained
+
+When `PAYMENT_FEE_REFUNDABLE=true`:
+- `max_refundable` = `total_amount` (includes fees)
+- Full refund returns entire charged amount
+
+The `PaymentBadgeComponent` displays accurate refund amounts based on these settings.
+
+### TypeScript Interface
+
+```typescript
+// From src/app/interfaces/entity.ts
+interface PaymentValue {
+  amount: number;           // Base amount (original pricing)
+  processing_fee: number;   // Processing fee amount
+  total_amount: number;     // Total charged to Stripe (amount + processing_fee)
+  max_refundable: number;   // Maximum refundable (respects fee_refundable)
+  fee_percent?: number;     // Fee % applied (e.g., 2.9 for 2.9%)
+  fee_flat_cents?: number;  // Flat fee in cents (e.g., 30 for $0.30)
+  fee_refundable: boolean;  // Whether fee was refundable at payment time
+  // ... other fields
+}
+```
 
 ---
 
@@ -2403,6 +2523,90 @@ Use these test cards in **test mode** only:
 
 ---
 
+## Testing the Payment System
+
+### Prerequisites
+
+1. Stripe account with test mode API keys
+2. Stripe CLI installed for webhook forwarding
+3. Example running (e.g., `examples/community-center/` or `examples/mottpark/`)
+
+### Quick Start Test Flow
+
+```bash
+# 1. Start services
+cd examples/community-center
+docker-compose up -d
+
+# 2. Start Stripe webhook listener (in separate terminal)
+stripe listen --forward-to http://localhost:8081/webhooks/stripe
+
+# 3. Test payment flow in browser:
+#    - Create reservation request
+#    - Click "Pay Now" on detail page
+#    - Use test card: 4242 4242 4242 4242 (any future date, any CVC)
+#    - Verify status updates to "succeeded"
+```
+
+### Test Cards
+
+| Card Number | Result |
+|-------------|--------|
+| `4242 4242 4242 4242` | Success |
+| `4000 0000 0000 0341` | Declined (card_declined) |
+| `4000 0000 0000 9995` | Insufficient funds |
+| `4000 0000 0000 0002` | Declined (generic) |
+
+Full list: [Stripe Testing Documentation](https://stripe.com/docs/testing#cards)
+
+### Testing Payment Retry
+
+```bash
+# 1. Use declined card: 4000 0000 0000 0341
+# 2. Verify status = "failed"
+# 3. Click "Pay Now" again
+# 4. Verify NEW transaction created (check database)
+# 5. Complete with success card
+# 6. Check database - should show 2 records (failed + succeeded)
+```
+
+### Database Verification
+
+```sql
+-- Check transactions
+SELECT id, provider_payment_id, status, amount, created_at
+FROM payments.transactions
+ORDER BY created_at DESC;
+
+-- Check entity link (example: community-center)
+SELECT id, display_name, payment_transaction_id
+FROM reservation_requests
+WHERE payment_transaction_id IS NOT NULL;
+
+-- Check webhooks processed
+SELECT provider_event_id, event_type, processed, created_at
+FROM metadata.webhooks
+ORDER BY created_at DESC;
+
+-- Check refunds
+SELECT r.*, t.amount as original_amount
+FROM payments.refunds r
+JOIN payments.transactions t ON r.transaction_id = t.id;
+```
+
+### Testing Refunds (Admin)
+
+1. Navigate to `/admin/payments`
+2. Find a succeeded payment
+3. Click "Refund" button
+4. Enter amount (partial or full)
+5. Verify:
+   - Refund appears in `payments.refunds` table
+   - `effective_status` updates to `partially_refunded` or `refunded`
+   - Stripe dashboard shows refund
+
+---
+
 ## Design Patterns from Production Systems
 
 This section documents patterns adopted from analysis of production payment synchronization systems (Supabase Stripe Sync Engine, November 2025).
@@ -3351,6 +3555,15 @@ WHERE table_name = 'permit_applications';
 - Bulk operations (admin refunds all registrations after event cancellation)
 - Payment links (shareable URLs without pre-creating entity)
 - Variable pricing (resident vs. non-resident rates)
+
+### Conditional Payment Button Visibility
+
+- Add `payment_show_condition` JSONB column to `metadata.entities`
+- Reuse `evaluateCondition()` utility from Entity Action Buttons
+- Hide "Pay Now" button when condition not met (vs. showing error after click)
+- Example: `{"field": "payment_type_name", "operator": "ne", "value": "Cleaning Fee"}`
+- Supports all condition operators: eq, ne, in, gt, lt, gte, lte, is_null, is_not_null
+- **Workaround until implemented**: RPC can `RAISE EXCEPTION` with user-friendly message (e.g., "Credit card payments are not available for Cleaning Fees. Please contact xxx-xxx-xxxx to arrange payment.")
 
 ---
 

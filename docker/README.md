@@ -120,9 +120,9 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 | `PGRST_DB_URI` | Yes | - | PostgreSQL connection string |
 | `KEYCLOAK_URL` | Yes | - | Keycloak server URL |
 | `KEYCLOAK_REALM` | Yes | - | Keycloak realm name |
-| `PGRST_DB_SCHEMA` | No | `public,metadata` | Exposed schemas |
+| `PGRST_DB_SCHEMA` | No | `public` | Exposed schemas |
 | `PGRST_DB_ANON_ROLE` | No | `web_anon` | Anonymous role |
-| `PGRST_DB_PRE_REQUEST` | No | `public.check_jwt` | Pre-request function |
+| `PGRST_DB_PRE_REQUEST` | No | `metadata.check_jwt` | Pre-request function |
 | `PGRST_JWT_AUD` | No | `account` | JWT audience claim |
 | `PGRST_LOG_LEVEL` | No | `info` | Log level |
 

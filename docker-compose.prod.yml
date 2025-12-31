@@ -55,9 +55,9 @@ services:
     environment:
       # Database connection
       PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      PGRST_DB_SCHEMA: public,metadata
+      PGRST_DB_SCHEMA: public
       PGRST_DB_ANON_ROLE: web_anon
-      PGRST_DB_PRE_REQUEST: public.check_jwt
+      PGRST_DB_PRE_REQUEST: metadata.check_jwt
 
       # Keycloak configuration (for JWKS fetching)
       KEYCLOAK_URL: ${KEYCLOAK_URL}
