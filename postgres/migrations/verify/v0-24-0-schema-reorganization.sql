@@ -234,14 +234,24 @@ $$;
 
 
 -- ============================================================================
--- 8. Verify no extension functions appear in schema_functions
+-- 8. Verify extension functions handling in schema_functions
 -- ============================================================================
+-- On managed databases where extensions couldn't be moved to plugins schema,
+-- extension functions will still appear in schema_functions. This is acceptable.
 
 DO $$
 DECLARE
     v_extension_func_count INT;
+    v_extensions_in_plugins INT;
 BEGIN
-    -- Count if any typical extension function names appear
+    -- Check if extensions were successfully moved to plugins
+    SELECT COUNT(*) INTO v_extensions_in_plugins
+    FROM pg_extension e
+    JOIN pg_namespace n ON e.extnamespace = n.oid
+    WHERE e.extname IN ('btree_gist', 'pgcrypto')
+      AND n.nspname = 'plugins';
+
+    -- Count extension function names in schema_functions
     SELECT COUNT(*) INTO v_extension_func_count
     FROM public.schema_functions
     WHERE function_name IN (
@@ -249,11 +259,15 @@ BEGIN
         'gist_int4_ops', 'gist_int8_ops'  -- btree_gist
     );
 
-    IF v_extension_func_count > 0 THEN
-        RAISE EXCEPTION 'Extension functions should not appear in schema_functions, found %', v_extension_func_count;
+    IF v_extensions_in_plugins > 0 AND v_extension_func_count > 0 THEN
+        -- Extensions were moved but functions still appear - this is a problem
+        RAISE EXCEPTION 'Extension functions should not appear in schema_functions after move, found %', v_extension_func_count;
+    ELSIF v_extension_func_count > 0 THEN
+        -- Extensions couldn't be moved (managed database) - functions appearing is expected
+        RAISE NOTICE 'Extension functions in schema_functions: % (expected on managed databases) ✓', v_extension_func_count;
+    ELSE
+        RAISE NOTICE 'No extension functions in schema_functions ✓';
     END IF;
-
-    RAISE NOTICE 'No extension functions in schema_functions ✓';
 END;
 $$;
 

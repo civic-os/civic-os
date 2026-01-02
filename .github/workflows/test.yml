@@ -137,6 +137,86 @@ jobs:
         env:
           PGPASSWORD: postgres
 
+  # Test migrations with managed database permissions (simulates DigitalOcean, AWS RDS, etc.)
+  test-migrations-managed-db:
+    name: Test Migrations (Managed DB)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: civic_os_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Sqitch and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libdbd-pg-perl \
+            libmodule-build-perl \
+            postgresql-client \
+            cpanminus
+
+          # Install Sqitch
+          sudo cpanm --notest App::Sqitch
+
+      - name: Setup managed database simulation
+        run: |
+          # Create a restricted user similar to DigitalOcean's doadmin
+          # Has CREATEDB, CREATEROLE but NOT SUPERUSER
+          # Cannot alter extensions (owned by postgres)
+          psql -h localhost -U postgres -d civic_os_test << 'EOF'
+          -- Create restricted admin user (like DigitalOcean's doadmin)
+          CREATE ROLE doadmin WITH LOGIN PASSWORD 'doadmin' CREATEDB CREATEROLE;
+
+          -- Grant database and schema access
+          GRANT ALL ON DATABASE civic_os_test TO doadmin;
+          GRANT ALL ON SCHEMA public TO doadmin;
+
+          -- Create authenticator role (doadmin CAN create roles)
+          CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD 'test-password';
+          GRANT authenticator TO doadmin WITH ADMIN OPTION;
+
+          -- Verify setup
+          SELECT rolname, rolsuper, rolcreaterole, rolcreatedb
+          FROM pg_roles
+          WHERE rolname IN ('postgres', 'doadmin', 'authenticator');
+          EOF
+        env:
+          PGPASSWORD: postgres
+
+      - name: Test migration deployment (as restricted user)
+        run: |
+          echo "Running migrations as doadmin (non-superuser)..."
+          sqitch deploy db:pg://doadmin:doadmin@localhost:5432/civic_os_test --verify
+        env:
+          PGPASSWORD: doadmin
+
+      - name: Verify managed database behavior
+        run: |
+          # Confirm extensions stayed in public (couldn't be moved)
+          psql -h localhost -U doadmin -d civic_os_test << 'EOF'
+          SELECT e.extname, n.nspname as schema
+          FROM pg_extension e
+          JOIN pg_namespace n ON e.extnamespace = n.oid
+          WHERE e.extname IN ('btree_gist', 'pgcrypto', 'postgis')
+          ORDER BY e.extname;
+          EOF
+        env:
+          PGPASSWORD: doadmin
+
   # Go Microservices Tests
   go-services-tests:
     name: Go Microservices Tests
