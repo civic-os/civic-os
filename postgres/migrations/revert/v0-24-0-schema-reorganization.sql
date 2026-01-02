@@ -4,11 +4,35 @@
 BEGIN;
 
 -- ============================================================================
--- 1. MOVE EXTENSIONS BACK TO PUBLIC SCHEMA
+-- 1. MOVE EXTENSIONS BACK TO PUBLIC SCHEMA (if they were moved)
 -- ============================================================================
+-- On managed databases, extensions may not have been moved (insufficient
+-- privileges). Only attempt to move back if they're currently in plugins.
 
-ALTER EXTENSION btree_gist SET SCHEMA public;
-ALTER EXTENSION pgcrypto SET SCHEMA public;
+DO $$
+DECLARE
+    v_ext RECORD;
+BEGIN
+    FOR v_ext IN
+        SELECT e.extname, n.nspname
+        FROM pg_extension e
+        JOIN pg_namespace n ON e.extnamespace = n.oid
+        WHERE e.extname IN ('btree_gist', 'pgcrypto')
+    LOOP
+        IF v_ext.nspname = 'plugins' THEN
+            BEGIN
+                EXECUTE format('ALTER EXTENSION %I SET SCHEMA public', v_ext.extname);
+                RAISE NOTICE 'Extension % moved back to public schema', v_ext.extname;
+            EXCEPTION
+                WHEN insufficient_privilege THEN
+                    RAISE NOTICE 'Cannot move % back (insufficient privileges) - leaving in plugins', v_ext.extname;
+            END;
+        ELSE
+            RAISE NOTICE 'Extension % already in % schema - no move needed', v_ext.extname, v_ext.nspname;
+        END IF;
+    END LOOP;
+END;
+$$;
 
 
 -- ============================================================================

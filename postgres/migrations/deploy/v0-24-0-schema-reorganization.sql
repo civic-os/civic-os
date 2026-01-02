@@ -47,46 +47,64 @@ COMMENT ON SCHEMA plugins IS
 
 
 -- ============================================================================
--- 2. MOVE EXTENSIONS TO PLUGINS SCHEMA
+-- 2. MOVE EXTENSIONS TO PLUGINS SCHEMA (if permissions allow)
 -- ============================================================================
 -- Note: ALTER EXTENSION SET SCHEMA moves all extension objects (functions,
 -- types, operators, etc.) to the new schema in one atomic operation.
+--
+-- On managed database services (DigitalOcean, AWS RDS, etc.), the database user
+-- may not have permission to alter extensions. In that case, we gracefully skip
+-- the move and leave extensions in their current schema. This is acceptable
+-- because the extensions still work via search_path.
 
--- Move btree_gist (used for exclusion constraints, adds ~164 functions)
-ALTER EXTENSION btree_gist SET SCHEMA plugins;
-
--- Move pgcrypto (used for crypt/digest, adds ~14 functions)
-ALTER EXTENSION pgcrypto SET SCHEMA plugins;
-
--- Verify extensions moved
 DO $$
 DECLARE
     v_ext RECORD;
-    v_public_count_before INT;
-    v_public_count_after INT;
+    v_moved_count INT := 0;
+    v_skipped_count INT := 0;
 BEGIN
-    -- Count functions removed from public
+    -- Attempt to move btree_gist
+    BEGIN
+        ALTER EXTENSION btree_gist SET SCHEMA plugins;
+        v_moved_count := v_moved_count + 1;
+        RAISE NOTICE 'Extension btree_gist moved to plugins schema';
+    EXCEPTION
+        WHEN insufficient_privilege THEN
+            RAISE NOTICE 'Cannot move btree_gist (insufficient privileges) - skipping';
+            v_skipped_count := v_skipped_count + 1;
+        WHEN undefined_object THEN
+            RAISE NOTICE 'Extension btree_gist not installed - skipping';
+    END;
+
+    -- Attempt to move pgcrypto
+    BEGIN
+        ALTER EXTENSION pgcrypto SET SCHEMA plugins;
+        v_moved_count := v_moved_count + 1;
+        RAISE NOTICE 'Extension pgcrypto moved to plugins schema';
+    EXCEPTION
+        WHEN insufficient_privilege THEN
+            RAISE NOTICE 'Cannot move pgcrypto (insufficient privileges) - skipping';
+            v_skipped_count := v_skipped_count + 1;
+        WHEN undefined_object THEN
+            RAISE NOTICE 'Extension pgcrypto not installed - skipping';
+    END;
+
+    -- Summary
+    IF v_skipped_count > 0 THEN
+        RAISE NOTICE 'Extension migration: % moved, % skipped (managed database detected)', v_moved_count, v_skipped_count;
+    ELSE
+        RAISE NOTICE 'Extension migration: % extensions moved to plugins schema', v_moved_count;
+    END IF;
+
+    -- Log current extension locations (informational only)
     FOR v_ext IN
         SELECT e.extname, n.nspname
         FROM pg_extension e
         JOIN pg_namespace n ON e.extnamespace = n.oid
-        WHERE e.extname IN ('btree_gist', 'pgcrypto')
+        WHERE e.extname IN ('btree_gist', 'pgcrypto', 'postgis')
     LOOP
-        IF v_ext.nspname != 'plugins' THEN
-            RAISE EXCEPTION 'Extension % is in schema % instead of plugins', v_ext.extname, v_ext.nspname;
-        END IF;
-        RAISE NOTICE 'Extension % moved to plugins schema', v_ext.extname;
+        RAISE NOTICE 'Extension % is in % schema', v_ext.extname, v_ext.nspname;
     END LOOP;
-
-    -- Verify postgis is in postgis schema (unchanged)
-    SELECT e.extname, n.nspname INTO v_ext
-    FROM pg_extension e
-    JOIN pg_namespace n ON e.extnamespace = n.oid
-    WHERE e.extname = 'postgis';
-
-    IF v_ext IS NOT NULL AND v_ext.nspname = 'postgis' THEN
-        RAISE NOTICE 'Extension postgis remains in postgis schema (unchanged)';
-    END IF;
 END;
 $$;
 
