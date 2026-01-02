@@ -921,6 +921,350 @@ describe('SchemaService', () => {
     });
   });
 
+  // =========================================================================
+  // STATUS OPTIONS CACHING TESTS (v0.24.0+)
+  // =========================================================================
+  describe('Status Options Caching', () => {
+    const mockStatusOptions = [
+      { id: 1, display_name: 'Pending', color: '#fbbf24' },
+      { id: 2, display_name: 'Approved', color: '#22c55e' },
+      { id: 3, display_name: 'Denied', color: '#ef4444' }
+    ];
+
+    describe('getStatusesForEntity()', () => {
+      it('should fetch statuses via RPC for given entity type', (done) => {
+        service.getStatusesForEntity('reservation_request').subscribe(statuses => {
+          expect(statuses.length).toBe(3);
+          expect(statuses[0].display_name).toBe('Pending');
+          expect(statuses[1].display_name).toBe('Approved');
+          expect(statuses[2].display_name).toBe('Denied');
+          done();
+        });
+
+        const req = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'reservation_request'
+        );
+        expect(req.request.method).toBe('POST');
+        req.flush(mockStatusOptions);
+      });
+
+      it('should cache status options per entity type', (done) => {
+        // First call
+        service.getStatusesForEntity('reservation_request').subscribe(() => {
+          // Second call - should return from cache
+          service.getStatusesForEntity('reservation_request').subscribe(cachedStatuses => {
+            expect(cachedStatuses.length).toBe(3);
+            done();
+          });
+          // No second HTTP request should be made
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req.flush(mockStatusOptions);
+      });
+
+      it('should maintain separate caches for different entity types', (done) => {
+        const issueStatuses = [
+          { id: 10, display_name: 'Open', color: '#3b82f6' },
+          { id: 11, display_name: 'Closed', color: '#6b7280' }
+        ];
+
+        // Load reservation_request statuses
+        service.getStatusesForEntity('reservation_request').subscribe(() => {
+          // Load issue statuses (different entity type)
+          service.getStatusesForEntity('issue').subscribe(statuses => {
+            expect(statuses.length).toBe(2);
+            expect(statuses[0].display_name).toBe('Open');
+            done();
+          });
+
+          const issueReq = httpMock.expectOne(req =>
+            req.url.includes('rpc/get_statuses_for_entity') &&
+            req.body.p_entity_type === 'issue'
+          );
+          issueReq.flush(issueStatuses);
+        });
+
+        const reservationReq = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'reservation_request'
+        );
+        reservationReq.flush(mockStatusOptions);
+      });
+
+      it('should handle HTTP errors gracefully', (done) => {
+        service.getStatusesForEntity('invalid_entity').subscribe(statuses => {
+          expect(statuses).toEqual([]);
+          done();
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req.error(new ProgressEvent('error'), { status: 404, statusText: 'Not Found' });
+      });
+
+      it('should populate signal cache when data loads', (done) => {
+        // Initially, signal cache should be empty
+        expect(service.getStatusOptionsSync('reservation_request')).toEqual([]);
+
+        service.getStatusesForEntity('reservation_request').subscribe(() => {
+          // After load, signal cache should have data
+          const cached = service.getStatusOptionsSync('reservation_request');
+          expect(cached.length).toBe(3);
+          expect(cached[0].display_name).toBe('Pending');
+          done();
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req.flush(mockStatusOptions);
+      });
+
+      it('should prevent duplicate concurrent requests', () => {
+        // Simulate multiple components calling simultaneously
+        const sub1 = service.getStatusesForEntity('reservation_request').subscribe();
+        const sub2 = service.getStatusesForEntity('reservation_request').subscribe();
+        const sub3 = service.getStatusesForEntity('reservation_request').subscribe();
+
+        // Should only make ONE HTTP request
+        const requests = httpMock.match(req => req.url.includes('rpc/get_statuses_for_entity'));
+        expect(requests.length).toBe(1);
+
+        requests[0].flush(mockStatusOptions);
+
+        sub1.unsubscribe();
+        sub2.unsubscribe();
+        sub3.unsubscribe();
+      });
+    });
+
+    describe('getStatusOptionsSync()', () => {
+      it('should return empty array when entity type not loaded', () => {
+        const result = service.getStatusOptionsSync('unloaded_entity');
+        expect(result).toEqual([]);
+      });
+
+      it('should return cached options after load completes', (done) => {
+        service.getStatusesForEntity('reservation_request').subscribe(() => {
+          const result = service.getStatusOptionsSync('reservation_request');
+          expect(result.length).toBe(3);
+          expect(result[0].id).toBe(1);
+          expect(result[0].display_name).toBe('Pending');
+          expect(result[0].color).toBe('#fbbf24');
+          done();
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req.flush(mockStatusOptions);
+      });
+
+      it('should return options for specific entity type only', (done) => {
+        const issueStatuses = [{ id: 10, display_name: 'Open', color: '#3b82f6' }];
+
+        // Load both entity types
+        service.getStatusesForEntity('reservation_request').subscribe(() => {
+          service.getStatusesForEntity('issue').subscribe(() => {
+            // Each entity type should have its own cached options
+            const reservationOptions = service.getStatusOptionsSync('reservation_request');
+            const issueOptions = service.getStatusOptionsSync('issue');
+
+            expect(reservationOptions.length).toBe(3);
+            expect(issueOptions.length).toBe(1);
+            expect(reservationOptions[0].display_name).toBe('Pending');
+            expect(issueOptions[0].display_name).toBe('Open');
+            done();
+          });
+
+          const issueReq = httpMock.expectOne(req =>
+            req.url.includes('rpc/get_statuses_for_entity') &&
+            req.body.p_entity_type === 'issue'
+          );
+          issueReq.flush(issueStatuses);
+        });
+
+        const reservationReq = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'reservation_request'
+        );
+        reservationReq.flush(mockStatusOptions);
+      });
+    });
+
+    describe('ensureStatusOptionsLoaded()', () => {
+      it('should trigger HTTP request when entity type not cached', () => {
+        service.ensureStatusOptionsLoaded('reservation_request');
+
+        const req = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'reservation_request'
+        );
+        expect(req).toBeTruthy();
+        req.flush(mockStatusOptions);
+      });
+
+      it('should not trigger HTTP request when already cached', () => {
+        // First, load the data
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req.flush(mockStatusOptions);
+
+        // Now call ensureStatusOptionsLoaded - should NOT make another request
+        service.ensureStatusOptionsLoaded('reservation_request');
+
+        // Verify no additional requests were made
+        httpMock.expectNone(req => req.url.includes('rpc/get_statuses_for_entity'));
+      });
+
+      it('should not trigger duplicate request when already loading', () => {
+        // Start loading
+        service.ensureStatusOptionsLoaded('reservation_request');
+
+        // Call again while still loading - should NOT make another request
+        service.ensureStatusOptionsLoaded('reservation_request');
+        service.ensureStatusOptionsLoaded('reservation_request');
+
+        // Should only have ONE request
+        const requests = httpMock.match(req => req.url.includes('rpc/get_statuses_for_entity'));
+        expect(requests.length).toBe(1);
+
+        requests[0].flush(mockStatusOptions);
+      });
+    });
+
+    describe('invalidateStatusCache()', () => {
+      it('should clear cache for specific entity type', () => {
+        // Load data first
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req1.flush(mockStatusOptions);
+
+        // Verify data is cached
+        expect(service.getStatusOptionsSync('reservation_request').length).toBe(3);
+
+        // Invalidate cache
+        service.invalidateStatusCache('reservation_request');
+
+        // Signal cache should be cleared
+        expect(service.getStatusOptionsSync('reservation_request')).toEqual([]);
+      });
+
+      it('should allow fresh HTTP request after invalidation', (done) => {
+        // Load data first
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req1.flush(mockStatusOptions);
+
+        // Invalidate cache
+        service.invalidateStatusCache('reservation_request');
+
+        // Next request should trigger fresh HTTP
+        service.getStatusesForEntity('reservation_request').subscribe(statuses => {
+          expect(statuses.length).toBe(3);
+          done();
+        });
+
+        const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req2.flush(mockStatusOptions);
+      });
+
+      it('should clear all status caches when no entity type specified', () => {
+        const issueStatuses = [{ id: 10, display_name: 'Open', color: '#3b82f6' }];
+
+        // Load reservation_request
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req1 = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'reservation_request'
+        );
+        req1.flush(mockStatusOptions);
+
+        // Load issue
+        service.getStatusesForEntity('issue').subscribe();
+        const req2 = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'issue'
+        );
+        req2.flush(issueStatuses);
+
+        // Verify both are cached
+        expect(service.getStatusOptionsSync('reservation_request').length).toBe(3);
+        expect(service.getStatusOptionsSync('issue').length).toBe(1);
+
+        // Invalidate ALL caches
+        service.invalidateStatusCache();
+
+        // Both should be cleared
+        expect(service.getStatusOptionsSync('reservation_request')).toEqual([]);
+        expect(service.getStatusOptionsSync('issue')).toEqual([]);
+      });
+
+      it('should not affect other entity types when invalidating specific one', () => {
+        const issueStatuses = [{ id: 10, display_name: 'Open', color: '#3b82f6' }];
+
+        // Load reservation_request
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req1 = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'reservation_request'
+        );
+        req1.flush(mockStatusOptions);
+
+        // Load issue
+        service.getStatusesForEntity('issue').subscribe();
+        const req2 = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_statuses_for_entity') &&
+          req.body.p_entity_type === 'issue'
+        );
+        req2.flush(issueStatuses);
+
+        // Invalidate only reservation_request
+        service.invalidateStatusCache('reservation_request');
+
+        // reservation_request should be cleared
+        expect(service.getStatusOptionsSync('reservation_request')).toEqual([]);
+
+        // issue should still be cached
+        expect(service.getStatusOptionsSync('issue').length).toBe(1);
+      });
+    });
+
+    describe('refreshStatusesCache()', () => {
+      it('should clear both observable and signal caches', () => {
+        // Load data first
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req1.flush(mockStatusOptions);
+
+        // Verify data is cached
+        expect(service.getStatusOptionsSync('reservation_request').length).toBe(3);
+
+        // Refresh cache
+        service.refreshStatusesCache();
+
+        // Signal cache should be cleared
+        expect(service.getStatusOptionsSync('reservation_request')).toEqual([]);
+      });
+
+      it('should allow fresh HTTP request after refresh', (done) => {
+        // Load data first
+        service.getStatusesForEntity('reservation_request').subscribe();
+        const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req1.flush(mockStatusOptions);
+
+        // Refresh cache
+        service.refreshStatusesCache();
+
+        // Next request should trigger fresh HTTP
+        service.getStatusesForEntity('reservation_request').subscribe(statuses => {
+          expect(statuses.length).toBe(3);
+          done();
+        });
+
+        const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
+        req2.flush(mockStatusOptions);
+      });
+    });
+  });
+
   describe('Many-to-Many Detection', () => {
     it('should detect junction table with exactly 2 FKs and only metadata columns', () => {
       const tables = [createMockEntity({ table_name: 'issue_tags' })];

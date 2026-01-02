@@ -51,9 +51,13 @@ export class SchemaService {
   private constraintMessagesCache$?: Observable<ConstraintMessage[]>;
 
   // Status cache: keyed by entity_type (e.g., 'reservation_request', 'issue')
-  // Each entity_type has its own set of statuses from metadata.statuses
-  private statusesCache = new Map<string, Observable<StatusOption[]>>();
+  // Signal-based cache for synchronous access without subscriptions (v0.24.0)
+  // This prevents infinite loops when effects read status options
+  private statusOptionsCache = signal<Map<string, StatusOption[]>>(new Map());
   private loadingStatuses = new Set<string>();
+
+  // Legacy observable cache - kept for backward compatibility
+  private statusesCache = new Map<string, Observable<StatusOption[]>>();
 
   // Static text cache (v0.17.0)
   private staticTextCache$?: Observable<StaticText[]>;
@@ -104,6 +108,7 @@ export class SchemaService {
     this.constraintMessages = undefined;
     // Clear status cache (keyed by entity_type)
     this.statusesCache.clear();
+    this.statusOptionsCache.set(new Map());
     this.loadingStatuses.clear();
     // Reset loading flags to allow new fetches
     this.loadingEntities = false;
@@ -122,6 +127,7 @@ export class SchemaService {
    */
   public refreshStatusesCache(): void {
     this.statusesCache.clear();
+    this.statusOptionsCache.set(new Map());
     this.loadingStatuses.clear();
   }
 
@@ -285,6 +291,14 @@ export class SchemaService {
         display_name: s.display_name,
         color: s.color
       }))),
+      tap(statuses => {
+        // Also update signal cache for synchronous access (v0.24.0)
+        this.statusOptionsCache.update(cache => {
+          const newCache = new Map(cache);
+          newCache.set(entityType, statuses);
+          return newCache;
+        });
+      }),
       catchError(err => {
         console.error(`Failed to load statuses for entity type '${entityType}':`, err);
         return of([]);
@@ -299,6 +313,59 @@ export class SchemaService {
     this.statusesCache.set(entityType, status$);
 
     return status$;
+  }
+
+  /**
+   * Get cached status options synchronously. Returns empty array if not loaded.
+   * Use ensureStatusOptionsLoaded() to trigger loading if needed.
+   *
+   * @param entityType The status_entity_type value
+   * @returns Cached StatusOption array or empty array
+   */
+  public getStatusOptionsSync(entityType: string): StatusOption[] {
+    return this.statusOptionsCache().get(entityType) || [];
+  }
+
+  /**
+   * Ensure status options are loaded for an entity type.
+   * This triggers loading if not already cached or loading.
+   * Use with getStatusOptionsSync() for subscription-free access in effects.
+   *
+   * @param entityType The status_entity_type value
+   */
+  public ensureStatusOptionsLoaded(entityType: string): void {
+    // Check signal cache first
+    if (this.statusOptionsCache().has(entityType)) {
+      return;
+    }
+    // Check if already loading
+    if (this.loadingStatuses.has(entityType)) {
+      return;
+    }
+    // Trigger load (will update signal cache via tap in getStatusesForEntity)
+    this.getStatusesForEntity(entityType).subscribe();
+  }
+
+  /**
+   * Invalidate status options cache.
+   * Call when statuses are modified to force reload on next access.
+   *
+   * @param entityType Optional - invalidate specific entity type, or all if not provided
+   */
+  public invalidateStatusCache(entityType?: string): void {
+    if (entityType) {
+      // Invalidate specific entity type
+      this.statusesCache.delete(entityType);
+      this.statusOptionsCache.update(cache => {
+        const newCache = new Map(cache);
+        newCache.delete(entityType);
+        return newCache;
+      });
+    } else {
+      // Invalidate all
+      this.statusesCache.clear();
+      this.statusOptionsCache.set(new Map());
+    }
   }
 
   public getPropertiesForEntity(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {

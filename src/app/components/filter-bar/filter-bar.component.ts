@@ -65,6 +65,9 @@ export class FilterBarComponent {
 
   private previousEntityKey?: string;
 
+  // Track which columns have pending or completed loads to prevent duplicate requests
+  private loadedColumns = new Set<string>();
+
   // Property type enum exposed to template
   public EntityPropertyType = EntityPropertyType;
 
@@ -130,24 +133,55 @@ export class FilterBarComponent {
   });
 
   // Load FK, User, Status, and Payment filter options when properties change
+  // IMPORTANT: This effect uses signal-based caching for Status to prevent infinite loops.
+  // Status options are read from SchemaService's signal cache, not via subscription callbacks.
   private _loadOptionsEffect = effect(() => {
     const props = this.properties(); // Read signal value
     if (props && props.length > 0) {
+      let optionsChanged = false;
+      const newOptions = new Map(this.filterOptions());
+
       props.forEach(prop => {
         if (prop.type === EntityPropertyType.ForeignKeyName && prop.join_table) {
-          this.loadFilterOptions(prop.column_name, prop.join_table);
+          // FK: Use subscription-based loading with duplicate prevention
+          if (!this.loadedColumns.has(prop.column_name)) {
+            this.loadFilterOptions(prop.column_name, prop.join_table);
+          }
         } else if (prop.type === EntityPropertyType.User) {
-          this.loadFilterOptions(prop.column_name, 'civic_os_users');
+          // User: Use subscription-based loading with duplicate prevention
+          if (!this.loadedColumns.has(prop.column_name)) {
+            this.loadFilterOptions(prop.column_name, 'civic_os_users');
+          }
         } else if (prop.type === EntityPropertyType.Status && prop.status_entity_type) {
-          // Status type: load options via RPC filtered by entity_type
-          this.loadStatusOptions(prop.column_name, prop.status_entity_type);
+          // Status: Use signal-based cache from SchemaService (no subscription)
+          // This reads from statusOptionsCache signal, which triggers effect re-run when data loads
+          const cachedOptions = this.schemaService.getStatusOptionsSync(prop.status_entity_type);
+          if (cachedOptions.length > 0) {
+            // Options available - update local filterOptions if not already set
+            if (!newOptions.has(prop.column_name)) {
+              newOptions.set(prop.column_name, cachedOptions.map(s => ({
+                id: s.id,
+                display_name: s.display_name
+              })));
+              optionsChanged = true;
+            }
+          } else {
+            // Options not loaded - trigger async load (effect will re-run when cache updates)
+            this.schemaService.ensureStatusOptionsLoaded(prop.status_entity_type);
+          }
         } else if (prop.type === EntityPropertyType.Payment) {
-          // Payment type uses static status options (not from database)
-          const options = this.filterOptions();
-          options.set(prop.column_name, PAYMENT_STATUS_OPTIONS);
-          this.filterOptions.set(new Map(options));
+          // Payment: Static options, set directly without reading filterOptions first
+          if (!newOptions.has(prop.column_name)) {
+            newOptions.set(prop.column_name, PAYMENT_STATUS_OPTIONS);
+            optionsChanged = true;
+          }
         }
       });
+
+      // Update filterOptions signal only if changes were made
+      if (optionsChanged) {
+        this.filterOptions.set(newOptions);
+      }
     }
   });
 
@@ -159,6 +193,7 @@ export class FilterBarComponent {
     if (this.previousEntityKey !== undefined && key !== this.previousEntityKey) {
       this.filterState.set({});
       this.filterOptions.set(new Map());
+      this.loadedColumns.clear();
       this.isExpanded.set(false);
     }
 
@@ -246,29 +281,29 @@ export class FilterBarComponent {
   });
 
   private loadFilterOptions(columnName: string, tableName: string) {
+    // Mark as loaded BEFORE subscribing to prevent duplicate requests
+    // This is checked in _loadOptionsEffect before calling this method
+    this.loadedColumns.add(columnName);
+
     this.dataService.getData({
       key: tableName,
       fields: ['id', 'display_name'],
       orderField: 'display_name',
       orderDirection: 'asc'
     }).subscribe(data => {
-      const options = this.filterOptions();
-      options.set(columnName, data as FilterOption[]);
-      this.filterOptions.set(new Map(options));
+      // Update filterOptions with loaded data
+      // Use update pattern to avoid reading signal (potential loop trigger)
+      this.filterOptions.update(options => {
+        const newOptions = new Map(options);
+        newOptions.set(columnName, data as FilterOption[]);
+        return newOptions;
+      });
     });
   }
 
-  private loadStatusOptions(columnName: string, entityType: string) {
-    // Use SchemaService's cached status retrieval
-    this.schemaService.getStatusesForEntity(entityType).subscribe(statusOptions => {
-      const options = this.filterOptions();
-      options.set(columnName, statusOptions.map(s => ({
-        id: s.id,
-        display_name: s.display_name
-      })));
-      this.filterOptions.set(new Map(options));
-    });
-  }
+  // Note: loadStatusOptions removed - now using SchemaService signal-based cache
+  // Status options are loaded via schemaService.ensureStatusOptionsLoaded() and read
+  // synchronously via schemaService.getStatusOptionsSync() in _loadOptionsEffect
 
   public toggleExpanded() {
     this.isExpanded.set(!this.isExpanded());

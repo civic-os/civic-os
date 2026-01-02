@@ -173,8 +173,6 @@ grep -B 5 -A 10 "FAILED" /tmp/test-output.txt          # Get failure context
 ```
 This avoids re-running the full test suite (30+ seconds) when investigating multiple failures.
 
-**KNOWN ISSUE**: FilterBarComponent cannot be unit tested due to Angular effects creating unmanaged subscriptions in `loadFilterOptions()`. The effect triggers on property changes and calls `dataService.getData().subscribe()` without cleanup, causing subscription leaks in tests. The component works correctly in production but causes test hangs when created/destroyed repeatedly. Fix requires refactoring to use `takeUntilDestroyed()` or converting to signal-based data loading.
-
 See `docs/development/TESTING.md` for comprehensive testing guidelines, best practices, and troubleshooting.
 
 **Building:**
