@@ -82,12 +82,30 @@ ALTER FUNCTION metadata.get_status_entity_types() SET SCHEMA public;
 -- ============================================================================
 -- 2. RESTORE ORIGINAL SEARCH_PATH
 -- ============================================================================
+-- On managed databases, we may not be able to alter certain roles.
 
 SET search_path = public, postgis;
-ALTER ROLE postgres SET search_path = public, postgis;
-ALTER ROLE authenticator SET search_path = public, postgis;
-ALTER ROLE web_anon SET search_path = public, postgis;
-ALTER ROLE authenticated SET search_path = public, postgis;
+
+DO $$
+DECLARE
+    v_role TEXT;
+BEGIN
+    -- Restore search_path for application roles
+    -- Skip postgres role (owned by cloud provider on managed databases)
+    FOR v_role IN SELECT unnest(ARRAY['authenticator', 'web_anon', 'authenticated'])
+    LOOP
+        BEGIN
+            EXECUTE format('ALTER ROLE %I SET search_path = public, postgis', v_role);
+            RAISE NOTICE 'Restored search_path for role %', v_role;
+        EXCEPTION
+            WHEN insufficient_privilege THEN
+                RAISE NOTICE 'Cannot alter role % - skipping', v_role;
+            WHEN undefined_object THEN
+                RAISE NOTICE 'Role % does not exist - skipping', v_role;
+        END;
+    END LOOP;
+END;
+$$;
 
 
 -- ============================================================================

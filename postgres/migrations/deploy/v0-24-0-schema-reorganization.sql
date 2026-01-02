@@ -148,14 +148,43 @@ DO $$ BEGIN RAISE NOTICE 'Moved 13 internal helper functions to metadata schema'
 -- Add plugins and metadata to the search_path so:
 -- - Extension functions (crypt, digest, etc.) work with unqualified names
 -- - Internal helpers (has_permission, current_user_id, etc.) resolve in RLS/views
--- Note: postgres role also needs the updated search_path for migrations/verify
 -- The SET command updates the current session; ALTER ROLE updates future sessions
+--
+-- Note: On managed databases, the postgres role is a SUPERUSER owned by the cloud
+-- provider and cannot be altered. We skip it and handle other roles gracefully.
 
 SET search_path = public, metadata, plugins, postgis;
-ALTER ROLE postgres SET search_path = public, metadata, plugins, postgis;
-ALTER ROLE authenticator SET search_path = public, metadata, plugins, postgis;
-ALTER ROLE web_anon SET search_path = public, metadata, plugins, postgis;
-ALTER ROLE authenticated SET search_path = public, metadata, plugins, postgis;
+
+DO $$
+DECLARE
+    v_role TEXT;
+    v_updated INT := 0;
+    v_skipped INT := 0;
+BEGIN
+    -- Update search_path for application roles
+    -- Skip postgres role (owned by cloud provider on managed databases)
+    FOR v_role IN SELECT unnest(ARRAY['authenticator', 'web_anon', 'authenticated'])
+    LOOP
+        BEGIN
+            EXECUTE format('ALTER ROLE %I SET search_path = public, metadata, plugins, postgis', v_role);
+            v_updated := v_updated + 1;
+        EXCEPTION
+            WHEN insufficient_privilege THEN
+                RAISE NOTICE 'Cannot alter role % (insufficient privileges) - skipping', v_role;
+                v_skipped := v_skipped + 1;
+            WHEN undefined_object THEN
+                RAISE NOTICE 'Role % does not exist - skipping', v_role;
+                v_skipped := v_skipped + 1;
+        END;
+    END LOOP;
+
+    IF v_skipped > 0 THEN
+        RAISE NOTICE 'Search path update: % roles updated, % skipped', v_updated, v_skipped;
+    ELSE
+        RAISE NOTICE 'Search path updated for % application roles', v_updated;
+    END IF;
+END;
+$$;
 
 
 -- ============================================================================
