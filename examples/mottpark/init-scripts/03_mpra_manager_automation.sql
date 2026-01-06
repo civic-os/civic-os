@@ -178,7 +178,7 @@ VALUES (
     <p><strong>Event:</strong> {{.Entity.event_type}}</p>
     <p><strong>Date:</strong> {{.Entity.event_date}}</p>
     <p>
-      <a href="{{.Metadata.site_url}}/view/reservation_requests/{{.Entity.reservation_id}}"
+      <a href="{{.Metadata.site_url}}/view/reservation_payments/{{.Entity.id}}"
          style="display: inline-block; background-color: #2563eb; color: white;
                 padding: 12px 24px; text-decoration: none; border-radius: 4px;">
         Make Payment
@@ -192,7 +192,7 @@ Your {{.Entity.payment_type}} payment of {{.Entity.amount}} is due on {{.Entity.
 Event: {{.Entity.event_type}}
 Date: {{.Entity.event_date}}
 
-Make payment at: {{.Metadata.site_url}}/view/reservation_requests/{{.Entity.reservation_id}}'
+Make payment at: {{.Metadata.site_url}}/view/reservation_payments/{{.Entity.id}}'
 ) ON CONFLICT (name) DO UPDATE SET
   html_template = EXCLUDED.html_template,
   text_template = EXCLUDED.text_template;
@@ -211,7 +211,7 @@ VALUES (
     <p><strong>Event:</strong> {{.Entity.event_type}}</p>
     <p><strong>Date:</strong> {{.Entity.event_date}}</p>
     <p>
-      <a href="{{.Metadata.site_url}}/view/reservation_requests/{{.Entity.reservation_id}}"
+      <a href="{{.Metadata.site_url}}/view/reservation_payments/{{.Entity.id}}"
          style="display: inline-block; background-color: #EF4444; color: white;
                 padding: 12px 24px; text-decoration: none; border-radius: 4px;">
         Pay Now
@@ -226,7 +226,7 @@ Your {{.Entity.payment_type}} payment of {{.Entity.amount}} is due TODAY.
 Event: {{.Entity.event_type}}
 Date: {{.Entity.event_date}}
 
-Pay now at: {{.Metadata.site_url}}/view/reservation_requests/{{.Entity.reservation_id}}
+Pay now at: {{.Metadata.site_url}}/view/reservation_payments/{{.Entity.id}}
 
 Failure to pay may result in cancellation of your reservation.'
 ) ON CONFLICT (name) DO UPDATE SET
@@ -248,7 +248,7 @@ VALUES (
     <p><strong>Event:</strong> {{.Entity.event_type}}</p>
     <p><strong>Date:</strong> {{.Entity.event_date}}</p>
     <p>
-      <a href="{{.Metadata.site_url}}/view/reservation_requests/{{.Entity.reservation_id}}"
+      <a href="{{.Metadata.site_url}}/view/reservation_payments/{{.Entity.id}}"
          style="display: inline-block; background-color: #DC2626; color: white;
                 padding: 12px 24px; text-decoration: none; border-radius: 4px;">
         Pay Immediately
@@ -265,7 +265,7 @@ YOUR RESERVATION MAY BE CANCELLED IF PAYMENT IS NOT RECEIVED PROMPTLY.
 Event: {{.Entity.event_type}}
 Date: {{.Entity.event_date}}
 
-Pay immediately at: {{.Metadata.site_url}}/view/reservation_requests/{{.Entity.reservation_id}}
+Pay immediately at: {{.Metadata.site_url}}/view/reservation_payments/{{.Entity.id}}
 
 If you have questions, please contact the Mott Park Recreation Association.'
 ) ON CONFLICT (name) DO UPDATE SET

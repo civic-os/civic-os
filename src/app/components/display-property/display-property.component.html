@@ -203,8 +203,10 @@
     }
     @if (propType() == EntityPropertyType.Status) {
       <span
-        class="badge badge-lg text-white font-medium"
-        [style.background-color]="datum()?.color || '#3B82F6'">
+        class="badge badge-lg"
+        [style.background-color]="datum()?.color || '#3B82F6'"
+        [style.border-color]="datum()?.color || '#3B82F6'"
+        [style.color]="'white'">
         {{ datum()?.display_name }}
       </span>
     }

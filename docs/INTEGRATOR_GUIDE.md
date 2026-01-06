@@ -172,6 +172,37 @@ VALUES ('users', 'username', 'pattern', '^[a-zA-Z0-9_]{3,20}$', 'Username must b
 
 ---
 
+### Avoid Dynamic Values in CHECK Constraints
+
+**WARNING**: Do NOT use `CURRENT_DATE`, `NOW()`, or `CURRENT_TIMESTAMP` in CHECK constraints.
+
+CHECK constraints are evaluated on **every INSERT and UPDATE**. If you use dynamic values:
+- A row that was valid when created may become invalid later
+- ANY update to the row (even unrelated columns) will fail once the constraint condition changes
+
+**Bad Example**:
+```sql
+-- This blocks ALL updates once the event is < 10 days away!
+ALTER TABLE reservations
+  ADD CONSTRAINT min_advance_booking
+  CHECK (event_date >= CURRENT_DATE + INTERVAL '10 days');
+```
+
+**Good Example**:
+```sql
+-- Use created_at to validate against submission time (immutable)
+ALTER TABLE reservations
+  ADD CONSTRAINT min_advance_booking
+  CHECK (event_date >= created_at::DATE + INTERVAL '10 days');
+```
+
+**Alternative Approaches** for time-based validations that should only apply at creation:
+1. **Use `created_at`** as the reference point (recommended - simple and declarative)
+2. **Use a trigger** with `TG_OP = 'INSERT'` check (more flexible but more code)
+3. **Validate in an RPC function** instead of a constraint (for complex business logic)
+
+---
+
 **`metadata.constraint_messages`** - Maps database constraint names to user-friendly error messages
 
 When database constraints are violated (CHECK, UNIQUE, FOREIGN KEY, EXCLUSION), PostgreSQL returns cryptic error messages like `"23514: new row violates check constraint"`. This table maps constraint names to friendly messages that users see in the UI.
