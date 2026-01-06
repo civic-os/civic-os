@@ -44,8 +44,11 @@ DROP FUNCTION IF EXISTS public.validate_status_entity_type();
 -- ============================================================================
 -- 6. RESTORE schema_properties VIEW (remove status_entity_type column)
 -- ============================================================================
+-- Must DROP before CREATE because CREATE OR REPLACE can't remove columns
 
-CREATE OR REPLACE VIEW public.schema_properties AS
+DROP VIEW IF EXISTS public.schema_properties;
+
+CREATE VIEW public.schema_properties AS
 SELECT
   columns.table_catalog,
   columns.table_schema,

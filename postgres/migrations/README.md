@@ -455,6 +455,60 @@ cat postgres/migrations/revert/v0-4-0-migration_name.sql
 2. Test in dev: `sqitch revert dev --to @HEAD^`
 3. Commit fix: `git add postgres/migrations/revert/ && git commit`
 
+## Revert Script Patterns
+
+Writing correct revert scripts requires understanding PostgreSQL's dependency system. The most common bug pattern is **view column dependencies**.
+
+### The View Column Rule
+
+**PostgreSQL's `CREATE OR REPLACE VIEW` cannot remove columns from an existing view.** This causes revert failures when:
+1. Deploy adds a column to a metadata table
+2. Deploy updates a view to include the new column
+3. Revert tries to `CREATE OR REPLACE VIEW` without the column → **ERROR**
+
+**Solution: Always DROP VIEW before CREATE VIEW when removing columns**
+
+```sql
+-- ❌ WRONG - Will fail with "cannot drop columns from view"
+CREATE OR REPLACE VIEW public.schema_entities AS
+SELECT ... -- missing a column that the current view has
+
+-- ✅ CORRECT - Drop first, then create
+DROP VIEW IF EXISTS public.schema_properties;  -- Drop dependent views first
+DROP VIEW IF EXISTS public.schema_entities;
+
+ALTER TABLE metadata.entities DROP COLUMN some_column;
+
+CREATE VIEW public.schema_entities AS SELECT ...
+CREATE VIEW public.schema_properties AS SELECT ...
+```
+
+### Common Revert Patterns
+
+| Situation | Pattern |
+|-----------|---------|
+| Removing view columns | `DROP VIEW` → `ALTER TABLE` → `CREATE VIEW` |
+| Foreign key cleanup | Delete from child table first (`permission_roles` before `permissions`) |
+| Function with triggers | `DROP TABLE ... CASCADE` removes triggers, then safe to drop functions |
+| Multiple function overloads | Use full signature in `COMMENT ON FUNCTION` and `GRANT EXECUTE` |
+
+### Manual Round-Trip Testing
+
+Before releasing migrations, test the full round-trip locally:
+
+```bash
+# 1. Deploy all migrations
+sqitch deploy dev --verify
+
+# 2. Revert ALL the way to baseline
+sqitch revert dev --to v0-4-0-baseline -y
+
+# 3. Re-deploy everything
+sqitch deploy dev --verify
+```
+
+This catches issues that single-step revert testing (`--to @HEAD^`) misses, particularly in older migrations that haven't been tested recently.
+
 ## Best Practices
 
 1. **Always test migrations in dev before production**

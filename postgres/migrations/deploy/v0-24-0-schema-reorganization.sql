@@ -120,26 +120,61 @@ $$;
 -- doesn't break existing references. The search_path update (section 3) ensures
 -- unqualified calls continue to work.
 
--- JWT/Auth helpers (used by RLS policies)
-ALTER FUNCTION public.current_user_id() SET SCHEMA metadata;
-ALTER FUNCTION public.current_user_email() SET SCHEMA metadata;
-ALTER FUNCTION public.current_user_name() SET SCHEMA metadata;
-ALTER FUNCTION public.current_user_phone() SET SCHEMA metadata;
-ALTER FUNCTION public.check_jwt() SET SCHEMA metadata;
-ALTER FUNCTION public.get_user_roles() SET SCHEMA metadata;
-ALTER FUNCTION public.has_permission(TEXT, TEXT) SET SCHEMA metadata;
-ALTER FUNCTION public.is_admin() SET SCHEMA metadata;
-ALTER FUNCTION public.has_role(UUID, TEXT) SET SCHEMA metadata;
+-- Move functions from public to metadata, skipping if already in metadata
+-- This makes the migration idempotent (safe to run after partial revert/redeploy)
+DO $$
+DECLARE
+    v_moved INT := 0;
+    v_skipped INT := 0;
+    v_functions TEXT[] := ARRAY[
+        'current_user_id()',
+        'current_user_email()',
+        'current_user_name()',
+        'current_user_phone()',
+        'check_jwt()',
+        'get_user_roles()',
+        'has_permission(text,text)',
+        'is_admin()',
+        'has_role(uuid,text)',
+        'has_entity_action_permission(integer)',
+        'get_initial_status(text)',
+        'get_statuses_for_entity(text)',
+        'get_status_entity_types()'
+    ];
+    v_func_sig TEXT;
+    v_func_name TEXT;
+BEGIN
+    FOREACH v_func_sig IN ARRAY v_functions
+    LOOP
+        -- Extract function name (without parentheses and args)
+        v_func_name := split_part(v_func_sig, '(', 1);
 
--- Entity action permission helper (used by views)
-ALTER FUNCTION public.has_entity_action_permission(INT) SET SCHEMA metadata;
+        -- Check if function already exists in metadata schema (match by name, check signature)
+        IF EXISTS (
+            SELECT 1 FROM pg_proc p
+            JOIN pg_namespace n ON p.pronamespace = n.oid
+            WHERE n.nspname = 'metadata'
+            AND p.proname = v_func_name
+        ) THEN
+            RAISE NOTICE 'Function % already in metadata schema - skipping', v_func_sig;
+            v_skipped := v_skipped + 1;
+        ELSIF EXISTS (
+            SELECT 1 FROM pg_proc p
+            JOIN pg_namespace n ON p.pronamespace = n.oid
+            WHERE n.nspname = 'public'
+            AND p.proname = v_func_name
+        ) THEN
+            EXECUTE format('ALTER FUNCTION public.%s SET SCHEMA metadata', v_func_sig);
+            v_moved := v_moved + 1;
+        ELSE
+            RAISE NOTICE 'Function % not found in public schema - skipping', v_func_sig;
+            v_skipped := v_skipped + 1;
+        END IF;
+    END LOOP;
 
--- Status system helpers (used by column defaults and validation)
-ALTER FUNCTION public.get_initial_status(TEXT) SET SCHEMA metadata;
-ALTER FUNCTION public.get_statuses_for_entity(TEXT) SET SCHEMA metadata;
-ALTER FUNCTION public.get_status_entity_types() SET SCHEMA metadata;
-
-DO $$ BEGIN RAISE NOTICE 'Moved 13 internal helper functions to metadata schema'; END $$;
+    RAISE NOTICE 'Moved % internal helper functions to metadata schema (% skipped)', v_moved, v_skipped;
+END;
+$$;
 
 
 -- ============================================================================

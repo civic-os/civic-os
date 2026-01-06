@@ -70,7 +70,14 @@ DROP TABLE IF EXISTS payments.refunds;
 -- 2. Drop permission-based RLS policy
 DROP POLICY IF EXISTS "Payment managers see all payments" ON payments.transactions;
 
--- 1. Remove payment permissions (leave role grants - they'll be orphaned but harmless)
+-- 1. Remove payment permissions
+-- Must delete permission_roles first due to FK constraint
+DELETE FROM metadata.permission_roles
+WHERE permission_id IN (
+  SELECT id FROM metadata.permissions
+  WHERE table_name IN ('payment_transactions', 'payment_refunds')
+);
+
 DELETE FROM metadata.permissions
 WHERE table_name IN ('payment_transactions', 'payment_refunds');
 

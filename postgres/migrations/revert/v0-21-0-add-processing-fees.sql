@@ -206,10 +206,48 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 -- ============================================================================
--- 4. RESTORE ORIGINAL payment_transactions VIEW
+-- 4. DROP VIEW BEFORE MODIFYING COLUMNS IT DEPENDS ON
 -- ============================================================================
+-- IMPORTANT: Must drop view BEFORE modifying display_name column, then recreate after
 
 DROP VIEW IF EXISTS public.payment_transactions;
+
+
+-- ============================================================================
+-- 5. REMOVE PROCESSING FEE COLUMNS FROM payments.transactions
+-- ============================================================================
+
+-- Drop the display_name column (will be recreated with original formula)
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS display_name;
+
+-- Drop generated columns first
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS max_refundable;
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS total_amount;
+
+-- Drop fee columns
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS fee_refundable;
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS fee_flat_cents;
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS fee_percent;
+ALTER TABLE payments.transactions DROP COLUMN IF EXISTS processing_fee;
+
+-- Recreate original display_name
+ALTER TABLE payments.transactions
+ADD COLUMN display_name TEXT GENERATED ALWAYS AS (
+    '$' || amount::TEXT || ' - ' ||
+    CASE status
+        WHEN 'pending_intent' THEN 'Creating...'
+        WHEN 'pending' THEN 'Pending'
+        WHEN 'succeeded' THEN 'Paid'
+        WHEN 'failed' THEN 'Failed'
+        WHEN 'canceled' THEN 'Canceled'
+        ELSE UPPER(status)
+    END
+) STORED;
+
+
+-- ============================================================================
+-- 6. RESTORE ORIGINAL payment_transactions VIEW
+-- ============================================================================
 
 CREATE VIEW public.payment_transactions AS
 SELECT
@@ -254,38 +292,6 @@ LEFT JOIN LATERAL (
 ) r_agg ON true;
 
 GRANT SELECT ON public.payment_transactions TO authenticated, web_anon;
-
-
--- ============================================================================
--- 5. REMOVE PROCESSING FEE COLUMNS FROM payments.transactions
--- ============================================================================
-
--- Drop the display_name column (will be recreated with original formula)
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS display_name;
-
--- Drop generated columns first
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS max_refundable;
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS total_amount;
-
--- Drop fee columns
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS fee_refundable;
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS fee_flat_cents;
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS fee_percent;
-ALTER TABLE payments.transactions DROP COLUMN IF EXISTS processing_fee;
-
--- Recreate original display_name
-ALTER TABLE payments.transactions
-ADD COLUMN display_name TEXT GENERATED ALWAYS AS (
-    '$' || amount::TEXT || ' - ' ||
-    CASE status
-        WHEN 'pending_intent' THEN 'Creating...'
-        WHEN 'pending' THEN 'Pending'
-        WHEN 'succeeded' THEN 'Paid'
-        WHEN 'failed' THEN 'Failed'
-        WHEN 'canceled' THEN 'Canceled'
-        ELSE UPPER(status)
-    END
-) STORED;
 
 
 COMMIT;

@@ -3,6 +3,9 @@
 BEGIN;
 
 -- Drop views first (in dependency order)
+-- IMPORTANT: schema_cache_versions must be dropped BEFORE notification_triggers table
+-- because v0.23.0 added a dependency on notification_triggers to the view
+DROP VIEW IF EXISTS public.schema_cache_versions;
 DROP VIEW IF EXISTS public.schema_scheduled_functions;
 DROP VIEW IF EXISTS public.schema_permissions_matrix;
 DROP VIEW IF EXISTS public.schema_notifications;
@@ -32,7 +35,7 @@ DROP TABLE IF EXISTS metadata.database_triggers;
 DROP TABLE IF EXISTS metadata.rpc_functions;
 
 -- Restore original schema_cache_versions without introspection
-DROP VIEW IF EXISTS public.schema_cache_versions;
+-- (view was already dropped at the top due to dependency on notification_triggers)
 
 CREATE VIEW public.schema_cache_versions AS
 SELECT 'entities' AS cache_name,
