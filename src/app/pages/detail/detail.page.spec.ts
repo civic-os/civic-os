@@ -46,7 +46,8 @@ describe('DetailPage', () => {
       'getPropsForDetail',
       'getDetailRenderables',
       'getInverseRelationships',
-      'getEntities'
+      'getEntities',
+      'getEntityActions'
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData']);
     mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
@@ -71,6 +72,9 @@ describe('DetailPage', () => {
 
     // Setup default for renderables (most tests use properties$ directly)
     mockSchemaService.getDetailRenderables.and.returnValue(of([]));
+
+    // Default mock for entity actions (returns empty array)
+    mockSchemaService.getEntityActions.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [DetailPage],
