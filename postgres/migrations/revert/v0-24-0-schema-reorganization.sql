@@ -36,47 +36,165 @@ $$;
 
 
 -- ============================================================================
--- 1.5 DROP SHIM FUNCTIONS BEFORE MOVING ORIGINALS BACK
+-- 1.5 RESTORE ORIGINAL FUNCTIONS IN PUBLIC SCHEMA
 -- ============================================================================
--- The shims in public schema must be dropped before we can move the originals
--- back from metadata (can't have two functions with same name in same schema)
+-- Instead of DROP + ALTER SET SCHEMA (which fails due to RLS policy dependencies),
+-- we use CREATE OR REPLACE to overwrite the shims with the original function bodies.
+-- This preserves dependencies on public.is_admin(), public.has_permission(), etc.
 
-DROP FUNCTION IF EXISTS public.is_admin();
-DROP FUNCTION IF EXISTS public.has_permission(TEXT, TEXT);
-DROP FUNCTION IF EXISTS public.get_user_roles();
-DROP FUNCTION IF EXISTS public.current_user_id();
-DROP FUNCTION IF EXISTS public.current_user_email();
-DROP FUNCTION IF EXISTS public.current_user_name();
-DROP FUNCTION IF EXISTS public.current_user_phone();
-DROP FUNCTION IF EXISTS public.check_jwt();
-DROP FUNCTION IF EXISTS public.get_initial_status(TEXT);
-DROP FUNCTION IF EXISTS public.get_statuses_for_entity(TEXT);
-DROP FUNCTION IF EXISTS public.has_role(UUID, TEXT);
-DROP FUNCTION IF EXISTS public.has_entity_action_permission(INT);
+-- JWT helpers (restore original simple SQL functions)
+CREATE OR REPLACE FUNCTION public.current_user_id()
+RETURNS UUID AS $$
+  SELECT NULLIF(current_setting('request.jwt.claims', true)::json->>'sub', '')::UUID;
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION public.current_user_email()
+RETURNS TEXT AS $$
+  SELECT current_setting('request.jwt.claims', true)::json->>'email';
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION public.current_user_name()
+RETURNS TEXT AS $$
+  SELECT current_setting('request.jwt.claims', true)::json->>'preferred_username';
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION public.current_user_phone()
+RETURNS TEXT AS $$
+  SELECT current_setting('request.jwt.claims', true)::json->>'phone_number';
+$$ LANGUAGE SQL STABLE;
+
+-- check_jwt (restore original - NO SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION public.check_jwt()
+RETURNS VOID AS $$
+BEGIN
+  IF current_setting('request.jwt.claims', true)::json->>'sub' IS NOT NULL THEN
+    EXECUTE 'SET LOCAL ROLE authenticated';
+  ELSE
+    EXECUTE 'SET LOCAL ROLE web_anon';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- get_user_roles (restore original)
+CREATE OR REPLACE FUNCTION public.get_user_roles()
+RETURNS TEXT[] AS $$
+DECLARE
+  jwt_claims JSON;
+  jwt_sub TEXT;
+  roles_array TEXT[];
+BEGIN
+  BEGIN
+    jwt_claims := current_setting('request.jwt.claims', true)::JSON;
+  EXCEPTION WHEN OTHERS THEN
+    RETURN ARRAY['anonymous'];
+  END;
+
+  IF jwt_claims IS NULL THEN
+    RETURN ARRAY['anonymous'];
+  END IF;
+
+  jwt_sub := jwt_claims->>'sub';
+
+  IF jwt_sub IS NULL OR jwt_sub = '' THEN
+    RETURN ARRAY['anonymous'];
+  END IF;
+
+  roles_array := ARRAY['user'];
+  BEGIN
+    SELECT roles_array || COALESCE(
+      (SELECT array_agg(r.display_name)
+       FROM metadata.user_roles ur
+       JOIN metadata.roles r ON r.id = ur.role_id
+       WHERE ur.user_id = jwt_sub::UUID),
+      ARRAY[]::TEXT[]
+    ) INTO roles_array;
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
+
+  IF jwt_claims->'civic_os_roles' IS NOT NULL THEN
+    SELECT roles_array || COALESCE(
+      ARRAY(SELECT json_array_elements_text(jwt_claims->'civic_os_roles')),
+      ARRAY[]::TEXT[]
+    ) INTO roles_array;
+  END IF;
+
+  RETURN roles_array;
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+
+-- has_role (restore original)
+CREATE OR REPLACE FUNCTION public.has_role(p_user_id UUID, p_role_name TEXT)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM metadata.user_roles ur
+    JOIN metadata.roles r ON r.id = ur.role_id
+    WHERE ur.user_id = p_user_id AND r.display_name = p_role_name
+  );
+$$ LANGUAGE SQL STABLE SECURITY DEFINER;
+
+-- has_entity_action_permission (restore original)
+CREATE OR REPLACE FUNCTION public.has_entity_action_permission(p_action_id INT)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_user_roles TEXT[];
+BEGIN
+  v_user_roles := public.get_user_roles();
+  RETURN EXISTS (
+    SELECT 1 FROM metadata.entity_action_roles ear
+    JOIN metadata.roles r ON r.id = ear.role_id
+    WHERE ear.action_id = p_action_id
+      AND r.display_name = ANY(v_user_roles)
+  );
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+
+-- Status helpers (restore original)
+CREATE OR REPLACE FUNCTION public.get_initial_status(p_entity_type TEXT)
+RETURNS INT AS $$
+  SELECT id FROM metadata.statuses
+  WHERE entity_type = p_entity_type AND is_initial = true
+  LIMIT 1;
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION public.get_statuses_for_entity(p_entity_type TEXT)
+RETURNS TABLE (
+  id INT,
+  display_name VARCHAR(50),
+  description TEXT,
+  color hex_color,
+  sort_order INT,
+  is_initial BOOLEAN,
+  is_terminal BOOLEAN
+) AS $$
+  SELECT id, display_name, description, color, sort_order, is_initial, is_terminal
+  FROM metadata.statuses
+  WHERE entity_type = p_entity_type
+  ORDER BY sort_order;
+$$ LANGUAGE SQL STABLE;
+
+CREATE OR REPLACE FUNCTION public.get_status_entity_types()
+RETURNS TABLE (entity_type VARCHAR(100)) AS $$
+  SELECT DISTINCT entity_type FROM metadata.status_types ORDER BY entity_type;
+$$ LANGUAGE SQL STABLE;
 
 
 -- ============================================================================
--- 1.6 MOVE INTERNAL HELPER FUNCTIONS BACK TO PUBLIC SCHEMA
+-- 1.6 NOTE: METADATA FUNCTIONS LEFT IN PLACE
 -- ============================================================================
-
--- JWT/Auth helpers
-ALTER FUNCTION metadata.current_user_id() SET SCHEMA public;
-ALTER FUNCTION metadata.current_user_email() SET SCHEMA public;
-ALTER FUNCTION metadata.current_user_name() SET SCHEMA public;
-ALTER FUNCTION metadata.current_user_phone() SET SCHEMA public;
-ALTER FUNCTION metadata.check_jwt() SET SCHEMA public;
-ALTER FUNCTION metadata.get_user_roles() SET SCHEMA public;
-ALTER FUNCTION metadata.has_permission(TEXT, TEXT) SET SCHEMA public;
-ALTER FUNCTION metadata.is_admin() SET SCHEMA public;
-ALTER FUNCTION metadata.has_role(UUID, TEXT) SET SCHEMA public;
-
--- Entity action permission helper
-ALTER FUNCTION metadata.has_entity_action_permission(INT) SET SCHEMA public;
-
--- Status system helpers
-ALTER FUNCTION metadata.get_initial_status(TEXT) SET SCHEMA public;
-ALTER FUNCTION metadata.get_statuses_for_entity(TEXT) SET SCHEMA public;
-ALTER FUNCTION metadata.get_status_entity_types() SET SCHEMA public;
+-- We intentionally DO NOT drop the metadata.X functions here because:
+-- 1. Views/policies created after v0.24.0 may reference them (due to search_path)
+-- 2. Dropping them would CASCADE and destroy those objects
+-- 3. Having orphaned functions in metadata is harmless
+--
+-- The metadata functions will remain as duplicates of the public functions.
+-- If a clean removal is needed, it should be done in a new forward migration
+-- that properly handles all dependencies.
+--
+-- DO NOT UNCOMMENT THESE:
+-- DROP FUNCTION IF EXISTS metadata.current_user_id();
+-- DROP FUNCTION IF EXISTS metadata.current_user_email();
+-- etc.
 
 
 -- ============================================================================
