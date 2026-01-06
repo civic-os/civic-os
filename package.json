@@ -1,6 +1,6 @@
 {
   "name": "civic-os",
-  "version": "0.24.5",
+  "version": "0.24.6",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
