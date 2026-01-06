@@ -1,6 +1,6 @@
 <!-- Payment badge using effective_status for refund-aware display -->
 <!-- Tooltip shows breakdown for refunded/partially_refunded statuses -->
-<div class="badge gap-2 whitespace-normal h-auto min-h-[2rem]"
+<div class="badge badge-lg gap-2 whitespace-normal h-auto min-h-[2rem]"
      [class.badge-success]="payment()?.effective_status === 'succeeded'"
      [class.badge-warning]="payment()?.effective_status === 'pending' || payment()?.effective_status === 'pending_intent' || payment()?.effective_status === 'refund_pending'"
      [class.badge-error]="payment()?.effective_status === 'failed'"

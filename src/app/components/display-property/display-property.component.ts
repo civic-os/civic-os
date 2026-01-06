@@ -26,6 +26,7 @@ import { PdfViewerComponent } from '../pdf-viewer/pdf-viewer.component';
 import { DisplayTimeSlotComponent } from '../display-time-slot/display-time-slot.component';
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
 import { getS3Config } from '../../config/runtime';
+import { getContrastTextColor } from '../../utils/color.utils';
 
 @Component({
     selector: 'app-display-property',
@@ -98,5 +99,14 @@ export class DisplayPropertyComponent {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+  }
+
+  /**
+   * Get contrast text color for status badge based on background luminance.
+   * Returns 'white' for dark backgrounds, 'black' for light backgrounds.
+   */
+  getStatusTextColor(): string {
+    const color = this.datum()?.color || '#3B82F6';
+    return getContrastTextColor(color);
   }
 }
