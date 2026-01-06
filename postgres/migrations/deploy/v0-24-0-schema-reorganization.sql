@@ -290,12 +290,14 @@ RETURNS TEXT AS $$
 $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- Shim for check_jwt (pre-request function)
+-- NOTE: Do NOT use SECURITY DEFINER here - check_jwt uses SET LOCAL ROLE
+-- which PostgreSQL 17 blocks inside SECURITY DEFINER functions
 CREATE OR REPLACE FUNCTION public.check_jwt()
 RETURNS VOID AS $$
 BEGIN
   PERFORM metadata.check_jwt();
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 -- Shim for get_initial_status
 CREATE OR REPLACE FUNCTION public.get_initial_status(p_entity_type TEXT)
