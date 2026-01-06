@@ -1,8 +1,33 @@
 <div class="prose">
+  <!-- Use ng-container to handle both entity-found and entity-not-found cases -->
   @if (entity$ | async; as entity) {
-    @if (regularProps$ | async; as regularProps) {
-      @if (data$ | async; as data) {
-        <!-- Header row (clean, just back button + title) -->
+    <!-- Entity found in schema - check permissions -->
+    @if (!entity.select && !auth.authenticated()) {
+      <!-- User doesn't have select permission and is not logged in -->
+      <div class="p-8">
+        <app-empty-state
+          icon="lock"
+          title="Sign in to view this record"
+          message="Log in to access this information."
+          alertType="info"
+          [showLoginButton]="true">
+        </app-empty-state>
+      </div>
+    } @else if (!entity.select) {
+      <!-- User is authenticated but doesn't have select permission -->
+      <div class="p-8">
+        <app-empty-state
+          icon="block"
+          title="Access denied"
+          message="You don't have permission to view this record."
+          alertType="error">
+        </app-empty-state>
+      </div>
+    } @else {
+      <!-- User has select permission - proceed with normal flow -->
+      @if (regularProps$ | async; as regularProps) {
+        @if (data$ | async; as data) {
+          <!-- Header row (clean, just back button + title) -->
         <div class="flex items-center gap-4 mb-2 mt-4">
           <button class="btn btn-ghost btn-circle" [routerLink]="'/view/' + entity.table_name" type="button">
             <span class="material-symbols-outlined">arrow_back</span>
@@ -324,6 +349,7 @@
         }
       } @else {
         <!-- Loading or error state when data is not available -->
+        <!-- Permission checks are handled in the outer block, so we only show loading/not-found here -->
         <div class="p-8">
           @if (dataLoading()) {
             <!-- Loading state -->
@@ -331,22 +357,8 @@
               <span class="loading loading-spinner loading-lg"></span>
               <p class="text-base-content/60">Loading record...</p>
             </div>
-          } @else if (!entity.select && !auth.authenticated()) {
-            <app-empty-state
-              icon="lock"
-              title="Sign in to view this record"
-              message="Log in to access this information."
-              alertType="info"
-              [showLoginButton]="true">
-            </app-empty-state>
-          } @else if (!entity.select) {
-            <app-empty-state
-              icon="block"
-              title="Access denied"
-              message="You don't have permission to view this record."
-              alertType="error">
-            </app-empty-state>
           } @else {
+            <!-- Data fetch completed but no data returned - record doesn't exist -->
             <app-empty-state
               icon="error"
               title="Record not found"
@@ -357,5 +369,28 @@
         </div>
       }
     }
+    } <!-- Close @else { entity.select } -->
+  } @else {
+    <!-- Entity not found in schema_entities - likely no privileges for anonymous user -->
+    <div class="p-8">
+      @if (!auth.authenticated()) {
+        <!-- Anonymous user - the entity might exist but they have no privileges to see it -->
+        <app-empty-state
+          icon="lock"
+          title="Sign in to view this record"
+          message="Log in to access this information."
+          alertType="info"
+          [showLoginButton]="true">
+        </app-empty-state>
+      } @else {
+        <!-- Authenticated but entity truly doesn't exist or user has no access -->
+        <app-empty-state
+          icon="error"
+          title="Record not found"
+          message="The record you're looking for doesn't exist or you don't have access."
+          alertType="error">
+        </app-empty-state>
+      }
+    </div>
   }
 </div>
