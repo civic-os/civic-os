@@ -143,6 +143,12 @@ This document outlines the development roadmap for Civic OS, organized by phases
 ### Utilities
 - [x] Build notification service (v0.11.0 - database templates, River-based worker, email via AWS SES)
 
+- [ ] **Multi-Tenancy** - First-class support for multi-tenant applications
+  - [ ] Row-level tenant isolation with `tenant_id` column and automatic RLS
+  - [ ] Tenant context detection (subdomain, header, or JWT-based)
+  - [ ] Tenant management UI for provisioning and configuration
+  - [ ] Schema-per-tenant option for stronger data boundaries
+
 - [ ] **Activity/Audit Log** - Track who changed what and when
   - [ ] Database schema (`metadata.audit_log` table, polymorphic design)
   - [ ] PostgreSQL trigger function for automatic change capture
