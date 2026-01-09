@@ -277,6 +277,39 @@ Fields:
 - `editor` - Can create and edit records
 - `admin` - Full access including admin pages
 
+#### Anonymous Access Patterns
+
+The `web_anon` PostgreSQL role controls what unauthenticated users can see. Two patterns are available:
+
+| Pattern | Use Case | Anonymous Experience |
+|---------|----------|---------------------|
+| **Grant SELECT to `web_anon`** | Public data (events, locations, reports) | Can browse list/detail pages |
+| **No grants to `web_anon`** | Sensitive data (payments, private records) | "Sign in to view" prompt |
+
+**Recommendation**: Grant `web_anon` SELECT on most tables for public browsing. Withhold for:
+- Payment/financial tables
+- Private user information
+- Draft/unpublished content
+
+**Example - Public table:**
+```sql
+GRANT SELECT ON public.events TO web_anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.events TO authenticated;
+```
+
+**Example - Sensitive table (no anonymous access):**
+```sql
+-- No web_anon grant = table invisible to anonymous users
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.payments TO authenticated;
+```
+
+**Why this matters**: When `web_anon` has no privileges on a table, PostgreSQL's `information_schema` doesn't expose the table at all. This means:
+1. The table won't appear in `schema_entities` for anonymous users
+2. Attackers can't even enumerate that the table exists
+3. This provides stronger security than RLS-based blocking alone
+
+---
+
 **Creating Custom Roles**:
 ```sql
 -- Via SQL
@@ -1031,6 +1064,32 @@ Send multi-channel notifications (email, SMS) to users using database-managed te
 - Civic OS v0.11.0+ (notification worker + schema)
 - AWS SES account with verified sender email
 - PostgreSQL database with River queue (`metadata.river_job`)
+
+#### Email Sender Configuration
+
+Configure the consolidated worker's email sender via environment variables:
+
+```bash
+# Required
+SMTP_HOST=email-smtp.us-east-1.amazonaws.com
+SMTP_PORT=587
+SMTP_USERNAME=your-smtp-username
+SMTP_PASSWORD=your-smtp-password
+
+# Sender address (v0.25.0+ supports display names)
+SMTP_FROM="Mott Park Reservations" <noreply@mottpark.org>
+
+# Optional: Reply-To address (v0.25.0+)
+SMTP_REPLY_TO=reservations@mottpark.org
+```
+
+**Display Name Support (v0.25.0+)**: Use RFC 5322 format for branded emails:
+- Plain email: `SMTP_FROM=noreply@example.com`
+- With name: `SMTP_FROM="Your App Name" <noreply@example.com>`
+
+**Startup Validation**: Invalid `SMTP_FROM` or `SMTP_REPLY_TO` values cause the worker to fail immediately with a clear error, preventing silent email delivery failures.
+
+See `docs/development/NOTIFICATIONS.md` for complete AWS SES setup and troubleshooting.
 
 #### Creating Notification Templates
 

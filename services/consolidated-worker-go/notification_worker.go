@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/smtp"
 	"strings"
@@ -44,8 +45,9 @@ type SMTPConfig struct {
 	Port           string
 	Username       string
 	Password       string
-	From           string
-	SkipTestEmails bool // Skip sending to test/dummy email addresses (e.g., @example.com)
+	From           string // RFC 5322 format supported: "Display Name" <email@example.com>
+	ReplyTo        string // Optional Reply-To address
+	SkipTestEmails bool   // Skip sending to test/dummy email addresses (e.g., @example.com)
 }
 
 // NotificationWorker implements the River Worker interface
@@ -222,14 +224,34 @@ func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rend
 		return nil // Return success to mark notification as sent (prevents retries)
 	}
 
+	// Parse RFC 5322 format for From header vs SMTP envelope
+	// e.g., "Mott Park Reservations" <noreply@mottpark.org> → header gets full, envelope gets email only
+	headerFrom, envelopeFrom := parseEmailAddress(w.smtpConfig.From)
+
+	// Extract domain for Message-ID (from envelope sender)
+	domain := "localhost"
+	if atIdx := strings.LastIndex(envelopeFrom, "@"); atIdx != -1 {
+		domain = envelopeFrom[atIdx+1:]
+	}
+
+	// Generate unique values per message (v0.25.0)
+	boundary := generateBoundary()
+	messageID := generateMessageID(domain)
+
 	// Build MIME email with multipart/alternative (HTML + plain text)
 	headers := make(map[string]string)
-	headers["From"] = w.smtpConfig.From
+	headers["From"] = headerFrom // Full RFC 5322 format with display name
 	headers["To"] = toEmail
 	headers["Subject"] = rendered.Subject
+	headers["Message-ID"] = messageID
 	headers["MIME-Version"] = "1.0"
-	headers["Content-Type"] = "multipart/alternative; boundary=\"boundary123\""
+	headers["Content-Type"] = fmt.Sprintf("multipart/alternative; boundary=\"%s\"", boundary)
 	headers["Date"] = time.Now().Format(time.RFC1123Z)
+
+	// Add Reply-To header if configured
+	if w.smtpConfig.ReplyTo != "" {
+		headers["Reply-To"] = w.smtpConfig.ReplyTo
+	}
 
 	// Build email body
 	var emailBody strings.Builder
@@ -239,20 +261,20 @@ func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rend
 	emailBody.WriteString("\r\n")
 
 	// Plain text part
-	emailBody.WriteString("--boundary123\r\n")
+	emailBody.WriteString("--" + boundary + "\r\n")
 	emailBody.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
 	emailBody.WriteString("Content-Transfer-Encoding: 7bit\r\n\r\n")
 	emailBody.WriteString(rendered.Text)
 	emailBody.WriteString("\r\n\r\n")
 
 	// HTML part
-	emailBody.WriteString("--boundary123\r\n")
+	emailBody.WriteString("--" + boundary + "\r\n")
 	emailBody.WriteString("Content-Type: text/html; charset=UTF-8\r\n")
 	emailBody.WriteString("Content-Transfer-Encoding: 7bit\r\n\r\n")
 	emailBody.WriteString(rendered.HTML)
 	emailBody.WriteString("\r\n\r\n")
 
-	emailBody.WriteString("--boundary123--")
+	emailBody.WriteString("--" + boundary + "--")
 
 	// Connect to SMTP server
 	serverAddr := net.JoinHostPort(w.smtpConfig.Host, w.smtpConfig.Port)
@@ -286,8 +308,8 @@ func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rend
 		}
 	}
 
-	// Send email
-	if err = client.Mail(w.smtpConfig.From); err != nil {
+	// Send email (SMTP envelope uses email-only, not display name)
+	if err = client.Mail(envelopeFrom); err != nil {
 		return fmt.Errorf("MAIL FROM failed: %w", err)
 	}
 
@@ -419,4 +441,52 @@ func isTransientError(err error) bool {
 
 	// Default to retry (conservative approach)
 	return true
+}
+
+// ============================================================================
+// Email Helper Functions (v0.25.0)
+// ============================================================================
+
+// parseEmailAddress extracts display name and email from RFC 5322 format.
+// Input examples:
+//   - "Display Name" <email@example.com> → ("Display Name" <email@example.com>, email@example.com)
+//   - email@example.com → (email@example.com, email@example.com)
+//
+// Returns: (headerFrom for email headers, envelopeFrom for SMTP MAIL FROM command)
+func parseEmailAddress(from string) (headerFrom, envelopeFrom string) {
+	from = strings.TrimSpace(from)
+	if idx := strings.LastIndex(from, "<"); idx != -1 {
+		if end := strings.LastIndex(from, ">"); end > idx {
+			return from, strings.TrimSpace(from[idx+1 : end])
+		}
+	}
+	return from, from
+}
+
+// isValidEmail performs basic email validation for startup checks.
+// This is not RFC 5322 compliant but catches obvious configuration errors.
+func isValidEmail(email string) bool {
+	email = strings.TrimSpace(email)
+	if email == "" {
+		return false
+	}
+	atIdx := strings.LastIndex(email, "@")
+	if atIdx <= 0 || atIdx >= len(email)-1 {
+		return false
+	}
+	domain := email[atIdx+1:]
+	return strings.Contains(domain, ".")
+}
+
+// generateMessageID creates a unique Message-ID for email threading and deduplication.
+// Format: <timestamp.random@domain>
+func generateMessageID(domain string) string {
+	timestamp := time.Now().UnixNano()
+	randomPart := rand.Int63()
+	return fmt.Sprintf("<%d.%d@%s>", timestamp, randomPart, domain)
+}
+
+// generateBoundary creates a unique MIME boundary for multipart emails.
+func generateBoundary() string {
+	return fmt.Sprintf("----=_Part_%d_%d", time.Now().UnixNano(), rand.Int31())
 }

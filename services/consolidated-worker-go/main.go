@@ -59,7 +59,19 @@ func main() {
 	smtpUsername := getEnv("SMTP_USERNAME", "")
 	smtpPassword := getEnv("SMTP_PASSWORD", "")
 	smtpFrom := getEnv("SMTP_FROM", "noreply@civic-os.org")
+	smtpReplyTo := getEnv("SMTP_REPLY_TO", "") // Optional Reply-To address
 	skipTestEmails := getEnvBool("SKIP_TEST_EMAILS", false)
+
+	// Validate SMTP_FROM at startup (fail-fast)
+	_, envelopeFrom := parseEmailAddress(smtpFrom)
+	if !isValidEmail(envelopeFrom) {
+		log.Fatalf("[Init] Invalid SMTP_FROM '%s': must contain valid email address (e.g., 'noreply@example.com' or '\"Display Name\" <noreply@example.com>')", smtpFrom)
+	}
+
+	// Validate SMTP_REPLY_TO if provided
+	if smtpReplyTo != "" && !isValidEmail(smtpReplyTo) {
+		log.Fatalf("[Init] Invalid SMTP_REPLY_TO '%s': must be valid email address", smtpReplyTo)
+	}
 
 	// Connection Pool Configuration (CRITICAL for connection reduction)
 	dbMaxConns := getEnvInt("DB_MAX_CONNS", 4)
@@ -73,6 +85,9 @@ func main() {
 	log.Printf("[Init]   Notification Timezone: %s", notificationTimezone)
 	log.Printf("[Init]   SMTP Host: %s:%s", smtpHost, smtpPort)
 	log.Printf("[Init]   SMTP From: %s", smtpFrom)
+	if smtpReplyTo != "" {
+		log.Printf("[Init]   SMTP Reply-To: %s", smtpReplyTo)
+	}
 	log.Printf("[Init]   SMTP Auth: %v", smtpUsername != "")
 	log.Printf("[Init]   Skip Test Emails: %v", skipTestEmails)
 	log.Printf("[Init]   DB Max Connections: %d", dbMaxConns)
@@ -150,6 +165,7 @@ func main() {
 		Username:       smtpUsername,
 		Password:       smtpPassword,
 		From:           smtpFrom,
+		ReplyTo:        smtpReplyTo,
 		SkipTestEmails: skipTestEmails,
 	}
 	log.Println("[Init] ✓ SMTP configuration loaded")

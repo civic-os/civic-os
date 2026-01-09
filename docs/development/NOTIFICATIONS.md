@@ -1801,7 +1801,12 @@ SMTP_HOST=email-smtp.us-east-1.amazonaws.com  # AWS SES endpoint (adjust region)
 SMTP_PORT=587                                   # 587 for STARTTLS (recommended)
 SMTP_USERNAME=AKIAIOSFODNN7EXAMPLE             # SMTP credentials
 SMTP_PASSWORD=BGbLaM1234567890abcdefghijklmnopqrstuvwxyz1234
-SMTP_FROM=noreply@civic-os.org                 # Verified sender email
+
+# Sender Configuration (v0.25.0+)
+# Plain email: SMTP_FROM=noreply@civic-os.org
+# With display name: SMTP_FROM="Civic OS Notifications" <noreply@civic-os.org>
+SMTP_FROM="Civic OS Notifications" <noreply@civic-os.org>
+SMTP_REPLY_TO=support@civic-os.org             # Optional: replies go here instead of SMTP_FROM
 
 # Application Configuration
 SITE_URL=https://app.civic-os.org
@@ -2906,7 +2911,10 @@ tmpl, err := texttemplate.New("subject").Option("missingkey=zero").Parse(templat
 - `SMTP_PORT`: SMTP port (587 for STARTTLS recommended)
 - `SMTP_USERNAME`: SMTP authentication username
 - `SMTP_PASSWORD`: SMTP authentication password
-- `SMTP_FROM`: Sender email address (must be verified by provider)
+- `SMTP_FROM`: Sender email address (must be verified by provider). Supports RFC 5322 format with display name: `"Mott Park Reservations" <noreply@mottpark.org>` (v0.25.0+)
+- `SMTP_REPLY_TO`: Optional Reply-To address. When set, recipients who reply will send to this address instead of the From address (v0.25.0+)
+
+**Startup Validation (v0.25.0+):** The worker validates `SMTP_FROM` and `SMTP_REPLY_TO` at startup. Invalid configurations cause immediate failure with a clear error message, preventing silent email delivery failures.
 
 **AWS SES Setup (if using AWS SES):**
 1. **Verify sender email** in AWS SES console: https://console.aws.amazon.com/ses/

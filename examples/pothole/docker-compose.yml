@@ -149,7 +149,9 @@ services:
       - SMTP_PORT=${SMTP_PORT:-2500}       # Inbucket SMTP port
       - SMTP_USERNAME=${SMTP_USERNAME:-}   # Empty for Inbucket (no auth required)
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}   # Empty for Inbucket
-      - SMTP_FROM=${SMTP_FROM:-noreply@example.com}  # Match mock data domain
+      # v0.25.0+: Display name support in SMTP_FROM, optional SMTP_REPLY_TO
+      - SMTP_FROM=${SMTP_FROM:-"Pot Hole Tracker" <noreply@example.com>}
+      - SMTP_REPLY_TO=${SMTP_REPLY_TO:-}   # Optional: where replies should go
       - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}  # Set to true in production to prevent sending to @example.com/@example.org/@example.net
     networks:
       - postgrest-network

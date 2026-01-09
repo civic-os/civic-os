@@ -141,7 +141,9 @@ services:
       - SMTP_PORT=${SMTP_PORT:-2500}
       - SMTP_USERNAME=${SMTP_USERNAME:-}
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}
-      - SMTP_FROM=${SMTP_FROM:-noreply@mottpark.org}
+      # v0.25.0+: Display name support in SMTP_FROM, optional SMTP_REPLY_TO
+      - SMTP_FROM=${SMTP_FROM:-"Mott Park Reservations" <noreply@mottpark.org>}
+      - SMTP_REPLY_TO=${SMTP_REPLY_TO:-}
       - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}
     networks:
       - mottpark-network
