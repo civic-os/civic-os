@@ -776,70 +776,87 @@ BEGIN
   WHERE display_name = 'Reservation Management';
   
   IF v_dashboard_id IS NOT NULL THEN
-    -- Add Overdue Payments widget (high priority - red alert)
-    INSERT INTO metadata.dashboard_widgets (
-      dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
-    ) VALUES (
-      v_dashboard_id,
-      'filtered_list',
-      '🚨 Overdue Payments',
-      'reservation_payments',
-      jsonb_build_object(
-        'filters', jsonb_build_array(
-          jsonb_build_object('column', 'is_overdue', 'operator', 'eq', 'value', true)
-        ),
-        'orderBy', 'due_date',
-        'orderDirection', 'asc',
-        'limit', 10,
-        'showColumns', jsonb_build_array('display_name', 'amount', 'due_date', 'days_until_due', 'reservation_request_id')
-      ),
-      0,  -- First position (before pending requests)
-      1, 
-      2
-    );
-    
-    -- Add Events This Week widget
-    INSERT INTO metadata.dashboard_widgets (
-      dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
-    ) VALUES (
-      v_dashboard_id,
-      'filtered_list',
-      '📅 Events This Week',
-      'reservation_requests',
-      jsonb_build_object(
-        'filters', jsonb_build_array(
-          jsonb_build_object(
-            'column', 'status_id',
-            'operator', 'eq',
-            'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved')
+    -- Add Overdue Payments widget (high priority - red alert) - idempotent
+    IF NOT EXISTS (
+      SELECT 1 FROM metadata.dashboard_widgets
+      WHERE dashboard_id = v_dashboard_id AND title = '🚨 Overdue Payments'
+    ) THEN
+      INSERT INTO metadata.dashboard_widgets (
+        dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+      ) VALUES (
+        v_dashboard_id,
+        'filtered_list',
+        '🚨 Overdue Payments',
+        'reservation_payments',
+        jsonb_build_object(
+          'filters', jsonb_build_array(
+            jsonb_build_object('column', 'is_overdue', 'operator', 'eq', 'value', true)
           ),
-          jsonb_build_object(
-            'column', 'days_until_event',
-            'operator', 'lte',
-            'value', 7
-          ),
-          jsonb_build_object(
-            'column', 'days_until_event',
-            'operator', 'gte',
-            'value', 0
-          )
+          'orderBy', 'due_date',
+          'orderDirection', 'asc',
+          'limit', 10,
+          'showColumns', jsonb_build_array('display_name', 'amount', 'due_date', 'days_until_due', 'reservation_request_id')
         ),
-        'orderBy', 'time_slot',
-        'orderDirection', 'asc',
-        'limit', 10,
-        'showColumns', jsonb_build_array('display_name_full', 'time_slot', 'days_until_event', 'attendee_count')
-      ),
-      1,  -- Second position
-      1, 
-      2
-    );
-    
-    -- Update sort orders of existing widgets to make room
-    UPDATE metadata.dashboard_widgets
-    SET sort_order = sort_order + 2
-    WHERE dashboard_id = v_dashboard_id
-      AND sort_order >= 1
-      AND title NOT IN ('🚨 Overdue Payments', '📅 Events This Week');
+        0,  -- First position (before pending requests)
+        1,
+        2
+      );
+
+      -- Update sort orders of existing widgets to make room (only when adding new widgets)
+      UPDATE metadata.dashboard_widgets
+      SET sort_order = sort_order + 1
+      WHERE dashboard_id = v_dashboard_id
+        AND sort_order >= 0
+        AND title NOT IN ('🚨 Overdue Payments');
+    END IF;
+
+    -- Add Events This Week widget - idempotent
+    IF NOT EXISTS (
+      SELECT 1 FROM metadata.dashboard_widgets
+      WHERE dashboard_id = v_dashboard_id AND title = '📅 Events This Week'
+    ) THEN
+      INSERT INTO metadata.dashboard_widgets (
+        dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+      ) VALUES (
+        v_dashboard_id,
+        'filtered_list',
+        '📅 Events This Week',
+        'reservation_requests',
+        jsonb_build_object(
+          'filters', jsonb_build_array(
+            jsonb_build_object(
+              'column', 'status_id',
+              'operator', 'eq',
+              'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved')
+            ),
+            jsonb_build_object(
+              'column', 'days_until_event',
+              'operator', 'lte',
+              'value', 7
+            ),
+            jsonb_build_object(
+              'column', 'days_until_event',
+              'operator', 'gte',
+              'value', 0
+            )
+          ),
+          'orderBy', 'time_slot',
+          'orderDirection', 'asc',
+          'limit', 10,
+          'showColumns', jsonb_build_array('display_name_full', 'time_slot', 'days_until_event', 'attendee_count')
+        ),
+        1,  -- Second position
+        1,
+        2
+      );
+
+      -- Update sort orders of existing widgets to make room (only when adding new widgets)
+      UPDATE metadata.dashboard_widgets
+      SET sort_order = sort_order + 1
+      WHERE dashboard_id = v_dashboard_id
+        AND sort_order >= 1
+        AND title NOT IN ('🚨 Overdue Payments', '📅 Events This Week');
+    END IF;
   END IF;
 END $$;
 

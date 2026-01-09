@@ -325,7 +325,11 @@ See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters a
 
 ### Adding a New Entity to the UI
 1. Create table in PostgreSQL `public` schema
-2. Grant permissions (INSERT, SELECT, UPDATE, DELETE) to `authenticated` role
+2. Grant permissions to database roles:
+   - **Public tables**: Grant SELECT to `web_anon` (anonymous) and all CRUD permissions to `authenticated`
+   - **Sensitive tables** (payments, private data): Grant only to `authenticated`, withhold from `web_anon`
+
+   When `web_anon` has no privileges, anonymous users see a "Sign in to view this record" prompt instead of the data.
 3. **IMPORTANT: Create indexes on all foreign key columns** (PostgreSQL does NOT auto-index FKs)
    ```sql
    -- Example: For a table with foreign keys

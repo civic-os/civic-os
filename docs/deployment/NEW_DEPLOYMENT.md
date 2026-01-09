@@ -332,7 +332,26 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.books TO web_anon, authenti
 -- Grant sequence permissions (for SERIAL columns)
 GRANT USAGE ON SEQUENCE public.authors_id_seq TO web_anon, authenticated;
 GRANT USAGE ON SEQUENCE public.books_id_seq TO web_anon, authenticated;
+```
 
+**Anonymous Access Control**
+
+The example above grants to both `web_anon` and `authenticated`. For sensitive tables (payments, private user data), omit `web_anon`:
+
+```sql
+-- Sensitive table: only authenticated users can see it
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.payments TO authenticated;
+-- Note: No grant to web_anon = table invisible to anonymous users
+```
+
+When `web_anon` has no privileges on a table:
+- Table won't appear in `schema_entities` for anonymous users
+- Anonymous visitors see "Sign in to view this record" prompt
+- This is more secure than RLS-based blocking (table existence is hidden)
+
+See `docs/INTEGRATOR_GUIDE.md` (RBAC System > Anonymous Access Patterns) for detailed guidance.
+
+```sql
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.authors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;

@@ -302,60 +302,76 @@ BEGIN
     SELECT id INTO v_admin_user_id FROM metadata.civic_os_users LIMIT 1;
   END IF;
 
-  -- Clear any existing default dashboard (unique constraint allows only one)
-  UPDATE metadata.dashboards SET is_default = FALSE WHERE is_default = TRUE;
+  -- Check if dashboard already exists (idempotent)
+  SELECT id INTO v_dashboard_id
+  FROM metadata.dashboards
+  WHERE display_name = 'Mott Park Clubhouse Reservations';
 
-  -- Create main dashboard
-  INSERT INTO metadata.dashboards (
-    display_name, 
-    description, 
-    is_default, 
-    is_public, 
-    sort_order,
-    created_by
-  ) VALUES (
-    'Mott Park Clubhouse Reservations',
-    'View availability and reserve the clubhouse for your next event',
-    TRUE,
-    TRUE,
-    1,
-    v_admin_user_id
-  )
-  RETURNING id INTO v_dashboard_id;
+  IF v_dashboard_id IS NULL THEN
+    -- Clear any existing default dashboard (unique constraint allows only one)
+    UPDATE metadata.dashboards SET is_default = FALSE WHERE is_default = TRUE;
+
+    -- Create main dashboard
+    INSERT INTO metadata.dashboards (
+      display_name,
+      description,
+      is_default,
+      is_public,
+      sort_order,
+      created_by
+    ) VALUES (
+      'Mott Park Clubhouse Reservations',
+      'View availability and reserve the clubhouse for your next event',
+      TRUE,
+      TRUE,
+      1,
+      v_admin_user_id
+    )
+    RETURNING id INTO v_dashboard_id;
+  END IF;
 
   -- ============================================================================
   -- Widget 1: Welcome Header (Markdown - Full Width)
   -- ============================================================================
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'markdown',
-    NULL,  -- No title for header widget
-    jsonb_build_object(
-      'content', E'# 🏠 Mott Park Recreation Area Clubhouse
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND sort_order = 1 AND widget_type = 'markdown'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'markdown',
+      NULL,  -- No title for header widget
+      jsonb_build_object(
+        'content', E'# 🏠 Mott Park Recreation Area Clubhouse
 
 Welcome to the Mott Park Recreation Area reservation system! The clubhouse is available for community events, meetings, and private gatherings.
 
 **Capacity:** 75 people  |  **Hours:** Until 10 PM (vacate by 11 PM)  |  **Minimum Rental:** 4 hours',
-      'enableHtml', false
-    ),
-    1,   -- sort_order (first)
-    2,   -- width (full width)
-    1    -- height (single unit)
-  );
+        'enableHtml', false
+      ),
+      1,   -- sort_order (first)
+      2,   -- width (full width)
+      1    -- height (single unit)
+    );
+  END IF;
 
   -- ============================================================================
   -- Widget 2: Quick Actions (Markdown with Links - Half Width)
   -- ============================================================================
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'markdown',
-    'Quick Actions',
-    jsonb_build_object(
-      'content', E'### Ready to Reserve?
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = 'Quick Actions'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'markdown',
+      'Quick Actions',
+      jsonb_build_object(
+        'content', E'### Ready to Reserve?
 
 <a href="/create/reservation_requests" class="btn btn-primary btn-lg w-full mb-4">📅 Request a Reservation</a>
 
@@ -368,24 +384,29 @@ Welcome to the Mott Park Recreation Area reservation system! The clubhouse is av
 - 📋 [View Facility Use Policy](/docs/policy)
 - 📞 Contact: (810) 555-MPRA
 - 📧 Email: reservations@mottparkra.org',
-      'enableHtml', true
-    ),
-    2,   -- sort_order
-    1,   -- width (half width)
-    2    -- height (double unit)
-  );
+        'enableHtml', true
+      ),
+      2,   -- sort_order
+      1,   -- width (half width)
+      2    -- height (double unit)
+    );
+  END IF;
 
   -- ============================================================================
   -- Widget 3: Getting Started Tips (Markdown - Half Width)
   -- ============================================================================
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'markdown',
-    'Getting Started',
-    jsonb_build_object(
-      'content', E'### How It Works
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = 'Getting Started'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'markdown',
+      'Getting Started',
+      jsonb_build_object(
+        'content', E'### How It Works
 
 1. **Check Availability** - Use the calendar below to see open dates
 2. **Submit Request** - Click "Request a Reservation" and fill out the form
@@ -402,58 +423,68 @@ Welcome to the Mott Park Recreation Area reservation system! The clubhouse is av
 | Cleaning Fee | $75 | Before event |
 
 *Security deposit is refundable after event if no damages.*',
-      'enableHtml', false
-    ),
-    3,   -- sort_order
-    1,   -- width (half width)
-    2    -- height (double unit)
-  );
+        'enableHtml', false
+      ),
+      3,   -- sort_order
+      1,   -- width (half width)
+      2    -- height (double unit)
+    );
+  END IF;
 
   -- ============================================================================
   -- Widget 4: Availability Calendar (Full Width, Tall)
   -- Uses public_calendar_events which only contains approved/completed events
   -- (synced from reservation_requests via trigger in 05_mpra_public_calendar.sql)
   -- ============================================================================
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id,
-    widget_type,
-    title,
-    entity_key,
-    config,
-    sort_order,
-    width,
-    height
-  ) VALUES (
-    v_dashboard_id,
-    'calendar',
-    'Clubhouse Availability',
-    'public_calendar_events',
-    jsonb_build_object(
-      'entityKey', 'public_calendar_events',
-      'timeSlotPropertyName', 'time_slot',
-      'defaultColor', '#22C55E',           -- Green for approved events
-      'initialView', 'dayGridMonth',       -- Month view as requested
-      'showCreateButton', false,           -- No create button - users create via reservation_requests
-      'maxEvents', 500,
-      -- No filters needed - public_calendar_events only contains approved/completed
-      'showColumns', jsonb_build_array('display_name', 'event_type')
-    ),
-    4,   -- sort_order (last, below the info sections)
-    2,   -- width (full width)
-    3    -- height (triple unit for good calendar visibility)
-  );
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = 'Clubhouse Availability'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id,
+      widget_type,
+      title,
+      entity_key,
+      config,
+      sort_order,
+      width,
+      height
+    ) VALUES (
+      v_dashboard_id,
+      'calendar',
+      'Clubhouse Availability',
+      'public_calendar_events',
+      jsonb_build_object(
+        'entityKey', 'public_calendar_events',
+        'timeSlotPropertyName', 'time_slot',
+        'defaultColor', '#22C55E',           -- Green for approved events
+        'initialView', 'dayGridMonth',       -- Month view as requested
+        'showCreateButton', false,           -- No create button - users create via reservation_requests
+        'maxEvents', 500,
+        -- No filters needed - public_calendar_events only contains approved/completed
+        'showColumns', jsonb_build_array('display_name', 'event_type')
+      ),
+      4,   -- sort_order (last, below the info sections)
+      2,   -- width (full width)
+      3    -- height (triple unit for good calendar visibility)
+    );
+  END IF;
 
   -- ============================================================================
   -- Widget 5: Facility Rules Reminder (Markdown - Full Width)
   -- ============================================================================
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'markdown',
-    'Important Reminders',
-    jsonb_build_object(
-      'content', E'### Facility Rules
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = 'Important Reminders'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'markdown',
+      'Important Reminders',
+      jsonb_build_object(
+        'content', E'### Facility Rules
 
 - 🚫 **No alcohol** (City of Flint ordinance)
 - 🚫 **No cooking** - warming food only; food must be catered or prepared off-site
@@ -464,12 +495,13 @@ Welcome to the Mott Park Recreation Area reservation system! The clubhouse is av
 - 🐕 **No pets** except service animals
 
 *The person signing the reservation is responsible for their group''s conduct and any damages.*',
-      'enableHtml', false
-    ),
-    5,   -- sort_order
-    2,   -- width (full width)
-    1    -- height (single unit)
-  );
+        'enableHtml', false
+      ),
+      5,   -- sort_order
+      2,   -- width (full width)
+      1    -- height (single unit)
+    );
+  END IF;
 
 END $$;
 
@@ -495,123 +527,155 @@ BEGIN
     SELECT id INTO v_admin_user_id FROM metadata.civic_os_users LIMIT 1;
   END IF;
 
-  -- Create manager dashboard (not default, not public)
-  INSERT INTO metadata.dashboards (
-    display_name, 
-    description, 
-    is_default, 
-    is_public, 
-    sort_order,
-    created_by
-  ) VALUES (
-    'Reservation Management',
-    'Staff dashboard for managing reservation requests',
-    FALSE,
-    FALSE,  -- Only visible to logged-in users with access
-    2,
-    v_admin_user_id
-  )
-  RETURNING id INTO v_dashboard_id;
+  -- Check if dashboard already exists (idempotent)
+  SELECT id INTO v_dashboard_id
+  FROM metadata.dashboards
+  WHERE display_name = 'Reservation Management';
+
+  -- Only create dashboard and widgets if they don't exist
+  IF v_dashboard_id IS NULL THEN
+    -- Create manager dashboard (not default, not public)
+    INSERT INTO metadata.dashboards (
+      display_name,
+      description,
+      is_default,
+      is_public,
+      sort_order,
+      created_by
+    ) VALUES (
+      'Reservation Management',
+      'Staff dashboard for managing reservation requests',
+      FALSE,
+      FALSE,  -- Only visible to logged-in users with access
+      2,
+      v_admin_user_id
+    )
+    RETURNING id INTO v_dashboard_id;
+  END IF;
 
   -- Widget 1: Pending Requests (needs attention)
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'filtered_list',
-    '⏳ Pending Requests',
-    'reservation_requests',
-    jsonb_build_object(
-      'filters', jsonb_build_array(
-        jsonb_build_object(
-          'column', 'status_id',
-          'operator', 'eq',
-          'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Pending')
-        )
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = '⏳ Pending Requests'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'filtered_list',
+      '⏳ Pending Requests',
+      'reservation_requests',
+      jsonb_build_object(
+        'filters', jsonb_build_array(
+          jsonb_build_object(
+            'column', 'status_id',
+            'operator', 'eq',
+            'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Pending')
+          )
+        ),
+        'orderBy', 'created_at',
+        'orderDirection', 'asc',  -- Oldest first (FIFO)
+        'limit', 10,
+        'showColumns', jsonb_build_array('display_name_full', 'time_slot', 'attendee_count', 'created_at')
       ),
-      'orderBy', 'created_at',
-      'orderDirection', 'asc',  -- Oldest first (FIFO)
-      'limit', 10,
-      'showColumns', jsonb_build_array('display_name_full', 'time_slot', 'attendee_count', 'created_at')
-    ),
-    1, 1, 2
-  );
+      1, 1, 2
+    );
+  END IF;
 
   -- Widget 2: Upcoming Approved Events
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'filtered_list',
-    '✅ Upcoming Approved Events',
-    'reservation_requests',
-    jsonb_build_object(
-      'filters', jsonb_build_array(
-        jsonb_build_object(
-          'column', 'status_id',
-          'operator', 'eq',
-          'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved')
-        )
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = '✅ Upcoming Approved Events'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'filtered_list',
+      '✅ Upcoming Approved Events',
+      'reservation_requests',
+      jsonb_build_object(
+        'filters', jsonb_build_array(
+          jsonb_build_object(
+            'column', 'status_id',
+            'operator', 'eq',
+            'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_request' AND display_name = 'Approved')
+          )
+        ),
+        'orderBy', 'time_slot',
+        'orderDirection', 'asc',
+        'limit', 10,
+        'showColumns', jsonb_build_array('display_name_full', 'time_slot', 'facility_fee_amount', 'is_public_event')
       ),
-      'orderBy', 'time_slot',
-      'orderDirection', 'asc',
-      'limit', 10,
-      'showColumns', jsonb_build_array('display_name_full', 'time_slot', 'facility_fee_amount', 'is_public_event')
-    ),
-    2, 1, 2
-  );
+      2, 1, 2
+    );
+  END IF;
 
   -- Widget 3: Full Calendar View
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'calendar',
-    'All Reservations',
-    'reservation_requests',
-    jsonb_build_object(
-      'entityKey', 'reservation_requests',
-      'timeSlotPropertyName', 'time_slot',
-      'defaultColor', '#3B82F6',
-      'initialView', 'timeGridWeek',  -- Week view for managers
-      'showCreateButton', true,
-      'maxEvents', 500,
-      'filters', jsonb_build_array(
-        -- Show all non-denied/cancelled for managers
-        jsonb_build_object(
-          'column', 'status_id',
-          'operator', 'in',
-          'value', (
-            SELECT jsonb_agg(id)
-            FROM metadata.statuses
-            WHERE entity_type = 'reservation_request'
-            AND display_name NOT IN ('Denied', 'Cancelled')
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = 'All Reservations'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'calendar',
+      'All Reservations',
+      'reservation_requests',
+      jsonb_build_object(
+        'entityKey', 'reservation_requests',
+        'timeSlotPropertyName', 'time_slot',
+        'defaultColor', '#3B82F6',
+        'initialView', 'timeGridWeek',  -- Week view for managers
+        'showCreateButton', true,
+        'maxEvents', 500,
+        'filters', jsonb_build_array(
+          -- Show all non-denied/cancelled for managers
+          jsonb_build_object(
+            'column', 'status_id',
+            'operator', 'in',
+            'value', (
+              SELECT jsonb_agg(id)
+              FROM metadata.statuses
+              WHERE entity_type = 'reservation_request'
+              AND display_name NOT IN ('Denied', 'Cancelled')
+            )
           )
         )
-      )
-    ),
-    3, 2, 3
-  );
+      ),
+      3, 2, 3
+    );
+  END IF;
 
   -- Widget 4: Payments Needing Attention
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'filtered_list',
-    '💳 Pending Payments',
-    'reservation_payments',
-    jsonb_build_object(
-      'filters', jsonb_build_array(
-        jsonb_build_object('column', 'status', 'operator', 'eq', 'value', 'pending')
+  IF NOT EXISTS (
+    SELECT 1 FROM metadata.dashboard_widgets
+    WHERE dashboard_id = v_dashboard_id AND title = '💳 Pending Payments'
+  ) THEN
+    INSERT INTO metadata.dashboard_widgets (
+      dashboard_id, widget_type, title, entity_key, config, sort_order, width, height
+    ) VALUES (
+      v_dashboard_id,
+      'filtered_list',
+      '💳 Pending Payments',
+      'reservation_payments',
+      jsonb_build_object(
+        'filters', jsonb_build_array(
+          jsonb_build_object(
+            'column', 'status_id',
+            'operator', 'eq',
+            'value', (SELECT id FROM metadata.statuses WHERE entity_type = 'reservation_payment' AND display_name = 'Pending')
+          )
+        ),
+        'orderBy', 'due_date',
+        'orderDirection', 'asc',
+        'limit', 15,
+        'showColumns', jsonb_build_array('display_name', 'amount', 'due_date', 'reservation_request_id')
       ),
-      'orderBy', 'due_date',
-      'orderDirection', 'asc',
-      'limit', 15,
-      'showColumns', jsonb_build_array('display_name', 'amount', 'due_date', 'reservation_request_id')
-    ),
-    4, 2, 2
-  );
+      4, 2, 2
+    );
+  END IF;
 
 END $$;
 
