@@ -43,6 +43,7 @@ import { StaticTextComponent } from '../../components/static-text/static-text.co
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CommonModule } from '@angular/common';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 @Component({
     selector: 'app-edit',
@@ -607,9 +608,12 @@ export class EditPage {
           // PostgreSQL expects: ISO string with timezone (e.g., "2025-01-15T22:30:00.000Z")
           if (value.length === 16) {
             // Interpret input string as LOCAL time, then convert to UTC
-            const localDate = new Date(value); // Browser interprets as local timezone
-            const utcISO = localDate.toISOString(); // Converts to UTC with .000Z format
-            transformed[prop.column_name] = utcISO;
+            // Use Safari-safe parsing for datetime-local strings
+            const localDate = parseDatetimeLocal(value);
+            if (localDate) {
+              const utcISO = localDate.toISOString(); // Converts to UTC with .000Z format
+              transformed[prop.column_name] = utcISO;
+            }
           }
         }
       }

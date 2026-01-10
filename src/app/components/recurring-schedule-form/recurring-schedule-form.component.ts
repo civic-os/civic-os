@@ -29,6 +29,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RecurrenceRuleEditorComponent } from '../recurrence-rule-editor/recurrence-rule-editor.component';
 import { RecurringService } from '../../services/recurring.service';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 /**
  * Value emitted by the RecurringScheduleFormComponent.
@@ -150,7 +151,11 @@ export class RecurringScheduleFormComponent implements OnInit {
     const start = this.dtstartInternal();
     const end = this.dtendInternal();
     if (!start || !end) return null;
-    if (new Date(end) <= new Date(start)) {
+    // Use Safari-safe parsing for datetime-local strings
+    const startDate = parseDatetimeLocal(start);
+    const endDate = parseDatetimeLocal(end);
+    if (!startDate || !endDate) return null;
+    if (endDate <= startDate) {
       return 'End must be after start';
     }
     return null;
@@ -161,8 +166,10 @@ export class RecurringScheduleFormComponent implements OnInit {
     const end = this.dtendInternal();
     if (!start || !end) return '';
 
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+    // Use Safari-safe parsing for datetime-local strings
+    const startDate = parseDatetimeLocal(start);
+    const endDate = parseDatetimeLocal(end);
+    if (!startDate || !endDate) return '';
     const diffMs = endDate.getTime() - startDate.getTime();
     if (diffMs <= 0) return '';
 
@@ -234,9 +241,12 @@ export class RecurringScheduleFormComponent implements OnInit {
     this.dtstartInternal.set(value);
 
     // Auto-advance end if not set or if end is before new start
+    // Use Safari-safe parsing for datetime-local strings
     const end = this.dtendInternal();
-    if (value && (!end || new Date(end) <= new Date(value))) {
-      const startDate = new Date(value);
+    const endDate = end ? parseDatetimeLocal(end) : null;
+    const valueDate = parseDatetimeLocal(value);
+    if (valueDate && (!endDate || endDate <= valueDate)) {
+      const startDate = new Date(valueDate.getTime());
       startDate.setHours(startDate.getHours() + 1);
       this.dtendInternal.set(this.formatDateTimeLocal(startDate.toISOString()));
     }
@@ -272,8 +282,10 @@ export class RecurringScheduleFormComponent implements OnInit {
     const end = this.dtendInternal();
     if (!start || !end) return 'PT1H';
 
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+    // Use Safari-safe parsing for datetime-local strings
+    const startDate = parseDatetimeLocal(start);
+    const endDate = parseDatetimeLocal(end);
+    if (!startDate || !endDate) return 'PT1H';
     const diffMs = endDate.getTime() - startDate.getTime();
     if (diffMs <= 0) return 'PT1H';
 

@@ -18,6 +18,7 @@
 import { Component, forwardRef, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 @Component({
   selector: 'app-edit-time-slot',
@@ -88,8 +89,14 @@ export class EditTimeSlotComponent implements ControlValueAccessor {
         return;
       }
 
-      const startDate = new Date(start);
-      const endDate = new Date(end);
+      // Use Safari-safe parsing for datetime-local strings
+      const startDate = parseDatetimeLocal(start);
+      const endDate = parseDatetimeLocal(end);
+
+      if (!startDate || !endDate) {
+        this.errorMessage.set('');
+        return;
+      }
 
       if (endDate <= startDate) {
         this.errorMessage.set('End time must be after start time');
@@ -143,7 +150,9 @@ export class EditTimeSlotComponent implements ControlValueAccessor {
   onEndFocus(): void {
     if (this.startLocal() && !this.endLocal()) {
       // Pre-fill end with start + 1 hour
-      const startDate = new Date(this.startLocal());
+      // Use Safari-safe parsing for datetime-local strings
+      const startDate = parseDatetimeLocal(this.startLocal());
+      if (!startDate) return;
       startDate.setHours(startDate.getHours() + 1);
       this.endLocal.set(this.toDatetimeLocal(startDate));
     }

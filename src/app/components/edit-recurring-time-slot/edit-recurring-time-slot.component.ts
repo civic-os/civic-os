@@ -36,6 +36,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ConflictInfo } from '../../interfaces/entity';
 import { RecurringService } from '../../services/recurring.service';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 import { RecurrenceRuleEditorComponent } from '../recurrence-rule-editor/recurrence-rule-editor.component';
 import { ConflictPreviewComponent, ConflictPreviewResult } from '../conflict-preview/conflict-preview.component';
 
@@ -266,7 +267,11 @@ export class EditRecurringTimeSlotComponent implements ControlValueAccessor, Val
     const start = this.startDateTime();
     const end = this.endDateTime();
     if (!start || !end) return null;
-    if (new Date(end) <= new Date(start)) {
+    // Use Safari-safe parsing for datetime-local strings
+    const startDate = parseDatetimeLocal(start);
+    const endDate = parseDatetimeLocal(end);
+    if (!startDate || !endDate) return null;
+    if (endDate <= startDate) {
       return 'End time must be after start time';
     }
     return null;
@@ -439,16 +444,20 @@ export class EditRecurringTimeSlotComponent implements ControlValueAccessor, Val
     if (!start || !end) return '';
 
     // Convert to ISO format for PostgreSQL
-    const startISO = new Date(start).toISOString();
-    const endISO = new Date(end).toISOString();
-    return `[${startISO},${endISO})`;
+    // Use Safari-safe parsing for datetime-local strings
+    const startDate = parseDatetimeLocal(start);
+    const endDate = parseDatetimeLocal(end);
+    if (!startDate || !endDate) return '';
+    return `[${startDate.toISOString()},${endDate.toISOString()})`;
   }
 
   private generateOccurrencesForPreview(): Array<[string, string]> {
     // For preview, generate first 20 occurrences (or until RRULE ends)
     // This is a simplified frontend calculation - actual expansion happens server-side
-    const start = new Date(this.startDateTime());
-    const end = new Date(this.endDateTime());
+    // Use Safari-safe parsing for datetime-local strings
+    const start = parseDatetimeLocal(this.startDateTime());
+    const end = parseDatetimeLocal(this.endDateTime());
+    if (!start || !end) return [];
     const duration = end.getTime() - start.getTime();
 
     const occurrences: Array<[string, string]> = [];

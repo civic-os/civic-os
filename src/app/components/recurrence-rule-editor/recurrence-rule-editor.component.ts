@@ -20,6 +20,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
 import { CommonModule } from '@angular/common';
 import { RRuleFrequency, RRuleDayOfWeek, RRuleConfig } from '../../interfaces/entity';
 import { RecurringService } from '../../services/recurring.service';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 /**
  * RRULE Builder Component
@@ -420,8 +421,11 @@ export class RecurrenceRuleEditorComponent implements ControlValueAccessor {
     const dtstartValue = this.dtstart();
     if (!dtstartValue) return;
 
-    const date = dtstartValue instanceof Date ? dtstartValue : new Date(dtstartValue);
-    if (isNaN(date.getTime())) return;
+    // Use Safari-safe parsing for datetime-local strings
+    const date = dtstartValue instanceof Date
+      ? dtstartValue
+      : parseDatetimeLocal(dtstartValue as string);
+    if (!date || isNaN(date.getTime())) return;
 
     const { position, weekday } = this.calculateWeekdayPosition(date);
 
