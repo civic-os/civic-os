@@ -213,6 +213,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Workload visibility dashboard widget
   - [ ] Manual reassignment via Entity Actions
 
+- [ ] **E-Signatures** - Electronic document signing capabilities
 
 ---
 

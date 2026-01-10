@@ -1,0 +1,42 @@
+/* Boolean toggle label animation - slides to match toggle direction */
+.boolean-label-container {
+  position: relative;
+  width: 28px;
+  height: 1.5rem;
+  overflow: hidden;
+}
+
+.boolean-label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* "Yes" - slides in from left when active (following toggle knob moving right) */
+.boolean-yes {
+  color: oklch(var(--su));
+  transform: translateY(-50%) translateX(-100%);
+  opacity: 0;
+}
+
+.boolean-yes.active {
+  transform: translateY(-50%) translateX(0);
+  opacity: 1;
+}
+
+/* "No" - slides in from right when active (following toggle knob moving left) */
+.boolean-no {
+  color: oklch(var(--bc) / 0.5);
+  transform: translateY(-50%) translateX(100%);
+  opacity: 0;
+}
+
+.boolean-no.active {
+  transform: translateY(-50%) translateX(0);
+  opacity: 1;
+}

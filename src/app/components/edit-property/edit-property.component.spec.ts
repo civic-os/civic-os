@@ -125,6 +125,111 @@ describe('EditPropertyComponent', () => {
       const checkbox = fixture.debugElement.query(By.css('input[type="checkbox"]')).nativeElement;
       expect(checkbox.checked).toBe(true);
     });
+
+    it('should display Yes/No labels next to toggle', () => {
+      const formGroup = new FormGroup({
+        is_active: new FormControl(false)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.boolean);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const yesLabel = fixture.debugElement.query(By.css('.boolean-yes'));
+      const noLabel = fixture.debugElement.query(By.css('.boolean-no'));
+      expect(yesLabel).toBeTruthy();
+      expect(noLabel).toBeTruthy();
+      expect(yesLabel.nativeElement.textContent).toBe('Yes');
+      expect(noLabel.nativeElement.textContent).toBe('No');
+    });
+
+    it('should show "No" as active when value is false', () => {
+      const formGroup = new FormGroup({
+        is_active: new FormControl(false)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.boolean);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const yesLabel = fixture.debugElement.query(By.css('.boolean-yes'));
+      const noLabel = fixture.debugElement.query(By.css('.boolean-no'));
+      expect(yesLabel.nativeElement.classList.contains('active')).toBe(false);
+      expect(noLabel.nativeElement.classList.contains('active')).toBe(true);
+    });
+
+    it('should show "Yes" as active when value is true', () => {
+      const formGroup = new FormGroup({
+        is_active: new FormControl(true)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.boolean);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const yesLabel = fixture.debugElement.query(By.css('.boolean-yes'));
+      const noLabel = fixture.debugElement.query(By.css('.boolean-no'));
+      expect(yesLabel.nativeElement.classList.contains('active')).toBe(true);
+      expect(noLabel.nativeElement.classList.contains('active')).toBe(false);
+    });
+
+    it('should toggle active label when checkbox is clicked', async () => {
+      const formControl = new FormControl(false);
+      const formGroup = new FormGroup({
+        is_active: formControl
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.boolean);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Initially "No" should be active
+      let yesLabel = fixture.debugElement.query(By.css('.boolean-yes'));
+      let noLabel = fixture.debugElement.query(By.css('.boolean-no'));
+      expect(noLabel.nativeElement.classList.contains('active')).toBe(true);
+      expect(yesLabel.nativeElement.classList.contains('active')).toBe(false);
+
+      // Click the checkbox to toggle
+      const checkbox = fixture.debugElement.query(By.css('input[type="checkbox"]'));
+      checkbox.nativeElement.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Now "Yes" should be active
+      yesLabel = fixture.debugElement.query(By.css('.boolean-yes'));
+      noLabel = fixture.debugElement.query(By.css('.boolean-no'));
+      expect(yesLabel.nativeElement.classList.contains('active')).toBe(true);
+      expect(noLabel.nativeElement.classList.contains('active')).toBe(false);
+    });
+
+    it('should toggle checkbox when clicking the label text', async () => {
+      const formControl = new FormControl(false);
+      const formGroup = new FormGroup({
+        is_active: formControl
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.boolean);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Initial state should be false
+      expect(formControl.value).toBe(false);
+
+      // Click the label container (which wraps the toggle and text)
+      const labelContainer = fixture.debugElement.query(By.css('label.cursor-pointer'));
+      expect(labelContainer).toBeTruthy();
+
+      // Click on the Yes/No label area
+      const booleanLabelContainer = fixture.debugElement.query(By.css('.boolean-label-container'));
+      booleanLabelContainer.nativeElement.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      // Value should now be true
+      expect(formControl.value).toBe(true);
+    });
   });
 
   describe('IntegerNumber Type', () => {

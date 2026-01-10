@@ -34,9 +34,13 @@
     <input type="number" placeholder="Type here" step=1 mask="0*" [allowNegativeNumbers]="true" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
   }
   @if (propType() == EntityPropertyType.Boolean) {
-    <div class="pt-2">
+    <label class="pt-2 flex items-center gap-3 cursor-pointer w-fit" [for]="prop().column_name">
       <input type="checkbox" class="toggle" [id]="prop().column_name" [formControlName]="prop().column_name" />
-    </div>
+      <span class="boolean-label-container">
+        <span class="boolean-label boolean-yes" [class.active]="form().get(prop().column_name)?.value">Yes</span>
+        <span class="boolean-label boolean-no" [class.active]="!form().get(prop().column_name)?.value">No</span>
+      </span>
+    </label>
   }
   @if (propType() == EntityPropertyType.ForeignKeyName) {
     @if (selectOptions$ | async; as selectOptions) {
