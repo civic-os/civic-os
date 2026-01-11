@@ -38,6 +38,7 @@ export class ManyToManyEditorComponent {
   entityId = input.required<number | string>();
   property = input.required<SchemaEntityProperty>();
   currentValues = input.required<any[]>(); // Array of related entities with {id, display_name, color?}
+  refreshTrigger = input<number>(0);  // Increment to force refresh from parent
 
   // State
   isEditing = signal(false);
@@ -88,6 +89,18 @@ export class ManyToManyEditorComponent {
       if (prop?.many_to_many_meta) {
         this.loadAvailableOptions();
         this.checkPermissions();
+      }
+    });
+
+    // Refresh effect: reload available options when parent triggers refresh
+    // Skip initial load (trigger === 0) to avoid double-loading
+    effect(() => {
+      const trigger = this.refreshTrigger();
+      const prop = this.property();
+
+      if (trigger > 0 && prop?.many_to_many_meta) {
+        this.loadAvailableOptions();
+        this.cancel();  // Exit edit mode if active
       }
     });
   }

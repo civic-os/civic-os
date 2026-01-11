@@ -49,6 +49,7 @@ export class EntityNotesComponent {
   // Inputs
   entityType = input.required<string>();
   entityId = input.required<string>();
+  refreshTrigger = input<number>(0);  // Increment to force refresh from parent
 
   // Services
   private notesService = inject(NotesService);
@@ -107,10 +108,12 @@ export class EntityNotesComponent {
   }
 
   constructor() {
-    // Load notes and check permissions when inputs change
+    // Load notes and check permissions when inputs change OR refresh is triggered
     effect(() => {
       const entityType = this.entityType();
       const entityId = this.entityId();
+      const trigger = this.refreshTrigger();  // Track refresh trigger signal
+
       if (entityType && entityId) {
         this.loadNotesAndPermissions();
       }

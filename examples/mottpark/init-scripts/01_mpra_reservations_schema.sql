@@ -605,8 +605,8 @@ CREATE POLICY "reservation_payments: admin modify" ON reservation_payments
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, search_fields, show_calendar, calendar_property_name)
 VALUES
   ('reservation_payment_types', 'Payment Types', 'System lookup: types of payments for reservations', 99, NULL, FALSE, NULL),
-  ('reservation_requests', 'Reservation Requests', 'Clubhouse reservation requests and approved bookings', 10, 
-   ARRAY['requestor_name', 'organization_name', 'event_type'], TRUE, 'time_slot'),
+  ('reservation_requests', 'Reservation Requests', 'Clubhouse reservation requests and approved bookings', 10,
+   NULL, TRUE, 'time_slot'),
   ('reservation_payments', 'Reservation Payments', 'Payment tracking for reservation requests', 20, NULL, FALSE, NULL)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,

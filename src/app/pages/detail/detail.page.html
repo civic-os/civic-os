@@ -97,6 +97,7 @@
                     [entityId]="data.id"
                     [property]="prop"
                     [currentValues]="data[prop.column_name] || []"
+                    [refreshTrigger]="refreshCounter()"
                     (relationChanged)="refreshData()">
                   </app-many-to-many-editor>
                   @if (!$last) {
@@ -112,7 +113,8 @@
         @if (entity.enable_notes) {
           <app-entity-notes
             [entityType]="entity.table_name"
-            [entityId]="data.id.toString()">
+            [entityId]="data.id.toString()"
+            [refreshTrigger]="refreshCounter()">
           </app-entity-notes>
         }
 

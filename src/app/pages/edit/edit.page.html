@@ -25,7 +25,7 @@
           <div class="flex justify-center my-8">
             <span class="loading loading-spinner loading-lg"></span>
           </div>
-        } @else if (editForm; as form) {
+        } @else if (entity.update && editForm; as form) {
           <form [formGroup]="form" (ngSubmit)="submitForm($event)">
             @if (showValidationError()) {
               <div role="alert" class="alert alert-error mb-4">
@@ -53,6 +53,26 @@
               <span class="material-symbols-outlined">save</span> Save
             </button>
           </form>
+        } @else if (!entity.update) {
+          <!-- Access denied when record exists but user lacks update permission -->
+          <div class="p-8">
+            @if (!auth.authenticated()) {
+              <app-empty-state
+                icon="lock"
+                title="Sign in to edit records"
+                message="Log in to access this feature."
+                alertType="info"
+                [showLoginButton]="true">
+              </app-empty-state>
+            } @else {
+              <app-empty-state
+                icon="block"
+                title="Access denied"
+                message="You don't have permission to edit records of this type."
+                alertType="error">
+              </app-empty-state>
+            }
+          </div>
         }
       } @else {
         <!-- Loading or error state when data is not available -->
@@ -64,12 +84,22 @@
               <p class="text-base-content/60">Loading record...</p>
             </div>
           } @else if (!entity.update) {
-            <app-empty-state
-              icon="block"
-              title="Access denied"
-              message="You don't have permission to edit records of this type."
-              alertType="error">
-            </app-empty-state>
+            @if (!auth.authenticated()) {
+              <app-empty-state
+                icon="lock"
+                title="Sign in to edit records"
+                message="Log in to access this feature."
+                alertType="info"
+                [showLoginButton]="true">
+              </app-empty-state>
+            } @else {
+              <app-empty-state
+                icon="block"
+                title="Access denied"
+                message="You don't have permission to edit records of this type."
+                alertType="error">
+              </app-empty-state>
+            }
           } @else {
             <app-empty-state
               icon="error"

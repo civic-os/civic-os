@@ -17,6 +17,7 @@
 
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap } from 'rxjs';
 import {
   SchemaEntityProperty,
@@ -132,6 +133,13 @@ export class DetailPage {
   seriesMembership = signal<SeriesMembership | undefined>(undefined);
   showDeleteScopeDialog = signal(false);
 
+  // Cascading refresh trigger for child components (notes, M:M editors)
+  // Increment this signal to trigger refresh in components that watch it
+  refreshCounter = signal(0);
+
+  // Observable form of refreshCounter for use in RxJS pipelines
+  private refreshCounter$ = toObservable(this.refreshCounter);
+
   public entityKey?: string;
   public entityId?: string;
   public entity$: Observable<SchemaEntityTable | undefined> = this.route.params.pipe(mergeMap(p => {
@@ -174,17 +182,60 @@ export class DetailPage {
   protected readonly isStaticText = isStaticText;
   protected readonly isProperty = isProperty;
 
-  public data$: Observable<any> = combineLatest([this.properties$, this.refreshTrigger$.pipe(startWith(null))]).pipe(
+  /**
+   * Fetch entity actions for the current entity.
+   * Actions are filtered by permission (can_execute) on the server side.
+   * NOTE: Defined before data$ because data$ needs to extract condition fields from actions.
+   */
+  public actions$: Observable<EntityAction[]> = this.entity$.pipe(
+    switchMap(entity => entity ? this.schema.getEntityActions(entity.table_name) : of([]))
+  );
+
+  /**
+   * Extracts field names from action visibility and enabled conditions.
+   * These fields need to be fetched even if hidden from display, so that
+   * condition evaluation works correctly.
+   */
+  private extractConditionFields(actions: EntityAction[]): string[] {
+    const fields = new Set<string>();
+    for (const action of actions) {
+      if (action.visibility_condition?.field) {
+        fields.add(action.visibility_condition.field);
+      }
+      if (action.enabled_condition?.field) {
+        fields.add(action.enabled_condition.field);
+      }
+    }
+    return Array.from(fields);
+  }
+
+  public data$: Observable<any> = combineLatest([
+    this.properties$,
+    this.actions$,
+    this.refreshTrigger$.pipe(startWith(null))
+  ]).pipe(
     // Batch synchronous emissions during initialization
     debounceTime(0),
-    tap(([props, trigger]) => {
-      console.log('[DetailPage] data$ pipeline triggered', { propsCount: props?.length, triggerValue: trigger, dataLoading: this.dataLoading() });
+    tap(([props, actions, trigger]) => {
+      console.log('[DetailPage] data$ pipeline triggered', { propsCount: props?.length, actionsCount: actions?.length, triggerValue: trigger, dataLoading: this.dataLoading() });
       this.dataLoading.set(true);
     }),
-    mergeMap(([props, _]) => {
+    mergeMap(([props, actions, _]) => {
     if(props && props.length > 0 && this.entityKey) {
+      // Build columns from display properties
       let columns = props
         .map(x => SchemaService.propertyToSelectString(x));
+
+      // Extract fields from action conditions (visibility_condition and enabled_condition)
+      // These fields may be hidden from display but needed for condition evaluation
+      const conditionFields = this.extractConditionFields(actions);
+      const existingColumns = new Set(props.map(p => p.column_name));
+      conditionFields.forEach(field => {
+        if (!existingColumns.has(field)) {
+          columns.push(field);
+        }
+      });
+
       return this.data.getData({key: this.entityKey, fields: columns, entityId: this.entityId})
         .pipe(
           tap((results) => {
@@ -302,14 +353,8 @@ export class DetailPage {
   // =========================================================================
   // ENTITY ACTIONS (v0.18.0)
   // =========================================================================
-
-  /**
-   * Fetch entity actions for the current entity.
-   * Actions are filtered by permission (can_execute) on the server side.
-   */
-  public actions$: Observable<EntityAction[]> = this.entity$.pipe(
-    switchMap(entity => entity ? this.schema.getEntityActions(entity.table_name) : of([]))
-  );
+  // NOTE: actions$ is defined earlier (before data$) because data$ needs
+  // to extract condition fields from actions for proper data fetching.
 
   /**
    * Filter actions by permission and visibility condition.
@@ -410,16 +455,26 @@ export class DetailPage {
   public inverseRelationships$: Observable<InverseRelationshipData[]> =
     combineLatest([
       this.entity$,
-      this.data$
+      this.data$,
+      this.refreshCounter$
     ]).pipe(
       // Batch synchronous emissions during initialization
       debounceTime(0),
-      // Skip emissions when entity or data ID haven't changed
+      // Skip emissions when entity, data ID, AND refresh counter haven't changed
+      // Including refreshCounter ensures manual refresh triggers bypass this check
       distinctUntilChanged((prev, curr) => {
         return prev[0]?.table_name === curr[0]?.table_name &&
-               prev[1]?.id === curr[1]?.id;
+               prev[1]?.id === curr[1]?.id &&
+               prev[2] === curr[2];  // Compare refresh counter
       }),
-      mergeMap(([entity, data]) => {
+      tap(([entity, data, refreshCount]) => {
+        console.log('[DetailPage] inverseRelationships$ triggered', {
+          tableName: entity?.table_name,
+          dataId: data?.id,
+          refreshCount
+        });
+      }),
+      mergeMap(([entity, data, _refreshCount]) => {
         if (!entity || !data) return of([]);
 
         // Get inverse relationship metadata
@@ -457,14 +512,24 @@ export class DetailPage {
     combineLatest([
       this.entity$,
       this.data$,
-      this.schema.getEntities()
+      this.schema.getEntities(),
+      this.refreshCounter$
     ]).pipe(
       debounceTime(0),
+      // Skip emissions when entity, data ID, AND refresh counter haven't changed
       distinctUntilChanged((prev, curr) => {
         return prev[0]?.table_name === curr[0]?.table_name &&
-               prev[1]?.id === curr[1]?.id;
+               prev[1]?.id === curr[1]?.id &&
+               prev[3] === curr[3];  // Compare refresh counter (index 3)
       }),
-      mergeMap(([entity, data, allEntities]) => {
+      tap(([entity, data, _allEntities, refreshCount]) => {
+        console.log('[DetailPage] calendarSections$ triggered', {
+          tableName: entity?.table_name,
+          dataId: data?.id,
+          refreshCount
+        });
+      }),
+      mergeMap(([entity, data, allEntities, _refreshCount]) => {
         if (!entity || !data) return of([]);
 
         // Get inverse relationship metadata
@@ -535,8 +600,12 @@ export class DetailPage {
 
   // Refresh data after M:M changes
   refreshData() {
-    console.log('[DetailPage] refreshData() called - emitting refreshTrigger');
+    const newCount = this.refreshCounter() + 1;
+    console.log('[DetailPage] refreshData() called - emitting refreshTrigger, incrementing refreshCounter to', newCount);
     this.refreshTrigger$.next();
+
+    // Cascade to child components (notes, M:M editors) via signal
+    this.refreshCounter.set(newCount);
   }
 
   // Delete modal methods

@@ -14,7 +14,7 @@
           }
         </h1>
       </div>
-      @if (createForm) {
+      @if (createForm && entity.insert) {
         <form [formGroup]="createForm" (ngSubmit)="submitForm($event)">
           @if (showValidationError) {
             <div role="alert" class="alert alert-error mb-4">
@@ -45,12 +45,22 @@
       } @else {
         <!-- Empty state when form is not available -->
         <div class="p-8">
-          <app-empty-state
-            icon="block"
-            title="Access denied"
-            message="You don't have permission to create records of this type."
-            alertType="error">
-          </app-empty-state>
+          @if (!auth.authenticated()) {
+            <app-empty-state
+              icon="lock"
+              title="Sign in to create records"
+              message="Log in to access this feature."
+              alertType="info"
+              [showLoginButton]="true">
+            </app-empty-state>
+          } @else {
+            <app-empty-state
+              icon="block"
+              title="Access denied"
+              message="You don't have permission to create records of this type."
+              alertType="error">
+            </app-empty-state>
+          }
         </div>
       }
     }
