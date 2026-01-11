@@ -1522,6 +1522,7 @@ Framework-provided status and workflow system. Instead of creating separate stat
 - `is_initial` flag for default status on new records
 - `is_terminal` flag for workflow end states
 - `sort_order` for dropdown ordering
+- `status_key` for stable programmatic references (v0.25.0+)
 - Cache invalidation via `schema_cache_versions`
 - Frontend auto-detects via `status_entity_type` in `metadata.properties`
 
@@ -1570,6 +1571,7 @@ WHERE table_name = 'issues' AND column_name = 'status_id';
 |--------|------|---------|-------------|
 | `id` | SERIAL | auto | Primary key |
 | `entity_type` | NAME | required | FK to status_types |
+| `status_key` | VARCHAR(50) | auto-generated | Stable snake_case identifier for code references (v0.25.0+) |
 | `display_name` | VARCHAR(100) | required | Status label shown in UI |
 | `color` | hex_color | '#6B7280' | Badge color (#RRGGBB) |
 | `sort_order` | INT | 100 | Dropdown ordering |
@@ -1582,6 +1584,41 @@ WHERE table_name = 'issues' AND column_name = 'status_id';
 
 ```sql
 status_id INT NOT NULL DEFAULT public.get_initial_status('issue')
+```
+
+**`get_status_id(entity_type, status_key)`** (v0.25.0+) - Returns the status ID for a given entity type and status key. Use this in migrations and RPC functions instead of display_name lookups:
+
+```sql
+-- Instead of fragile display_name lookup:
+-- UPDATE issues SET status_id = (SELECT id FROM metadata.statuses WHERE display_name = 'Pending')
+
+-- Use stable status_key lookup:
+UPDATE issues SET status_id = public.get_status_id('issue', 'pending');
+```
+
+#### Status Key (v0.25.0+)
+
+The `status_key` column provides a stable, programmatic identifier for statuses that won't break when display names change. It's auto-generated from `display_name` on INSERT (converted to snake_case: "In Progress" → "in_progress").
+
+**Benefits**:
+- Display names can be updated without breaking code
+- No hard-coded IDs that differ between environments
+- Clear, readable identifiers in migrations and RPC functions
+
+**Usage**:
+```sql
+-- When inserting, status_key is auto-generated if not provided:
+INSERT INTO metadata.statuses (entity_type, display_name) VALUES ('issue', 'In Progress');
+-- status_key automatically becomes 'in_progress'
+
+-- Or provide explicitly:
+INSERT INTO metadata.statuses (entity_type, display_name, status_key)
+VALUES ('issue', 'In Progress', 'in_progress');
+
+-- In RPC functions, use get_status_id() helper:
+IF current_status_id = get_status_id('reservation', 'pending') THEN
+  UPDATE reservations SET status_id = get_status_id('reservation', 'approved');
+END IF;
 ```
 
 See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design documentation and `examples/community-center/` for working example.

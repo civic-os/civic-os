@@ -2,7 +2,9 @@
 
 **Date:** 2025-10-30
 **Version:** v0.8.2
-**Status:** Experimental code in place, awaiting testing
+**Status:** Resolved - fixes implemented and working
+
+> **Note**: This is a historical design document. Line number references are from v0.8.2 and may not match current code. Code has been refactored since this document was written.
 
 ## Problem Statement
 

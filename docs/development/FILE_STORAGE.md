@@ -87,14 +87,11 @@ VALUES ('issues', 'photo', 'Photo', 'Upload a photo of the issue', 50);
 
 ## S3 Configuration
 
-**Current**: Hardcoded to `http://localhost:9000/civic-os-files/` for MinIO development.
+S3 bucket and endpoint are configured via runtime environment variables. Components use `getS3Config()` from `src/app/config/runtime.ts` which reads:
+- `S3_ENDPOINT` - S3 endpoint URL (default: `http://localhost:9000` for MinIO development)
+- `S3_BUCKET` - Bucket name (default: `civic-os-files`)
 
-**Production TODO**: Use environment configuration with CloudFront or S3 bucket URLs.
-
-**Files to update**:
-- `FileUploadService.getS3Url()`
-- `DisplayPropertyComponent.getS3Url()`
-- `PdfViewerComponent.getS3Url()`
+For production deployment with CloudFront or AWS S3, set these environment variables in your deployment configuration. See `docs/deployment/PRODUCTION.md` for details.
 
 ## Services
 

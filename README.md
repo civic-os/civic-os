@@ -21,7 +21,7 @@ A meta-application framework that automatically generates CRUD (Create, Read, Up
 - **Authentication**: Keycloak (OAuth2/OIDC)
 - **Styling**: Tailwind CSS + DaisyUI (with theme support)
 - **Maps**: Leaflet.js for GeoPoint fields
-- **Diagrams**: Mermaid.js for ERD visualization
+- **Diagrams**: JointJS for interactive ERD visualization
 
 ## Prerequisites
 
@@ -232,6 +232,7 @@ Civic OS stands on the shoulders of giants. We're grateful to the following open
 
 ### Documentation & Visualization
 
+- **[JointJS](https://www.jointjs.com/)** - Interactive diagramming library for ERD visualization
 - **[Mermaid](https://mermaid.js.org/)** - Diagramming and charting tool using markdown-like syntax
 - **[ngx-markdown](https://github.com/jfcere/ngx-markdown)** - Angular markdown component with Mermaid support
 
