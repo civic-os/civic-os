@@ -61,7 +61,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 })
 export class CosModalComponent implements AfterViewInit, OnDestroy {
   /** Whether the modal is open */
-  isOpen = input.required<boolean>();
+  isOpen = input<boolean>(false);
 
   /** Modal size variant */
   size = input<'sm' | 'md' | 'lg' | 'xl' | 'full'>('md');

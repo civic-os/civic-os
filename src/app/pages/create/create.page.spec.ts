@@ -213,12 +213,8 @@ describe('CreatePage', () => {
       mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
       mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
 
-      // Initialize component and dialogs FIRST
+      // Initialize component
       fixture.detectChanges();
-
-      // THEN spy on the dialog components
-      spyOn(component.successDialog, 'open');
-      spyOn(component.errorDialog, 'open');
     });
 
     it('should call createData with form values', (done) => {
@@ -236,7 +232,7 @@ describe('CreatePage', () => {
       });
     });
 
-    it('should open success dialog on successful create', (done) => {
+    it('should show success modal on successful create', (done) => {
       mockDataService.createData.and.returnValue(of({ success: true, body: { id: 1 } }));
 
       component.properties$.subscribe(() => {
@@ -245,14 +241,14 @@ describe('CreatePage', () => {
 
         // Wait for async observable to complete
         setTimeout(() => {
-          expect(component.successDialog.open).toHaveBeenCalled();
-          expect(component.errorDialog.open).not.toHaveBeenCalled();
+          expect(component.showSuccessModal()).toBeTrue();
+          expect(component.showErrorModal()).toBeFalse();
           done();
         }, 10);
       });
     });
 
-    it('should open error dialog on failed create', (done) => {
+    it('should show error modal on failed create', (done) => {
       const error = {
         httpCode: 400,
         message: 'Database error',
@@ -268,8 +264,9 @@ describe('CreatePage', () => {
 
         // Wait for async observable to complete
         setTimeout(() => {
-          expect(component.errorDialog.open).toHaveBeenCalledWith(error);
-          expect(component.successDialog.open).not.toHaveBeenCalled();
+          expect(component.showErrorModal()).toBeTrue();
+          expect(component.currentError()).toEqual(error);
+          expect(component.showSuccessModal()).toBeFalse();
           done();
         }, 10);
       });
@@ -483,10 +480,6 @@ describe('CreatePage', () => {
       (component as any).keycloak = mockKeycloak;
 
       fixture.detectChanges();
-
-      // Spy on dialogs after fixture init
-      spyOn(component.successDialog, 'open');
-      spyOn(component.errorDialog, 'open');
     });
 
     it('should call updateToken before form submission', (done) => {
@@ -515,14 +508,14 @@ describe('CreatePage', () => {
 
         setTimeout(() => {
           expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
-          expect(component.successDialog.open).toHaveBeenCalled();
-          expect(component.errorDialog.open).not.toHaveBeenCalled();
+          expect(component.showSuccessModal()).toBeTrue();
+          expect(component.showErrorModal()).toBeFalse();
           done();
         }, 10);
       });
     });
 
-    it('should show 401 error dialog when token refresh fails', (done) => {
+    it('should show 401 error modal when token refresh fails', (done) => {
       mockKeycloak.updateToken.and.returnValue(Promise.reject(new Error('Token refresh failed')));
 
       component.properties$.subscribe(() => {
@@ -530,7 +523,8 @@ describe('CreatePage', () => {
         component.submitForm({});
 
         setTimeout(() => {
-          expect(component.errorDialog.open).toHaveBeenCalledWith(
+          expect(component.showErrorModal()).toBeTrue();
+          expect(component.currentError()).toEqual(
             jasmine.objectContaining({
               httpCode: 401,
               message: 'Session expired',
@@ -539,7 +533,7 @@ describe('CreatePage', () => {
             })
           );
           expect(mockDataService.createData).not.toHaveBeenCalled();
-          expect(component.successDialog.open).not.toHaveBeenCalled();
+          expect(component.showSuccessModal()).toBeFalse();
           done();
         }, 10);
       });

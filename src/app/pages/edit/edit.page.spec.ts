@@ -242,12 +242,8 @@ describe('EditPage', () => {
       mockSchemaService.getPropsForEdit.and.returnValue(of([MOCK_PROPERTIES.textShort]));
       mockDataService.getData.and.returnValue(of([{ id: 42, name: 'Old Name' }] as any));
 
-      // Initialize component and dialogs FIRST
+      // Initialize component
       fixture.detectChanges();
-
-      // THEN spy on the dialog components
-      spyOn(component.successDialog, 'open');
-      spyOn(component.errorDialog, 'open');
     });
 
     it('should call editData with form values', (done) => {
@@ -268,21 +264,21 @@ describe('EditPage', () => {
       });
     });
 
-    it('should open success dialog on successful update', (done) => {
+    it('should show success modal on successful update', (done) => {
       mockDataService.editData.and.returnValue(of({ success: true }));
 
       component.data$.subscribe(() => {
         component.submitForm({});
 
         setTimeout(() => {
-          expect(component.successDialog.open).toHaveBeenCalled();
-          expect(component.errorDialog.open).not.toHaveBeenCalled();
+          expect(component.showSuccessModal()).toBeTrue();
+          expect(component.showErrorModal()).toBeFalse();
           done();
         }, 10);
       });
     });
 
-    it('should open error dialog on failed update', (done) => {
+    it('should show error modal on failed update', (done) => {
       const error = {
         httpCode: 400,
         message: 'Update failed',
@@ -296,8 +292,9 @@ describe('EditPage', () => {
         component.submitForm({});
 
         setTimeout(() => {
-          expect(component.errorDialog.open).toHaveBeenCalledWith(error);
-          expect(component.successDialog.open).not.toHaveBeenCalled();
+          expect(component.showErrorModal()).toBeTrue();
+          expect(component.currentError()).toEqual(error);
+          expect(component.showSuccessModal()).toBeFalse();
           done();
         }, 10);
       });
@@ -678,9 +675,6 @@ describe('EditPage', () => {
         fixture.detectChanges();
 
         component.data$.subscribe(() => {
-          spyOn(component.successDialog, 'open');
-          spyOn(component.errorDialog, 'open');
-
           // Form receives '2025-01-15T10:30' from transformValueForControl
           // User edits to '2025-01-15T11:45' (naive time, no timezone)
           component.editForm?.patchValue({ created_at: '2025-01-15T11:45' });
@@ -710,9 +704,6 @@ describe('EditPage', () => {
         fixture.detectChanges();
 
         component.data$.subscribe(() => {
-          spyOn(component.successDialog, 'open');
-          spyOn(component.errorDialog, 'open');
-
           // User enters time in their local timezone (e.g., "5:30 PM" shows as "17:30")
           const localTimeInput = '2025-01-15T17:30';
           component.editForm?.patchValue({ updated_at: localTimeInput });
@@ -746,9 +737,6 @@ describe('EditPage', () => {
         fixture.detectChanges();
 
         component.data$.subscribe(() => {
-          spyOn(component.successDialog, 'open');
-          spyOn(component.errorDialog, 'open');
-
           // Form receives 100 (number) from transformValueForControl
           // User edits to 250.75
           component.editForm?.patchValue({ amount: 250.75 });
@@ -786,9 +774,6 @@ describe('EditPage', () => {
         fixture.detectChanges();
 
         component.data$.subscribe(() => {
-          spyOn(component.successDialog, 'open');
-          spyOn(component.errorDialog, 'open');
-
           const dateTimeInput = '2025-01-20T14:30'; // Naive time
           const dateTimeLocalInput = '2025-01-20T18:00'; // Local time
 
@@ -844,9 +829,6 @@ describe('EditPage', () => {
       mockDataService.editData.and.returnValue(of({ success: true }));
 
       component.data$.subscribe(() => {
-        spyOn(component.successDialog, 'open');
-        spyOn(component.errorDialog, 'open');
-
         component.submitForm({});
 
         setTimeout(() => {
@@ -862,9 +844,6 @@ describe('EditPage', () => {
       mockDataService.editData.and.returnValue(of({ success: true }));
 
       component.data$.subscribe(() => {
-        spyOn(component.successDialog, 'open');
-        spyOn(component.errorDialog, 'open');
-
         component.editForm?.patchValue({ name: 'Updated' });
         component.submitForm({});
 
@@ -874,23 +853,21 @@ describe('EditPage', () => {
             '42',
             { name: 'Updated' }
           );
-          expect(component.successDialog.open).toHaveBeenCalled();
+          expect(component.showSuccessModal()).toBeTrue();
           done();
         }, 10);
       });
     });
 
-    it('should show 401 error dialog when token refresh fails', (done) => {
+    it('should show 401 error modal when token refresh fails', (done) => {
       mockKeycloak.updateToken.and.returnValue(Promise.reject(new Error('Token refresh failed')));
 
       component.data$.subscribe(() => {
-        spyOn(component.errorDialog, 'open');
-        spyOn(component.successDialog, 'open');
-
         component.submitForm({});
 
         setTimeout(() => {
-          expect(component.errorDialog.open).toHaveBeenCalledWith(
+          expect(component.showErrorModal()).toBeTrue();
+          expect(component.currentError()).toEqual(
             jasmine.objectContaining({
               httpCode: 401,
               message: 'Session expired',
@@ -899,7 +876,7 @@ describe('EditPage', () => {
             })
           );
           expect(mockDataService.editData).not.toHaveBeenCalled();
-          expect(component.successDialog.open).not.toHaveBeenCalled();
+          expect(component.showSuccessModal()).toBeFalse();
           done();
         }, 10);
       });
