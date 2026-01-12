@@ -114,6 +114,37 @@
   margin: 0 0.25rem;
 }
 
+/* Mobile-responsive calendar toolbar */
+@media (max-width: 480px) {
+  :host ::ng-deep .fc-header-toolbar {
+    flex-wrap: wrap !important;
+    gap: 0.5rem;
+    justify-content: center !important;
+  }
+
+  :host ::ng-deep .fc-toolbar-chunk {
+    margin: 0.25rem;
+  }
+
+  /* Stack title on its own row */
+  :host ::ng-deep .fc-toolbar-chunk:nth-child(2) {
+    order: -1;
+    flex-basis: 100%;
+    text-align: center;
+  }
+
+  /* Smaller buttons on mobile */
+  :host ::ng-deep .fc .fc-button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Reduce title size */
+  :host ::ng-deep .fc-toolbar-title {
+    font-size: 1.125rem !important;
+  }
+}
+
 :host ::ng-deep .fc-scrollgrid {
   margin-top: 0 !important; /* Remove extra top margin */
 }
