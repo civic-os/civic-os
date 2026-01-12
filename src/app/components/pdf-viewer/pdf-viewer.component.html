@@ -1,43 +1,35 @@
-<dialog #pdfDialog class="modal">
-  <div class="modal-box max-w-6xl h-[85vh] p-4 flex flex-col">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="font-bold text-lg">{{ currentPdf()?.file_name }}</h3>
-      <button (click)="close()" class="btn btn-sm btn-circle btn-ghost">✕</button>
-    </div>
-
-    <!-- PDF Container (iframe for browser-native rendering) -->
-    <div class="flex-1 overflow-hidden rounded-lg border">
-      @if (currentPdf()) {
-        <iframe
-          [src]="getSanitizedPdfUrl()"
-          class="w-full h-full"
-          type="application/pdf">
-          <!-- Fallback for browsers without PDF support -->
-          <div class="p-8 text-center">
-            <p class="mb-4">Your browser doesn't support embedded PDF viewing.</p>
-            <button (click)="downloadPdf()" class="btn btn-primary">
-              Download PDF
-            </button>
-          </div>
-        </iframe>
-      }
-    </div>
-
-    <!-- Actions -->
-    <div class="modal-action">
-      <button (click)="openFullScreen()" class="btn">
-        Open in New Tab
-      </button>
-      <button (click)="downloadPdf()" class="btn btn-primary">
-        Download
-      </button>
-      <button (click)="close()" class="btn">Close</button>
-    </div>
+<cos-modal [isOpen]="isOpen()" (closed)="close()" size="xl">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="font-bold text-lg">{{ currentPdf()?.file_name }}</h3>
   </div>
 
-  <!-- Backdrop -->
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+  <!-- PDF Container (iframe for browser-native rendering) -->
+  <div class="h-[60vh] overflow-hidden rounded-lg border">
+    @if (currentPdf()) {
+      <iframe
+        [src]="getSanitizedPdfUrl()"
+        class="w-full h-full"
+        type="application/pdf">
+        <!-- Fallback for browsers without PDF support -->
+        <div class="p-8 text-center">
+          <p class="mb-4">Your browser doesn't support embedded PDF viewing.</p>
+          <button (click)="downloadPdf()" class="btn btn-primary">
+            Download PDF
+          </button>
+        </div>
+      </iframe>
+    }
+  </div>
+
+  <!-- Actions -->
+  <div class="cos-modal-action">
+    <button (click)="openFullScreen()" class="btn">
+      Open in New Tab
+    </button>
+    <button (click)="downloadPdf()" class="btn btn-primary">
+      Download
+    </button>
+    <button (click)="close()" class="btn">Close</button>
+  </div>
+</cos-modal>

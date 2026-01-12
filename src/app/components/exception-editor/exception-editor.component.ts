@@ -19,6 +19,7 @@ import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SeriesEditScope, SeriesMembership } from '../../interfaces/entity';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
  * Result of the exception editor modal.
@@ -50,153 +51,148 @@ export interface ExceptionEditorResult {
 @Component({
   selector: 'app-exception-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CosModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (isOpen) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-md">
-          <h3 class="font-bold text-lg mb-4">
-            @if (operation === 'edit') {
-              Edit Recurring Event
-            } @else if (operation === 'delete') {
-              Delete Recurring Event
-            } @else {
-              Recurring Event
-            }
-          </h3>
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="sm">
+      <h3 class="font-bold text-lg mb-4">
+        @if (operation === 'edit') {
+          Edit Recurring Event
+        } @else if (operation === 'delete') {
+          Delete Recurring Event
+        } @else {
+          Recurring Event
+        }
+      </h3>
 
-          @if (membership) {
-            <div class="mb-4 p-3 bg-base-200 rounded-lg">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-info">repeat</span>
-                <span class="font-medium">{{ membership.group_name }}</span>
-              </div>
-              @if (membership.occurrence_date) {
-                <p class="text-sm text-base-content/70 mt-1">
-                  Occurrence: {{ formatDate(membership.occurrence_date) }}
-                </p>
-              }
-            </div>
-          }
-
-          <p class="mb-4">
-            @if (operation === 'edit') {
-              How do you want to apply this change?
-            } @else if (operation === 'delete') {
-              What do you want to delete?
-            }
-          </p>
-
-          <div class="space-y-3">
-            <!-- This Only -->
-            <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
-                   [class.border-primary]="selectedScope() === 'this_only'"
-                   [class.bg-primary/5]="selectedScope() === 'this_only'">
-              <input
-                type="radio"
-                class="radio radio-primary mt-1"
-                name="scope"
-                value="this_only"
-                [checked]="selectedScope() === 'this_only'"
-                (change)="selectScope('this_only')"
-              />
-              <div>
-                <span class="font-medium block">This occurrence only</span>
-                <span class="text-sm text-base-content/70">
-                  @if (operation === 'edit') {
-                    Changes will only affect this single event
-                  } @else {
-                    Only this occurrence will be deleted
-                  }
-                </span>
-              </div>
-            </label>
-
-            <!-- This and Future -->
-            <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
-                   [class.border-primary]="selectedScope() === 'this_and_future'"
-                   [class.bg-primary/5]="selectedScope() === 'this_and_future'">
-              <input
-                type="radio"
-                class="radio radio-primary mt-1"
-                name="scope"
-                value="this_and_future"
-                [checked]="selectedScope() === 'this_and_future'"
-                (change)="selectScope('this_and_future')"
-              />
-              <div>
-                <span class="font-medium block">This and future occurrences</span>
-                <span class="text-sm text-base-content/70">
-                  @if (operation === 'edit') {
-                    Changes will apply to this and all future events
-                  } @else {
-                    This and all future occurrences will be deleted
-                  }
-                </span>
-              </div>
-            </label>
-
-            <!-- All -->
-            <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
-                   [class.border-primary]="selectedScope() === 'all'"
-                   [class.bg-primary/5]="selectedScope() === 'all'">
-              <input
-                type="radio"
-                class="radio radio-primary mt-1"
-                name="scope"
-                value="all"
-                [checked]="selectedScope() === 'all'"
-                (change)="selectScope('all')"
-              />
-              <div>
-                <span class="font-medium block">All occurrences</span>
-                <span class="text-sm text-base-content/70">
-                  @if (operation === 'edit') {
-                    Changes will apply to all events in this series
-                  } @else {
-                    The entire recurring series will be deleted
-                  }
-                </span>
-              </div>
-            </label>
+      @if (membership) {
+        <div class="mb-4 p-3 bg-base-200 rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-info">repeat</span>
+            <span class="font-medium">{{ membership.group_name }}</span>
           </div>
-
-          <!-- Reason (for delete) -->
-          @if (operation === 'delete' && selectedScope() === 'this_only') {
-            <div class="form-control mt-4">
-              <label class="label">
-                <span class="label-text">Reason (optional)</span>
-              </label>
-              <textarea
-                class="textarea textarea-bordered"
-                rows="2"
-                placeholder="Why is this occurrence being cancelled?"
-                [ngModel]="reason()"
-                (ngModelChange)="reason.set($event)"
-              ></textarea>
-            </div>
+          @if (membership.occurrence_date) {
+            <p class="text-sm text-base-content/70 mt-1">
+              Occurrence: {{ formatDate(membership.occurrence_date) }}
+            </p>
           }
-
-          <div class="modal-action">
-            <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
-            <button
-              class="btn"
-              [class.btn-error]="operation === 'delete'"
-              [class.btn-primary]="operation !== 'delete'"
-              (click)="onConfirm()"
-            >
-              @if (operation === 'delete') {
-                Delete
-              } @else {
-                Apply Changes
-              }
-            </button>
-          </div>
         </div>
-        <div class="modal-backdrop" (click)="onCancel()"></div>
+      }
+
+      <p class="mb-4">
+        @if (operation === 'edit') {
+          How do you want to apply this change?
+        } @else if (operation === 'delete') {
+          What do you want to delete?
+        }
+      </p>
+
+      <div class="space-y-3">
+        <!-- This Only -->
+        <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
+               [class.border-primary]="selectedScope() === 'this_only'"
+               [class.bg-primary/5]="selectedScope() === 'this_only'">
+          <input
+            type="radio"
+            class="radio radio-primary mt-1"
+            name="scope"
+            value="this_only"
+            [checked]="selectedScope() === 'this_only'"
+            (change)="selectScope('this_only')"
+          />
+          <div>
+            <span class="font-medium block">This occurrence only</span>
+            <span class="text-sm text-base-content/70">
+              @if (operation === 'edit') {
+                Changes will only affect this single event
+              } @else {
+                Only this occurrence will be deleted
+              }
+            </span>
+          </div>
+        </label>
+
+        <!-- This and Future -->
+        <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
+               [class.border-primary]="selectedScope() === 'this_and_future'"
+               [class.bg-primary/5]="selectedScope() === 'this_and_future'">
+          <input
+            type="radio"
+            class="radio radio-primary mt-1"
+            name="scope"
+            value="this_and_future"
+            [checked]="selectedScope() === 'this_and_future'"
+            (change)="selectScope('this_and_future')"
+          />
+          <div>
+            <span class="font-medium block">This and future occurrences</span>
+            <span class="text-sm text-base-content/70">
+              @if (operation === 'edit') {
+                Changes will apply to this and all future events
+              } @else {
+                This and all future occurrences will be deleted
+              }
+            </span>
+          </div>
+        </label>
+
+        <!-- All -->
+        <label class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
+               [class.border-primary]="selectedScope() === 'all'"
+               [class.bg-primary/5]="selectedScope() === 'all'">
+          <input
+            type="radio"
+            class="radio radio-primary mt-1"
+            name="scope"
+            value="all"
+            [checked]="selectedScope() === 'all'"
+            (change)="selectScope('all')"
+          />
+          <div>
+            <span class="font-medium block">All occurrences</span>
+            <span class="text-sm text-base-content/70">
+              @if (operation === 'edit') {
+                Changes will apply to all events in this series
+              } @else {
+                The entire recurring series will be deleted
+              }
+            </span>
+          </div>
+        </label>
       </div>
-    }
+
+      <!-- Reason (for delete) -->
+      @if (operation === 'delete' && selectedScope() === 'this_only') {
+        <div class="form-control mt-4">
+          <label class="label">
+            <span class="label-text">Reason (optional)</span>
+          </label>
+          <textarea
+            class="textarea textarea-bordered"
+            rows="2"
+            placeholder="Why is this occurrence being cancelled?"
+            [ngModel]="reason()"
+            (ngModelChange)="reason.set($event)"
+          ></textarea>
+        </div>
+      }
+
+      <div class="cos-modal-action">
+        <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
+        <button
+          class="btn"
+          [class.btn-error]="operation === 'delete'"
+          [class.btn-primary]="operation !== 'delete'"
+          (click)="onConfirm()"
+        >
+          @if (operation === 'delete') {
+            Delete
+          } @else {
+            Apply Changes
+          }
+        </button>
+      </div>
+    </cos-modal>
   `
 })
 export class ExceptionEditorComponent {

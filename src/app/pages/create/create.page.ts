@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { Observable, mergeMap, of, tap, map, take } from 'rxjs';
 import {
   SchemaEntityProperty,
@@ -38,7 +38,8 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
-import { DialogComponent } from "../../components/dialog/dialog.component";
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { ApiError } from '../../interfaces/api';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
 @Component({
@@ -52,7 +53,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     StaticTextComponent,
     CommonModule,
     ReactiveFormsModule,
-    DialogComponent,
+    CosModalComponent,
     RouterModule
 ]
 })
@@ -144,8 +145,11 @@ export class CreatePage {
   public createForm?: FormGroup;
   public showValidationError = false;
   private currentProps: SchemaEntityProperty[] = [];
-  @ViewChild('successDialog') successDialog!: DialogComponent;
-  @ViewChild('errorDialog') errorDialog!: DialogComponent;
+
+  // Signal-based modal state (replaces ViewChild DialogComponent)
+  showSuccessModal = signal(false);
+  showErrorModal = signal(false);
+  currentError = signal<ApiError | undefined>(undefined);
 
   // Store the created record ID for navigation
   private createdRecordId?: number | string;
@@ -200,11 +204,7 @@ export class CreatePage {
                     this.createdRecordId = result.body[0].id;
                   }
 
-                  if (this.successDialog) {
-                    this.successDialog.open();
-                  } else {
-                    console.error('Success dialog not available');
-                  }
+                  this.showSuccessModal.set(true);
                 } else {
                   console.error('[CREATE SUBMIT] API returned error:', result.error);
                   console.error('[CREATE SUBMIT] Error details:', {
@@ -214,36 +214,31 @@ export class CreatePage {
                     hint: result.error?.hint,
                     humanMessage: result.error?.humanMessage
                   });
-                  if (this.errorDialog) {
-                    this.errorDialog.open(result.error);
-                  } else {
-                    console.error('Error dialog not available', result.error);
-                  }
+                  this.currentError.set(result.error);
+                  this.showErrorModal.set(true);
                 }
               },
               error: (err) => {
                 console.error('Unexpected error during create:', err);
-                if (this.errorDialog) {
-                  this.errorDialog.open({
-                    httpCode: 500,
-                    message: 'An unexpected error occurred',
-                    humanMessage: 'System Error'
-                  });
-                }
+                this.currentError.set({
+                  httpCode: 500,
+                  message: 'An unexpected error occurred',
+                  humanMessage: 'System Error'
+                });
+                this.showErrorModal.set(true);
               }
             });
         }
       })
       .catch((error) => {
         // Token refresh failed - session expired
-        if (this.errorDialog) {
-          this.errorDialog.open({
-            httpCode: 401,
-            message: "Session expired",
-            humanMessage: "Session Expired",
-            hint: "Your login session has expired. Please refresh the page to log in again."
-          });
-        }
+        this.currentError.set({
+          httpCode: 401,
+          message: "Session expired",
+          humanMessage: "Session Expired",
+          hint: "Your login session has expired. Please refresh the page to log in again."
+        });
+        this.showErrorModal.set(true);
       });
   }
 
@@ -282,6 +277,17 @@ export class CreatePage {
     } else {
       this.router.navigate(['create', this.entityKey]);
     }
+  }
+
+  /** Close success modal */
+  closeSuccessModal(): void {
+    this.showSuccessModal.set(false);
+  }
+
+  /** Close error modal and reset error state */
+  closeErrorModal(): void {
+    this.showErrorModal.set(false);
+    this.currentError.set(undefined);
   }
 
   /**

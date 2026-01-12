@@ -25,6 +25,7 @@ import { SchemaService } from '../../services/schema.service';
 import { AuthService } from '../../services/auth.service';
 import { SeriesGroupDetailComponent } from '../../components/series-group-detail/series-group-detail.component';
 import { CreateSeriesWizardComponent } from '../../components/create-series-wizard/create-series-wizard.component';
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { of, forkJoin } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -46,7 +47,8 @@ import { catchError, map } from 'rxjs/operators';
     CommonModule,
     FormsModule,
     SeriesGroupDetailComponent,
-    CreateSeriesWizardComponent
+    CreateSeriesWizardComponent,
+    CosModalComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -220,28 +222,23 @@ import { catchError, map } from 'rxjs/operators';
     </div>
 
     <!-- Delete Confirmation Modal -->
-    @if (showDeleteModal()) {
-      <div class="modal modal-open">
-        <div class="modal-box">
-          <h3 class="font-bold text-lg">Delete Recurring Series?</h3>
-          <p class="py-4">
-            This will permanently delete the series "{{ groupToDelete()?.display_name }}"
-            and all {{ groupToDelete()?.active_instance_count || 0 }} occurrences.
-            This action cannot be undone.
-          </p>
-          <div class="modal-action">
-            <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
-            <button class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
-              @if (deleting()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              }
-              Delete Series
-            </button>
-          </div>
-        </div>
-        <div class="modal-backdrop" (click)="cancelDelete()"></div>
+    <cos-modal [isOpen]="showDeleteModal()" (closed)="cancelDelete()" size="sm">
+      <h3 class="font-bold text-lg">Delete Recurring Series?</h3>
+      <p class="py-4">
+        This will permanently delete the series "{{ groupToDelete()?.display_name }}"
+        and all {{ groupToDelete()?.active_instance_count || 0 }} occurrences.
+        This action cannot be undone.
+      </p>
+      <div class="cos-modal-action">
+        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
+          @if (deleting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Delete Series
+        </button>
       </div>
-    }
+    </cos-modal>
 
     <!-- Create Series Wizard -->
     <app-create-series-wizard

@@ -34,6 +34,7 @@ import { RecurringService, CreateSeriesParams } from '../../services/recurring.s
 import { SchemaEntityTable, SchemaEntityProperty, ConflictInfo, CreateSeriesResult } from '../../interfaces/entity';
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { catchError, of, forkJoin, map } from 'rxjs';
 import { RRule } from 'rrule';
 
@@ -67,20 +68,19 @@ import { RRule } from 'rrule';
     FormsModule,
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
-    EditPropertyComponent
+    EditPropertyComponent,
+    CosModalComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (isOpen) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-          <!-- Header with Steps -->
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="font-bold text-lg">Create Recurring Series</h3>
-            <button class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="xl" [closeOnBackdrop]="!creating()">
+      <!-- Header with Steps -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-bold text-lg">Create Recurring Series</h3>
+        <button class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
 
           <!-- Step Indicator -->
           <ul class="steps steps-horizontal w-full mb-6 text-xs">
@@ -319,47 +319,44 @@ import { RRule } from 'rrule';
             }
           </div>
 
-          <!-- Footer with Navigation -->
-          <div class="modal-action border-t pt-4 mt-4">
-            <button class="btn btn-ghost" (click)="onCancel()" [disabled]="creating()">
-              Cancel
-            </button>
+      <!-- Footer with Navigation -->
+      <div class="cos-modal-action border-t pt-4 mt-4">
+        <button class="btn btn-ghost" (click)="onCancel()" [disabled]="creating()">
+          Cancel
+        </button>
 
-            <div class="flex-1"></div>
+        <div class="flex-1"></div>
 
-            @if (currentStep() > 1) {
-              <button class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
-                <span class="material-symbols-outlined">chevron_left</span>
-                Back
-              </button>
+        @if (currentStep() > 1) {
+          <button class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
+            <span class="material-symbols-outlined">chevron_left</span>
+            Back
+          </button>
+        }
+
+        @if (currentStep() < 4) {
+          <button
+            class="btn btn-primary"
+            (click)="nextStep()"
+            [disabled]="!canProceed()"
+          >
+            Next
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        } @else {
+          <button
+            class="btn btn-primary"
+            (click)="createSeries()"
+            [disabled]="creating() || loadingPreview() || previewOccurrences().length === 0"
+          >
+            @if (creating()) {
+              <span class="loading loading-spinner loading-sm"></span>
             }
-
-            @if (currentStep() < 4) {
-              <button
-                class="btn btn-primary"
-                (click)="nextStep()"
-                [disabled]="!canProceed()"
-              >
-                Next
-                <span class="material-symbols-outlined">chevron_right</span>
-              </button>
-            } @else {
-              <button
-                class="btn btn-primary"
-                (click)="createSeries()"
-                [disabled]="creating() || loadingPreview() || previewOccurrences().length === 0"
-              >
-                @if (creating()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                }
-                Create Series
-              </button>
-            }
-          </div>
-        </div>
-        <div class="modal-backdrop" (click)="onCancel()"></div>
+            Create Series
+          </button>
+        }
       </div>
-    }
+    </cos-modal>
   `
 })
 export class CreateSeriesWizardComponent implements OnChanges {

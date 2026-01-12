@@ -1,0 +1,93 @@
+/**
+ * Copyright (C) 2023-2025 Civic OS, L3C
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * Custom modal styles that avoid DaisyUI containing block issues.
+ *
+ * Key insight: CSS transforms on ancestors create containing blocks,
+ * breaking percentage-based positioning. This uses flexbox centering
+ * on a fixed full-viewport container - centering is relative to the
+ * container itself, not using affected percentage calculations.
+ */
+
+/* Container - handles backdrop and centering */
+.cos-modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Safe area padding for notched devices */
+  padding: max(1rem, env(safe-area-inset-top))
+           max(1rem, env(safe-area-inset-right))
+           max(1rem, env(safe-area-inset-bottom))
+           max(1rem, env(safe-area-inset-left));
+  /* Animation - start hidden */
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.cos-modal-container.cos-modal-open {
+  opacity: 1;
+}
+
+/* Backdrop - semi-transparent overlay */
+.cos-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: oklch(0% 0 0 / 0.4);
+  cursor: pointer;
+}
+
+/* Modal box - inherits DaisyUI visual styles */
+.cos-modal-box {
+  /* CRITICAL: position: relative, NOT fixed */
+  /* This allows the box to participate in flexbox centering */
+  position: relative;
+  /* DaisyUI theme-aware styles */
+  @apply bg-base-100 text-base-content shadow-xl;
+  border-radius: var(--rounded-box, 0.5rem);
+  padding: 1.5rem;
+  /* Responsive sizing - dvh handles mobile browser chrome */
+  max-height: calc(100dvh - 2rem);
+  width: min(calc(100vw - 2rem), 28rem); /* Default md size: 448px */
+  overflow-x: hidden; /* Prevent horizontal scroll - content must fit */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Stack above backdrop */
+  z-index: 1;
+  /* Animation - start scaled down */
+  transform: scale(0.95);
+  transition: transform 0.15s ease-out;
+}
+
+.cos-modal-container.cos-modal-open .cos-modal-box {
+  transform: scale(1);
+}
+
+/* Size variants */
+.cos-modal-sm {
+  width: min(calc(100vw - 2rem), 20rem); /* 320px */
+}
+
+.cos-modal-lg {
+  width: min(calc(100vw - 2rem), 40rem); /* 640px */
+}
+
+.cos-modal-xl {
+  width: min(calc(100vw - 2rem), 56rem); /* 896px */
+}
+
+.cos-modal-full {
+  width: calc(100vw - 2rem);
+  height: calc(100dvh - 2rem);
+}
+
+/* Action buttons container - matches DaisyUI modal-action pattern */
+:host ::ng-deep .cos-modal-action {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}

@@ -231,46 +231,46 @@
         -->
 
         <!-- Delete Confirmation Modal -->
-        @if (showDeleteModal()) {
-          <div class="modal modal-open">
-            <div class="modal-box">
-              <h3 class="font-bold text-lg mb-4">Delete {{ entity.display_name }}?</h3>
+        <cos-modal
+          [isOpen]="showDeleteModal()"
+          (closed)="closeDeleteModal()"
+          size="sm"
+          [closeOnBackdrop]="!deleteLoading()">
+          <h3 class="font-bold text-lg mb-4">Delete {{ entity.display_name }}?</h3>
 
-              <!-- Error Alert -->
-              @if (deleteError()) {
-                <div class="alert alert-error mb-4">
-                  <span>{{ deleteError() }}</span>
-                </div>
-              }
-
-              <p class="mb-6">
-                Are you sure you want to delete <strong>{{ data.display_name }}</strong>? This action cannot be undone.
-              </p>
-
-              <!-- Actions -->
-              <div class="modal-action">
-                <button
-                  class="btn"
-                  (click)="closeDeleteModal()"
-                  [disabled]="deleteLoading()">
-                  Cancel
-                </button>
-                <button
-                  class="btn btn-error"
-                  (click)="confirmDelete()"
-                  [disabled]="deleteLoading()">
-                  @if (deleteLoading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
-                    Deleting...
-                  } @else {
-                    <span class="material-symbols-outlined">delete</span>
-                    Delete
-                  }
-                </button>
-              </div>
+          <!-- Error Alert -->
+          @if (deleteError()) {
+            <div class="alert alert-error mb-4">
+              <span>{{ deleteError() }}</span>
             </div>
+          }
+
+          <p class="mb-6">
+            Are you sure you want to delete <strong>{{ data.display_name }}</strong>? This action cannot be undone.
+          </p>
+
+          <!-- Actions -->
+          <div class="cos-modal-action">
+            <button
+              class="btn"
+              (click)="closeDeleteModal()"
+              [disabled]="deleteLoading()">
+              Cancel
+            </button>
+            <button
+              class="btn btn-error"
+              (click)="confirmDelete()"
+              [disabled]="deleteLoading()">
+              @if (deleteLoading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+                Deleting...
+              } @else {
+                <span class="material-symbols-outlined">delete</span>
+                Delete
+              }
+            </button>
           </div>
-        }
+        </cos-modal>
 
         <!-- Payment Checkout Modal -->
         @if (currentPaymentId()) {
@@ -292,53 +292,52 @@
         ></app-exception-editor>
 
         <!-- Entity Action Confirmation Modal -->
-        @if (showActionModal()) {
-          <div class="modal modal-open">
-            <div class="modal-box">
-              @if (currentAction(); as action) {
-                <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
+        <cos-modal
+          [isOpen]="showActionModal()"
+          (closed)="closeActionModal()"
+          size="sm"
+          [closeOnBackdrop]="!actionLoading()">
+          @if (currentAction(); as action) {
+            <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
 
-                <!-- Error Alert -->
-                @if (actionError()) {
-                  <div class="alert alert-error mb-4">
-                    <span class="material-symbols-outlined">error</span>
-                    <span>{{ actionError() }}</span>
-                  </div>
-                }
+            <!-- Error Alert -->
+            @if (actionError()) {
+              <div class="alert alert-error mb-4">
+                <span class="material-symbols-outlined">error</span>
+                <span>{{ actionError() }}</span>
+              </div>
+            }
 
-                <!-- Success Alert -->
-                @if (actionSuccess()) {
-                  <div class="alert alert-success mb-4">
-                    <span class="material-symbols-outlined">check_circle</span>
-                    <span>{{ actionSuccess() }}</span>
-                  </div>
-                } @else {
-                  <p class="mb-6">{{ action.confirmation_message || 'Are you sure you want to proceed?' }}</p>
+            <!-- Success Alert -->
+            @if (actionSuccess()) {
+              <div class="alert alert-success mb-4">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>{{ actionSuccess() }}</span>
+              </div>
+            } @else {
+              <p class="mb-6">{{ action.confirmation_message || 'Are you sure you want to proceed?' }}</p>
 
-                  <!-- Actions -->
-                  <div class="modal-action">
-                    <button
-                      class="btn"
-                      (click)="closeActionModal()"
-                      [disabled]="actionLoading()">
-                      Cancel
-                    </button>
-                    <button
-                      [class]="'btn btn-' + action.button_style"
-                      (click)="confirmEntityAction()"
-                      [disabled]="actionLoading()">
-                      @if (actionLoading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
-                      }
-                      Confirm
-                    </button>
-                  </div>
-                }
-              }
-            </div>
-            <div class="modal-backdrop bg-base-300/50" (click)="closeActionModal()"></div>
-          </div>
-        }
+              <!-- Actions -->
+              <div class="cos-modal-action">
+                <button
+                  class="btn"
+                  (click)="closeActionModal()"
+                  [disabled]="actionLoading()">
+                  Cancel
+                </button>
+                <button
+                  [class]="'btn btn-' + action.button_style"
+                  (click)="confirmEntityAction()"
+                  [disabled]="actionLoading()">
+                  @if (actionLoading()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                  }
+                  Confirm
+                </button>
+              </div>
+            }
+          }
+        </cos-modal>
 
         <!-- Action Loading Overlay (for non-confirmation actions) -->
         @if (actionOverlayLoading()) {

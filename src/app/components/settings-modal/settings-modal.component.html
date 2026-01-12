@@ -1,83 +1,76 @@
-<dialog [class.modal-open]="showModal()" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg mb-4">Settings</h3>
+<cos-modal [isOpen]="showModal()" (closed)="close()" size="sm">
+  <h3 class="font-bold text-lg mb-4">Settings</h3>
 
-    <!-- Privacy Section -->
-    @if (analyticsConfigured) {
-      <div class="py-4">
-        <h4 class="font-semibold mb-3">Privacy</h4>
-        <label class="label cursor-pointer justify-start gap-3">
-          <input
-            type="checkbox"
-            class="checkbox"
-            [(ngModel)]="analyticsEnabled"
-            (change)="onAnalyticsToggle()"
-          />
-          <span class="label-text">Share anonymous usage data to help improve Civic OS</span>
-        </label>
-        <p class="text-sm opacity-70 mt-2 ml-9">
-          We collect page views and feature usage statistics. No personal information or data content is tracked.
-          You can change this preference at any time.
-        </p>
-      </div>
-    }
-
-    <!-- Notifications Section -->
+  <!-- Privacy Section -->
+  @if (analyticsConfigured) {
     <div class="py-4">
-      <h4 class="font-semibold mb-3">Notifications</h4>
+      <h4 class="font-semibold mb-3">Privacy</h4>
+      <label class="flex items-start cursor-pointer gap-3">
+        <input
+          type="checkbox"
+          class="checkbox flex-shrink-0 mt-0.5"
+          [(ngModel)]="analyticsEnabled"
+          (change)="onAnalyticsToggle()"
+        />
+        <span>Share anonymous usage data to help improve Civic OS</span>
+      </label>
+      <p class="text-xs opacity-70 mt-1 ml-9">
+        We collect page views and feature usage statistics. No personal information or data content is tracked.
+        You can change this preference at any time.
+      </p>
+    </div>
+  }
 
-      @if (preferencesLoading()) {
-        <div class="text-sm opacity-70">Loading preferences...</div>
-      } @else {
-        <!-- Email Notifications -->
-        @if (emailPreference(); as email) {
-          <div class="mb-4">
-            <label class="label cursor-pointer justify-start gap-3">
-              <input
-                type="checkbox"
-                class="checkbox"
-                [checked]="email.enabled"
-                (change)="onEmailToggle($any($event.target).checked)"
-              />
-              <span class="label-text">Email notifications</span>
-            </label>
-            <p class="text-sm opacity-70 ml-9">
-              Send notifications to: <strong>{{ email.email_address }}</strong>
-            </p>
-          </div>
-        }
+  <!-- Notifications Section -->
+  <div class="py-4">
+    <h4 class="font-semibold mb-3">Notifications</h4>
 
-        <!-- SMS Notifications -->
-        @if (smsPreference(); as sms) {
-          <div class="mb-4">
-            <label class="label cursor-pointer justify-start gap-3">
-              <input
-                type="checkbox"
-                class="checkbox"
-                [checked]="sms.enabled"
-                (change)="onSmsToggle($any($event.target).checked)"
-              />
-              <span class="label-text">SMS notifications</span>
-            </label>
-            <p class="text-sm opacity-70 ml-9">
-              Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
-            </p>
-          </div>
-        }
-
-        @if (!emailPreference() && !smsPreference()) {
-          <p class="text-sm opacity-70">No notification preferences found. They will be created on your next login.</p>
-        }
+    @if (preferencesLoading()) {
+      <div class="text-sm opacity-70">Loading preferences...</div>
+    } @else {
+      <!-- Email Notifications -->
+      @if (emailPreference(); as email) {
+        <div class="mb-4">
+          <label class="flex items-start cursor-pointer gap-3">
+            <input
+              type="checkbox"
+              class="checkbox flex-shrink-0 mt-0.5"
+              [checked]="email.enabled"
+              (change)="onEmailToggle($any($event.target).checked)"
+            />
+            <span>Email notifications</span>
+          </label>
+          <p class="text-xs opacity-70 mt-1 ml-9">
+            Send notifications to: <strong>{{ email.email_address }}</strong>
+          </p>
+        </div>
       }
-    </div>
 
-    <div class="modal-action">
-      <button class="btn" (click)="close()">Close</button>
-    </div>
+      <!-- SMS Notifications -->
+      @if (smsPreference(); as sms) {
+        <div class="mb-4">
+          <label class="flex items-start cursor-pointer gap-3">
+            <input
+              type="checkbox"
+              class="checkbox flex-shrink-0 mt-0.5"
+              [checked]="sms.enabled"
+              (change)="onSmsToggle($any($event.target).checked)"
+            />
+            <span>SMS notifications</span>
+          </label>
+          <p class="text-xs opacity-70 mt-1 ml-9">
+            Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
+          </p>
+        </div>
+      }
+
+      @if (!emailPreference() && !smsPreference()) {
+        <p class="text-sm opacity-70">No notification preferences found. They will be created on your next login.</p>
+      }
+    }
   </div>
 
-  <!-- Backdrop (click to close) -->
-  <form method="dialog" class="modal-backdrop" (click)="close()">
-    <button type="button">close</button>
-  </form>
-</dialog>
+  <div class="cos-modal-action">
+    <button class="btn" (click)="close()">Close</button>
+  </div>
+</cos-modal>

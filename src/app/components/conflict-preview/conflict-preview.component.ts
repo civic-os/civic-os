@@ -18,6 +18,7 @@
 import { Component, Input, Output, EventEmitter, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConflictInfo } from '../../interfaces/entity';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
  * Result of the conflict preview modal.
@@ -48,110 +49,105 @@ export interface ConflictPreviewResult {
 @Component({
   selector: 'app-conflict-preview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CosModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (isOpen) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-2xl">
-          <h3 class="font-bold text-lg mb-4">Schedule Preview</h3>
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg">
+      <h3 class="font-bold text-lg mb-4">Schedule Preview</h3>
 
-          @if (loading) {
-            <div class="flex items-center justify-center py-8">
-              <span class="loading loading-spinner loading-lg"></span>
-              <span class="ml-3">Checking for conflicts...</span>
-            </div>
-          } @else {
-            <!-- Summary -->
-            <div class="flex gap-4 mb-4">
-              <div class="stat bg-success/10 rounded-lg p-3 flex-1">
-                <div class="stat-title text-sm">Available</div>
-                <div class="stat-value text-success text-2xl">{{ availableCount() }}</div>
-              </div>
-              @if (conflictCount() > 0) {
-                <div class="stat bg-error/10 rounded-lg p-3 flex-1">
-                  <div class="stat-title text-sm">Conflicts</div>
-                  <div class="stat-value text-error text-2xl">{{ conflictCount() }}</div>
-                </div>
-              }
-            </div>
-
-            @if (conflictCount() > 0) {
-              <div class="alert alert-warning mb-4">
-                <span class="material-symbols-outlined">warning</span>
-                <span>{{ conflictCount() }} occurrence(s) conflict with existing schedules.</span>
-              </div>
-            }
-
-            <!-- Occurrences List -->
-            <div class="max-h-80 overflow-y-auto border rounded-lg">
-              @for (item of conflicts; track item.occurrence_start) {
-                <div class="flex items-center gap-3 p-3 border-b last:border-b-0"
-                     [class.bg-success/5]="!item.has_conflict"
-                     [class.bg-error/5]="item.has_conflict">
-                  <!-- Status Icon -->
-                  @if (item.has_conflict) {
-                    <span class="material-symbols-outlined text-error">cancel</span>
-                  } @else {
-                    <span class="material-symbols-outlined text-success">check_circle</span>
-                  }
-
-                  <!-- Time Slot -->
-                  <div class="flex-1">
-                    <p class="font-medium">{{ formatTimeRange(item.occurrence_start, item.occurrence_end) }}</p>
-                    @if (item.has_conflict && item.conflicting_display) {
-                      <p class="text-sm text-base-content/70">
-                        Conflicts with: {{ item.conflicting_display }}
-                      </p>
-                    }
-                  </div>
-
-                  <!-- Status Badge -->
-                  @if (item.has_conflict) {
-                    <span class="badge badge-error badge-sm">Conflict</span>
-                  } @else {
-                    <span class="badge badge-success badge-sm">Available</span>
-                  }
-                </div>
-              } @empty {
-                <div class="p-4 text-center text-base-content/70">
-                  No occurrences to preview
-                </div>
-              }
+      @if (loading) {
+        <div class="flex items-center justify-center py-8">
+          <span class="loading loading-spinner loading-lg"></span>
+          <span class="ml-3">Checking for conflicts...</span>
+        </div>
+      } @else {
+        <!-- Summary -->
+        <div class="flex gap-4 mb-4">
+          <div class="stat bg-success/10 rounded-lg p-3 flex-1">
+            <div class="stat-title text-sm">Available</div>
+            <div class="stat-value text-success text-2xl">{{ availableCount() }}</div>
+          </div>
+          @if (conflictCount() > 0) {
+            <div class="stat bg-error/10 rounded-lg p-3 flex-1">
+              <div class="stat-title text-sm">Conflicts</div>
+              <div class="stat-value text-error text-2xl">{{ conflictCount() }}</div>
             </div>
           }
-
-          <div class="modal-action">
-            <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
-
-            @if (!loading && conflictCount() > 0) {
-              <button
-                class="btn btn-outline btn-primary"
-                (click)="onAction('create_available')"
-                [disabled]="availableCount() === 0"
-              >
-                Create {{ availableCount() }} Available
-              </button>
-            }
-
-            @if (!loading) {
-              <button
-                class="btn btn-primary"
-                (click)="onAction('create_all')"
-                [disabled]="conflicts.length === 0"
-              >
-                @if (conflictCount() > 0) {
-                  Create All (Skip Conflicts)
-                } @else {
-                  Create {{ availableCount() }} Occurrences
-                }
-              </button>
-            }
-          </div>
         </div>
-        <div class="modal-backdrop" (click)="onCancel()"></div>
+
+        @if (conflictCount() > 0) {
+          <div class="alert alert-warning mb-4">
+            <span class="material-symbols-outlined">warning</span>
+            <span>{{ conflictCount() }} occurrence(s) conflict with existing schedules.</span>
+          </div>
+        }
+
+        <!-- Occurrences List -->
+        <div class="max-h-80 overflow-y-auto border rounded-lg">
+          @for (item of conflicts; track item.occurrence_start) {
+            <div class="flex items-center gap-3 p-3 border-b last:border-b-0"
+                 [class.bg-success/5]="!item.has_conflict"
+                 [class.bg-error/5]="item.has_conflict">
+              <!-- Status Icon -->
+              @if (item.has_conflict) {
+                <span class="material-symbols-outlined text-error">cancel</span>
+              } @else {
+                <span class="material-symbols-outlined text-success">check_circle</span>
+              }
+
+              <!-- Time Slot -->
+              <div class="flex-1">
+                <p class="font-medium">{{ formatTimeRange(item.occurrence_start, item.occurrence_end) }}</p>
+                @if (item.has_conflict && item.conflicting_display) {
+                  <p class="text-sm text-base-content/70">
+                    Conflicts with: {{ item.conflicting_display }}
+                  </p>
+                }
+              </div>
+
+              <!-- Status Badge -->
+              @if (item.has_conflict) {
+                <span class="badge badge-error badge-sm">Conflict</span>
+              } @else {
+                <span class="badge badge-success badge-sm">Available</span>
+              }
+            </div>
+          } @empty {
+            <div class="p-4 text-center text-base-content/70">
+              No occurrences to preview
+            </div>
+          }
+        </div>
+      }
+
+      <div class="cos-modal-action">
+        <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
+
+        @if (!loading && conflictCount() > 0) {
+          <button
+            class="btn btn-outline btn-primary"
+            (click)="onAction('create_available')"
+            [disabled]="availableCount() === 0"
+          >
+            Create {{ availableCount() }} Available
+          </button>
+        }
+
+        @if (!loading) {
+          <button
+            class="btn btn-primary"
+            (click)="onAction('create_all')"
+            [disabled]="conflicts.length === 0"
+          >
+            @if (conflictCount() > 0) {
+              Create All (Skip Conflicts)
+            } @else {
+              Create {{ availableCount() }} Occurrences
+            }
+          </button>
+        }
       </div>
-    }
+    </cos-modal>
   `
 })
 export class ConflictPreviewComponent {

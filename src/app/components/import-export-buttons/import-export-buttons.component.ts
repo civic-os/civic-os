@@ -24,11 +24,12 @@ import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
 import { NotesService } from '../../services/notes.service';
 import { ImportModalComponent } from '../import-modal/import-modal.component';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-import-export-buttons',
-  imports: [CommonModule, FormsModule, ImportModalComponent],
+  imports: [CommonModule, FormsModule, ImportModalComponent, CosModalComponent],
   templateUrl: './import-export-buttons.component.html',
   styleUrl: './import-export-buttons.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

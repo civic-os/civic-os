@@ -2,20 +2,20 @@
  * Copyright (C) 2023-2025 Civic OS, L3C
  */
 
-import { Component, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FileReference } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 @Component({
   selector: 'app-image-viewer',
   standalone: true,
-  imports: [],
+  imports: [CosModalComponent],
   templateUrl: './image-viewer.component.html',
   styleUrl: './image-viewer.component.css'
 })
 export class ImageViewerComponent {
-  @ViewChild('imageDialog') dialog!: ElementRef<HTMLDialogElement>;
-
+  isOpen = signal(false);
   currentImage = signal<FileReference | null>(null);
   zoomed = signal(false);
 
@@ -25,14 +25,14 @@ export class ImageViewerComponent {
   open(image: FileReference) {
     this.currentImage.set(image);
     this.zoomed.set(false);
-    this.dialog.nativeElement.showModal();
+    this.isOpen.set(true);
   }
 
   /**
    * Close the viewer
    */
   close() {
-    this.dialog.nativeElement.close();
+    this.isOpen.set(false);
     this.currentImage.set(null);
     this.zoomed.set(false);
   }

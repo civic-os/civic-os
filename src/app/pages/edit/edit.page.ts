@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ViewChild, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { SchemaService } from '../../services/schema.service';
 import { Observable, map, mergeMap, of, tap } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -34,7 +34,8 @@ import {
   SeriesMembership,
   SeriesEditScope
 } from '../../interfaces/entity';
-import { DialogComponent } from '../../components/dialog/dialog.component';
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { ApiError } from '../../interfaces/api';
 import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
@@ -55,7 +56,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     ExceptionEditorComponent,
     CommonModule,
     ReactiveFormsModule,
-    DialogComponent,
+    CosModalComponent,
     RouterModule
 ],
     templateUrl: './edit.page.html',
@@ -172,8 +173,10 @@ export class EditPage {
   public showScopeDialog = signal(false);
   private pendingFormData: any = null;
 
-  @ViewChild('successDialog') successDialog!: DialogComponent;
-  @ViewChild('errorDialog') errorDialog!: DialogComponent;
+  // Signal-based modal state (replaces ViewChild DialogComponent)
+  showSuccessModal = signal(false);
+  showErrorModal = signal(false);
+  currentError = signal<ApiError | undefined>(undefined);
 
   submitForm(event: any) {
     event?.preventDefault?.();
@@ -275,11 +278,7 @@ export class EditPage {
                     this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
                   }
 
-                  if (this.successDialog) {
-                    this.successDialog.open();
-                  } else {
-                    console.error('Success dialog not available');
-                  }
+                  this.showSuccessModal.set(true);
                 } else {
                   console.error('[EDIT SUBMIT] API returned error:', result.error);
                   console.error('[EDIT SUBMIT] Error details:', {
@@ -289,36 +288,31 @@ export class EditPage {
                     hint: result.error?.hint,
                     humanMessage: result.error?.humanMessage
                   });
-                  if (this.errorDialog) {
-                    this.errorDialog.open(result.error);
-                  } else {
-                    console.error('Error dialog not available', result.error);
-                  }
+                  this.currentError.set(result.error);
+                  this.showErrorModal.set(true);
                 }
               },
               error: (err) => {
                 console.error('Unexpected error during edit:', err);
-                if (this.errorDialog) {
-                  this.errorDialog.open({
-                    httpCode: 500,
-                    message: 'An unexpected error occurred',
-                    humanMessage: 'System Error'
-                  });
-                }
+                this.currentError.set({
+                  httpCode: 500,
+                  message: 'An unexpected error occurred',
+                  humanMessage: 'System Error'
+                });
+                this.showErrorModal.set(true);
               }
             });
         }
       })
       .catch((error) => {
         // Token refresh failed - session expired
-        if (this.errorDialog) {
-          this.errorDialog.open({
-            httpCode: 401,
-            message: "Session expired",
-            humanMessage: "Session Expired",
-            hint: "Your login session has expired. Please refresh the page to log in again."
-          });
-        }
+        this.currentError.set({
+          httpCode: 401,
+          message: "Session expired",
+          humanMessage: "Session Expired",
+          hint: "Your login session has expired. Please refresh the page to log in again."
+        });
+        this.showErrorModal.set(true);
       });
   }
 
@@ -376,41 +370,36 @@ export class EditPage {
                   this.analytics.trackEvent('Entity', 'EditSeriesAll', this.entityKey);
                 }
 
-                if (this.successDialog) {
-                  this.successDialog.open();
-                }
+                this.showSuccessModal.set(true);
               } else {
                 console.error('[SERIES UPDATE] API returned error:', result.message);
-                if (this.errorDialog) {
-                  this.errorDialog.open({
-                    httpCode: 400,
-                    message: result.message || 'Failed to update series',
-                    humanMessage: 'Series Update Failed'
-                  });
-                }
+                this.currentError.set({
+                  httpCode: 400,
+                  message: result.message || 'Failed to update series',
+                  humanMessage: 'Series Update Failed'
+                });
+                this.showErrorModal.set(true);
               }
             },
             error: (err) => {
               console.error('Error updating series template:', err);
-              if (this.errorDialog) {
-                this.errorDialog.open({
-                  httpCode: 500,
-                  message: 'An unexpected error occurred',
-                  humanMessage: 'System Error'
-                });
-              }
+              this.currentError.set({
+                httpCode: 500,
+                message: 'An unexpected error occurred',
+                humanMessage: 'System Error'
+              });
+              this.showErrorModal.set(true);
             }
           });
       })
       .catch(() => {
-        if (this.errorDialog) {
-          this.errorDialog.open({
-            httpCode: 401,
-            message: "Session expired",
-            humanMessage: "Session Expired",
-            hint: "Your login session has expired. Please refresh the page to log in again."
-          });
-        }
+        this.currentError.set({
+          httpCode: 401,
+          message: "Session expired",
+          humanMessage: "Session Expired",
+          hint: "Your login session has expired. Please refresh the page to log in again."
+        });
+        this.showErrorModal.set(true);
       });
   }
 
@@ -474,6 +463,17 @@ export class EditPage {
   }
   navToRecord(key: string, id?: string) {
     this.router.navigate(['view', key, id]);
+  }
+
+  /** Close success modal */
+  closeSuccessModal(): void {
+    this.showSuccessModal.set(false);
+  }
+
+  /** Close error modal and reset error state */
+  closeErrorModal(): void {
+    this.showErrorModal.set(false);
+    this.currentError.set(undefined);
   }
 
   /**

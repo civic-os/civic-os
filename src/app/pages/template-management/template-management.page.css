@@ -1,11 +1,5 @@
 /* Template Management Page Styles */
 
-/* Ensure modal doesn't overflow viewport */
-.modal-box {
-  max-height: calc(100vh - 4rem);
-  overflow-y: auto;
-}
-
 /* Table responsiveness */
 @media (max-width: 768px) {
   .table {

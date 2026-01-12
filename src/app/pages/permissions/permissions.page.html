@@ -198,71 +198,67 @@
   }
 
   <!-- Create Role Modal -->
-  @if (showCreateModal()) {
-    <div class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Create New Role</h3>
+  <cos-modal [isOpen]="showCreateModal()" (closed)="closeCreateRoleModal()" size="sm">
+    <h3 class="font-bold text-lg mb-4">Create New Role</h3>
 
-        <!-- Error Alert -->
-        @if (createError()) {
-          <div class="alert alert-error mb-4">
-            <span>{{ createError() }}</span>
-          </div>
-        }
+    <!-- Error Alert -->
+    @if (createError()) {
+      <div class="alert alert-error mb-4">
+        <span>{{ createError() }}</span>
+      </div>
+    }
 
-        <!-- Form -->
-        <div class="mb-4">
-          <label class="label" for="role-name">
-            <span class="font-semibold">Role Name *</span>
-          </label>
-          <input
-            id="role-name"
-            type="text"
-            class="input input-bordered w-full"
-            placeholder="e.g., editor, moderator, viewer"
-            [ngModel]="newRoleName()"
-            (ngModelChange)="newRoleName.set($event)"
-            [disabled]="createLoading()" />
-          <div class="text-warning text-sm mt-1">
-            Must match exactly with your Keycloak role configuration
-          </div>
-        </div>
-
-        <div class="mb-6">
-          <label class="label" for="role-description">
-            <span class="font-semibold">Description</span>
-          </label>
-          <textarea
-            id="role-description"
-            class="textarea textarea-bordered w-full"
-            placeholder="Optional description of this role's purpose"
-            rows="3"
-            [ngModel]="newRoleDescription()"
-            (ngModelChange)="newRoleDescription.set($event)"
-            [disabled]="createLoading()"></textarea>
-        </div>
-
-        <!-- Actions -->
-        <div class="modal-action">
-          <button
-            class="btn"
-            (click)="closeCreateRoleModal()"
-            [disabled]="createLoading()">
-            Cancel
-          </button>
-          <button
-            class="btn btn-primary"
-            (click)="submitCreateRole()"
-            [disabled]="createLoading()">
-            @if (createLoading()) {
-              <span class="loading loading-spinner loading-sm"></span>
-              Creating...
-            } @else {
-              Create Role
-            }
-          </button>
-        </div>
+    <!-- Form -->
+    <div class="mb-4">
+      <label class="label" for="role-name">
+        <span class="font-semibold">Role Name *</span>
+      </label>
+      <input
+        id="role-name"
+        type="text"
+        class="input input-bordered w-full"
+        placeholder="e.g., editor, moderator, viewer"
+        [ngModel]="newRoleName()"
+        (ngModelChange)="newRoleName.set($event)"
+        [disabled]="createLoading()" />
+      <div class="text-warning text-sm mt-1">
+        Must match exactly with your Keycloak role configuration
       </div>
     </div>
-  }
+
+    <div class="mb-6">
+      <label class="label" for="role-description">
+        <span class="font-semibold">Description</span>
+      </label>
+      <textarea
+        id="role-description"
+        class="textarea textarea-bordered w-full"
+        placeholder="Optional description of this role's purpose"
+        rows="3"
+        [ngModel]="newRoleDescription()"
+        (ngModelChange)="newRoleDescription.set($event)"
+        [disabled]="createLoading()"></textarea>
+    </div>
+
+    <!-- Actions -->
+    <div class="cos-modal-action">
+      <button
+        class="btn"
+        (click)="closeCreateRoleModal()"
+        [disabled]="createLoading()">
+        Cancel
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="submitCreateRole()"
+        [disabled]="createLoading()">
+        @if (createLoading()) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Creating...
+        } @else {
+          Create Role
+        }
+      </button>
+    </div>
+  </cos-modal>
 </div>

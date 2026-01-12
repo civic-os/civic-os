@@ -31,6 +31,7 @@ import { SchemaEntityTable, SchemaEntityProperty, ValidationErrorSummary } from 
 import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
  * Import workflow steps:
@@ -72,7 +73,7 @@ type ImportStep = 'choose' | 'validating' | 'results' | 'importing' | 'success';
  */
 @Component({
   selector: 'app-import-modal',
-  imports: [CommonModule],
+  imports: [CommonModule, CosModalComponent],
   templateUrl: './import-modal.component.html',
   styleUrl: './import-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -86,6 +87,9 @@ export class ImportModalComponent implements OnDestroy {
   @Input() entityKey?: string;
   @Output() close = new EventEmitter<void>();
   @Output() importSuccess = new EventEmitter<number>();
+
+  // Modal is always open when component exists (parent conditionally renders)
+  public isOpen = signal(true);
 
   // State signals
   public currentStep = signal<ImportStep>('choose');

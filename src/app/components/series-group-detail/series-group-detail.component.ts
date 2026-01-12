@@ -36,6 +36,7 @@ import { SeriesGroup, SeriesVersionSummary, SeriesInstanceSummary, SchemaEntityP
 import { SeriesVersionTimelineComponent } from '../series-version-timeline/series-version-timeline.component';
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { RecurringService } from '../../services/recurring.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
@@ -83,7 +84,8 @@ type EditTab = 'info' | 'schedule' | 'template';
     ReactiveFormsModule,
     SeriesVersionTimelineComponent,
     RecurringScheduleFormComponent,
-    EditPropertyComponent
+    EditPropertyComponent,
+    CosModalComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -382,10 +384,8 @@ type EditTab = 'info' | 'schedule' | 'template';
     }
 
     <!-- Unified Edit Modal -->
-    @if (showEditModal()) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-2xl">
-          <h3 class="font-bold text-lg mb-4">Edit Series</h3>
+    <cos-modal [isOpen]="showEditModal()" (closed)="cancelEdit()" size="lg">
+      <h3 class="font-bold text-lg mb-4">Edit Series</h3>
 
           <!-- Tab Navigation (DaisyUI 5 lift style) -->
           <div role="tablist" class="tabs tabs-lift mb-4">
@@ -551,19 +551,16 @@ type EditTab = 'info' | 'schedule' | 'template';
             </div>
           }
 
-          <div class="modal-action">
-            <button class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving()">
-              @if (saving()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              }
-              Save Changes
-            </button>
-          </div>
-        </div>
-        <div class="modal-backdrop" (click)="cancelEdit()"></div>
+      <div class="cos-modal-action">
+        <button class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving()">
+          @if (saving()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Save Changes
+        </button>
       </div>
-    }
+    </cos-modal>
   `
 })
 export class SeriesGroupDetailComponent implements OnChanges {

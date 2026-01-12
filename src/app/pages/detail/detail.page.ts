@@ -58,6 +58,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { PaymentCheckoutComponent } from '../../components/payment-checkout/payment-checkout.component';
 import { EntityNotesComponent } from '../../components/entity-notes/entity-notes.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -87,7 +88,8 @@ export interface CalendarSection {
     EntityNotesComponent,
     StaticTextComponent,
     ActionBarComponent,
-    ExceptionEditorComponent
+    ExceptionEditorComponent,
+    CosModalComponent
     // TimeSlotCalendarComponent
   ]
 })

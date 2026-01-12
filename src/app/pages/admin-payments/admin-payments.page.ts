@@ -25,6 +25,7 @@ import { forkJoin, of, switchMap, map, catchError, BehaviorSubject } from 'rxjs'
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { AuthService } from '../../services/auth.service';
 import { getPostgrestUrl } from '../../config/runtime';
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 
 /**
  * Payment transaction from the payment_transactions view
@@ -97,7 +98,7 @@ interface RefundFormData {
 @Component({
   selector: 'app-admin-payments',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe, RouterLink, NgxCurrencyDirective],
+  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe, RouterLink, NgxCurrencyDirective, CosModalComponent],
   templateUrl: './admin-payments.page.html',
   styleUrl: './admin-payments.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush

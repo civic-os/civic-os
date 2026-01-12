@@ -1,0 +1,25 @@
+@if (isOpen()) {
+  <div
+    #modalContainer
+    class="cos-modal-container"
+    [class.cos-modal-open]="animationReady()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    (keydown)="onKeydown($event)"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
+
+    <!-- Backdrop overlay -->
+    <div
+      class="cos-modal-backdrop"
+      (click)="onBackdropClick()"
+      aria-hidden="true">
+    </div>
+
+    <!-- Modal content box -->
+    <div class="cos-modal-box not-prose" [ngClass]="sizeClass()">
+      <ng-content></ng-content>
+    </div>
+  </div>
+}

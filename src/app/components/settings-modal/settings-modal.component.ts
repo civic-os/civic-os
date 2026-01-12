@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { AnalyticsService } from '../../services/analytics.service';
 import { NotificationService, type NotificationPreference } from '../../services/notification.service';
 import { getMatomoConfig } from '../../config/runtime';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
  * Settings modal component for user preferences.
@@ -31,7 +32,7 @@ import { getMatomoConfig } from '../../config/runtime';
  */
 @Component({
   selector: 'app-settings-modal',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CosModalComponent],
   templateUrl: './settings-modal.component.html',
   styleUrl: './settings-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

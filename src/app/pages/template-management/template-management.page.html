@@ -119,41 +119,29 @@
   }
 
   <!-- Delete Confirmation Modal -->
-  @if (deletingTemplate()) {
-    <dialog class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Delete Template?</h3>
-        <p class="mb-4">
-          Are you sure you want to delete the template <strong>{{ deletingTemplate()!.name }}</strong>?
-          This action cannot be undone.
-        </p>
-        <div class="modal-action">
-          <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
-          <button class="btn btn-error" (click)="deleteTemplate()">Delete</button>
-        </div>
+  <cos-modal [isOpen]="!!deletingTemplate()" (closed)="closeModals()" size="sm">
+    @if (deletingTemplate()) {
+      <h3 class="font-bold text-lg mb-4">Delete Template?</h3>
+      <p class="mb-4">
+        Are you sure you want to delete the template <strong>{{ deletingTemplate()!.name }}</strong>?
+        This action cannot be undone.
+      </p>
+      <div class="cos-modal-action">
+        <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
+        <button class="btn btn-error" (click)="deleteTemplate()">Delete</button>
       </div>
-      <form method="dialog" class="modal-backdrop" (click)="closeModals()">
-        <button>close</button>
-      </form>
-    </dialog>
-  }
+    }
+  </cos-modal>
 
   <!-- Create/Edit Template Modal -->
-  @if (showCreateModal() || editingTemplate()) {
-    <dialog class="modal modal-open">
-      <div class="modal-box max-w-7xl">
-        <h3 class="font-bold text-lg mb-4">
-          {{ editingTemplate() ? 'Edit Template' : 'Create Template' }}
-        </h3>
-        <app-template-editor
-          [template]="editingTemplate()"
-          (save)="handleTemplateSaved($event)"
-          (cancel)="closeModals()">
-        </app-template-editor>
-      </div>
-      <form method="dialog" class="modal-backdrop" (click)="closeModals()">
-        <button>close</button>
-      </form>
-    </dialog>
-  }
+  <cos-modal [isOpen]="showCreateModal() || !!editingTemplate()" (closed)="closeModals()" size="xl">
+    <h3 class="font-bold text-lg mb-4">
+      {{ editingTemplate() ? 'Edit Template' : 'Create Template' }}
+    </h3>
+    <app-template-editor
+      [template]="editingTemplate()"
+      (save)="handleTemplateSaved($event)"
+      (cancel)="closeModals()">
+    </app-template-editor>
+  </cos-modal>
 </div>

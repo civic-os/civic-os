@@ -111,18 +111,44 @@
         </div>
       }
     }
-    <app-dialog #successDialog>
+    <!-- Success Modal -->
+    <cos-modal [isOpen]="showSuccessModal()" (closed)="closeSuccessModal()" size="sm">
+      <h3 class="font-bold text-lg mb-4">
+        <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+        Success
+      </h3>
+      <p class="mb-4">Record updated successfully.</p>
       <div class="flex flex-col gap-2 w-full">
+        <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
         <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
       </div>
-    </app-dialog>
-    <app-dialog #errorDialog>
+    </cos-modal>
+
+    <!-- Error Modal -->
+    <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm">
+      <h3 class="font-bold text-lg mb-4">
+        <span class="material-symbols-outlined text-error align-middle mr-2">error</span>
+        Error
+      </h3>
+      @if (currentError(); as err) {
+        <div class="collapse collapse-plus bg-base-200 mb-4">
+          <input type="checkbox" />
+          <div class="collapse-title font-medium">
+            {{ err.humanMessage }}
+          </div>
+          <div class="collapse-content">
+            <p>{{err.code ?? err.httpCode}}: {{err.message}}</p>
+            @if (err.hint) {
+              <p class="mt-2 text-sm opacity-70">{{err.hint}}</p>
+            }
+          </div>
+        </div>
+      }
       <div class="flex flex-col gap-2 w-full">
-        <button class="btn whitespace-normal h-auto min-h-12">Try again</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">Try again</button>
         <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
       </div>
-    </app-dialog>
+    </cos-modal>
 
     <!-- Series Scope Dialog -->
     <app-exception-editor

@@ -1,96 +1,96 @@
 <!-- Payment Checkout Modal -->
-@if (isOpen()) {
-  <div class="modal modal-open">
-    <div class="modal-box max-w-lg">
-      <h3 class="font-bold text-lg mb-4">
-        <span class="material-symbols-outlined align-middle mr-2">payment</span>
-        Complete Payment
-      </h3>
+<cos-modal
+  [isOpen]="isOpen()"
+  (closed)="handleClose()"
+  size="md"
+  [closeOnBackdrop]="!processing() && !loading()">
+  <h3 class="font-bold text-lg mb-4">
+    <span class="material-symbols-outlined align-middle mr-2">payment</span>
+    Complete Payment
+  </h3>
 
-      <!-- Amount Display with Fee Breakdown -->
-      @if (totalAmount()) {
-        <div class="bg-base-200 rounded-lg p-4 mb-4">
-          <div class="text-sm text-base-content/70 mb-2">Payment Summary</div>
+  <!-- Amount Display with Fee Breakdown -->
+  @if (totalAmount()) {
+    <div class="bg-base-200 rounded-lg p-4 mb-4">
+      <div class="text-sm text-base-content/70 mb-2">Payment Summary</div>
 
-          @if (showFeeBreakdown()) {
-            <!-- Show breakdown when processing fee exists -->
-            <div class="flex justify-between mb-1">
-              <span>Amount:</span>
-              <span>${{ baseAmount()?.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between mb-1 text-base-content/70">
-              <span>Processing Fee:</span>
-              <span>${{ processingFee()?.toFixed(2) }}</span>
-            </div>
-            <div class="divider my-1"></div>
-          }
-
-          <div class="flex justify-between font-bold">
-            <span>Total:</span>
-            <span>${{ totalAmount()?.toFixed(2) }}</span>
-          </div>
+      @if (showFeeBreakdown()) {
+        <!-- Show breakdown when processing fee exists -->
+        <div class="flex justify-between mb-1">
+          <span>Amount:</span>
+          <span>${{ baseAmount()?.toFixed(2) }}</span>
         </div>
+        <div class="flex justify-between mb-1 text-base-content/70">
+          <span>Processing Fee:</span>
+          <span>${{ processingFee()?.toFixed(2) }}</span>
+        </div>
+        <div class="divider my-1"></div>
       }
 
-      <!-- Error Alert -->
-      @if (error()) {
-        <div class="alert alert-error mb-4">
-          <span class="material-symbols-outlined">error</span>
-          <span>{{ error() }}</span>
-        </div>
-      }
-
-      <!-- Loading State -->
-      @if (loading()) {
-        <div class="flex flex-col items-center justify-center py-8">
-          <span class="loading loading-spinner loading-lg mb-4"></span>
-          <p class="text-base-content/60">Initializing payment...</p>
-          <p class="text-xs text-base-content/40 mt-2">This usually takes a few seconds</p>
-        </div>
-      }
-
-      <!-- Payment Form -->
-      @if (!loading() && !error()) {
-        <!-- Stripe Payment Element Mount Point -->
-        <div class="mb-6">
-          <div #paymentElement class="p-4 border border-base-300 rounded-lg bg-base-100"></div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="flex gap-2 justify-end">
-          <button
-            class="btn"
-            (click)="handleClose()"
-            [disabled]="processing()">
-            Cancel
-          </button>
-          <button
-            class="btn btn-primary"
-            (click)="handleSubmit()"
-            [disabled]="processing()">
-            @if (processing()) {
-              <span class="loading loading-spinner loading-sm"></span>
-              Processing...
-            } @else {
-              <span class="material-symbols-outlined">credit_card</span>
-              Pay ${{ totalAmount()?.toFixed(2) }}
-            }
-          </button>
-        </div>
-      }
-
-      <!-- Error State Actions -->
-      @if (error() && !loading()) {
-        <div class="flex justify-end">
-          <button class="btn" (click)="handleClose()">Close</button>
-        </div>
-      }
-
-      <!-- Security Notice -->
-      <div class="mt-4 text-xs text-base-content/60 text-center">
-        <span class="material-symbols-outlined text-sm align-middle">lock</span>
-        Payments processed securely by Stripe
+      <div class="flex justify-between font-bold">
+        <span>Total:</span>
+        <span>${{ totalAmount()?.toFixed(2) }}</span>
       </div>
     </div>
+  }
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-8">
+      <span class="loading loading-spinner loading-lg mb-4"></span>
+      <p class="text-base-content/60">Initializing payment...</p>
+      <p class="text-xs text-base-content/40 mt-2">This usually takes a few seconds</p>
+    </div>
+  }
+
+  <!-- Payment Form -->
+  @if (!loading() && !error()) {
+    <!-- Stripe Payment Element Mount Point -->
+    <div class="mb-6">
+      <div #paymentElement class="p-4 border border-base-300 rounded-lg bg-base-100"></div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex gap-2 justify-end">
+      <button
+        class="btn"
+        (click)="handleClose()"
+        [disabled]="processing()">
+        Cancel
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="handleSubmit()"
+        [disabled]="processing()">
+        @if (processing()) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Processing...
+        } @else {
+          <span class="material-symbols-outlined">credit_card</span>
+          Pay ${{ totalAmount()?.toFixed(2) }}
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Error State Actions -->
+  @if (error() && !loading()) {
+    <div class="flex justify-end">
+      <button class="btn" (click)="handleClose()">Close</button>
+    </div>
+  }
+
+  <!-- Security Notice -->
+  <div class="mt-4 text-xs text-base-content/60 text-center">
+    <span class="material-symbols-outlined text-sm align-middle">lock</span>
+    Payments processed securely by Stripe
   </div>
-}
+</cos-modal>

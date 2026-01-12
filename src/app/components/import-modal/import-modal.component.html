@@ -1,188 +1,190 @@
-<div class="modal modal-open">
-  <div class="modal-box max-w-4xl">
-    <h3 class="font-bold text-lg mb-4">Import {{ entity.display_name }}</h3>
+<cos-modal
+  [isOpen]="isOpen()"
+  (closed)="closeModal()"
+  size="xl"
+  [closeOnBackdrop]="currentStep() === 'choose' || currentStep() === 'results'">
+  <h3 class="font-bold text-lg mb-4">Import {{ entity.display_name }}</h3>
 
-    <!-- Error Alert -->
-    @if (errorMessage()) {
-      <div class="alert alert-error mb-4">
-        <span class="material-symbols-outlined">error</span>
-        <span>{{ errorMessage() }}</span>
-      </div>
-    }
+  <!-- Error Alert -->
+  @if (errorMessage()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
 
-    <!-- Step 1: Choose Action -->
-    @if (currentStep() === 'choose') {
-      <div class="space-y-4">
-        <p>Choose an action to get started:</p>
+  <!-- Step 1: Choose Action -->
+  @if (currentStep() === 'choose') {
+    <div class="space-y-4">
+      <p>Choose an action to get started:</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Download Template -->
-          <div class="card bg-base-200">
-            <div class="card-body">
-              <h4 class="card-title text-base">Download Template</h4>
-              <p class="text-sm">Get a blank template with field definitions and reference data.</p>
-              <div class="card-actions justify-end">
-                <button class="btn btn-sm btn-primary" (click)="downloadTemplate()">
-                  <span class="material-symbols-outlined">download</span>
-                  Download
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Upload File -->
-          <div class="card bg-base-200">
-            <div class="card-body">
-              <h4 class="card-title text-base">Upload File</h4>
-              <p class="text-sm">Upload a filled template or exported file to import data.</p>
-              <div class="card-actions justify-end">
-                <label class="btn btn-sm btn-primary">
-                  <span class="material-symbols-outlined">upload</span>
-                  Choose File
-                  <input type="file" class="hidden" accept=".xlsx,.xls" (change)="onFileSelected($event)">
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Drag & Drop Zone -->
-        <div
-          class="border-2 border-dashed border-base-300 rounded-lg p-8 text-center hover:border-primary transition-colors"
-          (drop)="onFileDrop($event)"
-          (dragover)="onDragOver($event)">
-          <span class="material-symbols-outlined text-4xl text-base-content/50">cloud_upload</span>
-          <p class="mt-2 text-sm text-base-content/70">or drag and drop your file here</p>
-          <p class="text-xs text-base-content/50 mt-1">Excel files only (.xlsx, .xls) - Max 10MB</p>
-        </div>
-      </div>
-    }
-
-    <!-- Step 2: Validating -->
-    @if (currentStep() === 'validating') {
-      <div class="space-y-4">
-        <p>Validating your data...</p>
-        <div class="flex items-center gap-4">
-          <progress class="progress progress-primary w-full" [value]="validationProgress()" max="100"></progress>
-          <span class="text-sm">{{ validationProgress() }}%</span>
-        </div>
-        <div class="flex justify-end">
-          <button class="btn btn-sm" (click)="cancelValidation()">Cancel</button>
-        </div>
-      </div>
-    }
-
-    <!-- Step 3: Results -->
-    @if (currentStep() === 'results') {
-      <div class="space-y-4">
-        @if (hasErrors()) {
-          <!-- Errors Found -->
-          <div class="alert alert-warning">
-            <span class="material-symbols-outlined">warning</span>
-            <span>Found {{ errorSummary()?.totalErrors }} errors in your data. Please fix them and try again.</span>
-          </div>
-
-          @if (errorSummary(); as summary) {
-            <!-- Error Summary -->
-            <div class="space-y-2">
-              <h4 class="font-semibold">Error Summary (showing first 100):</h4>
-              <div class="overflow-x-auto max-h-64 overflow-y-auto">
-                <table class="table table-sm table-zebra">
-                  <thead>
-                    <tr>
-                      <th>Row</th>
-                      <th>Column</th>
-                      <th>Value</th>
-                      <th>Error</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (error of summary.firstNErrors; track error.row) {
-                      <tr>
-                        <td>{{ error.row }}</td>
-                        <td>{{ error.column }}</td>
-                        <td class="font-mono text-xs">{{ error.value }}</td>
-                        <td class="text-error text-xs">{{ error.error }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-
-              @if (summary.totalErrors > summary.firstNErrors.length) {
-                <p class="text-sm text-base-content/70">
-                  ... and {{ summary.totalErrors - summary.firstNErrors.length }} more errors
-                </p>
-              }
-            </div>
-
-            <div class="flex gap-2">
-              <button class="btn btn-sm" (click)="downloadErrorReport()">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Download Template -->
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <h4 class="card-title text-base">Download Template</h4>
+            <p class="text-sm">Get a blank template with field definitions and reference data.</p>
+            <div class="card-actions justify-end">
+              <button class="btn btn-sm btn-primary" (click)="downloadTemplate()">
                 <span class="material-symbols-outlined">download</span>
-                Download Full Report
+                Download
               </button>
             </div>
-          }
-        } @else {
-          <!-- No Errors -->
-          <div class="alert alert-success">
-            <span class="material-symbols-outlined">check_circle</span>
-            <span>Validation successful! {{ validRowCount() }} rows ready to import.</span>
+          </div>
+        </div>
+
+        <!-- Upload File -->
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <h4 class="card-title text-base">Upload File</h4>
+            <p class="text-sm">Upload a filled template or exported file to import data.</p>
+            <div class="card-actions justify-end">
+              <label class="btn btn-sm btn-primary">
+                <span class="material-symbols-outlined">upload</span>
+                Choose File
+                <input type="file" class="hidden" accept=".xlsx,.xls" (change)="onFileSelected($event)">
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div
+        class="border-2 border-dashed border-base-300 rounded-lg p-8 text-center hover:border-primary transition-colors"
+        (drop)="onFileDrop($event)"
+        (dragover)="onDragOver($event)">
+        <span class="material-symbols-outlined text-4xl text-base-content/50">cloud_upload</span>
+        <p class="mt-2 text-sm text-base-content/70">or drag and drop your file here</p>
+        <p class="text-xs text-base-content/50 mt-1">Excel files only (.xlsx, .xls) - Max 10MB</p>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2: Validating -->
+  @if (currentStep() === 'validating') {
+    <div class="space-y-4">
+      <p>Validating your data...</p>
+      <div class="flex items-center gap-4">
+        <progress class="progress progress-primary w-full" [value]="validationProgress()" max="100"></progress>
+        <span class="text-sm">{{ validationProgress() }}%</span>
+      </div>
+      <div class="flex justify-end">
+        <button class="btn btn-sm" (click)="cancelValidation()">Cancel</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 3: Results -->
+  @if (currentStep() === 'results') {
+    <div class="space-y-4">
+      @if (hasErrors()) {
+        <!-- Errors Found -->
+        <div class="alert alert-warning">
+          <span class="material-symbols-outlined">warning</span>
+          <span>Found {{ errorSummary()?.totalErrors }} errors in your data. Please fix them and try again.</span>
+        </div>
+
+        @if (errorSummary(); as summary) {
+          <!-- Error Summary -->
+          <div class="space-y-2">
+            <h4 class="font-semibold">Error Summary (showing first 100):</h4>
+            <div class="overflow-x-auto max-h-64 overflow-y-auto">
+              <table class="table table-sm table-zebra">
+                <thead>
+                  <tr>
+                    <th>Row</th>
+                    <th>Column</th>
+                    <th>Value</th>
+                    <th>Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (error of summary.firstNErrors; track error.row) {
+                    <tr>
+                      <td>{{ error.row }}</td>
+                      <td>{{ error.column }}</td>
+                      <td class="font-mono text-xs">{{ error.value }}</td>
+                      <td class="text-error text-xs">{{ error.error }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (summary.totalErrors > summary.firstNErrors.length) {
+              <p class="text-sm text-base-content/70">
+                ... and {{ summary.totalErrors - summary.firstNErrors.length }} more errors
+              </p>
+            }
           </div>
 
-          <div class="alert alert-warning">
-            <span class="material-symbols-outlined">info</span>
-            <span>This will insert {{ validRowCount() }} new records. This action cannot be undone.</span>
+          <div class="flex gap-2">
+            <button class="btn btn-sm" (click)="downloadErrorReport()">
+              <span class="material-symbols-outlined">download</span>
+              Download Full Report
+            </button>
           </div>
         }
-
-        <div class="flex justify-between">
-          <button class="btn btn-sm" (click)="startOver()">
-            <span class="material-symbols-outlined">arrow_back</span>
-            Start Over
-          </button>
-          @if (canProceedToImport()) {
-            <button class="btn btn-sm btn-primary" (click)="proceedWithImport()">
-              Proceed with Import
-              <span class="material-symbols-outlined">arrow_forward</span>
-            </button>
-          }
-        </div>
-      </div>
-    }
-
-    <!-- Step 4: Importing -->
-    @if (currentStep() === 'importing') {
-      <div class="space-y-4">
-        <p>Importing {{ validRowCount() }} records...</p>
-        <div class="flex items-center gap-4">
-          <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
-          <span class="text-sm">{{ uploadProgress() }}%</span>
-        </div>
-        <p class="text-xs text-base-content/70">Please do not close this window.</p>
-      </div>
-    }
-
-    <!-- Step 5: Success -->
-    @if (currentStep() === 'success') {
-      <div class="space-y-4">
+      } @else {
+        <!-- No Errors -->
         <div class="alert alert-success">
           <span class="material-symbols-outlined">check_circle</span>
-          <span>Successfully imported {{ importedCount() }} records!</span>
+          <span>Validation successful! {{ validRowCount() }} rows ready to import.</span>
         </div>
-        <div class="flex justify-end">
-          <button class="btn btn-primary" (click)="completeImport()">
-            Done
-          </button>
-        </div>
-      </div>
-    }
 
-    <!-- Close Button -->
-    @if (currentStep() === 'choose' || currentStep() === 'results') {
-      <div class="modal-action">
-        <button class="btn btn-sm" (click)="closeModal()">Close</button>
+        <div class="alert alert-warning">
+          <span class="material-symbols-outlined">info</span>
+          <span>This will insert {{ validRowCount() }} new records. This action cannot be undone.</span>
+        </div>
+      }
+
+      <div class="flex justify-between">
+        <button class="btn btn-sm" (click)="startOver()">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Start Over
+        </button>
+        @if (canProceedToImport()) {
+          <button class="btn btn-sm btn-primary" (click)="proceedWithImport()">
+            Proceed with Import
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        }
       </div>
-    }
-  </div>
-</div>
+    </div>
+  }
+
+  <!-- Step 4: Importing -->
+  @if (currentStep() === 'importing') {
+    <div class="space-y-4">
+      <p>Importing {{ validRowCount() }} records...</p>
+      <div class="flex items-center gap-4">
+        <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
+        <span class="text-sm">{{ uploadProgress() }}%</span>
+      </div>
+      <p class="text-xs text-base-content/70">Please do not close this window.</p>
+    </div>
+  }
+
+  <!-- Step 5: Success -->
+  @if (currentStep() === 'success') {
+    <div class="space-y-4">
+      <div class="alert alert-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>Successfully imported {{ importedCount() }} records!</span>
+      </div>
+      <div class="flex justify-end">
+        <button class="btn btn-primary" (click)="completeImport()">
+          Done
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Close Button -->
+  @if (currentStep() === 'choose' || currentStep() === 'results') {
+    <div class="cos-modal-action">
+      <button class="btn btn-sm" (click)="closeModal()">Close</button>
+    </div>
+  }
+</cos-modal>

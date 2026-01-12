@@ -2,21 +2,21 @@
  * Copyright (C) 2023-2025 Civic OS, L3C
  */
 
-import { Component, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileReference } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 @Component({
   selector: 'app-pdf-viewer',
   standalone: true,
-  imports: [],
+  imports: [CosModalComponent],
   templateUrl: './pdf-viewer.component.html',
   styleUrl: './pdf-viewer.component.css'
 })
 export class PdfViewerComponent {
-  @ViewChild('pdfDialog') dialog!: ElementRef<HTMLDialogElement>;
-
+  isOpen = signal(false);
   currentPdf = signal<FileReference | null>(null);
 
   constructor(private sanitizer: DomSanitizer) {}
@@ -26,14 +26,14 @@ export class PdfViewerComponent {
    */
   open(pdf: FileReference) {
     this.currentPdf.set(pdf);
-    this.dialog.nativeElement.showModal();
+    this.isOpen.set(true);
   }
 
   /**
    * Close the viewer
    */
   close() {
-    this.dialog.nativeElement.close();
+    this.isOpen.set(false);
     this.currentPdf.set(null);
   }
 

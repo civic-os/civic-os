@@ -19,6 +19,7 @@ import { Component, signal, computed, inject, input, output, effect, ChangeDetec
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { getStripePublishableKey } from '../../config/runtime';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
  * Stripe instance (loaded from CDN)
@@ -55,7 +56,7 @@ declare const Stripe: any;
   templateUrl: './payment-checkout.component.html',
   styleUrl: './payment-checkout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule]
+  imports: [CommonModule, CosModalComponent]
 })
 export class PaymentCheckoutComponent {
   private dataService = inject(DataService);

@@ -32,6 +32,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { SeriesGroup, Series, SchemaEntityProperty, EntityPropertyType } from '../../interfaces/entity';
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
+import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { SchemaService } from '../../services/schema.service';
 import { RecurringService } from '../../services/recurring.service';
 import { forkJoin, of } from 'rxjs';
@@ -66,167 +67,163 @@ import { catchError, map } from 'rxjs/operators';
     FormsModule,
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
-    EditPropertyComponent
+    EditPropertyComponent,
+    CosModalComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (isOpen) {
-      <div class="modal modal-open">
-        <div class="modal-box max-w-3xl max-h-[90vh] overflow-y-auto">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined">edit</span>
-            Edit Recurring Series
-          </h3>
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg">
+      <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined">edit</span>
+        Edit Recurring Series
+      </h3>
 
-          @if (loading()) {
-            <div class="flex items-center justify-center py-12">
-              <span class="loading loading-spinner loading-lg"></span>
-            </div>
-          } @else if (error()) {
-            <div class="alert alert-error mb-4">
-              <span>{{ error() }}</span>
-            </div>
-          } @else {
-            <!-- Tabs -->
-            <div class="tabs tabs-box mb-4">
-              <button
-                class="tab"
-                [class.tab-active]="activeTab() === 'info'"
-                (click)="activeTab.set('info')"
-              >
-                Series Info
-              </button>
-              <button
-                class="tab"
-                [class.tab-active]="activeTab() === 'template'"
-                (click)="activeTab.set('template')"
-              >
-                {{ group?.entity_table || 'Entity' }} Fields
-              </button>
-              <button
-                class="tab"
-                [class.tab-active]="activeTab() === 'schedule'"
-                (click)="activeTab.set('schedule')"
-              >
-                Schedule
-              </button>
-            </div>
+      @if (loading()) {
+        <div class="flex items-center justify-center py-12">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      } @else if (error()) {
+        <div class="alert alert-error mb-4">
+          <span>{{ error() }}</span>
+        </div>
+      } @else {
+        <!-- Tabs -->
+        <div class="tabs tabs-box mb-4">
+          <button
+            class="tab"
+            [class.tab-active]="activeTab() === 'info'"
+            (click)="activeTab.set('info')"
+          >
+            Series Info
+          </button>
+          <button
+            class="tab"
+            [class.tab-active]="activeTab() === 'template'"
+            (click)="activeTab.set('template')"
+          >
+            {{ group?.entity_table || 'Entity' }} Fields
+          </button>
+          <button
+            class="tab"
+            [class.tab-active]="activeTab() === 'schedule'"
+            (click)="activeTab.set('schedule')"
+          >
+            Schedule
+          </button>
+        </div>
 
-            <form [formGroup]="form">
-              <!-- Tab: Series Info -->
-              @if (activeTab() === 'info') {
-                <div class="space-y-4">
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">Series Name</span>
-                    </label>
-                    <input
-                      type="text"
-                      class="input input-bordered w-full"
-                      formControlName="display_name"
-                      placeholder="e.g., Weekly Yoga Class"
-                    />
-                  </div>
+        <form [formGroup]="form">
+          <!-- Tab: Series Info -->
+          @if (activeTab() === 'info') {
+            <div class="space-y-4">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">Series Name</span>
+                </label>
+                <input
+                  type="text"
+                  class="input input-bordered w-full"
+                  formControlName="display_name"
+                  placeholder="e.g., Weekly Yoga Class"
+                />
+              </div>
 
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text">Description (optional)</span>
-                    </label>
-                    <textarea
-                      class="textarea textarea-bordered w-full"
-                      rows="3"
-                      formControlName="description"
-                      placeholder="Brief description of this recurring schedule"
-                    ></textarea>
-                  </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Description (optional)</span>
+                </label>
+                <textarea
+                  class="textarea textarea-bordered w-full"
+                  rows="3"
+                  formControlName="description"
+                  placeholder="Brief description of this recurring schedule"
+                ></textarea>
+              </div>
 
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text">Color</span>
-                    </label>
-                    <div class="flex items-center gap-3">
-                      <input
-                        type="color"
-                        class="w-12 h-10 cursor-pointer rounded border border-base-300"
-                        formControlName="color"
-                      />
-                      <input
-                        type="text"
-                        class="input input-bordered flex-1"
-                        formControlName="color"
-                        placeholder="#3B82F6"
-                      />
-                    </div>
-                  </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Color</span>
+                </label>
+                <div class="flex items-center gap-3">
+                  <input
+                    type="color"
+                    class="w-12 h-10 cursor-pointer rounded border border-base-300"
+                    formControlName="color"
+                  />
+                  <input
+                    type="text"
+                    class="input input-bordered flex-1"
+                    formControlName="color"
+                    placeholder="#3B82F6"
+                  />
                 </div>
-              }
-
-              <!-- Tab: Entity Template Fields -->
-              @if (activeTab() === 'template') {
-                <div class="space-y-4">
-                  @if (templateProperties().length === 0) {
-                    <div class="alert">
-                      <span class="material-symbols-outlined">info</span>
-                      <span>No editable template fields found.</span>
-                    </div>
-                  } @else {
-                    <p class="text-sm text-base-content/70 mb-4">
-                      These values will be applied to all future occurrences in this series.
-                    </p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" formGroupName="template">
-                      @for (prop of templateProperties(); track prop.column_name) {
-                        <div [class.md:col-span-2]="isWideField(prop)">
-                          <app-edit-property
-                            [property]="prop"
-                            [formGroup]="templateFormGroup"
-                          ></app-edit-property>
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-
-              <!-- Tab: Schedule (RRULE) -->
-              @if (activeTab() === 'schedule') {
-                <div class="space-y-6">
-                  <app-recurring-schedule-form
-                    [dtstart]="scheduleValue().dtstart"
-                    [dtend]="scheduleValue().dtend"
-                    [rrule]="scheduleValue().rrule"
-                    (valueChange)="onScheduleChange($event)"
-                  ></app-recurring-schedule-form>
-
-                  @if (series?.expanded_until) {
-                    <div class="alert alert-info">
-                      <span class="material-symbols-outlined">info</span>
-                      <span>Series expanded until {{ formatDateTime(series!.expanded_until!) }}</span>
-                    </div>
-                  }
-                </div>
-              }
-            </form>
+              </div>
+            </div>
           }
 
-          <div class="modal-action">
-            <button class="btn btn-ghost" (click)="onCancel()" [disabled]="saving()">
-              Cancel
-            </button>
-            <button
-              class="btn btn-primary"
-              (click)="onSave()"
-              [disabled]="saving() || loading() || !form.valid || !scheduleValue().isValid"
-            >
-              @if (saving()) {
-                <span class="loading loading-spinner loading-sm"></span>
+          <!-- Tab: Entity Template Fields -->
+          @if (activeTab() === 'template') {
+            <div class="space-y-4">
+              @if (templateProperties().length === 0) {
+                <div class="alert">
+                  <span class="material-symbols-outlined">info</span>
+                  <span>No editable template fields found.</span>
+                </div>
+              } @else {
+                <p class="text-sm text-base-content/70 mb-4">
+                  These values will be applied to all future occurrences in this series.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" formGroupName="template">
+                  @for (prop of templateProperties(); track prop.column_name) {
+                    <div [class.md:col-span-2]="isWideField(prop)">
+                      <app-edit-property
+                        [property]="prop"
+                        [formGroup]="templateFormGroup"
+                      ></app-edit-property>
+                    </div>
+                  }
+                </div>
               }
-              Save Changes
-            </button>
-          </div>
-        </div>
-        <div class="modal-backdrop" (click)="onCancel()"></div>
+            </div>
+          }
+
+          <!-- Tab: Schedule (RRULE) -->
+          @if (activeTab() === 'schedule') {
+            <div class="space-y-6">
+              <app-recurring-schedule-form
+                [dtstart]="scheduleValue().dtstart"
+                [dtend]="scheduleValue().dtend"
+                [rrule]="scheduleValue().rrule"
+                (valueChange)="onScheduleChange($event)"
+              ></app-recurring-schedule-form>
+
+              @if (series?.expanded_until) {
+                <div class="alert alert-info">
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Series expanded until {{ formatDateTime(series!.expanded_until!) }}</span>
+                </div>
+              }
+            </div>
+          }
+        </form>
+      }
+
+      <div class="cos-modal-action">
+        <button class="btn btn-ghost" (click)="onCancel()" [disabled]="saving()">
+          Cancel
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="onSave()"
+          [disabled]="saving() || loading() || !form.valid || !scheduleValue().isValid"
+        >
+          @if (saving()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          Save Changes
+        </button>
       </div>
-    }
+    </cos-modal>
   `
 })
 export class SeriesEditorModalComponent implements OnChanges {

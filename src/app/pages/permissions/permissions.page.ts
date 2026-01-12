@@ -24,6 +24,7 @@ import { PermissionsService, Role, RolePermission, EntityActionPermission } from
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 
 type PermissionTab = 'tables' | 'actions';
 
@@ -45,7 +46,7 @@ interface PermissionsData {
 @Component({
   selector: 'app-permissions',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CosModalComponent],
   templateUrl: './permissions.page.html',
   styleUrl: './permissions.page.css'
 })
