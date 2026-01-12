@@ -3794,45 +3794,79 @@ ANALYZE issues;
 
 Use RLS to enforce data access controls at the database level (defense in depth).
 
-**Common Patterns**:
+#### Best Practice: Granular CRUD Policies
 
-1. **Users see own records**:
+**Every table should have separate policies for SELECT, INSERT, UPDATE, and DELETE** that use `has_permission()`. This enables the Permissions UI (`/permissions`) to control access without modifying RLS policies.
+
+```sql
+-- Enable RLS
+ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
+
+-- SELECT: Users with read permission
+CREATE POLICY "my_table: authorized read" ON my_table
+  FOR SELECT TO authenticated
+  USING (has_permission('my_table', 'read'));
+
+-- INSERT: Users with create permission
+CREATE POLICY "my_table: authorized insert" ON my_table
+  FOR INSERT TO authenticated
+  WITH CHECK (has_permission('my_table', 'create'));
+
+-- UPDATE: Users with update permission
+CREATE POLICY "my_table: authorized update" ON my_table
+  FOR UPDATE TO authenticated
+  USING (has_permission('my_table', 'update'))
+  WITH CHECK (has_permission('my_table', 'update'));
+
+-- DELETE: Users with delete permission
+CREATE POLICY "my_table: authorized delete" ON my_table
+  FOR DELETE TO authenticated
+  USING (has_permission('my_table', 'delete'));
+```
+
+**Why granular policies?**
+- **UI Administration**: Permissions page can toggle access per role without SQL changes
+- **Audit Trail**: Delete can be admin-only while allowing manager updates
+- **Clarity**: Easy to understand which roles can do what
+- **Avoid `FOR ALL`**: Coarse-grained policies can't be controlled via UI
+
+#### Common Patterns
+
+1. **Users see own records** (combine with permission-based):
    ```sql
-   CREATE POLICY "users_own_records" ON issues
-     FOR SELECT TO authenticated
-     USING (created_by = current_user_id());
-   ```
-
-2. **Permission-based access**:
-   ```sql
-   CREATE POLICY "permission_read" ON issues
-     FOR SELECT USING (has_permission('issues', 'READ'));
-
-   CREATE POLICY "permission_update" ON issues
-     FOR UPDATE USING (has_permission('issues', 'UPDATE'));
-   ```
-
-3. **Role-based access**:
-   ```sql
-   CREATE POLICY "moderators_all" ON submissions
-     FOR ALL TO authenticated
-     USING ('moderator' = ANY(get_user_roles()) OR is_admin());
-   ```
-
-4. **Conditional access**:
-   ```sql
-   CREATE POLICY "view_published_or_own" ON articles
+   CREATE POLICY "my_table: read own or authorized" ON my_table
      FOR SELECT TO authenticated
      USING (
-       status = 'published' OR
-       created_by = current_user_id() OR
-       is_admin()
+       created_by = current_user_id()
+       OR has_permission('my_table', 'read')
+     );
+   ```
+
+2. **Public read, authenticated write** (lookup tables):
+   ```sql
+   CREATE POLICY "my_table: public read" ON my_table
+     FOR SELECT TO web_anon, authenticated
+     USING (true);
+
+   CREATE POLICY "my_table: admin insert" ON my_table
+     FOR INSERT TO authenticated
+     WITH CHECK (is_admin());
+   ```
+
+3. **Conditional access** (published vs draft):
+   ```sql
+   CREATE POLICY "articles: view published or own" ON articles
+     FOR SELECT TO authenticated
+     USING (
+       status = 'published'
+       OR created_by = current_user_id()
+       OR has_permission('articles', 'read')
      );
    ```
 
 **Enable RLS**:
 ```sql
-ALTER TABLE issues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
 ```
 
 **Important**: Always test RLS policies with different user roles. Use `SET ROLE` to impersonate users in psql.

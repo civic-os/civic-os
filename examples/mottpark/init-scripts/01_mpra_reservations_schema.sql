@@ -539,8 +539,32 @@ GRANT USAGE, SELECT ON SEQUENCE reservation_payments_id_seq TO authenticated;
 
 -- Enable RLS
 -- NOTE: holiday_rules RLS is in mpra_holidays_dashboard.sql (Part 2)
+ALTER TABLE reservation_payment_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservation_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservation_payments ENABLE ROW LEVEL SECURITY;
+
+-- ---------------------------------------------------------------------------
+-- Reservation Payment Types: Read-only lookup table (admin can modify)
+-- ---------------------------------------------------------------------------
+
+-- SELECT: Anyone can read lookup data
+CREATE POLICY "reservation_payment_types: public read" ON reservation_payment_types
+  FOR SELECT TO web_anon, authenticated
+  USING (true);
+
+-- INSERT/UPDATE/DELETE: Admin only (system lookup table)
+CREATE POLICY "reservation_payment_types: admin insert" ON reservation_payment_types
+  FOR INSERT TO authenticated
+  WITH CHECK (is_admin());
+
+CREATE POLICY "reservation_payment_types: admin update" ON reservation_payment_types
+  FOR UPDATE TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+CREATE POLICY "reservation_payment_types: admin delete" ON reservation_payment_types
+  FOR DELETE TO authenticated
+  USING (is_admin());
 
 -- ---------------------------------------------------------------------------
 -- Reservation Requests: Complex visibility rules
@@ -590,11 +614,21 @@ CREATE POLICY "reservation_payments: read own or manager" ON reservation_payment
     OR has_permission('reservation_payments', 'read')
   );
 
--- Only admins can modify payments (waive, refund, etc.)
-CREATE POLICY "reservation_payments: admin modify" ON reservation_payments
-  FOR ALL TO authenticated
-  USING (is_admin())
+-- Only admins can delete payments
+CREATE POLICY "reservation_payments: admin delete" ON reservation_payments
+  FOR DELETE TO authenticated
+  USING (is_admin());
+
+-- Only admins can insert payments (typically created by system/triggers)
+CREATE POLICY "reservation_payments: admin insert" ON reservation_payments
+  FOR INSERT TO authenticated
   WITH CHECK (is_admin());
+
+-- Managers can update payment details (status, notes, waivers, etc.)
+CREATE POLICY "reservation_payments: authorized update" ON reservation_payments
+  FOR UPDATE TO authenticated
+  USING (has_permission('reservation_payments', 'update'))
+  WITH CHECK (has_permission('reservation_payments', 'update'));
 
 -- ============================================================================
 -- SECTION 11: METADATA CONFIGURATION
@@ -1132,6 +1166,37 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('time_slot_series_groups', 'time_slot_series', 'time_slot_instances')
   AND r.display_name IN ('editor', 'manager', 'admin')
+ON CONFLICT DO NOTHING;
+
+-- Grant core payment permissions to manager/admin
+-- payment_transactions:read - View payment details (Stripe transactions)
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'payment_transactions'
+  AND p.permission = 'read'
+  AND r.display_name IN ('manager', 'admin')
+ON CONFLICT DO NOTHING;
+
+-- payment_refunds:read - View refund status and history
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'payment_refunds'
+  AND p.permission = 'read'
+  AND r.display_name IN ('manager', 'admin')
+ON CONFLICT DO NOTHING;
+
+-- payment_refunds:create - Initiate refunds (manager can process refunds)
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'payment_refunds'
+  AND p.permission = 'create'
+  AND r.display_name IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================

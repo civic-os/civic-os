@@ -18,7 +18,7 @@
 import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, of, catchError } from 'rxjs';
 import { SchemaService } from './services/schema.service';
 import { VersionService } from './services/version.service';
 import { ThemeService } from './services/theme.service';
@@ -89,6 +89,33 @@ export class AppComponent {
   public hasPaymentEntities = computed(() => {
     const entities = this.entities();
     return entities?.some(e => e.payment_initiation_rpc) ?? false;
+  });
+
+  // Permission signals for feature access (v0.25.1)
+  // These check if the user has read permission on the underlying tables
+  public hasRecurringSchedulePermission = toSignal(
+    this.auth.hasPermission('time_slot_series', 'read').pipe(
+      catchError(() => of(false))
+    ),
+    { initialValue: false }
+  );
+
+  public hasPaymentPermission = toSignal(
+    this.auth.hasPermission('payment_transactions', 'read').pipe(
+      catchError(() => of(false))
+    ),
+    { initialValue: false }
+  );
+
+  // Show Admin section if user is admin OR has access to feature-specific pages
+  public showAdminSection = computed(() => {
+    // Admin always sees the section
+    if (this.auth.isAdmin()) return true;
+    // Non-admins see it if they have recurring schedule access
+    if (this.hasRecurringEntities() && this.hasRecurringSchedulePermission()) return true;
+    // Non-admins see it if they have payment access
+    if (this.hasPaymentEntities() && this.hasPaymentPermission()) return true;
+    return false;
   });
 
   constructor() {

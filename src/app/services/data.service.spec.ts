@@ -1534,6 +1534,71 @@ describe('DataService', () => {
     });
   });
 
+  describe('compareDateValues() - Date-only field comparison', () => {
+    // PostgreSQL 'date' columns return ISO 8601 datetime strings via JSON serialization,
+    // but HTML date inputs submit YYYY-MM-DD format
+
+    it('should match date-only input with datetime response (same date)', () => {
+      // Input: HTML date input format
+      // Response: PostgreSQL JSON serialization adds time component (midnight in server TZ)
+      const result = (service as any).compareDateValues('2025-01-15', '2025-01-15T05:00:00.000Z');
+      expect(result.isDate).toBe(true);
+      expect(result.matches).toBe(true);
+    });
+
+    it('should not match when dates differ', () => {
+      const result = (service as any).compareDateValues('2025-01-15', '2025-01-16T05:00:00.000Z');
+      expect(result.isDate).toBe(true);
+      expect(result.matches).toBe(false);
+    });
+
+    it('should match date-only input with date-only response', () => {
+      const result = (service as any).compareDateValues('2025-01-15', '2025-01-15');
+      expect(result.isDate).toBe(true);
+      expect(result.matches).toBe(true);
+    });
+
+    it('should handle different timezone offsets in response', () => {
+      // PostgreSQL might return different timezone formats
+      const result = (service as any).compareDateValues('2025-01-15', '2025-01-15T00:00:00+00:00');
+      expect(result.isDate).toBe(true);
+      expect(result.matches).toBe(true);
+    });
+
+    it('should handle datetime with space separator', () => {
+      // Some PostgreSQL JSON encoders use space instead of T
+      const result = (service as any).compareDateValues('2025-01-15', '2025-01-15 00:00:00+00');
+      expect(result.isDate).toBe(true);
+      expect(result.matches).toBe(true);
+    });
+
+    it('should return isDate=false for non-string input', () => {
+      const result = (service as any).compareDateValues(20250115, '2025-01-15T05:00:00.000Z');
+      expect(result.isDate).toBe(false);
+    });
+
+    it('should return isDate=false for non-string response', () => {
+      const result = (service as any).compareDateValues('2025-01-15', 20250115);
+      expect(result.isDate).toBe(false);
+    });
+
+    it('should return isDate=false if input is not date-only format', () => {
+      // DateTime format has time component - not handled by compareDateValues
+      const result = (service as any).compareDateValues('2025-01-15T10:30:00', '2025-01-15T05:00:00.000Z');
+      expect(result.isDate).toBe(false);
+    });
+
+    it('should return isDate=false for invalid date format', () => {
+      const result = (service as any).compareDateValues('01-15-2025', '2025-01-15T05:00:00.000Z');
+      expect(result.isDate).toBe(false);
+    });
+
+    it('should return isDate=false for partial date string', () => {
+      const result = (service as any).compareDateValues('2025-01', '2025-01-15T05:00:00.000Z');
+      expect(result.isDate).toBe(false);
+    });
+  });
+
   describe('EWKB Parsing Logic', () => {
     it('should parse valid EWKB Point (Downtown Flint)', () => {
       const result = (service as any).parseEWKBPoint(EWKB_SAMPLES.downtown_flint);

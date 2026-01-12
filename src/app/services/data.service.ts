@@ -337,6 +337,45 @@ export class DataService {
   }
 
   /**
+   * Compares date-only values (PostgreSQL 'date' type).
+   * Input: "2025-01-15" (HTML date input format)
+   * Response: "2025-01-15T05:00:00.000Z" (PostgreSQL JSON serialization adds time component)
+   *
+   * PostgreSQL's JSON serializer converts 'date' columns to ISO 8601 format with a
+   * midnight timestamp in the server's timezone, resulting in values like "T05:00:00.000Z"
+   * (midnight EST = 5 AM UTC).
+   */
+  private compareDateValues(inputValue: any, responseValue: any): { isDate: boolean, matches: boolean } {
+    if (typeof inputValue !== 'string' || typeof responseValue !== 'string') {
+      return { isDate: false, matches: false };
+    }
+
+    // Check if input is date-only format (YYYY-MM-DD) - exactly 10 characters
+    const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
+    const isInputDateOnly = dateOnlyPattern.test(inputValue);
+
+    // Check if response has a time component (from PostgreSQL JSON serialization)
+    const dateTimePattern = /^\d{4}-\d{2}-\d{2}[T ]/;
+    const isResponseDateTime = dateTimePattern.test(responseValue);
+
+    // This comparison handles: date-only input vs datetime response
+    // Also handles: date-only input vs date-only response (direct match)
+    if (!isInputDateOnly) {
+      return { isDate: false, matches: false };
+    }
+
+    try {
+      // Extract just the date portion (first 10 characters: YYYY-MM-DD)
+      const inputDate = inputValue.substring(0, 10);
+      const responseDate = responseValue.substring(0, 10);
+
+      return { isDate: true, matches: inputDate === responseDate };
+    } catch (error) {
+      return { isDate: false, matches: false };
+    }
+  }
+
+  /**
    * Compares money values.
    * Input: 100 (number) or "100" (string)
    * Response: "$100.00" (formatted string from PostgreSQL)
@@ -556,6 +595,11 @@ export class DataService {
             if (dateTimeComparison.isDateTime) {
               match = dateTimeComparison.matches;
             } else {
+              // Check if this is a date-only field (PostgreSQL 'date' type)
+              const dateComparison = this.compareDateValues(inputValue, responseValue);
+              if (dateComparison.isDate) {
+                match = dateComparison.matches;
+              } else {
               // Check if this is a money field and compare properly
               const moneyComparison = this.compareMoneyValues(inputValue, responseValue);
               if (moneyComparison.isMoney) {
@@ -575,6 +619,7 @@ export class DataService {
                     match = inputValue == responseValue;  // Use == for type coercion
                   }
                 }
+              }
               }
             }
           }

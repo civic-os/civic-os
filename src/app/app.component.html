@@ -109,46 +109,48 @@
               Database Schema
             </a>
           </li>
-          <!-- Admin section (admin-only) -->
-          @if (auth.isAdmin()) {
+          <!-- Admin section (shown to admins OR users with feature permissions) -->
+          @if (showAdminSection()) {
             <li class="mt-4">
               <span class="block px-4 py-2 text-base font-bold uppercase tracking-wide pointer-events-none">Admin</span>
             </li>
-          }
-          @if (auth.isAdmin()) {
-            <li (click)="navigateToEntityManagement()">
-              <a [class.menu-active]="isRouteActive('/entity-management')"
-                 [class.font-bold]="isRouteActive('/entity-management')"
-                 [class.opacity-85]="!isRouteActive('/entity-management')">
-                <span class="material-symbols-outlined" aria-hidden="true">dashboard_customize</span>
-                Entities
-              </a>
-            </li>
-            <li (click)="navigateToPropertyManagement()">
-              <a [class.menu-active]="isRouteActive('/property-management')"
-                 [class.font-bold]="isRouteActive('/property-management')"
-                 [class.opacity-85]="!isRouteActive('/property-management')">
-                <span class="material-symbols-outlined" aria-hidden="true">tune</span>
-                Properties
-              </a>
-            </li>
-            <li (click)="navigateToPermissions()">
-              <a [class.menu-active]="isRouteActive('/permissions')"
-                 [class.font-bold]="isRouteActive('/permissions')"
-                 [class.opacity-85]="!isRouteActive('/permissions')">
-                <span class="material-symbols-outlined" aria-hidden="true">lock</span>
-                Permissions
-              </a>
-            </li>
-            <li (click)="navigateToNotificationTemplates()">
-              <a [class.menu-active]="isRouteActive('/notifications/templates')"
-                 [class.font-bold]="isRouteActive('/notifications/templates')"
-                 [class.opacity-85]="!isRouteActive('/notifications/templates')">
-                <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
-                Notifications
-              </a>
-            </li>
-            @if (hasRecurringEntities()) {
+            <!-- Core admin items (admin-only) -->
+            @if (auth.isAdmin()) {
+              <li (click)="navigateToEntityManagement()">
+                <a [class.menu-active]="isRouteActive('/entity-management')"
+                   [class.font-bold]="isRouteActive('/entity-management')"
+                   [class.opacity-85]="!isRouteActive('/entity-management')">
+                  <span class="material-symbols-outlined" aria-hidden="true">dashboard_customize</span>
+                  Entities
+                </a>
+              </li>
+              <li (click)="navigateToPropertyManagement()">
+                <a [class.menu-active]="isRouteActive('/property-management')"
+                   [class.font-bold]="isRouteActive('/property-management')"
+                   [class.opacity-85]="!isRouteActive('/property-management')">
+                  <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+                  Properties
+                </a>
+              </li>
+              <li (click)="navigateToPermissions()">
+                <a [class.menu-active]="isRouteActive('/permissions')"
+                   [class.font-bold]="isRouteActive('/permissions')"
+                   [class.opacity-85]="!isRouteActive('/permissions')">
+                  <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                  Permissions
+                </a>
+              </li>
+              <li (click)="navigateToNotificationTemplates()">
+                <a [class.menu-active]="isRouteActive('/notifications/templates')"
+                   [class.font-bold]="isRouteActive('/notifications/templates')"
+                   [class.opacity-85]="!isRouteActive('/notifications/templates')">
+                  <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+                  Notifications
+                </a>
+              </li>
+            }
+            <!-- Feature-specific items (shown based on entity config + user permissions) -->
+            @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
               <li (click)="navigateToRecurringSchedules()">
                 <a [class.menu-active]="isRouteActive('/admin/recurring-schedules')"
                    [class.font-bold]="isRouteActive('/admin/recurring-schedules')"
@@ -158,7 +160,7 @@
                 </a>
               </li>
             }
-            @if (hasPaymentEntities()) {
+            @if (hasPaymentEntities() && hasPaymentPermission()) {
               <li (click)="navigateToPaymentsAdmin()">
                 <a [class.menu-active]="isRouteActive('/admin/payments')"
                    [class.font-bold]="isRouteActive('/admin/payments')"

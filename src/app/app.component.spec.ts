@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 import { AppComponent } from './app.component';
 import { AuthService } from './services/auth.service';
 import { ThemeService } from './services/theme.service';
@@ -33,10 +34,12 @@ describe('AppComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
-    mockAuthService = jasmine.createSpyObj('AuthService', ['isAdmin', 'hasRole', 'authenticated'], {
+    mockAuthService = jasmine.createSpyObj('AuthService', ['isAdmin', 'hasRole', 'authenticated', 'hasPermission'], {
       userRoles: []
     });
     mockAuthService.authenticated.and.returnValue(false);
+    // Default hasPermission to return false (as Observable)
+    mockAuthService.hasPermission.and.returnValue(of(false));
 
     // Mock ThemeService with signal
     const themeSignal = signal('corporate');
