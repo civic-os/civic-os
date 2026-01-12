@@ -643,8 +643,8 @@ export class DataService {
         success: false,
         error: {
           httpCode: 400,
-          message: "The update was not applied. The returned data does not match the submitted data.",
-          humanMessage: "Could not update",
+          message: "Your changes may not have been saved. The returned data does not match the submitted data.",
+          humanMessage: "Changes may not have been saved",
           hint: `Some fields were modified by the database (possibly: ${mismatchList}). This may indicate a configuration issue - contact your administrator if this persists.`,
           details: `Field mismatches: ${mismatchList}`
         }
