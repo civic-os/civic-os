@@ -19,6 +19,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Live update page as Schema is updated
 - [x] Add Color PropertyType
 - [ ] Configurable Entity Menu (Nesting, Hiding, Singular/Plural names)
+- [ ] **Cascading Dropdowns** - Filter FK dropdown options based on another field's selection (e.g., category → subcategory)
 
 #### List Pages
 - [X] Add pagination
