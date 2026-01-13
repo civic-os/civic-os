@@ -905,7 +905,7 @@ describe('DataService', () => {
       service.editData('Issue', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false);
         expect(response.error).toBeDefined();
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 
@@ -918,7 +918,7 @@ describe('DataService', () => {
 
       service.editData('Issue', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 
@@ -1108,7 +1108,7 @@ describe('DataService', () => {
       service.editData('Issue', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false);
         expect(response.error).toBeDefined();
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 
@@ -1260,7 +1260,7 @@ describe('DataService', () => {
 
       service.editData('Issue', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 
@@ -1287,7 +1287,7 @@ describe('DataService', () => {
 
       service.editData('Issue', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false); // Not detected as EWKB, compared as string
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 
@@ -1301,7 +1301,7 @@ describe('DataService', () => {
 
       service.editData('Issue', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false); // Not detected as EWKB, compared as string
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 
@@ -1383,7 +1383,7 @@ describe('DataService', () => {
       service.editData('tags', 1, updatedData).subscribe(response => {
         expect(response.success).toBe(false);
         expect(response.error).toBeDefined();
-        expect(response.error?.humanMessage).toBe('Could not update');
+        expect(response.error?.humanMessage).toBe('Changes may not have been saved');
         done();
       });
 

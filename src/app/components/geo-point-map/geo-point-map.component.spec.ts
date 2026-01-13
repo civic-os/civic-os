@@ -42,6 +42,27 @@ function createMockMarker(): any {
   };
 }
 
+/**
+ * Helper to wait for an async condition to be true.
+ * Polls every 10ms up to maxWait (default 1000ms).
+ * More robust than fixed timeouts for async lifecycle hooks.
+ */
+function waitFor(condition: () => boolean, maxWait = 1000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const checkCondition = () => {
+      if (condition()) {
+        resolve();
+      } else if (Date.now() - startTime > maxWait) {
+        reject(new Error(`waitFor timed out after ${maxWait}ms`));
+      } else {
+        setTimeout(checkCondition, 10);
+      }
+    };
+    checkCondition();
+  });
+}
+
 describe('GeoPointMapComponent', () => {
   let component: GeoPointMapComponent;
   let fixture: ComponentFixture<GeoPointMapComponent>;
@@ -233,14 +254,13 @@ describe('GeoPointMapComponent', () => {
       spyOn<any>(component, 'initializeMap');
     });
 
-    it('should call initializeMap after view init', (done) => {
+    it('should call initializeMap after view init', async () => {
       fixture.detectChanges();
 
-      // Increased timeout to account for async ngAfterViewInit with dynamic import
-      setTimeout(() => {
-        expect(component['initializeMap']).toHaveBeenCalled();
-        done();
-      }, 50);
+      // Wait for async ngAfterViewInit to complete (dynamic import + setTimeout)
+      await waitFor(() => (component['initializeMap'] as jasmine.Spy).calls.count() > 0);
+
+      expect(component['initializeMap']).toHaveBeenCalled();
     });
 
     it('should not emit valueChange in display mode', (done) => {
@@ -266,14 +286,13 @@ describe('GeoPointMapComponent', () => {
       spyOn<any>(component, 'initializeMap');
     });
 
-    it('should call initializeMap after view init', (done) => {
+    it('should call initializeMap after view init', async () => {
       fixture.detectChanges();
 
-      // Increased timeout to account for async ngAfterViewInit with dynamic import
-      setTimeout(() => {
-        expect(component['initializeMap']).toHaveBeenCalled();
-        done();
-      }, 50);
+      // Wait for async ngAfterViewInit to complete (dynamic import + setTimeout)
+      await waitFor(() => (component['initializeMap'] as jasmine.Spy).calls.count() > 0);
+
+      expect(component['initializeMap']).toHaveBeenCalled();
     });
 
     it('should emit valueChange with EWKT format when setLocation is called', (done) => {
@@ -679,17 +698,16 @@ describe('GeoPointMapComponent', () => {
       expect(component['markerClusterLoaded']()).toBe(false);
     });
 
-    it('should set markerClusterLoaded to true after ngAfterViewInit', (done) => {
+    it('should set markerClusterLoaded to true after ngAfterViewInit', async () => {
       // Mock initializeMap to prevent Leaflet DOM operations
       spyOn<any>(component, 'initializeMap');
 
       fixture.detectChanges();
 
-      // Wait for async ngAfterViewInit to complete
-      setTimeout(() => {
-        expect(component['markerClusterLoaded']()).toBe(true);
-        done();
-      }, 50);
+      // Wait for async ngAfterViewInit to complete (dynamic import sets the signal)
+      await waitFor(() => component['markerClusterLoaded']() === true);
+
+      expect(component['markerClusterLoaded']()).toBe(true);
     });
 
     it('should not call updateMultiMarkers before cluster is loaded', () => {
