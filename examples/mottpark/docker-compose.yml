@@ -172,7 +172,7 @@ services:
       - "8082:8080"
     command: start-dev --import-realm
     volumes:
-      - ./keycloak:/opt/keycloak/data/import:ro
+      - ../keycloak:/opt/keycloak/data/import:ro
     networks:
       - mottpark-network
     healthcheck:

@@ -1,6 +1,6 @@
 {
-  "realm": "mottpark-dev",
-  "displayName": "Mott Park Rec Area (Local Dev)",
+  "realm": "civic-os-dev",
+  "displayName": "Civic OS (Local Dev)",
   "enabled": true,
   "sslRequired": "none",
 
@@ -47,8 +47,12 @@
         "description": "Standard authenticated user - assigned to all new users by default"
       },
       {
+        "name": "editor",
+        "description": "Can create and edit records"
+      },
+      {
         "name": "manager",
-        "description": "Can create, edit, and manage records"
+        "description": "Can create, edit, and manage records (superset of editor)"
       },
       {
         "name": "admin",
@@ -63,7 +67,7 @@
         "description": "${role_uma_authorization}"
       },
       {
-        "name": "default-roles-mottpark-dev",
+        "name": "default-roles-civic-os-dev",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -83,15 +87,15 @@
     ]
   },
   "defaultRole": {
-    "name": "default-roles-mottpark-dev",
+    "name": "default-roles-civic-os-dev",
     "description": "${role_default-roles}",
     "composite": true
   },
 
   "clients": [
     {
-      "clientId": "mottpark-dev-client",
-      "name": "Mott Park Rec Area (Local Dev)",
+      "clientId": "civic-os-dev-client",
+      "name": "Civic OS (Local Dev)",
       "description": "Civic OS frontend application for local development",
       "enabled": true,
       "publicClient": true,
@@ -158,7 +162,23 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "default-roles-mottpark-dev"]
+      "realmRoles": ["user", "default-roles-civic-os-dev"]
+    },
+    {
+      "username": "testeditor",
+      "email": "testeditor@example.com",
+      "firstName": "Test",
+      "lastName": "Editor",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "testeditor",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "editor", "default-roles-civic-os-dev"]
     },
     {
       "username": "testmanager",
@@ -174,7 +194,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "manager", "default-roles-mottpark-dev"]
+      "realmRoles": ["user", "manager", "default-roles-civic-os-dev"]
     },
     {
       "username": "testadmin",
@@ -190,7 +210,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "admin", "default-roles-mottpark-dev"]
+      "realmRoles": ["user", "admin", "default-roles-civic-os-dev"]
     }
   ],
 

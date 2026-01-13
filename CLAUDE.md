@@ -301,17 +301,21 @@ See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters a
 
 ## Authentication & RBAC
 
-**Keycloak Authentication**: See `docs/AUTHENTICATION.md` for complete setup instructions including running your own Keycloak instance for RBAC testing.
+**Keycloak Authentication**: See `docs/AUTHENTICATION.md` for complete setup instructions.
 
-**Quick Reference** (default shared instance):
-- Keycloak URL: `https://auth.civic-os.org`
+**Quick Reference** (default local instance):
+- Keycloak URL: `http://localhost:8082`
 - Realm: `civic-os-dev`
-- Client ID: `myclient`
-- Configuration: `src/app/app.config.ts` (Keycloak configuration section)
+- Client ID: `civic-os-dev-client`
+- Admin Console: http://localhost:8082 (admin/admin)
+- Realm config: `examples/keycloak/civic-os-dev.json` (auto-imported on startup)
+- Test users: `testuser`, `testeditor`, `testmanager`, `testadmin` (password = username)
+
+All example docker-compose files include a pre-configured Keycloak service. The shared instance at `auth.civic-os.org` is available as an alternative (see `docs/AUTHENTICATION.md`).
 
 **RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
 
-**Default Roles**: `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `admin` (full access + permissions UI)
+**Default Roles**: `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)
 
 **Admin Features** (require `admin` role):
 - **Permissions Page** (`/permissions`) - Manage role-based table permissions

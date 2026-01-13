@@ -8,12 +8,56 @@ Civic OS uses Keycloak for authentication and role-based authorization. You have
 
 | Option | Best For | Pros | Cons |
 |--------|----------|------|------|
-| **A. Shared Instance** | Quick testing, learning | No setup required | Can't manage roles/users, can't test RBAC |
-| **B. Your Own Keycloak** | Development, RBAC testing | Full control, test all features | Requires setup |
+| **A. Local Keycloak (Default)** | Development, RBAC testing | Full control, test all features, auto-imports realm config | Requires Docker |
+| **B. Shared Instance** | Quick testing without Docker | No Keycloak setup required | Can't manage roles/users, can't test RBAC |
 
-## Option A: Using the Shared Instance (Quick Start)
+## Option A: Local Keycloak with Docker (Default)
 
-The default configuration uses a shared Keycloak instance at `auth.civic-os.org`.
+All example docker-compose files include a pre-configured Keycloak service that automatically imports a development realm (`mottpark-dev`) with users and roles ready to use.
+
+**What you can do:**
+- ✅ Full RBAC testing with admin, editor, and user roles
+- ✅ Create and manage users in Keycloak admin console
+- ✅ Access the Permissions management page
+- ✅ Test all Civic OS features
+
+**Setup:**
+
+1. Start the example with Docker Compose:
+   ```bash
+   cd examples/pothole  # or any example
+   docker-compose up -d
+   ```
+
+2. Wait for Keycloak to initialize (~90 seconds on first start)
+
+3. Access Keycloak admin console at: **http://localhost:8082**
+   - Username: `admin`
+   - Password: `admin`
+
+4. The `civic-os-dev` realm is auto-imported with pre-configured:
+   - Client: `civic-os-dev-client`
+   - Roles: `user`, `editor`, `manager`, `admin`
+   - Role mappers for JWT token claims
+   - Test users (password = username): `testuser`, `testeditor`, `testmanager`, `testadmin`
+
+**Angular Configuration (already set):**
+
+The Angular environment files (`src/environments/environment*.ts`) are pre-configured for local Keycloak:
+
+```typescript
+keycloak: {
+  url: 'http://localhost:8082',
+  realm: 'civic-os-dev',
+  clientId: 'civic-os-dev-client'
+}
+```
+
+---
+
+## Option B: Using the Shared Instance
+
+For quick testing without running Docker, you can use the shared Keycloak instance at `auth.civic-os.org`.
 
 **What you can do:**
 - ✅ Login and test basic authentication
@@ -26,101 +70,43 @@ The default configuration uses a shared Keycloak instance at `auth.civic-os.org`
 - ❌ Access the Permissions management page (requires `admin` role)
 
 **Setup:**
-1. Use the default settings in `.env.example`
-2. Run `./fetch-keycloak-jwk.sh` in the `examples/pothole/` directory (or your chosen example)
+
+1. Update `src/environments/environment.development.ts`:
+   ```typescript
+   keycloak: {
+     url: 'https://auth.civic-os.org',
+     realm: 'civic-os-dev',
+     clientId: 'myclient'
+   }
+   ```
+
+2. Run `./fetch-keycloak-jwk.sh` in the example directory to get the shared instance's public key
+
 3. Start the application
 
-**When to use this:** Initial exploration of Civic OS, understanding the basic flow.
+**When to use this:** Initial exploration of Civic OS when you can't run Docker locally.
 
 ---
 
-## Option B: Running Your Own Keycloak (Recommended)
+## Option C: Cloud Keycloak (Production)
 
-To fully test Civic OS features, especially RBAC, you need your own Keycloak instance where you have admin access.
+For production deployments, use a hosted Keycloak instance (Keycloak.cloud, AWS, GCP, Azure, etc.)
 
-### B1: Local Keycloak with Docker (Easiest)
-
-Add Keycloak to your Docker Compose setup:
-
-#### 1. Add Keycloak Service to docker-compose.yml
-
-Edit `examples/pothole/docker-compose.yml` and uncomment (or add) the Keycloak service:
-
-```yaml
-services:
-  # ... existing services (postgres, postgrest) ...
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    container_name: keycloak_server
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HEALTH_ENABLED: true
-      KC_METRICS_ENABLED: true
-    ports:
-      - "8080:8080"
-    command: start-dev
-    networks:
-      - postgrest-network
-```
-
-#### 2. Start Keycloak
-
-```bash
-cd example
-docker-compose up -d keycloak
-```
-
-Access Keycloak admin console at: **http://localhost:8080**
-- Username: `admin`
-- Password: `admin`
-
-#### 3. Update Configuration
-
-Edit `examples/pothole/.env`:
-
-```bash
-KEYCLOAK_URL=http://localhost:8080
-KEYCLOAK_REALM=civic-os-dev
-KEYCLOAK_CLIENT_ID=myclient
-```
-
-Edit `src/app/app.config.ts`:
-
-```typescript
-provideKeycloak({
-  config: {
-    url: 'http://localhost:8080',        // Changed from https://auth.civic-os.org
-    realm: 'civic-os-dev',               // Keep same or customize
-    clientId: 'myclient'                 // Keep same or customize
-  },
-  // ... rest of config
-```
-
-Now proceed to **Realm Configuration** below.
-
----
-
-### B2: Cloud Keycloak
-
-Use a hosted Keycloak instance (Keycloak.cloud, AWS, GCP, Azure, etc.)
-
-#### Popular Options:
+**Popular Options:**
 - **[Keycloak.cloud](https://www.keycloak.org/cloud)** - Official hosted service
 - **[Auth0](https://auth0.com/)** - Commercial alternative (OIDC compatible)
 - **AWS**: Deploy Keycloak on EC2/ECS
 - **GCP/Azure**: Use container services
 
-#### Setup Steps:
+**Setup Steps:**
 1. Deploy Keycloak to your chosen platform
 2. Note your Keycloak URL (e.g., `https://keycloak.example.com`)
-3. Update `.env` and `app.config.ts` with your URL
-4. Proceed to **Realm Configuration** below
+3. Update Angular environment files and example `.env` with your URL
+4. Proceed to **Realm Configuration** below to set up your realm
 
 ---
 
-## Realm Configuration (Required for Option B)
+## Realm Configuration (Required for Options B and C)
 
 Once you have your own Keycloak instance, configure a realm for Civic OS.
 

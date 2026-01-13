@@ -164,25 +164,31 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  # Optional: Local Keycloak instance for RBAC testing
-  # Uncomment this section to run Keycloak locally (recommended for testing roles/permissions)
-  # See docs/AUTHENTICATION.md for complete setup instructions
-  # keycloak:
-  #   image: quay.io/keycloak/keycloak:24.0
-  #   container_name: keycloak_server
-  #   environment:
-  #     KEYCLOAK_ADMIN: admin
-  #     KEYCLOAK_ADMIN_PASSWORD: admin
-  #     KC_HEALTH_ENABLED: true
-  #     KC_METRICS_ENABLED: true
-  #   ports:
-  #     - "8081:8080"  # Mapped to 8081 to avoid conflict with swagger-ui
-  #   command: start-dev
-  #   networks:
-  #     - postgrest-network
-  #   # Note: After starting Keycloak, access admin console at http://localhost:8081
-  #   #       Login: admin / admin
-  #   #       Follow docs/AUTHENTICATION.md to configure realm, client, and roles
+  # Local Keycloak for RBAC testing
+  # Admin console: http://localhost:8082 (admin/admin)
+  # Realm auto-imports from mottpark config on startup
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: pothole_keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8082:8080"
+    command: start-dev --import-realm
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import:ro
+    networks:
+      - postgrest-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
 
 volumes:
   postgres_data:

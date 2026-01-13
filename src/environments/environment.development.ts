@@ -27,9 +27,9 @@ export const environment: Environment = {
         defaultZoom: 13
     },
     keycloak: {
-        url: 'https://auth.civic-os.org',
+        url: 'http://localhost:8082',
         realm: 'civic-os-dev',
-        clientId: 'myclient'
+        clientId: 'civic-os-dev-client'
     },
     s3: {
         endpoint: 'http://localhost:9000',
