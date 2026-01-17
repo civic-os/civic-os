@@ -33,8 +33,7 @@ users:
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-      # IMPORTANT: Replace with your actual SSH public key before provisioning
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... your-key-here
+      - ${SSH_PUBLIC_KEY}
 
 write_files:
   # Docker daemon configuration

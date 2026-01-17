@@ -15,7 +15,8 @@
 #
 # Prerequisites:
 #   - doctl installed and authenticated (doctl auth init)
-#   - cloud-init.yaml configured with your SSH key
+#   - SSH public key in ~/.ssh/id_ed25519.pub or ~/.ssh/id_rsa.pub
+#     (or set SSH_PUBLIC_KEY environment variable)
 
 set -e
 
@@ -112,12 +113,29 @@ if [ ! -f "cloud-init.yaml" ]; then
     exit 1
 fi
 
-# Check if SSH key is configured in cloud-init.yaml
-if grep -q "your-key-here" cloud-init.yaml; then
-    log_error "SSH key not configured in cloud-init.yaml"
-    log_error "Edit cloud-init.yaml and replace 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... your-key-here' with your actual SSH public key"
-    exit 1
+# Resolve SSH public key
+if [ -z "${SSH_PUBLIC_KEY}" ]; then
+    # Try common SSH key locations
+    if [ -f ~/.ssh/id_ed25519.pub ]; then
+        export SSH_PUBLIC_KEY="$(cat ~/.ssh/id_ed25519.pub)"
+        log_info "Using SSH key from ~/.ssh/id_ed25519.pub"
+    elif [ -f ~/.ssh/id_rsa.pub ]; then
+        export SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
+        log_info "Using SSH key from ~/.ssh/id_rsa.pub"
+    else
+        log_error "No SSH public key found. Either:"
+        log_error "  1. Create one: ssh-keygen -t ed25519"
+        log_error "  2. Set SSH_PUBLIC_KEY environment variable"
+        exit 1
+    fi
+else
+    log_info "Using SSH key from SSH_PUBLIC_KEY environment variable"
 fi
+
+# Generate resolved cloud-init with SSH key substituted
+CLOUD_INIT_RESOLVED=$(mktemp)
+envsubst '${SSH_PUBLIC_KEY}' < cloud-init.yaml > "${CLOUD_INIT_RESOLVED}"
+trap "rm -f ${CLOUD_INIT_RESOLVED}" EXIT
 
 # Check if droplet already exists
 if doctl compute droplet list --format Name --no-header | grep -q "^${DROPLET_NAME}$"; then
@@ -137,7 +155,7 @@ DROPLET_ID=$(doctl compute droplet create "${DROPLET_NAME}" \
     --region "${REGION}" \
     --size "${SIZE}" \
     --image "${IMAGE}" \
-    --user-data-file cloud-init.yaml \
+    --user-data-file "${CLOUD_INIT_RESOLVED}" \
     --tag-names "civic-os,${INSTANCE_NAME}" \
     --format ID \
     --no-header \
