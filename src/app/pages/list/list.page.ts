@@ -77,7 +77,8 @@ export class ListPage implements OnInit, OnDestroy {
 
   public entityKey?: string;
   public searchControl = new FormControl('');
-  public isLoading = signal<boolean>(false);
+  // Start as true - data pipeline will set to false when complete
+  public isLoading = signal<boolean>(true);
 
   // Row hover stream for debouncing map interactions
   private rowHover$ = new Subject<number | null>();
@@ -286,13 +287,18 @@ export class ListPage implements OnInit, OnDestroy {
                 orderDirection: sortState.direction || undefined,
                 filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
                 pagination: effectivePagination
-              })
+              }).pipe(
+                // Only set loading=false AFTER API data arrives, not after the initial clearing emission
+                tap(() => this.isLoading.set(false))
+              )
             );
           } else {
-            return of({ data: [], totalCount: 0 });
+            // No data to fetch - set loading to false
+            return of({ data: [], totalCount: 0 }).pipe(
+              tap(() => this.isLoading.set(false))
+            );
           }
-        }),
-        tap(() => this.isLoading.set(false))
+        })
       );
     })
   );
@@ -303,6 +309,7 @@ export class ListPage implements OnInit, OnDestroy {
   // Derive data and pagination state from observables
   public dataSignal = computed(() => this.dataWithCount().data);
   public totalCount = computed(() => this.dataWithCount().totalCount);
+
 
   // Convert observables to signals for template use
   public sortStateSignal = toSignal(this.sortState$, {

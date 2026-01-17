@@ -66,9 +66,15 @@
   transform: scale(1);
 }
 
-/* Size variants */
+/* Size variants - responsive widths for larger screens */
 .cos-modal-sm {
-  width: min(calc(100vw - 2rem), 20rem); /* 320px */
+  width: min(calc(100vw - 2rem), 20rem); /* 320px on mobile */
+}
+
+@media (min-width: 640px) {
+  .cos-modal-sm {
+    width: min(calc(100vw - 2rem), 28rem); /* 448px on sm+ screens */
+  }
 }
 
 .cos-modal-lg {

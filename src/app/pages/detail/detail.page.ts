@@ -218,8 +218,7 @@ export class DetailPage {
   ]).pipe(
     // Batch synchronous emissions during initialization
     debounceTime(0),
-    tap(([props, actions, trigger]) => {
-      console.log('[DetailPage] data$ pipeline triggered', { propsCount: props?.length, actionsCount: actions?.length, triggerValue: trigger, dataLoading: this.dataLoading() });
+    tap(() => {
       this.dataLoading.set(true);
     }),
     mergeMap(([props, actions, _]) => {
@@ -240,9 +239,6 @@ export class DetailPage {
 
       return this.data.getData({key: this.entityKey, fields: columns, entityId: this.entityId})
         .pipe(
-          tap((results) => {
-            console.log('[DetailPage] getData returned', { resultsCount: results?.length, entityKey: this.entityKey });
-          }),
           map(results => {
           const data = results[0];
 
@@ -283,53 +279,37 @@ export class DetailPage {
     this.entity$
   ]).pipe(
     map(([props, data, entity]) => {
-      console.log('[Payment Debug] Checking payment eligibility:', {
-        entityTable: entity?.table_name,
-        hasData: !!data,
-        propsCount: props?.length
-      });
-
       // Must have Payment property type
       const hasPaymentProp = props.some(p => p.type === EntityPropertyType.Payment);
-      console.log('[Payment Debug] Has payment property:', hasPaymentProp);
 
       if (!hasPaymentProp || !data || !entity) {
-        console.log('[Payment Debug] Early return: missing requirements');
         return false;
       }
 
       // Find payment property
       const paymentProp = props.find(p => p.type === EntityPropertyType.Payment);
-      console.log('[Payment Debug] Payment property:', paymentProp);
 
       if (!paymentProp) {
-        console.log('[Payment Debug] No payment property found');
         return false;
       }
 
       // Check payment status
       const paymentValue = data[paymentProp.column_name];
-      console.log('[Payment Debug] Payment value:', paymentValue);
 
       // If payment exists, check if it's completed
       if (isPaymentValue(paymentValue)) {
-        console.log('[Payment Debug] Payment status:', paymentValue.status);
-
         // Hide button if payment succeeded (completed)
         // Show button if payment is pending/pending_intent/failed (allow retry)
         if (paymentValue.status === 'succeeded') {
-          console.log('[Payment Debug] Payment already succeeded');
           return false;
         }
         // For pending/pending_intent/failed/canceled, allow retry
-        console.log('[Payment Debug] Payment incomplete, allow retry');
       }
 
       // Check if entity has payment_initiation_rpc configured in metadata
       const canPay = hasPaymentProp &&
         entity.payment_initiation_rpc != null &&
         entity.payment_initiation_rpc !== '';
-      console.log('[Payment Debug] Can initiate payment:', canPay, 'for table:', entity.table_name, 'RPC:', entity.payment_initiation_rpc);
       return canPay;
     })
   );
@@ -469,13 +449,6 @@ export class DetailPage {
                prev[1]?.id === curr[1]?.id &&
                prev[2] === curr[2];  // Compare refresh counter
       }),
-      tap(([entity, data, refreshCount]) => {
-        console.log('[DetailPage] inverseRelationships$ triggered', {
-          tableName: entity?.table_name,
-          dataId: data?.id,
-          refreshCount
-        });
-      }),
       mergeMap(([entity, data, _refreshCount]) => {
         if (!entity || !data) return of([]);
 
@@ -523,13 +496,6 @@ export class DetailPage {
         return prev[0]?.table_name === curr[0]?.table_name &&
                prev[1]?.id === curr[1]?.id &&
                prev[3] === curr[3];  // Compare refresh counter (index 3)
-      }),
-      tap(([entity, data, _allEntities, refreshCount]) => {
-        console.log('[DetailPage] calendarSections$ triggered', {
-          tableName: entity?.table_name,
-          dataId: data?.id,
-          refreshCount
-        });
       }),
       mergeMap(([entity, data, allEntities, _refreshCount]) => {
         if (!entity || !data) return of([]);
@@ -602,11 +568,10 @@ export class DetailPage {
 
   // Refresh data after M:M changes
   refreshData() {
-    const newCount = this.refreshCounter() + 1;
-    console.log('[DetailPage] refreshData() called - emitting refreshTrigger, incrementing refreshCounter to', newCount);
     this.refreshTrigger$.next();
 
     // Cascade to child components (notes, M:M editors) via signal
+    const newCount = this.refreshCounter() + 1;
     this.refreshCounter.set(newCount);
   }
 
@@ -885,20 +850,13 @@ export class DetailPage {
   /**
    * Handle successful payment (or any status change)
    */
-  handlePaymentSuccess(paymentId: string) {
-    console.log('[DetailPage] handlePaymentSuccess called', {
-      paymentId,
-      showCheckoutModal: this.showCheckoutModal(),
-      currentPaymentId: this.currentPaymentId()
-    });
+  handlePaymentSuccess(_paymentId: string) {
     this.showCheckoutModal.set(false);
     this.currentPaymentId.set(undefined);
 
     // Refresh data to show updated payment status
     // (PaymentCheckoutComponent already waits 500ms before emitting to ensure DB consistency)
-    console.log('[DetailPage] Calling refreshData() from handlePaymentSuccess');
     this.refreshData();
-    console.log('[DetailPage] refreshData() called, refreshTrigger emitted');
   }
 
   /**
@@ -906,17 +864,11 @@ export class DetailPage {
    * Refresh data to show any payment status changes that occurred before close
    */
   handleCheckoutClose() {
-    console.log('[DetailPage] handleCheckoutClose called', {
-      showCheckoutModal: this.showCheckoutModal(),
-      currentPaymentId: this.currentPaymentId()
-    });
     this.showCheckoutModal.set(false);
     this.currentPaymentId.set(undefined);
 
     // Refresh data in case payment status changed before user closed modal
-    console.log('[DetailPage] Calling refreshData() from handleCheckoutClose');
     this.refreshData();
-    console.log('[DetailPage] refreshData() called, refreshTrigger emitted');
   }
 
   /**

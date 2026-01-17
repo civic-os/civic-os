@@ -20,6 +20,9 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AnalyticsService } from '../../services/analytics.service';
 import { NotificationService, type NotificationPreference } from '../../services/notification.service';
+import { AuthService } from '../../services/auth.service';
+import { ImpersonationService } from '../../services/impersonation.service';
+import { PermissionsService, Role } from '../../services/permissions.service';
 import { getMatomoConfig } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
@@ -42,6 +45,11 @@ export class SettingsModalComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly matomoConfig = getMatomoConfig();
 
+  // Public services for template access
+  readonly auth = inject(AuthService);
+  readonly impersonation = inject(ImpersonationService);
+  private readonly permissionsService = inject(PermissionsService);
+
   // Input: Control visibility of modal
   showModal = input.required<boolean>();
 
@@ -57,6 +65,11 @@ export class SettingsModalComponent {
   smsPreference = signal<NotificationPreference | undefined>(undefined);
   preferencesLoading = signal<boolean>(false);
 
+  // State: Impersonation
+  availableRoles = signal<Role[]>([]);
+  selectedRoles = signal<string[]>([]);
+  impersonationLoading = signal<boolean>(false);
+
   // Check if analytics is configured at all
   analyticsConfigured = this.matomoConfig.url && this.matomoConfig.siteId;
 
@@ -64,10 +77,15 @@ export class SettingsModalComponent {
     // Load initial preference from localStorage
     this.analyticsEnabled.set(this.analyticsService.getUserPreference());
 
-    // Load notification preferences when modal opens
+    // Load preferences and roles when modal opens
     effect(() => {
       if (this.showModal()) {
         this.loadNotificationPreferences();
+
+        // Load available roles for admins
+        if (this.auth.isRealAdmin()) {
+          this.loadAvailableRoles();
+        }
       }
     });
   }
@@ -135,5 +153,85 @@ export class SettingsModalComponent {
    */
   close(): void {
     this.closeModal.emit();
+  }
+
+  // =========================================================================
+  // IMPERSONATION (Admin Only)
+  // =========================================================================
+
+  /**
+   * Load available roles for impersonation selection
+   */
+  private loadAvailableRoles(): void {
+    this.permissionsService.getRoles().subscribe({
+      next: (roles) => {
+        // Filter out 'anonymous' - can't impersonate as anonymous
+        this.availableRoles.set(roles.filter(r => r.display_name !== 'anonymous'));
+      },
+      error: (err) => {
+        console.error('Failed to load roles for impersonation:', err);
+        this.availableRoles.set([]);
+      }
+    });
+  }
+
+  /**
+   * Toggle role selection for impersonation
+   */
+  toggleRole(roleName: string): void {
+    const current = this.selectedRoles();
+    if (current.includes(roleName)) {
+      this.selectedRoles.set(current.filter(r => r !== roleName));
+    } else {
+      this.selectedRoles.set([...current, roleName]);
+    }
+  }
+
+  /**
+   * Check if a role is currently selected
+   */
+  isRoleSelected(roleName: string): boolean {
+    return this.selectedRoles().includes(roleName);
+  }
+
+  /**
+   * Start impersonation with selected roles
+   */
+  startImpersonation(): void {
+    const roles = this.selectedRoles();
+    if (roles.length === 0) {
+      return;
+    }
+
+    this.impersonationLoading.set(true);
+    this.impersonation.startImpersonation(roles).subscribe({
+      next: () => {
+        this.impersonationLoading.set(false);
+        // Clear selection after starting
+        this.selectedRoles.set([]);
+      },
+      error: (err) => {
+        console.error('Failed to start impersonation:', err);
+        this.impersonationLoading.set(false);
+      }
+    });
+  }
+
+  /**
+   * Stop impersonation and return to real roles
+   */
+  stopImpersonation(): void {
+    this.impersonationLoading.set(true);
+    this.impersonation.stopImpersonation().subscribe({
+      next: () => {
+        this.impersonationLoading.set(false);
+        // Reload available roles now that we have real admin permissions again
+        this.loadAvailableRoles();
+      },
+      error: (err) => {
+        console.error('Failed to stop impersonation:', err);
+        this.impersonationLoading.set(false);
+      }
+    });
   }
 }

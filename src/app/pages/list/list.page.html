@@ -179,7 +179,13 @@
               } @else {
                 <tr>
                   <td colspan="100%" class="p-8">
-                    @if (!entity.select && !auth.authenticated()) {
+                    @if (isLoading()) {
+                      <!-- Loading state - show spinner while data is being fetched -->
+                      <div class="flex flex-col items-center justify-center gap-4 py-12">
+                        <span class="loading loading-spinner loading-lg"></span>
+                        <p class="text-base-content/60">Loading records...</p>
+                      </div>
+                    } @else if (!entity.select && !auth.authenticated()) {
                       <app-empty-state
                         icon="lock"
                         title="Sign in to view data"

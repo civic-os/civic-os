@@ -15,12 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakService, ReadyArgs, typeEventArgs } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { DataService } from './data.service';
 import { SchemaService } from './schema.service';
 import { AnalyticsService } from './analytics.service';
+import { ImpersonationService } from './impersonation.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
@@ -34,9 +35,26 @@ export class AuthService {
   private keycloakSignal = inject(KEYCLOAK_EVENT_SIGNAL);
   private http = inject(HttpClient);
   private analytics = inject(AnalyticsService);
+  private impersonation = inject(ImpersonationService);
 
   authenticated = signal(false);
-  userRoles = signal<string[]>([]);
+
+  /**
+   * The actual roles from the JWT token.
+   * Use this when you need the real user identity (e.g., checking if user can access impersonation UI).
+   */
+  realUserRoles = signal<string[]>([]);
+
+  /**
+   * Effective roles - returns impersonated roles if impersonation is active, otherwise real JWT roles.
+   * Use this for all permission checks in the UI.
+   */
+  userRoles = computed(() => {
+    if (this.impersonation.isActive()) {
+      return this.impersonation.impersonatedRoles();
+    }
+    return this.realUserRoles();
+  });
 
   constructor() {
     effect(() => {
@@ -75,7 +93,7 @@ export class AuthService {
 
       if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
         this.authenticated.set(false);
-        this.userRoles.set([]);
+        this.realUserRoles.set([]);
 
         // Track logout and reset user ID
         this.analytics.trackEvent('Auth', 'Logout');
@@ -98,20 +116,46 @@ export class AuthService {
                         tokenParsed['resource_access']?.['myclient']?.['roles'] ||
                         tokenParsed['roles'] ||
                         [];
-        this.userRoles.set(roles);
+        this.realUserRoles.set(roles);
       }
     } catch (error) {
       console.error('Error loading user roles:', error);
-      this.userRoles.set([]);
+      this.realUserRoles.set([]);
     }
   }
 
+  /**
+   * Check if effective roles include the given role.
+   * Uses impersonated roles if impersonation is active.
+   */
   hasRole(roleName: string): boolean {
     return this.userRoles().includes(roleName);
   }
 
+  /**
+   * Check if effective roles include 'admin'.
+   * Returns false when impersonating as non-admin role.
+   * Use this for hiding/showing admin UI elements.
+   */
   isAdmin(): boolean {
     return this.hasRole('admin');
+  }
+
+  /**
+   * Check if the REAL user (from JWT) has the given role.
+   * Ignores impersonation.
+   */
+  hasRealRole(roleName: string): boolean {
+    return this.realUserRoles().includes(roleName);
+  }
+
+  /**
+   * Check if the REAL user (from JWT) is an admin.
+   * Ignores impersonation - always returns true for real admins.
+   * Use this for showing impersonation controls.
+   */
+  isRealAdmin(): boolean {
+    return this.hasRealRole('admin');
   }
 
   /**

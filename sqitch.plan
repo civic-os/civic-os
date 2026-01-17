@@ -33,3 +33,4 @@ v0-22-0-add-scheduled-jobs [v0-21-0-add-processing-fees] 2025-12-20T12:00:00Z Da
 v0-23-0-system-introspection [v0-22-0-add-scheduled-jobs] 2025-12-24T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add System Introspection: RPC registry, trigger documentation, entity dependency graphs
 v0-24-0-schema-reorganization [v0-23-0-system-introspection] 2025-12-24T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Schema Reorganization: extensions to plugins, framework functions to metadata
 v0-25-1-add-status-key [v0-24-0-schema-reorganization] 2026-01-10T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add status_key column for stable programmatic reference to statuses
+v0-26-0-impersonation [v0-25-1-add-status-key] 2026-01-17T19:53:42Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add admin role impersonation for testing permissions

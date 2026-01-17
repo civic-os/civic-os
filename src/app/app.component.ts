@@ -22,6 +22,7 @@ import { filter, of, catchError } from 'rxjs';
 import { SchemaService } from './services/schema.service';
 import { VersionService } from './services/version.service';
 import { ThemeService } from './services/theme.service';
+import { ImpersonationService } from './services/impersonation.service';
 import { Observable } from 'rxjs';
 import { OpenAPIV2 } from 'openapi-types';
 import { CommonModule } from '@angular/common';
@@ -53,6 +54,7 @@ export class AppComponent {
   private elementRef = inject(ElementRef);
   public auth = inject(AuthService);
   public themeService = inject(ThemeService);
+  public impersonation = inject(ImpersonationService);
 
   public drawerOpen: boolean = false;
   title = 'frontend';
@@ -210,6 +212,13 @@ export class AppComponent {
    */
   public openAbout() {
     this.showAboutModal.set(true);
+  }
+
+  /**
+   * Stop impersonation from navbar dropdown
+   */
+  public stopImpersonation() {
+    this.impersonation.stopImpersonation().subscribe();
   }
 
   /**

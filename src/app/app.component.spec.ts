@@ -25,21 +25,25 @@ import { AppComponent } from './app.component';
 import { AuthService } from './services/auth.service';
 import { ThemeService } from './services/theme.service';
 import { AnalyticsService } from './services/analytics.service';
+import { ImpersonationService } from './services/impersonation.service';
 import { Location } from '@angular/common';
 
 describe('AppComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockThemeService: jasmine.SpyObj<ThemeService>;
   let mockAnalyticsService: jasmine.SpyObj<AnalyticsService>;
+  let mockImpersonationService: jasmine.SpyObj<ImpersonationService>;
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
-    mockAuthService = jasmine.createSpyObj('AuthService', ['isAdmin', 'hasRole', 'authenticated', 'hasPermission'], {
+    mockAuthService = jasmine.createSpyObj('AuthService', ['isAdmin', 'hasRole', 'authenticated', 'hasPermission', 'isRealAdmin'], {
       userRoles: []
     });
     mockAuthService.authenticated.and.returnValue(false);
     // Default hasPermission to return false (as Observable)
     mockAuthService.hasPermission.and.returnValue(of(false));
+    // Default isRealAdmin to return false
+    mockAuthService.isRealAdmin.and.returnValue(false);
 
     // Mock ThemeService with signal
     const themeSignal = signal('corporate');
@@ -52,6 +56,12 @@ describe('AppComponent', () => {
     mockAnalyticsService = jasmine.createSpyObj('AnalyticsService', ['trackPageView', 'trackEvent', 'getUserPreference']);
     mockAnalyticsService.getUserPreference.and.returnValue(true);
 
+    // Mock ImpersonationService with signal
+    mockImpersonationService = jasmine.createSpyObj('ImpersonationService', ['startImpersonation', 'stopImpersonation'], {
+      isActive: signal(false),
+      impersonatedRoles: signal<string[]>([])
+    });
+
     await TestBed.configureTestingModule({
       imports: [AppComponent],
       providers: [
@@ -61,7 +71,8 @@ describe('AppComponent', () => {
         provideHttpClientTesting(),
         { provide: AuthService, useValue: mockAuthService },
         { provide: ThemeService, useValue: mockThemeService },
-        { provide: AnalyticsService, useValue: mockAnalyticsService }
+        { provide: AnalyticsService, useValue: mockAnalyticsService },
+        { provide: ImpersonationService, useValue: mockImpersonationService }
       ]
     }).compileComponents();
 

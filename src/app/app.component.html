@@ -35,16 +35,41 @@
             <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="Emerald" value="emerald" [checked]="themeService.theme() === 'emerald'" (change)="themeService.setTheme('emerald')"/></li>
           </ul>
         </div>
+        <!-- Impersonation Button (shown when active) -->
+        @if (impersonation.isActive()) {
+          <button class="btn btn-warning m-1" (click)="openSettings()" title="Click to manage impersonation">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            Impersonating
+          </button>
+        }
+
         <details id="profile-dropdown" class="dropdown dropdown-end">
-          <summary class="btn m-1 btn-ghost" aria-label="User account menu">
+          <summary class="btn m-1" [class.btn-ghost]="!impersonation.isActive()" [class.btn-warning]="impersonation.isActive()" aria-label="User account menu">
             @if (this.auth.authenticated()) {
-              <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+              @if (impersonation.isActive()) {
+                <!-- Warning icon when impersonating -->
+                <span class="material-symbols-outlined" aria-hidden="true">shield_person</span>
+              } @else {
+                <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+              }
             } @else {
               <span class="material-symbols-outlined" aria-hidden="true">person</span>
             }
           </summary>
           <ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
             @if (this.auth.authenticated()) {
+              @if (impersonation.isActive()) {
+                <!-- Impersonation info at top of menu -->
+                <li class="menu-disabled">
+                  <span class="text-warning text-xs">
+                    Viewing as: {{ impersonation.impersonatedRoles().join(', ') }}
+                  </span>
+                </li>
+                <li><a class="text-warning font-medium" (click)="stopImpersonation()">Stop Impersonation</a></li>
+                <li class="border-t border-base-300 my-1"></li>
+              }
               <li><a (click)="openSettings()">Preferences</a></li>
               <li><a [href]="getKeycloakAccountUrl()">Account Settings</a></li>
               <li><a (click)="this.auth.logout()">Logout</a></li>

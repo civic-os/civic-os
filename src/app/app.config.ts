@@ -21,6 +21,7 @@ import { provideRouter, withRouterConfig } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak } from 'keycloak-angular';
+import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
 import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/markdown-widget.component';
 import { FilteredListWidgetComponent } from './components/widgets/filtered-list-widget/filtered-list-widget.component';
@@ -59,7 +60,10 @@ export const appConfig: ApplicationConfig = {
     },
 
     provideRouter(routes),
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
+    provideHttpClient(withInterceptors([
+      includeBearerTokenInterceptor,
+      impersonationInterceptor  // Adds X-Impersonate-Roles header when admin is impersonating
+    ])),
 
     // Matomo analytics - conditionally provided if configured
     ...(() => {

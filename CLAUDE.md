@@ -175,6 +175,15 @@ This avoids re-running the full test suite (30+ seconds) when investigating mult
 
 See `docs/development/TESTING.md` for comprehensive testing guidelines, best practices, and troubleshooting.
 
+**⚠️ MANDATORY: Run Tests Before Committing**
+
+You **MUST** run the full test suite (`npm run test:headless`) before staging or committing ANY code changes. This is non-negotiable. Failing tests that reach CI/CD waste time and break the build.
+
+- Run `npm run test:headless` after completing your changes
+- If tests fail, fix them before staging
+- Never ignore failing tests or assume they're "unrelated" to your changes
+- Adding new services/dependencies to components often requires updating test mocks
+
 **Building:**
 ```bash
 npm run build                      # Production build
@@ -513,6 +522,7 @@ When creating new documentation files, follow this structure:
 
 ## Git Commit Guidelines
 
+- **ALWAYS run `npm run test:headless` before staging/committing** - failing tests break CI/CD
 - Use concise summary-style commit messages that describe the overall change
 - Avoid bulleted lists of individual changes - summarize the purpose instead
 - Keep commit messages clean and professional
