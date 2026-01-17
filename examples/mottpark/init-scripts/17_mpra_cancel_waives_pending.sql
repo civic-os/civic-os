@@ -1,9 +1,8 @@
 -- =============================================================================
--- AUTO-CANCEL PENDING PAYMENTS ON RESERVATION CANCELLATION
+-- RESERVATION SYSTEM UPDATES
 --
--- When a reservation request is cancelled, automatically cancel all pending
--- payments instead of leaving them in limbo. Paid payments still require
--- manual refund processing.
+-- 1. Auto-cancel pending payments when reservation is cancelled
+-- 2. Reduce advance booking requirement from 10 days to 24 hours
 --
 -- LOGICAL DEPENDENCY: Should be run after 16_mpra_waive_fees.sql (not enforced)
 --
@@ -150,6 +149,32 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.cancel_reservation_request(BIGINT) TO authenticated;
+
+-- =============================================================================
+-- PART 3: Reduce advance booking requirement from 10 days to 24 hours
+-- =============================================================================
+-- This allows same-day or next-day reservations, which is more flexible for
+-- community members who need the facility on short notice.
+
+ALTER TABLE reservation_requests
+  DROP CONSTRAINT IF EXISTS min_advance_booking;
+
+ALTER TABLE reservation_requests
+  ADD CONSTRAINT min_advance_booking
+  CHECK (
+    lower(time_slot) >= (created_at + INTERVAL '24 hours')
+  );
+
+COMMENT ON CONSTRAINT min_advance_booking ON reservation_requests IS
+'Ensures reservations are requested at least 24 hours in advance. Uses created_at
+(immutable after INSERT) instead of CURRENT_DATE to allow managers to approve,
+deny, or cancel requests even after the 24-hour window has passed.';
+
+-- Also update the friendly error message for this constraint
+INSERT INTO metadata.constraint_messages (constraint_name, table_name, error_message)
+VALUES ('min_advance_booking', 'reservation_requests', 'Reservations must be made at least 24 hours in advance.')
+ON CONFLICT (constraint_name) DO UPDATE SET
+  error_message = EXCLUDED.error_message;
 
 -- =============================================================================
 -- Reload PostgREST schema cache
