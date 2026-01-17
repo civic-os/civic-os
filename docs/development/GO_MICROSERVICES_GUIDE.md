@@ -1294,10 +1294,10 @@ S3_ENDPOINT=http://minio:9000
 
 ```bash
 # Build S3 Signer
-docker build -t civic-os/s3-signer:0.10.0 services/s3-signer-go/
+docker build -t civic-os/s3-signer:${VERSION:-latest} services/s3-signer-go/
 
 # Build Thumbnail Worker
-docker build -t civic-os/thumbnail-worker:0.10.0 services/thumbnail-worker-go/
+docker build -t civic-os/thumbnail-worker:${VERSION:-latest} services/thumbnail-worker-go/
 ```
 
 **Running with Docker Compose (Production):**
@@ -1305,7 +1305,7 @@ docker build -t civic-os/thumbnail-worker:0.10.0 services/thumbnail-worker-go/
 ```yaml
 services:
   s3-signer:
-    image: civic-os/s3-signer:0.10.0
+    image: civic-os/s3-signer:${VERSION:-latest}
     environment:
       - DATABASE_URL=postgres://user:pass@db-host:5432/civic_os
       - S3_REGION=us-east-1
@@ -1316,7 +1316,7 @@ services:
     restart: unless-stopped
 
   thumbnail-worker:
-    image: civic-os/thumbnail-worker:0.10.0
+    image: civic-os/thumbnail-worker:${VERSION:-latest}
     environment:
       - DATABASE_URL=postgres://user:pass@db-host:5432/civic_os
       - S3_REGION=us-east-1

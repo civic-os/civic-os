@@ -272,7 +272,7 @@ Civic OS provides production-ready Docker containers (frontend, postgrest, migra
 
 **Runtime Configuration**: Use semantic helper functions (`getPostgrestUrl()`, `getKeycloakConfig()`, etc.) from `src/app/config/runtime.ts`. **CRITICAL**: Never import `environment.postgrestUrl` directly - helpers enable runtime configuration in production.
 
-See `docs/deployment/PRODUCTION.md` for complete deployment guide, `docker/README.md` for container documentation, and `docker-compose.prod.yml` for deployment example
+See `docs/deployment/PRODUCTION.md` for complete deployment guide, `docker/README.md` for container documentation, and `docker-compose.prod.yml` for deployment example. For single-VPS deployments (DigitalOcean, etc.), see `infrastructure/vps/README.md` for Caddy + docker-rollout setup with zero-downtime updates.
 
 ## PostgREST Integration
 
@@ -331,8 +331,11 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
+- **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only.
 
 **Troubleshooting RBAC**: See `docs/TROUBLESHOOTING.md` for debugging JWT roles and permissions issues.
+
+**Role Impersonation** (v0.26.0+): Admins can impersonate other roles via Settings modal to test RLS policies. When active, `X-Impersonate-Roles` header is sent with HTTP requests, causing `get_user_roles()` to return impersonated roles instead of JWT roles. State persists in localStorage. See `ImpersonationService` for implementation.
 
 ## Common Patterns
 

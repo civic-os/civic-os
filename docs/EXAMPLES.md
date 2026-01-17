@@ -30,7 +30,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | **Map Widgets** | | | | | ✅ |
 | **Filtered List Widgets** | | | ✅ | | ✅ |
 | **Calendar Widgets** | | ✅ | | ✅ | |
-| **Local Keycloak** | | | | ✅ | |
+| **Local Keycloak** | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Mock Data Generator** | ✅ | ✅ | ✅ | | ✅ |
 
 ## Services by Example
@@ -43,7 +43,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | MinIO S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | |
 | Inbucket SMTP | 9100 | ✅ | ✅ | ✅ | ✅ | |
 | Payment Worker | 8081 | | ✅ | | ✅ | |
-| Local Keycloak | 8082 | | | | ✅ | |
+| Local Keycloak | 8082 | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 

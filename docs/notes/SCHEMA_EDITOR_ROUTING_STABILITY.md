@@ -53,7 +53,7 @@ Each triggered separate router recalculations, causing routing instability.
 
 ### Fix 1: Combined Batching for Highlight Operations
 
-**File:** `src/app/pages/schema-editor/schema-editor.page.ts:1758-1828`
+**File:** `src/app/pages/schema-editor/schema-editor.page.ts` (in `highlightSelectedEntity`)
 
 ```typescript
 private highlightSelectedEntity(selectedCell: any): void {
@@ -104,7 +104,7 @@ private highlightSelectedEntity(selectedCell: any): void {
 
 ### Fix 2: Batched Unhighlight with Explicit Recalculation
 
-**File:** `src/app/pages/schema-editor/schema-editor.page.ts:1833-1916`
+**File:** `src/app/pages/schema-editor/schema-editor.page.ts` (in `clearHighlights`)
 
 ```typescript
 private clearHighlights(): void {
@@ -135,7 +135,7 @@ private clearHighlights(): void {
 
 ### Fix 3: Batched Port Reconnection
 
-**File:** `src/app/pages/schema-editor/schema-editor.page.ts:1352-1463`
+**File:** `src/app/pages/schema-editor/schema-editor.page.ts` (in `reconnectLinksToGeometricPorts`)
 
 ```typescript
 private reconnectLinksToGeometricPorts(): void {
@@ -161,7 +161,7 @@ private reconnectLinksToGeometricPorts(): void {
 
 ### Fix 4: Enhanced Metro Router Configuration
 
-**File:** `src/app/pages/schema-editor/schema-editor.page.ts:585-593, 647-655`
+**File:** `src/app/pages/schema-editor/schema-editor.page.ts` (in FK and M:M link creation)
 
 Added comprehensive metro router configuration to both FK and M:M link creation:
 
@@ -179,7 +179,7 @@ router: {
 
 ### Fix 5: EXPERIMENTAL - Anchor-Only Routing Test
 
-**File:** `src/app/pages/schema-editor/schema-editor.page.ts:1892-1901`
+**File:** `src/app/pages/schema-editor/schema-editor.page.ts` (in `clearHighlights`, experimental section)
 
 ```typescript
 // HYPOTHESIS: Metro router might not respect maxAllowedDirectionChange with port-based routing.
@@ -227,15 +227,15 @@ link.router(router);
 
 ## Related Changes
 
-- **Schema Service:** Fixed `detectJunctionTables()` to ignore non-public FK columns (`src/app/services/schema.service.ts:570-579`)
+- **Schema Service:** Fixed `detectJunctionTables()` to ignore non-public FK columns (`src/app/services/schema.service.ts`, in `detectJunctionTables`)
 - **Migration v0.8.2:** Fixed cross-schema foreign key bug in `schema_relations_func()` RPC
-- **Zoom Implementation:** Added mousewheel and pinch-to-zoom with proper batching (`schema-editor.page.ts:955-987`)
+- **Zoom Implementation:** Added mousewheel and pinch-to-zoom with proper batching (`schema-editor.page.ts`, in zoom handlers)
 
 ## Debug Logging
 
 Comprehensive debug logging was added during investigation but has been cleaned up. Two debug-related features remain:
 
-1. **`debugLinkRouting()` method** (`schema-editor.page.ts:1966-2015`): Helper method for logging link configuration (currently unused but kept for future debugging)
+1. **`debugLinkRouting()` method** (`schema-editor.page.ts`, in `debugLinkRouting`): Helper method for logging link configuration (currently unused but kept for future debugging)
 2. **Console logs in `clearHighlights()`**: Logs router recalculation during experimental anchor-only routing test
 
 Once experiment is concluded, consider removing remaining debug output.
