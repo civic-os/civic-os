@@ -1,0 +1,99 @@
+#cloud-config
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+# Civic OS VPS Cloud-Init Configuration
+# Use with: doctl compute droplet create --user-data-file cloud-init.yaml
+#
+# This script:
+# 1. Updates system packages
+# 2. Installs Docker and Docker Compose
+# 3. Installs docker-rollout plugin
+# 4. Creates deploy user with SSH access
+# 5. Sets up UFW firewall
+# 6. Creates /opt/civic-os directory
+# 7. Installs DigitalOcean Monitoring Agent (advanced metrics)
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - ufw
+  - fail2ban
+
+# Create deploy user
+users:
+  - name: deploy
+    groups: docker
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      # IMPORTANT: Replace with your actual SSH public key before provisioning
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... your-key-here
+
+write_files:
+  # Docker daemon configuration
+  - path: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+
+runcmd:
+  # Install Docker
+  - curl -fsSL https://get.docker.com | sh
+
+  # Enable Docker service
+  - systemctl enable docker
+  - systemctl start docker
+
+  # Install docker-rollout plugin for deploy user (zero-downtime deployments)
+  - mkdir -p /home/deploy/.docker/cli-plugins
+  - curl -sL https://raw.githubusercontent.com/wowu/docker-rollout/main/docker-rollout -o /home/deploy/.docker/cli-plugins/docker-rollout
+  - chmod +x /home/deploy/.docker/cli-plugins/docker-rollout
+  - chown -R deploy:deploy /home/deploy/.docker
+
+  # Create application directory
+  - mkdir -p /opt/civic-os
+  - chown deploy:deploy /opt/civic-os
+
+  # Configure UFW firewall
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp    # SSH
+  - ufw allow 80/tcp    # HTTP (Caddy)
+  - ufw allow 443/tcp   # HTTPS (Caddy)
+  - ufw --force enable
+
+  # Enable fail2ban for SSH protection
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
+
+  # Add deploy user to docker group (in case cloud-init didn't)
+  - usermod -aG docker deploy
+
+  # Install DigitalOcean Monitoring Agent for advanced metrics
+  # Provides enhanced CPU, memory, disk, and network metrics in DO dashboard
+  - curl -sSL https://repos.insights.digitalocean.com/install.sh | bash
+
+  # Log completion
+  - echo "Cloud-init complete. Ready for deployment." >> /var/log/civic-os-init.log
+
+final_message: |
+  Civic OS VPS provisioning complete!
+
+  Next steps:
+  1. Copy deployment files to /opt/civic-os/
+  2. Create .env from .env.example
+  3. Run ./deploy.sh
+
+  SSH access: ssh deploy@${DROPLET_IP}

@@ -1,0 +1,34 @@
+# Caddyfile for Civic OS VPS Deployment
+# Subdomain-based routing with automatic HTTPS via Let's Encrypt
+#
+# Required environment variable:
+#   APP_DOMAIN - e.g., "demo.civic-os.app"
+#
+# This creates:
+#   https://{APP_DOMAIN}       -> Frontend
+#   https://api.{APP_DOMAIN}   -> PostgREST API
+#   https://docs.{APP_DOMAIN}  -> Swagger UI
+
+# Frontend - main application
+{$APP_DOMAIN} {
+	reverse_proxy frontend:80
+}
+
+# API - PostgREST + Stripe webhooks
+api.{$APP_DOMAIN} {
+	# Stripe webhook endpoint (if payment-worker is running)
+	# Stripe requires this to be publicly accessible
+	handle /webhooks/stripe {
+		reverse_proxy payment-worker:8080
+	}
+
+	# All other API requests go to PostgREST
+	handle {
+		reverse_proxy postgrest:3000
+	}
+}
+
+# Documentation - Swagger UI
+docs.{$APP_DOMAIN} {
+	reverse_proxy swagger-ui:8080
+}

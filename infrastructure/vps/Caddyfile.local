@@ -1,0 +1,33 @@
+# Caddyfile for LOCAL TESTING
+# Uses HTTP only (no SSL certificates needed)
+#
+# Add to /etc/hosts:
+#   127.0.0.1 demo.local api.demo.local docs.demo.local
+#
+# Then set APP_DOMAIN=demo.local in .env
+
+# Disable automatic HTTPS for local testing
+{
+	auto_https off
+}
+
+# Frontend
+http://{$APP_DOMAIN} {
+	reverse_proxy frontend:80
+}
+
+# API
+http://api.{$APP_DOMAIN} {
+	handle /webhooks/stripe {
+		reverse_proxy payment-worker:8080
+	}
+
+	handle {
+		reverse_proxy postgrest:3000
+	}
+}
+
+# Documentation
+http://docs.{$APP_DOMAIN} {
+	reverse_proxy swagger-ui:8080
+}

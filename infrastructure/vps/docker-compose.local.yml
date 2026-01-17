@@ -1,0 +1,20 @@
+# Local testing override for Apple Silicon (ARM64) Macs
+# Usage: docker compose -f docker-compose.vps.yml -f docker-compose.local.yml up -d
+#
+# This adds platform: linux/amd64 to services that don't have ARM64 builds
+
+services:
+  migrations:
+    platform: linux/amd64
+
+  postgrest:
+    platform: linux/amd64
+
+  frontend:
+    platform: linux/amd64
+
+  consolidated-worker:
+    platform: linux/amd64
+
+  payment-worker:
+    platform: linux/amd64

@@ -1,0 +1,226 @@
+# Copyright (C) 2023-2025 Civic OS, L3C
+# AGPL-3.0-or-later
+
+# VPS Docker Compose Configuration
+# Optimized for single-VPS deployment with:
+# - Caddy reverse proxy (automatic HTTPS)
+# - docker-rollout zero-downtime deployments
+# - Managed PostgreSQL (external)
+#
+# IMPORTANT: Services do NOT have container_name set (required for docker-rollout)
+
+services:
+  # Caddy Reverse Proxy - ONLY externally exposed service
+  # Handles SSL termination and subdomain routing
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+      postgrest:
+        condition: service_healthy
+    networks:
+      - civic-os-network
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Swagger UI - API Documentation
+  # Accessible at docs.${APP_DOMAIN}
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    restart: unless-stopped
+    # NO ports - Caddy handles routing
+    environment:
+      # IMPORTANT: Must be public URL (runs in browser)
+      API_URL: https://api.${APP_DOMAIN}/
+    networks:
+      - civic-os-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database Migrations (one-shot)
+  # Run via: docker compose run --rm migrations
+  migrations:
+    image: ghcr.io/${GITHUB_ORG:-civic-os}/migrations:${VERSION:-latest}
+    environment:
+      PGRST_DB_URI: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${SSLMODE:-require}
+      CIVIC_OS_VERIFY_FULL: ${CIVIC_OS_VERIFY_FULL:-false}
+    networks:
+      - civic-os-network
+    restart: "no"  # One-shot container
+
+  # PostgREST API
+  # Accessible at api.${APP_DOMAIN}
+  postgrest:
+    image: ghcr.io/${GITHUB_ORG:-civic-os}/postgrest:${VERSION:-latest}
+    # NO container_name - required for docker-rollout
+    # NO ports - Caddy handles routing
+    restart: unless-stopped
+    environment:
+      # Database connection (managed PostgreSQL)
+      PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${SSLMODE:-require}
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_DB_PRE_REQUEST: metadata.check_jwt
+
+      # Keycloak configuration (for JWKS fetching)
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+
+      # JWT settings
+      PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
+      PGRST_JWT_AUD: account
+
+      # API settings - use public URL for OpenAPI spec
+      PGRST_OPENAPI_SERVER_PROXY_URI: https://api.${APP_DOMAIN}
+      PGRST_LOG_LEVEL: ${POSTGREST_LOG_LEVEL:-info}
+    networks:
+      - civic-os-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3000/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Consolidated Worker - S3 Signer, Thumbnails, Notifications, Recurring, Scheduled Jobs
+  consolidated-worker:
+    image: ghcr.io/${GITHUB_ORG:-civic-os}/consolidated-worker:${VERSION:-latest}
+    # NO container_name - required for docker-rollout
+    restart: unless-stopped
+    environment:
+      # Database Configuration (managed PostgreSQL)
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${SSLMODE:-require}
+      DB_MAX_CONNS: ${DB_MAX_CONNS:-4}
+      DB_MIN_CONNS: ${DB_MIN_CONNS:-1}
+
+      # S3 Configuration (DigitalOcean Spaces or AWS S3)
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT}
+      S3_BUCKET: ${S3_BUCKET:-civic-os-files}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_REGION: ${S3_REGION:-us-east-1}
+
+      # Thumbnail Worker
+      THUMBNAIL_MAX_WORKERS: ${THUMBNAIL_MAX_WORKERS:-5}
+
+      # Notification Worker
+      SITE_URL: https://${APP_DOMAIN}
+      NOTIFICATION_TIMEZONE: ${NOTIFICATION_TIMEZONE:-UTC}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: ${SMTP_FROM}
+      SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-true}
+    networks:
+      - civic-os-network
+    healthcheck:
+      # Worker doesn't have HTTP endpoint, check if main process is running
+      test: ["CMD-SHELL", "pgrep consolidated-worker || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Payment Worker - Stripe webhooks (OPTIONAL)
+  # Enable with: docker compose --profile payments up
+  payment-worker:
+    image: ghcr.io/${GITHUB_ORG:-civic-os}/payment-worker:${VERSION:-latest}
+    # NO container_name - required for docker-rollout
+    # NO external ports - Caddy routes /webhooks/stripe here
+    restart: unless-stopped
+    profiles:
+      - payments  # Only starts with --profile payments
+    environment:
+      # Database Configuration (managed PostgreSQL)
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${SSLMODE:-require}
+      DB_MAX_CONNS: ${PAYMENT_WORKER_DB_MAX_CONNS:-4}
+      DB_MIN_CONNS: ${PAYMENT_WORKER_DB_MIN_CONNS:-1}
+
+      # Stripe Configuration (REQUIRED for payment-worker)
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+
+      # Payment Configuration
+      PAYMENT_CURRENCY: ${PAYMENT_CURRENCY:-USD}
+      RIVER_WORKER_COUNT: ${PAYMENT_WORKER_COUNT:-1}
+      WEBHOOK_PORT: "8080"
+    networks:
+      - civic-os-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Angular Frontend
+  # Accessible at ${APP_DOMAIN}
+  frontend:
+    image: ghcr.io/${GITHUB_ORG:-civic-os}/frontend:${VERSION:-latest}
+    # NO container_name - required for docker-rollout
+    # NO ports - Caddy handles routing
+    restart: unless-stopped
+    environment:
+      # PostgREST connection (internal Docker network)
+      POSTGREST_URL: https://api.${APP_DOMAIN}/
+
+      # Swagger UI (public URL for About modal link)
+      SWAGGER_URL: https://docs.${APP_DOMAIN}
+
+      # Keycloak configuration
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+
+      # Map configuration
+      MAP_TILE_URL: ${MAP_TILE_URL:-https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png}
+      MAP_ATTRIBUTION: ${MAP_ATTRIBUTION:-&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors}
+      MAP_DEFAULT_LAT: ${MAP_DEFAULT_LAT:-43.0125}
+      MAP_DEFAULT_LNG: ${MAP_DEFAULT_LNG:--83.6875}
+      MAP_DEFAULT_ZOOM: ${MAP_DEFAULT_ZOOM:-13}
+
+      # S3 configuration (public endpoint for file URLs)
+      S3_ENDPOINT: ${S3_PUBLIC_ENDPOINT}
+      S3_BUCKET: ${S3_BUCKET:-civic-os-files}
+
+      # Stripe configuration (for payment UI)
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+
+      # Analytics (optional)
+      MATOMO_URL: ${MATOMO_URL:-}
+      MATOMO_SITE_ID: ${MATOMO_SITE_ID:-}
+      MATOMO_ENABLED: ${MATOMO_ENABLED:-false}
+    networks:
+      - civic-os-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  civic-os-network:
+    driver: bridge
