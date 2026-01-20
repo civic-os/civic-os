@@ -619,10 +619,10 @@ CREATE POLICY "reservation_payments: admin delete" ON reservation_payments
   FOR DELETE TO authenticated
   USING (is_admin());
 
--- Only admins can insert payments (typically created by system/triggers)
-CREATE POLICY "reservation_payments: admin insert" ON reservation_payments
+-- Authorized roles can insert payments (managers record manual payments)
+CREATE POLICY "reservation_payments: authorized insert" ON reservation_payments
   FOR INSERT TO authenticated
-  WITH CHECK (is_admin());
+  WITH CHECK (has_permission('reservation_payments', 'create'));
 
 -- Managers can update payment details (status, notes, waivers, etc.)
 CREATE POLICY "reservation_payments: authorized update" ON reservation_payments
