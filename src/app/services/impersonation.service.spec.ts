@@ -147,6 +147,29 @@ describe('ImpersonationService', () => {
       // No HTTP request for stop when not active
       httpMock.expectNone(`${getPostgrestUrl()}rpc/log_impersonation`);
     });
+
+    it('should clear state even when audit logging fails', () => {
+      // First start impersonation
+      service.startImpersonation(['user', 'editor']).subscribe();
+      httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`).flush({ success: true, message: '' });
+
+      expect(service.isActive()).toBeTrue();
+      expect(service.impersonatedRoles()).toEqual(['user', 'editor']);
+
+      // Now stop - but make audit logging fail
+      service.stopImpersonation().subscribe();
+
+      const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`);
+      expect(req.request.body.p_action).toBe('stop');
+      // Simulate HTTP error (e.g., token expired, 401)
+      req.error(new ProgressEvent('error'), { status: 401, statusText: 'Unauthorized' });
+
+      // State should still be cleared despite audit failure
+      expect(service.isActive()).toBeFalse();
+      expect(service.impersonatedRoles()).toEqual([]);
+      expect(service.headerValue()).toBeNull();
+      expect(localStorage.getItem('civic_os_impersonation')).toBeNull();
+    });
   });
 
   describe('headerValue', () => {

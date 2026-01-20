@@ -80,6 +80,11 @@ export class AuthService {
             this.analytics.setUserId(tokenParsed.sub);
           }
           this.analytics.trackEvent('Auth', 'Login');
+        } else {
+          // Not authenticated - clear any stale impersonation state
+          // This handles: browser closed while impersonating, token expired, etc.
+          // Impersonation requires a valid session, so clear it when there isn't one
+          this.impersonation.stopImpersonation().subscribe();
         }
 
         // IMPORTANT: Do NOT call schema.refreshCache() here
@@ -95,12 +100,23 @@ export class AuthService {
         this.authenticated.set(false);
         this.realUserRoles.set([]);
 
+        // Clear impersonation state on logout
+        // State is cleared immediately; audit logging is best-effort
+        this.impersonation.stopImpersonation().subscribe();
+
         // Track logout and reset user ID
         this.analytics.trackEvent('Auth', 'Logout');
         this.analytics.resetUserId();
 
         // Refresh schema cache when user logs out
         this.schema.refreshCache();
+      }
+
+      if (keycloakEvent.type === KeycloakEventType.AuthRefreshError) {
+        // Token refresh failed - clear impersonation state
+        // The user will likely be redirected to login, but we need to ensure
+        // impersonation doesn't persist to the next session
+        this.impersonation.stopImpersonation().subscribe();
       }
     });
   }
@@ -196,6 +212,9 @@ export class AuthService {
   }
 
   logout() {
+    // Clear impersonation state synchronously BEFORE redirect
+    // The AuthLogout event won't fire in time since keycloak.logout() redirects immediately
+    this.impersonation.stopImpersonation().subscribe();
     this.keycloak.logout();
   }
 }

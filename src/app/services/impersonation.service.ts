@@ -89,9 +89,13 @@ export class ImpersonationService {
 
   /**
    * Stop impersonation and return to real roles.
-   * Logs the action to the audit table.
+   * Logs the action to the audit table (best-effort).
    *
-   * @returns Observable that completes when audit log is recorded
+   * State is cleared immediately regardless of whether audit logging succeeds.
+   * This ensures impersonation is always cleared even when called during
+   * logout or token expiry when the API may not be accessible.
+   *
+   * @returns Observable that completes when audit log attempt finishes
    */
   stopImpersonation(): Observable<boolean> {
     const currentRoles = this._impersonatedRoles();
@@ -99,15 +103,14 @@ export class ImpersonationService {
       return of(true);
     }
 
-    return this.logImpersonation(currentRoles, 'stop').pipe(
-      tap(success => {
-        if (success) {
-          this._isActive.set(false);
-          this._impersonatedRoles.set([]);
-          this.clearStorage();
-        }
-      })
-    );
+    // Clear state immediately - don't wait for audit logging
+    // This ensures state is cleared even if token is expired/invalid
+    this._isActive.set(false);
+    this._impersonatedRoles.set([]);
+    this.clearStorage();
+
+    // Attempt to log the action (best-effort, errors are caught in logImpersonation)
+    return this.logImpersonation(currentRoles, 'stop');
   }
 
   /**
