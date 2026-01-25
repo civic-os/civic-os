@@ -73,6 +73,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Overlap Prevention**: Use GIST exclusion constraints to prevent double-booking at database level. Requires `btree_gist` extension (v0.9.0+). See `docs/development/CALENDAR_INTEGRATION.md` for SQL examples and `examples/community-center/` for working example.
 
+**iCal Subscription Feeds** (v0.27.0+): Export public calendar events as subscribable iCal feeds. Uses RFC 5545 helper functions (`format_ical_event()`, `wrap_ical_feed()`) with PostgREST media type handlers. Calendar apps (Google Calendar, Apple, Outlook) can subscribe to `/rpc/your_feed_function`. See `docs/INTEGRATOR_GUIDE.md` (iCal Calendar Feeds section) for implementation guide.
+
 **Status Type** (`Status`): Framework-provided status and workflow system using centralized `metadata.statuses` table with `entity_type` discriminator. Frontend detects via `status_entity_type` in `metadata.properties` and renders colored badges/dropdowns. Features: `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, `status_key` for stable programmatic references (v0.25.0+). Use `get_initial_status('entity_type')` or `get_status_id('entity_type', 'status_key')` helpers for column defaults and lookups. Requires v0.15.0+.
 
 See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) for Quick Setup SQL, `docs/development/STATUS_TYPE_SYSTEM.md` for design, and `examples/community-center/` for working example.

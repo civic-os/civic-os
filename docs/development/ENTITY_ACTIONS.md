@@ -336,7 +336,7 @@ describe('evaluateCondition', () => {
 
 **File**: `src/app/services/data.service.ts`
 
-Add method after `refreshCurrentUser()` (~line 217):
+Add method after `refreshCurrentUser()`:
 
 ```typescript
 /**
@@ -370,7 +370,7 @@ public executeRpc(
 
 **File**: `src/app/services/schema.service.ts`
 
-Add method in appropriate location (~line 150):
+Add method in appropriate location:
 
 ```typescript
 /**
@@ -534,7 +534,7 @@ confirmAction() {
 
 **File**: `src/app/pages/detail/detail.page.html`
 
-#### Add Action Buttons (after Edit/Delete buttons, ~line 21)
+#### Add Action Buttons (after Edit/Delete buttons)
 
 ```html
 <!-- Entity Actions -->
@@ -556,7 +556,7 @@ confirmAction() {
 }
 ```
 
-#### Add Action Modal (at end of template, ~line 201)
+#### Add Action Modal (at end of template)
 
 ```html
 <!-- Action Confirmation Modal -->

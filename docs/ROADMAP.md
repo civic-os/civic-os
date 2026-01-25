@@ -29,6 +29,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Add Sortable columns and default sort
 - [x] Add filter-able columns (mostly FK fields, but also expand to other indexed fields like datetime)
 - [x] Add spreadsheet Import/Export capabilities
+- [x] Add iCal subscription feeds for calendar apps to subscribe to events (v0.27.0)
 
 ### Roles
 - [x] Build Roles/Permissions schema

@@ -13,7 +13,7 @@ Civic OS uses Keycloak for authentication and role-based authorization. You have
 
 ## Option A: Local Keycloak with Docker (Default)
 
-All example docker-compose files include a pre-configured Keycloak service that automatically imports a development realm (`mottpark-dev`) with users and roles ready to use.
+All example docker-compose files include a pre-configured Keycloak service that automatically imports a development realm (`civic-os-dev`) with users and roles ready to use.
 
 **What you can do:**
 - ✅ Full RBAC testing with admin, editor, and user roles
