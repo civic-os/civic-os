@@ -40,3 +40,10 @@
   transform: translateY(-50%) translateX(0);
   opacity: 1;
 }
+
+/* Status select dropdown options - ensure solid background for readability */
+/* The select handle uses transparent status colors, but options need opaque backgrounds */
+select option {
+  background-color: oklch(var(--b1));
+  color: oklch(var(--bc));
+}
