@@ -87,6 +87,11 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
   initialView = input<string>('timeGridWeek'); // Initial calendar view from URL
   initialDate = input<string | undefined>(undefined); // Initial date from URL (YYYY-MM-DD)
 
+  // Month view configuration (configurable via dashboard widget)
+  dayMaxEvents = input<number | boolean>(2); // Events per day before "+more" (default: 2)
+  eventDisplay = input<'auto' | 'block' | 'list-item' | 'background'>('block'); // Event style
+  moreLinkClick = input<'popover' | 'day' | 'week'>('day'); // "+more" click behavior
+
   // Outputs
   valueChange = output<string>(); // tstzrange
   eventClick = output<CalendarEvent>();
@@ -167,9 +172,20 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
       right: 'dayGridMonth,timeGridWeek,timeGridDay'
     },
     selectMirror: true,
-    dayMaxEvents: true,
     weekends: true,
     fixedWeekCount: false, // Show only the weeks needed (4-6), not always 6
+
+    // Month view readability improvements
+    displayEventEnd: true, // Show end time in month view (e.g., "4p - 7p")
+    eventTimeFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      omitZeroMinute: true,
+      meridiem: 'narrow' // Compact format: "p" instead of "PM"
+    },
+    // Note: dayMaxEvents, moreLinkClick, eventDisplay are set imperatively in ngAfterViewInit
+    // to support configuration via inputs
+
     eventClick: (arg: EventClickArg) => this.handleEventClick(arg),
     select: (arg: DateSelectArg) => this.handleDateSelect(arg),
     datesSet: (arg) => this.handleDatesSet(arg),
@@ -199,6 +215,11 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
       const mode = this.mode();
       calendar.setOption('editable', mode === 'edit');
       calendar.setOption('selectable', mode === 'edit');
+
+      // Set configurable month view options from inputs
+      calendar.setOption('dayMaxEvents', this.dayMaxEvents());
+      calendar.setOption('eventDisplay', this.eventDisplay());
+      calendar.setOption('moreLinkClick', this.moreLinkClick());
 
       // Set initial view if provided
       const view = this.initialView();

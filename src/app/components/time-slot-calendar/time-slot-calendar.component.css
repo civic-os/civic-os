@@ -74,6 +74,48 @@
   opacity: 0.85;
 }
 
+/* Month view: reduce empty space above day numbers */
+:host ::ng-deep .fc-daygrid-day-top {
+  padding: 2px 4px;
+}
+
+/* Month view: block events with flowing text (time + title on one line that wraps) */
+:host ::ng-deep .fc-daygrid-event {
+  white-space: normal !important;
+  padding: 1px 4px;
+  margin-bottom: 1px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+:host ::ng-deep .fc-daygrid-event .fc-event-main {
+  /* Time and title flow together inline */
+  display: inline;
+}
+
+:host ::ng-deep .fc-daygrid-event .fc-event-time {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+:host ::ng-deep .fc-daygrid-event .fc-event-title {
+  /* Flows inline with time, wraps naturally */
+  display: inline;
+}
+
+/* Style "+more" link */
+:host ::ng-deep .fc-daygrid-more-link {
+  color: hsl(var(--color-primary) / 1);
+  font-weight: 500;
+  padding: 2px 4px;
+  margin-top: 2px;
+}
+
+:host ::ng-deep .fc-daygrid-more-link:hover {
+  color: hsl(var(--color-primary) / 0.8);
+  text-decoration: underline;
+}
+
 /* Header styling */
 :host ::ng-deep .fc-col-header-cell {
   background-color: hsl(var(--color-base-200) / 1);
@@ -146,7 +188,12 @@
 }
 
 :host ::ng-deep .fc-scrollgrid {
-  margin-top: 0 !important; /* Remove extra top margin */
+  margin-top: 0 !important;
+}
+
+/* Reduce top margin on the sync table in month view */
+:host ::ng-deep .fc-scrollgrid-sync-table {
+  margin-top: 0 !important;
 }
 
 /* Scrollbar styling for dark mode */

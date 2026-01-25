@@ -144,6 +144,11 @@ export interface CalendarWidgetConfig extends FilteredEntityWidgetBase {
   initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'; // Default: 'timeGridWeek'
   initialDate?: string;           // YYYY-MM-DD format (default: today)
 
+  // Month view options (optional)
+  dayMaxEvents?: number | boolean; // Events per day before "+more" link (default: 2, true = auto-calc)
+  eventDisplay?: 'auto' | 'block' | 'list-item' | 'background'; // Event rendering style (default: 'block')
+  moreLinkClick?: 'popover' | 'day' | 'week'; // "+more" click behavior (default: 'day')
+
   // Performance (optional)
   maxEvents?: number;             // Maximum events to display (default: 1000)
 

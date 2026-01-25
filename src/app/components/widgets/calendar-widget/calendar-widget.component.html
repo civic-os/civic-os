@@ -55,6 +55,9 @@
       [loading]="isLoading()"
       [initialView]="config().initialView ?? 'timeGridWeek'"
       [initialDate]="config().initialDate"
+      [dayMaxEvents]="config().dayMaxEvents ?? 2"
+      [eventDisplay]="config().eventDisplay ?? 'block'"
+      [moreLinkClick]="config().moreLinkClick ?? 'day'"
       (eventClick)="onEventClick($event)"
       (dateRangeChange)="onDateRangeChange($event)"
     />
