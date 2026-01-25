@@ -3687,6 +3687,112 @@ VALUES
 
 See `docs/notes/SYSTEM_INTROSPECTION_DESIGN.md` for complete architecture and `examples/mottpark/init-scripts/13_mpra_introspection.sql` for a complete working example.
 
+### iCal Calendar Feeds (v0.27.0+)
+
+Provide subscribable calendar feeds for any entity with time-based data. Users can subscribe in Google Calendar, Apple Calendar, Outlook, or any iCal-compatible application.
+
+**Features**:
+- RFC 5545 compliant VEVENT generation
+- Core helper functions for building custom feeds
+- UTC timestamp conversion for universal compatibility
+- Special character escaping per iCal spec
+- RLS-enforced data access (SECURITY INVOKER)
+
+**Requirements**:
+- Civic OS v0.27.0+ (iCal helper migrations)
+- Entity with `time_slot` or `timestamptz` columns for event times
+- PostgREST 12+ (uses domain-based media type handlers)
+
+**How it Works**: The `wrap_ical_feed()` function returns the `"*/*"` domain type (any media type handler), which responds to ALL Accept headers including requests with no Accept header. This ensures universal compatibility with all calendar applications (iOS, macOS, Google Calendar, Outlook). Content-Type is set to `text/calendar; charset=utf-8` via the PostgREST `response.headers` GUC.
+
+#### Core Helper Functions
+
+Civic OS provides three helper functions in the `metadata` schema:
+
+| Function | Purpose |
+|----------|---------|
+| `escape_ical_text(text)` | Escape special characters (commas, semicolons, backslashes, newlines) |
+| `format_ical_event(uid, summary, dtstart, dtend, description, location)` | Generate a single VEVENT block |
+| `wrap_ical_feed(events, calendar_name)` | Wrap VEVENT blocks in a VCALENDAR container |
+
+#### Creating a Calendar Feed RPC
+
+Create a PostgreSQL function that queries your entity and builds the iCal feed:
+
+```sql
+CREATE OR REPLACE FUNCTION public.my_events_ical_feed(
+  p_start_date DATE DEFAULT (CURRENT_DATE - interval '30 days')::date,
+  p_end_date DATE DEFAULT (CURRENT_DATE + interval '1 year')::date
+) RETURNS "*/*"  -- Any media type handler for universal calendar client compatibility
+LANGUAGE plpgsql
+SECURITY INVOKER  -- Respects RLS policies
+AS $$
+DECLARE
+  v_events TEXT := '';
+  v_event RECORD;
+BEGIN
+  FOR v_event IN
+    SELECT
+      id,
+      title,
+      lower(time_slot) as start_time,  -- Extract start from tstzrange
+      upper(time_slot) as end_time,    -- Extract end from tstzrange
+      description,
+      location
+    FROM my_events
+    WHERE time_slot && tstzrange(p_start_date::timestamptz, p_end_date::timestamptz)
+    ORDER BY lower(time_slot)
+  LOOP
+    v_events := v_events || metadata.format_ical_event(
+      p_uid := 'my-event-' || v_event.id || '@my-domain.org',
+      p_summary := v_event.title,
+      p_dtstart := v_event.start_time,
+      p_dtend := v_event.end_time,
+      p_description := v_event.description,
+      p_location := v_event.location
+    ) || chr(13) || chr(10);
+  END LOOP;
+
+  RETURN metadata.wrap_ical_feed(v_events, 'My Calendar');
+END;
+$$;
+
+-- Grant access (web_anon for public feeds, authenticated for private)
+GRANT EXECUTE ON FUNCTION public.my_events_ical_feed(DATE, DATE) TO web_anon;
+GRANT EXECUTE ON FUNCTION public.my_events_ical_feed(DATE, DATE) TO authenticated;
+```
+
+#### Subscription URL Patterns
+
+Users subscribe via the PostgREST RPC endpoint:
+
+| URL Pattern | Purpose |
+|-------------|---------|
+| `/rpc/my_events_ical_feed` | All events (default date range) |
+| `/rpc/my_events_ical_feed?p_start_date=2025-01-01&p_end_date=2025-12-31` | Specific date range |
+| `/rpc/my_events_ical_feed?p_resource_id=5` | Filtered by resource (if implemented) |
+
+**Example subscription URLs**:
+- Google Calendar: Add calendar → From URL → paste your API endpoint
+- Apple Calendar: File → New Calendar Subscription → paste URL
+- Outlook: Add calendar → Subscribe from web → paste URL
+
+#### Best Practices
+
+1. **UID Format**: Use globally unique identifiers like `entity-type-id@your-domain.org`
+2. **Date Range**: Default to 30 days past through 1 year future for reasonable data volume
+3. **Security**: Use `SECURITY INVOKER` to respect RLS policies; grant to `web_anon` only for public data
+4. **Caching**: Calendar apps typically refresh every 15-60 minutes; stale data is expected
+5. **Optional Filters**: Add parameters like `p_resource_id` or `p_category` for filtered feeds
+
+#### Complete Example
+
+See `examples/community-center/init-scripts/18_ical_feed_example.sql` for a complete implementation with:
+- Public events feed for community center reservations
+- Resource filtering parameter
+- Date range parameters
+- Usage examples with curl and calendar apps
+
 ---
 
 ## Database Patterns
