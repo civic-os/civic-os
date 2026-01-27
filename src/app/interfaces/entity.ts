@@ -37,6 +37,9 @@ export interface SchemaEntityTable {
     // Recurring configuration (v0.19.0)
     supports_recurring?: boolean,
     recurring_property_name?: string | null,
+    // Virtual Entity flag (v0.28.0)
+    // True when entity is backed by a VIEW with INSTEAD OF triggers
+    is_view?: boolean,
 }
 
 export interface ValidationRule {

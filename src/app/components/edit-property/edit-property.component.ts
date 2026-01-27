@@ -66,6 +66,21 @@ export class EditPropertyComponent {
 
   propType = computed(() => this.prop().type);
 
+  /**
+   * Computed signal to check if field is required.
+   * Returns true if:
+   *   1. Column is NOT NULL at database level (!is_nullable), OR
+   *   2. Column has a 'required' validation rule
+   *
+   * This is important for Virtual Entities (VIEWs) where columns are often
+   * nullable at the schema level but have required validation rules.
+   */
+  isRequired = computed(() => {
+    const prop = this.prop();
+    if (!prop.is_nullable) return true;
+    return prop.validation_rules?.some(r => r.type === 'required') ?? false;
+  });
+
   // File upload state
   uploadingFile = signal(false);
   uploadError = signal<string | null>(null);

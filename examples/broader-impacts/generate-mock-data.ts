@@ -939,7 +939,10 @@ class MockDataGenerator {
 -- Generated at: ${new Date().toISOString()}
 -- =====================================================\n\n`;
 
-    const footer = `\n-- Notify PostgREST to reload schema cache\nNOTIFY pgrst, 'reload schema';\n`;
+    // Generate sequence refresh SQL for all tables with data
+    const sequenceRefreshSql = this.generateSequenceRefreshSql();
+
+    const footer = `\n${sequenceRefreshSql}-- Notify PostgREST to reload schema cache\nNOTIFY pgrst, 'reload schema';\n`;
 
     const content = header + this.sqlStatements.join('\n') + footer;
 
@@ -963,6 +966,81 @@ class MockDataGenerator {
     }
 
     console.log('Data inserted successfully!');
+  }
+
+  /**
+   * Generate SQL statements to refresh sequences after inserting mock data.
+   * This ensures sequences are set higher than the max ID in each table.
+   */
+  private generateSequenceRefreshSql(): string {
+    const statements: string[] = [];
+    statements.push('-- Refresh sequences to be higher than max IDs');
+
+    for (const [tableName, records] of this.generatedData) {
+      if (records.length === 0) continue;
+
+      // Check if this table has an id column with explicit values
+      const hasIdColumn = records[0].hasOwnProperty('id');
+      if (!hasIdColumn) continue;
+
+      const schema = (tableName === 'civic_os_users' || tableName === 'civic_os_users_private') ? 'metadata' : 'public';
+      const sequenceName = `${tableName}_id_seq`;
+
+      // Generate setval statement that sets sequence to max(id) from inserted data
+      statements.push(
+        `SELECT setval('"${schema}"."${sequenceName}"', (SELECT COALESCE(MAX(id), 1) FROM "${schema}"."${tableName}"));`
+      );
+    }
+
+    return statements.length > 1 ? statements.join('\n') + '\n\n' : '';
+  }
+
+  /**
+   * Refresh all sequences to be higher than the max ID in each table.
+   * This is needed because mock data may insert with explicit IDs,
+   * which doesn't advance the sequence.
+   */
+  async refreshSequences(): Promise<void> {
+    if (!this.client) throw new Error('Database not connected');
+
+    console.log('\nRefreshing sequences...');
+
+    // Query to find all sequences and their associated tables
+    const sequenceQuery = `
+      SELECT
+        seq.relname AS sequence_name,
+        tab.relname AS table_name,
+        attr.attname AS column_name,
+        nsp.nspname AS schema_name
+      FROM pg_class seq
+      JOIN pg_depend dep ON seq.oid = dep.objid
+      JOIN pg_class tab ON dep.refobjid = tab.oid
+      JOIN pg_attribute attr ON attr.attrelid = tab.oid AND attr.attnum = dep.refobjsubid
+      JOIN pg_namespace nsp ON tab.relnamespace = nsp.oid
+      WHERE seq.relkind = 'S'
+        AND nsp.nspname IN ('public', 'metadata')
+      ORDER BY seq.relname;
+    `;
+
+    const sequences = await this.client.query(sequenceQuery);
+
+    for (const row of sequences.rows) {
+      const { sequence_name, table_name, column_name, schema_name } = row;
+
+      // Get max ID from the table
+      const maxQuery = `SELECT COALESCE(MAX("${column_name}"), 0) as max_id FROM "${schema_name}"."${table_name}"`;
+      const maxResult = await this.client.query(maxQuery);
+      const maxId = maxResult.rows[0].max_id;
+
+      if (maxId > 0) {
+        // Set sequence to max ID
+        const setvalQuery = `SELECT setval('"${schema_name}"."${sequence_name}"', $1)`;
+        await this.client.query(setvalQuery, [maxId]);
+        console.log(`  ${schema_name}.${sequence_name} -> ${maxId}`);
+      }
+    }
+
+    console.log('Sequences refreshed!');
   }
 }
 
@@ -998,6 +1076,7 @@ async function main() {
       await generator.saveSQLFile();
     } else {
       await generator.insertDirectly();
+      await generator.refreshSequences();
     }
   } catch (error) {
     console.error('Error generating mock data:', error);

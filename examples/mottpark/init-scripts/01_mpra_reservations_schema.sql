@@ -735,11 +735,18 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
 -- SECTION 12: VALIDATION RULES
 -- ============================================================================
 
--- Attendee count validation
+-- Required field validations (these will be inherited by VIEWs via v0.28.0 validation inheritance)
 INSERT INTO metadata.validations (table_name, column_name, validation_type, validation_value, error_message, sort_order)
 VALUES
-  ('reservation_requests', 'attendee_count', 'min', '1', 'At least 1 attendee is required', 1),
-  ('reservation_requests', 'attendee_count', 'max', '75', 'Maximum capacity is 75 people per facility policy', 2)
+  ('reservation_requests', 'event_type', 'required', '', 'Event type is required', 1),
+  ('reservation_requests', 'time_slot', 'required', '', 'Date and time are required', 1),
+  ('reservation_requests', 'attendee_count', 'required', '', 'Number of attendees is required', 1),
+  ('reservation_requests', 'attendee_count', 'min', '1', 'At least 1 attendee is required', 2),
+  ('reservation_requests', 'attendee_count', 'max', '75', 'Maximum capacity is 75 people per facility policy', 3),
+  ('reservation_requests', 'requestor_name', 'required', '', 'Your name is required', 1),
+  ('reservation_requests', 'requestor_phone', 'required', '', 'Phone number is required', 1),
+  ('reservation_requests', 'requestor_address', 'required', '', 'Address is required', 1),
+  ('reservation_requests', 'policy_agreed', 'required', '', 'You must agree to the policy to proceed', 1)
 ON CONFLICT (table_name, column_name, validation_type) DO UPDATE SET
   validation_value = EXCLUDED.validation_value,
   error_message = EXCLUDED.error_message;

@@ -15,7 +15,10 @@
   "excludeTables": [
     "IssueStatus",
     "WorkPackageStatus",
-    "Tag"
+    "Tag",
+    "time_slot_series",
+    "time_slot_series_groups",
+    "time_slot_instances"
   ],
   "outputFormat": "insert",
   "outputPath": "./example/init-scripts/04_mock_data.sql",

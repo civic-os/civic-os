@@ -3795,6 +3795,150 @@ See `examples/community-center/init-scripts/18_ical_feed_example.sql` for a comp
 
 ---
 
+### Virtual Entities (v0.28.0+)
+
+Virtual Entities enable PostgreSQL VIEWs with INSTEAD OF triggers to behave like regular entities in Civic OS. This allows simplified form interfaces, auto-approval workflows, computed defaults, and other patterns where you want the UI to interact with a subset or transformation of an underlying table.
+
+**Use Cases**:
+- **Simplified forms**: Expose only the fields managers need, auto-fill the rest
+- **Auto-approval workflows**: Create records that automatically transition through status workflows
+- **Computed defaults**: Fill in values based on the current user, date, or other context
+- **Audit-preserving shortcuts**: Insert with different logic while reusing existing triggers
+
+**Requirements**:
+
+1. **PostgreSQL VIEW** in the `public` schema
+2. **INSTEAD OF triggers** for INSERT, UPDATE, and DELETE operations
+3. **Explicit `metadata.entities` entry** (VIEWs are NOT auto-discovered to prevent random views from appearing)
+4. **RBAC permissions** via `metadata.permissions` (same as tables)
+
+**Quick Setup**:
+
+```sql
+-- 1. Create the VIEW (selecting from base table)
+CREATE OR REPLACE VIEW public.simplified_form AS
+SELECT
+  r.id,
+  r.field_a,
+  r.field_b,
+  r.status_id,
+  r.created_at
+FROM base_table r;
+
+-- 2. Create INSTEAD OF INSERT trigger
+CREATE OR REPLACE FUNCTION simplified_form_insert()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  v_new_id BIGINT;
+BEGIN
+  -- Insert with auto-filled defaults
+  INSERT INTO base_table (field_a, field_b, hidden_field, status_id)
+  VALUES (NEW.field_a, NEW.field_b, 'default_value', get_initial_status('my_entity'))
+  RETURNING id INTO v_new_id;
+
+  -- Optional: Auto-transition status or trigger workflows
+  UPDATE base_table SET status_id = get_status_id('my_entity', 'approved')
+  WHERE id = v_new_id;
+
+  NEW.id := v_new_id;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER simplified_form_insert_trigger
+  INSTEAD OF INSERT ON simplified_form
+  FOR EACH ROW EXECUTE FUNCTION simplified_form_insert();
+
+-- 3. Create INSTEAD OF UPDATE trigger (pass-through)
+CREATE OR REPLACE FUNCTION simplified_form_update()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE base_table SET field_a = NEW.field_a, field_b = NEW.field_b
+  WHERE id = OLD.id;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER simplified_form_update_trigger
+  INSTEAD OF UPDATE ON simplified_form
+  FOR EACH ROW EXECUTE FUNCTION simplified_form_update();
+
+-- 4. Create INSTEAD OF DELETE trigger (pass-through)
+CREATE OR REPLACE FUNCTION simplified_form_delete()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  DELETE FROM base_table WHERE id = OLD.id;
+  RETURN OLD;
+END;
+$$;
+
+CREATE TRIGGER simplified_form_delete_trigger
+  INSTEAD OF DELETE ON simplified_form
+  FOR EACH ROW EXECUTE FUNCTION simplified_form_delete();
+
+-- 5. Grant permissions on the VIEW
+GRANT SELECT, INSERT, UPDATE, DELETE ON simplified_form TO authenticated;
+
+-- 6. Register as entity (REQUIRED - VIEWs are not auto-discovered)
+INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
+VALUES ('simplified_form', 'Simplified Form', 'Streamlined entry with auto-defaults', 100);
+
+-- 7. Set up RBAC permissions
+INSERT INTO metadata.permissions (table_name, permission)
+SELECT 'simplified_form'::name, p.permission::metadata.permission
+FROM (VALUES ('create'), ('read'), ('update'), ('delete')) AS p(permission)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p, metadata.roles r
+WHERE p.table_name = 'simplified_form' AND r.display_name = 'manager'
+ON CONFLICT DO NOTHING;
+```
+
+**FK Handling**: Auto-Inherit + Manual Fallback
+
+VIEW columns cannot have FK constraints, but Civic OS automatically inherits FK metadata from base tables using PostgreSQL's `view_column_usage`:
+
+| Pattern | Example | Auto-Detected? |
+|---------|---------|----------------|
+| Simple column | `SELECT r.user_id` | ✅ Yes |
+| Aliased column | `SELECT r.user_id AS uid` | ✅ Yes |
+| Computed | `SELECT COALESCE(a, b)` | ❌ Manual |
+| Complex JOIN | Ambiguous origin | ❌ Manual |
+
+For computed columns, use manual FK override in `metadata.properties`:
+
+```sql
+-- Manual FK configuration for computed columns
+INSERT INTO metadata.properties (table_name, column_name, join_table, join_column)
+VALUES ('my_view', 'computed_user_id', 'civic_os_users', 'id')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET join_table = EXCLUDED.join_table, join_column = EXCLUDED.join_column;
+```
+
+**Status Column Configuration**:
+
+If your VIEW exposes a `status_id` column, configure the status entity type:
+
+```sql
+UPDATE metadata.properties
+SET status_entity_type = 'my_entity_type'
+WHERE table_name = 'my_view' AND column_name = 'status_id';
+```
+
+**Frontend Awareness**:
+
+The `schema_entities` view includes an `is_view` column (boolean) that the frontend can use to detect Virtual Entities. This is available in `SchemaEntityTable.is_view` in TypeScript.
+
+**Complete Example**: See `examples/mottpark/init-scripts/22_mpra_manager_events.sql` for a production example demonstrating:
+- Manager-only simplified event creation form
+- Auto-approval workflow that triggers payment record creation
+- Reuse of existing status triggers and validation logic
+- Calendar integration for the virtual entity
+
+---
+
 ## Database Patterns
 
 ### Custom Domains

@@ -1,0 +1,27 @@
+{
+  "recordsPerEntity": {
+    "reservation_requests": 15,
+    "reservation_payments": 0,
+    "manager_events": 0
+  },
+  "geographyBounds": {
+    "minLat": 43.01,
+    "maxLat": 43.05,
+    "minLng": -83.70,
+    "maxLng": -83.66
+  },
+  "excludeTables": [
+    "reservation_payment_types",
+    "reservation_payments",
+    "holiday_rules",
+    "public_calendar_events",
+    "manager_events",
+    "time_slot_series",
+    "time_slot_series_groups",
+    "time_slot_instances"
+  ],
+  "outputFormat": "insert",
+  "outputPath": "./init-scripts/99_mock_data.sql",
+  "generateUsers": true,
+  "userCount": 10
+}
