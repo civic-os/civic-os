@@ -20,18 +20,41 @@ type FeeConfig struct {
 	Refundable bool    // Whether the fee is refundable (default: false)
 }
 
-// CalculateFee computes the processing fee for a base amount
-// Formula: fee = (baseAmount * percent/100) + flatCents
-// Returns fee in cents, rounded to nearest cent
+// CalculateFee calculates the processing fee needed to ensure the recipient
+// receives exactly baseAmountCents after Stripe takes its cut.
+//
+// The "gross-up" formula accounts for Stripe charging its percentage on the
+// total amount (including the fee itself):
+//
+//	totalCharge = (base + flat) / (1 - percent)
+//	fee = totalCharge - base
+//
+// Example: $150 base with 2.9% + $0.30 flat
+//   - Naive formula: $150 × 2.9% + $0.30 = $4.65 → user pays $154.65
+//   - Stripe takes: $154.65 × 2.9% + $0.30 = $4.78 → recipient gets $149.87 ✗
+//   - Gross-up formula: ($150 + $0.30) / (1 - 0.029) = $154.79 → fee = $4.79
+//   - Stripe takes: $154.79 × 2.9% + $0.30 = $4.79 → recipient gets $150.00 ✓
+//
+// Returns fee in cents, rounded UP to ensure full coverage (never short recipient).
 func (fc *FeeConfig) CalculateFee(baseAmountCents int64) int64 {
 	if !fc.Enabled {
 		return 0
 	}
 
-	percentFee := float64(baseAmountCents) * (fc.Percent / 100.0)
-	totalFeeCents := int64(math.Round(percentFee)) + int64(fc.FlatCents)
+	// Convert to float for precision
+	base := float64(baseAmountCents)
+	flat := float64(fc.FlatCents)
+	percent := fc.Percent / 100.0
 
-	return totalFeeCents
+	// Gross-up formula: what we need to charge so recipient gets exactly 'base'
+	// after Stripe takes its cut of the total
+	totalToCharge := (base + flat) / (1.0 - percent)
+
+	// Fee is the difference between what we charge and what recipient needs
+	feeCents := totalToCharge - base
+
+	// Round UP to ensure we always cover the full amount (never short recipient by a penny)
+	return int64(math.Ceil(feeCents))
 }
 
 // CreateIntentWorkerArgs contains the arguments for CreateIntentWorker
