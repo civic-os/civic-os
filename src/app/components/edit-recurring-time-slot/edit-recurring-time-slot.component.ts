@@ -94,6 +94,15 @@ export interface RecurringTimeSlotValue {
       multi: true
     }
   ],
+  styles: [`
+    /* Propagate validation state from host element to internal inputs.
+     * Angular applies .ng-invalid/.ng-touched to the ControlValueAccessor host,
+     * but CSS validation rules target input elements directly. This rule bridges the gap. */
+    :host.ng-invalid.ng-touched input {
+      border-color: #ef4444 !important;
+      border-width: 2px !important;
+    }
+  `],
   template: `
     <div class="recurring-time-slot-editor space-y-4">
       <!-- Time Slot Inputs -->

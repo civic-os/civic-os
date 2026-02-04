@@ -74,9 +74,9 @@
         class="select w-full"
         [id]="prop().column_name"
         [formControlName]="prop().column_name"
-        [style.border-color]="getSelectedStatusColor(statusOptions)"
-        [style.border-width]="getSelectedStatusColor(statusOptions) ? '2px' : null"
-        [style.background-color]="getSelectedStatusBackgroundColor(statusOptions)">
+        [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedStatusColor(statusOptions)"
+        [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedStatusColor(statusOptions) ? '2px' : null)"
+        [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedStatusBackgroundColor(statusOptions)">
         @if (prop().is_nullable) {
           <option [value]="null">Select a Status</option>
         }
@@ -120,9 +120,12 @@
       placeholder="(555) 123-4567"
       maxlength="14"
       class="input input-bordered w-full font-mono"
+      [class.ng-invalid]="form().controls[prop().column_name]?.invalid"
+      [class.ng-touched]="form().controls[prop().column_name]?.touched"
       [id]="prop().column_name"
       [value]="getFormattedPhone(prop().column_name)"
       (input)="onPhoneInput($event, prop().column_name)"
+      (blur)="onPhoneBlur(prop().column_name)"
     />
     <div class="text-xs text-base-content/60 mt-1">
       Enter 10-digit US phone number
@@ -240,12 +243,8 @@
       <div class="text-error text-sm mt-1" role="alert" aria-live="polite">
         @if (ctl.errors?.['required']) {
           <div>
-            @if (prop().validation_rules) {
-              @for (rule of prop().validation_rules; track rule.type) {
-                @if (rule.type === 'required') {
-                  {{ rule.message }}
-                }
-              }
+            @if (getValidationMessage('required'); as customMsg) {
+              {{ customMsg }}
             } @else {
               {{ prop().display_name }} is required.
             }
@@ -253,12 +252,8 @@
         }
         @if (ctl.errors?.['min']) {
           <div>
-            @if (prop().validation_rules) {
-              @for (rule of prop().validation_rules; track rule.type) {
-                @if (rule.type === 'min') {
-                  {{ rule.message }}
-                }
-              }
+            @if (getValidationMessage('min'); as customMsg) {
+              {{ customMsg }}
             } @else {
               Value must be at least {{ ctl.errors?.['min'].min }}.
             }
@@ -266,12 +261,8 @@
         }
         @if (ctl.errors?.['max']) {
           <div>
-            @if (prop().validation_rules) {
-              @for (rule of prop().validation_rules; track rule.type) {
-                @if (rule.type === 'max') {
-                  {{ rule.message }}
-                }
-              }
+            @if (getValidationMessage('max'); as customMsg) {
+              {{ customMsg }}
             } @else {
               Value must be no more than {{ ctl.errors?.['max'].max }}.
             }
@@ -279,12 +270,8 @@
         }
         @if (ctl.errors?.['minlength']) {
           <div>
-            @if (prop().validation_rules) {
-              @for (rule of prop().validation_rules; track rule.type) {
-                @if (rule.type === 'minLength') {
-                  {{ rule.message }}
-                }
-              }
+            @if (getValidationMessage('minLength'); as customMsg) {
+              {{ customMsg }}
             } @else {
               Must be at least {{ ctl.errors?.['minlength'].requiredLength }} characters.
             }
@@ -292,12 +279,8 @@
         }
         @if (ctl.errors?.['maxlength']) {
           <div>
-            @if (prop().validation_rules) {
-              @for (rule of prop().validation_rules; track rule.type) {
-                @if (rule.type === 'maxLength') {
-                  {{ rule.message }}
-                }
-              }
+            @if (getValidationMessage('maxLength'); as customMsg) {
+              {{ customMsg }}
             } @else {
               Must be no more than {{ ctl.errors?.['maxlength'].requiredLength }} characters.
             }
@@ -305,12 +288,8 @@
         }
         @if (ctl.errors?.['pattern']) {
           <div>
-            @if (prop().validation_rules) {
-              @for (rule of prop().validation_rules; track rule.type) {
-                @if (rule.type === 'pattern') {
-                  {{ rule.message }}
-                }
-              }
+            @if (getValidationMessage('pattern'); as customMsg) {
+              {{ customMsg }}
             } @else {
               Invalid format.
             }

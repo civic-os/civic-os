@@ -208,6 +208,26 @@ export class EditPropertyComponent {
     return `rgba(${r}, ${g}, ${b}, 0.15)`;
   }
 
+  /**
+   * Get custom validation message for a specific validation type.
+   * Returns null if no custom message exists (triggering default message display).
+   */
+  getValidationMessage(type: string): string | null {
+    const rules = this.prop().validation_rules;
+    if (!rules || rules.length === 0) return null;
+    const rule = rules.find(r => r.type === type);
+    return rule?.message || null;
+  }
+
+  /**
+   * Check if form control is invalid and touched (for conditional styling).
+   * Used to skip status color styling when field needs validation highlight.
+   */
+  isControlInvalidAndTouched(columnName: string): boolean {
+    const ctl = this.form().controls[columnName];
+    return ctl?.invalid && ctl?.touched;
+  }
+
   // Format phone number for display: 5551234567 → (555) 123-4567
   public getFormattedPhone(controlName: string): string {
     const rawValue = this.form().get(controlName)?.value;
@@ -255,6 +275,14 @@ export class EditPropertyComponent {
     }
 
     input.setSelectionRange(newCursorPos, newCursorPos);
+  }
+
+  /**
+   * Mark phone control as touched on blur.
+   * Required because phone input doesn't use formControlName binding.
+   */
+  public onPhoneBlur(controlName: string): void {
+    this.form().get(controlName)?.markAsTouched();
   }
 
   /**
