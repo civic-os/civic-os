@@ -193,6 +193,12 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Delete actions with confirmation
   - [ ] Manage role permissions inline
 
+- [ ] **Validation Management UI** - Full CRUD for validation rules
+  - [ ] Add/edit/delete validation rules per property
+  - [ ] Validation type picker (required, min, max, minLength, maxLength, pattern)
+  - [ ] Custom error message editor
+  - [ ] Link from Schema Inspector Validations tab
+
 ### Analytics & Observability
 - [ ] Build integrated analytics engine (no external servers required)
   - [ ] Error logging and tracking
