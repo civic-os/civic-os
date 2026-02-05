@@ -280,7 +280,7 @@ export class SeriesEditorModalComponent implements OnChanges {
       p.column_name !== timeSlotProp &&
       !p.column_name.endsWith('_at') &&
       p.column_name !== 'display_name' &&
-      p.show_on_edit !== false
+      (p.show_on_edit !== false || p.show_on_create !== false)
     );
   });
 

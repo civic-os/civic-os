@@ -671,11 +671,11 @@ export class SeriesGroupDetailComponent implements OnChanges {
       const templateKeys = new Set(Object.keys(template));
 
       // All editable properties for this entity (for edit modal)
-      // Only filter by show_on_edit - no hardcoded _at suffix filter
+      // Include show_on_edit OR show_on_create since templates define initial values
       const allEditable = properties.filter((p: SchemaEntityProperty) =>
         p.table_name === entityTable &&
         p.column_name !== timeSlotProp &&  // Time slot managed by recurrence system
-        p.show_on_edit !== false
+        (p.show_on_edit !== false || p.show_on_create !== false)
       );
       this.allEditableProperties.set(allEditable);
 

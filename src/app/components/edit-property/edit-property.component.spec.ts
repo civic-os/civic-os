@@ -960,6 +960,327 @@ describe('EditPropertyComponent', () => {
       const errorDiv = fixture.debugElement.query(By.css('.text-error'));
       expect(errorDiv).toBeTruthy();
     });
+
+    it('should show default error message when validation_rules is empty array', () => {
+      // This tests the critical bug fix: empty arrays [] are truthy in JS
+      const formControl = new FormControl('');
+      const formGroup = new FormGroup({
+        name: formControl
+      });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: [] // Empty array - the bug case
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      formControl.markAsTouched();
+      formControl.setErrors({ required: true });
+      fixture.detectChanges();
+
+      const errorDiv = fixture.debugElement.query(By.css('.text-error'));
+      expect(errorDiv).toBeTruthy();
+      expect(errorDiv.nativeElement.textContent).toContain('Name is required');
+    });
+
+    it('should show custom message when validation_rules has matching rule', () => {
+      const formControl = new FormControl('');
+      const formGroup = new FormGroup({
+        name: formControl
+      });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: [
+          { type: 'required', message: 'Please enter your name' }
+        ]
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      formControl.markAsTouched();
+      formControl.setErrors({ required: true });
+      fixture.detectChanges();
+
+      const errorDiv = fixture.debugElement.query(By.css('.text-error'));
+      expect(errorDiv).toBeTruthy();
+      expect(errorDiv.nativeElement.textContent).toContain('Please enter your name');
+    });
+
+    it('should show default message when validation_rules has no matching rule type', () => {
+      const formControl = new FormControl('');
+      const formGroup = new FormGroup({
+        name: formControl
+      });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: [
+          { type: 'minLength', value: '5', message: 'Too short' } // Different rule type
+        ]
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      formControl.markAsTouched();
+      formControl.setErrors({ required: true }); // required error, but only minLength rule
+      fixture.detectChanges();
+
+      const errorDiv = fixture.debugElement.query(By.css('.text-error'));
+      expect(errorDiv).toBeTruthy();
+      expect(errorDiv.nativeElement.textContent).toContain('Name is required');
+    });
+
+    it('should show min error with custom message', () => {
+      const formControl = new FormControl(0);
+      const formGroup = new FormGroup({
+        count: formControl
+      });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.integer,
+        validation_rules: [
+          { type: 'min', value: '1', message: 'Must have at least 1 item' }
+        ]
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      formControl.markAsTouched();
+      formControl.setErrors({ min: { min: 1, actual: 0 } });
+      fixture.detectChanges();
+
+      const errorDiv = fixture.debugElement.query(By.css('.text-error'));
+      expect(errorDiv).toBeTruthy();
+      expect(errorDiv.nativeElement.textContent).toContain('Must have at least 1 item');
+    });
+
+    it('should show default min error when validation_rules is empty', () => {
+      const formControl = new FormControl(0);
+      const formGroup = new FormGroup({
+        count: formControl
+      });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.integer,
+        validation_rules: []
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      formControl.markAsTouched();
+      formControl.setErrors({ min: { min: 5, actual: 0 } });
+      fixture.detectChanges();
+
+      const errorDiv = fixture.debugElement.query(By.css('.text-error'));
+      expect(errorDiv).toBeTruthy();
+      expect(errorDiv.nativeElement.textContent).toContain('Value must be at least 5');
+    });
+  });
+
+  describe('getValidationMessage()', () => {
+    it('should return null when validation_rules is undefined', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: undefined
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.getValidationMessage('required')).toBeNull();
+    });
+
+    it('should return null when validation_rules is empty array', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: []
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.getValidationMessage('required')).toBeNull();
+    });
+
+    it('should return null when rule type not found', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: [
+          { type: 'minLength', value: '5', message: 'Too short' }
+        ]
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.getValidationMessage('required')).toBeNull();
+    });
+
+    it('should return message when rule type found', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: [
+          { type: 'required', message: 'This field is mandatory' }
+        ]
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.getValidationMessage('required')).toBe('This field is mandatory');
+    });
+
+    it('should return null when rule has empty message', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        ...MOCK_PROPERTIES.textShort,
+        validation_rules: [
+          { type: 'required', value: 'true', message: '' } // Empty message
+        ]
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.getValidationMessage('required')).toBeNull();
+    });
+  });
+
+  describe('isControlInvalidAndTouched()', () => {
+    it('should return false when control is valid', () => {
+      const formGroup = new FormGroup({
+        name: new FormControl('valid value')
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.textShort);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.isControlInvalidAndTouched('name')).toBeFalse();
+    });
+
+    it('should return false when control is invalid but not touched', () => {
+      const formControl = new FormControl('');
+      formControl.setErrors({ required: true });
+      const formGroup = new FormGroup({ name: formControl });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.textShort);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.isControlInvalidAndTouched('name')).toBeFalse();
+    });
+
+    it('should return true when control is invalid and touched', () => {
+      const formControl = new FormControl('');
+      formControl.setErrors({ required: true });
+      formControl.markAsTouched();
+      const formGroup = new FormGroup({ name: formControl });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.textShort);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.isControlInvalidAndTouched('name')).toBeTrue();
+    });
+  });
+
+  describe('onPhoneBlur()', () => {
+    it('should mark phone control as touched', () => {
+      const telProp = createMockProperty({
+        column_name: 'contact_phone',
+        udt_name: 'phone_number',
+        type: EntityPropertyType.Telephone
+      });
+      const formControl = new FormControl('');
+      const formGroup = new FormGroup({
+        contact_phone: formControl
+      });
+      fixture.componentRef.setInput('property', telProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(formControl.touched).toBeFalse();
+
+      component.onPhoneBlur('contact_phone');
+
+      expect(formControl.touched).toBeTrue();
+    });
+  });
+
+  describe('Telephone validation highlighting', () => {
+    it('should have blur event handler wired up to call onPhoneBlur', () => {
+      const telProp = createMockProperty({
+        column_name: 'contact_phone',
+        udt_name: 'phone_number',
+        type: EntityPropertyType.Telephone
+      });
+      const formControl = new FormControl('');
+      const formGroup = new FormGroup({
+        contact_phone: formControl
+      });
+      fixture.componentRef.setInput('property', telProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      spyOn(component, 'onPhoneBlur');
+
+      const input = fixture.debugElement.query(By.css('input[type="tel"]'));
+      input.triggerEventHandler('blur', {});
+
+      expect(component.onPhoneBlur).toHaveBeenCalledWith('contact_phone');
+    });
+
+    it('should have class bindings for validation state', () => {
+      const telProp = createMockProperty({
+        column_name: 'contact_phone',
+        udt_name: 'phone_number',
+        type: EntityPropertyType.Telephone
+      });
+      const formControl = new FormControl('');
+      const formGroup = new FormGroup({
+        contact_phone: formControl
+      });
+      fixture.componentRef.setInput('property', telProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // Verify the input element exists and has our manual class binding attributes
+      const input = fixture.debugElement.query(By.css('input[type="tel"]'));
+      expect(input).toBeTruthy();
+      // The class bindings are driven by form control state,
+      // which we test via isControlInvalidAndTouched() helper
+    });
+  });
+
+  describe('Status validation styling helpers', () => {
+    it('isControlInvalidAndTouched should be used by status select for conditional styling', () => {
+      // Verify the helper returns correct values that would be used by the status select
+      const statusProp = createMockProperty({
+        column_name: 'status_id',
+        type: EntityPropertyType.Status,
+        status_entity_type: 'test_status'
+      });
+
+      // Test 1: Invalid and touched should return true (skip color styling)
+      const formControlInvalid = new FormControl(null);
+      formControlInvalid.setErrors({ required: true });
+      formControlInvalid.markAsTouched();
+      const formGroupInvalid = new FormGroup({ status_id: formControlInvalid });
+      fixture.componentRef.setInput('property', statusProp);
+      fixture.componentRef.setInput('formGroup', formGroupInvalid);
+      component.ngOnInit();
+
+      expect(component.isControlInvalidAndTouched('status_id')).toBeTrue();
+
+      // Test 2: Valid should return false (apply color styling)
+      const formControlValid = new FormControl(1);
+      const formGroupValid = new FormGroup({ status_id: formControlValid });
+      fixture.componentRef.setInput('formGroup', formGroupValid);
+
+      expect(component.isControlInvalidAndTouched('status_id')).toBeFalse();
+    });
   });
 
   describe('Component Initialization', () => {

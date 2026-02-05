@@ -421,7 +421,7 @@ export class CreateSeriesWizardComponent implements OnChanges {
 
     return props.filter(p =>
       p.column_name !== timeSlotProp &&  // Time slot managed by recurrence system
-      p.show_on_edit !== false           // Respects metadata configuration
+      (p.show_on_edit !== false || p.show_on_create !== false)  // Include create-only fields for templates
     );
   });
 
@@ -477,10 +477,10 @@ export class CreateSeriesWizardComponent implements OnChanges {
 
     properties.forEach(prop => {
       // Skip fields that shouldn't be in template
-      // Only filter by time_slot and show_on_edit - no hardcoded _at suffix filter
+      // Include show_on_edit OR show_on_create since templates define initial values
       if (
         prop.column_name === timeSlotProp ||  // Time slot managed by recurrence system
-        prop.show_on_edit === false           // Respects metadata configuration
+        (prop.show_on_edit === false && prop.show_on_create === false)  // Exclude if hidden in both contexts
       ) {
         return;
       }
