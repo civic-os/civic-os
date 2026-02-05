@@ -210,8 +210,9 @@ export class SchemaService {
           return p;
         });
 
-        // Then enrich with M:M virtual properties
-        return this.enrichPropertiesWithManyToMany(typedProps, tables);
+        // Then enrich with M:M virtual properties and sort by sort_order
+        const enriched = this.enrichPropertiesWithManyToMany(typedProps, tables);
+        return enriched.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
       }),
       tap(enrichedProps => {
         this.properties = enrichedProps;
@@ -537,75 +538,72 @@ export class SchemaService {
           }
         }
 
-        return visibleProps.sort((a, b) => a.sort_order - b.sort_order);
+        // Properties are pre-sorted by sort_order in getProperties()
+        return visibleProps;
       }));
   }
   public getPropsForDetail(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
-        return props
-          .filter(p => p.show_on_detail !== false)
-          .sort((a, b) => a.sort_order - b.sort_order);
+        // Properties are pre-sorted by sort_order in getProperties()
+        return props.filter(p => p.show_on_detail !== false);
       }));
   }
   public getPropsForCreate(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
-        return props
-          .filter(p =>{
-            // Exclude auto-managed timestamp fields (created_at, updated_at)
-            // These are managed by database triggers and should never be in create forms
-            if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
-              return false;
-            }
-            return !(p.is_generated || p.is_identity) &&
-              p.is_updatable &&
-              p.show_on_create !== false;
-          })
-          .sort((a, b) => a.sort_order - b.sort_order);
+        // Properties are pre-sorted by sort_order in getProperties()
+        return props.filter(p =>{
+          // Exclude auto-managed timestamp fields (created_at, updated_at)
+          // These are managed by database triggers and should never be in create forms
+          if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
+            return false;
+          }
+          return !(p.is_generated || p.is_identity) &&
+            p.is_updatable &&
+            p.show_on_create !== false;
+        });
       }));
   }
   public getPropsForEdit(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
-        return props
-          .filter(p =>{
-            // Exclude auto-managed timestamp fields (created_at, updated_at)
-            // These are managed by database triggers and should never be in edit forms
-            if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
-              return false;
-            }
-            return !(p.is_generated || p.is_identity) &&
-              p.is_updatable &&
-              p.show_on_edit !== false;
-          })
-          .sort((a, b) => a.sort_order - b.sort_order);
+        // Properties are pre-sorted by sort_order in getProperties()
+        return props.filter(p =>{
+          // Exclude auto-managed timestamp fields (created_at, updated_at)
+          // These are managed by database triggers and should never be in edit forms
+          if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
+            return false;
+          }
+          return !(p.is_generated || p.is_identity) &&
+            p.is_updatable &&
+            p.show_on_edit !== false;
+        });
       }));
   }
   public getPropsForFilter(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
-        return props
-          .filter(p => {
-            // Only include properties marked as filterable
-            if (p.filterable !== true) {
-              return false;
-            }
-            // Only include supported property types
-            const supportedTypes = [
-              EntityPropertyType.ForeignKeyName,
-              EntityPropertyType.DateTime,
-              EntityPropertyType.DateTimeLocal,
-              EntityPropertyType.Date,
-              EntityPropertyType.Boolean,
-              EntityPropertyType.IntegerNumber,
-              EntityPropertyType.Money,
-              EntityPropertyType.User,
-              EntityPropertyType.Status  // Status uses same filter pattern as ForeignKeyName
-            ];
-            return supportedTypes.includes(p.type);
-          })
-          .sort((a, b) => a.sort_order - b.sort_order);
+        // Properties are pre-sorted by sort_order in getProperties()
+        return props.filter(p => {
+          // Only include properties marked as filterable
+          if (p.filterable !== true) {
+            return false;
+          }
+          // Only include supported property types
+          const supportedTypes = [
+            EntityPropertyType.ForeignKeyName,
+            EntityPropertyType.DateTime,
+            EntityPropertyType.DateTimeLocal,
+            EntityPropertyType.Date,
+            EntityPropertyType.Boolean,
+            EntityPropertyType.IntegerNumber,
+            EntityPropertyType.Money,
+            EntityPropertyType.User,
+            EntityPropertyType.Status  // Status uses same filter pattern as ForeignKeyName
+          ];
+          return supportedTypes.includes(p.type);
+        });
       }));
   }
   public static getFormValidatorsForProperty(prop: SchemaEntityProperty): ValidatorFn[] {
