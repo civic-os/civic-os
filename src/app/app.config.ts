@@ -42,6 +42,7 @@ export const appConfig: ApplicationConfig = {
       config: getKeycloakConfig(),
       initOptions: {
         onLoad: 'check-sso',
+        pkceMethod: 'S256',
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
       }
     }),

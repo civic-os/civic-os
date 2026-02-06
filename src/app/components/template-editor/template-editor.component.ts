@@ -5,6 +5,8 @@ import {
   EventEmitter,
   OnInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
   ChangeDetectionStrategy,
   signal,
   inject
@@ -12,6 +14,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 import { Subject, Observable } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import {
@@ -32,7 +35,7 @@ import { SchemaEntityTable } from '../../interfaces/entity';
   templateUrl: './template-editor.component.html',
   styleUrl: './template-editor.component.css'
 })
-export class TemplateEditorComponent implements OnInit, OnDestroy {
+export class TemplateEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() template: NotificationTemplate | null = null;
   @Output() save = new EventEmitter<NotificationTemplate>();
   @Output() cancel = new EventEmitter<void>();
@@ -97,6 +100,26 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
     const entityType = this.templateForm.get('entity_type')?.value;
     if (entityType) {
       this.fetchRandomEntityData(entityType);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['template'] && this.templateForm && this.template) {
+      this.templateForm.patchValue({
+        name: this.template.name || '',
+        description: this.template.description || '',
+        entity_type: this.template.entity_type || '',
+        subject_template: this.template.subject_template || '',
+        html_template: this.template.html_template || '',
+        text_template: this.template.text_template || '',
+        sms_template: this.template.sms_template || ''
+      });
+
+      // Load sample data for the entity type
+      const entityType = this.template.entity_type;
+      if (entityType) {
+        this.fetchRandomEntityData(entityType);
+      }
     }
   }
 
@@ -322,7 +345,8 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
     if (!result) {
       return null;
     }
-    const wrappedHtml = this.wrapHtmlPreview(result);
+    const sanitizedContent = DOMPurify.sanitize(result);
+    const wrappedHtml = this.wrapHtmlPreview(sanitizedContent);
     return this.sanitizer.bypassSecurityTrustHtml(wrappedHtml);
   }
 
