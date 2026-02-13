@@ -55,7 +55,7 @@ if [ ! -f "docker-compose.vps.yml" ]; then
 fi
 
 # Check for docker-rollout (Docker CLI plugin)
-if ! docker rollout --help > /dev/null 2>&1; then
+if ! docker rollout 2>&1 | grep -q "Usage"; then
     log_error "docker-rollout plugin not installed. Install with:"
     log_error "  mkdir -p ~/.docker/cli-plugins"
     log_error "  curl -sL https://raw.githubusercontent.com/wowu/docker-rollout/main/docker-rollout -o ~/.docker/cli-plugins/docker-rollout"

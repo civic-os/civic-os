@@ -20,8 +20,10 @@ services:
       - "443:443"
     environment:
       APP_DOMAIN: ${APP_DOMAIN}
+      VANITY_DOMAIN: ${VANITY_DOMAIN:-}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./conf.d/:/etc/caddy/conf.d/:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -122,13 +124,14 @@ services:
       THUMBNAIL_MAX_WORKERS: ${THUMBNAIL_MAX_WORKERS:-5}
 
       # Notification Worker
-      SITE_URL: https://${APP_DOMAIN}
+      SITE_URL: ${SITE_URL:-https://${APP_DOMAIN}}
       NOTIFICATION_TIMEZONE: ${NOTIFICATION_TIMEZONE:-UTC}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ${SMTP_FROM}
+      SMTP_REPLY_TO: ${SMTP_REPLY_TO:-}
       SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-true}
     networks:
       - civic-os-network
@@ -162,6 +165,12 @@ services:
       # Payment Configuration
       PAYMENT_CURRENCY: ${PAYMENT_CURRENCY:-USD}
       RIVER_WORKER_COUNT: ${PAYMENT_WORKER_COUNT:-1}
+
+      # Processing Fee Configuration (optional)
+      PROCESSING_FEE_ENABLED: ${PROCESSING_FEE_ENABLED:-false}
+      PROCESSING_FEE_PERCENT: ${PROCESSING_FEE_PERCENT:-0}
+      PROCESSING_FEE_FLAT_CENTS: ${PROCESSING_FEE_FLAT_CENTS:-0}
+      PROCESSING_FEE_REFUNDABLE: ${PROCESSING_FEE_REFUNDABLE:-false}
       WEBHOOK_PORT: "8080"
     networks:
       - civic-os-network
@@ -179,11 +188,11 @@ services:
     # NO ports - Caddy handles routing
     restart: unless-stopped
     environment:
-      # PostgREST connection (internal Docker network)
-      POSTGREST_URL: https://api.${APP_DOMAIN}/
+      # PostgREST connection (path-based routing via Caddy)
+      POSTGREST_URL: /_/api/
 
-      # Swagger UI (public URL for About modal link)
-      SWAGGER_URL: https://docs.${APP_DOMAIN}
+      # Swagger UI (About modal link)
+      SWAGGER_URL: /_/docs
 
       # Keycloak configuration
       KEYCLOAK_URL: ${KEYCLOAK_URL}

@@ -9,9 +9,34 @@
 #   https://api.{APP_DOMAIN}   -> PostgREST API
 #   https://docs.{APP_DOMAIN}  -> Swagger UI
 
-# Frontend - main application
+# Global options
+{
+	email dkurin@civic-os.org
+}
+
+# Main application — path-based routing + frontend
+# When VANITY_DOMAIN is set (and differs from APP_DOMAIN), browser traffic
+# redirects to the vanity domain. API/docs paths always served directly.
 {$APP_DOMAIN} {
-	reverse_proxy frontend:80
+	handle_path /_/api/* {
+		reverse_proxy postgrest:3000
+	}
+
+	redir /_/docs /_/docs/ 308
+	handle_path /_/docs/* {
+		reverse_proxy swagger-ui:8080
+	}
+
+	# Redirect browser traffic to vanity domain (if configured)
+	@has_vanity expression `"{$VANITY_DOMAIN:}" != "" && "{$VANITY_DOMAIN:}" != "{$APP_DOMAIN}"`
+	handle @has_vanity {
+		redir https://{$VANITY_DOMAIN:}{uri} permanent
+	}
+
+	# Default: serve frontend directly
+	handle {
+		reverse_proxy frontend:80
+	}
 }
 
 # API - PostgREST + Stripe webhooks
@@ -32,3 +57,7 @@ api.{$APP_DOMAIN} {
 docs.{$APP_DOMAIN} {
 	reverse_proxy swagger-ui:8080
 }
+
+# Per-instance config (vanity domain redirects, etc.)
+# Files in conf.d/*.caddy are optional — glob is a no-op when empty
+import /etc/caddy/conf.d/*.caddy

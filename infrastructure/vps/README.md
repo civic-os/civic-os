@@ -9,13 +9,15 @@ Deploy Civic OS to a single VPS (DigitalOcean Droplet) with:
 
 ```
 Internet → Caddy (:80/:443)
-              ├── {APP_DOMAIN}       → Frontend
-              ├── api.{APP_DOMAIN}   → PostgREST API
-              │   └── /webhooks/stripe → Payment Worker (optional)
-              └── docs.{APP_DOMAIN}  → Swagger UI
+              ├── {APP_DOMAIN}/          → Frontend (Angular)
+              ├── {APP_DOMAIN}/_/api/    → PostgREST API
+              ├── {APP_DOMAIN}/_/docs/   → Swagger UI
+              └── (optional) api.{APP_DOMAIN}/webhooks/stripe → Payment Worker
 
 Managed PostgreSQL (external) ← All services
 ```
+
+All services are accessed through a single domain using path-based routing with the `/_/` prefix. The prefix prevents any overlap with Angular routes. Subdomain-based routing (`api.{APP_DOMAIN}`) is available for backward compatibility and Stripe webhooks.
 
 ## Prerequisites
 
@@ -61,9 +63,10 @@ This creates a `civic-os-demo` droplet with Docker and docker-rollout pre-instal
 # Get the droplet IP from provision.sh output
 DROPLET_IP=xxx.xxx.xxx.xxx
 
-# Copy deployment files
+# Copy deployment files (include conf.d/ if it has instance-specific config)
 scp docker-compose.vps.yml Caddyfile deploy.sh .env.example \
     deploy@${DROPLET_IP}:/opt/civic-os/
+scp -r conf.d deploy@${DROPLET_IP}:/opt/civic-os/
 
 # SSH in and configure
 ssh deploy@${DROPLET_IP}
@@ -84,31 +87,62 @@ nano .env  # Fill in your configuration
 
 ### 5. Configure DNS
 
-Create three A records pointing to your droplet IP:
-- `{instance}` → `{DROPLET_IP}`
-- `api.{instance}` → `{DROPLET_IP}`
-- `docs.{instance}` → `{DROPLET_IP}`
-
-For example, if your domain is `demo.civic-os.org` and instance is `pothole`:
-- `pothole.demo.civic-os.org` → `165.227.80.192`
-- `api.pothole.demo.civic-os.org` → `165.227.80.192`
-- `docs.pothole.demo.civic-os.org` → `165.227.80.192`
-
-**Using doctl** (if DNS is managed by DigitalOcean):
+Create a single A record pointing to your droplet IP:
 
 ```bash
-# List available domains
-doctl compute domain list
+doctl compute domain records create {domain} \
+  --record-type A --record-name {instance} \
+  --record-data {DROPLET_IP} --record-ttl 300
+```
 
-# Create A records (TTL 300 = 5 minutes)
-doctl compute domain records create {domain} --record-type A --record-name {instance} --record-data {DROPLET_IP} --record-ttl 300
-doctl compute domain records create {domain} --record-type A --record-name api.{instance} --record-data {DROPLET_IP} --record-ttl 300
-doctl compute domain records create {domain} --record-type A --record-name docs.{instance} --record-data {DROPLET_IP} --record-ttl 300
+For example, if your domain is `demo.civic-os.org` and instance is `pothole`:
+
+```
+pothole.demo.civic-os.org → 165.227.80.192
+```
+
+Caddy will automatically obtain an SSL certificate via Let's Encrypt.
+
+**With Stripe webhooks**: If using payment processing, also create an `api.` subdomain record:
+
+```bash
+doctl compute domain records create {domain} \
+  --record-type A --record-name api.{instance} \
+  --record-data {DROPLET_IP} --record-ttl 300
 ```
 
 > **Note**: If you have a wildcard DNS record (`*.domain`), Let's Encrypt may have issues with multi-perspective validation until the specific records propagate. Wait 5-10 minutes for DNS caches to update.
 
-Caddy will automatically obtain SSL certificates via Let's Encrypt.
+### Vanity Domains
+
+To serve a Civic OS instance from a custom domain (e.g., `events.mottpark.org`), create a `.caddy` file in `conf.d/`:
+
+```caddy
+# conf.d/vanity-domain.caddy
+events.mottpark.org {
+    handle_path /_/api/* {
+        reverse_proxy postgrest:3000
+    }
+
+    redir /_/docs /_/docs/ 308
+    handle_path /_/docs/* {
+        reverse_proxy swagger-ui:8080
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+}
+```
+
+Then set `VANITY_DOMAIN` in `.env` to redirect browser traffic from the infrastructure domain to the vanity domain:
+
+```bash
+VANITY_DOMAIN=events.mottpark.org
+SITE_URL=https://events.mottpark.org
+```
+
+The vanity domain's DNS must have a CNAME (or A record) pointing to the droplet. Caddy auto-provisions a Let's Encrypt cert for it.
 
 ### 6. Configure Database Firewall
 
@@ -135,7 +169,8 @@ doctl databases firewalls append 00888968-a952-430c-9895-1d263de733c2 --rule ip_
 | File | Purpose |
 |------|---------|
 | `docker-compose.vps.yml` | Service definitions (docker-rollout compatible) |
-| `Caddyfile` | Reverse proxy with subdomain routing |
+| `Caddyfile` | Reverse proxy with path-based routing |
+| `conf.d/` | Per-instance Caddy config (vanity domains, etc.) |
 | `deploy.sh` | Zero-downtime deployment script |
 | `provision.sh` | Droplet creation via doctl |
 | `cloud-init.yaml` | Droplet provisioning (Docker, firewall, etc.) |

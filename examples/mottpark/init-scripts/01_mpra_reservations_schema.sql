@@ -756,7 +756,9 @@ INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_na
 VALUES
   ('valid_time_slot_bounds', 'reservation_requests', 'time_slot', 'Invalid time slot: end time must be after start time.'),
   ('policy_must_be_agreed', 'reservation_requests', 'policy_agreed', 'You must agree to the Facility and Parkland Use Policy to submit a reservation request.'),
-  ('attendee_count_positive', 'reservation_requests', 'attendee_count', 'Number of attendees must be between 1 and 75 (maximum capacity).')
+  ('attendee_count_positive', 'reservation_requests', 'attendee_count', 'Number of attendees must be between 1 and 75 (maximum capacity).'),
+  ('cancellation_reason_required', 'reservation_requests', 'cancellation_reason', 'A cancellation reason is required when cancelling a reservation.'),
+  ('denial_reason_required', 'reservation_requests', 'denial_reason', 'A denial reason is required when denying a reservation.')
   -- NOTE: Overlap constraint is on public_calendar_events (see 05_mpra_public_calendar.sql)
 ON CONFLICT (constraint_name) DO UPDATE SET
   error_message = EXCLUDED.error_message;
