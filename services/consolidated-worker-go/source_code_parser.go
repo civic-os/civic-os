@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	pgquery "github.com/pganalyze/pg_query_go/v6"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	pgquery "github.com/pganalyze/pg_query_go/v6"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/rivertype"
 )
