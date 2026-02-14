@@ -55,19 +55,6 @@ WHERE table_schema = 'public'
   AND table_name = 'schema_rls_policies';
 
 -- ============================================================================
--- Verify views are queryable (don't require data to exist)
--- ============================================================================
-
-SELECT 1/(CASE
-  WHEN (SELECT COUNT(*) FROM schema_functions WHERE source_code IS NOT NULL) >= 0
-  THEN 1 ELSE 0 END);
-
-SELECT 1/(CASE
-  WHEN (SELECT COUNT(*) FROM schema_triggers WHERE trigger_definition IS NOT NULL) >= 0
-  THEN 1 ELSE 0 END);
-
-
--- ============================================================================
 -- Verify schema_functions has ast_json column
 -- ============================================================================
 

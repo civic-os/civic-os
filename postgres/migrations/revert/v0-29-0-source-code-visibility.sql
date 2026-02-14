@@ -3,14 +3,15 @@
 BEGIN;
 
 -- ============================================================================
--- 1. DROP NEW OBJECTS
+-- 1. DROP NEW OBJECTS (order matters: views depend on metadata.parsed_source_code)
 -- ============================================================================
 
 DROP VIEW IF EXISTS public.schema_rls_policies;
 DROP FUNCTION IF EXISTS public.get_entity_source_code(NAME);
 DROP VIEW IF EXISTS public.parsed_source_code;
-DROP TABLE IF EXISTS metadata.parsed_source_code;
 
+-- schema_functions LEFT JOINs metadata.parsed_source_code, so we must
+-- drop/recreate schema_functions BEFORE dropping the table.
 
 -- ============================================================================
 -- 2. RESTORE schema_functions VIEW (without source_code, language columns)
@@ -185,7 +186,13 @@ COMMENT ON VIEW public.schema_triggers IS
 
 
 -- ============================================================================
--- 4. RE-GRANT PERMISSIONS
+-- 4. DROP parsed_source_code TABLE (safe now that schema_functions is recreated without the JOIN)
+-- ============================================================================
+
+DROP TABLE IF EXISTS metadata.parsed_source_code;
+
+-- ============================================================================
+-- 5. RE-GRANT PERMISSIONS
 -- ============================================================================
 
 GRANT SELECT ON public.schema_functions TO authenticated, web_anon;
