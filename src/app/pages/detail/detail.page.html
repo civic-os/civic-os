@@ -10,6 +10,12 @@
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
           <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}</h1>
+          @if (auth.isAdmin()) {
+            <a class="btn btn-ghost btn-xs gap-1" [routerLink]="'/system/entity-code/' + entity.table_name">
+              <span class="material-symbols-outlined text-sm">code</span>
+              View Source
+            </a>
+          }
           @if (seriesMembership()?.is_member) {
             <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
               <span class="material-symbols-outlined text-sm">repeat</span>

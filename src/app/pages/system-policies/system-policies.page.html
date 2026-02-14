@@ -1,0 +1,100 @@
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-2">Security Policies</h1>
+  <p class="text-sm text-base-content/60 mb-6">Row Level Security (RLS) policies controlling data access.</p>
+
+  @if (error()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="flex items-center justify-center h-64">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  }
+
+  @if (!loading() && !error()) {
+    <!-- Search -->
+    <div class="flex flex-wrap gap-3 mb-4">
+      <input type="text"
+             class="input input-bordered input-sm w-64"
+             placeholder="Search policies..."
+             [ngModel]="searchQuery()"
+             (ngModelChange)="searchQuery.set($event)" />
+      <span class="text-sm text-base-content/60 self-center">
+        {{ filteredPolicies().length }} policies across {{ policyGroups().length }} tables
+      </span>
+    </div>
+
+    @if (policyGroups().length === 0) {
+      <div class="text-center py-12 text-base-content/50">
+        <span class="material-symbols-outlined text-4xl mb-2">shield</span>
+        <p>No RLS policies found.</p>
+      </div>
+    } @else {
+      <!-- Policies grouped by table -->
+      @for (group of policyGroups(); track group.tableName) {
+        <div class="mb-6">
+          <h2 class="text-base font-semibold font-mono flex items-center gap-2 mb-2">
+            <span class="material-symbols-outlined text-sm text-base-content/70">table</span>
+            {{ group.tableName }}
+            <span class="badge badge-sm badge-ghost">{{ group.policies.length }}</span>
+          </h2>
+
+          <div class="space-y-2">
+            @for (policy of group.policies; track getPolicyKey(policy)) {
+              <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg"
+                   [class.collapse-open]="isExpanded(getPolicyKey(policy))">
+                <div class="collapse-title cursor-pointer flex items-center gap-3 pr-12"
+                     (click)="togglePolicy(getPolicyKey(policy))">
+                  <span class="font-mono text-sm flex-1">{{ policy.policy_name }}</span>
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="badge badge-sm" [ngClass]="getCommandBadgeClass(policy.command)">
+                      {{ policy.command }}
+                    </span>
+                    <span class="badge badge-sm" [class.badge-success]="policy.permissive === 'PERMISSIVE'"
+                          [class.badge-warning]="policy.permissive !== 'PERMISSIVE'">
+                      {{ policy.permissive }}
+                    </span>
+                    @if (policy.roles && policy.roles.length > 0) {
+                      <span class="text-xs text-base-content/50">{{ policy.roles.join(', ') }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="collapse-content">
+                  @if (isExpanded(getPolicyKey(policy))) {
+                    <div class="space-y-3">
+                      @if (policy.using_expression) {
+                        <div>
+                          <h4 class="text-xs font-semibold text-base-content/70 mb-1">USING expression</h4>
+                          <app-code-viewer
+                            [sourceCode]="policy.using_expression"
+                            [title]="'USING'"
+                            [objectType]="'rls_policy'" />
+                        </div>
+                      }
+                      @if (policy.with_check_expression) {
+                        <div>
+                          <h4 class="text-xs font-semibold text-base-content/70 mb-1">WITH CHECK expression</h4>
+                          <app-code-viewer
+                            [sourceCode]="policy.with_check_expression"
+                            [title]="'WITH CHECK'"
+                            [objectType]="'rls_policy'" />
+                        </div>
+                      }
+                      @if (!policy.using_expression && !policy.with_check_expression) {
+                        <p class="text-sm text-base-content/50 italic">No expressions defined.</p>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

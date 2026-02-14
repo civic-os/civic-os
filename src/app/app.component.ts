@@ -200,6 +200,16 @@ export class AppComponent {
     this.drawerOpen = false;
   }
 
+  public navigateToSystemFunctions() {
+    this.router.navigate(['system', 'functions']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToSystemPolicies() {
+    this.router.navigate(['system', 'policies']);
+    this.drawerOpen = false;
+  }
+
   /**
    * Open the settings modal
    */

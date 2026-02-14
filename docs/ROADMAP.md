@@ -136,7 +136,17 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Build automatic generation of Workflow diagrams showing how workflows operate
 
 ### Logic
-- [ ] Build automatic generation of Block Diagrams showing how Logic works
+- [~] **Source Code Block Visualization** (v0.29.0) - Read-only Blockly-based visualization of PL/pgSQL functions and SQL views
+  - [x] Go worker parses source code via `libpg_query` and stores AST in `metadata.parsed_source_code`
+  - [x] `AstToBlocklyService` maps PL/pgSQL AST nodes to custom Blockly block definitions
+  - [x] `BlocklyViewerComponent` lazy-loads Blockly (~150KB gzip) with read-only workspace
+  - [x] Custom block definitions (`sql-blocks.ts`) for SQL/PL/pgSQL constructs (SELECT INTO, UPDATE, IF/ELSE, DECLARE, etc.)
+  - [x] Theme integration (DaisyUI light/dark with `civic-os-theme.ts`)
+  - [x] Entity Code page (`/entity-code/:entity`) showing functions with Source/Blocks toggle
+  - [x] System Functions page (`/system-functions`) and System Policies page (`/system-policies`)
+  - [ ] **Documentation**: Write `docs/development/CODE_BLOCK_SYSTEM.md` user-facing guide. Design doc at `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md`
+  - [ ] Regex fallback (`SqlBlockTransformerService`) for functions without pre-parsed ASTs
+  - [ ] Interactive editing (Phase 3: remove `readOnly: true`, enable visual SQL editing)
 - [ ] **Entity Actions Management Page** - Read-only view of all configured entity actions
   - [ ] List all actions grouped by entity
   - [ ] Show action configuration (visibility/enabled conditions, RPC function, button style)

@@ -34,6 +34,7 @@ func main() {
 	log.Println("    - Notification Worker")
 	log.Println("    - Recurring Series Worker")
 	log.Println("    - Scheduled Jobs Worker")
+	log.Println("    - Source Code Parser")
 	log.Println("========================================")
 
 	ctx := context.Background()
@@ -230,6 +231,12 @@ func main() {
 	})
 	log.Println("[Init] ✓ ScheduledJobExecuteWorker registered (queue: scheduled_jobs)")
 
+	// Source Code Parser Worker (source_parsing queue)
+	river.AddWorker(workers, &ParseAllSourceCodeWorker{
+		dbPool: dbPool,
+	})
+	log.Println("[Init] ✓ ParseAllSourceCodeWorker registered (queue: source_parsing)")
+
 	// Scheduled Jobs Scheduler - uses internal Go ticker, not River periodic jobs
 	// This ensures only consolidated-worker runs the scheduler (not payment-worker)
 	scheduledJobScheduler := &ScheduledJobScheduler{
@@ -249,6 +256,7 @@ func main() {
 			"notifications":  {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
 			"recurring":      {MaxWorkers: 5},                   // Series expansion jobs
 			"scheduled_jobs": {MaxWorkers: 5},                   // Scheduled SQL function execution
+			"source_parsing": {MaxWorkers: 1},                   // Serial — one parse at a time
 		},
 		Workers: workers,
 		Logger:  slog.Default(),
@@ -265,6 +273,18 @@ func main() {
 		log.Fatalf("[Init] Failed to start River client: %v", err)
 	}
 	log.Println("[Init] ✓ River client started")
+
+	// Start the source code listener (LISTEN on pgrst channel)
+	StartSourceCodeListener(ctx, databaseURL, func(ctx context.Context) error {
+		_, err := riverClient.Insert(ctx, ParseAllSourceCodeArgs{}, nil)
+		return err
+	})
+	log.Println("[Init] ✓ Source code listener started (LISTEN pgrst)")
+
+	// Insert initial parse job to populate table on startup
+	if _, err := riverClient.Insert(ctx, ParseAllSourceCodeArgs{}, nil); err != nil {
+		log.Printf("[Init] Warning: failed to insert initial parse job: %v", err)
+	}
 
 	// Start the scheduled job scheduler (Go ticker, not River periodic)
 	scheduledJobScheduler.Start(ctx)
@@ -283,8 +303,10 @@ func main() {
 	log.Println("  - expand_recurring_series (queue: recurring, 5 workers)")
 	log.Println("  - scheduled_job_scheduler (Go ticker, every minute)")
 	log.Println("  - scheduled_job_execute (queue: scheduled_jobs, 5 workers)")
+	log.Println("  - parse_all_source_code (queue: source_parsing, 1 worker)")
+	log.Println("  - pgrst LISTEN (dedicated connection)")
 	log.Println("")
-	log.Printf("Database connections: %d max, %d min", dbMaxConns, dbMinConns)
+	log.Printf("Database connections: %d max, %d min (+1 LISTEN)", dbMaxConns, dbMinConns)
 	log.Println("Press Ctrl+C to shutdown gracefully...")
 	log.Println("========================================")
 

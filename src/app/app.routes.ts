@@ -48,6 +48,24 @@ export const routes: Routes = [
         canActivate: [schemaVersionGuard]
     },
     {
+        path: 'system/functions',
+        loadComponent: () => import('./pages/system-functions/system-functions.page')
+            .then(m => m.SystemFunctionsPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
+        path: 'system/entity-code/:tableName',
+        loadComponent: () => import('./pages/entity-code/entity-code.page')
+            .then(m => m.EntityCodePage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
+        path: 'system/policies',
+        loadComponent: () => import('./pages/system-policies/system-policies.page')
+            .then(m => m.SystemPoliciesPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
         path: 'permissions',
         component: PermissionsPage,
         canActivate: [schemaVersionGuard, authGuard]

@@ -173,6 +173,22 @@
                   Notifications
                 </a>
               </li>
+              <li (click)="navigateToSystemFunctions()">
+                <a [class.menu-active]="isRouteActive('/system/functions')"
+                   [class.font-bold]="isRouteActive('/system/functions')"
+                   [class.opacity-85]="!isRouteActive('/system/functions')">
+                  <span class="material-symbols-outlined" aria-hidden="true">functions</span>
+                  Functions & RPCs
+                </a>
+              </li>
+              <li (click)="navigateToSystemPolicies()">
+                <a [class.menu-active]="isRouteActive('/system/policies')"
+                   [class.font-bold]="isRouteActive('/system/policies')"
+                   [class.opacity-85]="!isRouteActive('/system/policies')">
+                  <span class="material-symbols-outlined" aria-hidden="true">shield</span>
+                  Security Policies
+                </a>
+              </li>
             }
             <!-- Feature-specific items (shown based on entity config + user permissions) -->
             @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
