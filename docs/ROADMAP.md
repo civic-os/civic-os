@@ -147,6 +147,13 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] **Documentation**: Write `docs/development/CODE_BLOCK_SYSTEM.md` user-facing guide. Design doc at `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md`
   - [ ] Regex fallback (`SqlBlockTransformerService`) for functions without pre-parsed ASTs
   - [ ] Interactive editing (Phase 3: remove `readOnly: true`, enable visual SQL editing)
+- [x] **Schema Decisions (ADR)** (v0.30.0) - Database-native decision records for schema evolution
+  - [x] `metadata.schema_decisions` table with entity/property linking
+  - [x] `create_schema_decision()` RPC with supersession support
+  - [x] RLS policies (authenticated read, admin write)
+  - [ ] Admin browse page (`/admin/schema-decisions`) — filter, search, create via UI
+  - [ ] Surface decisions on Entity Management and Property Management pages
+
 - [ ] **Entity Actions Management Page** - Read-only view of all configured entity actions
   - [ ] List all actions grouped by entity
   - [ ] Show action configuration (visibility/enabled conditions, RPC function, button style)
@@ -197,6 +204,10 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Logic
 - [ ] Build GUI editor for Block Diagrams showing how Logic works
+- [ ] **Schema Decision Prompts** - Require ADR documentation for schema changes
+  - [ ] Prompt for decision rationale when modifying schema through GUI editor
+  - [ ] Show prior decisions for an entity/property before editing
+  - [ ] Auto-link new decisions to migrations
 - [ ] **Entity Actions Editor** - Full CRUD for entity actions via UI
   - [ ] Create new actions (select entity, configure RPC, set conditions)
   - [ ] Edit existing actions (update visibility/enabled conditions, button style, messages)

@@ -3939,6 +3939,158 @@ The `schema_entities` view includes an `is_view` column (boolean) that the front
 
 ---
 
+### Schema Decisions (ADR) System (v0.30.0+)
+
+Track the reasoning behind schema design choices using database-native architectural decision records (ADRs). Unlike traditional markdown ADRs in a repo, these records travel with the database — if you `pg_dump` and restore elsewhere, the reasoning comes along.
+
+**Why Schema Decisions matter**:
+- **Prevent flip-flop changes**: Making prior reasoning visible prevents re-litigating settled tradeoffs
+- **Government accountability**: Civic OS's government customers expect documentation for architectural choices
+- **Integrator onboarding**: New integrators understand WHY a schema is designed the way it is, not just WHAT it looks like
+
+**Key Concepts**:
+- Decisions attach to **schema objects** (tables/columns), not data records
+- **Array-based linking** — a single decision can reference multiple entity types and/or property names for cross-entity architectural choices
+- **Append-only** with supersession model — decisions are never edited, only superseded by newer decisions
+- **Admin-only write**, authenticated read access via RLS
+- No Angular UI needed — usable via SQL immediately
+
+#### Quick Setup
+
+Document a schema decision alongside your schema changes:
+
+```sql
+SELECT create_schema_decision(
+    p_title := 'Use tstzrange for reservation time slots',
+    p_decision := 'Reservation time slots use the time_slot domain (tstzrange) rather than separate start/end columns',
+    p_entity_types := ARRAY['reservations']::NAME[],
+    p_property_names := ARRAY['time_slot']::NAME[],
+    p_rationale := 'Single-column range type enables GIST exclusion constraints for automatic double-booking prevention.',
+    p_consequences := 'Calendar visualization built-in. Requires btree_gist extension.',
+    p_migration_id := 'v0-9-0-add-time-slot'
+);
+```
+
+For cross-entity decisions, pass multiple entity types:
+
+```sql
+SELECT create_schema_decision(
+    p_title := 'Separate request and calendar tables with one-way sync',
+    p_decision := 'Reservation requests and public calendar events are stored in separate tables with trigger-based sync',
+    p_entity_types := ARRAY['reservation_requests', 'public_calendar_events']::NAME[],
+    p_rationale := 'Clean privacy isolation — public table is always a safe subset of the full request data.'
+);
+```
+
+#### `create_schema_decision()` API Reference
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `p_title` | TEXT | Yes | Short title (max 200 chars) |
+| `p_decision` | TEXT | Yes | What was decided |
+| `p_entity_types` | NAME[] | No | Array of table/view names (NULL for system-level decisions) |
+| `p_property_names` | NAME[] | No | Array of column names (requires `p_entity_types`) |
+| `p_context` | TEXT | No | Problem statement / current situation |
+| `p_rationale` | TEXT | No | Why this approach over alternatives |
+| `p_consequences` | TEXT | No | Expected effects, tradeoffs |
+| `p_status` | TEXT | No | `proposed`, `accepted` (default), `deprecated`, `superseded` |
+| `p_migration_id` | TEXT | No | Sqitch migration reference for traceability |
+| `p_supersedes_id` | INT | No | ID of the decision being superseded |
+
+**Returns**: `INT` — the new decision's ID.
+
+**Validation**:
+- Each element of `p_entity_types` is validated against `information_schema.tables` and `information_schema.views`
+- `p_property_names` requires `p_entity_types` to be specified
+- `p_supersedes_id` must reference an existing decision
+- Author is automatically set from the JWT via `current_user_id()`
+
+#### Superseding a Prior Decision
+
+When a design choice is revised, create a new decision that supersedes the old one:
+
+```sql
+-- Original decision (ID = 1):
+-- "Use single status column for reservation workflow"
+
+-- Supersede it with a new approach:
+SELECT create_schema_decision(
+    p_title := 'Use Status Type System for reservation workflow',
+    p_decision := 'Migrate from single status column to centralized metadata.statuses with entity_type discriminator',
+    p_entity_types := ARRAY['reservations']::NAME[],
+    p_rationale := 'Status Type System provides colored badges, dropdown ordering, terminal state tracking, and is_initial defaults without custom code.',
+    p_supersedes_id := 1  -- Marks decision #1 as 'superseded'
+);
+```
+
+The old decision's status is automatically set to `superseded` and its `superseded_by_id` links to the new decision.
+
+#### Query Examples
+
+```sql
+-- Find all decisions for a specific entity (array containment query)
+SELECT * FROM schema_decisions
+WHERE 'reservation_requests' = ANY(entity_types)
+ORDER BY decided_date DESC;
+
+-- Find cross-entity decisions (decisions spanning multiple tables)
+SELECT id, title, entity_types FROM schema_decisions
+WHERE array_length(entity_types, 1) > 1;
+
+-- Find all active (non-superseded) decisions
+SELECT * FROM schema_decisions
+WHERE status = 'accepted'
+ORDER BY decided_date;
+
+-- Find superseded decisions and their replacements
+SELECT
+    old.title AS original_decision,
+    old.decided_date AS original_date,
+    new.title AS replacement_decision,
+    new.decided_date AS replacement_date
+FROM schema_decisions old
+JOIN schema_decisions new ON old.superseded_by_id = new.id
+WHERE old.status = 'superseded';
+```
+
+#### Best Practices
+
+1. **Every schema change should document its rationale** via `create_schema_decision()` or direct INSERT alongside the schema change. This applies to human integrators AND AI assistants (Claudes) working on the codebase
+2. **Before modifying any entity's schema, query existing decisions first** to understand prior tradeoffs: `SELECT * FROM schema_decisions WHERE 'entity_name' = ANY(entity_types) AND status = 'accepted'`
+3. **Use arrays for cross-entity decisions**: If a design choice spans multiple tables (e.g., separating request and calendar tables), list all affected entities in `p_entity_types`
+4. **Focus on "why"**: The `decision` field says what you chose; the `rationale` field explains why that approach was better than alternatives
+5. **Link to migrations**: Use `p_migration_id` to trace decisions back to specific Sqitch migrations
+6. **Don't over-document**: Not every column needs a decision — focus on choices where alternatives existed and tradeoffs were weighed
+7. **Use supersession**: When changing a prior approach, create a new decision with `p_supersedes_id` rather than editing the old one
+
+#### Schema Reference
+
+**Table**: `metadata.schema_decisions`
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | SERIAL | Primary key |
+| `entity_types` | NAME[] | Array of table/view names (nullable) |
+| `property_names` | NAME[] | Array of column names (nullable) |
+| `migration_id` | TEXT | Sqitch migration reference |
+| `title` | VARCHAR(200) | Decision title |
+| `status` | VARCHAR(50) | `proposed`, `accepted`, `deprecated`, `superseded` |
+| `context` | TEXT | Problem statement |
+| `decision` | TEXT | What was decided |
+| `rationale` | TEXT | Why this approach |
+| `consequences` | TEXT | Expected effects |
+| `superseded_by_id` | INT | FK to replacement decision |
+| `author_id` | UUID | FK to `metadata.civic_os_users` |
+| `decided_date` | DATE | When the decision was made |
+| `created_at` | TIMESTAMPTZ | Record creation timestamp |
+| `updated_at` | TIMESTAMPTZ | Record update timestamp |
+
+**RLS Policies**: All authenticated users can read. Only admins can insert or update (enforced via `is_admin()`).
+
+**Complete Example**: See `examples/mottpark/init-scripts/24_mpra_schema_decisions.sql` for 8 retroactive decisions documenting the Mott Park reservation system design.
+
+---
+
 ## Database Patterns
 
 ### Custom Domains

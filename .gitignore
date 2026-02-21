@@ -19,6 +19,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+.mcp.json
 
 # Visual Studio Code
 .vscode/*
@@ -36,6 +37,7 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
+jwt-secret.jwks
 
 # System files
 .DS_Store
