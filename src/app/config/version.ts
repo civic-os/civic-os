@@ -22,4 +22,4 @@
  * This file is generated from package.json by scripts/update-version.js
  * Run 'npm run update-version' to regenerate after version changes.
  */
-export const APP_VERSION = '0.28.5';
+export const APP_VERSION = '0.30.0';

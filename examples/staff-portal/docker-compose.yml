@@ -1,0 +1,182 @@
+services:
+  postgres:
+    build:
+      context: ../..
+      dockerfile: docker/dev-postgres/Dockerfile
+    platform: linux/amd64
+    container_name: staff_portal_postgres_db
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Mount Sqitch files for migrations
+      - ../../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
+      - ../../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
+      - ../../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
+      # Mount example-specific init scripts
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - postgrest-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    container_name: staff_portal_postgrest_api
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_DB_PRE_REQUEST: "metadata.check_jwt"
+      PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
+      PGRST_JWT_AUD: "account"
+      PGRST_OPENAPI_SERVER_PROXY_URI: "http://localhost:3000"
+      PGRST_LOG_LEVEL: "info"
+    volumes:
+      - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - postgrest-network
+    restart: unless-stopped
+
+  # Optional: Swagger UI for API documentation
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: staff_portal_swagger_ui
+    ports:
+      - "8080:8080"
+    environment:
+      API_URL: "http://localhost:3000/"
+    depends_on:
+      - postgrest
+    networks:
+      - postgrest-network
+
+  # MinIO - S3-compatible object storage for local development (optional)
+  minio:
+    image: minio/minio:latest
+    container_name: staff_portal_minio
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Web Console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - postgrest-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  # Inbucket - SMTP server with web UI for local email testing
+  inbucket:
+    image: inbucket/inbucket:latest
+    container_name: staff_portal_inbucket
+    ports:
+      - "9100:9000"  # Web UI (changed from 9000 to avoid conflict with MinIO)
+      - "2500:2500"  # SMTP
+      - "1100:1100"  # POP3
+    environment:
+      - INBUCKET_SMTP_ADDR=0.0.0.0:2500
+      - INBUCKET_POP3_ADDR=0.0.0.0:1100
+      - INBUCKET_WEB_ADDR=0.0.0.0:9000
+    networks:
+      - postgrest-network
+    restart: unless-stopped
+
+  # Consolidated Worker - Combines S3 Signer, Thumbnail Worker, and Notification Worker
+  # Single service with shared connection pool (4 connections total instead of 12)
+  consolidated-worker:
+    build:
+      context: ../../services/consolidated-worker-go
+      dockerfile: Dockerfile
+    container_name: staff_portal_consolidated_worker
+    environment:
+      # Database Configuration (shared pool with explicit limits)
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DB_MAX_CONNS=${DB_MAX_CONNS:-4}  # Total connections for all workers (default: 4)
+      - DB_MIN_CONNS=${DB_MIN_CONNS:-1}
+
+      # S3 Configuration (for S3 Signer and Thumbnail Worker)
+      - S3_ENDPOINT=http://minio:9000
+      - S3_PUBLIC_ENDPOINT=${S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - S3_BUCKET=${S3_BUCKET:-civic-os-files}
+      - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - S3_REGION=us-east-1
+
+      # Thumbnail Worker Configuration
+      - THUMBNAIL_MAX_WORKERS=${THUMBNAIL_MAX_WORKERS:-3}
+
+      # Notification Worker Configuration
+      - SITE_URL=${SITE_URL:-http://localhost:4200}
+      - NOTIFICATION_TIMEZONE=${NOTIFICATION_TIMEZONE:-America/New_York}
+      - SMTP_HOST=${SMTP_HOST:-inbucket}  # Default to Inbucket for local dev
+      - SMTP_PORT=${SMTP_PORT:-2500}       # Inbucket SMTP port
+      - SMTP_USERNAME=${SMTP_USERNAME:-}   # Empty for Inbucket (no auth required)
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}   # Empty for Inbucket
+      # v0.25.0+: Display name support in SMTP_FROM, optional SMTP_REPLY_TO
+      - SMTP_FROM=${SMTP_FROM:-"FFSC Staff Portal" <noreply@example.com>}
+      - SMTP_REPLY_TO=${SMTP_REPLY_TO:-}   # Optional: where replies should go
+      - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}  # Set to true in production
+    networks:
+      - postgrest-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      inbucket:
+        condition: service_started
+    restart: unless-stopped
+
+  # Local Keycloak for RBAC testing
+  # Admin console: http://localhost:8082 (admin/admin)
+  # Realm auto-imports from mottpark config on startup
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: staff_portal_keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8082:8080"
+    command: start-dev --import-realm
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import:ro
+    networks:
+      - postgrest-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  postgres_data:
+  init-scripts:
+  minio_data:
+
+networks:
+  postgrest-network:
+    driver: bridge

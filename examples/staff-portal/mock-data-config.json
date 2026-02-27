@@ -1,0 +1,13 @@
+{
+  "recordsPerEntity": {
+    "staff_members": 20,
+    "time_entries": 100,
+    "time_off_requests": 15,
+    "incident_reports": 8,
+    "reimbursements": 10,
+    "offboarding_feedback": 5
+  },
+  "excludeTables": [
+    "staff_roles", "sites", "document_requirements", "staff_documents"
+  ]
+}
