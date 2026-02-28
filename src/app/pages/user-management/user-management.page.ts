@@ -121,8 +121,14 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                     </span>
                   </td>
                   <td>
-                    @if (user.status === 'failed') {
-                      <div class="flex gap-1">
+                    <div class="flex gap-1">
+                      @if (user.status === 'active' && user.id) {
+                        <button class="btn btn-xs btn-ghost" title="Edit user"
+                                (click)="openEditModal(user)">
+                          <span class="material-symbols-outlined text-sm">edit</span>
+                        </button>
+                      }
+                      @if (user.status === 'failed') {
                         <button class="btn btn-xs btn-ghost" title="View error"
                                 (click)="viewError(user)">
                           <span class="material-symbols-outlined text-sm">info</span>
@@ -131,8 +137,8 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                                 (click)="retryUser(user)">
                           <span class="material-symbols-outlined text-sm">refresh</span>
                         </button>
-                      </div>
-                    }
+                      }
+                    </div>
                   </td>
                 </tr>
               }
@@ -252,6 +258,87 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
       </div>
     }
 
+    <!-- Edit User Modal -->
+    @if (showEditModal()) {
+      <div class="modal modal-open">
+        <div class="modal-box">
+          <h3 class="font-bold text-lg mb-4">Edit User</h3>
+
+          <!-- User Info Section -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label"><span class="label-text">First Name *</span></label>
+              <input type="text" class="input input-bordered w-full"
+                     [ngModel]="editFirstName()"
+                     (ngModelChange)="editFirstName.set($event)" />
+            </div>
+            <div>
+              <label class="label"><span class="label-text">Last Name *</span></label>
+              <input type="text" class="input input-bordered w-full"
+                     [ngModel]="editLastName()"
+                     (ngModelChange)="editLastName.set($event)" />
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="label"><span class="label-text">Phone</span></label>
+            <input type="tel" class="input input-bordered w-full" placeholder="5551234567"
+                   [ngModel]="editPhone()"
+                   (ngModelChange)="editPhone.set($event)" />
+          </div>
+
+          <div class="mt-3">
+            <label class="label"><span class="label-text">Email</span></label>
+            <input type="email" class="input input-bordered w-full" disabled
+                   [value]="editUser()?.email" />
+            <div class="text-xs text-base-content/50 mt-1">Email address cannot be changed from this page</div>
+          </div>
+
+          <!-- Divider -->
+          <div class="divider">Roles</div>
+
+          <!-- Roles Section -->
+          <div class="flex flex-wrap gap-3">
+            @for (role of manageableRoles(); track role.role_id) {
+              <label class="cursor-pointer flex items-center gap-1.5">
+                <input type="checkbox" class="checkbox checkbox-sm"
+                       [checked]="editRoles().has(role.display_name)"
+                       [disabled]="editRolesLoading().has(role.display_name)"
+                       (change)="toggleEditRole(role.display_name)" />
+                <span class="text-sm">{{ role.display_name }}</span>
+                @if (editRolesLoading().has(role.display_name)) {
+                  <span class="loading loading-spinner loading-xs"></span>
+                }
+              </label>
+            }
+          </div>
+          @if (getNonManageableRoles().length > 0) {
+            <div class="mt-2 flex flex-wrap gap-1">
+              @for (role of getNonManageableRoles(); track role) {
+                <span class="badge badge-sm badge-ghost" title="You cannot manage this role">{{ role }}</span>
+              }
+            </div>
+          }
+
+          @if (editError()) {
+            <div class="alert alert-error mt-4 text-sm">{{ editError() }}</div>
+          }
+
+          <div class="modal-action">
+            <button class="btn" (click)="closeEditModal()">Cancel</button>
+            <button class="btn btn-primary" [disabled]="editLoading()"
+                    (click)="submitEditUser()">
+              @if (editLoading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              }
+              Save Changes
+            </button>
+          </div>
+        </div>
+        <div class="modal-backdrop" (click)="closeEditModal()"></div>
+      </div>
+    }
+
     <!-- Import Users Modal -->
     @if (showImportModal()) {
       <app-import-modal
@@ -290,6 +377,17 @@ export class UserManagementPage {
 
   // Manageable roles
   manageableRoles = toSignal(this.userService.getManageableRoles(), { initialValue: [] as ManageableRole[] });
+
+  // Edit modal state
+  showEditModal = signal(false);
+  editLoading = signal(false);
+  editError = signal<string | undefined>(undefined);
+  editUser = signal<ManagedUser | undefined>(undefined);
+  editFirstName = signal('');
+  editLastName = signal('');
+  editPhone = signal('');
+  editRoles = signal<Set<string>>(new Set());
+  editRolesLoading = signal<Set<string>>(new Set());
 
   // Error detail modal
   showErrorModal = signal(false);
@@ -395,6 +493,107 @@ export class UserManagementPage {
         setTimeout(() => this.successMessage.set(undefined), 5000);
       } else {
         this.createError.set(response.error?.humanMessage || 'Failed to create user');
+      }
+    });
+  }
+
+  // =========================================================================
+  // Edit User Modal
+  // =========================================================================
+
+  openEditModal(user: ManagedUser): void {
+    if (user.status !== 'active' || !user.id) {
+      return;
+    }
+    this.editUser.set(user);
+    this.editFirstName.set(user.first_name || '');
+    this.editLastName.set(user.last_name || '');
+    this.editPhone.set(user.phone || '');
+    this.editRoles.set(new Set(user.roles || []));
+    this.editRolesLoading.set(new Set());
+    this.editError.set(undefined);
+    this.editLoading.set(false);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.loadUsers();
+  }
+
+  getNonManageableRoles(): string[] {
+    const manageable = new Set(this.manageableRoles().map(r => r.display_name));
+    return Array.from(this.editRoles()).filter(r => !manageable.has(r));
+  }
+
+  toggleEditRole(roleName: string): void {
+    const user = this.editUser();
+    if (!user?.id) return;
+
+    const currentRoles = this.editRoles();
+    const isAssigned = currentRoles.has(roleName);
+
+    // Set loading for this role
+    const loading = new Set(this.editRolesLoading());
+    loading.add(roleName);
+    this.editRolesLoading.set(loading);
+
+    const operation = isAssigned
+      ? this.userService.revokeUserRole(user.id, roleName)
+      : this.userService.assignUserRole(user.id, roleName);
+
+    operation.subscribe(response => {
+      // Clear loading for this role
+      const updatedLoading = new Set(this.editRolesLoading());
+      updatedLoading.delete(roleName);
+      this.editRolesLoading.set(updatedLoading);
+
+      if (response.success) {
+        const updatedRoles = new Set(this.editRoles());
+        if (isAssigned) {
+          updatedRoles.delete(roleName);
+        } else {
+          updatedRoles.add(roleName);
+        }
+        this.editRoles.set(updatedRoles);
+        this.editError.set(undefined);
+      } else {
+        this.editError.set(response.error?.humanMessage || 'Failed to update role');
+      }
+    });
+  }
+
+  submitEditUser(): void {
+    const user = this.editUser();
+    if (!user?.id) return;
+
+    const firstName = this.editFirstName().trim();
+    const lastName = this.editLastName().trim();
+
+    if (!firstName || !lastName) {
+      this.editError.set('First name and last name are required');
+      return;
+    }
+
+    this.editLoading.set(true);
+    this.editError.set(undefined);
+
+    const phone = this.editPhone().trim();
+
+    this.userService.updateUserInfo({
+      user_id: user.id,
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone || undefined
+    }).subscribe(response => {
+      this.editLoading.set(false);
+      if (response.success) {
+        this.showEditModal.set(false);
+        this.successMessage.set(`User ${firstName} ${lastName} updated successfully.`);
+        this.loadUsers();
+        setTimeout(() => this.successMessage.set(undefined), 5000);
+      } else {
+        this.editError.set(response.error?.humanMessage || 'Failed to update user');
       }
     });
   }

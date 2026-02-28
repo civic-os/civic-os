@@ -336,7 +336,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 
 **Admin Features** (require `admin` role):
 - **Permissions Page** (`/permissions`) - Manage role-based table permissions, entity action permissions, and role delegation (v0.31.0+)
-- **User Management Page** (`/admin/users`) - Create and manage user accounts with async Keycloak provisioning, bulk import from Excel with partial success handling (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
+- **User Management Page** (`/admin/users`) - Create, edit, and manage user accounts with async Keycloak provisioning, inline role assignment/revocation, and bulk import from Excel with partial success handling (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering

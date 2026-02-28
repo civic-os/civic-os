@@ -17,10 +17,11 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { UserManagementPage } from './user-management.page';
-import { UserManagementService } from '../../services/user-management.service';
+import { UserManagementService, ManagedUser } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
+import { ApiResponse } from '../../interfaces/api';
 
 describe('UserManagementPage', () => {
   let component: UserManagementPage;
@@ -38,7 +39,8 @@ describe('UserManagementPage', () => {
       'getManageableRoles',
       'assignUserRole',
       'revokeUserRole',
-      'hasUserManagementAccess'
+      'hasUserManagementAccess',
+      'updateUserInfo'
     ]);
     mockImportExportService = jasmine.createSpyObj('ImportExportService', [
       'validateFileSize',
@@ -53,6 +55,9 @@ describe('UserManagementPage', () => {
       { role_id: 2, display_name: 'editor', description: 'Can edit' }
     ]));
     mockUserService.createUser.and.returnValue(of({ success: true }));
+    mockUserService.updateUserInfo.and.returnValue(of({ success: true }));
+    mockUserService.assignUserRole.and.returnValue(of({ success: true }));
+    mockUserService.revokeUserRole.and.returnValue(of({ success: true }));
 
     await TestBed.configureTestingModule({
       imports: [UserManagementPage],
@@ -229,8 +234,9 @@ describe('UserManagementPage', () => {
 
   describe('viewError()', () => {
     it('should set error detail user and show error modal', () => {
-      const mockUser = {
+      const mockUser: ManagedUser = {
         id: '1', display_name: 'Failed User', full_name: 'Failed User',
+        first_name: 'Failed', last_name: 'User',
         email: 'fail@test.com', phone: null, status: 'failed',
         error_message: 'Keycloak connection refused', roles: null, created_at: '2025-01-01',
         provision_id: 42
@@ -240,6 +246,265 @@ describe('UserManagementPage', () => {
 
       expect(component.showErrorModal()).toBe(true);
       expect(component.errorDetailUser()).toEqual(mockUser);
+    });
+  });
+
+  describe('Edit User Modal', () => {
+    const mockActiveUser: ManagedUser = {
+      id: 'uuid-123',
+      display_name: 'John D.',
+      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      phone: '5551234567',
+      status: 'active',
+      error_message: null,
+      roles: ['user', 'editor'],
+      created_at: '2025-01-01',
+      provision_id: null
+    };
+
+    const mockPendingUser: ManagedUser = {
+      id: null,
+      display_name: 'Pending P.',
+      full_name: 'Pending Person',
+      first_name: 'Pending',
+      last_name: 'Person',
+      email: 'pending@example.com',
+      phone: null,
+      status: 'pending',
+      error_message: null,
+      roles: ['user'],
+      created_at: '2025-01-02',
+      provision_id: 99
+    };
+
+    it('should populate edit signals from user data', () => {
+      component.openEditModal(mockActiveUser);
+
+      expect(component.showEditModal()).toBe(true);
+      expect(component.editFirstName()).toBe('John');
+      expect(component.editLastName()).toBe('Doe');
+      expect(component.editPhone()).toBe('5551234567');
+      expect(component.editRoles().has('user')).toBe(true);
+      expect(component.editRoles().has('editor')).toBe(true);
+      expect(component.editUser()).toEqual(mockActiveUser);
+      expect(component.editError()).toBeUndefined();
+    });
+
+    it('should not open for pending users', () => {
+      component.openEditModal(mockPendingUser);
+      expect(component.showEditModal()).toBe(false);
+    });
+
+    it('should not open for users without id', () => {
+      component.openEditModal({ ...mockActiveUser, id: null });
+      expect(component.showEditModal()).toBe(false);
+    });
+
+    it('should close modal and reload users', () => {
+      component.showEditModal.set(true);
+      mockUserService.getManagedUsers.calls.reset();
+
+      component.closeEditModal();
+
+      expect(component.showEditModal()).toBe(false);
+      expect(mockUserService.getManagedUsers).toHaveBeenCalled();
+    });
+
+    it('should reject empty first name', () => {
+      component.openEditModal(mockActiveUser);
+      component.editFirstName.set('');
+
+      component.submitEditUser();
+
+      expect(component.editError()).toBe('First name and last name are required');
+      expect(mockUserService.updateUserInfo).not.toHaveBeenCalled();
+    });
+
+    it('should reject empty last name', () => {
+      component.openEditModal(mockActiveUser);
+      component.editLastName.set('');
+
+      component.submitEditUser();
+
+      expect(component.editError()).toBe('First name and last name are required');
+      expect(mockUserService.updateUserInfo).not.toHaveBeenCalled();
+    });
+
+    it('should reject whitespace-only first name', () => {
+      component.openEditModal(mockActiveUser);
+      component.editFirstName.set('   ');
+
+      component.submitEditUser();
+
+      expect(component.editError()).toBe('First name and last name are required');
+    });
+
+    it('should call updateUserInfo and close modal on success', () => {
+      component.openEditModal(mockActiveUser);
+      component.editFirstName.set('Jane');
+      component.editLastName.set('Smith');
+      component.editPhone.set('5559876543');
+
+      component.submitEditUser();
+
+      expect(mockUserService.updateUserInfo).toHaveBeenCalledWith({
+        user_id: 'uuid-123',
+        first_name: 'Jane',
+        last_name: 'Smith',
+        phone: '5559876543'
+      });
+      expect(component.showEditModal()).toBe(false);
+      expect(component.successMessage()).toContain('Jane Smith');
+    });
+
+    it('should send undefined phone when cleared', () => {
+      component.openEditModal(mockActiveUser);
+      component.editPhone.set('');
+
+      component.submitEditUser();
+
+      const calledWith = mockUserService.updateUserInfo.calls.mostRecent().args[0];
+      expect(calledWith.phone).toBeUndefined();
+    });
+
+    it('should show error and keep modal open on failure', () => {
+      mockUserService.updateUserInfo.and.returnValue(of({
+        success: false,
+        error: { message: 'Permission denied', humanMessage: 'You do not have permission to edit users' }
+      }));
+
+      component.openEditModal(mockActiveUser);
+      component.submitEditUser();
+
+      expect(component.editError()).toBe('You do not have permission to edit users');
+      expect(component.showEditModal()).toBe(true);
+    });
+
+    it('should set editLoading during submission', () => {
+      const subject = new Subject<ApiResponse>();
+      mockUserService.updateUserInfo.and.returnValue(subject.asObservable());
+
+      component.openEditModal(mockActiveUser);
+      component.submitEditUser();
+
+      expect(component.editLoading()).toBe(true);
+
+      subject.next({ success: true });
+      subject.complete();
+
+      expect(component.editLoading()).toBe(false);
+    });
+  });
+
+  describe('Edit Role Toggle', () => {
+    const mockActiveUser: ManagedUser = {
+      id: 'uuid-123',
+      display_name: 'John D.',
+      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      phone: '5551234567',
+      status: 'active',
+      error_message: null,
+      roles: ['user', 'editor'],
+      created_at: '2025-01-01',
+      provision_id: null
+    };
+
+    it('should assign role when toggling unselected role', () => {
+      component.openEditModal(mockActiveUser);
+
+      component.toggleEditRole('admin');
+
+      expect(mockUserService.assignUserRole).toHaveBeenCalledWith('uuid-123', 'admin');
+    });
+
+    it('should revoke role when toggling selected role', () => {
+      component.openEditModal(mockActiveUser);
+
+      component.toggleEditRole('editor');
+
+      expect(mockUserService.revokeUserRole).toHaveBeenCalledWith('uuid-123', 'editor');
+    });
+
+    it('should add role to editRoles set on successful assign', () => {
+      component.openEditModal(mockActiveUser);
+
+      component.toggleEditRole('admin');
+
+      expect(component.editRoles().has('admin')).toBe(true);
+    });
+
+    it('should remove role from editRoles set on successful revoke', () => {
+      component.openEditModal(mockActiveUser);
+
+      component.toggleEditRole('editor');
+
+      expect(component.editRoles().has('editor')).toBe(false);
+    });
+
+    it('should show error and not change roles on failure', () => {
+      mockUserService.assignUserRole.and.returnValue(of({
+        success: false,
+        error: { message: 'Delegation error', humanMessage: 'Your role cannot assign the "admin" role' }
+      }));
+
+      component.openEditModal(mockActiveUser);
+      const rolesBefore = new Set(component.editRoles());
+
+      component.toggleEditRole('admin');
+
+      expect(component.editError()).toContain('cannot assign');
+      expect(component.editRoles()).toEqual(rolesBefore);
+    });
+
+    it('should track per-role loading state', () => {
+      const subject = new Subject<ApiResponse>();
+      mockUserService.assignUserRole.and.returnValue(subject.asObservable());
+
+      component.openEditModal(mockActiveUser);
+      component.toggleEditRole('admin');
+
+      expect(component.editRolesLoading().has('admin')).toBe(true);
+
+      subject.next({ success: true });
+      subject.complete();
+
+      expect(component.editRolesLoading().has('admin')).toBe(false);
+    });
+  });
+
+  describe('Non-Manageable Roles', () => {
+    const mockActiveUser: ManagedUser = {
+      id: 'uuid-123',
+      display_name: 'John D.',
+      full_name: 'John Doe',
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      phone: null,
+      status: 'active',
+      error_message: null,
+      roles: ['user', 'editor'],
+      created_at: '2025-01-01',
+      provision_id: null
+    };
+
+    it('should return roles the current user cannot manage', () => {
+      const userWithAdmin = { ...mockActiveUser, roles: ['user', 'editor', 'admin'] as string[] };
+      component.openEditModal(userWithAdmin);
+
+      expect(component.getNonManageableRoles()).toEqual(['admin']);
+    });
+
+    it('should return empty array when all roles are manageable', () => {
+      component.openEditModal(mockActiveUser);
+
+      expect(component.getNonManageableRoles()).toEqual([]);
     });
   });
 

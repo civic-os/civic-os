@@ -26,6 +26,8 @@ export interface ManagedUser {
   id: string | null;
   display_name: string;
   full_name: string;
+  first_name: string | null;
+  last_name: string | null;
   email: string;
   phone: string | null;
   status: string;
@@ -33,6 +35,13 @@ export interface ManagedUser {
   roles: string[] | null;
   created_at: string;
   provision_id: number | null;
+}
+
+export interface UpdateUserInfoRequest {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
 }
 
 export interface ManageableRole {
@@ -243,6 +252,35 @@ export class UserManagementService {
         success: false,
         error: { message: error.message, humanMessage: 'Failed to revoke role' }
       }))
+    );
+  }
+
+  updateUserInfo(request: UpdateUserInfoRequest): Observable<ApiResponse> {
+    return this.http.post<any>(
+      getPostgrestUrl() + 'rpc/update_user_info',
+      {
+        p_user_id: request.user_id,
+        p_first_name: request.first_name,
+        p_last_name: request.last_name,
+        p_phone: request.phone ?? null
+      }
+    ).pipe(
+      map(response => {
+        if (response?.success === false) {
+          return <ApiResponse>{
+            success: false,
+            error: { message: response.error, humanMessage: response.error }
+          };
+        }
+        return <ApiResponse>{ success: true };
+      }),
+      catchError(error => {
+        const message = error.error?.message || error.message || 'Failed to update user';
+        return of(<ApiResponse>{
+          success: false,
+          error: { message, humanMessage: message }
+        });
+      })
     );
   }
 

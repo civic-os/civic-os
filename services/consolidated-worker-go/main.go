@@ -290,6 +290,12 @@ func main() {
 			keycloakClient: keycloakClient,
 		})
 		log.Println("[Init] ✓ RevokeKeycloakRoleWorker registered (queue: user_provisioning)")
+
+		river.AddWorker(workers, &UpdateKeycloakUserWorker{
+			dbPool:         dbPool,
+			keycloakClient: keycloakClient,
+		})
+		log.Println("[Init] ✓ UpdateKeycloakUserWorker registered (queue: user_provisioning)")
 	}
 
 	// Scheduled Jobs Scheduler - uses internal Go ticker, not River periodic jobs
@@ -365,6 +371,7 @@ func main() {
 		log.Println("  - sync_keycloak_role (queue: user_provisioning)")
 		log.Println("  - assign_keycloak_role (queue: user_provisioning)")
 		log.Println("  - revoke_keycloak_role (queue: user_provisioning)")
+		log.Println("  - update_keycloak_user (queue: user_provisioning)")
 	}
 	log.Println("  - pgrst LISTEN (dedicated connection)")
 	log.Println("")

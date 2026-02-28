@@ -347,6 +347,40 @@ func (kc *KeycloakClient) SendWelcomeEmail(ctx context.Context, userID, clientID
 	return nil
 }
 
+// UpdateUser updates a user's profile in Keycloak (firstName, lastName, phone)
+func (kc *KeycloakClient) UpdateUser(ctx context.Context, userID, firstName, lastName, phone string) error {
+	payload := map[string]interface{}{
+		"firstName": firstName,
+		"lastName":  lastName,
+	}
+
+	if phone != "" {
+		payload["attributes"] = map[string][]string{
+			"phoneNumber": {phone},
+		}
+	} else {
+		payload["attributes"] = map[string][]string{
+			"phoneNumber": {},
+		}
+	}
+
+	payloadBytes, _ := json.Marshal(payload)
+
+	path := fmt.Sprintf("/users/%s", userID)
+	resp, err := kc.doRequest(ctx, "PUT", path, strings.NewReader(string(payloadBytes)))
+	if err != nil {
+		return fmt.Errorf("update user request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("update user returned %d: %s", resp.StatusCode, string(body))
+	}
+
+	return nil
+}
+
 // DisableUser sets enabled=false on a Keycloak user
 func (kc *KeycloakClient) DisableUser(ctx context.Context, userID string) error {
 	payload := map[string]interface{}{"enabled": false}

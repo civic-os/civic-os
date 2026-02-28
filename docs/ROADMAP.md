@@ -48,9 +48,9 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Go worker: create Keycloak user, assign roles, sync to `civic_os_users`
   - [x] User Management page (`/admin/users`) with search, status filter, create modal
   - [x] Role assignment/revocation RPCs with delegation enforcement
-  - [ ] **Edit existing users** (change name, email, phone, enable/disable)
-  - [ ] **Edit user roles** inline from user management page (assign/revoke roles per user)
-  - [ ] **Bulk user import** from CSV/Excel via the import modal
+  - [x] Edit existing users (change name, phone; email read-only; enable/disable deferred)
+  - [x] Edit user roles inline from user management page (assign/revoke roles per user)
+  - [x] Bulk user import from CSV/Excel via the import modal
 
 ### Workflow
 - [ ] Build table structure for attaching workflow to Entity (Use Properties table)

@@ -390,6 +390,68 @@ describe('UserManagementService', () => {
     });
   });
 
+  describe('updateUserInfo()', () => {
+    it('should POST to update_user_info RPC with p_-prefixed params', (done) => {
+      service.updateUserInfo({
+        user_id: 'uuid-456',
+        first_name: 'Jane',
+        last_name: 'Doe',
+        phone: '5559876543'
+      }).subscribe(response => {
+        expect(response.success).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        p_user_id: 'uuid-456',
+        p_first_name: 'Jane',
+        p_last_name: 'Doe',
+        p_phone: '5559876543'
+      });
+      req.flush({ success: true, message: 'User info updated' });
+    });
+
+    it('should send null phone when not provided', (done) => {
+      service.updateUserInfo({
+        user_id: 'uuid-456',
+        first_name: 'Jane',
+        last_name: 'Doe'
+      }).subscribe(() => done());
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
+      expect(req.request.body.p_phone).toBeNull();
+      req.flush({ success: true });
+    });
+
+    it('should handle RPC error response', (done) => {
+      service.updateUserInfo({
+        user_id: 'uuid-456', first_name: 'Jane', last_name: 'Doe'
+      }).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error?.humanMessage).toBe('Permission denied');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
+      req.flush({ success: false, error: 'Permission denied' });
+    });
+
+    it('should handle HTTP error', (done) => {
+      service.updateUserInfo({
+        user_id: 'uuid-456', first_name: 'Jane', last_name: 'Doe'
+      }).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error?.humanMessage).toBe('Internal error');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
+      req.flush({ message: 'Internal error' }, { status: 500, statusText: 'Internal Server Error' });
+    });
+  });
+
   describe('hasUserManagementAccess()', () => {
     it('should delegate to AuthService.hasPermission', (done) => {
       mockAuthService.hasPermission.and.returnValue(of(true));
