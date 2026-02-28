@@ -20,7 +20,7 @@ import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, withAutoRefreshToken } from 'keycloak-angular';
+import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
 import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
@@ -46,6 +46,7 @@ export const appConfig: ApplicationConfig = {
         pkceMethod: 'S256',
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
       },
+      providers: [UserActivityService, AutoRefreshTokenService],  // Bug workaround: keycloak-angular@20 doesn't register these
       features: [
         withAutoRefreshToken({
           onInactivityTimeout: 'none'  // Don't redirect on inactivity — visibility listener + 401 interceptor handle zombie state
