@@ -19,13 +19,16 @@ import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, switchMap, of, debounceTime, startWith, combineLatest } from 'rxjs';
+import { Subject, switchMap, of, debounceTime, startWith, combineLatest, Observable, map } from 'rxjs';
 import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest } from '../../services/user-management.service';
+import { ImportExportService } from '../../services/import-export.service';
+import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
+import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../interfaces/import';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImportModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-4 max-w-7xl mx-auto">
@@ -34,10 +37,16 @@ import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserReques
           <h1 class="text-2xl font-bold">User Management</h1>
           <p class="text-base-content/60 mt-1">Create and manage user accounts</p>
         </div>
-        <button class="btn btn-primary" (click)="openCreateModal()">
-          <span class="material-symbols-outlined">person_add</span>
-          Create User
-        </button>
+        <div class="flex gap-2">
+          <button class="btn btn-outline" (click)="openImportModal()">
+            <span class="material-symbols-outlined">upload</span>
+            Import Users
+          </button>
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            <span class="material-symbols-outlined">person_add</span>
+            Create User
+          </button>
+        </div>
       </div>
 
       <!-- Filters -->
@@ -242,10 +251,20 @@ import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserReques
         <div class="modal-backdrop" (click)="showErrorModal.set(false)"></div>
       </div>
     }
+
+    <!-- Import Users Modal -->
+    @if (showImportModal()) {
+      <app-import-modal
+        [customImport]="userImportConfig"
+        (close)="showImportModal.set(false)"
+        (importSuccess)="onImportSuccess($event)">
+      </app-import-modal>
+    }
   `
 })
 export class UserManagementPage {
   private userService = inject(UserManagementService);
+  private importExportService = inject(ImportExportService);
 
   // Search and filter state
   searchTerm = signal('');
@@ -261,6 +280,9 @@ export class UserManagementPage {
 
   // Create modal state
   showCreateModal = signal(false);
+
+  // Import modal state
+  showImportModal = signal(false);
   createLoading = signal(false);
   createError = signal<string | undefined>(undefined);
   newUser: ProvisionUserRequest = this.emptyUser();
@@ -402,6 +424,71 @@ export class UserManagementPage {
         this.errorMessage.set(response.error?.humanMessage || 'Retry failed');
       }
     });
+  }
+
+  // =========================================================================
+  // Import Users
+  // =========================================================================
+
+  /** Column definitions for user import */
+  private readonly userImportColumns: ImportColumn[] = [
+    { name: 'Email', key: 'email', required: true, type: 'email', hint: 'Required. User email address' },
+    { name: 'First Name', key: 'first_name', required: true, type: 'text', hint: 'Required. User first name' },
+    { name: 'Last Name', key: 'last_name', required: true, type: 'text', hint: 'Required. User last name' },
+    { name: 'Phone', key: 'phone', required: false, type: 'phone', hint: 'Optional. 10-digit phone number' },
+    { name: 'Roles', key: 'roles', required: false, type: 'comma-list', hint: 'Optional. Comma-separated role names (default: user)' },
+    { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean', hint: 'Optional. true/false (default: true)' }
+  ];
+
+  /** Custom import configuration for the import modal */
+  userImportConfig: CustomImportConfig = {
+    title: 'Import Users',
+    columns: this.userImportColumns,
+    submit: (validRows: Record<string, any>[]): Observable<CustomImportResult> => {
+      return this.submitUserImport(validRows);
+    },
+    generateTemplate: () => {
+      this.importExportService.generateUserImportTemplate(this.manageableRoles());
+    }
+  };
+
+  openImportModal(): void {
+    this.showImportModal.set(true);
+  }
+
+  /**
+   * Transform validated rows to ProvisionUserRequest[] and submit via RPC.
+   * Applies defaults: roles → ['user'], send_welcome_email → true.
+   */
+  submitUserImport(validRows: Record<string, any>[]): Observable<CustomImportResult> {
+    const users: ProvisionUserRequest[] = validRows.map(row => ({
+      email: row['email'],
+      first_name: row['first_name'],
+      last_name: row['last_name'],
+      phone: row['phone'] || undefined,
+      initial_roles: row['roles'] && row['roles'].length > 0 ? row['roles'] : ['user'],
+      send_welcome_email: row['send_welcome_email'] !== null ? row['send_welcome_email'] : true
+    }));
+
+    return this.userService.importUsersDetailed(users).pipe(
+      map(result => ({
+        success: result.success,
+        importedCount: result.created_count,
+        errorCount: result.error_count,
+        errors: result.errors.map(e => ({
+          index: e.index,
+          identifier: e.email,
+          error: e.error
+        }))
+      }))
+    );
+  }
+
+  onImportSuccess(count: number): void {
+    this.showImportModal.set(false);
+    this.successMessage.set(`${count} users submitted for provisioning.`);
+    this.loadUsers();
+    setTimeout(() => this.successMessage.set(undefined), 5000);
   }
 
   private emptyUser(): ProvisionUserRequest {

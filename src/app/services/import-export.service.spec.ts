@@ -728,6 +728,50 @@ describe('ImportExportService', () => {
     });
   });
 
+  describe('generateUserImportTemplate()', () => {
+    it('should generate user import template with 6 column headers', () => {
+      const roles = [
+        { display_name: 'user', description: 'Basic user' },
+        { display_name: 'editor', description: 'Can edit records' }
+      ];
+
+      service.generateUserImportTemplate(roles);
+
+      expect(saveWorkbookSpy).toHaveBeenCalledTimes(1);
+      const [workbook, filename] = saveWorkbookSpy.calls.mostRecent().args;
+      expect(filename).toBe('user_import_template.xlsx');
+
+      // Verify data sheet exists and has expected structure
+      expect(workbook.SheetNames).toContain('Import Data');
+    });
+
+    it('should include Available Roles reference sheet when roles provided', () => {
+      const roles = [
+        { display_name: 'user', description: 'Basic user' },
+        { display_name: 'editor', description: 'Can edit records' }
+      ];
+
+      service.generateUserImportTemplate(roles);
+
+      const [workbook] = saveWorkbookSpy.calls.mostRecent().args;
+      expect(workbook.SheetNames).toContain('Available Roles');
+    });
+
+    it('should handle empty roles array (no reference sheet)', () => {
+      service.generateUserImportTemplate([]);
+
+      const [workbook] = saveWorkbookSpy.calls.mostRecent().args;
+      expect(workbook.SheetNames).not.toContain('Available Roles');
+      expect(workbook.SheetNames.length).toBe(1);
+    });
+
+    it('should call saveWorkbook with correct filename', () => {
+      service.generateUserImportTemplate([]);
+
+      expect(saveWorkbookSpy).toHaveBeenCalledWith(jasmine.anything(), 'user_import_template.xlsx');
+    });
+  });
+
   /**
    * EntityPropertyType Enum Synchronization Tests
    *

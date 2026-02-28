@@ -130,7 +130,7 @@ These two timestamp types have fundamentally different timezone behaviors:
 
 **Full-Text Search**: Add `civic_os_text_search` tsvector column (generated, indexed) and configure `metadata.entities.search_fields` array. Frontend automatically displays search input on List pages. See example tables for implementation pattern.
 
-**Excel Import/Export**: List pages include Import/Export buttons for bulk data operations. Export preserves filters/search/sort and includes foreign key display names. Import supports name-to-ID resolution for foreign keys with comprehensive validation. Requires CREATE permission.
+**Excel Import/Export**: List pages include Import/Export buttons for bulk data operations. Export preserves filters/search/sort and includes foreign key display names. Import supports name-to-ID resolution for foreign keys with comprehensive validation. Requires CREATE permission. **Custom Import Mode** (v0.31.0+): `CustomImportConfig` abstraction enables non-entity imports (e.g., User Management bulk import) with inline validation and partial success handling.
 
 **Limitations**: No M:M relationships (use junction table import), 10MB file limit, 50,000 row export limit, INSERT only (no updates).
 
@@ -336,7 +336,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 
 **Admin Features** (require `admin` role):
 - **Permissions Page** (`/permissions`) - Manage role-based table permissions, entity action permissions, and role delegation (v0.31.0+)
-- **User Management Page** (`/admin/users`) - Create and manage user accounts with async Keycloak provisioning (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
+- **User Management Page** (`/admin/users`) - Create and manage user accounts with async Keycloak provisioning, bulk import from Excel with partial success handling (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering

@@ -50,6 +50,13 @@ export interface ProvisionUserRequest {
   send_welcome_email?: boolean;
 }
 
+export interface BulkProvisionResult {
+  success: boolean;
+  created_count: number;
+  error_count: number;
+  errors: { index: number; email: string; error: string }[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -80,7 +87,7 @@ export class UserManagementService {
   importUsers(users: ProvisionUserRequest[]): Observable<ApiResponse> {
     return this.http.post<any>(
       getPostgrestUrl() + 'rpc/bulk_provision_users',
-      { p_users: JSON.stringify(users) }
+      { p_users: users }
     ).pipe(
       map(response => {
         if (response?.success === false) {
@@ -97,6 +104,34 @@ export class UserManagementService {
         return of(<ApiResponse>{
           success: false,
           error: { message, humanMessage: message }
+        });
+      })
+    );
+  }
+
+  /**
+   * Import users via bulk_provision_users RPC, returning full per-row error details.
+   * Unlike importUsers() which returns a simple ApiResponse, this method preserves
+   * the RPC's detailed response for partial success handling in the import modal.
+   */
+  importUsersDetailed(users: ProvisionUserRequest[]): Observable<BulkProvisionResult> {
+    return this.http.post<any>(
+      getPostgrestUrl() + 'rpc/bulk_provision_users',
+      { p_users: users }
+    ).pipe(
+      map(response => ({
+        success: response.success ?? false,
+        created_count: response.created_count ?? 0,
+        error_count: response.error_count ?? 0,
+        errors: response.errors ?? []
+      })),
+      catchError(error => {
+        const message = error.error?.message || error.error?.details || error.message || 'Import failed';
+        return of<BulkProvisionResult>({
+          success: false,
+          created_count: 0,
+          error_count: users.length,
+          errors: [{ index: 0, email: '', error: message }]
         });
       })
     );

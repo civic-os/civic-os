@@ -27,7 +27,8 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SchemaEntityTable, SchemaEntityProperty, ValidationErrorSummary } from '../../interfaces/entity';
+import { SchemaEntityTable, SchemaEntityProperty, ValidationErrorSummary, ImportError } from '../../interfaces/entity';
+import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
 import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
@@ -83,8 +84,9 @@ export class ImportModalComponent implements OnDestroy {
   private schemaService = inject(SchemaService);
   private dataService = inject(DataService);
 
-  @Input({ required: true }) entity!: SchemaEntityTable;
+  @Input() entity?: SchemaEntityTable;
   @Input() entityKey?: string;
+  @Input() customImport?: CustomImportConfig;
   @Output() close = new EventEmitter<void>();
   @Output() importSuccess = new EventEmitter<number>();
 
@@ -100,6 +102,7 @@ export class ImportModalComponent implements OnDestroy {
   public errorSummary = signal<ValidationErrorSummary | null>(null);
   public validRowCount = signal<number>(0);
   public importedCount = signal<number>(0);
+  public partialSuccessCount = signal<number>(0);
 
   // Computed properties
   public hasErrors = computed(() => {
@@ -148,13 +151,16 @@ export class ImportModalComponent implements OnDestroy {
   }
 
   /**
-   * Handle file validation and parsing
+   * Handle file validation and parsing.
+   * Branches to custom validation (inline) or entity validation (Web Worker)
+   * based on whether a customImport config is provided.
    */
   private async handleFile(file: File): Promise<void> {
     // Reset state
     this.errorMessage.set(null);
     this.errorSummary.set(null);
     this.validRowCount.set(0);
+    this.partialSuccessCount.set(0);
 
     // Validate file size
     const sizeCheck = this.importExportService.validateFileSize(file);
@@ -175,8 +181,153 @@ export class ImportModalComponent implements OnDestroy {
 
     this.originalExcelData = parseResult.data;
 
-    // Start validation
-    this.startValidation(parseResult.data);
+    // Branch: custom import runs inline validation, entity import uses Web Worker
+    if (this.customImport) {
+      this.runCustomValidation(parseResult.data);
+    } else {
+      this.startValidation(parseResult.data);
+    }
+  }
+
+  /**
+   * Run inline validation for custom import mode.
+   * Validates each cell against the column definitions in customImport.columns.
+   * No Web Worker needed — custom imports are typically small (<100 rows).
+   */
+  private runCustomValidation(data: any[]): void {
+    if (!this.customImport) return;
+
+    this.currentStep.set('validating');
+    this.validationProgress.set(0);
+
+    const columns = this.customImport.columns;
+    const validRows: Record<string, any>[] = [];
+    const allErrors: ImportError[] = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNumber = i + 3; // +3 for 1-indexing, hint row, and header row
+      const validatedRow: Record<string, any> = {};
+      let rowHasError = false;
+
+      for (const col of columns) {
+        const rawValue = row[col.name];
+        const strValue = rawValue != null ? String(rawValue).trim() : '';
+
+        // Required check
+        if (col.required && strValue === '') {
+          allErrors.push({
+            row: rowNumber,
+            column: col.name,
+            value: '',
+            error: `${col.name} is required`,
+            errorType: 'Required'
+          });
+          rowHasError = true;
+          continue;
+        }
+
+        // Empty optional field
+        if (strValue === '') {
+          validatedRow[col.key] = null;
+          continue;
+        }
+
+        // Type-specific validation
+        switch (col.type) {
+          case 'text':
+            validatedRow[col.key] = strValue;
+            break;
+
+          case 'email': {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(strValue)) {
+              allErrors.push({
+                row: rowNumber,
+                column: col.name,
+                value: strValue,
+                error: 'Invalid email format',
+                errorType: 'Invalid format'
+              });
+              rowHasError = true;
+            } else {
+              validatedRow[col.key] = strValue.toLowerCase();
+            }
+            break;
+          }
+
+          case 'phone': {
+            const digits = strValue.replace(/\D/g, '');
+            if (digits.length !== 10) {
+              allErrors.push({
+                row: rowNumber,
+                column: col.name,
+                value: strValue,
+                error: 'Phone must be 10 digits',
+                errorType: 'Invalid format'
+              });
+              rowHasError = true;
+            } else {
+              validatedRow[col.key] = digits;
+            }
+            break;
+          }
+
+          case 'boolean': {
+            const lower = strValue.toLowerCase();
+            if (['true', 'yes', '1', 'y'].includes(lower)) {
+              validatedRow[col.key] = true;
+            } else if (['false', 'no', '0', 'n'].includes(lower)) {
+              validatedRow[col.key] = false;
+            } else {
+              allErrors.push({
+                row: rowNumber,
+                column: col.name,
+                value: strValue,
+                error: 'Must be true/false, yes/no, 1/0, or y/n',
+                errorType: 'Invalid format'
+              });
+              rowHasError = true;
+            }
+            break;
+          }
+
+          case 'comma-list': {
+            const items = strValue.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            validatedRow[col.key] = items;
+            break;
+          }
+        }
+      }
+
+      if (!rowHasError) {
+        validRows.push(validatedRow);
+      }
+
+      // Update progress
+      this.validationProgress.set(Math.round(((i + 1) / data.length) * 100));
+    }
+
+    // Build error summary
+    const errorsByType = new Map<string, number>();
+    const errorsByColumn = new Map<string, number>();
+    for (const err of allErrors) {
+      errorsByType.set(err.errorType, (errorsByType.get(err.errorType) || 0) + 1);
+      errorsByColumn.set(err.column, (errorsByColumn.get(err.column) || 0) + 1);
+    }
+
+    const errorSummary: ValidationErrorSummary = {
+      totalErrors: allErrors.length,
+      errorsByType,
+      errorsByColumn,
+      firstNErrors: allErrors.slice(0, 100),
+      allErrors
+    };
+
+    this.validatedData = validRows;
+    this.errorSummary.set(errorSummary);
+    this.validRowCount.set(validRows.length);
+    this.currentStep.set('results');
   }
 
   /**
@@ -206,7 +357,7 @@ export class ImportModalComponent implements OnDestroy {
 
     try {
       // Fetch properties and FK lookups
-      const properties = await this.schemaService.getPropsForCreate(this.entity).toPromise();
+      const properties = await this.schemaService.getPropsForCreate(this.entity!).toPromise();
       if (!properties) {
         throw new Error('Failed to fetch properties');
       }
@@ -349,16 +500,23 @@ export class ImportModalComponent implements OnDestroy {
   }
 
   /**
-   * Download template
+   * Download template.
+   * In custom mode, delegates to customImport.generateTemplate().
+   * In entity mode, fetches properties and generates entity template.
    */
   async downloadTemplate(): Promise<void> {
+    if (this.customImport) {
+      this.customImport.generateTemplate();
+      return;
+    }
+
     try {
-      const properties = await this.schemaService.getPropsForCreate(this.entity).toPromise();
+      const properties = await this.schemaService.getPropsForCreate(this.entity!).toPromise();
       if (!properties) {
         throw new Error('Failed to fetch properties');
       }
 
-      await this.importExportService.downloadTemplate(this.entity, properties);
+      await this.importExportService.downloadTemplate(this.entity!, properties);
     } catch (error) {
       console.error('Template download error:', error);
       this.errorMessage.set(`Template download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -400,6 +558,72 @@ export class ImportModalComponent implements OnDestroy {
    * @see ErrorService.parseToHuman() - Converts PostgreSQL errors to friendly messages
    */
   async proceedWithImport(): Promise<void> {
+    // Custom import path
+    if (this.customImport) {
+      if (this.validatedData.length === 0) return;
+      this.currentStep.set('importing');
+      this.uploadProgress.set(0);
+
+      this.customImport.submit(this.validatedData).subscribe({
+        next: (result) => {
+          if (result.errorCount === 0) {
+            // Full success
+            this.importedCount.set(result.importedCount);
+            this.currentStep.set('success');
+          } else if (result.importedCount > 0) {
+            // Partial success - some rows succeeded, some failed
+            this.partialSuccessCount.set(result.importedCount);
+            this.importedCount.set(result.importedCount);
+            // Convert server errors to ValidationErrorSummary for display
+            const errors: ImportError[] = (result.errors || []).map(e => ({
+              row: e.index,
+              column: e.identifier || '',
+              value: e.identifier || '',
+              error: e.error,
+              errorType: 'Server error'
+            }));
+            const errorsByType = new Map<string, number>([['Server error', errors.length]]);
+            const errorsByColumn = new Map<string, number>();
+            this.errorSummary.set({
+              totalErrors: errors.length,
+              errorsByType,
+              errorsByColumn,
+              firstNErrors: errors.slice(0, 100),
+              allErrors: errors
+            });
+            this.currentStep.set('results');
+          } else {
+            // All failed
+            this.errorMessage.set(`Import failed: all ${result.errorCount} rows had errors`);
+            const errors: ImportError[] = (result.errors || []).map(e => ({
+              row: e.index,
+              column: e.identifier || '',
+              value: e.identifier || '',
+              error: e.error,
+              errorType: 'Server error'
+            }));
+            const errorsByType = new Map<string, number>([['Server error', errors.length]]);
+            const errorsByColumn = new Map<string, number>();
+            this.errorSummary.set({
+              totalErrors: errors.length,
+              errorsByType,
+              errorsByColumn,
+              firstNErrors: errors.slice(0, 100),
+              allErrors: errors
+            });
+            this.currentStep.set('results');
+          }
+        },
+        error: (error) => {
+          console.error('Custom import error:', error);
+          this.errorMessage.set(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          this.currentStep.set('results');
+        }
+      });
+      return;
+    }
+
+    // Entity import path (existing behavior)
     if (this.validatedData.length === 0 || !this.entityKey) return;
 
     this.currentStep.set('importing');
@@ -461,6 +685,7 @@ export class ImportModalComponent implements OnDestroy {
     this.errorMessage.set(null);
     this.errorSummary.set(null);
     this.validRowCount.set(0);
+    this.partialSuccessCount.set(0);
     this.validatedData = [];
     this.originalExcelData = [];
   }

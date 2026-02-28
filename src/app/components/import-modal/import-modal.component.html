@@ -3,7 +3,7 @@
   (closed)="closeModal()"
   size="xl"
   [closeOnBackdrop]="currentStep() === 'choose' || currentStep() === 'results'">
-  <h3 class="font-bold text-lg mb-4">Import {{ entity.display_name }}</h3>
+  <h3 class="font-bold text-lg mb-4">{{ customImport ? customImport.title : 'Import ' + entity?.display_name }}</h3>
 
   <!-- Error Alert -->
   @if (errorMessage()) {
@@ -69,17 +69,54 @@
         <progress class="progress progress-primary w-full" [value]="validationProgress()" max="100"></progress>
         <span class="text-sm">{{ validationProgress() }}%</span>
       </div>
-      <div class="flex justify-end">
-        <button class="btn btn-sm" (click)="cancelValidation()">Cancel</button>
-      </div>
+      @if (!customImport) {
+        <div class="flex justify-end">
+          <button class="btn btn-sm" (click)="cancelValidation()">Cancel</button>
+        </div>
+      }
     </div>
   }
 
   <!-- Step 3: Results -->
   @if (currentStep() === 'results') {
     <div class="space-y-4">
-      @if (hasErrors()) {
-        <!-- Errors Found -->
+      <!-- Partial Success (custom import only) -->
+      @if (partialSuccessCount() > 0) {
+        <div class="alert alert-success mb-2">
+          <span class="material-symbols-outlined">check_circle</span>
+          <span>{{ partialSuccessCount() }} users created successfully.</span>
+        </div>
+        <div class="alert alert-warning">
+          <span class="material-symbols-outlined">warning</span>
+          <span>{{ errorSummary()?.totalErrors }} failed with errors:</span>
+        </div>
+
+        @if (errorSummary(); as summary) {
+          <div class="space-y-2">
+            <div class="overflow-x-auto max-h-64 overflow-y-auto">
+              <table class="table table-sm table-zebra">
+                <thead>
+                  <tr>
+                    <th>Row</th>
+                    <th>Identifier</th>
+                    <th>Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (error of summary.firstNErrors; track error.row) {
+                    <tr>
+                      <td>{{ error.row }}</td>
+                      <td class="font-mono text-xs">{{ error.column }}</td>
+                      <td class="text-error text-xs">{{ error.error }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      } @else if (hasErrors()) {
+        <!-- Errors Found (client-side validation) -->
         <div class="alert alert-warning">
           <span class="material-symbols-outlined">warning</span>
           <span>Found {{ errorSummary()?.totalErrors }} errors in your data. Please fix them and try again.</span>
@@ -119,12 +156,14 @@
             }
           </div>
 
-          <div class="flex gap-2">
-            <button class="btn btn-sm" (click)="downloadErrorReport()">
-              <span class="material-symbols-outlined">download</span>
-              Download Full Report
-            </button>
-          </div>
+          @if (!customImport) {
+            <div class="flex gap-2">
+              <button class="btn btn-sm" (click)="downloadErrorReport()">
+                <span class="material-symbols-outlined">download</span>
+                Download Full Report
+              </button>
+            </div>
+          }
         }
       } @else {
         <!-- No Errors -->
@@ -135,7 +174,11 @@
 
         <div class="alert alert-warning">
           <span class="material-symbols-outlined">info</span>
-          <span>This will insert {{ validRowCount() }} new records. This action cannot be undone.</span>
+          @if (customImport) {
+            <span>This will submit {{ validRowCount() }} users for provisioning.</span>
+          } @else {
+            <span>This will insert {{ validRowCount() }} new records. This action cannot be undone.</span>
+          }
         </div>
       }
 
@@ -157,11 +200,18 @@
   <!-- Step 4: Importing -->
   @if (currentStep() === 'importing') {
     <div class="space-y-4">
-      <p>Importing {{ validRowCount() }} records...</p>
-      <div class="flex items-center gap-4">
-        <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
-        <span class="text-sm">{{ uploadProgress() }}%</span>
-      </div>
+      @if (customImport) {
+        <p>Submitting {{ validRowCount() }} users for provisioning...</p>
+        <div class="flex justify-center py-4">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      } @else {
+        <p>Importing {{ validRowCount() }} records...</p>
+        <div class="flex items-center gap-4">
+          <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
+          <span class="text-sm">{{ uploadProgress() }}%</span>
+        </div>
+      }
       <p class="text-xs text-base-content/70">Please do not close this window.</p>
     </div>
   }
@@ -171,7 +221,11 @@
     <div class="space-y-4">
       <div class="alert alert-success">
         <span class="material-symbols-outlined">check_circle</span>
-        <span>Successfully imported {{ importedCount() }} records!</span>
+        @if (customImport) {
+          <span>Successfully submitted {{ importedCount() }} users for provisioning!</span>
+        } @else {
+          <span>Successfully imported {{ importedCount() }} records!</span>
+        }
       </div>
       <div class="flex justify-end">
         <button class="btn btn-primary" (click)="completeImport()">

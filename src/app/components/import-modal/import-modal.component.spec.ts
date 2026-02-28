@@ -28,6 +28,7 @@ import {
   EntityPropertyType,
   ValidationErrorSummary
 } from '../../interfaces/entity';
+import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
 
 describe('ImportModalComponent', () => {
   let component: ImportModalComponent;
@@ -660,6 +661,262 @@ describe('ImportModalComponent', () => {
       const serialized = (component as any).serializeLookups(fkLookups);
 
       expect(serialized).toEqual({});
+    });
+  });
+
+  // =========================================================================
+  // Custom Import Mode Tests
+  // =========================================================================
+
+  describe('Custom Import Mode', () => {
+    const mockColumns: ImportColumn[] = [
+      { name: 'Email', key: 'email', required: true, type: 'email' },
+      { name: 'First Name', key: 'first_name', required: true, type: 'text' },
+      { name: 'Last Name', key: 'last_name', required: true, type: 'text' },
+      { name: 'Phone', key: 'phone', required: false, type: 'phone' },
+      { name: 'Roles', key: 'roles', required: false, type: 'comma-list' },
+      { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean' }
+    ];
+
+    let mockCustomImport: CustomImportConfig;
+
+    beforeEach(() => {
+      mockCustomImport = {
+        title: 'Import Users',
+        columns: mockColumns,
+        submit: jasmine.createSpy('submit').and.returnValue(of({
+          success: true, importedCount: 2, errorCount: 0, errors: []
+        })),
+        generateTemplate: jasmine.createSpy('generateTemplate')
+      };
+      component.customImport = mockCustomImport;
+    });
+
+    describe('Inline Validation', () => {
+      it('should validate required fields and report missing values', () => {
+        const data = [{ 'Email': '', 'First Name': '', 'Last Name': 'Doe' }];
+        (component as any).runCustomValidation(data);
+
+        const summary = component.errorSummary();
+        expect(summary).toBeTruthy();
+        expect(summary!.totalErrors).toBe(2); // Email + First Name
+      });
+
+      it('should validate email format and report invalid emails', () => {
+        const data = [{ 'Email': 'not-an-email', 'First Name': 'Jane', 'Last Name': 'Doe' }];
+        (component as any).runCustomValidation(data);
+
+        const summary = component.errorSummary();
+        expect(summary!.totalErrors).toBe(1);
+        expect(summary!.firstNErrors[0].error).toContain('email');
+      });
+
+      it('should accept valid email format', () => {
+        const data = [{ 'Email': 'jane@example.com', 'First Name': 'Jane', 'Last Name': 'Doe' }];
+        (component as any).runCustomValidation(data);
+
+        expect(component.validRowCount()).toBe(1);
+        expect((component as any).validatedData[0].email).toBe('jane@example.com');
+      });
+
+      it('should validate phone format (strip non-digits, check 10 digits)', () => {
+        const data = [
+          { 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Phone': '12345' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        expect(component.errorSummary()!.totalErrors).toBe(1);
+        expect(component.errorSummary()!.firstNErrors[0].error).toContain('10 digits');
+      });
+
+      it('should accept phone with formatting like (555) 123-4567', () => {
+        const data = [
+          { 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Phone': '(555) 123-4567' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        expect(component.validRowCount()).toBe(1);
+        expect((component as any).validatedData[0].phone).toBe('5551234567');
+      });
+
+      it('should validate boolean values (true/false/yes/no/1/0)', () => {
+        const data = [
+          { 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Send Welcome Email': 'maybe' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        expect(component.errorSummary()!.totalErrors).toBe(1);
+      });
+
+      it('should map boolean edge cases: TRUE, Yes, 1, y', () => {
+        const testCases = ['TRUE', 'Yes', '1', 'y'];
+        for (const val of testCases) {
+          const data = [{ 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Send Welcome Email': val }];
+          (component as any).runCustomValidation(data);
+          expect((component as any).validatedData[0].send_welcome_email)
+            .withContext(`Expected ${val} to map to true`)
+            .toBe(true);
+        }
+      });
+
+      it('should map boolean false cases: FALSE, No, 0, n', () => {
+        const testCases = ['FALSE', 'No', '0', 'n'];
+        for (const val of testCases) {
+          const data = [{ 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Send Welcome Email': val }];
+          (component as any).runCustomValidation(data);
+          expect((component as any).validatedData[0].send_welcome_email)
+            .withContext(`Expected ${val} to map to false`)
+            .toBe(false);
+        }
+      });
+
+      it('should parse comma-list into string arrays', () => {
+        const data = [
+          { 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Roles': 'user,editor' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        expect((component as any).validatedData[0].roles).toEqual(['user', 'editor']);
+      });
+
+      it('should trim whitespace from comma-list items', () => {
+        const data = [
+          { 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B', 'Roles': 'user , editor , admin' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        expect((component as any).validatedData[0].roles).toEqual(['user', 'editor', 'admin']);
+      });
+
+      it('should set null for empty optional fields', () => {
+        const data = [
+          { 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        expect((component as any).validatedData[0].phone).toBeNull();
+        expect((component as any).validatedData[0].roles).toBeNull();
+        expect((component as any).validatedData[0].send_welcome_email).toBeNull();
+      });
+
+      it('should transition to results step after validation', () => {
+        const data = [{ 'Email': 'a@test.com', 'First Name': 'A', 'Last Name': 'B' }];
+        (component as any).runCustomValidation(data);
+
+        expect(component.currentStep()).toBe('results');
+      });
+
+      it('should build ValidationErrorSummary with correct totals', () => {
+        const data = [
+          { 'Email': 'bad', 'First Name': '', 'Last Name': 'Doe' },
+          { 'Email': '', 'First Name': 'Jane', 'Last Name': '' }
+        ];
+        (component as any).runCustomValidation(data);
+
+        const summary = component.errorSummary()!;
+        expect(summary.totalErrors).toBe(4);
+        expect(summary.errorsByType.get('Required')).toBe(3);
+        expect(summary.errorsByType.get('Invalid format')).toBe(1);
+      });
+
+      it('should handle empty file (no data rows)', () => {
+        (component as any).runCustomValidation([]);
+
+        expect(component.validRowCount()).toBe(0);
+        expect(component.currentStep()).toBe('results');
+      });
+    });
+
+    describe('Custom Template', () => {
+      it('should call customImport.generateTemplate when customImport is set', async () => {
+        await component.downloadTemplate();
+
+        expect(mockCustomImport.generateTemplate).toHaveBeenCalled();
+      });
+
+      it('should not call schemaService when customImport is set', async () => {
+        await component.downloadTemplate();
+
+        expect(mockSchemaService.getPropsForCreate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Custom Submit', () => {
+      it('should call customImport.submit with validated data', async () => {
+        (component as any).validatedData = [{ email: 'a@test.com', first_name: 'A', last_name: 'B' }];
+
+        await component.proceedWithImport();
+
+        expect(mockCustomImport.submit).toHaveBeenCalledWith([
+          { email: 'a@test.com', first_name: 'A', last_name: 'B' }
+        ]);
+      });
+
+      it('should handle full success result (go to success step)', async () => {
+        (component as any).validatedData = [{ email: 'a@test.com' }];
+
+        await component.proceedWithImport();
+
+        expect(component.currentStep()).toBe('success');
+        expect(component.importedCount()).toBe(2);
+      });
+
+      it('should handle full failure result (show error on results step)', async () => {
+        (mockCustomImport.submit as jasmine.Spy).and.returnValue(of({
+          success: false, importedCount: 0, errorCount: 2,
+          errors: [
+            { index: 1, identifier: 'a@test.com', error: 'Duplicate email' },
+            { index: 2, identifier: 'b@test.com', error: 'Invalid role' }
+          ]
+        }));
+        (component as any).validatedData = [{ email: 'a@test.com' }];
+
+        await component.proceedWithImport();
+
+        expect(component.currentStep()).toBe('results');
+        expect(component.errorMessage()).toContain('all 2 rows');
+      });
+
+      it('should handle partial success (set partialSuccessCount, show error table)', async () => {
+        (mockCustomImport.submit as jasmine.Spy).and.returnValue(of({
+          success: false, importedCount: 1, errorCount: 1,
+          errors: [{ index: 2, identifier: 'b@test.com', error: 'Duplicate email' }]
+        }));
+        (component as any).validatedData = [{ email: 'a@test.com' }, { email: 'b@test.com' }];
+
+        await component.proceedWithImport();
+
+        expect(component.currentStep()).toBe('results');
+        expect(component.partialSuccessCount()).toBe(1);
+        expect(component.errorSummary()!.totalErrors).toBe(1);
+      });
+
+      it('should not call dataService.bulkInsert in custom mode', async () => {
+        (component as any).validatedData = [{ email: 'a@test.com' }];
+
+        await component.proceedWithImport();
+
+        expect(mockDataService.bulkInsert).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Entity input optional', () => {
+      it('should work without entity when customImport is provided', () => {
+        component.entity = undefined;
+
+        expect(component).toBeTruthy();
+        expect(component.currentStep()).toBe('choose');
+      });
+    });
+
+    describe('Start Over', () => {
+      it('should reset partialSuccessCount on startOver', () => {
+        component.partialSuccessCount.set(5);
+
+        component.startOver();
+
+        expect(component.partialSuccessCount()).toBe(0);
+      });
     });
   });
 });

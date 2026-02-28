@@ -159,7 +159,7 @@ describe('UserManagementService', () => {
   });
 
   describe('importUsers()', () => {
-    it('should POST to bulk_provision_users RPC with stringified users', (done) => {
+    it('should POST to bulk_provision_users RPC with users array', (done) => {
       const users = [
         { email: 'a@test.com', first_name: 'A', last_name: 'User' },
         { email: 'b@test.com', first_name: 'B', last_name: 'User' }
@@ -172,7 +172,7 @@ describe('UserManagementService', () => {
 
       const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
       expect(req.request.method).toBe('POST');
-      expect(req.request.body.p_users).toBe(JSON.stringify(users));
+      expect(req.request.body.p_users).toEqual(users);
       req.flush({ success: true, created_count: 2, error_count: 0, errors: [] });
     });
 
@@ -194,6 +194,63 @@ describe('UserManagementService', () => {
 
       const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
       req.flush({ message: 'Bulk import failed' }, { status: 400, statusText: 'Bad Request' });
+    });
+  });
+
+  describe('importUsersDetailed()', () => {
+    it('should POST to rpc/bulk_provision_users with users array', (done) => {
+      const users = [
+        { email: 'a@test.com', first_name: 'A', last_name: 'User' }
+      ];
+
+      service.importUsersDetailed(users).subscribe(result => {
+        expect(result.success).toBe(true);
+        expect(result.created_count).toBe(1);
+        expect(result.error_count).toBe(0);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.p_users).toEqual(users);
+      req.flush({ success: true, created_count: 1, error_count: 0, errors: [] });
+    });
+
+    it('should return full BulkProvisionResult on partial failure', (done) => {
+      const users = [
+        { email: 'a@test.com', first_name: 'A', last_name: 'User' },
+        { email: 'b@test.com', first_name: 'B', last_name: 'User' }
+      ];
+
+      service.importUsersDetailed(users).subscribe(result => {
+        expect(result.success).toBe(false);
+        expect(result.created_count).toBe(1);
+        expect(result.error_count).toBe(1);
+        expect(result.errors.length).toBe(1);
+        expect(result.errors[0].email).toBe('b@test.com');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
+      req.flush({
+        success: false,
+        created_count: 1,
+        error_count: 1,
+        errors: [{ index: 2, email: 'b@test.com', error: 'Duplicate email' }]
+      });
+    });
+
+    it('should handle HTTP error with fallback error response', (done) => {
+      service.importUsersDetailed([{ email: 'a@test.com', first_name: 'A', last_name: 'User' }]).subscribe(result => {
+        expect(result.success).toBe(false);
+        expect(result.created_count).toBe(0);
+        expect(result.error_count).toBe(1);
+        expect(result.errors.length).toBe(1);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
+      req.flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
     });
   });
 

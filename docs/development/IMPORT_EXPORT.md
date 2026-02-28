@@ -63,6 +63,13 @@ This document specifies the implementation of Excel import/export functionality 
 - ✅ **Related Records Navigation**: Fixed "View All" button navigation for large relationships (>1000 records)
 - ✅ **Metadata Preservation**: Fixed `upsert_entity_metadata()` to preserve existing search_fields when NULL is passed
 
+**Custom Import Mode (v0.31.0 - February 2026):**
+- ✅ **CustomImportConfig abstraction**: Pluggable column definitions, submit logic, and template generation
+- ✅ **Inline validation**: Type-specific validators (email, phone, boolean, comma-list) without Web Worker
+- ✅ **Partial success handling**: Three-outcome display for RPCs with per-row error reporting
+- ✅ **User import**: First consumer — bulk user provisioning from User Management page
+- ✅ **Template generation**: `generateUserImportTemplate()` with Available Roles reference sheet
+
 **Inline Documentation (October 2025):**
 - ✅ Comprehensive JSDoc comments added to all implementation files
 - ✅ EntityPropertyType enum duplication in worker thoroughly documented
@@ -1604,11 +1611,14 @@ Template:
 
 Location: `src/app/components/import-modal/`
 
-Purpose: Multi-step import wizard
+Purpose: Multi-step import wizard supporting two modes:
+- **Entity mode**: Schema-driven validation via Web Worker (for List page imports)
+- **Custom mode**: Pluggable validation and submission via `CustomImportConfig` (for specialized imports like User Management)
 
 Props:
-- `entity: SchemaEntityTable` - Current entity
-- `entityKey: string` - Table name
+- `entity?: SchemaEntityTable` - Current entity (optional when using custom mode)
+- `entityKey?: string` - Table name (optional when using custom mode)
+- `customImport?: CustomImportConfig` - Custom import configuration (see Custom Import Mode below)
 - `visible: boolean` - Modal visibility
 
 Events:
@@ -1868,6 +1878,8 @@ src/app/
 │       ├── import-modal.component.ts
 │       ├── import-modal.component.html
 │       └── import-modal.component.css
+├── interfaces/
+│   └── import.ts                          # CustomImportConfig types (v0.31.0+)
 ├── services/
 │   └── import-export.service.ts
 └── workers/
@@ -1933,6 +1945,69 @@ tsconfig.worker.json (new file for worker compilation)
     "src/**/*.worker.ts"
   ]
 }
+```
+
+## Custom Import Mode (v0.31.0+)
+
+The ImportModalComponent supports a **custom import mode** via the `CustomImportConfig` interface, allowing any page to reuse the import wizard without requiring a `SchemaEntityTable`. This enables importing data that goes through RPCs rather than direct PostgREST table inserts.
+
+### When to Use Custom Import
+
+Use custom import when:
+- Data is submitted via an RPC function (not a direct table insert)
+- The RPC supports **partial success** (some rows succeed, some fail)
+- Validation rules are simple and don't require FK lookups or Web Worker processing
+- The dataset is small (< 100 rows typically)
+
+For schema-driven entity imports with FK resolution, continue using the standard entity mode.
+
+### Interface
+
+Types are defined in `src/app/interfaces/import.ts`:
+
+- **`ImportColumn`** - Column definition with `name`, `key`, `required`, and `type` (`text`, `email`, `phone`, `boolean`, `comma-list`)
+- **`CustomImportConfig`** - Configuration object with `title`, `columns`, `submit` function, and `generateTemplate` function
+- **`CustomImportResult`** - Submit result with `success`, `importedCount`, `errorCount`, and optional `errors` array
+- **`CustomImportError`** - Per-row error with `index`, optional `identifier`, and `error` message
+
+### Validation
+
+Custom mode validates inline (no Web Worker) using type-specific rules:
+- `email`: RFC 5322 regex, lowercased
+- `phone`: Strips non-digits, requires exactly 10 digits
+- `boolean`: Accepts `true/false/yes/no/1/0/y/n` (case-insensitive)
+- `comma-list`: Splits by comma, trims whitespace, returns `string[]`
+- `text`: Trimmed, no special validation
+
+### Partial Success Handling
+
+Unlike entity imports (PostgREST all-or-nothing), custom imports support three outcomes:
+1. **Full success** (`errorCount === 0`): Shows success step with imported count
+2. **Partial success** (`errorCount > 0 && importedCount > 0`): Shows success count + error table
+3. **Full failure** (`importedCount === 0`): Shows error table only
+
+### Usage Example (User Management Page)
+
+```typescript
+userImportConfig: CustomImportConfig = {
+  title: 'Import Users',
+  columns: [
+    { name: 'Email', key: 'email', required: true, type: 'email' },
+    { name: 'First Name', key: 'first_name', required: true, type: 'text' },
+    // ...
+    { name: 'Roles', key: 'roles', required: false, type: 'comma-list' },
+  ],
+  submit: (rows) => this.submitUserImport(rows),
+  generateTemplate: () => this.importExportService.generateUserImportTemplate(this.manageableRoles())
+};
+```
+
+Template in parent component:
+```html
+<app-import-modal [customImport]="userImportConfig"
+  (close)="showImportModal.set(false)"
+  (importSuccess)="onImportSuccess($event)">
+</app-import-modal>
 ```
 
 ## Error Handling
@@ -2742,6 +2817,17 @@ it('should compute canProceedToImport', () => {
 **Status**: ✅ IMPLEMENTED - Core functionality complete, ready for extensions
 
 ## Changelog
+
+### Version 2.3 (2026-02-27) - CUSTOM IMPORT MODE
+- **Added Custom Import Mode** (`CustomImportConfig`) enabling any page to reuse ImportModalComponent for non-entity imports
+- **Interfaces**: `ImportColumn`, `CustomImportConfig`, `CustomImportResult`, `CustomImportError` in `src/app/interfaces/import.ts`
+- **Inline validation**: Type-specific validators (email, phone, boolean, comma-list) run synchronously instead of via Web Worker
+- **Partial success**: Three-outcome handling (full success, partial success, full failure) for RPCs that process rows individually
+- **First consumer**: User Management page bulk user import via `bulk_provision_users` RPC
+- **Template generation**: `ImportExportService.generateUserImportTemplate()` with Available Roles reference sheet
+- **Files added**: `src/app/interfaces/import.ts`
+- **Files modified**: `import-modal.component.ts/html`, `import-export.service.ts`, `user-management.service.ts`, `user-management.page.ts`
+- **Test coverage**: ~30 new tests across 4 spec files
 
 ### Version 2.2 (2025-10-15) - TEST COVERAGE
 - **Added Test Coverage section** documenting comprehensive unit test implementation

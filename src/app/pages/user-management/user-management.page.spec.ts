@@ -20,22 +20,30 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { UserManagementPage } from './user-management.page';
 import { UserManagementService } from '../../services/user-management.service';
+import { ImportExportService } from '../../services/import-export.service';
 
 describe('UserManagementPage', () => {
   let component: UserManagementPage;
   let fixture: ComponentFixture<UserManagementPage>;
   let mockUserService: jasmine.SpyObj<UserManagementService>;
+  let mockImportExportService: jasmine.SpyObj<ImportExportService>;
 
   beforeEach(async () => {
     mockUserService = jasmine.createSpyObj('UserManagementService', [
       'getManagedUsers',
       'createUser',
       'importUsers',
+      'importUsersDetailed',
       'retryProvisioning',
       'getManageableRoles',
       'assignUserRole',
       'revokeUserRole',
       'hasUserManagementAccess'
+    ]);
+    mockImportExportService = jasmine.createSpyObj('ImportExportService', [
+      'validateFileSize',
+      'parseExcelFile',
+      'generateUserImportTemplate'
     ]);
 
     // Default mocks
@@ -50,7 +58,8 @@ describe('UserManagementPage', () => {
       imports: [UserManagementPage],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: UserManagementService, useValue: mockUserService }
+        { provide: UserManagementService, useValue: mockUserService },
+        { provide: ImportExportService, useValue: mockImportExportService }
       ]
     }).compileComponents();
 
@@ -231,6 +240,87 @@ describe('UserManagementPage', () => {
 
       expect(component.showErrorModal()).toBe(true);
       expect(component.errorDetailUser()).toEqual(mockUser);
+    });
+  });
+
+  describe('Import Users', () => {
+    it('should have userImportConfig with 6 columns', () => {
+      expect(component.userImportConfig).toBeTruthy();
+      expect(component.userImportConfig.columns.length).toBe(6);
+      expect(component.userImportConfig.title).toBe('Import Users');
+    });
+
+    it('should set showImportModal on openImportModal()', () => {
+      component.openImportModal();
+      expect(component.showImportModal()).toBe(true);
+    });
+
+    it('submitUserImport should transform rows to ProvisionUserRequest format', (done) => {
+      const rows = [
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: '5551234567', roles: ['editor'], send_welcome_email: false }
+      ];
+
+      mockUserService.importUsersDetailed.and.returnValue(of({
+        success: true, created_count: 1, error_count: 0, errors: []
+      }));
+
+      component.submitUserImport(rows).subscribe(result => {
+        expect(mockUserService.importUsersDetailed).toHaveBeenCalledWith([
+          jasmine.objectContaining({
+            email: 'a@test.com',
+            first_name: 'A',
+            last_name: 'User',
+            phone: '5551234567',
+            initial_roles: ['editor'],
+            send_welcome_email: false
+          })
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.importedCount).toBe(1);
+        done();
+      });
+    });
+
+    it('submitUserImport should default roles to ["user"] when not specified', (done) => {
+      const rows = [
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null }
+      ];
+
+      mockUserService.importUsersDetailed.and.returnValue(of({
+        success: true, created_count: 1, error_count: 0, errors: []
+      }));
+
+      component.submitUserImport(rows).subscribe(() => {
+        const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
+        expect(calledWith[0].initial_roles).toEqual(['user']);
+        done();
+      });
+    });
+
+    it('submitUserImport should default send_welcome_email to true when not specified', (done) => {
+      const rows = [
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null }
+      ];
+
+      mockUserService.importUsersDetailed.and.returnValue(of({
+        success: true, created_count: 1, error_count: 0, errors: []
+      }));
+
+      component.submitUserImport(rows).subscribe(() => {
+        const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
+        expect(calledWith[0].send_welcome_email).toBe(true);
+        done();
+      });
+    });
+
+    it('onImportSuccess should close modal, show message, and reload users', () => {
+      component.showImportModal.set(true);
+
+      component.onImportSuccess(5);
+
+      expect(component.showImportModal()).toBe(false);
+      expect(component.successMessage()).toContain('5 users');
+      expect(mockUserService.getManagedUsers).toHaveBeenCalled();
     });
   });
 });

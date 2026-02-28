@@ -815,6 +815,52 @@ export class ImportExportService {
   }
 
   /**
+   * Generate and download a user import template.
+   * Creates an Excel file with a data sheet (hint row + header row for 6 columns)
+   * and a reference sheet listing available roles.
+   *
+   * @param roles Array of { display_name, description } for available roles
+   */
+  generateUserImportTemplate(roles: { display_name: string; description: string | null }[]): void {
+    const hints: any = {
+      'Email': 'Required. User email address',
+      'First Name': 'Required. User first name',
+      'Last Name': 'Required. User last name',
+      'Phone': 'Optional. 10-digit phone number',
+      'Roles': 'Optional. Comma-separated role names (default: user)',
+      'Send Welcome Email': 'Optional. true/false (default: true)'
+    };
+
+    const headers: any = {
+      'Email': 'Email',
+      'First Name': 'First Name',
+      'Last Name': 'Last Name',
+      'Phone': 'Phone',
+      'Roles': 'Roles',
+      'Send Welcome Email': 'Send Welcome Email'
+    };
+
+    // Create data sheet: hints first, then headers
+    const dataSheet = utils.json_to_sheet([hints, headers], { skipHeader: true });
+
+    // Create workbook
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, dataSheet, 'Import Data');
+
+    // Add reference sheet for available roles
+    if (roles.length > 0) {
+      const roleData = roles.map(r => ({
+        'Role Name': r.display_name,
+        'Description': r.description || ''
+      }));
+      const roleSheet = utils.json_to_sheet(roleData);
+      utils.book_append_sheet(workbook, roleSheet, 'Available Roles');
+    }
+
+    this.saveWorkbook(workbook, 'user_import_template.xlsx');
+  }
+
+  /**
    * Save workbook to file.
    * This is a protected wrapper around xlsx's writeFileXLSX to enable testing
    * without actual file system writes.
