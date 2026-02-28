@@ -2,7 +2,7 @@
   @if (entity$ | async; as entity) {
     @if (properties$ | async; as props) {
       <div class="flex items-center gap-4 mb-4">
-        <button class="btn btn-ghost btn-circle" [routerLink]="'/view/' + entity.table_name" type="button">
+        <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
         <h1 class="mb-0">

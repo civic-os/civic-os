@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,10 +21,12 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { DetailPage } from './detail.page';
+import { Router } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { RecurringService } from '../../services/recurring.service';
+import { NavigationService } from '../../services/navigation.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -36,6 +38,7 @@ describe('DetailPage', () => {
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRecurringService: jasmine.SpyObj<RecurringService>;
+  let mockNavigationService: jasmine.SpyObj<NavigationService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -50,15 +53,17 @@ describe('DetailPage', () => {
       'getEntityActions'
     ]);
     mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData']);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
+    mockAuthService = jasmine.createSpyObj('AuthService', ['login', 'isAdmin'], {
       authenticated: signal(false)
     });
+    mockAuthService.isAdmin.and.returnValue(false);
     mockRecurringService = jasmine.createSpyObj('RecurringService', [
       'getSeriesMembership',
       'cancelOccurrence',
       'splitSeries',
       'deleteSeriesGroup'
     ]);
+    mockNavigationService = jasmine.createSpyObj('NavigationService', ['goBack']);
 
     // Default mock for series membership - not a member
     mockRecurringService.getSeriesMembership.and.returnValue(of({ is_member: false }));
@@ -85,7 +90,8 @@ describe('DetailPage', () => {
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },
         { provide: AuthService, useValue: mockAuthService },
-        { provide: RecurringService, useValue: mockRecurringService }
+        { provide: RecurringService, useValue: mockRecurringService },
+        { provide: NavigationService, useValue: mockNavigationService }
       ]
     })
     .compileComponents();
@@ -313,6 +319,37 @@ describe('DetailPage', () => {
           expect(component.entityKey).toBe('Status');
           done();
         }
+      });
+    });
+  });
+
+  describe('Navigation', () => {
+    it('goBack() should delegate to NavigationService with fallback URL', () => {
+      component.entityKey = 'issues';
+      component.goBack();
+
+      expect(mockNavigationService.goBack).toHaveBeenCalledWith('/view/issues');
+    });
+
+    it('onActionButtonClick("edit") should navigate with replaceUrl: true', (done) => {
+      const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+      // Router is from provideRouter([]) — spy on navigate
+      spyOn(mockRouter, 'navigate');
+
+      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
+      mockSchemaService.getPropsForDetail.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getData.and.returnValue(of([{ id: 42, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }]));
+
+      component.data$.subscribe(() => {
+        component.onActionButtonClick('edit');
+
+        setTimeout(() => {
+          expect(mockRouter.navigate).toHaveBeenCalledWith(
+            ['/edit', 'Issue', 42],
+            { replaceUrl: true }
+          );
+          done();
+        }, 10);
       });
     });
   });

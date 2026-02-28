@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -26,6 +26,7 @@ import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
+import { NavigationService } from '../../services/navigation.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -40,6 +41,7 @@ describe('EditPage', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockKeycloak: jasmine.SpyObj<Keycloak>;
+  let mockNavigationService: jasmine.SpyObj<NavigationService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -57,6 +59,7 @@ describe('EditPage', () => {
     });
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockKeycloak = jasmine.createSpyObj('Keycloak', ['updateToken']);
+    mockNavigationService = jasmine.createSpyObj('NavigationService', ['goBack']);
 
     // Setup updateToken to return resolved promise by default (for form submission)
     mockKeycloak.updateToken.and.returnValue(Promise.resolve(true));
@@ -76,7 +79,8 @@ describe('EditPage', () => {
         { provide: AnalyticsService, useValue: mockAnalyticsService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: Router, useValue: mockRouter },
-        { provide: Keycloak, useValue: mockKeycloak }
+        { provide: Keycloak, useValue: mockKeycloak },
+        { provide: NavigationService, useValue: mockNavigationService }
       ]
     })
     .compileComponents();
@@ -409,27 +413,37 @@ describe('EditPage', () => {
     });
   });
 
+  describe('goBack()', () => {
+    it('should delegate to NavigationService with fallback URL including entityId', () => {
+      component.entityKey = 'Issue';
+      component.entityId = '42';
+      component.goBack();
+
+      expect(mockNavigationService.goBack).toHaveBeenCalledWith('/view/Issue/42');
+    });
+  });
+
   describe('navToList()', () => {
-    it('should navigate to current entity list', () => {
+    it('should navigate to current entity list with replaceUrl', () => {
       component.entityKey = 'Issue';
       component.navToList();
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue'], { replaceUrl: true });
     });
 
-    it('should navigate to specified entity list', () => {
+    it('should navigate to specified entity list with replaceUrl', () => {
       component.entityKey = 'Issue';
       component.navToList('Status');
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Status']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Status'], { replaceUrl: true });
     });
   });
 
   describe('navToRecord()', () => {
-    it('should navigate to specified record', () => {
+    it('should navigate to specified record with replaceUrl', () => {
       component.navToRecord('Issue', '99');
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue', '99']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue', '99'], { replaceUrl: true });
     });
   });
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -29,6 +29,7 @@ import {
 import { ActivatedRoute, Router, RouterModule, Params } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { AuthService } from '../../services/auth.service';
+import { NavigationService } from '../../services/navigation.service';
 import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from "../../components/edit-property/edit-property.component";
@@ -64,6 +65,7 @@ export class CreatePage {
   private router = inject(Router);
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
+  private navigation = inject(NavigationService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -256,17 +258,21 @@ export class CreatePage {
     }, 100);
   }
 
+  goBack(): void {
+    this.navigation.goBack('/view/' + this.entityKey);
+  }
+
   navToList(key?: string) {
     if(key) {
-      this.router.navigate(['view', key]);
+      this.router.navigate(['view', key], { replaceUrl: true });
     } else {
-      this.router.navigate(['view', this.entityKey]);
+      this.router.navigate(['view', this.entityKey], { replaceUrl: true });
     }
   }
 
   navToDetail() {
     if (this.entityKey && this.createdRecordId) {
-      this.router.navigate(['view', this.entityKey, this.createdRecordId]);
+      this.router.navigate(['view', this.entityKey, this.createdRecordId], { replaceUrl: true });
     }
   }
 

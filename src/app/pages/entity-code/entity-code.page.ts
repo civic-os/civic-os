@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -9,10 +9,11 @@
 
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { switchMap, catchError, of, map } from 'rxjs';
 import { IntrospectionService } from '../../services/introspection.service';
+import { NavigationService } from '../../services/navigation.service';
 import { CodeObject, CodeObjectType, EntitySourceCodeResponse } from '../../interfaces/introspection';
 import { CodeViewerComponent } from '../../components/code-viewer/code-viewer.component';
 
@@ -38,13 +39,14 @@ interface CodeSection {
 @Component({
   selector: 'app-entity-code',
   standalone: true,
-  imports: [CommonModule, RouterModule, CodeViewerComponent],
+  imports: [CommonModule, CodeViewerComponent],
   templateUrl: './entity-code.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityCodePage {
   private route = inject(ActivatedRoute);
   private introspection = inject(IntrospectionService);
+  private navigation = inject(NavigationService);
 
   error = signal<string | undefined>(undefined);
 
@@ -102,4 +104,8 @@ export class EntityCodePage {
       }))
       .filter(section => section.items.length > 0);
   });
+
+  goBack(): void {
+    this.navigation.goBack('/system/functions');
+  }
 }

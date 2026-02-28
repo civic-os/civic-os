@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { NavigationService } from '../../services/navigation.service';
 import { RecurringService } from '../../services/recurring.service';
 import {
   SchemaEntityProperty,
@@ -70,6 +71,7 @@ export class EditPage {
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
   private recurringService = inject(RecurringService);
+  private navigation = inject(NavigationService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -454,15 +456,19 @@ export class EditPage {
     }, 100);
   }
 
+  goBack(): void {
+    this.navigation.goBack('/view/' + this.entityKey + '/' + this.entityId);
+  }
+
   navToList(key?: string) {
     if(key) {
-      this.router.navigate(['view', key]);
+      this.router.navigate(['view', key], { replaceUrl: true });
     } else {
-      this.router.navigate(['view', this.entityKey]);
+      this.router.navigate(['view', this.entityKey], { replaceUrl: true });
     }
   }
   navToRecord(key: string, id?: string) {
-    this.router.navigate(['view', key, id]);
+    this.router.navigate(['view', key, id], { replaceUrl: true });
   }
 
   /** Close success modal */

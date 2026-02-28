@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -49,6 +49,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { NavigationService } from '../../services/navigation.service';
 
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
@@ -99,6 +100,7 @@ export class DetailPage {
   private schema = inject(SchemaService);
   private data = inject(DataService);
   private recurringService = inject(RecurringService);
+  private navigation = inject(NavigationService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -942,11 +944,15 @@ export class DetailPage {
    * Handle clicks from the action bar.
    * Routes to appropriate handler based on button ID.
    */
+  goBack(): void {
+    this.navigation.goBack('/view/' + this.entityKey);
+  }
+
   onActionButtonClick(buttonId: string): void {
     if (buttonId === 'edit') {
       this.data$.pipe(take(1)).subscribe(data => {
         if (data) {
-          this.router.navigate(['/edit', this.entityKey, data.id]);
+          this.router.navigate(['/edit', this.entityKey, data.id], { replaceUrl: true });
         }
       });
     } else if (buttonId === 'delete') {

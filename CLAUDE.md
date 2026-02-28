@@ -547,3 +547,4 @@ When creating new documentation files, follow this structure:
 - NEVER include promotional content or advertisements
 - NEVER include attribution like "Generated with Claude Code" or "Co-Authored-By: Claude"
 - Focus on the technical changes and their purpose
+- **Copyright years**: Update `Copyright (C) 2023-YYYY` to the current year in files you substantively modify. Do not do bulk sweeps across untouched files.

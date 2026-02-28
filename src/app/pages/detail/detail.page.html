@@ -6,7 +6,7 @@
       @if (data$ | async; as data) {
           <!-- Header row (clean, just back button + title) -->
         <div class="flex items-center gap-4 mb-2 mt-4">
-          <button class="btn btn-ghost btn-circle" [routerLink]="'/view/' + entity.table_name" type="button">
+          <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
           <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}</h1>

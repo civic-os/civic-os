@@ -45,3 +45,35 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## Navigation
+
+### Smart Back Navigation (`NavigationService`)
+
+Back buttons on Detail, Create, Edit, and Entity Code pages use `NavigationService.goBack(fallbackUrl)` instead of static `routerLink` directives. This preserves URL state (filters, sort, pagination, search, calendar view) when navigating back to list pages.
+
+**How it works:**
+- Counts in-app `NavigationEnd` events to detect whether browser history has a real page to return to
+- When history exists (`count > 1`): calls `Location.back()` — preserves all query params
+- When no history (deep link / new tab): falls back to a static URL via `Router.navigateByUrl()`
+
+**Usage in pages:**
+```typescript
+private navigation = inject(NavigationService);
+
+goBack(): void {
+  this.navigation.goBack('/view/' + this.entityKey);
+}
+```
+
+### Transient Page Skipping via `replaceUrl`
+
+Create and Edit pages are transient workflow steps. Use `replaceUrl: true` on navigations that enter or exit them so the browser back button skips over them:
+
+- **Detail → Edit**: `router.navigate(['/edit', key, id], { replaceUrl: true })`
+- **Edit → Detail** (after save): `router.navigate(['/view', key, id], { replaceUrl: true })`
+- **Create → Detail** (after save): `router.navigate(['/view', key, id], { replaceUrl: true })`
+- **Create/Edit → List** (modal "Back to list"): `router.navigate(['/view', key], { replaceUrl: true })`
+- **Create → Create** ("Create another"): does **not** use `replaceUrl` — user deliberately stays in create flow
+
+**Do not use `replaceUrl` for entity action `navigate_to`** — the source record is a real destination the user may want to return to, unlike transient form pages.
