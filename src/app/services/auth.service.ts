@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -113,14 +113,36 @@ export class AuthService {
       }
 
       if (keycloakEvent.type === KeycloakEventType.AuthRefreshError) {
-        // Token refresh failed - clear impersonation state
-        // The user will likely be redirected to login, but we need to ensure
-        // impersonation doesn't persist to the next session
+        // Token refresh failed - update auth state and clear impersonation.
+        // withAutoRefreshToken handles the login redirect, so we don't call keycloak.login() here.
+        this.authenticated.set(false);
+        this.realUserRoles.set([]);
         this.impersonation.stopImpersonation().subscribe();
+        this.analytics.trackEvent('Auth', 'RefreshError');
       }
     });
+
+    this.setupVisibilityChangeListener();
   }
   private readonly keycloak = inject(Keycloak);
+
+  /**
+   * Detect tab reactivation after sleep/wake and validate the token.
+   * visibilitychange fires reliably when the OS wakes, unlike setTimeout-based timers.
+   */
+  private setupVisibilityChangeListener() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || !this.authenticated()) {
+        return;
+      }
+      // Request a token valid for at least 30 more seconds
+      this.keycloak.updateToken(30).catch(() => {
+        // Refresh token is also expired — force re-authentication
+        this.analytics.trackEvent('Auth', 'VisibilityRefreshFailed');
+        this.keycloak.login();
+      });
+    });
+  }
 
   private loadUserRoles() {
     try {

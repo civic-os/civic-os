@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,8 +20,9 @@ import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak } from 'keycloak-angular';
+import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, withAutoRefreshToken } from 'keycloak-angular';
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
+import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
 import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/markdown-widget.component';
 import { FilteredListWidgetComponent } from './components/widgets/filtered-list-widget/filtered-list-widget.component';
@@ -44,7 +45,12 @@ export const appConfig: ApplicationConfig = {
         onLoad: 'check-sso',
         pkceMethod: 'S256',
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
-      }
+      },
+      features: [
+        withAutoRefreshToken({
+          onInactivityTimeout: 'none'  // Don't redirect on inactivity — visibility listener + 401 interceptor handle zombie state
+        })
+      ]
     }),
 
     // Bearer token interceptor - uses helper function to get PostgREST URL
@@ -63,7 +69,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([
       includeBearerTokenInterceptor,
-      impersonationInterceptor  // Adds X-Impersonate-Roles header when admin is impersonating
+      impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
+      authErrorInterceptor        // Safety net: redirects to login on 401 for authenticated users
     ])),
 
     // Matomo analytics - conditionally provided if configured
