@@ -988,7 +988,9 @@ export class SchemaService {
       map(junctions => {
         const allTables = this.tables();
         if (!allTables) return [];
-        return allTables.filter(t => !junctions.has(t.table_name));
+        return allTables.filter(t =>
+          !junctions.has(t.table_name)
+        );
       })
     );
   }

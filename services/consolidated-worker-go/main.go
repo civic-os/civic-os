@@ -35,6 +35,7 @@ func main() {
 	log.Println("    - Recurring Series Worker")
 	log.Println("    - Scheduled Jobs Worker")
 	log.Println("    - Source Code Parser")
+	log.Println("    - User Provisioning Worker (Keycloak)")
 	log.Println("========================================")
 
 	ctx := context.Background()
@@ -62,6 +63,13 @@ func main() {
 	smtpFrom := getEnv("SMTP_FROM", "noreply@civic-os.org")
 	smtpReplyTo := getEnv("SMTP_REPLY_TO", "") // Optional Reply-To address
 	skipTestEmails := getEnvBool("SKIP_TEST_EMAILS", false)
+
+	// Keycloak Service Account Configuration (optional - backward compatible)
+	keycloakAdminURL := getEnv("KEYCLOAK_ADMIN_URL", "")
+	keycloakRealm := getEnv("KEYCLOAK_REALM", "civic-os-dev")
+	keycloakServiceClientID := getEnv("KEYCLOAK_SERVICE_CLIENT_ID", "civic-os-service-account")
+	keycloakServiceClientSecret := getEnv("KEYCLOAK_SERVICE_CLIENT_SECRET", "")
+	keycloakClientID := getEnv("KEYCLOAK_CLIENT_ID", "civic-os-dev-client") // For redirect URIs
 
 	// Validate SMTP_FROM at startup (fail-fast)
 	_, envelopeFrom := parseEmailAddress(smtpFrom)
@@ -91,6 +99,13 @@ func main() {
 	}
 	log.Printf("[Init]   SMTP Auth: %v", smtpUsername != "")
 	log.Printf("[Init]   Skip Test Emails: %v", skipTestEmails)
+	if keycloakAdminURL != "" {
+		log.Printf("[Init]   Keycloak Admin URL: %s", keycloakAdminURL)
+		log.Printf("[Init]   Keycloak Realm: %s", keycloakRealm)
+		log.Printf("[Init]   Keycloak Service Client: %s", keycloakServiceClientID)
+	} else {
+		log.Println("[Init]   Keycloak: disabled (KEYCLOAK_ADMIN_URL not set)")
+	}
 	log.Printf("[Init]   DB Max Connections: %d", dbMaxConns)
 	log.Printf("[Init]   DB Min Connections: %d", dbMinConns)
 
@@ -176,6 +191,17 @@ func main() {
 	log.Println("[Init] ✓ Template renderer initialized")
 
 	// ===========================================================================
+	// 5b. Initialize Keycloak Client (optional)
+	// ===========================================================================
+	var keycloakClient *KeycloakClient
+	if keycloakAdminURL != "" {
+		keycloakClient = NewKeycloakClient(keycloakAdminURL, keycloakRealm, keycloakServiceClientID, keycloakServiceClientSecret)
+		log.Println("[Init] ✓ Keycloak client configured")
+	} else {
+		log.Println("[Init] ⚠ Keycloak client not configured (user provisioning disabled)")
+	}
+
+	// ===========================================================================
 	// 6. Register All River Workers
 	// ===========================================================================
 	log.Println("[Init] Registering River workers...")
@@ -237,6 +263,35 @@ func main() {
 	})
 	log.Println("[Init] ✓ ParseAllSourceCodeWorker registered (queue: source_parsing)")
 
+	// User Provisioning Workers (only if Keycloak is configured)
+	if keycloakClient != nil {
+		river.AddWorker(workers, &UserProvisionWorker{
+			dbPool:           dbPool,
+			keycloakClient:   keycloakClient,
+			siteURL:          siteURL,
+			keycloakClientID: keycloakClientID,
+		})
+		log.Println("[Init] ✓ UserProvisionWorker registered (queue: user_provisioning)")
+
+		river.AddWorker(workers, &SyncKeycloakRoleWorker{
+			dbPool:         dbPool,
+			keycloakClient: keycloakClient,
+		})
+		log.Println("[Init] ✓ SyncKeycloakRoleWorker registered (queue: user_provisioning)")
+
+		river.AddWorker(workers, &AssignKeycloakRoleWorker{
+			dbPool:         dbPool,
+			keycloakClient: keycloakClient,
+		})
+		log.Println("[Init] ✓ AssignKeycloakRoleWorker registered (queue: user_provisioning)")
+
+		river.AddWorker(workers, &RevokeKeycloakRoleWorker{
+			dbPool:         dbPool,
+			keycloakClient: keycloakClient,
+		})
+		log.Println("[Init] ✓ RevokeKeycloakRoleWorker registered (queue: user_provisioning)")
+	}
+
 	// Scheduled Jobs Scheduler - uses internal Go ticker, not River periodic jobs
 	// This ensures only consolidated-worker runs the scheduler (not payment-worker)
 	scheduledJobScheduler := &ScheduledJobScheduler{
@@ -251,12 +306,13 @@ func main() {
 
 	riverClient, err := river.NewClient(riverpgxv5.New(dbPool), &river.Config{
 		Queues: map[string]river.QueueConfig{
-			"s3_signer":      {MaxWorkers: 20},                  // I/O-bound, many workers
-			"thumbnails":     {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
-			"notifications":  {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
-			"recurring":      {MaxWorkers: 5},                   // Series expansion jobs
-			"scheduled_jobs": {MaxWorkers: 5},                   // Scheduled SQL function execution
-			"source_parsing": {MaxWorkers: 1},                   // Serial — one parse at a time
+			"s3_signer":         {MaxWorkers: 20},                  // I/O-bound, many workers
+			"thumbnails":        {MaxWorkers: thumbnailMaxWorkers}, // CPU-bound, configurable
+			"notifications":     {MaxWorkers: 30},                  // I/O-bound (SMTP), many workers
+			"recurring":         {MaxWorkers: 5},                   // Series expansion jobs
+			"scheduled_jobs":    {MaxWorkers: 5},                   // Scheduled SQL function execution
+			"source_parsing":    {MaxWorkers: 1},                   // Serial — one parse at a time
+			"user_provisioning": {MaxWorkers: 5},                   // Keycloak user provisioning + role sync
 		},
 		Workers: workers,
 		Logger:  slog.Default(),
@@ -304,6 +360,12 @@ func main() {
 	log.Println("  - scheduled_job_scheduler (Go ticker, every minute)")
 	log.Println("  - scheduled_job_execute (queue: scheduled_jobs, 5 workers)")
 	log.Println("  - parse_all_source_code (queue: source_parsing, 1 worker)")
+	if keycloakClient != nil {
+		log.Println("  - provision_keycloak_user (queue: user_provisioning, 5 workers)")
+		log.Println("  - sync_keycloak_role (queue: user_provisioning)")
+		log.Println("  - assign_keycloak_role (queue: user_provisioning)")
+		log.Println("  - revoke_keycloak_role (queue: user_provisioning)")
+	}
 	log.Println("  - pgrst LISTEN (dedicated connection)")
 	log.Println("")
 	log.Printf("Database connections: %d max, %d min (+1 LISTEN)", dbMaxConns, dbMinConns)

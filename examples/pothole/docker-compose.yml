@@ -153,6 +153,13 @@ services:
       - SMTP_FROM=${SMTP_FROM:-"Pot Hole Tracker" <noreply@example.com>}
       - SMTP_REPLY_TO=${SMTP_REPLY_TO:-}   # Optional: where replies should go
       - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}  # Set to true in production to prevent sending to @example.com/@example.org/@example.net
+
+      # Keycloak Configuration (for user provisioning and role management)
+      - KEYCLOAK_ADMIN_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=civic-os-dev
+      - KEYCLOAK_SERVICE_CLIENT_ID=civic-os-service-account
+      - KEYCLOAK_SERVICE_CLIENT_SECRET=civic-os-service-secret
+      - KEYCLOAK_CLIENT_ID=civic-os-dev-client
     networks:
       - postgrest-network
     depends_on:

@@ -1,6 +1,6 @@
 # Go Microservices Implementation Guide
 
-**Status:** ✅ **CURRENT** - Updated in v0.11.0 for Consolidated Worker Architecture
+**Status:** ✅ **CURRENT** - Updated in v0.31.0 for User Provisioning and Role Sync Workers
 **Purpose:** Complete guide for Civic OS microservices using Go + River (PostgreSQL table queue)
 
 > **⚠️ ARCHITECTURAL CHANGE (v0.11.0)**: The three separate Go microservices (S3 Signer, Thumbnail Worker, Notification Worker) have been consolidated into a single `consolidated-worker` service. This reduces database connections from 12 to 4, simplifies deployment from 3 containers to 1, and maintains all functionality with improved resource efficiency. The architecture documented below reflects this consolidated approach, though historical references to separate services remain for context.
@@ -114,6 +114,21 @@
 │  │  - Sends emails via SMTP/SES                 │ │
 │  │  - Template rendering with Go templates      │ │
 │  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ User Provisioning Worker (v0.31.0)           │ │
+│  │  - Kind: "provision_keycloak_user"           │ │
+│  │  - Creates Keycloak user via Admin REST API  │ │
+│  │  - Assigns roles, triggers welcome email     │ │
+│  │  - Syncs to civic_os_users tables            │ │
+│  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ Role Sync Worker (v0.31.0)                   │ │
+│  │  - Kind: "sync_keycloak_role"                │ │
+│  │  - Creates/deletes Keycloak realm roles      │ │
+│  │  - Triggered by create_role()/delete_role()  │ │
+│  └──────────────────────────────────────────────┘ │
 └───────────────────────────────────────────────────┘
 ```
 
@@ -136,6 +151,52 @@
 8. ✅ **Dead-letter queue** - Failed jobs preserved for debugging
 9. ✅ **Priority queues** - Critical jobs processed first
 10. ✅ **Scheduled/delayed jobs** - Run at specific time or after delay
+
+#### User Provisioning Worker (v0.31.0+)
+
+**Kind**: `provision_keycloak_user`
+**Source file**: `services/consolidated-worker-go/user_provision_worker.go`
+
+Handles async user creation when admins/managers submit new user requests via the User Management page.
+
+**Job payload** (`UserProvisionArgs`):
+- `provision_id` (int) - References `metadata.user_provisioning.id`
+
+**Processing flow**:
+1. Reads provisioning record from database (email, name, phone, roles, send_welcome_email)
+2. Sets status to `processing`
+3. Creates user in Keycloak via Admin REST API (username = email prefix)
+4. Assigns requested realm roles in Keycloak
+5. Optionally triggers "UPDATE_PASSWORD" execute action (welcome email)
+6. Inserts user into `metadata.civic_os_users` and `metadata.civic_os_users_private`
+7. Inserts role mappings into `metadata.user_roles`
+8. Updates provisioning record: `status = 'completed'`, `keycloak_user_id = <UUID>`
+
+**Error handling**: On failure, sets `status = 'failed'` with `error_message`. Admins can retry by setting status back to `pending` via the UI.
+
+**Required environment variables**:
+- `KEYCLOAK_URL` - Keycloak base URL
+- `KEYCLOAK_REALM` - Target realm name
+- `KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID` - Service account client ID
+- `KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET` - Service account client secret
+
+#### Role Sync Worker (v0.31.0+)
+
+**Kind**: `sync_keycloak_role`
+**Source file**: `services/consolidated-worker-go/role_sync_worker.go`
+
+Synchronizes role create/delete operations between Civic OS and Keycloak. Triggered automatically when `create_role()` or `delete_role()` RPCs are called.
+
+**Job payload** (`RoleSyncArgs`):
+- `action` - `"create"` or `"delete"`
+- `role_name` - Role display name
+- `description` - Role description (for create only)
+
+**Processing flow**:
+- **Create**: Creates a realm role in Keycloak with the given name and description. Idempotent — if role already exists, succeeds silently.
+- **Delete**: Removes the realm role from Keycloak. Idempotent — if role doesn't exist, succeeds silently.
+
+Uses the same Keycloak service account credentials as the User Provisioning Worker.
 
 ---
 

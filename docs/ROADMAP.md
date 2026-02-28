@@ -35,6 +35,22 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Build Roles/Permissions schema
 - [ ] Give Roles display name, description
 - [x] Allow creation of Roles on the Permissions screen (or a role-specific screen)
+- [x] **Role Delegation** (v0.31.0) - Admin-configurable matrix controlling which roles can assign which other roles
+  - [x] `metadata.role_can_manage` table with RLS policies
+  - [x] `set_role_can_manage()` / `get_role_can_manage()` RPCs
+  - [x] Delegation matrix UI on Permissions page (checkbox grid)
+  - [x] Delete custom roles from Permissions page
+  - [x] Keycloak role sync (create/delete realm roles via Go worker)
+- [~] **User Provisioning** (v0.31.0) - Admin/manager user creation with async Keycloak sync
+  - [x] `metadata.user_provisioning` table with status tracking (pending → processing → completed/failed)
+  - [x] `managed_users` UNION view combining active users + provisioning records
+  - [x] INSTEAD OF triggers for view-based INSERT/UPDATE
+  - [x] Go worker: create Keycloak user, assign roles, sync to `civic_os_users`
+  - [x] User Management page (`/admin/users`) with search, status filter, create modal
+  - [x] Role assignment/revocation RPCs with delegation enforcement
+  - [ ] **Edit existing users** (change name, email, phone, enable/disable)
+  - [ ] **Edit user roles** inline from user management page (assign/revoke roles per user)
+  - [ ] **Bulk user import** from CSV/Excel via the import modal
 
 ### Workflow
 - [ ] Build table structure for attaching workflow to Entity (Use Properties table)

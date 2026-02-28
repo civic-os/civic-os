@@ -45,7 +45,6 @@ Key fields:
 - `show_calendar` - BOOLEAN - Enable calendar visualization on List page
 - `calendar_property_name` - Column name with time_slot data (requires `show_calendar=true`)
 - `calendar_color_property` - Optional hex_color column for event colors
-
 **Configuration Methods**:
 1. Entity Management page UI (`/entity-management`) - Admin-only visual editor
 2. SQL INSERT/UPDATE statements - Seed scripts or migrations
@@ -434,6 +433,82 @@ Fields:
   - User has `civic_os_users_private:read` permission
 
 **Data Sync**: User data is synced from Keycloak on login via `refresh_current_user()` RPC. This ensures Civic OS has current profile information without storing passwords.
+
+### User Provisioning (v0.31.0+)
+
+Admin and manager users can create new user accounts directly from the Civic OS UI. The system provisions users asynchronously via a Go worker that creates the Keycloak account, assigns roles, and syncs profile data back to Civic OS.
+
+**`metadata.user_provisioning`** - Tracks user creation requests through their lifecycle
+
+Key fields:
+- `id` (SERIAL PK) - Provisioning request identifier
+- `email` - New user's email address (unique among active requests)
+- `first_name`, `last_name` - User's name
+- `phone` - Optional phone number
+- `initial_roles` - NAME[] array of roles to assign (validated against `metadata.roles`)
+- `status` - Lifecycle state: `pending` → `processing` → `completed` or `failed`
+- `error_message` - Error details when status is `failed`
+- `keycloak_user_id` - UUID assigned by Keycloak after successful creation
+- `send_welcome_email` - BOOLEAN - Whether Keycloak sends a set-password email
+- `requested_by` - UUID FK to the admin/manager who initiated the request
+
+**Status Lifecycle**:
+| Status | Meaning |
+|--------|---------|
+| `pending` | Request created, waiting for worker to pick up |
+| `processing` | Worker is creating Keycloak user and syncing data |
+| `completed` | User successfully created in Keycloak and synced to Civic OS |
+| `failed` | Worker encountered an error (see `error_message`). Can be retried by setting status back to `pending` |
+
+**`public.managed_users`** (VIEW) - Read-only UNION view combining active users from `civic_os_users` with pending/failed provisioning records. Provides PostgREST-native filtering and pagination for the User Management page. Columns: `id`, `display_name`, `full_name`, `email`, `phone`, `roles`, `status`, `error_message`, `created_at`, `provision_id`. Excluded from `schema_entities` to avoid sidebar/ERD pollution.
+
+**Mutation RPCs** (follow the admin page pattern: VIEW for reads, RPCs for mutations):
+- `create_provisioned_user(p_email, p_first_name, p_last_name, p_phone, p_initial_roles, p_send_welcome_email)` - Create a provisioning request. Validates roles and delegation, returns `{success, provision_id}` or `{success, error}`
+- `retry_user_provisioning(p_provision_id BIGINT)` - Retry a failed provisioning request. Resets to pending and re-enqueues River job
+- `bulk_provision_users(p_users JSON)` - Bulk create provisioning requests. Accepts JSON array, returns `{success, created_count, error_count, errors}`
+
+**Role Management RPCs**:
+- `assign_user_role(p_user_id UUID, p_role_name TEXT)` - Assign a role to an existing user (respects delegation)
+- `revoke_user_role(p_user_id UUID, p_role_name TEXT)` - Remove a role from a user (respects delegation)
+- `get_manageable_roles()` - Returns roles the current user can assign (admins see all non-system roles; managers see delegated roles only)
+- `can_manage_role(p_role_name TEXT)` - Check if current user can assign a specific role
+
+**Worker Processing** (consolidated worker):
+1. Worker picks up `provision_keycloak_user` job from River queue
+2. Creates user in Keycloak via Admin REST API (using service account credentials)
+3. Assigns requested roles in Keycloak
+4. Optionally triggers welcome email (Keycloak "execute actions" API)
+5. Syncs user to `civic_os_users` and `civic_os_users_private` tables
+6. Updates provisioning record with `status = 'completed'` and `keycloak_user_id`
+
+**UI**: User Management page at `/admin/users` (admin-only). Features search, status filter, create modal with role selection, and retry for failed provisioning.
+
+### Role Delegation (v0.31.0+)
+
+Controls which roles can assign or revoke which other roles. This enables non-admin users (e.g., managers) to manage user roles within their authorized scope.
+
+**`metadata.role_can_manage`** - Junction table defining delegation relationships
+
+Fields:
+- `manager_role_id` (SMALLINT FK) - The role that can manage
+- `managed_role_id` (SMALLINT FK) - The role being managed
+- Composite PK on `(manager_role_id, managed_role_id)`
+
+**Default Seed Data** (created in v0.31.0 migration):
+- `admin` can manage: `user`, `editor` (and any custom roles)
+- `manager` can manage: `user`, `editor`
+
+**Important**: The `anonymous` role is excluded from role delegation entirely. It exists only for table-level permissions (controlling what unauthenticated users can see) and should never be assigned to or managed by users.
+
+**Key RPCs**:
+- `set_role_can_manage(p_manager_role_id, p_managed_role_id, p_enabled)` - Admin-only. Enable or disable a delegation relationship
+- `get_role_can_manage(p_manager_role_id)` - Returns which roles a given role can manage
+
+**Role Lifecycle**:
+- `create_role()` - Creates a role in Civic OS and enqueues a `sync_keycloak_role` job to create it in Keycloak
+- `delete_role()` - Deletes a custom role (built-in roles `admin`, `user`, `editor`, `anonymous` are protected) and enqueues a Keycloak sync job to remove it
+
+**UI**: "Role Delegation" tab on the Permissions page (`/permissions`). Shows a checkbox matrix where admins configure which roles can manage which. The "Delete Selected Role" button allows removing custom roles.
 
 ---
 

@@ -39,3 +39,4 @@ v0-28-0-virtual-entities [v0-27-0-ical-helpers] 2026-01-25T12:00:00Z Daniel Kuri
 v0-28-1-filter-system-views [v0-28-0-virtual-entities] 2026-01-26T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Filter system/framework views from entity list
 v0-29-0-source-code-visibility [v0-28-1-filter-system-views] 2026-02-10T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add source code visibility for functions, triggers, views, and RLS policies
 v0-30-0-schema-decisions [v0-29-0-source-code-visibility] 2026-02-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Schema Decisions (ADR) system for tracking schema evolution rationale
+v0-31-0-user-provisioning [v0-30-0-schema-decisions] 2026-02-27T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add user provisioning with Keycloak sync and role delegation

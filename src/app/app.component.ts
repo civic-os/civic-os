@@ -29,6 +29,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SchemaEntityTable } from './interfaces/entity';
 import { AuthService } from './services/auth.service';
+import { UserManagementService } from './services/user-management.service';
 import { DashboardSelectorComponent } from './components/dashboard-selector/dashboard-selector.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
@@ -55,6 +56,7 @@ export class AppComponent {
   public auth = inject(AuthService);
   public themeService = inject(ThemeService);
   public impersonation = inject(ImpersonationService);
+  private userManagement = inject(UserManagementService);
 
   public drawerOpen: boolean = false;
   title = 'frontend';
@@ -109,10 +111,19 @@ export class AppComponent {
     { initialValue: false }
   );
 
+  public hasUserManagementPermission = toSignal(
+    this.userManagement.hasUserManagementAccess().pipe(
+      catchError(() => of(false))
+    ),
+    { initialValue: false }
+  );
+
   // Show Admin section if user is admin OR has access to feature-specific pages
   public showAdminSection = computed(() => {
     // Admin always sees the section
     if (this.auth.isAdmin()) return true;
+    // Non-admins see it if they have user management access
+    if (this.hasUserManagementPermission()) return true;
     // Non-admins see it if they have recurring schedule access
     if (this.hasRecurringEntities() && this.hasRecurringSchedulePermission()) return true;
     // Non-admins see it if they have payment access
@@ -197,6 +208,11 @@ export class AppComponent {
 
   public navigateToRecurringSchedules() {
     this.router.navigate(['admin', 'recurring-schedules']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToUserManagement() {
+    this.router.navigate(['admin', 'users']);
     this.drawerOpen = false;
   }
 

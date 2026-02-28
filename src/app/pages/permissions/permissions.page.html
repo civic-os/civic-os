@@ -10,16 +10,9 @@
       </button>
       <div class="flex flex-col gap-2 pr-8">
         <span class="font-semibold">{{ successMessage() }}</span>
-        <div class="text-sm">
-          <p class="mb-2">Remember to create the role <strong>{{ newlyCreatedRoleName() }}</strong> in Keycloak for authentication to work.</p>
-          <a
-            [href]="keycloakRolesUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-sm btn-outline">
-            Open Keycloak Roles →
-          </a>
-        </div>
+        @if (newlyCreatedRoleName()) {
+          <p class="text-sm">Role <strong>{{ newlyCreatedRoleName() }}</strong> will be synced to Keycloak automatically.</p>
+        }
       </div>
     </div>
   }
@@ -78,6 +71,13 @@
           [class.tab-active]="activeTab() === 'actions'"
           (click)="switchTab('actions')">
           Entity Actions
+        </button>
+        <button
+          role="tab"
+          class="tab"
+          [class.tab-active]="activeTab() === 'delegation'"
+          (click)="switchTab('delegation')">
+          Role Delegation
         </button>
       </div>
 
@@ -194,8 +194,89 @@
           </div>
         }
       }
+
+      <!-- Role Delegation Tab -->
+      @if (activeTab() === 'delegation') {
+        @if (delegationLoading()) {
+          <div class="flex justify-center items-center min-h-[200px]">
+            <span class="loading loading-spinner loading-lg"></span>
+          </div>
+        } @else {
+          <div class="mb-4">
+            <p class="text-base-content/60 text-sm">
+              Configure which roles the selected role can assign or revoke from users.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th class="font-bold">Role</th>
+                  <th class="text-center font-bold">Can Manage</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (role of delegationRoles(); track role.id) {
+                  <tr>
+                    <td>
+                      <div class="font-semibold">{{ role.display_name }}</div>
+                      @if (role.description) {
+                        <div class="text-xs opacity-60">{{ role.description }}</div>
+                      }
+                    </td>
+                    <td class="text-center">
+                      @if (role.id === selectedRoleId()) {
+                        <span class="text-base-content/30">—</span>
+                      } @else {
+                        <input
+                          type="checkbox"
+                          class="checkbox checkbox-primary checkbox-sm"
+                          [checked]="isDelegated(role.id)"
+                          (change)="toggleDelegation(role.id)" />
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Delete Role Button -->
+          <div class="mt-6 pt-4 border-t border-base-300">
+            <button
+              class="btn btn-error btn-sm"
+              (click)="openDeleteRoleModal()">
+              <span class="material-symbols-outlined text-sm">delete</span>
+              Delete Selected Role
+            </button>
+          </div>
+        }
+      }
     </div>
   }
+
+  <!-- Delete Role Modal -->
+  <cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteRoleModal()" size="sm">
+    <h3 class="font-bold text-lg mb-4">Delete Role</h3>
+    <p>Are you sure you want to delete the selected role?</p>
+    <p class="text-sm text-base-content/60 mt-2">
+      This will remove all permission assignments and delegation rules for this role.
+      Built-in roles (user, admin) cannot be deleted.
+    </p>
+
+    <div class="cos-modal-action">
+      <button class="btn" (click)="closeDeleteRoleModal()" [disabled]="deleteLoading()">Cancel</button>
+      <button class="btn btn-error" (click)="submitDeleteRole()" [disabled]="deleteLoading()">
+        @if (deleteLoading()) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Deleting...
+        } @else {
+          Delete Role
+        }
+      </button>
+    </div>
+  </cos-modal>
 
   <!-- Create Role Modal -->
   <cos-modal [isOpen]="showCreateModal()" (closed)="closeCreateRoleModal()" size="sm">

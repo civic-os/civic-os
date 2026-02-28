@@ -335,11 +335,18 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 **Default Roles**: `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)
 
 **Admin Features** (require `admin` role):
-- **Permissions Page** (`/permissions`) - Manage role-based table permissions
+- **Permissions Page** (`/permissions`) - Manage role-based table permissions, entity action permissions, and role delegation (v0.31.0+)
+- **User Management Page** (`/admin/users`) - Create and manage user accounts with async Keycloak provisioning (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
 - **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only.
+
+**Role Delegation** (v0.31.0+): Admin-configurable matrix controlling which roles can assign/revoke which other roles. Configured via "Role Delegation" tab on Permissions page. Uses `metadata.role_can_manage` table. The `anonymous` role is excluded from delegation (framework-only permission role). See `docs/INTEGRATOR_GUIDE.md` (Role Delegation section) for details.
+
+**Admin Page Architecture**: Admin pages (User Management, Permissions, Entity/Property Management) use **read-only VIEWs** for data retrieval and **RPCs** for mutations. System views like `managed_users` are excluded from `schema_entities` via its WHERE clause so they don't appear in the sidebar or Schema Editor ERD. This pattern avoids the complexity of INSTEAD OF triggers while keeping PostgREST's native filtering/pagination for reads.
+
+**Keycloak Service Account** (v0.31.0+): The consolidated worker uses a `civic-os-service-account` client (client credentials flow) for Keycloak API access. This enables user provisioning (creating Keycloak users) and role sync (creating/deleting realm roles). See `docs/AUTHENTICATION.md` (Step 8) for setup.
 
 **Troubleshooting RBAC**: See `docs/TROUBLESHOOTING.md` for debugging JWT roles and permissions issues.
 

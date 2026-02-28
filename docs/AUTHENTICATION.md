@@ -320,6 +320,34 @@ It's critical to verify roles are included in JWT tokens:
    - Try logging out and back in
    - Check the client scope is assigned to your client
 
+### Step 8: Create Service Account Client (v0.31.0+, Required for User Provisioning)
+
+The consolidated worker needs a Keycloak service account to create users and manage roles via the Keycloak Admin REST API.
+
+1. **Create client** in Keycloak admin console:
+   - Go to: Clients → Create client
+   - **Client ID**: `civic-os-service-account`
+   - **Client authentication**: ON (confidential client)
+   - **Authentication flow**: Check only "Service accounts roles"
+   - Click Save
+
+2. **Get client credentials**:
+   - Go to: Clients → civic-os-service-account → Credentials tab
+   - Copy the **Client secret**
+
+3. **Assign realm management roles**:
+   - Go to: Clients → civic-os-service-account → Service account roles tab
+   - Click "Assign role" → Filter by clients → Select `realm-management`
+   - Assign: `manage-users`, `view-users`, `view-realm`, `manage-realm`
+
+4. **Configure worker environment variables**:
+   ```bash
+   KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID=civic-os-service-account
+   KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET=<secret from step 2>
+   ```
+
+**Note**: The pre-configured `examples/keycloak/civic-os-dev.json` realm export already includes this service account client with secret `civic-os-service-secret` for local development. Production deployments must generate a new secret.
+
 ---
 
 ## Update Application Configuration

@@ -315,4 +315,124 @@ describe('PermissionsService', () => {
       req.flush({ message: 'Internal server error' }, { status: 500, statusText: 'Internal Server Error' });
     });
   });
+
+  describe('getRoleCanManage()', () => {
+    it('should POST to get_role_can_manage RPC with role ID', (done) => {
+      const mockDelegations = [
+        { managed_role_id: 2, managed_role_name: 'editor' },
+        { managed_role_id: 3, managed_role_name: 'user' }
+      ];
+
+      service.getRoleCanManage(1).subscribe(delegations => {
+        expect(delegations).toEqual(mockDelegations);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ p_manager_role_id: 1 });
+      req.flush(mockDelegations);
+    });
+
+    it('should return empty array on error', (done) => {
+      service.getRoleCanManage(1).subscribe(delegations => {
+        expect(delegations).toEqual([]);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
+      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+    });
+  });
+
+  describe('setRoleCanManage()', () => {
+    it('should POST correct params for enabling delegation', (done) => {
+      service.setRoleCanManage(1, 2, true).subscribe(response => {
+        expect(response.success).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        p_manager_role_id: 1,
+        p_managed_role_id: 2,
+        p_enabled: true
+      });
+      req.flush({ success: true });
+    });
+
+    it('should POST correct params for disabling delegation', (done) => {
+      service.setRoleCanManage(1, 2, false).subscribe(response => {
+        expect(response.success).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+      expect(req.request.body).toEqual({
+        p_manager_role_id: 1,
+        p_managed_role_id: 2,
+        p_enabled: false
+      });
+      req.flush({ success: true });
+    });
+
+    it('should handle API error response', (done) => {
+      service.setRoleCanManage(1, 2, true).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error?.humanMessage).toBe('Admin access required');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+      req.flush({ success: false, error: 'Admin access required' });
+    });
+
+    it('should handle HTTP error', (done) => {
+      service.setRoleCanManage(1, 2, true).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error?.humanMessage).toBe('Failed to update role delegation');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+      req.flush({ message: 'Error' }, { status: 403, statusText: 'Forbidden' });
+    });
+  });
+
+  describe('deleteRole()', () => {
+    it('should POST to delete_role RPC with role ID', (done) => {
+      service.deleteRole(5).subscribe(response => {
+        expect(response.success).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ p_role_id: 5 });
+      req.flush({ success: true, message: 'Role "volunteer" deleted' });
+    });
+
+    it('should handle built-in role error', (done) => {
+      service.deleteRole(1).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error?.humanMessage).toBe('Cannot delete built-in role "user"');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
+      req.flush({ success: false, error: 'Cannot delete built-in role "user"' });
+    });
+
+    it('should handle HTTP error', (done) => {
+      service.deleteRole(5).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error?.humanMessage).toBe('Failed to delete role');
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
+      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+    });
+  });
 });

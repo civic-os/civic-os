@@ -35,7 +35,13 @@ describe('PermissionsPage', () => {
       'getTables',
       'getRolePermissions',
       'setRolePermission',
-      'createRole'
+      'createRole',
+      'getEntityActionPermissions',
+      'getEntityActionRoles',
+      'setEntityActionPermission',
+      'getRoleCanManage',
+      'setRoleCanManage',
+      'deleteRole'
     ]);
     mockAuthService = jasmine.createSpyObj('AuthService', ['isAdmin']);
 
@@ -142,6 +148,92 @@ describe('PermissionsPage', () => {
       const result = component.getApplicablePermissions(':notes');
 
       expect(result).toEqual(['create', 'read']);
+    });
+  });
+
+  describe('Role Delegation Tab (v0.31.0)', () => {
+    beforeEach(() => {
+      // Setup mock for delegation tests
+      mockPermissionsService.getRoleCanManage.and.returnValue(of([
+        { managed_role_id: 2, managed_role_name: 'Editor' }
+      ]));
+      mockPermissionsService.setRoleCanManage.and.returnValue(of({ success: true }));
+      mockPermissionsService.deleteRole.and.returnValue(of({ success: true, message: 'Role deleted' }));
+    });
+
+    it('should switch to delegation tab and load delegation matrix', () => {
+      component.selectedRoleId.set(1);
+
+      component.switchTab('delegation');
+
+      expect(component.activeTab()).toBe('delegation');
+      expect(mockPermissionsService.getRoleCanManage).toHaveBeenCalledWith(1);
+    });
+
+    it('should populate delegationManagedIds from getRoleCanManage', () => {
+      component.selectedRoleId.set(1);
+
+      component.loadDelegationMatrix();
+
+      expect(component.delegationManagedIds().has(2)).toBe(true);
+      expect(component.delegationManagedIds().size).toBe(1);
+    });
+
+    it('should return true for delegated role IDs', () => {
+      component.delegationManagedIds.set(new Set([2, 3]));
+
+      expect(component.isDelegated(2)).toBe(true);
+      expect(component.isDelegated(3)).toBe(true);
+      expect(component.isDelegated(1)).toBe(false);
+    });
+
+    it('should call setRoleCanManage when toggling delegation on', () => {
+      component.selectedRoleId.set(1);
+      component.delegationManagedIds.set(new Set());
+
+      component.toggleDelegation(3);
+
+      expect(mockPermissionsService.setRoleCanManage).toHaveBeenCalledWith(1, 3, true);
+    });
+
+    it('should call setRoleCanManage when toggling delegation off', () => {
+      component.selectedRoleId.set(1);
+      component.delegationManagedIds.set(new Set([3]));
+
+      component.toggleDelegation(3);
+
+      expect(mockPermissionsService.setRoleCanManage).toHaveBeenCalledWith(1, 3, false);
+    });
+
+    it('should update local state on successful toggle', () => {
+      component.selectedRoleId.set(1);
+      component.delegationManagedIds.set(new Set());
+
+      component.toggleDelegation(3);
+
+      expect(component.delegationManagedIds().has(3)).toBe(true);
+    });
+
+    it('should open and close delete role modal', () => {
+      component.openDeleteRoleModal();
+      expect(component.showDeleteModal()).toBe(true);
+
+      component.closeDeleteRoleModal();
+      expect(component.showDeleteModal()).toBe(false);
+    });
+
+    it('should call deleteRole with selected role ID', () => {
+      component.selectedRoleId.set(5);
+      // Need to set up roles signal by having data loaded
+      // Since roles() comes from computed data signal, we test the service call directly
+      mockPermissionsService.deleteRole.and.returnValue(of({ success: true }));
+      mockPermissionsService.getRoles.and.returnValue(of([
+        { id: 1, display_name: 'admin' }
+      ]));
+
+      component.submitDeleteRole();
+
+      expect(mockPermissionsService.deleteRole).toHaveBeenCalledWith(5);
     });
   });
 });

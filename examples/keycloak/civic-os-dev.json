@@ -12,9 +12,9 @@
   "editUsernameAllowed": false,
   "rememberMe": true,
 
-  "accessTokenLifespan": 7200,
-  "ssoSessionIdleTimeout": 1800,
-  "ssoSessionMaxLifespan": 36000,
+  "accessTokenLifespan": 43200,
+  "ssoSessionIdleTimeout": 43200,
+  "ssoSessionMaxLifespan": 86400,
   "ssoSessionIdleTimeoutRememberMe": 604800,
   "ssoSessionMaxLifespanRememberMe": 2592000,
   "revokeRefreshToken": false,
@@ -23,6 +23,16 @@
   "defaultSignatureAlgorithm": "RS256",
 
   "bruteForceProtected": false,
+
+  "smtpServer": {
+    "host": "inbucket",
+    "port": "2500",
+    "from": "keycloak@civic-os.local",
+    "fromDisplayName": "Civic OS (Local Dev)",
+    "auth": "",
+    "ssl": "",
+    "starttls": ""
+  },
 
   "passwordPolicy": "length(8)",
 
@@ -130,6 +140,30 @@
         "phone",
         "offline_access"
       ]
+    },
+    {
+      "clientId": "civic-os-service-account",
+      "name": "Civic OS Service Account",
+      "description": "Service account for Civic OS consolidated worker - used for user provisioning and role management",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "protocol": "openid-connect",
+      "secret": "civic-os-service-secret",
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": []
     }
   ],
 
@@ -211,8 +245,26 @@
         }
       ],
       "realmRoles": ["user", "admin", "default-roles-civic-os-dev"]
+    },
+    {
+      "username": "service-account-civic-os-service-account",
+      "enabled": true,
+      "serviceAccountClientId": "civic-os-service-account",
+      "realmRoles": ["default-roles-civic-os-dev"],
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "view-realm", "manage-realm"]
+      }
     }
   ],
+
+  "clientScopeMappings": {
+    "realm-management": [
+      {
+        "client": "civic-os-service-account",
+        "roles": ["manage-users", "view-users", "view-realm", "manage-realm"]
+      }
+    ]
+  },
 
   "browserFlow": "browser",
   "registrationFlow": "registration",

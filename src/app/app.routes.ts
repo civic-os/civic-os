@@ -91,6 +91,12 @@ export const routes: Routes = [
         canActivate: [schemaVersionGuard, authGuard]
     },
     {
+        path: 'admin/users',
+        loadComponent: () => import('./pages/user-management/user-management.page')
+            .then(m => m.UserManagementPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
         path: 'admin/recurring-schedules',
         component: SeriesGroupManagementPage,
         canActivate: [schemaVersionGuard, authGuard]

@@ -20,13 +20,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { PermissionsService, Role, RolePermission, EntityActionPermission } from '../../services/permissions.service';
+import { PermissionsService, Role, RolePermission, EntityActionPermission, RoleDelegation } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
-import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take } from 'rxjs';
+import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 
-type PermissionTab = 'tables' | 'actions';
+type PermissionTab = 'tables' | 'actions' | 'delegation';
 
 interface PermissionMatrix {
   tableName: string;
@@ -141,6 +141,7 @@ export class PermissionsPage {
 
         // Load roles first
         return this.permissionsService.getRoles().pipe(
+          tap(roles => this.roles.set(roles)),
           switchMap(roles => {
             if (roles.length === 0) {
               return of({
@@ -202,8 +203,8 @@ export class PermissionsPage {
     { initialValue: { roles: [], permissionMatrix: [], loading: true } as PermissionsData }
   );
 
-  // Expose computed signals for template
-  roles = computed(() => this.data()?.roles || []);
+  // Roles: writable signal updated by initial load and create/delete handlers
+  roles = signal<Role[]>([]);
   permissionMatrix = computed(() => this.data()?.permissionMatrix || []);
   loading = computed(() => this.data()?.loading ?? true);
   error = computed(() => this.data()?.error);
@@ -212,9 +213,11 @@ export class PermissionsPage {
     this.selectedRoleId.set(newRoleId);
     this.selectedRoleIdSubject.next(newRoleId);
 
-    // Also reload entity actions if on that tab
+    // Reload tab-specific data
     if (this.activeTab() === 'actions') {
       this.loadEntityActionPermissions();
+    } else if (this.activeTab() === 'delegation') {
+      this.loadDelegationMatrix();
     }
   }
 
@@ -317,6 +320,7 @@ export class PermissionsPage {
           // Reload roles and auto-select the new role
           this.permissionsService.getRoles().subscribe({
             next: (roles) => {
+              this.roles.set(roles);
               const newRole = roles.find(r => r.id === response.roleId);
               if (newRole) {
                 this.selectedRoleId.set(newRole.id);
@@ -379,12 +383,14 @@ export class PermissionsPage {
   }
 
   /**
-   * Switch to a tab. Loads entity actions if switching to actions tab.
+   * Switch to a tab. Loads entity actions or delegation data as needed.
    */
   switchTab(tab: PermissionTab) {
     this.activeTab.set(tab);
     if (tab === 'actions') {
       this.loadEntityActionPermissions();
+    } else if (tab === 'delegation') {
+      this.loadDelegationMatrix();
     }
   }
 
@@ -412,6 +418,122 @@ export class PermissionsPage {
       },
       error: (err) => {
         console.error('Failed to update entity action permission:', err);
+      }
+    });
+  }
+
+  // =========================================================================
+  // ROLE DELEGATION (v0.31.0)
+  // =========================================================================
+
+  delegationLoading = signal(false);
+  delegationManagedIds = signal<Set<number>>(new Set());
+
+  /** Roles eligible for delegation (excludes 'anonymous' — framework-only permission role). */
+  delegationRoles = computed(() => this.roles().filter(r => r.display_name !== 'anonymous'));
+
+  // Delete role state
+  showDeleteModal = signal(false);
+  deleteLoading = signal(false);
+
+  loadDelegationMatrix() {
+    const roleId = this.selectedRoleId();
+    if (roleId === undefined) return;
+
+    this.delegationLoading.set(true);
+
+    this.permissionsService.getRoleCanManage(roleId).pipe(take(1)).subscribe({
+      next: (delegations) => {
+        this.delegationManagedIds.set(new Set(delegations.map(d => d.managed_role_id)));
+        this.delegationLoading.set(false);
+      },
+      error: () => {
+        this.delegationLoading.set(false);
+      }
+    });
+  }
+
+  isDelegated(managedRoleId: number): boolean {
+    return this.delegationManagedIds().has(managedRoleId);
+  }
+
+  toggleDelegation(managedRoleId: number) {
+    const managerRoleId = this.selectedRoleId();
+    if (managerRoleId === undefined) return;
+
+    const currentlyEnabled = this.isDelegated(managedRoleId);
+    const newValue = !currentlyEnabled;
+
+    this.permissionsService.setRoleCanManage(managerRoleId, managedRoleId, newValue).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.delegationManagedIds.update(ids => {
+            const updated = new Set(ids);
+            if (newValue) {
+              updated.add(managedRoleId);
+            } else {
+              updated.delete(managedRoleId);
+            }
+            return updated;
+          });
+        } else {
+          console.error('Failed to update delegation:', response.error);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to update delegation:', err);
+      }
+    });
+  }
+
+  openDeleteRoleModal() {
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteRoleModal() {
+    this.showDeleteModal.set(false);
+  }
+
+  submitDeleteRole() {
+    const roleId = this.selectedRoleId();
+    if (roleId === undefined) return;
+
+    const roleName = this.roles().find(r => r.id === roleId)?.display_name;
+
+    this.deleteLoading.set(true);
+
+    this.permissionsService.deleteRole(roleId).subscribe({
+      next: (response) => {
+        this.deleteLoading.set(false);
+        if (response.success) {
+          this.showDeleteModal.set(false);
+          this.successMessage.set(`Role '${roleName}' deleted successfully.`);
+          this.newlyCreatedRoleName.set(undefined);
+          // Reload roles — select first available
+          this.permissionsService.getRoles().subscribe({
+            next: (roles) => {
+              this.roles.set(roles);
+              if (roles.length > 0) {
+                this.selectedRoleId.set(roles[0].id);
+                this.selectedRoleIdSubject.next(roles[0].id);
+                // Reload tab-specific data for new selected role
+                if (this.activeTab() === 'delegation') {
+                  this.loadDelegationMatrix();
+                } else if (this.activeTab() === 'actions') {
+                  this.loadEntityActionPermissions();
+                }
+              }
+            }
+          });
+        } else {
+          this.showDeleteModal.set(false);
+          this.successMessage.set(undefined);
+          // Use the error signal from the parent scope
+          console.error('Failed to delete role:', response.error);
+        }
+      },
+      error: () => {
+        this.deleteLoading.set(false);
       }
     });
   }

@@ -115,6 +115,43 @@ The PostgreSQL `get_user_roles()` function cannot extract roles from the JWT cla
 3. Test PostgREST directly: `curl http://localhost:3000/`
 4. Verify JWT token in Network tab (should be in Authorization header)
 
+## User Provisioning Issues (v0.31.0+)
+
+### Problem: User provisioning stuck on "processing" or "pending"
+
+**Possible Causes:**
+- Consolidated worker not running or not connected to Keycloak
+- Keycloak service account misconfigured (missing `manage-users` role)
+- Worker environment variables not set
+
+**Debug Steps:**
+1. Check worker is running: `docker-compose ps consolidated-worker`
+2. Check worker logs: `docker-compose logs consolidated-worker | grep -i "provision\|keycloak"`
+3. Check job queue: `SELECT kind, state, errors FROM metadata.river_job WHERE kind = 'provision_keycloak_user' ORDER BY id DESC LIMIT 5;`
+4. Verify service account credentials: `docker-compose exec consolidated-worker env | grep KEYCLOAK`
+
+### Problem: User provisioning fails with "role not found" error
+
+**Cause:** The `initial_roles` array contains a role name that doesn't exist in `metadata.roles`.
+
+**Fix:** Verify role names match exactly: `SELECT display_name FROM metadata.roles ORDER BY 1;`
+
+### Problem: Role changes not syncing to Keycloak
+
+**Possible Causes:**
+- `sync_keycloak_role` jobs failing in the worker
+- Service account lacks `manage-realm` permission in Keycloak
+
+**Debug Steps:**
+1. Check role sync jobs: `SELECT kind, args, state, errors FROM metadata.river_job WHERE kind = 'sync_keycloak_role' ORDER BY id DESC LIMIT 5;`
+2. Verify service account roles in Keycloak admin console: Clients → civic-os-service-account → Service account roles → should have `manage-users`, `view-users`, `view-realm`, `manage-realm`
+
+### Problem: "Your role cannot assign the X role" error
+
+**Cause:** Role delegation rules prevent the current user from assigning the requested role. Only admins can assign any role; other roles are limited by the `metadata.role_can_manage` delegation matrix.
+
+**Fix:** An admin must configure delegation on the Permissions page → Role Delegation tab to allow the user's role to manage the target role.
+
 ## Keycloak Configuration Issues
 
 ### Problem: Roles not appearing in JWT

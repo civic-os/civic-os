@@ -49,6 +49,11 @@ export interface EntityActionPermission {
   has_permission: boolean;
 }
 
+export interface RoleDelegation {
+  managed_role_id: number;
+  managed_role_name: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -231,6 +236,72 @@ export class PermissionsService {
         return of(<ApiResponse>{
           success: false,
           error: { message: error.message, humanMessage: enabled ? 'Failed to grant permission' : 'Failed to revoke permission' }
+        });
+      })
+    );
+  }
+
+  // =========================================================================
+  // ROLE DELEGATION (v0.31.0)
+  // =========================================================================
+
+  getRoleCanManage(roleId: number): Observable<RoleDelegation[]> {
+    return this.http.post<RoleDelegation[]>(
+      getPostgrestUrl() + 'rpc/get_role_can_manage',
+      { p_manager_role_id: roleId }
+    ).pipe(
+      catchError((error) => {
+        console.error('Error fetching role delegation:', error);
+        return of([]);
+      })
+    );
+  }
+
+  setRoleCanManage(managerRoleId: number, managedRoleId: number, enabled: boolean): Observable<ApiResponse> {
+    return this.http.post<any>(
+      getPostgrestUrl() + 'rpc/set_role_can_manage',
+      {
+        p_manager_role_id: managerRoleId,
+        p_managed_role_id: managedRoleId,
+        p_enabled: enabled
+      }
+    ).pipe(
+      map((response) => {
+        if (response?.success === false) {
+          return <ApiResponse>{
+            success: false,
+            error: { message: response.error, humanMessage: response.error }
+          };
+        }
+        return <ApiResponse>{ success: true };
+      }),
+      catchError((error) => {
+        return of(<ApiResponse>{
+          success: false,
+          error: { message: error.message, humanMessage: 'Failed to update role delegation' }
+        });
+      })
+    );
+  }
+
+  deleteRole(roleId: number): Observable<ApiResponse> {
+    return this.http.post<any>(
+      getPostgrestUrl() + 'rpc/delete_role',
+      { p_role_id: roleId }
+    ).pipe(
+      map((response) => {
+        if (response?.success === false) {
+          return <ApiResponse>{
+            success: false,
+            error: { message: response.error, humanMessage: response.error }
+          };
+        }
+        return <ApiResponse>{ success: true };
+      }),
+      catchError((error) => {
+        return of(<ApiResponse>{
+          success: false,
+          error: { message: error.message, humanMessage: 'Failed to delete role' }
         });
       })
     );

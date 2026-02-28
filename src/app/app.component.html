@@ -190,6 +190,17 @@
                 </a>
               </li>
             }
+            <!-- User Management (shown to users with civic_os_users_private permissions) -->
+            @if (hasUserManagementPermission()) {
+              <li (click)="navigateToUserManagement()">
+                <a [class.menu-active]="isRouteActive('/admin/users')"
+                   [class.font-bold]="isRouteActive('/admin/users')"
+                   [class.opacity-85]="!isRouteActive('/admin/users')">
+                  <span class="material-symbols-outlined" aria-hidden="true">group</span>
+                  Users
+                </a>
+              </li>
+            }
             <!-- Feature-specific items (shown based on entity config + user permissions) -->
             @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
               <li (click)="navigateToRecurringSchedules()">

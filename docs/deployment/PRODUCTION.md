@@ -263,6 +263,13 @@ PROCESSING_FEE_FLAT_CENTS=30  # Flat fee in cents (e.g., 30 for $0.30)
 PROCESSING_FEE_REFUNDABLE=false  # false = fee kept on refund, true = fee refundable
 
 # ======================================
+# Keycloak Service Account (v0.31.0+)
+# Required for user provisioning and role sync features
+# ======================================
+KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID=civic-os-service-account
+KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET=CHANGEME_SERVICE_SECRET  # From Keycloak client credentials
+
+# ======================================
 # Container Registry
 # ======================================
 GITHUB_ORG=your-github-org
