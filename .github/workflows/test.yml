@@ -183,6 +183,7 @@ jobs:
 
           -- Grant database and schema access
           GRANT ALL ON DATABASE civic_os_test TO doadmin;
+          ALTER DATABASE civic_os_test OWNER TO doadmin;
           GRANT ALL ON SCHEMA public TO doadmin;
 
           -- Create authenticator role (doadmin CAN create roles)
