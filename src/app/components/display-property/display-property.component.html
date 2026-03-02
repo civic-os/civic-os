@@ -184,9 +184,21 @@
     }
     @if (propType() == EntityPropertyType.File) {
       <div class="flex items-center gap-2">
-        <div class="w-12 h-12 flex items-center justify-center bg-base-200 rounded">
-          <span class="text-2xl">📎</span>
-        </div>
+        @if (datum()?.thumbnail_status === 'completed' && datum()?.s3_thumbnail_medium_key) {
+          <img
+            [src]="getS3Url(datum().s3_thumbnail_medium_key)"
+            [alt]="datum().file_name"
+            class="not-prose w-24 h-32 object-contain rounded border"
+          />
+        } @else if (datum()?.thumbnail_status === 'pending' || datum()?.thumbnail_status === 'processing') {
+          <div class="w-12 h-12 flex items-center justify-center bg-base-200 rounded">
+            <span class="loading loading-spinner"></span>
+          </div>
+        } @else {
+          <div class="w-12 h-12 flex items-center justify-center bg-base-200 rounded">
+            <span class="text-2xl">📎</span>
+          </div>
+        }
         <div class="flex flex-col">
           <a
             [href]="getS3Url(datum()?.s3_original_key)"

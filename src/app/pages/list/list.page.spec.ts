@@ -181,7 +181,7 @@ describe('ListPage', () => {
       setTimeout(() => {
         expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
           key: 'Issue',
-          fields: ['name', 'status_id:Status(id,display_name)'],
+          fields: ['name', 'status_id:Status!status_id(id,display_name)'],
           searchQuery: undefined,
           orderField: undefined,
           orderDirection: undefined,
@@ -293,7 +293,7 @@ describe('ListPage', () => {
         expect(callArgs.fields).toContain('name'); // TextShort
         expect(callArgs.fields).toContain('count'); // Integer
         expect(callArgs.fields).toContain('is_active'); // Boolean
-        expect(callArgs.fields).toContain('status_id:Status(id,display_name)'); // ForeignKey
+        expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)'); // ForeignKey
         expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)'); // User
         expect(callArgs.fields).toContain('location:location_text'); // GeoPoint
         done();

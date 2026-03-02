@@ -27,9 +27,10 @@ import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
+import { FileUploadService } from '../../services/file-upload.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
-import { EntityPropertyType } from '../../interfaces/entity';
+import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
 
 describe('DetailPage', () => {
   let component: DetailPage;
@@ -39,6 +40,7 @@ describe('DetailPage', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRecurringService: jasmine.SpyObj<RecurringService>;
   let mockNavigationService: jasmine.SpyObj<NavigationService>;
+  let mockFileUploadService: jasmine.SpyObj<FileUploadService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -52,7 +54,7 @@ describe('DetailPage', () => {
       'getEntities',
       'getEntityActions'
     ]);
-    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData']);
+    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData', 'executeRpc']);
     mockAuthService = jasmine.createSpyObj('AuthService', ['login', 'isAdmin'], {
       authenticated: signal(false)
     });
@@ -64,9 +66,14 @@ describe('DetailPage', () => {
       'deleteSeriesGroup'
     ]);
     mockNavigationService = jasmine.createSpyObj('NavigationService', ['goBack']);
+    mockFileUploadService = jasmine.createSpyObj('FileUploadService', ['validateFile', 'uploadFile']);
+    mockFileUploadService.validateFile.and.returnValue(null);
 
     // Default mock for series membership - not a member
     mockRecurringService.getSeriesMembership.and.returnValue(of({ is_member: false }));
+
+    // Default mock for getEntity to prevent afterAll stream errors during teardown
+    mockSchemaService.getEntity.and.returnValue(of(undefined));
 
     // Default mocks for inverse relationships
     mockSchemaService.getInverseRelationships.and.returnValue(of([]));
@@ -91,7 +98,8 @@ describe('DetailPage', () => {
         { provide: DataService, useValue: mockDataService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: RecurringService, useValue: mockRecurringService },
-        { provide: NavigationService, useValue: mockNavigationService }
+        { provide: NavigationService, useValue: mockNavigationService },
+        { provide: FileUploadService, useValue: mockFileUploadService }
       ]
     })
     .compileComponents();
@@ -193,7 +201,7 @@ describe('DetailPage', () => {
       component.data$.subscribe(data => {
         expect(mockDataService.getData).toHaveBeenCalledWith({
           key: 'Issue',
-          fields: ['name', 'status_id:Status(id,display_name)'],
+          fields: ['name', 'status_id:Status!status_id(id,display_name)'],
           entityId: '42'
         });
         done();
@@ -354,6 +362,342 @@ describe('DetailPage', () => {
     });
   });
 
+  describe('Entity Action Parameters (v0.32.0)', () => {
+    function createMockAction(overrides?: Partial<EntityAction>): EntityAction {
+      return {
+        id: 1,
+        table_name: 'test_entity',
+        action_name: 'test_action',
+        display_name: 'Test Action',
+        rpc_function: 'test_rpc',
+        button_style: 'primary',
+        sort_order: 10,
+        requires_confirmation: true,
+        confirmation_message: 'Are you sure?',
+        refresh_after_action: true,
+        show_on_detail: true,
+        can_execute: true,
+        parameters: [],
+        ...overrides
+      };
+    }
+
+    function createMockParam(overrides?: Partial<EntityActionParam>): EntityActionParam {
+      return {
+        id: 1,
+        param_name: 'p_reason',
+        display_name: 'Reason',
+        param_type: 'text',
+        required: false,
+        sort_order: 10,
+        ...overrides
+      };
+    }
+
+    it('should build form from action parameters', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_reason', display_name: 'Reason', param_type: 'text' }),
+        createMockParam({ id: 2, param_name: 'p_amount', display_name: 'Amount', param_type: 'number', sort_order: 20 })
+      ];
+
+      component.buildActionParamForm(params);
+
+      const form = component.actionParamForm();
+      expect(form).toBeTruthy();
+      expect(form!.get('p_reason')).toBeTruthy();
+      expect(form!.get('p_amount')).toBeTruthy();
+    });
+
+    it('should apply required validator for required params', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_notes', required: true })
+      ];
+
+      component.buildActionParamForm(params);
+
+      const form = component.actionParamForm()!;
+      const control = form.get('p_notes');
+      expect(control).toBeTruthy();
+      expect(control!.valid).toBeFalse(); // Empty required field is invalid
+      control!.setValue('Some notes');
+      expect(control!.valid).toBeTrue();
+    });
+
+    it('should show modal when action has parameters even without requires_confirmation', () => {
+      const action = createMockAction({
+        requires_confirmation: false,
+        parameters: [createMockParam()]
+      });
+
+      component.onEntityActionClick(action);
+
+      expect(component.showActionModal()).toBeTrue();
+      expect(component.actionParamForm()).toBeTruthy();
+    });
+
+    it('should not build param form for actions without parameters', () => {
+      const action = createMockAction({
+        requires_confirmation: true,
+        parameters: []
+      });
+
+      component.onEntityActionClick(action);
+
+      expect(component.showActionModal()).toBeTrue();
+      expect(component.actionParamForm()).toBeUndefined();
+    });
+
+    it('should disable confirm when required param is empty', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_notes', required: true })
+      ];
+
+      component.buildActionParamForm(params);
+
+      const form = component.actionParamForm()!;
+      expect(form.invalid).toBeTrue(); // Required field empty
+    });
+
+    it('should pass param values to executeRpc', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_response_notes', param_type: 'text' })
+      ];
+      const action = createMockAction({
+        rpc_function: 'deny_time_off',
+        parameters: params
+      });
+
+      component.entityId = '42';
+      mockDataService.executeRpc.and.returnValue(of({
+        success: true,
+        body: { success: true, message: 'Denied.', refresh: true }
+      }));
+
+      // Build form and set value
+      component.buildActionParamForm(params);
+      component.actionParamForm()!.get('p_response_notes')!.setValue('Schedule conflict');
+      component.currentAction.set(action);
+
+      component.confirmEntityAction();
+
+      expect(mockDataService.executeRpc).toHaveBeenCalledWith('deny_time_off', {
+        p_entity_id: '42',
+        p_response_notes: 'Schedule conflict'
+      });
+    });
+
+    it('should handle actions with no params same as before', () => {
+      const action = createMockAction({
+        requires_confirmation: false,
+        parameters: []
+      });
+
+      component.entityId = '42';
+      mockDataService.executeRpc.and.returnValue(of({
+        success: true,
+        body: { success: true, message: 'Done.', refresh: true }
+      }));
+
+      component.onEntityActionClick(action);
+
+      // Should execute immediately (no modal) with only p_entity_id
+      expect(component.showActionModal()).toBeFalse();
+      expect(mockDataService.executeRpc).toHaveBeenCalledWith('test_rpc', {
+        p_entity_id: '42'
+      });
+    });
+
+    it('should set boolean default to false when not provided', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_flag', param_type: 'boolean' })
+      ];
+
+      component.buildActionParamForm(params);
+
+      const form = component.actionParamForm()!;
+      expect(form.get('p_flag')!.value).toBeFalse();
+    });
+
+    it('should cast number default_value correctly', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_amount', param_type: 'number', default_value: '42.5' })
+      ];
+
+      component.buildActionParamForm(params);
+
+      const form = component.actionParamForm()!;
+      expect(form.get('p_amount')!.value).toBe(42.5);
+    });
+
+    it('should reset param form when modal is closed', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_notes' })
+      ];
+      const action = createMockAction({ parameters: params });
+
+      component.onEntityActionClick(action);
+      expect(component.actionParamForm()).toBeTruthy();
+
+      component.closeActionModal();
+      expect(component.actionParamForm()).toBeUndefined();
+      expect(component.actionParamOptions()).toEqual({});
+    });
+
+    it('should not submit when required param form is invalid', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_notes', required: true })
+      ];
+      const action = createMockAction({ parameters: params });
+
+      component.buildActionParamForm(params);
+      component.currentAction.set(action);
+
+      // Don't fill the required field
+      component.confirmEntityAction();
+
+      // executeRpc should NOT have been called
+      expect(mockDataService.executeRpc).not.toHaveBeenCalled();
+    });
+
+    it('should return correct accept string for file param types', () => {
+      expect(component.getFileAcceptForParam(
+        createMockParam({ param_type: 'file', file_type: 'image' })
+      )).toBe('image/*');
+      expect(component.getFileAcceptForParam(
+        createMockParam({ param_type: 'file', file_type: 'pdf' })
+      )).toBe('application/pdf');
+      expect(component.getFileAcceptForParam(
+        createMockParam({ param_type: 'file', file_type: 'any' })
+      )).toBe('*/*');
+      expect(component.getFileAcceptForParam(
+        createMockParam({ param_type: 'file' })
+      )).toBe('*/*');
+      expect(component.getFileAcceptForParam(undefined)).toBe('*/*');
+    });
+
+    it('should set file UUID in form control after successful upload', async () => {
+      const fileRef = { id: 'file-uuid-123', file_name: 'test.pdf' } as any;
+      mockFileUploadService.uploadFile.and.returnValue(Promise.resolve(fileRef));
+
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_document_file', param_type: 'file', file_type: 'any' })
+      ];
+      const action = createMockAction({ parameters: params });
+
+      component.entityKey = 'staff_documents';
+      component.entityId = '42';
+      component.currentAction.set(action);
+      component.buildActionParamForm(params);
+
+      // Simulate file selection
+      const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+      const mockEvent = { target: { files: [mockFile], value: '' } } as any;
+
+      component.onActionFileSelected(mockEvent, 'p_document_file');
+
+      // Wait for async upload promise + then/finally microtasks to settle
+      await mockFileUploadService.uploadFile.calls.mostRecent().returnValue;
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(component.actionParamForm()!.get('p_document_file')!.value).toBe('file-uuid-123');
+      expect(component.actionUploadedFile()['p_document_file'].file_name).toBe('test.pdf');
+      expect(component.actionFileUploading()).toBeFalse();
+    });
+
+    it('should show upload error on failed upload', async () => {
+      mockFileUploadService.uploadFile.and.returnValue(Promise.reject(new Error('Network error')));
+
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_file', param_type: 'file' })
+      ];
+      const action = createMockAction({ parameters: params });
+
+      component.entityKey = 'test_entity';
+      component.entityId = '1';
+      component.currentAction.set(action);
+      component.buildActionParamForm(params);
+
+      const mockFile = new File(['x'], 'bad.txt', { type: 'text/plain' });
+      const mockEvent = { target: { files: [mockFile], value: '' } } as any;
+
+      component.onActionFileSelected(mockEvent, 'p_file');
+
+      // Wait for the rejected promise to settle
+      try {
+        await mockFileUploadService.uploadFile.calls.mostRecent().returnValue;
+      } catch {
+        // Expected
+      }
+      // Allow microtasks (finally block) to execute
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(component.actionUploadError()).toBe('Network error');
+      expect(component.actionFileUploading()).toBeFalse();
+    });
+
+    it('should show validation error for invalid file type', () => {
+      mockFileUploadService.validateFile.and.returnValue('File type text/plain is not allowed');
+
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_file', param_type: 'file', file_type: 'image' })
+      ];
+      const action = createMockAction({ parameters: params });
+
+      component.entityKey = 'test_entity';
+      component.entityId = '1';
+      component.currentAction.set(action);
+      component.buildActionParamForm(params);
+
+      const mockFile = new File(['x'], 'doc.txt', { type: 'text/plain' });
+      const mockEvent = { target: { files: [mockFile], value: '' } } as any;
+
+      component.onActionFileSelected(mockEvent, 'p_file');
+
+      expect(component.actionUploadError()).toBe('File type text/plain is not allowed');
+      expect(mockFileUploadService.uploadFile).not.toHaveBeenCalled();
+    });
+
+    it('should reset file upload state when modal is closed', () => {
+      component.actionUploadedFile.set({ p_file: { file_name: 'test.pdf' } as any });
+      component.actionUploadError.set('some error');
+      component.actionFileUploading.set(true);
+
+      component.closeActionModal();
+
+      expect(component.actionUploadedFile()).toEqual({});
+      expect(component.actionUploadError()).toBeUndefined();
+      expect(component.actionFileUploading()).toBeFalse();
+    });
+
+    it('should pass uploaded file UUID to executeRpc via confirmEntityAction', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_document_file', param_type: 'file', required: true })
+      ];
+      const action = createMockAction({
+        rpc_function: 'submit_staff_document',
+        parameters: params
+      });
+
+      component.entityId = '42';
+      mockDataService.executeRpc.and.returnValue(of({
+        success: true,
+        body: { success: true, message: 'Submitted.', refresh: true }
+      }));
+
+      component.buildActionParamForm(params);
+      // Simulate that file was already uploaded and UUID stored in form
+      component.actionParamForm()!.get('p_document_file')!.setValue('file-uuid-456');
+      component.currentAction.set(action);
+
+      component.confirmEntityAction();
+
+      expect(mockDataService.executeRpc).toHaveBeenCalledWith('submit_staff_document', {
+        p_entity_id: '42',
+        p_document_file: 'file-uuid-456'
+      });
+    });
+  });
+
   describe('Data Flow with Complex Property Types', () => {
     it('should handle all property types in detail view', (done) => {
       const mockProps = [
@@ -382,7 +726,7 @@ describe('DetailPage', () => {
         expect(callArgs.fields).toContain('amount');
         expect(callArgs.fields).toContain('due_date');
         expect(callArgs.fields).toContain('created_at');
-        expect(callArgs.fields).toContain('status_id:Status(id,display_name)');
+        expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)');
         expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)');
         expect(callArgs.fields).toContain('location:location_text');
         done();

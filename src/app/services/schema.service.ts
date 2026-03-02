@@ -468,7 +468,7 @@ export class SchemaService {
 
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
     return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
-      (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '(' + prop.join_column + ',display_name)' :
+      (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + prop.join_column + ',display_name)' :
       (prop.type == EntityPropertyType.GeoPoint) ? prop.column_name + ':' + prop.column_name + '_text' :
       prop.column_name;
   }

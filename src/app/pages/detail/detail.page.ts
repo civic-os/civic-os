@@ -18,7 +18,8 @@
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap } from 'rxjs';
+import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin } from 'rxjs';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
@@ -31,12 +32,15 @@ import {
   isProperty,
   EntityAction,
   EntityActionResult,
+  EntityActionParam,
+  FileReference,
   SeriesMembership,
   SeriesEditScope
 } from '../../interfaces/entity';
-import { evaluateCondition } from '../../utils/condition-evaluator';
+import { evaluateCondition, extractConditionFieldNames } from '../../utils/condition-evaluator';
 import { ActionBarComponent, ActionButton } from '../../components/action-bar/action-bar.component';
 import { RecurringService } from '../../services/recurring.service';
+import { FileUploadService } from '../../services/file-upload.service';
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 
 /**
@@ -82,6 +86,7 @@ export interface CalendarSection {
   imports: [
     CommonModule,
     RouterModule,
+    ReactiveFormsModule,
     DisplayPropertyComponent,
     ManyToManyEditorComponent,
     EmptyStateComponent,
@@ -100,6 +105,7 @@ export class DetailPage {
   private schema = inject(SchemaService);
   private data = inject(DataService);
   private recurringService = inject(RecurringService);
+  private fileUpload = inject(FileUploadService);
   private navigation = inject(NavigationService);
   public auth = inject(AuthService);
 
@@ -129,6 +135,13 @@ export class DetailPage {
   actionOverlayLoading = signal(false);  // For non-confirmation actions
   actionError = signal<string | undefined>(undefined);
   actionSuccess = signal<string | undefined>(undefined);
+
+  // Action parameter state (v0.32.0)
+  actionParamForm = signal<FormGroup | undefined>(undefined);
+  actionParamOptions = signal<Record<string, any[]>>({});
+  actionFileUploading = signal(false);
+  actionUploadedFile = signal<Record<string, FileReference>>({});
+  actionUploadError = signal<string | undefined>(undefined);
 
   // Data loading state
   dataLoading = signal(true);
@@ -203,11 +216,11 @@ export class DetailPage {
   private extractConditionFields(actions: EntityAction[]): string[] {
     const fields = new Set<string>();
     for (const action of actions) {
-      if (action.visibility_condition?.field) {
-        fields.add(action.visibility_condition.field);
+      for (const f of extractConditionFieldNames(action.visibility_condition)) {
+        fields.add(f);
       }
-      if (action.enabled_condition?.field) {
-        fields.add(action.enabled_condition.field);
+      for (const f of extractConditionFieldNames(action.enabled_condition)) {
+        fields.add(f);
       }
     }
     return Array.from(fields);
@@ -972,14 +985,24 @@ export class DetailPage {
 
   /**
    * Handle entity action button click.
-   * Shows confirmation modal if required, otherwise executes immediately with overlay.
+   * Shows confirmation modal if:
+   * - action has parameters (form needed), or
+   * - action requires_confirmation
+   * Otherwise executes immediately with loading overlay.
    */
   onEntityActionClick(action: EntityAction): void {
     this.currentAction.set(action);
     this.actionError.set(undefined);
     this.actionSuccess.set(undefined);
 
-    if (action.requires_confirmation) {
+    const hasParams = action.parameters && action.parameters.length > 0;
+
+    if (hasParams || action.requires_confirmation) {
+      // Build param form if action has parameters
+      if (hasParams) {
+        this.buildActionParamForm(action.parameters);
+        this.loadParamOptions(action.parameters);
+      }
       this.showActionModal.set(true);
     } else {
       // Show loading overlay and execute immediately
@@ -990,31 +1013,52 @@ export class DetailPage {
 
   /**
    * Confirm action from modal.
+   * Validates param form if present, then collects values and executes.
    */
   confirmEntityAction(): void {
     const action = this.currentAction();
     if (!action) return;
 
+    // Validate param form if present
+    const form = this.actionParamForm();
+    if (form) {
+      if (form.invalid) {
+        form.markAllAsTouched();
+        return;
+      }
+    }
+
     this.actionLoading.set(true);
-    this.executeEntityAction(action);
+
+    // Collect param values from form
+    const additionalParams = form ? this.collectParamValues(action.parameters, form) : {};
+    this.executeEntityAction(action, additionalParams);
   }
 
   /**
-   * Close action modal and reset state.
+   * Close action modal and reset state (including param form).
    */
   closeActionModal(): void {
     this.showActionModal.set(false);
     this.currentAction.set(undefined);
     this.actionError.set(undefined);
     this.actionSuccess.set(undefined);
+    this.actionParamForm.set(undefined);
+    this.actionParamOptions.set({});
+    this.actionFileUploading.set(false);
+    this.actionUploadedFile.set({});
+    this.actionUploadError.set(undefined);
   }
 
   /**
    * Execute the entity action RPC.
    * Handles response processing, success messages, navigation, and data refresh.
+   *
+   * @param action - The action to execute
+   * @param additionalParams - Optional param values from the action param form (v0.32.0)
    */
-  private executeEntityAction(action: EntityAction): void {
-    this.data.executeRpc(action.rpc_function, { p_entity_id: this.entityId }).subscribe({
+  private executeEntityAction(action: EntityAction, additionalParams: Record<string, any> = {}): void {
+    this.data.executeRpc(action.rpc_function, { p_entity_id: this.entityId, ...additionalParams }).subscribe({
       next: (response) => {
         this.actionLoading.set(false);
         this.actionOverlayLoading.set(false);
@@ -1051,5 +1095,197 @@ export class DetailPage {
         this.actionError.set('An unexpected error occurred');
       }
     });
+  }
+
+  // =========================================================================
+  // ACTION PARAMETER HELPERS (v0.32.0)
+  // =========================================================================
+
+  /**
+   * Build a FormGroup from action parameter definitions.
+   * Creates a FormControl for each param with appropriate validators and defaults.
+   */
+  buildActionParamForm(params: EntityActionParam[]): void {
+    const controls: Record<string, FormControl> = {};
+
+    for (const param of params) {
+      const validators = param.required ? [Validators.required] : [];
+      let defaultValue: any = param.default_value ?? null;
+
+      // Cast default value based on param_type
+      if (defaultValue !== null) {
+        switch (param.param_type) {
+          case 'number':
+          case 'money':
+            defaultValue = parseFloat(defaultValue);
+            if (isNaN(defaultValue)) defaultValue = null;
+            break;
+          case 'boolean':
+            defaultValue = defaultValue === 'true' || defaultValue === '1';
+            break;
+        }
+      }
+
+      // Boolean defaults to false if no default provided
+      if (param.param_type === 'boolean' && defaultValue === null) {
+        defaultValue = false;
+      }
+
+      controls[param.param_name] = new FormControl(defaultValue, validators);
+    }
+
+    this.actionParamForm.set(new FormGroup(controls));
+  }
+
+  /**
+   * Load dropdown options for status, foreign_key, and user param types.
+   */
+  loadParamOptions(params: EntityActionParam[]): void {
+    const optionsToLoad: Record<string, Observable<any[]>> = {};
+
+    for (const param of params) {
+      if (param.param_type === 'status' && param.status_entity_type) {
+        optionsToLoad[param.param_name] = this.data.getData({
+          key: 'statuses',
+          fields: ['id', 'display_name'],
+          filters: [{ column: 'entity_type', operator: 'eq', value: param.status_entity_type }],
+          orderField: 'sort_order',
+          orderDirection: 'asc'
+        });
+      } else if (param.param_type === 'foreign_key' && param.join_table && param.join_column) {
+        optionsToLoad[param.param_name] = this.data.getData({
+          key: param.join_table,
+          fields: ['id', param.join_column],
+          orderField: param.join_column,
+          orderDirection: 'asc'
+        });
+      } else if (param.param_type === 'user') {
+        optionsToLoad[param.param_name] = this.data.getData({
+          key: 'civic_os_users',
+          fields: ['id', 'display_name'],
+          orderField: 'display_name',
+          orderDirection: 'asc'
+        });
+      }
+    }
+
+    if (Object.keys(optionsToLoad).length === 0) return;
+
+    // Load all options in parallel
+    forkJoin(optionsToLoad).subscribe({
+      next: (results) => {
+        this.actionParamOptions.set(results);
+      },
+      error: (err) => {
+        console.error('[DetailPage] Failed to load param options', err);
+      }
+    });
+  }
+
+  /**
+   * Collect form values from the param form, applying type-appropriate transformations.
+   */
+  private collectParamValues(params: EntityActionParam[], form: FormGroup): Record<string, any> {
+    const values: Record<string, any> = {};
+
+    for (const param of params) {
+      let value = form.get(param.param_name)?.value;
+
+      // Skip null/undefined/empty values for optional params
+      if (value === null || value === undefined || value === '') {
+        if (!param.required) continue;
+      }
+
+      // Type-specific transformations
+      switch (param.param_type) {
+        case 'number':
+          value = value !== null && value !== '' ? Number(value) : null;
+          break;
+        case 'money':
+          value = value !== null && value !== '' ? Number(value) : null;
+          break;
+        case 'boolean':
+          value = !!value;
+          break;
+        case 'datetime_local':
+          // Convert local datetime to UTC ISO string (same pattern as EditPage)
+          if (value) {
+            const localDate = new Date(value);
+            value = localDate.toISOString();
+          }
+          break;
+      }
+
+      values[param.param_name] = value;
+    }
+
+    return values;
+  }
+
+  /**
+   * Handle file selection for a file-type action parameter.
+   * Validates the file, uploads via FileUploadService, and stores the
+   * resulting file UUID in the param's form control for RPC submission.
+   */
+  onActionFileSelected(event: Event, paramName: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // Determine allowed types from param's file_type
+    const param = this.currentAction()?.parameters?.find(p => p.param_name === paramName);
+    const allowedTypes = this.getFileAcceptForParam(param);
+
+    // Validate file (skip type check for '*/*')
+    const typeFilter = allowedTypes !== '*/*' ? allowedTypes : undefined;
+    const validationError = this.fileUpload.validateFile(file, typeFilter, 10 * 1024 * 1024);
+    if (validationError) {
+      this.actionUploadError.set(validationError);
+      input.value = '';
+      return;
+    }
+
+    this.actionFileUploading.set(true);
+    this.actionUploadError.set(undefined);
+
+    this.fileUpload.uploadFile(file, this.entityKey!, this.entityId!, false)
+      .then(fileRef => {
+        // Store UUID in form control for RPC submission
+        this.actionParamForm()?.get(paramName)?.setValue(fileRef.id);
+        // Track uploaded file info for display
+        this.actionUploadedFile.set({
+          ...this.actionUploadedFile(),
+          [paramName]: fileRef
+        });
+      })
+      .catch(err => {
+        this.actionUploadError.set(err.message || 'File upload failed');
+      })
+      .finally(() => {
+        this.actionFileUploading.set(false);
+        input.value = '';
+      });
+  }
+
+  /**
+   * Get the HTML accept attribute value for a file-type action parameter.
+   */
+  getFileAcceptForParam(param?: EntityActionParam): string {
+    if (!param) return '*/*';
+    switch (param.file_type) {
+      case 'image': return 'image/*';
+      case 'pdf': return 'application/pdf';
+      default: return '*/*';
+    }
+  }
+
+  /**
+   * Get display column name for a foreign_key param's options.
+   */
+  getParamDisplayColumn(param: EntityActionParam): string {
+    if (param.param_type === 'foreign_key' && param.join_column) {
+      return param.join_column;
+    }
+    return 'display_name';
   }
 }

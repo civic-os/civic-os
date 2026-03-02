@@ -449,7 +449,8 @@ export function isProperty(item: RenderableItem): item is PropertyItem {
  * { field: 'status_id', operator: 'in', value: [1, 2] }
  * ```
  */
-export interface ActionCondition {
+/** Simple field-level condition */
+export interface SimpleCondition {
     /** Field name to evaluate from the record data */
     field: string;
     /** Comparison operator */
@@ -457,6 +458,19 @@ export interface ActionCondition {
     /** Value to compare against (not used for is_null/is_not_null) */
     value?: any;
 }
+
+/** Compound condition with logical OR */
+export interface OrCondition {
+    or: ActionCondition[];
+}
+
+/** Compound condition with logical AND */
+export interface AndCondition {
+    and: ActionCondition[];
+}
+
+/** Condition that can be simple or compound (or/and) */
+export type ActionCondition = SimpleCondition | OrCondition | AndCondition;
 
 /**
  * Entity action configuration from metadata.entity_actions table.
@@ -521,6 +535,67 @@ export interface EntityAction {
 
     /** Whether current user can execute this action (from view) */
     can_execute: boolean;
+
+    /** Parameters for this action (v0.32.0) - rendered as form fields in modal */
+    parameters: EntityActionParam[];
+}
+
+/**
+ * Supported parameter types for entity action params.
+ * Mirrors EntityPropertyType where applicable.
+ *
+ * MAINTENANCE NOTE: When adding a new EntityPropertyType, check if it
+ * should also be added here as an ActionParamType.
+ */
+export type ActionParamType =
+    | 'text' | 'text_short' | 'number' | 'boolean'
+    | 'money' | 'date' | 'datetime' | 'datetime_local'
+    | 'color' | 'email' | 'telephone'
+    | 'status' | 'foreign_key' | 'user' | 'file'
+    | 'geo_point' | 'time_slot';
+
+/**
+ * Parameter definition for an entity action.
+ * Rendered as a form field in the action confirmation modal.
+ *
+ * Added in v0.32.0.
+ */
+export interface EntityActionParam {
+    /** Primary key */
+    id: number;
+
+    /** RPC parameter name (e.g., 'p_reason') */
+    param_name: string;
+
+    /** Label in modal form */
+    display_name: string;
+
+    /** Input control type */
+    param_type: ActionParamType;
+
+    /** Whether the field is required */
+    required: boolean;
+
+    /** Display order in form (lower = earlier) */
+    sort_order: number;
+
+    /** Placeholder text for input */
+    placeholder?: string;
+
+    /** Default value (cast by frontend based on param_type) */
+    default_value?: string;
+
+    /** For foreign_key type: source table for dropdown options */
+    join_table?: string;
+
+    /** For foreign_key type: display column name */
+    join_column?: string;
+
+    /** For status type: entity_type discriminator for statuses lookup */
+    status_entity_type?: string;
+
+    /** For file type: accepted file category ('image', 'pdf', 'any') */
+    file_type?: string;
 }
 
 /**

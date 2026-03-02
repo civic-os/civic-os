@@ -143,7 +143,8 @@ END;
 $$;
 
 -- DENY TIME OFF: Changes time_off_request status to Denied
-CREATE OR REPLACE FUNCTION public.deny_time_off(p_entity_id BIGINT)
+-- Accepts optional p_response_notes to capture denial reason in modal (v0.32.0)
+CREATE OR REPLACE FUNCTION public.deny_time_off(p_entity_id BIGINT, p_response_notes TEXT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -181,6 +182,7 @@ BEGIN
 
   UPDATE time_off_requests SET
     status_id = v_denied_id,
+    response_notes = COALESCE(p_response_notes, response_notes),
     responded_by = current_user_id(),
     responded_at = NOW()
   WHERE id = p_entity_id;
@@ -188,8 +190,55 @@ BEGIN
   RETURN jsonb_build_object(
     'success', true,
     'message', 'Time off request denied.',
-    'navigate', '/edit/time_off_requests/' || p_entity_id
+    'refresh', true
   );
+END;
+$$;
+
+-- SUBMIT DOCUMENT: Allows staff to upload and submit a document from the Detail page
+-- Uses file param type (v0.32.0) so the upload happens in the action modal
+CREATE OR REPLACE FUNCTION public.submit_staff_document(
+  p_entity_id BIGINT,
+  p_document_file UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_pending_id INT;
+  v_needs_revision_id INT;
+  v_submitted_id INT;
+  v_document RECORD;
+BEGIN
+  -- Permission check: staff_documents:update
+  IF NOT has_permission('staff_documents', 'update') THEN
+    RETURN jsonb_build_object('success', false, 'message', 'Permission denied');
+  END IF;
+
+  SELECT id INTO v_pending_id FROM metadata.statuses
+    WHERE entity_type = 'staff_document' AND display_name = 'Pending';
+  SELECT id INTO v_needs_revision_id FROM metadata.statuses
+    WHERE entity_type = 'staff_document' AND display_name = 'Needs Revision';
+  SELECT id INTO v_submitted_id FROM metadata.statuses
+    WHERE entity_type = 'staff_document' AND display_name = 'Submitted';
+
+  SELECT * INTO v_document FROM staff_documents WHERE id = p_entity_id;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'message', 'Document not found');
+  END IF;
+
+  IF v_document.status_id NOT IN (v_pending_id, v_needs_revision_id) THEN
+    RETURN jsonb_build_object('success', false, 'message', 'Document can only be submitted when Pending or Needs Revision');
+  END IF;
+
+  UPDATE staff_documents SET
+    file = COALESCE(p_document_file, file),
+    status_id = v_submitted_id,
+    updated_at = NOW()
+  WHERE id = p_entity_id;
+
+  RETURN jsonb_build_object('success', true, 'message', 'Document submitted for review.', 'refresh', true);
 END;
 $$;
 
@@ -246,7 +295,8 @@ END;
 $$;
 
 -- REQUEST DOCUMENT REVISION: Changes staff_document status to Needs Revision
-CREATE OR REPLACE FUNCTION public.request_document_revision(p_entity_id BIGINT)
+-- Accepts optional p_reviewer_notes to explain what needs correction (v0.32.0)
+CREATE OR REPLACE FUNCTION public.request_document_revision(p_entity_id BIGINT, p_reviewer_notes TEXT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -283,13 +333,14 @@ BEGIN
   END IF;
 
   UPDATE staff_documents SET
-    status_id = v_needs_revision_id
+    status_id = v_needs_revision_id,
+    reviewer_notes = COALESCE(p_reviewer_notes, reviewer_notes)
   WHERE id = p_entity_id;
 
   RETURN jsonb_build_object(
     'success', true,
     'message', 'Document sent back for revision.',
-    'navigate', '/edit/staff_documents/' || p_entity_id
+    'refresh', true
   );
 END;
 $$;
@@ -346,7 +397,8 @@ END;
 $$;
 
 -- DENY REIMBURSEMENT: Changes reimbursement status to Denied
-CREATE OR REPLACE FUNCTION public.deny_reimbursement(p_entity_id BIGINT)
+-- Accepts optional p_response_notes to capture denial reason in modal (v0.32.0)
+CREATE OR REPLACE FUNCTION public.deny_reimbursement(p_entity_id BIGINT, p_response_notes TEXT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -384,6 +436,7 @@ BEGIN
 
   UPDATE reimbursements SET
     status_id = v_denied_id,
+    response_notes = COALESCE(p_response_notes, response_notes),
     responded_by = current_user_id(),
     responded_at = NOW()
   WHERE id = p_entity_id;
@@ -391,7 +444,7 @@ BEGIN
   RETURN jsonb_build_object(
     'success', true,
     'message', 'Reimbursement denied.',
-    'navigate', '/edit/reimbursements/' || p_entity_id
+    'refresh', true
   );
 END;
 $$;
@@ -404,11 +457,12 @@ $$;
 GRANT EXECUTE ON FUNCTION public.staff_clock_in(BIGINT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.staff_clock_out(BIGINT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.approve_time_off(BIGINT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.deny_time_off(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.deny_time_off(BIGINT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.submit_staff_document(BIGINT, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.approve_staff_document(BIGINT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.request_document_revision(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.request_document_revision(BIGINT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.approve_reimbursement(BIGINT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.deny_reimbursement(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.deny_reimbursement(BIGINT, TEXT) TO authenticated;
 
 
 -- ============================================================================
@@ -423,6 +477,7 @@ DECLARE
   v_tor_approved_id INT;
   v_tor_denied_id INT;
   -- staff_document statuses
+  v_sd_pending_id INT;
   v_sd_submitted_id INT;
   v_sd_approved_id INT;
   v_sd_needs_revision_id INT;
@@ -444,6 +499,8 @@ BEGIN
   WHERE entity_type = 'time_off_request' AND display_name = 'Denied';
 
   -- staff_document statuses
+  SELECT id INTO v_sd_pending_id FROM metadata.statuses
+  WHERE entity_type = 'staff_document' AND display_name = 'Pending';
   SELECT id INTO v_sd_submitted_id FROM metadata.statuses
   WHERE entity_type = 'staff_document' AND display_name = 'Submitted';
   SELECT id INTO v_sd_approved_id FROM metadata.statuses
@@ -597,22 +654,23 @@ BEGIN
     visibility_condition = EXCLUDED.visibility_condition,
     enabled_condition = EXCLUDED.enabled_condition;
 
-  -- REQUEST REVISION action
+  -- REQUEST REVISION action (updated v0.32.0: uses param form instead of navigate)
   INSERT INTO metadata.entity_actions (
     table_name, action_name, display_name, description, rpc_function,
-    icon, button_style, sort_order, requires_confirmation,
+    icon, button_style, sort_order, requires_confirmation, confirmation_message,
     visibility_condition, enabled_condition, disabled_tooltip,
     default_success_message, refresh_after_action
   ) VALUES (
     'staff_documents',
     'request_revision',
     'Request Revision',
-    'Send this document back for revision',
+    'Send this document back for revision with notes',
     'request_document_revision',
     'edit_note',
     'warning',
     20,
-    FALSE,
+    TRUE,
+    'Please provide notes explaining what needs to be corrected.',
     jsonb_build_object('field', 'status_id', 'operator', 'ne', 'value', v_sd_needs_revision_id),
     jsonb_build_object('field', 'status_id', 'operator', 'eq', 'value', v_sd_submitted_id),
     'Only submitted documents can be sent back for revision',
@@ -621,8 +679,38 @@ BEGIN
   ) ON CONFLICT (table_name, action_name) DO UPDATE SET
     display_name = EXCLUDED.display_name,
     description = EXCLUDED.description,
+    requires_confirmation = EXCLUDED.requires_confirmation,
+    confirmation_message = EXCLUDED.confirmation_message,
     visibility_condition = EXCLUDED.visibility_condition,
     enabled_condition = EXCLUDED.enabled_condition;
+
+  -- SUBMIT DOCUMENT action (v0.32.0: file param type)
+  INSERT INTO metadata.entity_actions (
+    table_name, action_name, display_name, description, rpc_function,
+    icon, button_style, sort_order, requires_confirmation, confirmation_message,
+    visibility_condition,
+    default_success_message, refresh_after_action
+  ) VALUES (
+    'staff_documents',
+    'submit',
+    'Submit Document',
+    'Upload and submit this document for review',
+    'submit_staff_document',
+    'upload_file',
+    'primary',
+    5,
+    TRUE,
+    'Upload and submit this document for review?',
+    jsonb_build_object('or', jsonb_build_array(
+      jsonb_build_object('field', 'status_id', 'operator', 'eq', 'value', v_sd_pending_id),
+      jsonb_build_object('field', 'status_id', 'operator', 'eq', 'value', v_sd_needs_revision_id)
+    )),
+    'Document submitted for review.',
+    TRUE
+  ) ON CONFLICT (table_name, action_name) DO UPDATE SET
+    display_name = EXCLUDED.display_name,
+    description = EXCLUDED.description,
+    visibility_condition = EXCLUDED.visibility_condition;
 
   -- ==============================
   -- reimbursements actions
@@ -712,6 +800,16 @@ WHERE ea.table_name = 'time_off_requests'
   AND r.display_name IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
+-- Document submit: user, editor, manager, admin (all roles with staff_documents:update)
+INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
+SELECT ea.id, r.id
+FROM metadata.entity_actions ea
+CROSS JOIN metadata.roles r
+WHERE ea.table_name = 'staff_documents'
+  AND ea.action_name = 'submit'
+  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+ON CONFLICT DO NOTHING;
+
 -- Document approve/request_revision: manager, admin
 INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
 SELECT ea.id, r.id
@@ -734,7 +832,58 @@ ON CONFLICT DO NOTHING;
 
 
 -- ============================================================================
--- 5. NOTIFY POSTGREST TO RELOAD SCHEMA
+-- 5. ENTITY ACTION PARAMETERS (v0.32.0)
+-- ============================================================================
+-- Add form fields to action confirmation modals so users can provide
+-- additional input (notes, reasons, etc.) without navigating to edit pages.
+
+-- Deny Time Off: optional reason for denial
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_response_notes', 'Reason for Denial', 'text',
+       FALSE, 10, 'Optional: explain why this request was denied'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'time_off_requests' AND ea.action_name = 'deny'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+-- Request Document Revision: required revision notes
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_reviewer_notes', 'Revision Notes', 'text',
+       TRUE, 10, 'Explain what needs to be corrected'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'staff_documents' AND ea.action_name = 'request_revision'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+-- Submit Document: file upload parameter
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, file_type
+)
+SELECT ea.id, 'p_document_file', 'Document File', 'file',
+       TRUE, 10, 'any'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'staff_documents' AND ea.action_name = 'submit'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+-- Deny Reimbursement: optional reason for denial
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_response_notes', 'Reason for Denial', 'text',
+       FALSE, 10, 'Optional: explain why this reimbursement was denied'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'reimbursements' AND ea.action_name = 'deny'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+
+-- ============================================================================
+-- 6. NOTIFY POSTGREST TO RELOAD SCHEMA
 -- ============================================================================
 
 NOTIFY pgrst, 'reload schema';

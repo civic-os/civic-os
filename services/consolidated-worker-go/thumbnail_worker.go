@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -97,7 +98,7 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 
 	// Generate thumbnails based on file type
 	var thumbnailKeys map[string]string
-	if fileType == "pdf" {
+	if isPDFType(fileType) {
 		thumbnailKeys, err = w.generatePDFThumbnails(ctx, job.ID, fileData, s3Key, bucket)
 	} else {
 		thumbnailKeys, err = w.generateImageThumbnails(ctx, job.ID, fileData, s3Key, bucket)
@@ -121,6 +122,14 @@ func (w *ThumbnailWorker) Work(ctx context.Context, job *river.Job[ThumbnailArgs
 	log.Printf("[Job %d] ✓ Completed successfully in %v", job.ID, duration)
 
 	return nil
+}
+
+// isPDFType checks if a file type string represents a PDF.
+// The database stores full MIME types from the browser (e.g., "application/pdf")
+// but we also handle the short name "pdf" for robustness.
+func isPDFType(fileType string) bool {
+	ft := strings.ToLower(strings.TrimSpace(fileType))
+	return ft == "application/pdf" || ft == "application/x-pdf" || ft == "pdf"
 }
 
 // generateImageThumbnails creates thumbnails for image files using bimg (libvips)
@@ -179,11 +188,13 @@ func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64
 	}
 	tempPDF.Close()
 
-	// Use pdftoppm to convert first page to PPM image
-	tempImage := tempPDF.Name() + ".ppm"
+	// Use pdftoppm to convert first page to PNG image
+	// PNG is used instead of PPM because bimg/libvips on Alpine may not
+	// include a PPM loader, whereas PNG is universally supported.
+	tempImage := tempPDF.Name() + ".png"
 	defer os.Remove(tempImage)
 
-	cmd := exec.Command("pdftoppm", "-f", "1", "-l", "1", "-singlefile", "-r", "300", tempPDF.Name(), tempPDF.Name())
+	cmd := exec.Command("pdftoppm", "-png", "-f", "1", "-l", "1", "-singlefile", "-r", "300", tempPDF.Name(), tempPDF.Name())
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("failed to run pdftoppm: %w", err)
 	}
@@ -196,8 +207,39 @@ func (w *ThumbnailWorker) generatePDFThumbnails(ctx context.Context, jobID int64
 
 	log.Printf("[Job %d] ✓ PDF converted to image (%d bytes)", jobID, len(imageData))
 
-	// Generate thumbnails from the converted image (same as image thumbnails)
-	return w.generateImageThumbnails(ctx, jobID, imageData, originalKey, bucket)
+	// Generate PDF thumbnails with proportional resize (no letterboxing).
+	// Unlike image thumbnails which use Embed (square with white background),
+	// PDF pages are typically portrait/landscape and look better without padding.
+	// Output as PNG to preserve transparency for non-white page backgrounds.
+	thumbnailKeys := make(map[string]string)
+	basePath := filepath.Dir(originalKey)
+
+	for _, size := range thumbnailSizes {
+		log.Printf("[Job %d] Generating %s thumbnail (%dx%d)...", jobID, size.Name, size.Width, size.Height)
+
+		options := bimg.Options{
+			Width:   size.Width,
+			Height:  size.Height,
+			Type:    bimg.PNG,
+			Quality: size.Quality,
+		}
+
+		thumbnail, err := bimg.NewImage(imageData).Process(options)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate %s thumbnail: %w", size.Name, err)
+		}
+
+		thumbnailKey := fmt.Sprintf("%s/thumb-%s.png", basePath, size.Name)
+		err = w.uploadToS3(ctx, bucket, thumbnailKey, thumbnail)
+		if err != nil {
+			return nil, fmt.Errorf("failed to upload %s thumbnail: %w", size.Name, err)
+		}
+
+		thumbnailKeys[fmt.Sprintf("thumbnail_%s_key", size.Name)] = thumbnailKey
+		log.Printf("[Job %d] ✓ %s thumbnail uploaded: %s", jobID, size.Name, thumbnailKey)
+	}
+
+	return thumbnailKeys, nil
 }
 
 // downloadFromS3 retrieves a file from S3
@@ -219,13 +261,17 @@ func (w *ThumbnailWorker) downloadFromS3(ctx context.Context, bucket, key string
 	return data, nil
 }
 
-// uploadToS3 uploads data to S3
+// uploadToS3 uploads data to S3 with content type derived from the key extension
 func (w *ThumbnailWorker) uploadToS3(ctx context.Context, bucket, key string, data []byte) error {
+	contentType := "image/jpeg"
+	if strings.HasSuffix(key, ".png") {
+		contentType = "image/png"
+	}
 	_, err := w.s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(data),
-		ContentType: aws.String("image/jpeg"),
+		ContentType: aws.String(contentType),
 	})
 	return err
 }

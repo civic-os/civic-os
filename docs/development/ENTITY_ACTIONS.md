@@ -1079,6 +1079,96 @@ describe('Entity Actions', () => {
 - [ ] Loading spinner shows during execution
 - [ ] Modal cannot be closed during execution
 
+## Action Parameters (v0.32.0)
+
+Entity actions can now accept user-provided parameters via form fields in the confirmation modal. This eliminates the need to navigate users to Edit pages for actions that need additional input.
+
+### Architecture
+
+**New Table**: `metadata.entity_action_params` (child of `entity_actions` via FK)
+
+Each param row defines:
+- `param_name` — RPC parameter name (e.g., `p_reason`)
+- `display_name` — Label shown in modal form
+- `param_type` — Input control type (see supported types below)
+- `required` — Whether the field must be filled
+- `sort_order` — Position in form
+- `placeholder` / `default_value` — UI hints
+
+**Type-specific columns**:
+- `join_table` + `join_column` — For `foreign_key` type (dropdown source)
+- `status_entity_type` — For `status` type (statuses discriminator)
+- `file_type` — For `file` type (`image`, `pdf`, `any`)
+
+### Supported Parameter Types
+
+| param_type | Input Control | Property Type Equivalent |
+|-----------|--------------|--------------------------|
+| `text` | `<textarea>` | TextLong |
+| `text_short` | `<input type="text">` | TextShort |
+| `number` | `<input type="number">` | IntegerNumber |
+| `boolean` | DaisyUI checkbox | Boolean |
+| `money` | Number with step=0.01 | Money |
+| `date` | `<input type="date">` | Date |
+| `datetime` | `<input type="datetime-local">` | DateTime (no TZ) |
+| `datetime_local` | `<input type="datetime-local">` | DateTimeLocal (UTC) |
+| `color` | `<input type="color">` | Color |
+| `email` | `<input type="email">` | Email |
+| `telephone` | `<input type="tel">` | Telephone |
+| `status` | `<select>` from statuses | Status |
+| `foreign_key` | `<select>` from join_table | ForeignKeyName |
+| `user` | `<select>` from civic_os_users | User |
+| `file` | File input (presigned URL) | File/FileImage/FilePDF |
+| `geo_point` | Map picker (fallback: text) | GeoPoint |
+| `time_slot` | Range picker (fallback: text) | TimeSlot |
+
+**Not supported** (different interaction model): ManyToMany, Payment, RecurringTimeSlot
+
+**MAINTENANCE NOTE**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type.
+
+### Frontend Behavior
+
+- Actions with `parameters.length > 0` **always** show the modal (even if `requires_confirmation = false`)
+- A `FormGroup` is built dynamically from parameter definitions
+- Dropdown options (`status`, `foreign_key`, `user`) are loaded on modal open
+- The Confirm button is disabled when: loading, form invalid, or file uploading
+- Form values are merged with `{ p_entity_id }` when calling the RPC
+- Modal size is `md` when params exist, `sm` when no params
+
+### SQL Example
+
+```sql
+-- 1. RPC accepts additional params with DEFAULT NULL for backwards compat
+CREATE OR REPLACE FUNCTION deny_time_off(
+  p_entity_id BIGINT,
+  p_response_notes TEXT DEFAULT NULL
+)
+RETURNS JSONB ...
+
+-- 2. Define the param in metadata
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_response_notes', 'Reason for Denial', 'text',
+       FALSE, 10, 'Optional: explain why this request was denied'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'time_off_requests' AND ea.action_name = 'deny';
+```
+
+### View Embedding
+
+The `schema_entity_actions` view embeds params as a `parameters` JSON array:
+```json
+{
+  "id": 1,
+  "action_name": "deny",
+  "parameters": [
+    {"param_name": "p_response_notes", "display_name": "Reason", "param_type": "text", "required": false, ...}
+  ]
+}
+```
+
 ## Future Enhancements
 
 ### Phase 2: Bulk Actions
@@ -1089,13 +1179,9 @@ describe('Entity Actions', () => {
 - Progress indicator for bulk operations
 - Partial success handling (some succeed, some fail)
 
-### Phase 3: Parameters
+### ~~Phase 3: Parameters~~ ✅ Implemented (v0.32.0)
 
-- Add `parameter_schema` JSONB to metadata
-- Generate dynamic form in modal
-- Support common types: text, number, dropdown, date
-- Validation for required parameters
-- Pass parameters to RPC alongside entity ID
+See "Action Parameters" section above.
 
 ### Phase 4: Advanced Conditions
 

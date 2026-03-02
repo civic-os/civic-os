@@ -278,7 +278,7 @@ describe('SchemaService', () => {
 
     it('should build embedded select for ForeignKeyName', () => {
       const result = SchemaService.propertyToSelectString(MOCK_PROPERTIES.foreignKey);
-      expect(result).toBe('status_id:Status(id,display_name)');
+      expect(result).toBe('status_id:Status!status_id(id,display_name)');
     });
 
     it('should build special select for User type', () => {

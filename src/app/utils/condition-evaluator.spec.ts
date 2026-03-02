@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { evaluateCondition } from './condition-evaluator';
+import { evaluateCondition, extractConditionFieldNames } from './condition-evaluator';
 import { ActionCondition } from '../interfaces/entity';
 
 describe('evaluateCondition', () => {
@@ -276,6 +276,72 @@ describe('evaluateCondition', () => {
         });
     });
 
+    describe('or compound condition', () => {
+        it('should return true when any sub-condition is true', () => {
+            const condition: ActionCondition = {
+                or: [
+                    { field: 'status_id', operator: 'eq', value: 5 },
+                    { field: 'status_id', operator: 'eq', value: 8 }
+                ]
+            };
+            expect(evaluateCondition(condition, { status_id: 5 })).toBe(true);
+            expect(evaluateCondition(condition, { status_id: 8 })).toBe(true);
+        });
+
+        it('should return false when no sub-condition is true', () => {
+            const condition: ActionCondition = {
+                or: [
+                    { field: 'status_id', operator: 'eq', value: 5 },
+                    { field: 'status_id', operator: 'eq', value: 8 }
+                ]
+            };
+            expect(evaluateCondition(condition, { status_id: 6 })).toBe(false);
+        });
+
+        it('should handle empty or array', () => {
+            const condition: ActionCondition = { or: [] };
+            expect(evaluateCondition(condition, testData)).toBe(false);
+        });
+    });
+
+    describe('and compound condition', () => {
+        it('should return true when all sub-conditions are true', () => {
+            const condition: ActionCondition = {
+                and: [
+                    { field: 'status_id', operator: 'eq', value: 1 },
+                    { field: 'amount', operator: 'gt', value: 50 }
+                ]
+            };
+            expect(evaluateCondition(condition, testData)).toBe(true);
+        });
+
+        it('should return false when any sub-condition is false', () => {
+            const condition: ActionCondition = {
+                and: [
+                    { field: 'status_id', operator: 'eq', value: 1 },
+                    { field: 'amount', operator: 'gt', value: 200 }
+                ]
+            };
+            expect(evaluateCondition(condition, testData)).toBe(false);
+        });
+    });
+
+    describe('nested compound conditions', () => {
+        it('should handle or inside and', () => {
+            const condition: ActionCondition = {
+                and: [
+                    { or: [
+                        { field: 'status_id', operator: 'eq', value: 1 },
+                        { field: 'status_id', operator: 'eq', value: 2 }
+                    ]},
+                    { field: 'amount', operator: 'gt', value: 50 }
+                ]
+            };
+            expect(evaluateCondition(condition, testData)).toBe(true);
+            expect(evaluateCondition(condition, { status_id: 3, amount: 200 })).toBe(false);
+        });
+    });
+
     describe('real-world scenarios', () => {
         it('should evaluate pending status condition', () => {
             const pendingCondition: ActionCondition = { field: 'status_id', operator: 'eq', value: 1 };
@@ -305,5 +371,52 @@ describe('evaluateCondition', () => {
             expect(evaluateCondition(notCancelledCondition, pendingData)).toBe(true);
             expect(evaluateCondition(notCancelledCondition, cancelledData)).toBe(false);
         });
+
+        it('should evaluate submit document or condition (Pending OR Needs Revision)', () => {
+            const condition: ActionCondition = {
+                or: [
+                    { field: 'status_id', operator: 'eq', value: 5 },
+                    { field: 'status_id', operator: 'eq', value: 8 }
+                ]
+            };
+            expect(evaluateCondition(condition, { status_id: 5 })).toBe(true);  // Pending
+            expect(evaluateCondition(condition, { status_id: 8 })).toBe(true);  // Needs Revision
+            expect(evaluateCondition(condition, { status_id: 6 })).toBe(false); // Submitted
+            expect(evaluateCondition(condition, { status_id: 7 })).toBe(false); // Approved
+        });
+    });
+});
+
+describe('extractConditionFieldNames', () => {
+    it('should return empty array for null/undefined', () => {
+        expect(extractConditionFieldNames(null)).toEqual([]);
+        expect(extractConditionFieldNames(undefined)).toEqual([]);
+    });
+
+    it('should return field from simple condition', () => {
+        expect(extractConditionFieldNames({ field: 'status_id', operator: 'eq', value: 1 })).toEqual(['status_id']);
+    });
+
+    it('should return fields from or condition', () => {
+        const result = extractConditionFieldNames({
+            or: [
+                { field: 'status_id', operator: 'eq', value: 5 },
+                { field: 'amount', operator: 'gt', value: 0 }
+            ]
+        });
+        expect(result).toEqual(['status_id', 'amount']);
+    });
+
+    it('should return fields from nested conditions', () => {
+        const result = extractConditionFieldNames({
+            and: [
+                { or: [
+                    { field: 'status_id', operator: 'eq', value: 1 },
+                    { field: 'type', operator: 'eq', value: 'a' }
+                ]},
+                { field: 'amount', operator: 'gt', value: 0 }
+            ]
+        });
+        expect(result).toEqual(['status_id', 'type', 'amount']);
     });
 });

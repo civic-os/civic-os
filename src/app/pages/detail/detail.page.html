@@ -278,7 +278,7 @@
         <cos-modal
           [isOpen]="showActionModal()"
           (closed)="closeActionModal()"
-          size="sm"
+          [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
           [closeOnBackdrop]="!actionLoading()">
           @if (currentAction(); as action) {
             <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
@@ -298,7 +298,166 @@
                 <span>{{ actionSuccess() }}</span>
               </div>
             } @else {
-              <p class="mb-6">{{ action.confirmation_message || 'Are you sure you want to proceed?' }}</p>
+              <p class="mb-4">{{ action.confirmation_message || 'Are you sure you want to proceed?' }}</p>
+
+              <!-- Action Parameter Form (v0.32.0) -->
+              @if (actionParamForm(); as form) {
+                <div [formGroup]="form" class="space-y-4 mb-6">
+                  @for (param of action.parameters; track param.param_name) {
+                    <fieldset>
+                      <label class="label font-semibold">
+                        {{ param.display_name }}
+                        @if (param.required) { <span class="text-error">*</span> }
+                      </label>
+
+                      @switch (param.param_type) {
+                        @case ('text') {
+                          <textarea
+                            class="textarea textarea-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || ''"
+                            rows="3">
+                          </textarea>
+                        }
+                        @case ('text_short') {
+                          <input
+                            type="text"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || ''">
+                        }
+                        @case ('number') {
+                          <input
+                            type="number"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || ''">
+                        }
+                        @case ('boolean') {
+                          <div class="flex items-center gap-2 mt-1">
+                            <input
+                              type="checkbox"
+                              class="checkbox"
+                              [formControlName]="param.param_name">
+                            <span class="text-sm">{{ param.placeholder || param.display_name }}</span>
+                          </div>
+                        }
+                        @case ('money') {
+                          <input
+                            type="number"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || '0.00'"
+                            step="0.01"
+                            min="0">
+                        }
+                        @case ('date') {
+                          <input
+                            type="date"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name">
+                        }
+                        @case ('datetime') {
+                          <input
+                            type="datetime-local"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name">
+                        }
+                        @case ('datetime_local') {
+                          <input
+                            type="datetime-local"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name">
+                        }
+                        @case ('color') {
+                          <input
+                            type="color"
+                            class="input input-bordered w-16 h-10 p-1"
+                            [formControlName]="param.param_name">
+                        }
+                        @case ('email') {
+                          <input
+                            type="email"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || 'email@example.com'">
+                        }
+                        @case ('telephone') {
+                          <input
+                            type="tel"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || '(555) 123-4567'">
+                        }
+                        @case ('status') {
+                          <select
+                            class="select select-bordered w-full"
+                            [formControlName]="param.param_name">
+                            <option [ngValue]="null">-- Select --</option>
+                            @for (option of actionParamOptions()[param.param_name]; track option.id) {
+                              <option [ngValue]="option.id">{{ option.display_name }}</option>
+                            }
+                          </select>
+                        }
+                        @case ('foreign_key') {
+                          <select
+                            class="select select-bordered w-full"
+                            [formControlName]="param.param_name">
+                            <option [ngValue]="null">-- Select --</option>
+                            @for (option of actionParamOptions()[param.param_name]; track option.id) {
+                              <option [ngValue]="option.id">{{ option[getParamDisplayColumn(param)] }}</option>
+                            }
+                          </select>
+                        }
+                        @case ('user') {
+                          <select
+                            class="select select-bordered w-full"
+                            [formControlName]="param.param_name">
+                            <option [ngValue]="null">-- Select --</option>
+                            @for (option of actionParamOptions()[param.param_name]; track option.id) {
+                              <option [ngValue]="option.id">{{ option.display_name }}</option>
+                            }
+                          </select>
+                        }
+                        @case ('file') {
+                          <input
+                            type="file"
+                            class="file-input file-input-bordered w-full"
+                            [accept]="getFileAcceptForParam(param)"
+                            (change)="onActionFileSelected($event, param.param_name)"
+                            [disabled]="actionFileUploading()">
+
+                          @if (actionFileUploading()) {
+                            <div class="flex items-center gap-2 text-sm mt-1">
+                              <span class="loading loading-spinner loading-sm"></span>
+                              <span>Uploading...</span>
+                            </div>
+                          }
+                          @if (actionUploadError()) {
+                            <p class="text-error text-sm mt-1">{{ actionUploadError() }}</p>
+                          }
+                          @if (actionUploadedFile()[param.param_name]; as fileRef) {
+                            <p class="text-success text-sm mt-1">Uploaded: {{ fileRef.file_name }}</p>
+                          }
+                        }
+                        @default {
+                          <!-- Fallback for less common types (geo_point, time_slot) -->
+                          <input
+                            type="text"
+                            class="input input-bordered w-full"
+                            [formControlName]="param.param_name"
+                            [placeholder]="param.placeholder || ''">
+                        }
+                      }
+
+                      <!-- Validation error message -->
+                      @if (form.get(param.param_name)?.touched && form.get(param.param_name)?.hasError('required')) {
+                        <p class="text-error text-sm mt-1">{{ param.display_name }} is required</p>
+                      }
+                    </fieldset>
+                  }
+                </div>
+              }
 
               <!-- Actions -->
               <div class="cos-modal-action">
@@ -311,7 +470,7 @@
                 <button
                   [class]="'btn btn-' + action.button_style"
                   (click)="confirmEntityAction()"
-                  [disabled]="actionLoading()">
+                  [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading()">
                   @if (actionLoading()) {
                     <span class="loading loading-spinner loading-sm"></span>
                   }
