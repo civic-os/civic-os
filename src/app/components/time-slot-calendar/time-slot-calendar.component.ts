@@ -126,6 +126,33 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
         calendar.addEventSource(events);
       }
     });
+
+    // Sync FullCalendar view/date when inputs change AFTER initialization.
+    // This handles entity transitions where the component survives across
+    // navigations (e.g., both old and new entities have showCalendar=true,
+    // so @if never toggles off). Without this, initialDate/initialView
+    // input changes are silently ignored because ngAfterViewInit only runs once.
+    effect(() => {
+      const date = this.initialDate();
+      const view = this.initialView();
+      // CRITICAL: Use untracked() for viewInitialized so this effect only fires when
+      // initialDate/initialView inputs CHANGE, not when viewInitialized transitions to true.
+      // The initial setup is handled by ngAfterViewInit — this effect only handles
+      // subsequent input changes (e.g., entity transitions in ListPage).
+      if (!untracked(() => this.viewInitialized())) return;
+
+      const calendar = untracked(() => this.calendarComponent?.getApi());
+      if (!calendar) return;
+
+      // Sync view type if it changed
+      if (view && calendar.view.type !== view) {
+        calendar.changeView(view);
+      }
+
+      // Sync date — default to today when no date specified (entity transition wiped params)
+      const targetDate = date ? new Date(date + 'T00:00:00') : new Date();
+      calendar.gotoDate(targetDate);
+    });
   }
 
   // Computed calendar events based on mode
@@ -243,7 +270,17 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     }
 
     // Mark view as initialized - effect can now update events reactively
+    // and handleDatesSet will no longer be suppressed
     this.viewInitialized.set(true);
+
+    // Emit initial date range for list mode so the ListPage can:
+    // - First load (no cal_date): populate URL with today's date and fetch data
+    // - Back-navigation (with cal_date): emit the correct range (gotoDate already ran above)
+    // - CalendarWidget: get its initial date range for data fetching
+    if (calendar && this.mode() === 'list') {
+      const view = calendar.view;
+      this.dateRangeChange.emit({ start: view.activeStart, end: view.activeEnd });
+    }
   }
 
   private transformEvents(events: CalendarEvent[]): EventInput[] {
@@ -286,6 +323,16 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
 
   private handleDatesSet(arg: DatesSetArg) {
     // Called when the visible date range changes (initial load, prev/next, view change)
+
+    // Guard: Suppress datesSet events fired during FullCalendar initialization.
+    // FullCalendar's Angular wrapper fires datesSet in its own ngAfterViewInit (child),
+    // which runs BEFORE our ngAfterViewInit can call gotoDate(). Without this guard,
+    // the initial datesSet fires with today's date range, causing the ListPage to
+    // overwrite the correct cal_date URL param on back-navigation.
+    if (!this.viewInitialized()) {
+      return;
+    }
+
     // CRITICAL: Check if this was triggered by our own URL update to prevent infinite loop
 
     const actualStart = new Date(arg.start);

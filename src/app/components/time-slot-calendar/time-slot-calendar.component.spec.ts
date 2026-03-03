@@ -309,6 +309,216 @@ describe('TimeSlotCalendarComponent', () => {
   });
 
   /**
+   * Back-Navigation & Entity Transition Bug Fix Tests
+   *
+   * These tests cover three fixes for calendar state bugs:
+   * 1. handleDatesSet guard: Suppress datesSet events before viewInitialized
+   * 2. Initial range emission: ngAfterViewInit emits dateRangeChange for list mode
+   * 3. Input-sync effect: gotoDate/changeView when inputs change after init
+   */
+  describe('handleDatesSet guard (Bug Fix: back-navigation URL overwrite)', () => {
+    it('should NOT emit dateRangeChange before viewInitialized', () => {
+      // NOTE: Do NOT call fixture.detectChanges() here — it triggers ngAfterViewInit
+      // which sets viewInitialized=true, defeating the test. We test the method directly
+      // with viewInitialized still at its default (false).
+      spyOn(component.dateRangeChange, 'emit');
+
+      // Simulate FullCalendar firing datesSet before ngAfterViewInit
+      const mockArg = {
+        start: new Date('2026-03-01'),
+        end: new Date('2026-03-08'),
+        startStr: '2026-03-01',
+        endStr: '2026-03-08',
+        view: { type: 'timeGridWeek', activeStart: new Date(), activeEnd: new Date() }
+      };
+
+      (component as any).handleDatesSet(mockArg);
+
+      expect(component.dateRangeChange.emit).not.toHaveBeenCalled();
+    });
+
+    it('should emit dateRangeChange after viewInitialized in list mode', () => {
+      fixture.componentRef.setInput('mode', 'list');
+      fixture.detectChanges();
+
+      // Simulate ngAfterViewInit completing
+      (component as any).viewInitialized.set(true);
+
+      spyOn(component.dateRangeChange, 'emit');
+
+      const mockArg = {
+        start: new Date('2026-03-01'),
+        end: new Date('2026-03-08'),
+        startStr: '2026-03-01',
+        endStr: '2026-03-08',
+        view: { type: 'timeGridWeek', activeStart: new Date(), activeEnd: new Date() }
+      };
+
+      (component as any).handleDatesSet(mockArg);
+
+      expect(component.dateRangeChange.emit).toHaveBeenCalled();
+    });
+
+    it('should NOT emit dateRangeChange in edit mode even after viewInitialized', () => {
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
+
+      (component as any).viewInitialized.set(true);
+
+      spyOn(component.dateRangeChange, 'emit');
+
+      const mockArg = {
+        start: new Date('2026-03-01'),
+        end: new Date('2026-03-08'),
+        startStr: '2026-03-01',
+        endStr: '2026-03-08',
+        view: { type: 'timeGridWeek', activeStart: new Date(), activeEnd: new Date() }
+      };
+
+      (component as any).handleDatesSet(mockArg);
+
+      expect(component.dateRangeChange.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Initial range emission (Bug Fix: first load data fetch)', () => {
+    it('should emit dateRangeChange in ngAfterViewInit for list mode', () => {
+      fixture.componentRef.setInput('mode', 'list');
+      fixture.detectChanges();
+
+      const mockView = {
+        type: 'timeGridWeek',
+        activeStart: new Date('2026-03-01'),
+        activeEnd: new Date('2026-03-08')
+      };
+      const mockApi = jasmine.createSpyObj('CalendarApi', [
+        'setOption', 'changeView', 'gotoDate', 'addEventSource', 'getEventSources'
+      ]);
+      mockApi.view = mockView;
+      mockApi.getEventSources.and.returnValue([]);
+
+      component.calendarComponent = { getApi: () => mockApi } as any;
+
+      spyOn(component.dateRangeChange, 'emit');
+
+      component.ngAfterViewInit();
+
+      expect(component.dateRangeChange.emit).toHaveBeenCalledWith({
+        start: mockView.activeStart,
+        end: mockView.activeEnd
+      });
+    });
+
+    it('should NOT emit dateRangeChange in ngAfterViewInit for edit mode', () => {
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
+
+      const mockApi = jasmine.createSpyObj('CalendarApi', [
+        'setOption', 'changeView', 'gotoDate', 'addEventSource', 'getEventSources'
+      ]);
+      mockApi.view = { type: 'timeGridWeek', activeStart: new Date(), activeEnd: new Date() };
+      mockApi.getEventSources.and.returnValue([]);
+
+      component.calendarComponent = { getApi: () => mockApi } as any;
+
+      spyOn(component.dateRangeChange, 'emit');
+
+      component.ngAfterViewInit();
+
+      expect(component.dateRangeChange.emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Input-sync effect (Bug Fix: entity transition stale calendar)', () => {
+    it('should call gotoDate when initialDate input changes after init', (done) => {
+      const mockApi = jasmine.createSpyObj('CalendarApi', [
+        'setOption', 'changeView', 'gotoDate', 'addEventSource', 'getEventSources'
+      ]);
+      mockApi.view = { type: 'timeGridWeek' };
+      mockApi.getEventSources.and.returnValue([]);
+
+      fixture.componentRef.setInput('mode', 'list');
+      fixture.componentRef.setInput('initialView', 'timeGridWeek');
+      fixture.detectChanges();
+
+      component.calendarComponent = { getApi: () => mockApi } as any;
+      component.ngAfterViewInit();
+
+      // Reset call tracking after ngAfterViewInit setup
+      mockApi.gotoDate.calls.reset();
+
+      // Simulate entity transition: initialDate input changes
+      fixture.componentRef.setInput('initialDate', '2026-04-15');
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(mockApi.gotoDate).toHaveBeenCalledWith(new Date('2026-04-15T00:00:00'));
+        done();
+      }, 0);
+    });
+
+    it('should call changeView when initialView input changes after init', (done) => {
+      const mockApi = jasmine.createSpyObj('CalendarApi', [
+        'setOption', 'changeView', 'gotoDate', 'addEventSource', 'getEventSources'
+      ]);
+      mockApi.view = { type: 'timeGridWeek' };
+      mockApi.getEventSources.and.returnValue([]);
+
+      fixture.componentRef.setInput('mode', 'list');
+      fixture.componentRef.setInput('initialView', 'timeGridWeek');
+      fixture.detectChanges();
+
+      component.calendarComponent = { getApi: () => mockApi } as any;
+      component.ngAfterViewInit();
+
+      // Reset call tracking after ngAfterViewInit setup
+      mockApi.changeView.calls.reset();
+
+      // Simulate view type change
+      fixture.componentRef.setInput('initialView', 'dayGridMonth');
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(mockApi.changeView).toHaveBeenCalledWith('dayGridMonth');
+        done();
+      }, 0);
+    });
+
+    it('should default to today when initialDate becomes undefined (entity transition)', (done) => {
+      const mockApi = jasmine.createSpyObj('CalendarApi', [
+        'setOption', 'changeView', 'gotoDate', 'addEventSource', 'getEventSources'
+      ]);
+      mockApi.view = { type: 'timeGridWeek' };
+      mockApi.getEventSources.and.returnValue([]);
+
+      fixture.componentRef.setInput('mode', 'list');
+      fixture.componentRef.setInput('initialView', 'timeGridWeek');
+      fixture.componentRef.setInput('initialDate', '2026-04-15');
+      fixture.detectChanges();
+
+      component.calendarComponent = { getApi: () => mockApi } as any;
+      component.ngAfterViewInit();
+
+      mockApi.gotoDate.calls.reset();
+
+      // Simulate entity transition wiping query params
+      fixture.componentRef.setInput('initialDate', undefined);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(mockApi.gotoDate).toHaveBeenCalled();
+        // Should be called with approximately today's date
+        const calledDate = mockApi.gotoDate.calls.mostRecent().args[0] as Date;
+        const today = new Date();
+        expect(calledDate.getFullYear()).toBe(today.getFullYear());
+        expect(calledDate.getMonth()).toBe(today.getMonth());
+        expect(calledDate.getDate()).toBe(today.getDate());
+        done();
+      }, 0);
+    });
+  });
+
+  /**
    * Timezone-Safe Date Parsing Tests
    *
    * These tests verify that date strings are parsed correctly in the user's
