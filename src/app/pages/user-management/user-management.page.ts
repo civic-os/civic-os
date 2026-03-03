@@ -103,10 +103,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
               @for (user of users(); track user.email) {
                 <tr>
                   <td>
-                    <div class="font-medium">{{ user.display_name }}</div>
-                    @if (user.full_name && user.full_name !== user.display_name) {
-                      <div class="text-xs text-base-content/60">{{ user.full_name }}</div>
-                    }
+                    <div class="font-medium">{{ user.full_name || user.display_name }}</div>
                   </td>
                   <td>{{ user.email }}</td>
                   <td>
