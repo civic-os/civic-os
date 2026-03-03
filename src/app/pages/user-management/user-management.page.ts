@@ -58,6 +58,14 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                  (ngModelChange)="onSearchChange($event)" />
         </div>
         <select class="select select-bordered"
+                [ngModel]="roleFilter()"
+                (ngModelChange)="onRoleFilterChange($event)">
+          <option value="all">All roles</option>
+          @for (role of manageableRoles(); track role.role_id) {
+            <option [value]="role.display_name">{{ role.display_name }}</option>
+          }
+        </select>
+        <select class="select select-bordered"
                 [ngModel]="statusFilter()"
                 (ngModelChange)="onStatusFilterChange($event)">
           <option value="all">All statuses</option>
@@ -356,6 +364,7 @@ export class UserManagementPage {
   // Search and filter state
   searchTerm = signal('');
   statusFilter = signal('all');
+  roleFilter = signal('all');
   private refreshSubject = new Subject<void>();
   private searchSubject = new Subject<string>();
 
@@ -408,7 +417,7 @@ export class UserManagementPage {
 
   private loadUsers(): void {
     this.loading.set(true);
-    this.userService.getManagedUsers(this.searchTerm(), this.statusFilter()).subscribe(users => {
+    this.userService.getManagedUsers(this.searchTerm(), this.statusFilter(), this.roleFilter()).subscribe(users => {
       this.users.set(users);
       this.loading.set(false);
     });
@@ -420,6 +429,11 @@ export class UserManagementPage {
 
   onStatusFilterChange(status: string): void {
     this.statusFilter.set(status);
+    this.loadUsers();
+  }
+
+  onRoleFilterChange(role: string): void {
+    this.roleFilter.set(role);
     this.loadUsers();
   }
 

@@ -73,7 +73,7 @@ export class UserManagementService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
 
-  getManagedUsers(search?: string, statusFilter?: string): Observable<ManagedUser[]> {
+  getManagedUsers(search?: string, statusFilter?: string, roleFilter?: string): Observable<ManagedUser[]> {
     let url = getPostgrestUrl() + 'managed_users?order=created_at.desc';
 
     if (search) {
@@ -83,6 +83,10 @@ export class UserManagementService {
 
     if (statusFilter && statusFilter !== 'all') {
       url += `&status=eq.${statusFilter}`;
+    }
+
+    if (roleFilter && roleFilter !== 'all') {
+      url += `&roles=cs.{${encodeURIComponent(roleFilter)}}`;
     }
 
     return this.http.get<ManagedUser[]>(url).pipe(

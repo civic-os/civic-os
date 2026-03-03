@@ -481,7 +481,7 @@ Key fields:
 5. Syncs user to `civic_os_users` and `civic_os_users_private` tables
 6. Updates provisioning record with `status = 'completed'` and `keycloak_user_id`
 
-**UI**: User Management page at `/admin/users` (admin-only). Features search, status filter, create modal with role selection, retry for failed provisioning, and bulk import from Excel.
+**UI**: User Management page at `/admin/users` (admin-only). Features search, status filter, role filter, create modal with role selection, edit user info, retry for failed provisioning, and bulk import from Excel.
 
 **Bulk Import** (v0.31.0+): The "Import Users" button opens an Excel import wizard that validates and submits users via the `bulk_provision_users` RPC. Features:
 - Excel template download with Available Roles reference sheet
