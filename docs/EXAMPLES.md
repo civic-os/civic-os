@@ -7,43 +7,54 @@ This guide helps you choose the right example for learning or as a starting poin
 | Example | Domain | Best For Learning |
 |---------|--------|-------------------|
 | [Pot Hole](#pot-hole) | Issue reporting | Basics: CRUD, file uploads, notifications |
-| [Community Center](#community-center) | Facility reservations | Calendar, recurring schedules, action buttons |
+| [Community Center](#community-center) | Facility reservations | Calendar, recurring schedules, action buttons, iCal feeds |
 | [Broader Impacts](#broader-impacts) | Research tracking | Many-to-many relationships, dashboards |
-| [Mott Park](#mott-park) | Clubhouse reservations | Payments, status workflows, local Keycloak |
+| [Mott Park](#mott-park) | Clubhouse reservations | Payments, virtual entities, schema decisions, iCal feeds |
+| [Staff Portal](#staff-portal) | Staff management | Action parameters, multi-entity workflows, three-tier RLS |
 | [StoryMap](#storymap) | Geographic narratives | Map widgets, dashboard storytelling |
 
 ## Feature Matrix
 
-| Feature | Pot Hole | Community Center | Broader Impacts | Mott Park | StoryMap |
-|---------|:--------:|:----------------:|:---------------:|:---------:|:--------:|
-| **TimeSlot / Calendar** | | ✅ | | ✅ | |
-| **Recurring Schedules** | | ✅ | | | |
-| **Status Workflows** | | | | ✅ | |
-| **Stripe Payments** | | ✅ | | ✅ | |
-| **Notifications (Email)** | ✅ | ✅ | | ✅ | |
-| **Entity Notes** | | ✅ | | | |
-| **Static Text Blocks** | | ✅ | | | |
-| **Entity Action Buttons** | | ✅ | | | |
-| **File Uploads** | ✅ | | | ✅ | |
-| **Full-Text Search** | ✅ | ✅ | ✅ | | |
-| **Many-to-Many** | | | ✅ | | |
-| **Map Widgets** | | | | | ✅ |
-| **Filtered List Widgets** | | | ✅ | | ✅ |
-| **Calendar Widgets** | | ✅ | | ✅ | |
-| **Local Keycloak** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Mock Data Generator** | ✅ | ✅ | ✅ | | ✅ |
+| Feature | Pot Hole | Community Center | Broader Impacts | Mott Park | Staff Portal | StoryMap |
+|---------|:--------:|:----------------:|:---------------:|:---------:|:------------:|:--------:|
+| **TimeSlot / Calendar** | | ✅ | | ✅ | | |
+| **Recurring Schedules** | | ✅ | | | | |
+| **Status Workflows** | | ✅ | | ✅ | ✅ | |
+| **Stripe Payments** | | ✅ | | ✅ | | |
+| **Notifications (Email)** | ✅ | ✅ | | ✅ | ✅ | |
+| **Entity Notes** | | ✅ | | ✅ | | |
+| **Static Text Blocks** | | ✅ | | ✅ | | |
+| **Entity Action Buttons** | | ✅ | | ✅ | ✅ | |
+| **Action Parameters** | | | | | ✅ | |
+| **File Uploads** | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| **Full-Text Search** | ✅ | ✅ | ✅ | | ✅ | |
+| **Many-to-Many** | | | ✅ | | | |
+| **Virtual Entities** | | | | ✅ | | |
+| **Geography/GeoPoint** | | | | | | ✅ |
+| **iCal Feeds** | | ✅ | | ✅ | | |
+| **System Introspection** | | ✅ | | ✅ | | |
+| **Schema Decisions (ADR)** | | | | ✅ | ✅ | |
+| **Scheduled Jobs (River)** | | | | ✅ | | |
+| **Map Widgets** | | | | | | ✅ |
+| **Calendar Widgets** | | ✅ | | ✅ | | |
+| **Filtered List Widgets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Markdown Widgets** | | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Dashboard Navigation** | | | | | | ✅ |
+| **Local Keycloak** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Mock Data Generator** | ✅ | ✅ | ✅ | | ✅ | ✅ |
 
 ## Services by Example
 
-| Service | Port | Pot Hole | Community Center | Broader Impacts | Mott Park | StoryMap |
-|---------|------|:--------:|:----------------:|:---------------:|:---------:|:--------:|
-| PostgreSQL | 15432 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| PostgREST | 3000 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Swagger UI | 8080 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MinIO S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | |
-| Inbucket SMTP | 9100 | ✅ | ✅ | ✅ | ✅ | |
-| Payment Worker | 8081 | | ✅ | | ✅ | |
-| Local Keycloak | 8082 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Service | Port | Pot Hole | Community Center | Broader Impacts | Mott Park | Staff Portal | StoryMap |
+|---------|------|:--------:|:----------------:|:---------------:|:---------:|:------------:|:--------:|
+| PostgreSQL | 15432 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| PostgREST | 3000 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Swagger UI | 8080 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MinIO S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| Inbucket SMTP | 9100 | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| Consolidated Worker | — | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| Payment Worker | 8081 | | ✅ | | ✅ | | |
+| Local Keycloak | 8082 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -60,6 +71,7 @@ This guide helps you choose the right example for learning or as a starting poin
 - Form validation rules
 - Full-text search
 - Role-based permissions (citizen, maintainer, admin)
+- Dashboard with filtered list widgets
 
 **Key tables:** `issues`, `issue_statuses`, `issue_types`, `attachments`
 
@@ -84,6 +96,8 @@ docker-compose up -d
 - **Entity Notes** (polymorphic notes on any entity)
 - **Static Text Blocks** (markdown content on forms)
 - **Entity Action Buttons** (Approve/Deny/Cancel workflows)
+- **iCal subscription feeds** (RFC 5545 calendar export)
+- **System introspection** (auto-registered functions)
 - Calendar widgets on dashboards
 - Overlap prevention (GiST exclusion constraints)
 - Email notifications for reservation workflow
@@ -140,9 +154,16 @@ docker-compose up -d
 - **Status Type System** (multi-stage workflow: Pending → Approved → Completed → Closed)
 - **Multiple payment tracking** (security deposit, facility fee, cleaning fee)
 - **Stripe payment integration** (production-ready)
-- **Local Keycloak** with pre-configured test users
+- **Entity Action Buttons** (workflow actions: waive fees, cancel, payment method)
+- **Entity Notes** (system audit trail on reservation requests)
+- **Static Text Blocks** (on reservation forms)
+- **Virtual Entities** (manager events view with INSTEAD OF triggers)
+- **iCal subscription feeds** (public calendar export)
+- **System introspection** (auto-registered functions)
+- **Schema Decisions (ADR)** (rationale for design choices)
+- **Scheduled jobs** (River-based daily automation)
 - **Public/private calendar** (approved events visible publicly)
-- **Scheduled jobs** (daily automation for reminders)
+- **Local Keycloak** with pre-configured test users
 - Holiday pricing rules
 
 **Key tables:** `reservation_requests`, `reservation_payments`, `reservation_payment_types`, `public_calendar_events`, `holiday_rules`
@@ -170,6 +191,44 @@ docker-compose up -d  # Start remaining services
 
 ---
 
+## Staff Portal
+
+**Path:** `examples/staff-portal/`
+
+**Domain:** Staff management for a summer education program
+
+**What it demonstrates:**
+- **Action Parameters** (form fields in action confirmation modals)
+- **Entity Action Buttons** (Clock In/Out, Approve/Deny/Request Revision across 4 entities)
+- **Status Type System** (4 status entity types: onboarding, documents, time-off, reimbursements)
+- **File Uploads** (document and receipt uploads via S3)
+- **Email Notifications** (10 templates with database triggers)
+- **Three-tier RLS** (staff → site lead → manager → admin)
+- **Schema Decisions (ADR)** (architecture rationale)
+- **Full-text search** (staff members and incident reports)
+- **Custom dashboards** (Staff Portal personal view, Admin Overview)
+- Auto-generated document checklists per staff member based on role
+- Denormalized fields with trigger-based sync
+
+**Key tables:** `staff_members`, `staff_documents`, `time_entries`, `time_off_requests`, `incident_reports`, `reimbursements`, `offboarding_feedback`
+
+**Good starting point for:** HR portals, onboarding systems, program management with approval workflows
+
+**Test accounts (local Keycloak):**
+| Username | Password | Roles |
+|----------|----------|-------|
+| testuser | testuser | user (staff) |
+| testeditor | testeditor | site_lead |
+| testmanager | testmanager | manager |
+| testadmin | testadmin | admin |
+
+```bash
+cd examples/staff-portal
+docker-compose up -d
+```
+
+---
+
 ## StoryMap
 
 **Path:** `examples/storymap/`
@@ -179,6 +238,7 @@ docker-compose up -d  # Start remaining services
 **What it demonstrates:**
 - **Map widgets** with progressive clustering
 - **Filtered list widgets** with temporal filtering
+- **Dashboard navigation** (sequential chapter flow with progress chips)
 - **Multi-dashboard narratives** (4 connected chapters)
 - **Geography/GeoPoint type** for location data
 - Markdown content widgets
@@ -248,22 +308,25 @@ docker-compose up -d    # Fresh start
 
 ### Intermediate
 3. **Broader Impacts** - Master many-to-many relationships
-4. **Community Center** - Learn calendar/scheduling features
+4. **Community Center** - Learn calendar/scheduling, recurring events, iCal feeds
 
 ### Advanced
-5. **Mott Park** - Full payment integration, status workflows, local Keycloak
+5. **Staff Portal** - Multi-entity workflows with action parameters, three-tier RLS
+6. **Mott Park** - Full payment integration, virtual entities, schema decisions, scheduled jobs
 
 ---
 
 ## Mock Data Generation
 
-Three examples include mock data generators:
+Five examples include mock data generators:
 
 ```bash
 # Generate fresh mock data
 npm run generate pothole
 npm run generate broader-impacts
 npm run generate community-center
+npm run generate staff-portal
+npm run generate storymap
 
 # SQL output only (for inspection)
 npm run generate pothole -- --sql
