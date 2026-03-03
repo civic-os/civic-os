@@ -133,6 +133,13 @@ services:
       SMTP_FROM: ${SMTP_FROM}
       SMTP_REPLY_TO: ${SMTP_REPLY_TO:-}
       SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-true}
+
+      # Keycloak Service Account (v0.31.0+ — required for User Management)
+      KEYCLOAK_ADMIN_URL: ${KEYCLOAK_URL:-}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-}
+      KEYCLOAK_SERVICE_CLIENT_ID: ${KEYCLOAK_SERVICE_CLIENT_ID:-civic-os-service-account}
+      KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:-}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-}
     networks:
       - civic-os-network
     healthcheck:
