@@ -75,7 +75,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **iCal Subscription Feeds** (v0.27.0+): Export public calendar events as subscribable iCal feeds. Uses RFC 5545 helper functions (`format_ical_event()`, `wrap_ical_feed()`) with PostgREST media type handlers. Calendar apps (Google Calendar, Apple, Outlook) can subscribe to `/rpc/your_feed_function`. See `docs/INTEGRATOR_GUIDE.md` (iCal Calendar Feeds section) for implementation guide.
 
-**Status Type** (`Status`): Framework-provided status and workflow system using centralized `metadata.statuses` table with `entity_type` discriminator. Frontend detects via `status_entity_type` in `metadata.properties` and renders colored badges/dropdowns. Features: `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, `status_key` for stable programmatic references (v0.25.0+). Use `get_initial_status('entity_type')` or `get_status_id('entity_type', 'status_key')` helpers for column defaults and lookups. Requires v0.15.0+.
+**Status Type** (`Status`): Framework-provided status and workflow system using centralized `metadata.statuses` table with `entity_type` discriminator. Frontend detects via `status_entity_type` in `metadata.properties` and renders colored badges/dropdowns. Features: `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, `status_key` for stable programmatic references (v0.25.0+). Allowed transitions can be declared via `metadata.status_transitions` with optional RPC binding (v0.33.0+). Use `get_initial_status('entity_type')` or `get_status_id('entity_type', 'status_key')` helpers for column defaults and lookups. Requires v0.15.0+.
 
 See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) for Quick Setup SQL, `docs/development/STATUS_TYPE_SYSTEM.md` for design, and `examples/community-center/` for working example.
 
@@ -308,7 +308,7 @@ Example workflow:
 
 ## Built-in PostgreSQL Functions
 
-Civic OS provides helper functions for JWT data extraction (`current_user_id()`, `current_user_email()`), RBAC checks (`has_permission()`, `is_admin()`), and programmatic metadata configuration (`upsert_entity_metadata()`, `set_role_permission()`).
+Civic OS provides helper functions for JWT data extraction (`current_user_id()`, `current_user_email()`), RBAC checks (`has_permission()`, `is_admin()`), programmatic metadata configuration (`upsert_entity_metadata()`, `set_role_permission()`), and causal binding registration (`add_status_transition()`, `add_property_change_trigger()`).
 
 **Example**: RLS policy using JWT helper
 ```sql
@@ -398,6 +398,8 @@ Configure Civic OS behavior via metadata tables:
 - **`metadata.validations`** / **`metadata.constraint_messages`** - Validation rules and friendly error messages
 - **`metadata.roles`** / **`metadata.permissions`** - RBAC configuration (use Permissions page or SQL)
 - **`metadata.dashboards`** / **`metadata.dashboard_widgets`** - Dashboard configuration (Preview, SQL only)
+- **`metadata.status_transitions`** - Allowed status transitions with optional RPC binding (v0.33.0+)
+- **`metadata.property_change_triggers`** - Property-level event-to-function bindings (v0.33.0+)
 
 See `docs/INTEGRATOR_GUIDE.md` for complete metadata architecture, field descriptions, and configuration patterns.
 

@@ -33,6 +33,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | **Geography/GeoPoint** | | | | | | ✅ |
 | **iCal Feeds** | | ✅ | | ✅ | | |
 | **System Introspection** | | ✅ | | ✅ | | |
+| **Causal Bindings** | ✅ | ✅ | | ✅ | ✅ | |
 | **Schema Decisions (ADR)** | | | | ✅ | ✅ | |
 | **Scheduled Jobs (River)** | | | | ✅ | | |
 | **Map Widgets** | | | | | | ✅ |

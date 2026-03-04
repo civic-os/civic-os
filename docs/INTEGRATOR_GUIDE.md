@@ -945,6 +945,18 @@ Parameters:
 - Returns role ID
 - **Use case**: Seed scripts that define custom roles
 
+**`add_status_transition(p_entity_type TEXT, p_from_key TEXT, p_to_key TEXT, p_on_transition_rpc NAME, p_display_name VARCHAR, p_description TEXT)`** → INT
+- Declares an allowed status transition between two statuses using `status_key` strings
+- Resolves keys to IDs via `get_status_id()` for ergonomic init script usage
+- Upserts on conflict for idempotent re-runs
+- **Use case**: Seed scripts that define status workflows (v0.33.0+)
+
+**`add_property_change_trigger(p_table_name NAME, p_property_name NAME, p_change_type TEXT, p_function_name NAME, p_display_name VARCHAR, p_change_value TEXT, p_description TEXT)`** → INT
+- Registers a property change binding that declares which function runs when a property changes
+- `change_type`: `'any'`, `'set'`, `'cleared'`, `'changed_to'`
+- Upserts on conflict for idempotent re-runs
+- **Use case**: Seed scripts that document automation bindings (v0.33.0+)
+
 **Examples**:
 
 Seed script configuring entity metadata:
@@ -1706,6 +1718,69 @@ END IF;
 ```
 
 See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design documentation and `examples/community-center/` for working example.
+
+### Event-to-Function Bindings
+
+**Version**: v0.33.0+
+
+Declare causal relationships (what happens at runtime) as queryable metadata instead of burying them in PL/pgSQL function bodies. Two binding types:
+
+#### Status Transitions
+
+Declare allowed transitions between statuses with optional RPC binding. Uses `add_status_transition()` helper which accepts `status_key` strings.
+
+```sql
+-- Define the allowed state machine for reservation requests
+SELECT add_status_transition('reservation_request', 'pending', 'approved',
+    'approve_reservation'::NAME, 'Approve');
+SELECT add_status_transition('reservation_request', 'pending', 'denied',
+    'deny_reservation'::NAME, 'Deny');
+SELECT add_status_transition('reservation_request', 'approved', 'cancelled',
+    'cancel_reservation'::NAME, 'Cancel');
+SELECT add_status_transition('reservation_request', 'denied', 'pending',
+    NULL, 'Resubmit');
+```
+
+The `on_transition_rpc` parameter is optional — transitions without an RPC are purely declarative (useful for documenting the state machine even when the transition logic lives in an entity action).
+
+#### Property Change Triggers
+
+Declare property-level event-to-function bindings. Four `change_type` options:
+
+```sql
+-- 'any' — fires on any modification to the property
+SELECT add_property_change_trigger(
+    'permits', 'assigned_reviewer_id', 'any',
+    'notify_reviewer_assignment'::NAME, 'Notify on reviewer change');
+
+-- 'set' — fires when value changes from NULL to non-NULL
+SELECT add_property_change_trigger(
+    'applications', 'submitted_at', 'set',
+    'process_application_submission'::NAME, 'Process submission');
+
+-- 'cleared' — fires when value changes from non-NULL to NULL
+SELECT add_property_change_trigger(
+    'tasks', 'assigned_to', 'cleared',
+    'return_to_unassigned_queue'::NAME, 'Return to queue');
+
+-- 'changed_to' — fires when value changes to a specific value
+SELECT add_property_change_trigger(
+    'inspections', 'result', 'changed_to',
+    'schedule_reinspection'::NAME, 'Auto-schedule reinspection',
+    'failed');
+```
+
+#### Causal Chain Concept
+
+These declarations make automation queryable and visualizable through `schema_entity_dependencies` (which now uses `'causal'` category instead of `'behavioral'`). New relationship types: `property_trigger_modifies` and `status_transition_modifies`.
+
+See `docs/design/INTROSPECTION_UX_DESIGN.md` for the full conceptual model of structural vs. causal relationships.
+
+**Working examples:**
+- `examples/community-center/init-scripts/15_causal_bindings.sql` — 4 status transitions, 7 property change triggers
+- `examples/mottpark/init-scripts/25_mpra_causal_bindings.sql` — 10 status transitions (2 entity types), 15+ property change triggers including Stripe integration
+- `examples/staff-portal/init-scripts/09_staff_portal_causal_bindings.sql` — 8 status transitions (4 entity types), computed status pattern, file-upload trigger binding
+- `examples/pothole/init-scripts/10_causal_bindings.sql` — Property change triggers only (legacy status tables)
 
 ### Entity Action Buttons
 

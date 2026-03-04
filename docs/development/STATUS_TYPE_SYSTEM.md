@@ -1316,6 +1316,52 @@ COMMIT;
 
 ---
 
+## Declaring Status Transitions (v0.33.0+)
+
+The `metadata.status_transitions` table allows declaring allowed transitions between statuses for a given entity type. This makes the state machine queryable from metadata (e.g., "what transitions are allowed from Pending?") without reading PL/pgSQL source code.
+
+### Table: `metadata.status_transitions`
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | SERIAL PK | Auto-generated ID |
+| `entity_type` | TEXT | FK to `metadata.status_types` |
+| `from_status_id` | INT | FK to `metadata.statuses(id)` — source status |
+| `to_status_id` | INT | FK to `metadata.statuses(id)` — target status |
+| `on_transition_rpc` | NAME | Optional function to call on this transition |
+| `display_name` | VARCHAR(100) | Human-readable label (e.g., "Approve") |
+| `description` | TEXT | Optional description |
+| `sort_order` | INT | Display order for transitions from same source |
+| `is_enabled` | BOOLEAN | Soft-disable without deletion |
+
+### Helper Function: `add_status_transition()`
+
+Uses `status_key` strings (not raw IDs) for ergonomic init script usage:
+
+```sql
+SELECT add_status_transition('reservation_request', 'pending', 'approved',
+    'approve_reservation'::NAME, 'Approve');
+SELECT add_status_transition('reservation_request', 'pending', 'denied',
+    'deny_reservation'::NAME, 'Deny');
+SELECT add_status_transition('reservation_request', 'approved', 'cancelled',
+    NULL, 'Cancel');
+```
+
+### Relationship to Entity Actions
+
+Entity actions (v0.18.0+) provide the UI buttons and RPC execution. Status transitions provide the state machine declaration. They complement each other:
+
+- **Entity actions** = "What buttons appear and what RPC runs when clicked"
+- **Status transitions** = "What status changes are allowed and what function binds to each transition"
+
+A typical workflow uses both: entity actions define user-facing buttons with visibility conditions, while status transitions declare the underlying state machine graph for visualization (statecharts) and validation.
+
+### Relationship to Causal Chain Visualization
+
+Status transitions feed into the `schema_entity_dependencies` view with `'causal'` category and `'status_transition_modifies'` relationship type (when `on_transition_rpc` is set and the function has registered entity effects). This enables the context diagram and statechart visualizations planned in Sessions 2-4 of the Introspection UX Design.
+
+---
+
 ## Future: Workflow Engine
 
 ### Phase 5: Workflow Validation (v0.11.0)
