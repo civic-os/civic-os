@@ -206,7 +206,7 @@ Each supplementary view deep-links back to entity-level views.
 | Summary | Property count, status count, action count, trigger count, role access | Aggregated from schema views |
 | Properties | Column list with types, validations, search config | `schema_properties` |
 | Relationships | Structural connections (FKs, M:M) | `schema_entity_dependencies` where `category = 'structural'` |
-| Status lifecycle | Statechart diagram (if entity has status type) | `metadata.statuses` + `metadata.status_transitions` |
+| Status lifecycle | Statechart diagram (if entity has status type). See `STATECHART_VISUALIZATION_DESIGN.md` for rendering decisions. | `metadata.statuses` + `metadata.status_transitions` + `metadata.property_change_triggers` (for listener panel) |
 | Context diagram | Causal I/O boundary visualization | `schema_entity_dependencies` where `category = 'causal'` + `schema_triggers` |
 | Actions | Available action buttons with conditions | `schema_entity_actions` |
 | Permissions | Per-role CRUD + RLS policy summaries | `schema_permissions_matrix` filtered |
@@ -346,11 +346,9 @@ Phase 2 views should display exactly the fields that Phase 3 editing will need t
 
 These items require dedicated design sessions to resolve.
 
-### O1: Statechart Rendering Technology
+### O1: Statechart Rendering Technology — ✅ Resolved (Session 2)
 
-The ERD uses JointJS, which could also render statecharts. Alternatively, a lighter approach (SVG + Angular signals) might suffice given that statecharts are simpler than ERDs (no auto-routing needed). Mermaid state diagram syntax is a useful mental model for the notation.
-
-**Resolve in:** Statechart visualization session.
+**Decision:** Dual renderer. JointJS for the full interactive canvas at `/schema-editor/entity/:type/workflow` (reuses ERD patterns, provides Phase 3 editing for free). Lightweight Angular + static SVG for the inline embed on entity introspection pages. Both share the same layout algorithm and visual encoding. See `STATECHART_VISUALIZATION_DESIGN.md` S2-D1.
 
 ### O2: Causal Chain UI Component
 
@@ -364,11 +362,9 @@ The entity context diagram (incoming left, triggers top, outgoing right) needs c
 
 **Resolve in:** Entity context diagram session.
 
-### O4: All-Transition Status Listeners
+### O4: All-Transition Status Listeners — ✅ Resolved (Session 2)
 
-How to bind functions that fire on any status transition for an entity — via `property_change_triggers` or a dedicated status mechanism. Affects both the metadata schema and the statechart visualization (entity-level annotation vs. edge annotation).
-
-**Resolve in:** Status/workflow design session.
+**Decision:** Use `property_change_triggers` with `change_type = 'any'` on the status column. Rendered as an entity-level panel below the statechart, grouped by effect category (guard / auto_update / sync / audit / notify) rather than PostgreSQL trigger phase. New `effect_category` column on `property_change_triggers` table. See `STATECHART_VISUALIZATION_DESIGN.md` S2-D6.
 
 ### O5: Property Change Trigger Execution Model
 
@@ -412,14 +408,14 @@ Per D9, the visual builder must surface effect-event links bidirectionally. When
 
 Future design sessions, ordered by dependency. Each produces a concrete deliverable.
 
-| # | Session | Depends On | Deliverable | Status |
-|---|---------|-----------|-------------|--------|
-| 1 | Property change trigger schema | This document | SQL migration + integrator registration patterns | ✅ Complete (v0.33.0) |
-| 2 | Statechart visualization | #1 (need transition RPCs formalized) | Component design + rendering approach decision | |
-| 3 | Entity context diagram | #1 | Layout design + data flow from `schema_entity_dependencies` | |
-| 4 | Causal chain UI | #2, #3 (need both views as entry points) | Component design for trace-level visualization | |
-| 5 | Permission-filtered introspection | #1–#4 (need views defined) | Role-based view filtering rules | |
-| 6 | Phase 3 editing affordances | #2, #3, #4 (need read views stable) | Spec for transitioning each view to editable | |
+| # | Session | Status | Deliverable |
+|---|---------|--------|-------------|
+| 1 | Property change trigger schema | ✅ v0.33.0 | `property_change_triggers` table, `on_transition_rpc` bindings, `CAUSAL_BINDINGS_EXAMPLES.md` |
+| 2 | Statechart visualization | ✅ Designed | `STATECHART_VISUALIZATION_DESIGN.md` — 10 decisions, prototype, dark-field UI aesthetic |
+| 3 | Entity context diagram | 📋 Next | Layout design + data flow from `schema_entity_dependencies`. Inputs from S2: effect categories apply here too, zero-transition entities need context diagram as primary view, listener panel overlap to resolve |
+| 4 | Causal chain UI | 📋 Next | Component design for trace-level visualization. Inputs from S2: `on_transition_rpc` = causal entry point, BEFORE/AFTER surfaces here as technical metadata, multi-pathway transitions need multiple entry points |
+| 5 | Permission-filtered introspection | 📋 Blocked on #3–#4 | Role-based view filtering rules |
+| 6 | Phase 3 editing affordances | 📋 Blocked on #3–#4 | Spec for transitioning each view to editable. Prereq: rename `on_transition_rpc` → `caused_by_rpc` |
 
 Sessions 1–3 can be parallelized on the backend (#1) and frontend (#2, #3) tracks.
 
@@ -437,6 +433,7 @@ This document **does not replace** any existing design document. Here is how it 
 | `STATUS_TYPE_SYSTEM.md` | Status transitions are a constrained special case of the causal chain model. The statechart visualization defined here renders data from that system's tables. The `on_transition_rpc` column becomes the primary status-level causal binding. |
 | `ENTITY_ACTIONS.md` | Entity actions are one of the entry points into causal chains. The action's RPC function, conditions, and parameters appear in the trace-level view. |
 | `CODE_BLOCK_SYSTEM_DESIGN.md` | Blockly function visualization may be linked from or embedded in the trace-level causal chain view (see Open Question O7). |
+| `STATECHART_VISUALIZATION_DESIGN.md` | Session 2 deliverable. Defines statechart rendering approach (S2-D1), visual encoding (S2-D2/D3), layout algorithm (S2-D4), transition popover and side panel (S2-D5), effect category system (S2-D6), and `on_transition_rpc` semantics (S2-D10). Resolves O1 and O4. |
 
 ---
 
