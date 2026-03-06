@@ -236,7 +236,7 @@ export class DetailPage {
     tap(() => {
       this.dataLoading.set(true);
     }),
-    mergeMap(([props, actions, _]) => {
+    switchMap(([props, actions, _]) => {
     if(props && props.length > 0 && this.entityKey) {
       // Build columns from display properties
       let columns = props
