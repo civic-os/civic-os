@@ -43,3 +43,4 @@ v0-31-0-user-provisioning [v0-30-0-schema-decisions] 2026-02-27T12:00:00Z Daniel
 v0-31-0-edit-user-info [v0-31-0-user-provisioning] 2026-02-28T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add edit user info with first_name/last_name columns and Keycloak sync
 v0-32-0-entity-action-params [v0-31-0-edit-user-info] 2026-03-01T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add entity action parameters for user-provided input in action modals
 v0-32-0-fix-database-search-path [v0-32-0-entity-action-params] 2026-03-02T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix database-level search_path to include plugins schema for worker connections
+v0-32-2-fix-recurring-template-validation [v0-32-0-fix-database-search-path] 2026-03-06T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix recurring template validation to allow show_on_create fields
