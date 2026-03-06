@@ -1,7 +1,8 @@
 # Introspection UX Architecture - Design Document
 
-**Status:** 📋 Design Phase
+**Status:** ⚠️ Partially Superseded
 **Created:** 2026-03-03
+**Superseded by:** `SYSTEM_MAP_PLAN.md` — replanned after Session 3. The zoom model (D3) expanded from 3 to 5 levels, sessions 4–7 replaced the original sessions 4–6, and the map metaphor became the organizing principle. Foundational decisions D1–D2, D4–D10, and principles P1–P6 remain current.
 **Author:** Design Discussion with Claude
 **Target:** Phase 2 (Introspection) and Phase 3 (Visual Builder)
 
@@ -406,7 +407,9 @@ Per D9, the visual builder must surface effect-event links bidirectionally. When
 
 ## 7. Work Session Plan
 
-Future design sessions, ordered by dependency. Each produces a concrete deliverable.
+> **⚠️ Superseded.** Sessions 4–6 below reflect the original plan. After Session 3 revealed a missing "Entity Overview" zoom level, the remaining work was replanned in `SYSTEM_MAP_PLAN.md` with sessions S4–S7. See that document for the current plan.
+
+~~Future~~ Original design sessions, ordered by dependency. Each produces a concrete deliverable.
 
 | # | Session | Status | Deliverable |
 |---|---------|--------|-------------|
