@@ -93,3 +93,5 @@ echo ""
 echo "Next steps:"
 echo "  1. Restart PostgREST: docker-compose restart postgrest"
 echo "  2. Test your application with Keycloak authentication"
+
+docker compose restart postgrest

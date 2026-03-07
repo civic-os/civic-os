@@ -19,14 +19,15 @@ INSERT INTO metadata.status_types (entity_type, description) VALUES
   ('staff_onboarding', 'Onboarding progress for staff members'),
   ('staff_document', 'Document submission and review status'),
   ('time_off_request', 'Time off request approval status'),
-  ('reimbursement', 'Reimbursement request approval status')
+  ('reimbursement', 'Reimbursement request approval status'),
+  ('time_entry', 'Time entry type (clock in/out)')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- staff_onboarding statuses
-INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal) VALUES
-  ('staff_onboarding', 'Not Started', 'No documents submitted yet', '#6B7280', 1, TRUE, FALSE),
-  ('staff_onboarding', 'Partial', 'Some documents approved, others pending', '#F59E0B', 2, FALSE, FALSE),
-  ('staff_onboarding', 'All Approved', 'All required documents approved', '#22C55E', 3, FALSE, TRUE)
+INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal, status_key) VALUES
+  ('staff_onboarding', 'No Approvals', 'No documents approved or submitted yet', '#6B7280', 1, TRUE, FALSE, 'no_approvals'),
+  ('staff_onboarding', 'In Progress', 'At least one document submitted or under review', '#F59E0B', 2, FALSE, FALSE, 'in_progress'),
+  ('staff_onboarding', 'All Approved', 'All required documents approved', '#22C55E', 3, FALSE, TRUE, 'all_approved')
 ON CONFLICT DO NOTHING;
 
 -- staff_document statuses
@@ -49,6 +50,12 @@ INSERT INTO metadata.statuses (entity_type, display_name, description, color, so
   ('reimbursement', 'Pending', 'Awaiting review', '#F59E0B', 1, TRUE, FALSE),
   ('reimbursement', 'Approved', 'Reimbursement approved', '#22C55E', 2, FALSE, TRUE),
   ('reimbursement', 'Denied', 'Reimbursement denied', '#EF4444', 3, FALSE, TRUE)
+ON CONFLICT DO NOTHING;
+
+-- time_entry statuses (category, not workflow)
+INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal, status_key) VALUES
+  ('time_entry', 'Clock In', 'Staff member clocked in', '#22C55E', 1, TRUE, FALSE, 'clock_in'),
+  ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, FALSE, FALSE, 'clock_out')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -126,7 +133,7 @@ CREATE TABLE time_entries (
   id BIGSERIAL PRIMARY KEY,
   display_name TEXT,
   staff_member_id BIGINT NOT NULL REFERENCES staff_members(id),
-  entry_type TEXT NOT NULL CHECK (entry_type IN ('clock_in', 'clock_out')),
+  entry_type_id INT NOT NULL DEFAULT get_initial_status('time_entry') REFERENCES metadata.statuses(id),
   entry_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   staff_name TEXT NOT NULL,
   site_name TEXT NOT NULL,
@@ -225,6 +232,7 @@ CREATE INDEX idx_staff_documents_reviewed_by ON staff_documents(reviewed_by);
 
 -- time_entries
 CREATE INDEX idx_time_entries_staff_member_id ON time_entries(staff_member_id);
+CREATE INDEX idx_time_entries_entry_type_id ON time_entries(entry_type_id);
 CREATE INDEX idx_time_entries_edited_by ON time_entries(edited_by);
 
 -- time_off_requests
@@ -443,6 +451,11 @@ GRANT EXECUTE ON FUNCTION current_user_is_site_lead() TO authenticated;
 GRANT EXECUTE ON FUNCTION is_lead_of_site(BIGINT) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_site_id_for_staff(BIGINT) TO authenticated;
 
+-- Set staff_member_id defaults now that the function exists
+ALTER TABLE time_entries ALTER COLUMN staff_member_id SET DEFAULT get_current_staff_member_id();
+ALTER TABLE time_off_requests ALTER COLUMN staff_member_id SET DEFAULT get_current_staff_member_id();
+ALTER TABLE reimbursements ALTER COLUMN staff_member_id SET DEFAULT get_current_staff_member_id();
+
 -- ============================================================================
 -- BUSINESS LOGIC TRIGGERS
 -- ============================================================================
@@ -508,14 +521,15 @@ CREATE OR REPLACE FUNCTION set_time_entry_display_name()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  v_type_name TEXT;
 BEGIN
+  SELECT display_name INTO v_type_name
+    FROM metadata.statuses WHERE id = NEW.entry_type_id;
+
   NEW.display_name := NEW.staff_name
     || ' - '
-    || CASE NEW.entry_type
-         WHEN 'clock_in' THEN 'Clock In'
-         WHEN 'clock_out' THEN 'Clock Out'
-         ELSE NEW.entry_type
-       END
+    || COALESCE(v_type_name, 'Unknown')
     || ' - '
     || TO_CHAR(NEW.entry_time, 'Mon DD');
   RETURN NEW;
@@ -669,7 +683,9 @@ DECLARE
   v_staff_member_id BIGINT;
   v_total INT;
   v_approved INT;
+  v_in_progress INT;
   v_approved_status_id INT;
+  v_pending_status_id INT;
   v_new_onboarding_id INT;
 BEGIN
   -- Determine which staff member to recalculate
@@ -679,9 +695,11 @@ BEGIN
     v_staff_member_id := NEW.staff_member_id;
   END IF;
 
-  -- Get the 'Approved' status ID for staff_document
+  -- Get status IDs for staff_document
   SELECT id INTO v_approved_status_id FROM metadata.statuses
     WHERE entity_type = 'staff_document' AND display_name = 'Approved';
+  SELECT id INTO v_pending_status_id FROM metadata.statuses
+    WHERE entity_type = 'staff_document' AND display_name = 'Pending';
 
   -- Count total documents that require approval for this staff member
   SELECT COUNT(*) INTO v_total
@@ -698,19 +716,27 @@ BEGIN
     AND dr.requires_approval = TRUE
     AND sd.status_id = v_approved_status_id;
 
-  -- Determine onboarding status
-  IF v_total = 0 OR v_approved = 0 THEN
-    -- No documents or none approved -> 'Not Started'
-    SELECT id INTO v_new_onboarding_id FROM metadata.statuses
-      WHERE entity_type = 'staff_onboarding' AND display_name = 'Not Started';
-  ELSIF v_approved < v_total THEN
-    -- Some but not all approved -> 'Partial'
-    SELECT id INTO v_new_onboarding_id FROM metadata.statuses
-      WHERE entity_type = 'staff_onboarding' AND display_name = 'Partial';
-  ELSE
+  -- Count how many have progressed beyond Pending (Submitted, Needs Revision, or Approved)
+  SELECT COUNT(*) INTO v_in_progress
+  FROM staff_documents sd
+  JOIN document_requirements dr ON dr.id = sd.requirement_id
+  WHERE sd.staff_member_id = v_staff_member_id
+    AND dr.requires_approval = TRUE
+    AND sd.status_id <> v_pending_status_id;
+
+  -- Determine onboarding status (check most-complete state first)
+  IF v_total > 0 AND v_approved = v_total THEN
     -- All approved -> 'All Approved'
     SELECT id INTO v_new_onboarding_id FROM metadata.statuses
       WHERE entity_type = 'staff_onboarding' AND display_name = 'All Approved';
+  ELSIF v_in_progress > 0 THEN
+    -- At least one doc submitted/under review/approved -> 'In Progress'
+    SELECT id INTO v_new_onboarding_id FROM metadata.statuses
+      WHERE entity_type = 'staff_onboarding' AND display_name = 'In Progress';
+  ELSE
+    -- Nothing submitted yet -> 'No Approvals'
+    SELECT id INTO v_new_onboarding_id FROM metadata.statuses
+      WHERE entity_type = 'staff_onboarding' AND display_name = 'No Approvals';
   END IF;
 
   -- Update the staff member's onboarding status
@@ -830,8 +856,7 @@ CREATE POLICY insert_time_entries ON time_entries
 CREATE POLICY update_time_entries ON time_entries
   FOR UPDATE TO authenticated
   USING (
-    staff_member_id = get_current_staff_member_id()
-    OR is_lead_of_site(get_site_id_for_staff(staff_member_id))
+    is_lead_of_site(get_site_id_for_staff(staff_member_id))
     OR 'manager' = ANY(get_user_roles()) OR is_admin()
   );
 
@@ -860,8 +885,7 @@ CREATE POLICY insert_time_off_requests ON time_off_requests
 CREATE POLICY update_time_off_requests ON time_off_requests
   FOR UPDATE TO authenticated
   USING (
-    staff_member_id = get_current_staff_member_id()
-    OR is_lead_of_site(get_site_id_for_staff(staff_member_id))
+    is_lead_of_site(get_site_id_for_staff(staff_member_id))
     OR 'manager' = ANY(get_user_roles()) OR is_admin()
   );
 
@@ -920,8 +944,7 @@ CREATE POLICY insert_reimbursements ON reimbursements
 CREATE POLICY update_reimbursements ON reimbursements
   FOR UPDATE TO authenticated
   USING (
-    staff_member_id = get_current_staff_member_id()
-    OR is_lead_of_site(get_site_id_for_staff(staff_member_id))
+    is_lead_of_site(get_site_id_for_staff(staff_member_id))
     OR 'manager' = ANY(get_user_roles()) OR is_admin()
   );
 
@@ -1086,17 +1109,7 @@ SET error_message = EXCLUDED.error_message,
     table_name = EXCLUDED.table_name,
     column_name = EXCLUDED.column_name;
 
-INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
-VALUES (
-  'time_entries_entry_type_check',
-  'time_entries',
-  'entry_type',
-  'Entry type must be either "clock_in" or "clock_out".'
-)
-ON CONFLICT (constraint_name) DO UPDATE
-SET error_message = EXCLUDED.error_message,
-    table_name = EXCLUDED.table_name,
-    column_name = EXCLUDED.column_name;
+-- (time_entries_entry_type_check constraint message removed - entry_type is now a status)
 
 -- Notify PostgREST to reload schema cache
 NOTIFY pgrst, 'reload schema';

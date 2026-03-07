@@ -46,6 +46,8 @@ class StaffPortalMockDataGenerator {
   private userIds: string[] = [];
   private staffMemberIds: number[] = [];
   private staffMemberSiteMap: Map<number, number> = new Map(); // staff_id -> site_id
+  private preservedUsers: { pub: any[]; priv: any[] } = { pub: [], priv: [] };
+  private keycloakTestUsers: { id: string; display_name: string; email: string }[] = [];
 
   constructor(config: Partial<MockDataConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -73,7 +75,7 @@ class StaffPortalMockDataGenerator {
     const result = await this.client.query(
       `SELECT id, entity_type, display_name, status_key, is_initial
        FROM metadata.statuses
-       WHERE entity_type IN ('staff_onboarding', 'staff_document', 'time_off_request', 'reimbursement')
+       WHERE entity_type IN ('staff_onboarding', 'staff_document', 'time_off_request', 'reimbursement', 'staff_task', 'time_entry')
        ORDER BY entity_type, sort_order`
     );
     for (const row of result.rows) {
@@ -109,9 +111,89 @@ class StaffPortalMockDataGenerator {
     return `'${value}'`;
   }
 
+  private async fetchKeycloakTestUsers(): Promise<void> {
+    const keycloakUrl = process.env['KEYCLOAK_URL'] || 'http://localhost:8082';
+    const realm = process.env['KEYCLOAK_REALM'] || 'civic-os-dev';
+    const clientId = process.env['KEYCLOAK_CLIENT_ID'] || 'civic-os-dev-client';
+    const tokenUrl = `${keycloakUrl}/realms/${realm}/protocol/openid-connect/token`;
+
+    // Fetch UUIDs for test users via resource-owner password grant
+    const testUsers = [
+      { username: 'testuser', name: 'Test User', email: 'testuser@example.com' },
+    ];
+
+    for (const tu of testUsers) {
+      try {
+        const body = new URLSearchParams({
+          grant_type: 'password',
+          client_id: clientId,
+          username: tu.username,
+          password: tu.username, // dev password = username
+        });
+        const res = await fetch(tokenUrl, { method: 'POST', body });
+        if (!res.ok) continue;
+        const data = await res.json();
+        // Decode JWT to get sub claim (UUID)
+        const payload = JSON.parse(Buffer.from(data.access_token.split('.')[1], 'base64').toString());
+        this.keycloakTestUsers.push({
+          id: payload.sub,
+          display_name: tu.name,
+          email: tu.email,
+        });
+        console.log(`  Found Keycloak user "${tu.username}" (${payload.sub})`);
+      } catch (err: any) {
+        console.warn(`  Warning: Could not fetch Keycloak user "${tu.username}": ${err.message}`);
+      }
+    }
+  }
+
+  private async preserveKeycloakUsers(): Promise<void> {
+    if (!this.client) return;
+    try {
+      const pubResult = await this.client.query(
+        `SELECT id, display_name FROM metadata.civic_os_users`
+      );
+      const privResult = await this.client.query(
+        `SELECT id, display_name, email, phone FROM metadata.civic_os_users_private`
+      );
+      this.preservedUsers = { pub: pubResult.rows, priv: privResult.rows };
+      if (this.preservedUsers.pub.length > 0) {
+        console.log(`  Preserved ${this.preservedUsers.pub.length} existing Keycloak user(s)`);
+      }
+    } catch (err: any) {
+      console.warn(`  Warning: Could not preserve Keycloak users: ${err.message}`);
+    }
+  }
+
+  private async restoreKeycloakUsers(): Promise<void> {
+    if (!this.client || this.preservedUsers.pub.length === 0) return;
+    try {
+      for (const u of this.preservedUsers.pub) {
+        await this.client.query(
+          `INSERT INTO metadata.civic_os_users (id, display_name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`,
+          [u.id, u.display_name]
+        );
+      }
+      for (const u of this.preservedUsers.priv) {
+        await this.client.query(
+          `INSERT INTO metadata.civic_os_users_private (id, display_name, email, phone) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING`,
+          [u.id, u.display_name, u.email, u.phone]
+        );
+      }
+      console.log(`  Restored ${this.preservedUsers.pub.length} Keycloak user(s)`);
+    } catch (err: any) {
+      console.warn(`  Warning: Could not restore Keycloak users: ${err.message}`);
+    }
+  }
+
   private async truncateTables(): Promise<void> {
     if (!this.client) throw new Error('Database not connected');
     console.log('Truncating existing mock data...\n');
+
+    // Preserve Keycloak-synced users before truncation so we can link them to staff members
+    if (this.config.generateUsers) {
+      await this.preserveKeycloakUsers();
+    }
 
     // Break circular FK: sites.lead_id -> staff_members before truncating
     try {
@@ -123,7 +205,7 @@ class StaffPortalMockDataGenerator {
 
     // Delete child tables first (no CASCADE to avoid wiping seed data)
     const tables = [
-      'offboarding_feedback', 'reimbursements', 'incident_reports',
+      'staff_tasks', 'offboarding_feedback', 'reimbursements', 'incident_reports',
       'time_off_requests', 'time_entries', 'staff_documents', 'staff_members',
     ];
 
@@ -157,9 +239,38 @@ class StaffPortalMockDataGenerator {
     const publicUsers: any[] = [];
     const privateUsers: any[] = [];
 
-    console.log(`Generating ${count} mock users...`);
+    // Include Keycloak test users first so they get linked to staff members
+    const includedIds = new Set<string>();
 
-    for (let i = 0; i < count; i++) {
+    // Keycloak test users (fetched via password grant)
+    for (const tu of this.keycloakTestUsers) {
+      publicUsers.push({ id: tu.id, display_name: tu.display_name });
+      privateUsers.push({ id: tu.id, display_name: tu.display_name, email: tu.email, phone: null });
+      this.userIds.push(tu.id);
+      includedIds.add(tu.id);
+    }
+
+    // Preserved DB users (from prior login sessions)
+    const keycloakIds = new Set(this.keycloakTestUsers.map(u => u.id));
+    for (const u of this.preservedUsers.pub) {
+      if (includedIds.has(u.id)) continue; // skip duplicates (Keycloak test users)
+      publicUsers.push({ id: u.id, display_name: u.display_name });
+      this.userIds.push(u.id);
+      includedIds.add(u.id);
+    }
+    for (const u of this.preservedUsers.priv) {
+      if (keycloakIds.has(u.id)) continue; // skip only Keycloak test users (already have priv record)
+      privateUsers.push({ id: u.id, display_name: u.display_name, email: u.email, phone: u.phone });
+    }
+
+    if (includedIds.size > 0) {
+      console.log(`Including ${includedIds.size} real user(s) (will be linked to staff members)`);
+    }
+
+    const remaining = count - includedIds.size;
+    console.log(`Generating ${remaining > 0 ? remaining : 0} additional mock users...`);
+
+    for (let i = 0; i < remaining; i++) {
       const fullName = faker.person.fullName();
       const firstName = fullName.split(' ')[0];
       const lastName = fullName.split(' ')[1] || 'Smith';
@@ -255,7 +366,7 @@ class StaffPortalMockDataGenerator {
 
       records.push({
         staff_member_id: staffId,
-        entry_type: isClockIn ? 'clock_in' : 'clock_out',
+        entry_type_id: this.getStatusId('time_entry', isClockIn ? 'clock_in' : 'clock_out'),
         entry_time: baseDate.toISOString(),
       });
     }
@@ -462,6 +573,79 @@ class StaffPortalMockDataGenerator {
     return records;
   }
 
+  // ── Staff Tasks ──────────────────────────────────────────
+
+  private generateStaffTasks(): any[] {
+    const count = this.config.recordsPerEntity['staff_tasks'] || 25;
+    const records: any[] = [];
+
+    console.log(`Generating ${count} staff tasks...`);
+
+    const tasks = [
+      { title: 'Complete fire safety training', desc: 'Watch the 30-minute fire safety video and pass the quiz with 80% or higher.' },
+      { title: 'Submit lesson plan for Week 3', desc: 'Lesson plan should include reading, math enrichment, and outdoor activity blocks.' },
+      { title: 'Inventory classroom supplies', desc: 'Count and record all art supplies, books, and learning materials. Report shortages.' },
+      { title: 'Set up parent communication folder', desc: 'Create weekly update template and distribution list for your classroom parents.' },
+      { title: 'Attend CPR certification session', desc: 'Saturday 9 AM at the main site. Bring comfortable clothes and closed-toe shoes.' },
+      { title: 'Review student allergy list', desc: 'Familiarize yourself with all student allergies and emergency procedures for your group.' },
+      { title: 'Prepare field trip permission slips', desc: 'Print, organize, and distribute permission slips for the upcoming museum visit.' },
+      { title: 'Clean and organize storage room', desc: 'Sort donations, discard damaged items, and label all storage bins.' },
+      { title: 'Update attendance records', desc: 'Reconcile paper sign-in sheets with digital records for the past two weeks.' },
+      { title: 'Coordinate with lunch volunteers', desc: 'Confirm volunteer schedule for next week and communicate any dietary changes.' },
+      { title: 'Post weekly photos to parent portal', desc: 'Select 5-8 activity photos (no faces of non-consented students) and upload with captions.' },
+      { title: 'Complete incident report follow-up', desc: 'Document resolution steps taken for the playground incident from last Thursday.' },
+      { title: 'Prep materials for science week', desc: 'Gather supplies for volcano, solar system, and plant growth experiments.' },
+      { title: 'Conduct student reading assessments', desc: 'Administer the standardized reading level assessment to all students in your group.' },
+      { title: 'Submit mileage reimbursement', desc: 'Log all site-to-site travel for the month and submit with odometer photos.' },
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const staffId = faker.helpers.arrayElement(this.staffMemberIds);
+      const siteId = this.staffMemberSiteMap.get(staffId) || 1;
+      const task = tasks[i % tasks.length];
+
+      // Status distribution: 30% open, 20% in progress, 40% completed, 10% cancelled
+      const rand = Math.random();
+      let statusId: number;
+      let completionNotes: string | null = null;
+      let completedAt: string | null = null;
+
+      if (rand < 0.3) {
+        statusId = this.getStatusId('staff_task', 'open');
+      } else if (rand < 0.5) {
+        statusId = this.getStatusId('staff_task', 'in_progress');
+      } else if (rand < 0.9) {
+        statusId = this.getStatusId('staff_task', 'completed');
+        completionNotes = faker.helpers.arrayElement([
+          'Done. No issues.',
+          'Completed on time.',
+          'Finished — submitted to site lead for review.',
+          'All items checked and verified.',
+        ]);
+        completedAt = faker.date.recent({ days: 21 }).toISOString();
+      } else {
+        statusId = this.getStatusId('staff_task', 'cancelled');
+      }
+
+      const dueDate = faker.datatype.boolean({ probability: 0.8 })
+        ? faker.date.between({ from: '2026-06-20', to: '2026-08-30' }).toISOString().split('T')[0]
+        : null;
+
+      records.push({
+        display_name: task.title,
+        description: task.desc,
+        assigned_to_id: staffId,
+        site_id: siteId,
+        due_date: dueDate,
+        status_id: statusId,
+        completion_notes: completionNotes,
+        completed_at: completedAt,
+      });
+    }
+
+    return records;
+  }
+
   // ── Offboarding Feedback ───────────────────────────────
 
   private generateOffboardingFeedback(): any[] {
@@ -510,6 +694,97 @@ class StaffPortalMockDataGenerator {
     }
 
     return records;
+  }
+
+  // ── Document Status Progression ────────────────────────
+  // Updates auto-created staff_documents to various statuses for realistic onboarding data.
+  // This triggers update_onboarding_status() which updates staff_members.onboarding_status_id.
+
+  private async progressStaffDocuments(): Promise<void> {
+    if (!this.client) return;
+
+    console.log('Progressing staff documents to various statuses...');
+
+    // Get staff_document status IDs
+    const statusResult = await this.client.query(
+      `SELECT id, display_name FROM metadata.statuses WHERE entity_type = 'staff_document' ORDER BY sort_order`
+    );
+    const docStatuses = new Map<string, number>();
+    for (const row of statusResult.rows) {
+      docStatuses.set(row.display_name, row.id);
+    }
+
+    const submittedId = docStatuses.get('Submitted');
+    const approvedId = docStatuses.get('Approved');
+    const needsRevisionId = docStatuses.get('Needs Revision');
+    if (!submittedId || !approvedId || !needsRevisionId) {
+      console.warn('  Warning: Could not find all document statuses');
+      return;
+    }
+
+    // Get all staff documents grouped by staff member
+    const docsResult = await this.client.query(
+      `SELECT id, staff_member_id FROM staff_documents ORDER BY staff_member_id, id`
+    );
+
+    const byStaff = new Map<number, number[]>();
+    for (const row of docsResult.rows) {
+      const list = byStaff.get(row.staff_member_id) || [];
+      list.push(row.id);
+      byStaff.set(row.staff_member_id, list);
+    }
+
+    let updated = 0;
+    for (const [staffId, docIds] of byStaff.entries()) {
+      // Assign a progression level per staff member for variety
+      const roll = faker.number.float({ min: 0, max: 1 });
+      let statusAssignments: number[];
+
+      if (roll < 0.15) {
+        // 15% — all pending (no change needed)
+        continue;
+      } else if (roll < 0.35) {
+        // 20% — some submitted, rest pending
+        statusAssignments = docIds.map((_, i) => i < Math.ceil(docIds.length / 2) ? submittedId : 0);
+      } else if (roll < 0.55) {
+        // 20% — mix of submitted and needs revision
+        statusAssignments = docIds.map((_, i) => {
+          if (i < Math.ceil(docIds.length / 3)) return approvedId;
+          if (i < Math.ceil(docIds.length * 2 / 3)) return submittedId;
+          return needsRevisionId;
+        });
+      } else if (roll < 0.75) {
+        // 20% — mostly approved, one or two pending
+        statusAssignments = docIds.map((_, i) => i < docIds.length - 1 ? approvedId : 0);
+      } else {
+        // 25% — all approved (onboarding complete)
+        statusAssignments = docIds.map(() => approvedId);
+      }
+
+      for (let i = 0; i < docIds.length; i++) {
+        const newStatus = statusAssignments[i];
+        if (newStatus && newStatus > 0) {
+          await this.client.query(
+            `UPDATE staff_documents SET status_id = $1 WHERE id = $2`,
+            [newStatus, docIds[i]]
+          );
+          updated++;
+        }
+      }
+    }
+
+    console.log(`  Updated ${updated} staff documents to various statuses`);
+
+    // Verify onboarding distribution
+    const onboardingResult = await this.client.query(
+      `SELECT s.display_name, COUNT(*) as count
+       FROM staff_members sm JOIN metadata.statuses s ON sm.onboarding_status_id = s.id
+       GROUP BY s.display_name ORDER BY s.display_name`
+    );
+    console.log('  Onboarding status distribution:');
+    for (const row of onboardingResult.rows) {
+      console.log(`    ${row.display_name}: ${row.count}`);
+    }
   }
 
   // ── SQL Generation ─────────────────────────────────────
@@ -603,6 +878,9 @@ class StaffPortalMockDataGenerator {
 
       console.log('Generating mock data...\n');
 
+      // 0. Fetch Keycloak test user UUIDs (so we can link them to staff members)
+      await this.fetchKeycloakTestUsers();
+
       // 1. Generate users
       let userEmails = new Map<string, string>(); // userId -> email
       if (this.config.generateUsers) {
@@ -658,12 +936,26 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('reimbursements', reimbursements);
       }
 
-      // 7. Offboarding feedback (unique per staff member)
+      // 7. Staff tasks
+      const staffTasks = this.generateStaffTasks();
+      if (sqlOnly) {
+        this.addInsertSQL('staff_tasks', staffTasks);
+      } else {
+        await this.insertRecords('staff_tasks', staffTasks);
+      }
+
+      // 8. Offboarding feedback (unique per staff member)
       const feedback = this.generateOffboardingFeedback();
       if (sqlOnly) {
         this.addInsertSQL('offboarding_feedback', feedback);
       } else {
         await this.insertRecords('offboarding_feedback', feedback);
+      }
+
+      // 9. Update some staff_documents to various statuses for realistic onboarding progress
+      // (staff_documents are auto-created by trigger in Pending status)
+      if (!sqlOnly && this.client) {
+        await this.progressStaffDocuments();
       }
 
       if (sqlOnly) {
@@ -675,6 +967,7 @@ class StaffPortalMockDataGenerator {
           '',
           '-- Clear existing mock data (preserves seed/reference data)',
           `UPDATE public.sites SET lead_id = NULL;`,
+          `DELETE FROM public.staff_tasks;`,
           `DELETE FROM public.offboarding_feedback;`,
           `DELETE FROM public.reimbursements;`,
           `DELETE FROM public.incident_reports;`,
@@ -690,7 +983,7 @@ class StaffPortalMockDataGenerator {
         // Add sequence refresh at the end
         const footer = [
           '-- Refresh sequences',
-          ...['staff_members', 'time_entries', 'time_off_requests', 'incident_reports', 'reimbursements', 'offboarding_feedback'].map(
+          ...['staff_members', 'time_entries', 'time_off_requests', 'incident_reports', 'reimbursements', 'staff_tasks', 'offboarding_feedback'].map(
             t => `SELECT setval('public."${t}_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM public."${t}"));`
           ),
           '',

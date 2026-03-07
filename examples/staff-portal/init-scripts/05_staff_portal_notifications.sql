@@ -13,6 +13,7 @@
 --   8. reimbursement_denied      - Reimbursement denied
 --   9. incident_report_filed     - New incident report created
 --  10. onboarding_complete       - Staff member onboarding fully approved
+--  11. document_submitted        - Staff doc submitted for manager review
 -- ============================================================================
 
 -- ============================================================================
@@ -73,7 +74,7 @@ GRANT EXECUTE ON FUNCTION get_site_lead_email TO authenticated;
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'document_needs_revision',
   'Sent to staff member when their document status changes to Needs Revision',
@@ -131,13 +132,16 @@ Requirement: {{.Entity.RequirementName}}
 Please upload a revised version at your earliest convenience.
 
 View Document: {{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}
-'
+',
+
+  'FFSC: Your document "{{.Entity.DocumentName}}" needs revision. {{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 2: document_approved
@@ -145,7 +149,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'document_approved',
   'Sent to staff member when their document status changes to Approved',
@@ -201,13 +205,16 @@ Requirement: {{.Entity.RequirementName}}
 No further action is needed for this document.
 
 View Document: {{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}
-'
+',
+
+  'FFSC: Your document "{{.Entity.DocumentName}}" has been approved. {{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 3: time_off_submitted
@@ -215,7 +222,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'time_off_submitted',
   'Sent to site lead when a staff member creates a new time-off request',
@@ -269,13 +276,16 @@ End Date: {{.Entity.EndDate}}
 {{if .Entity.Reason}}Reason: {{.Entity.Reason}}{{end}}
 
 Review Request: {{.Metadata.site_url}}/view/time_off_requests/{{.Entity.RequestId}}
-'
+',
+
+  'FFSC: {{.Entity.StaffName}} submitted a time-off request ({{.Entity.StartDate}} - {{.Entity.EndDate}}). {{.Metadata.site_url}}/view/time_off_requests/{{.Entity.RequestId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 4: time_off_approved
@@ -283,7 +293,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'time_off_approved',
   'Sent to staff member when their time-off request is approved',
@@ -341,13 +351,16 @@ End Date: {{.Entity.EndDate}}
 {{if .Entity.ResponseNotes}}Notes: {{.Entity.ResponseNotes}}{{end}}
 
 View Request: {{.Metadata.site_url}}/view/time_off_requests/{{.Entity.RequestId}}
-'
+',
+
+  'FFSC: Your time off ({{.Entity.StartDate}} - {{.Entity.EndDate}}) has been approved. {{.Metadata.site_url}}/view/time_off_requests/{{.Entity.RequestId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 5: time_off_denied
@@ -355,7 +368,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'time_off_denied',
   'Sent to staff member when their time-off request is denied',
@@ -420,13 +433,16 @@ End Date: {{.Entity.EndDate}}
 View Request: {{.Metadata.site_url}}/view/time_off_requests/{{.Entity.RequestId}}
 
 Contact your site lead or program manager for more information.
-'
+',
+
+  'FFSC: Your time off ({{.Entity.StartDate}} - {{.Entity.EndDate}}) was denied. {{.Metadata.site_url}}/view/time_off_requests/{{.Entity.RequestId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 6: reimbursement_submitted
@@ -434,7 +450,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'reimbursement_submitted',
   'Sent to all managers when a staff member submits a reimbursement request',
@@ -486,13 +502,16 @@ Description: {{.Entity.Description}}
 Has Receipt: {{if .Entity.HasReceipt}}Yes{{else}}No{{end}}
 
 Review Request: {{.Metadata.site_url}}/view/reimbursements/{{.Entity.ReimbursementId}}
-'
+',
+
+  'FFSC: {{.Entity.StaffName}} submitted a reimbursement ({{.Entity.Amount}}). {{.Metadata.site_url}}/view/reimbursements/{{.Entity.ReimbursementId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 7: reimbursement_approved
@@ -500,7 +519,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'reimbursement_approved',
   'Sent to staff member when their reimbursement is approved',
@@ -560,13 +579,16 @@ Description: {{.Entity.Description}}
 View Details: {{.Metadata.site_url}}/view/reimbursements/{{.Entity.ReimbursementId}}
 
 Payment will be processed according to the standard reimbursement schedule.
-'
+',
+
+  'FFSC: Your reimbursement for {{.Entity.Amount}} has been approved. {{.Metadata.site_url}}/view/reimbursements/{{.Entity.ReimbursementId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 8: reimbursement_denied
@@ -574,7 +596,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'reimbursement_denied',
   'Sent to staff member when their reimbursement is denied',
@@ -639,13 +661,16 @@ Description: {{.Entity.Description}}
 View Details: {{.Metadata.site_url}}/view/reimbursements/{{.Entity.ReimbursementId}}
 
 Contact your program manager for more information.
-'
+',
+
+  'FFSC: Your reimbursement for {{.Entity.Amount}} was denied. {{.Metadata.site_url}}/view/reimbursements/{{.Entity.ReimbursementId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 9: incident_report_filed
@@ -653,7 +678,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'incident_report_filed',
   'Sent to site lead and managers when an incident report is filed',
@@ -713,13 +738,16 @@ Description: {{.Entity.Description}}
 Follow-up Needed: {{if .Entity.FollowUpNeeded}}Yes{{else}}No{{end}}
 
 View Full Report: {{.Metadata.site_url}}/view/incident_reports/{{.Entity.ReportId}}
-'
+',
+
+  'FFSC: Incident report filed at {{.Entity.SiteName}} on {{.Entity.IncidentDate}}. {{.Metadata.site_url}}/view/incident_reports/{{.Entity.ReportId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TEMPLATE 10: onboarding_complete
@@ -727,7 +755,7 @@ ON CONFLICT (name) DO UPDATE SET
 -- ============================================================================
 
 INSERT INTO metadata.notification_templates (
-  name, description, subject_template, html_template, text_template
+  name, description, subject_template, html_template, text_template, sms_template
 ) VALUES (
   'onboarding_complete',
   'Sent to managers when a staff member completes all onboarding documents',
@@ -782,22 +810,100 @@ All required documents have been submitted and approved.
 This staff member is cleared to begin work.
 
 View Staff Profile: {{.Metadata.site_url}}/view/staff_members/{{.Entity.StaffMemberId}}
-'
+',
+
+  'FFSC: {{.Entity.StaffName}} has completed all onboarding documents. {{.Metadata.site_url}}/view/staff_members/{{.Entity.StaffMemberId}}'
 )
 ON CONFLICT (name) DO UPDATE SET
   description = EXCLUDED.description,
   subject_template = EXCLUDED.subject_template,
   html_template = EXCLUDED.html_template,
-  text_template = EXCLUDED.text_template;
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
+
+-- ============================================================================
+-- TEMPLATE 11: document_submitted
+-- Sent to managers when a staff member submits a document for review
+-- ============================================================================
+
+INSERT INTO metadata.notification_templates (
+  name, description, subject_template, html_template, text_template, sms_template
+) VALUES (
+  'document_submitted',
+  'Sent to managers when a staff document is submitted for review',
+
+  'Document submitted for review: {{.Entity.DocumentName}}',
+
+  '<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #3B82F6; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+    .content { background: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
+    .info-box { background: white; padding: 15px; margin: 15px 0; border-radius: 6px; border-left: 4px solid #3B82F6; }
+    .label { font-weight: bold; color: #1f2937; }
+    .button { display: inline-block; background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0; }
+    .footer { margin-top: 20px; padding-top: 20px; border-top: 2px solid #e5e7eb; font-size: 0.9em; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 style="margin: 0;">Document Submitted for Review</h1>
+    </div>
+    <div class="content">
+      <p>A staff member has submitted a document for your review.</p>
+      <div class="info-box">
+        <p><span class="label">Staff Member:</span> {{.Entity.StaffName}}</p>
+        <p><span class="label">Document:</span> {{.Entity.DocumentName}}</p>
+        <p><span class="label">Requirement:</span> {{.Entity.RequirementName}}</p>
+        <p><span class="label">Site:</span> {{.Entity.SiteName}}</p>
+      </div>
+      <p>Please review and approve or request revisions.</p>
+      <a href="{{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}" class="button">Review Document</a>
+      <div class="footer">
+        <p>You are receiving this because you are a program manager.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>',
+
+  'DOCUMENT SUBMITTED FOR REVIEW
+=================================
+
+A staff member has submitted a document for your review.
+
+Staff Member: {{.Entity.StaffName}}
+Document: {{.Entity.DocumentName}}
+Requirement: {{.Entity.RequirementName}}
+Site: {{.Entity.SiteName}}
+
+Please review and approve or request revisions.
+
+Review Document: {{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}
+',
+
+  'FFSC: {{.Entity.StaffName}} submitted "{{.Entity.DocumentName}}" for review. {{.Metadata.site_url}}/view/staff_documents/{{.Entity.DocumentId}}'
+)
+ON CONFLICT (name) DO UPDATE SET
+  description = EXCLUDED.description,
+  subject_template = EXCLUDED.subject_template,
+  html_template = EXCLUDED.html_template,
+  text_template = EXCLUDED.text_template,
+  sms_template = EXCLUDED.sms_template;
 
 -- ============================================================================
 -- TRIGGER FUNCTIONS
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
--- TRIGGER 1 & 2: Document status change notifications
+-- TRIGGER 1, 2 & 11: Document status change notifications
 -- Fires on status_id change of staff_documents
 -- Sends document_needs_revision or document_approved to the staff member
+-- Sends document_submitted to managers when status changes to Submitted
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION notify_document_status_change()
 RETURNS TRIGGER
@@ -805,15 +911,20 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
+  v_submitted_id INT;
   v_needs_revision_id INT;
   v_approved_id INT;
   v_staff_user_id UUID;
   v_staff_name TEXT;
+  v_site_name TEXT;
   v_requirement_name TEXT;
   v_entity_data JSONB;
   v_template TEXT;
+  v_mgr RECORD;
 BEGIN
   -- Get relevant status IDs
+  SELECT id INTO v_submitted_id FROM metadata.statuses
+    WHERE entity_type = 'staff_document' AND display_name = 'Submitted';
   SELECT id INTO v_needs_revision_id FROM metadata.statuses
     WHERE entity_type = 'staff_document' AND display_name = 'Needs Revision';
   SELECT id INTO v_approved_id FROM metadata.statuses
@@ -824,16 +935,7 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Determine which template to use
-  IF NEW.status_id = v_needs_revision_id THEN
-    v_template := 'document_needs_revision';
-  ELSIF NEW.status_id = v_approved_id THEN
-    v_template := 'document_approved';
-  ELSE
-    RETURN NEW;  -- No notification for other status changes
-  END IF;
-
-  -- Look up staff member info
+  -- Look up staff member info (needed for all templates)
   SELECT sm.user_id, sm.display_name
     INTO v_staff_user_id, v_staff_name
     FROM staff_members sm
@@ -843,6 +945,49 @@ BEGIN
   SELECT dr.display_name INTO v_requirement_name
     FROM document_requirements dr
     WHERE dr.id = NEW.requirement_id;
+
+  -- Handle Submitted → notify managers
+  IF NEW.status_id = v_submitted_id THEN
+    -- Look up site name for manager context
+    SELECT s.display_name INTO v_site_name
+      FROM staff_members sm
+      JOIN sites s ON s.id = sm.site_id
+      WHERE sm.id = NEW.staff_member_id;
+
+    v_entity_data := jsonb_build_object(
+      'DocumentId', NEW.id,
+      'DocumentName', NEW.display_name,
+      'StaffName', v_staff_name,
+      'RequirementName', v_requirement_name,
+      'SiteName', v_site_name
+    );
+
+    FOR v_mgr IN
+      SELECT DISTINCT user_id FROM get_users_with_role('manager')
+    LOOP
+      INSERT INTO metadata.notifications (
+        user_id, template_name, entity_type, entity_id, entity_data, channels
+      ) VALUES (
+        v_mgr.user_id,
+        'document_submitted',
+        'staff_documents',
+        NEW.id,
+        v_entity_data,
+        ARRAY['email', 'sms']
+      );
+    END LOOP;
+
+    RETURN NEW;
+  END IF;
+
+  -- Handle Needs Revision or Approved → notify staff member
+  IF NEW.status_id = v_needs_revision_id THEN
+    v_template := 'document_needs_revision';
+  ELSIF NEW.status_id = v_approved_id THEN
+    v_template := 'document_approved';
+  ELSE
+    RETURN NEW;  -- No notification for other status changes
+  END IF;
 
   -- Only send if staff member has a linked user account
   IF v_staff_user_id IS NULL THEN
@@ -860,13 +1005,14 @@ BEGIN
 
   -- Insert notification
   INSERT INTO metadata.notifications (
-    user_id, template_name, entity_type, entity_id, entity_data
+    user_id, template_name, entity_type, entity_id, entity_data, channels
   ) VALUES (
     v_staff_user_id,
     v_template,
     'staff_documents',
     NEW.id,
-    v_entity_data
+    v_entity_data,
+    ARRAY['email', 'sms']
   );
 
   RETURN NEW;
@@ -912,13 +1058,14 @@ BEGIN
     SELECT user_id FROM get_site_lead_email(v_site_id)
   LOOP
     INSERT INTO metadata.notifications (
-      user_id, template_name, entity_type, entity_id, entity_data
+      user_id, template_name, entity_type, entity_id, entity_data, channels
     ) VALUES (
       v_lead.user_id,
       'time_off_submitted',
       'time_off_requests',
       NEW.id,
-      v_entity_data
+      v_entity_data,
+      ARRAY['email', 'sms']
     );
   END LOOP;
 
@@ -984,13 +1131,14 @@ BEGIN
   );
 
   INSERT INTO metadata.notifications (
-    user_id, template_name, entity_type, entity_id, entity_data
+    user_id, template_name, entity_type, entity_id, entity_data, channels
   ) VALUES (
     v_staff_user_id,
     v_template,
     'time_off_requests',
     NEW.id,
-    v_entity_data
+    v_entity_data,
+    ARRAY['email', 'sms']
   );
 
   RETURN NEW;
@@ -1029,17 +1177,16 @@ BEGIN
   -- Send to all managers
   FOR v_mgr IN
     SELECT DISTINCT user_id FROM get_users_with_role('manager')
-    UNION
-    SELECT DISTINCT user_id FROM get_users_with_role('admin')
   LOOP
     INSERT INTO metadata.notifications (
-      user_id, template_name, entity_type, entity_id, entity_data
+      user_id, template_name, entity_type, entity_id, entity_data, channels
     ) VALUES (
       v_mgr.user_id,
       'reimbursement_submitted',
       'reimbursements',
       NEW.id,
-      v_entity_data
+      v_entity_data,
+      ARRAY['email', 'sms']
     );
   END LOOP;
 
@@ -1105,13 +1252,14 @@ BEGIN
   );
 
   INSERT INTO metadata.notifications (
-    user_id, template_name, entity_type, entity_id, entity_data
+    user_id, template_name, entity_type, entity_id, entity_data, channels
   ) VALUES (
     v_staff_user_id,
     v_template,
     'reimbursements',
     NEW.id,
-    v_entity_data
+    v_entity_data,
+    ARRAY['email', 'sms']
   );
 
   RETURN NEW;
@@ -1162,13 +1310,14 @@ BEGIN
     SELECT user_id FROM get_site_lead_email(NEW.site_id)
   LOOP
     INSERT INTO metadata.notifications (
-      user_id, template_name, entity_type, entity_id, entity_data
+      user_id, template_name, entity_type, entity_id, entity_data, channels
     ) VALUES (
       v_recipient.user_id,
       'incident_report_filed',
       'incident_reports',
       NEW.id,
-      v_entity_data
+      v_entity_data,
+      ARRAY['email', 'sms']
     );
     v_notified_users := array_append(v_notified_users, v_recipient.user_id);
   END LOOP;
@@ -1176,18 +1325,17 @@ BEGIN
   -- Send to all managers (avoiding duplicates with site lead)
   FOR v_recipient IN
     SELECT DISTINCT user_id FROM get_users_with_role('manager')
-    UNION
-    SELECT DISTINCT user_id FROM get_users_with_role('admin')
   LOOP
     IF NOT v_recipient.user_id = ANY(v_notified_users) THEN
       INSERT INTO metadata.notifications (
-        user_id, template_name, entity_type, entity_id, entity_data
+        user_id, template_name, entity_type, entity_id, entity_data, channels
       ) VALUES (
         v_recipient.user_id,
         'incident_report_filed',
         'incident_reports',
         NEW.id,
-        v_entity_data
+        v_entity_data,
+        ARRAY['email', 'sms']
       );
     END IF;
   END LOOP;
@@ -1238,17 +1386,16 @@ BEGIN
     -- Send to all managers
     FOR v_mgr IN
       SELECT DISTINCT user_id FROM get_users_with_role('manager')
-      UNION
-      SELECT DISTINCT user_id FROM get_users_with_role('admin')
     LOOP
       INSERT INTO metadata.notifications (
-        user_id, template_name, entity_type, entity_id, entity_data
+        user_id, template_name, entity_type, entity_id, entity_data, channels
       ) VALUES (
         v_mgr.user_id,
         'onboarding_complete',
         'staff_members',
         NEW.id,
-        v_entity_data
+        v_entity_data,
+        ARRAY['email', 'sms']
       );
     END LOOP;
   END IF;

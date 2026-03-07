@@ -5,7 +5,8 @@
     "time_off_requests": 15,
     "incident_reports": 8,
     "reimbursements": 10,
-    "offboarding_feedback": 5
+    "offboarding_feedback": 5,
+    "staff_tasks": 25
   },
   "excludeTables": [
     "staff_roles", "sites", "document_requirements", "staff_documents"

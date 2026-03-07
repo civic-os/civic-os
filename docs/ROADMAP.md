@@ -90,6 +90,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
 - [x] **Phase 2 - Dynamic Widgets**: Filtered list widget, map widget with clustering, calendar widget, auto-refresh infrastructure
 - [ ] **Phase 3 - Management**: Dashboard management UI, widget editor, user preferences, global filter bar
+  - [ ] **Role-based default dashboards** - `default_for_roles TEXT[]` column on `metadata.dashboards` so different roles land on different dashboards (e.g., staff → Staff Portal, managers → Admin Overview)
 - [ ] **Phase 4 - Polish**: Drag-and-drop reordering, dashboard templates, embedded links, mobile optimizations
 - [ ] **Phase 5 - Advanced Widgets**: Stat cards (backend aggregation required), charts (Chart.js), query results from views
 - [ ] **Phase 6 - Permissions**: Role-based visibility, widget-level permissions, private dashboards

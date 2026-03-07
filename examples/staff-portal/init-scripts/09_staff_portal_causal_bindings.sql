@@ -8,6 +8,8 @@
 --   time_off_request: Pending → Approved/Denied
 --   reimbursement: Pending → Approved/Denied
 --
+-- Note: staff_task transitions are in 10_staff_tasks.sql (runs after statuses are created)
+--
 -- Note: Uses direct INSERTs (not add_status_transition/add_property_change_trigger
 -- helper RPCs) because init scripts run as postgres superuser without JWT claims.
 -- The helpers are for runtime use in authenticated PostgREST contexts.

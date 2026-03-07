@@ -43,8 +43,8 @@ BEGIN
   END IF;
 
   -- Create time entry (denormalize trigger fills staff_name and site_name)
-  INSERT INTO time_entries (staff_member_id, entry_type, entry_time)
-  VALUES (p_entity_id, 'clock_in', NOW());
+  INSERT INTO time_entries (staff_member_id, entry_type_id, entry_time)
+  VALUES (p_entity_id, get_status_id('time_entry', 'clock_in'), NOW());
 
   v_time_text := TO_CHAR(NOW(), 'HH:MI AM');
 
@@ -74,8 +74,8 @@ BEGIN
   END IF;
 
   -- Create time entry (denormalize trigger fills staff_name and site_name)
-  INSERT INTO time_entries (staff_member_id, entry_type, entry_time)
-  VALUES (p_entity_id, 'clock_out', NOW());
+  INSERT INTO time_entries (staff_member_id, entry_type_id, entry_time)
+  VALUES (p_entity_id, get_status_id('time_entry', 'clock_out'), NOW());
 
   v_time_text := TO_CHAR(NOW(), 'HH:MI AM');
 
@@ -88,7 +88,7 @@ END;
 $$;
 
 -- APPROVE TIME OFF: Changes time_off_request status to Approved
-CREATE OR REPLACE FUNCTION public.approve_time_off(p_entity_id BIGINT)
+CREATE OR REPLACE FUNCTION public.approve_time_off(p_entity_id BIGINT, p_response_notes TEXT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -130,6 +130,7 @@ BEGIN
   -- Update status
   UPDATE time_off_requests SET
     status_id = v_approved_id,
+    response_notes = COALESCE(p_response_notes, response_notes),
     responded_by = current_user_id(),
     responded_at = NOW()
   WHERE id = p_entity_id;
@@ -243,7 +244,7 @@ END;
 $$;
 
 -- APPROVE DOCUMENT: Changes staff_document status to Approved
-CREATE OR REPLACE FUNCTION public.approve_staff_document(p_entity_id BIGINT)
+CREATE OR REPLACE FUNCTION public.approve_staff_document(p_entity_id BIGINT, p_reviewer_notes TEXT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -282,6 +283,7 @@ BEGIN
   -- Update status (trg_update_onboarding_status trigger recalculates onboarding status)
   UPDATE staff_documents SET
     status_id = v_approved_id,
+    reviewer_notes = COALESCE(p_reviewer_notes, reviewer_notes),
     reviewed_by = current_user_id(),
     reviewed_at = NOW()
   WHERE id = p_entity_id;
@@ -346,7 +348,7 @@ END;
 $$;
 
 -- APPROVE REIMBURSEMENT: Changes reimbursement status to Approved
-CREATE OR REPLACE FUNCTION public.approve_reimbursement(p_entity_id BIGINT)
+CREATE OR REPLACE FUNCTION public.approve_reimbursement(p_entity_id BIGINT, p_response_notes TEXT DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -384,6 +386,7 @@ BEGIN
 
   UPDATE reimbursements SET
     status_id = v_approved_id,
+    response_notes = COALESCE(p_response_notes, response_notes),
     responded_by = current_user_id(),
     responded_at = NOW()
   WHERE id = p_entity_id;
@@ -456,12 +459,12 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.staff_clock_in(BIGINT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.staff_clock_out(BIGINT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.approve_time_off(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.approve_time_off(BIGINT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.deny_time_off(BIGINT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.submit_staff_document(BIGINT, UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.approve_staff_document(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.approve_staff_document(BIGINT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.request_document_revision(BIGINT, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.approve_reimbursement(BIGINT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.approve_reimbursement(BIGINT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.deny_reimbursement(BIGINT, TEXT) TO authenticated;
 
 
@@ -868,6 +871,39 @@ SELECT ea.id, 'p_document_file', 'Document File', 'file',
        TRUE, 10, 'any'
 FROM metadata.entity_actions ea
 WHERE ea.table_name = 'staff_documents' AND ea.action_name = 'submit'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+-- Approve Time Off: optional notes
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_response_notes', 'Notes', 'text',
+       FALSE, 10, 'Optional: add a note to this approval'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'time_off_requests' AND ea.action_name = 'approve'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+-- Approve Document: optional reviewer notes
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_reviewer_notes', 'Reviewer Notes', 'text',
+       FALSE, 10, 'Optional: add a note to this approval'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'staff_documents' AND ea.action_name = 'approve'
+ON CONFLICT (entity_action_id, param_name) DO NOTHING;
+
+-- Approve Reimbursement: optional notes
+INSERT INTO metadata.entity_action_params (
+  entity_action_id, param_name, display_name, param_type,
+  required, sort_order, placeholder
+)
+SELECT ea.id, 'p_response_notes', 'Notes', 'text',
+       FALSE, 10, 'Optional: add a note to this approval'
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'reimbursements' AND ea.action_name = 'approve'
 ON CONFLICT (entity_action_id, param_name) DO NOTHING;
 
 -- Deny Reimbursement: optional reason for denial

@@ -353,7 +353,7 @@ WHERE p.table_name = 'incident_reports'
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
--- reimbursements: user=read/create, editor=read, manager=read/update, admin=all
+-- reimbursements: user=read/create, editor=read/update, manager=read/update, admin=all
 -- -----------------------------------------------
 
 -- Read access for user, editor, manager, admin
@@ -376,14 +376,14 @@ WHERE p.table_name = 'reimbursements'
   AND r.display_name IN ('user', 'admin')
 ON CONFLICT DO NOTHING;
 
--- Update for manager, admin
+-- Update for editor, manager, admin
 INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reimbursements'
   AND p.permission = 'update'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.display_name IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Delete for admin only
@@ -429,6 +429,22 @@ CROSS JOIN metadata.roles r
 WHERE p.table_name = 'offboarding_feedback'
   AND p.permission IN ('update', 'delete')
   AND r.display_name IN ('manager', 'admin')
+ON CONFLICT DO NOTHING;
+
+-- -----------------------------------------------
+-- civic_os_users_private: manager=read (User Management page access)
+-- -----------------------------------------------
+-- Core migrations register civic_os_users_private permissions and grant
+-- read to admin+editor. Adding manager here gives them access to the
+-- User Management page (/admin/users) for staff provisioning.
+
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'civic_os_users_private'
+  AND p.permission = 'read'
+  AND r.display_name = 'manager'
 ON CONFLICT DO NOTHING;
 
 -- NOTE: clock_in/clock_out action permissions are configured in

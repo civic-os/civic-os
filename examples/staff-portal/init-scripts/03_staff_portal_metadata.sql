@@ -190,9 +190,9 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width, show_on_list, show_on_create, show_on_edit, show_on_detail)
 VALUES
   ('time_entries', 'display_name', 'Entry', 1, 1, TRUE, FALSE, FALSE, TRUE),
-  ('time_entries', 'staff_member_id', 'Staff Member', 2, 1, TRUE, TRUE, TRUE, TRUE),
-  ('time_entries', 'entry_type', 'Type', 3, 1, TRUE, TRUE, TRUE, TRUE),
-  ('time_entries', 'entry_time', 'Time', 4, 1, TRUE, TRUE, TRUE, TRUE),
+  ('time_entries', 'staff_member_id', 'Staff Member', 2, 1, TRUE, FALSE, FALSE, TRUE),
+  ('time_entries', 'entry_type_id', 'Type', 3, 1, TRUE, TRUE, TRUE, TRUE),
+  ('time_entries', 'entry_time', 'Time', 4, 1, TRUE, FALSE, TRUE, TRUE),
   ('time_entries', 'staff_name', 'Staff Name', 5, 1, FALSE, FALSE, FALSE, TRUE),
   ('time_entries', 'site_name', 'Site Name', 6, 1, FALSE, FALSE, FALSE, TRUE),
   ('time_entries', 'edited_by', 'Edited By', 7, 1, FALSE, FALSE, FALSE, TRUE),
@@ -213,7 +213,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width, show_on_list, show_on_create, show_on_edit, show_on_detail)
 VALUES
   ('time_off_requests', 'display_name', 'Request', 1, 1, TRUE, FALSE, FALSE, TRUE),
-  ('time_off_requests', 'staff_member_id', 'Staff Member', 2, 1, TRUE, TRUE, FALSE, TRUE),
+  ('time_off_requests', 'staff_member_id', 'Staff Member', 2, 1, TRUE, FALSE, FALSE, TRUE),
   ('time_off_requests', 'start_date', 'Start Date', 3, 1, TRUE, TRUE, TRUE, TRUE),
   ('time_off_requests', 'end_date', 'End Date', 4, 1, TRUE, TRUE, TRUE, TRUE),
   ('time_off_requests', 'reason', 'Reason', 5, 2, FALSE, TRUE, TRUE, TRUE),
@@ -262,7 +262,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width, show_on_list, show_on_create, show_on_edit, show_on_detail)
 VALUES
   ('reimbursements', 'display_name', 'Reimbursement', 1, 1, TRUE, FALSE, FALSE, TRUE),
-  ('reimbursements', 'staff_member_id', 'Staff Member', 2, 1, TRUE, TRUE, FALSE, TRUE),
+  ('reimbursements', 'staff_member_id', 'Staff Member', 2, 1, TRUE, FALSE, FALSE, TRUE),
   ('reimbursements', 'amount', 'Amount', 3, 1, TRUE, TRUE, TRUE, TRUE),
   ('reimbursements', 'description', 'Description', 4, 2, TRUE, TRUE, TRUE, TRUE),
   ('reimbursements', 'receipt', 'Receipt', 5, 1, FALSE, TRUE, TRUE, TRUE),
@@ -320,6 +320,9 @@ WHERE table_name = 'time_off_requests' AND column_name = 'status_id';
 UPDATE metadata.properties SET status_entity_type = 'reimbursement'
 WHERE table_name = 'reimbursements' AND column_name = 'status_id';
 
+UPDATE metadata.properties SET status_entity_type = 'time_entry'
+WHERE table_name = 'time_entries' AND column_name = 'entry_type_id';
+
 -- =====================================================
 -- FILTERABLE & SORTABLE PROPERTIES
 -- =====================================================
@@ -342,7 +345,7 @@ WHERE table_name = 'staff_documents' AND column_name IN ('display_name', 'create
 
 -- time_entries: filterable columns
 UPDATE metadata.properties SET filterable = TRUE
-WHERE table_name = 'time_entries' AND column_name IN ('staff_member_id', 'entry_type');
+WHERE table_name = 'time_entries' AND column_name IN ('staff_member_id', 'entry_type_id');
 
 -- time_entries: sortable columns
 UPDATE metadata.properties SET sortable = TRUE
