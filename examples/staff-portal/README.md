@@ -75,7 +75,7 @@ Then open your browser to `http://localhost:4200`.
 
 ### Reference Tables
 
-- **`staff_roles`** - Position types (Lead Teacher, Assistant Teacher, Site Coordinator, Administrative Support)
+- **Staff Roles** - Position categories (Lead Teacher, Assistant Teacher, Site Coordinator, Administrative Support) via Category system (`metadata.categories` with `entity_type='staff_role'`)
 - **`sites`** - Program locations with site lead assignment
 - **`document_requirements`** - Templates for required onboarding documents (I-9, W-4, Background Check, etc.)
 

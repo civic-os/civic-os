@@ -44,7 +44,7 @@ BEGIN
 
   -- Create time entry (denormalize trigger fills staff_name and site_name)
   INSERT INTO time_entries (staff_member_id, entry_type_id, entry_time)
-  VALUES (p_entity_id, get_type_id('time_entry', 'clock_in'), NOW());
+  VALUES (p_entity_id, get_category_id('time_entry', 'clock_in'), NOW());
 
   v_time_text := TO_CHAR(NOW(), 'HH:MI AM');
 
@@ -75,7 +75,7 @@ BEGIN
 
   -- Create time entry (denormalize trigger fills staff_name and site_name)
   INSERT INTO time_entries (staff_member_id, entry_type_id, entry_time)
-  VALUES (p_entity_id, get_type_id('time_entry', 'clock_out'), NOW());
+  VALUES (p_entity_id, get_category_id('time_entry', 'clock_out'), NOW());
 
   v_time_text := TO_CHAR(NOW(), 'HH:MI AM');
 

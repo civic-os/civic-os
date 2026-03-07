@@ -31,10 +31,7 @@ WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE display_name = 'manager');
 
 -- Register CRUD permissions for all staff portal tables
 INSERT INTO metadata.permissions (table_name, permission) VALUES
-  ('staff_roles', 'read'),
-  ('staff_roles', 'create'),
-  ('staff_roles', 'update'),
-  ('staff_roles', 'delete'),
+  -- staff_roles migrated to Category system (metadata.categories) — no standalone permissions needed
   ('sites', 'read'),
   ('sites', 'create'),
   ('sites', 'update'),
@@ -80,39 +77,7 @@ ON CONFLICT (table_name, permission) DO NOTHING;
 -- MAP PERMISSIONS TO ROLES
 -- =====================================================
 
--- -----------------------------------------------
--- staff_roles: user=read, editor=read, manager=read/create/update, admin=all
--- -----------------------------------------------
-
--- Read access for user, editor, manager, admin
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name = 'staff_roles'
-  AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
-ON CONFLICT DO NOTHING;
-
--- Create/update for manager, admin
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name = 'staff_roles'
-  AND p.permission IN ('create', 'update')
-  AND r.display_name IN ('manager', 'admin')
-ON CONFLICT DO NOTHING;
-
--- Delete for admin only
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name = 'staff_roles'
-  AND p.permission = 'delete'
-  AND r.display_name = 'admin'
-ON CONFLICT DO NOTHING;
+-- staff_roles: Migrated to Category system (metadata.categories) — no standalone permissions needed
 
 -- -----------------------------------------------
 -- sites: user=read, editor=read, manager=read/create/update, admin=all

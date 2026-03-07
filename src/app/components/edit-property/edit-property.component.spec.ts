@@ -1545,8 +1545,8 @@ describe('EditPropertyComponent', () => {
     });
   });
 
-  describe('Type (Rich Enum)', () => {
-    const mockTypeOptions = [
+  describe('Category (Rich Enum)', () => {
+    const mockCategoryOptions = [
       { id: 1, text: 'Clock In', color: '#22C55E' },
       { id: 2, text: 'Clock Out', color: '#6B7280' },
       { id: 3, text: 'No Color', color: null }
@@ -1560,109 +1560,109 @@ describe('EditPropertyComponent', () => {
       ]));
     });
 
-    describe('getSelectedTypeColor()', () => {
-      it('should return color of selected type', () => {
-        const typeProp = createMockProperty({
+    describe('getSelectedCategoryColor()', () => {
+      it('should return color of selected category', () => {
+        const categoryProp = createMockProperty({
           column_name: 'entry_type_id',
-          type: EntityPropertyType.Type,
-          type_entity_type: 'time_entry'
+          type: EntityPropertyType.Category,
+          category_entity_type: 'time_entry'
         });
         const formGroup = new FormGroup({
           entry_type_id: new FormControl(1) // Clock In
         });
-        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('property', categoryProp);
         fixture.componentRef.setInput('formGroup', formGroup);
         component.ngOnInit();
 
-        const color = component.getSelectedTypeColor(mockTypeOptions);
+        const color = component.getSelectedCategoryColor(mockCategoryOptions);
         expect(color).toBe('#22C55E');
       });
 
-      it('should return null when no type selected', () => {
-        const typeProp = createMockProperty({
+      it('should return null when no category selected', () => {
+        const categoryProp = createMockProperty({
           column_name: 'entry_type_id',
-          type: EntityPropertyType.Type,
-          type_entity_type: 'time_entry'
+          type: EntityPropertyType.Category,
+          category_entity_type: 'time_entry'
         });
         const formGroup = new FormGroup({
           entry_type_id: new FormControl(null)
         });
-        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('property', categoryProp);
         fixture.componentRef.setInput('formGroup', formGroup);
         component.ngOnInit();
 
-        const color = component.getSelectedTypeColor(mockTypeOptions);
+        const color = component.getSelectedCategoryColor(mockCategoryOptions);
         expect(color).toBeNull();
       });
 
-      it('should return null when selected type has no color', () => {
-        const typeProp = createMockProperty({
+      it('should return null when selected category has no color', () => {
+        const categoryProp = createMockProperty({
           column_name: 'entry_type_id',
-          type: EntityPropertyType.Type,
-          type_entity_type: 'time_entry'
+          type: EntityPropertyType.Category,
+          category_entity_type: 'time_entry'
         });
         const formGroup = new FormGroup({
-          entry_type_id: new FormControl(3) // No Color type
+          entry_type_id: new FormControl(3) // No Color category
         });
-        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('property', categoryProp);
         fixture.componentRef.setInput('formGroup', formGroup);
         component.ngOnInit();
 
-        const color = component.getSelectedTypeColor(mockTypeOptions);
+        const color = component.getSelectedCategoryColor(mockCategoryOptions);
         expect(color).toBeNull();
       });
 
-      it('should handle string type_id (from select element)', () => {
-        const typeProp = createMockProperty({
+      it('should handle string category_id (from select element)', () => {
+        const categoryProp = createMockProperty({
           column_name: 'entry_type_id',
-          type: EntityPropertyType.Type,
-          type_entity_type: 'time_entry'
+          type: EntityPropertyType.Category,
+          category_entity_type: 'time_entry'
         });
         const formGroup = new FormGroup({
           entry_type_id: new FormControl('2') // String value from select
         });
-        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('property', categoryProp);
         fixture.componentRef.setInput('formGroup', formGroup);
         component.ngOnInit();
 
-        const color = component.getSelectedTypeColor(mockTypeOptions);
+        const color = component.getSelectedCategoryColor(mockCategoryOptions);
         expect(color).toBe('#6B7280');
       });
     });
 
-    describe('getSelectedTypeBackgroundColor()', () => {
+    describe('getSelectedCategoryBackgroundColor()', () => {
       it('should return rgba color with 15% opacity', () => {
-        const typeProp = createMockProperty({
+        const categoryProp = createMockProperty({
           column_name: 'entry_type_id',
-          type: EntityPropertyType.Type,
-          type_entity_type: 'time_entry'
+          type: EntityPropertyType.Category,
+          category_entity_type: 'time_entry'
         });
         const formGroup = new FormGroup({
           entry_type_id: new FormControl(1) // Clock In - #22C55E
         });
-        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('property', categoryProp);
         fixture.componentRef.setInput('formGroup', formGroup);
         component.ngOnInit();
 
-        const bgColor = component.getSelectedTypeBackgroundColor(mockTypeOptions);
+        const bgColor = component.getSelectedCategoryBackgroundColor(mockCategoryOptions);
         // #22C55E = rgb(34, 197, 94)
         expect(bgColor).toBe('rgba(34, 197, 94, 0.15)');
       });
 
-      it('should return null when no type selected', () => {
-        const typeProp = createMockProperty({
+      it('should return null when no category selected', () => {
+        const categoryProp = createMockProperty({
           column_name: 'entry_type_id',
-          type: EntityPropertyType.Type,
-          type_entity_type: 'time_entry'
+          type: EntityPropertyType.Category,
+          category_entity_type: 'time_entry'
         });
         const formGroup = new FormGroup({
           entry_type_id: new FormControl(null)
         });
-        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('property', categoryProp);
         fixture.componentRef.setInput('formGroup', formGroup);
         component.ngOnInit();
 
-        const bgColor = component.getSelectedTypeBackgroundColor(mockTypeOptions);
+        const bgColor = component.getSelectedCategoryBackgroundColor(mockCategoryOptions);
         expect(bgColor).toBeNull();
       });
     });

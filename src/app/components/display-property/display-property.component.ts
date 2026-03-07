@@ -111,9 +111,9 @@ export class DisplayPropertyComponent {
   }
 
   /**
-   * Get contrast text color for type badge (same logic as status).
+   * Get contrast text color for category badge (same logic as status).
    */
-  getTypeTextColor(): string {
+  getCategoryTextColor(): string {
     const color = this.datum()?.color || '#3B82F6';
     return getContrastTextColor(color);
   }

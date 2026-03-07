@@ -1,13 +1,13 @@
 -- ============================================================================
 -- STAFF PORTAL EXAMPLE
 -- A staff management portal for a summer education program.
--- Demonstrates: Status types, Type system, file uploads, RLS with role-based
+-- Demonstrates: Status types, Category system, file uploads, RLS with role-based
 --   visibility, SECURITY DEFINER helpers, denormalized fields, auto-generated
 --   documents, onboarding status aggregation, text search.
 -- ============================================================================
 -- NOTE: Requires Civic OS v0.15.0+ (Status Type System)
 -- NOTE: Requires Civic OS v0.25.0+ (status_key for programmatic lookups)
--- NOTE: Requires Civic OS v0.34.0+ (Type system for non-workflow categorization)
+-- NOTE: Requires Civic OS v0.34.0+ (Category system for non-workflow categorization)
 -- ============================================================================
 
 -- ============================================================================
@@ -53,24 +53,24 @@ INSERT INTO metadata.statuses (entity_type, display_name, description, color, so
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
--- TYPE SYSTEM CONFIGURATION
--- Uses centralized metadata.types for non-workflow categorization (v0.34.0+)
+-- CATEGORY SYSTEM CONFIGURATION
+-- Uses centralized metadata.categories for non-workflow categorization (v0.34.0+)
 -- ============================================================================
 
--- Register type entity types
-INSERT INTO metadata.type_categories (entity_type, description) VALUES
-  ('time_entry', 'Clock in/out entry types'),
-  ('staff_role', 'Position types for program staff')
+-- Register category entity types
+INSERT INTO metadata.category_groups (entity_type, description) VALUES
+  ('time_entry', 'Clock in/out entry categories'),
+  ('staff_role', 'Position categories for program staff')
 ON CONFLICT (entity_type) DO NOTHING;
 
--- time_entry types (categorization, not workflow — no is_initial/is_terminal)
-INSERT INTO metadata.types (entity_type, display_name, description, color, sort_order, type_key) VALUES
+-- time_entry categories (categorization, not workflow — no is_initial/is_terminal)
+INSERT INTO metadata.categories (entity_type, display_name, description, color, sort_order, category_key) VALUES
   ('time_entry', 'Clock In', 'Staff member clocked in', '#22C55E', 1, 'clock_in'),
   ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, 'clock_out')
 ON CONFLICT DO NOTHING;
 
--- staff_role types (position categorization)
-INSERT INTO metadata.types (entity_type, display_name, color, sort_order) VALUES
+-- staff_role categories (position categorization)
+INSERT INTO metadata.categories (entity_type, display_name, color, sort_order) VALUES
   ('staff_role', 'Lead Teacher', '#3B82F6', 1),
   ('staff_role', 'Assistant Teacher', '#22C55E', 2),
   ('staff_role', 'Site Coordinator', '#8B5CF6', 3),
@@ -98,7 +98,7 @@ CREATE TABLE staff_members (
   email email_address NOT NULL UNIQUE,
   user_id UUID NULL REFERENCES metadata.civic_os_users(id),
   site_id BIGINT NOT NULL REFERENCES sites(id),
-  role_id INT NOT NULL REFERENCES metadata.types(id),
+  role_id INT NOT NULL REFERENCES metadata.categories(id),
   pay_rate MONEY,
   start_date DATE,
   onboarding_status_id INT NOT NULL DEFAULT get_initial_status('staff_onboarding') REFERENCES metadata.statuses(id),
@@ -143,7 +143,7 @@ CREATE TABLE time_entries (
   id BIGSERIAL PRIMARY KEY,
   display_name TEXT,
   staff_member_id BIGINT NOT NULL REFERENCES staff_members(id),
-  entry_type_id INT NOT NULL REFERENCES metadata.types(id),
+  entry_type_id INT NOT NULL REFERENCES metadata.categories(id),
   entry_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   staff_name TEXT NOT NULL,
   site_name TEXT NOT NULL,
@@ -598,8 +598,8 @@ AS $$
 DECLARE
   v_role_name TEXT;
 BEGIN
-  -- Look up the staff member's role display_name from the Type system
-  SELECT display_name INTO v_role_name FROM metadata.types WHERE id = NEW.role_id;
+  -- Look up the staff member's role display_name from the Category system
+  SELECT display_name INTO v_role_name FROM metadata.categories WHERE id = NEW.role_id;
 
   -- For each requirement where applies_to_roles is empty/null (all roles)
   -- or the staff member's role is in the array, create a document record
@@ -772,7 +772,7 @@ GRANT EXECUTE ON FUNCTION update_onboarding_status() TO authenticated;
 -- ============================================================================
 -- RLS is NOT enabled on reference tables (sites, document_requirements)
 -- since all authenticated users can read these freely.
--- staff_roles has been migrated to the Type system (metadata.types).
+-- staff_roles has been migrated to the Category system (metadata.categories).
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -1028,7 +1028,7 @@ CREATE INDEX idx_incident_reports_search ON incident_reports USING GIN(civic_os_
 -- ============================================================================
 
 -- Entity descriptions
--- staff_roles table migrated to Type system (metadata.types with entity_type='staff_role')
+-- staff_roles table migrated to Category system (metadata.categories with entity_type='staff_role')
 UPDATE metadata.entities SET description = 'Summer program locations' WHERE table_name = 'sites';
 UPDATE metadata.entities SET description = 'Staff members in the summer education program' WHERE table_name = 'staff_members';
 UPDATE metadata.entities SET description = 'Required documents that staff must submit' WHERE table_name = 'document_requirements';

@@ -203,7 +203,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                       <td class="text-right py-1">
                         @if (!resolved || !resolved.display) {
                           <span class="text-base-content/40">—</span>
-                        } @else if (resolved.type === EntityPropertyType.Status || resolved.type === EntityPropertyType.Type) {
+                        } @else if (resolved.type === EntityPropertyType.Status || resolved.type === EntityPropertyType.Category) {
                           <span
                             class="badge badge-sm text-white"
                             [style.background-color]="resolved.color || '#3B82F6'">
@@ -740,21 +740,21 @@ export class SeriesGroupDetailComponent implements OnChanges {
           )
         );
       }
-      // Handle Type type - fetch from types table (v0.34.0)
-      else if (propType === EntityPropertyType.Type && prop.type_entity_type) {
+      // Handle Category type - fetch from categories table (v0.34.0)
+      else if (propType === EntityPropertyType.Category && prop.category_entity_type) {
         fetchObservables.push(
           this.dataService.getData({
-            key: 'types',
+            key: 'categories',
             fields: ['id', 'display_name', 'color'],
             filters: [{ column: 'id', operator: 'eq', value: rawValue }]
           }).pipe(
-            map((types: any[]) => {
-              const type = types[0];
+            map((categories: any[]) => {
+              const category = categories[0];
               resolved.set(prop.column_name, {
                 raw: rawValue,
-                display: type?.display_name || `Type #${rawValue}`,
+                display: category?.display_name || `Category #${rawValue}`,
                 type: propType,
-                color: type?.color
+                color: category?.color
               });
             }),
             catchError(() => {

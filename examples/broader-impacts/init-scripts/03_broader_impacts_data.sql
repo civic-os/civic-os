@@ -122,12 +122,12 @@ ON CONFLICT (table_name, column_name) DO UPDATE
       sort_order = EXCLUDED.sort_order;
 
 -- =====================================================
--- TYPE/STATUS ENTITY TYPE CONFIGURATION
+-- CATEGORY/STATUS ENTITY TYPE CONFIGURATION
 -- =====================================================
--- Configure FK columns to use the Type/Status systems so the frontend
+-- Configure FK columns to use the Category/Status systems so the frontend
 -- renders colored badge dropdowns via the framework RPCs
 
-UPDATE metadata.properties SET type_entity_type = 'organization_type'
+UPDATE metadata.properties SET category_entity_type = 'organization_type'
 WHERE table_name = 'organizations' AND column_name = 'organization_type_id';
 
 UPDATE metadata.properties SET status_entity_type = 'project'

@@ -1152,11 +1152,11 @@ export class DetailPage {
           orderField: 'sort_order',
           orderDirection: 'asc'
         });
-      } else if (param.param_type === 'type' && param.type_entity_type) {
+      } else if (param.param_type === 'category' && param.category_entity_type) {
         optionsToLoad[param.param_name] = this.data.getData({
-          key: 'types',
+          key: 'categories',
           fields: ['id', 'display_name'],
-          filters: [{ column: 'entity_type', operator: 'eq', value: param.type_entity_type }],
+          filters: [{ column: 'entity_type', operator: 'eq', value: param.category_entity_type }],
           orderField: 'sort_order',
           orderDirection: 'asc'
         });

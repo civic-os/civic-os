@@ -296,10 +296,10 @@ WHERE table_name = 'time_off_requests' AND column_name = 'status_id';
 UPDATE metadata.properties SET status_entity_type = 'reimbursement'
 WHERE table_name = 'reimbursements' AND column_name = 'status_id';
 
-UPDATE metadata.properties SET type_entity_type = 'time_entry'
+UPDATE metadata.properties SET category_entity_type = 'time_entry'
 WHERE table_name = 'time_entries' AND column_name = 'entry_type_id';
 
-UPDATE metadata.properties SET type_entity_type = 'staff_role'
+UPDATE metadata.properties SET category_entity_type = 'staff_role'
 WHERE table_name = 'staff_members' AND column_name = 'role_id';
 
 -- =====================================================

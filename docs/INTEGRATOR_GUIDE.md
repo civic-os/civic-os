@@ -1719,80 +1719,80 @@ END IF;
 
 See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design documentation and `examples/community-center/` for working example.
 
-### Type System
+### Category System
 
 **Version**: v0.34.0+
 
-Rich enum categorization system for non-workflow properties. While the Status system tracks workflow states (with `is_initial`/`is_terminal` and transitions), Types are simple colored badge enums for categorization — building types, staff roles, entry categories, etc.
+Rich enum categorization system for non-workflow properties. While the Status system tracks workflow states (with `is_initial`/`is_terminal` and transitions), Categories are simple colored badge enums for categorization — building types, staff roles, entry categories, etc.
 
 **Features**:
 - Colored badges with `hex_color` for visual identification
 - `sort_order` for dropdown ordering
-- `type_key` for stable programmatic references (auto-generated from `display_name`)
+- `category_key` for stable programmatic references (auto-generated from `display_name`)
 - Cache invalidation via `schema_cache_versions`
-- Frontend auto-detects via `type_entity_type` in `metadata.properties`
+- Frontend auto-detects via `category_entity_type` in `metadata.properties`
 
-**When to Use Type vs Status vs Custom Table**:
-- **Type**: Simple categorization with colored badges and admin-managed values. Use when the categories are display-oriented and don't carry extra data beyond a name, color, and sort order. Examples: entry types (Clock In/Clock Out), building types, staff roles.
+**When to Use Category vs Status vs Custom Table**:
+- **Category**: Simple categorization with colored badges and admin-managed values. Use when the categories are display-oriented and don't carry extra data beyond a name, color, and sort order. Examples: entry types (Clock In/Clock Out), building types, staff roles.
 - **Status**: Workflow state tracking. Use when records progress through a lifecycle. Has `is_initial`/`is_terminal`, allowed transitions, causal bindings. Examples: Pending → Approved → Completed.
-- **Custom lookup table**: Use when categories need extended properties that influence behavior — e.g., a `resource_types` table with `hourly_rate`, `capacity`, or `requires_approval` columns. Types only store `display_name`, `color`, `sort_order`, and `description`. If you need additional columns that drive business logic, a dedicated table with its own schema is the right choice.
+- **Custom lookup table**: Use when categories need extended properties that influence behavior — e.g., a `resource_types` table with `hourly_rate`, `capacity`, or `requires_approval` columns. Categories only store `display_name`, `color`, `sort_order`, and `description`. If you need additional columns that drive business logic, a dedicated table with its own schema is the right choice.
 
 #### Quick Setup
 
 ```sql
--- 1. Register the type category
-INSERT INTO metadata.type_categories (entity_type, description)
+-- 1. Register the category group
+INSERT INTO metadata.category_groups (entity_type, description)
 VALUES ('time_entry', 'Clock in/out entry types');
 
--- 2. Define type values with colors
-INSERT INTO metadata.types (entity_type, display_name, description, color, sort_order, type_key)
+-- 2. Define category values with colors
+INSERT INTO metadata.categories (entity_type, display_name, description, color, sort_order, category_key)
 VALUES
   ('time_entry', 'Clock In', 'Staff member clocked in', '#22C55E', 1, 'clock_in'),
   ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, 'clock_out');
 
--- 3. Create your table with FK to metadata.types
+-- 3. Create your table with FK to metadata.categories
 CREATE TABLE time_entries (
   id BIGSERIAL PRIMARY KEY,
-  entry_type_id INT NOT NULL REFERENCES metadata.types(id),
+  entry_type_id INT NOT NULL REFERENCES metadata.categories(id),
   -- ... other columns
 );
 CREATE INDEX idx_time_entries_entry_type_id ON time_entries(entry_type_id);
 
--- 4. Configure the property to use the Type system
-UPDATE metadata.properties SET type_entity_type = 'time_entry'
+-- 4. Configure the property to use the Category system
+UPDATE metadata.properties SET category_entity_type = 'time_entry'
 WHERE table_name = 'time_entries' AND column_name = 'entry_type_id';
 ```
 
 #### Schema Reference
 
-**`metadata.type_categories`** — Registry of entity types that use the Type system:
+**`metadata.category_groups`** — Registry of entity types that use the Category system:
 | Column | Type | Description |
 |--------|------|-------------|
 | `entity_type` | `TEXT PRIMARY KEY` | Identifier matching your entity concept |
 | `description` | `TEXT` | Human-readable description |
 
-**`metadata.types`** — Type values with display properties:
+**`metadata.categories`** — Category values with display properties:
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | `SERIAL PRIMARY KEY` | Auto-generated ID |
-| `entity_type` | `TEXT NOT NULL` | FK to `type_categories` |
+| `entity_type` | `TEXT NOT NULL` | FK to `category_groups` |
 | `display_name` | `VARCHAR(50) NOT NULL` | Display label |
 | `description` | `TEXT` | Optional description |
 | `color` | `hex_color` | Badge color (default `#3B82F6`) |
 | `sort_order` | `INT NOT NULL` | Dropdown ordering |
-| `type_key` | `VARCHAR(50) NOT NULL` | Stable programmatic key (auto-generated) |
+| `category_key` | `VARCHAR(50) NOT NULL` | Stable programmatic key (auto-generated) |
 
 #### Helper Functions
 
 ```sql
--- Look up type ID by key (for use in RPC functions and defaults)
-SELECT get_type_id('time_entry', 'clock_in');  -- Returns INT
+-- Look up category ID by key (for use in RPC functions and defaults)
+SELECT get_category_id('time_entry', 'clock_in');  -- Returns INT
 
--- Get all types for an entity (used by frontend)
-SELECT * FROM get_types_for_entity('time_entry');
+-- Get all categories for an entity (used by frontend)
+SELECT * FROM get_categories_for_entity('time_entry');
 ```
 
-See `examples/staff-portal/` for a working example where `time_entry` uses the Type system for Clock In/Clock Out categorization.
+See `examples/staff-portal/` for a working example where `time_entry` uses the Category system for Clock In/Clock Out categorization.
 
 ### Event-to-Function Bindings
 

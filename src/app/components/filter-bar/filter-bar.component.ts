@@ -169,19 +169,19 @@ export class FilterBarComponent {
             // Options not loaded - trigger async load (effect will re-run when cache updates)
             this.schemaService.ensureStatusOptionsLoaded(prop.status_entity_type);
           }
-        } else if (prop.type === EntityPropertyType.Type && prop.type_entity_type) {
-          // Type: Use signal-based cache from SchemaService (mirrors Status pattern, v0.34.0)
-          const cachedOptions = this.schemaService.getTypeOptionsSync(prop.type_entity_type);
+        } else if (prop.type === EntityPropertyType.Category && prop.category_entity_type) {
+          // Category: Use signal-based cache from SchemaService (mirrors Status pattern, v0.34.0)
+          const cachedOptions = this.schemaService.getCategoryOptionsSync(prop.category_entity_type);
           if (cachedOptions.length > 0) {
             if (!newOptions.has(prop.column_name)) {
-              newOptions.set(prop.column_name, cachedOptions.map(t => ({
-                id: t.id,
-                display_name: t.display_name
+              newOptions.set(prop.column_name, cachedOptions.map(c => ({
+                id: c.id,
+                display_name: c.display_name
               })));
               optionsChanged = true;
             }
           } else {
-            this.schemaService.ensureTypeOptionsLoaded(prop.type_entity_type);
+            this.schemaService.ensureCategoryOptionsLoaded(prop.category_entity_type);
           }
         } else if (prop.type === EntityPropertyType.Payment) {
           // Payment: Static options, set directly without reading filterOptions first
@@ -257,7 +257,7 @@ export class FilterBarComponent {
         case EntityPropertyType.ForeignKeyName:
         case EntityPropertyType.User:
         case EntityPropertyType.Status:
-        case EntityPropertyType.Type:
+        case EntityPropertyType.Category:
           // Reverse transformation: in:(1,2,3) → [1, 2, 3] or ["uuid1", "uuid2"]
           if (filter.operator === 'in') {
             const match = filter.value.match(/\(([^)]+)\)/);
@@ -334,7 +334,7 @@ export class FilterBarComponent {
         case EntityPropertyType.ForeignKeyName:
         case EntityPropertyType.User:
         case EntityPropertyType.Status:
-        case EntityPropertyType.Type:
+        case EntityPropertyType.Category:
           // Checkbox multi-select: use 'in' operator
           const value = state[prop.column_name];
           if (Array.isArray(value) && value.length > 0) {

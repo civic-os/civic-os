@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, TypeValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
@@ -36,11 +36,11 @@ export interface StatusOption {
 }
 
 /**
- * Type option for dropdowns and filters.
+ * Category option for dropdowns and filters.
  * Same shape as StatusOption (both are colored badge enums).
  * Added in v0.34.0.
  */
-export interface TypeOption {
+export interface CategoryOption {
   id: number;
   display_name: string;
   color: string | null;
@@ -70,11 +70,11 @@ export class SchemaService {
   // Legacy observable cache - kept for backward compatibility
   private statusesCache = new Map<string, Observable<StatusOption[]>>();
 
-  // Type cache: keyed by entity_type (e.g., 'time_entry', 'building_type')
+  // Category cache: keyed by entity_type (e.g., 'time_entry', 'building_type')
   // Signal-based cache for synchronous access (mirrors status pattern, v0.34.0)
-  private typeOptionsCache = signal<Map<string, TypeOption[]>>(new Map());
-  private loadingTypes = new Set<string>();
-  private typesCache = new Map<string, Observable<TypeOption[]>>();
+  private categoryOptionsCache = signal<Map<string, CategoryOption[]>>(new Map());
+  private loadingCategories = new Set<string>();
+  private categoriesCache = new Map<string, Observable<CategoryOption[]>>();
 
   // Static text cache (v0.17.0)
   private staticTextCache$?: Observable<StaticText[]>;
@@ -387,91 +387,91 @@ export class SchemaService {
   }
 
   // ===========================================================================
-  // TYPE CACHE (v0.34.0) - mirrors Status cache pattern
+  // CATEGORY CACHE (v0.34.0) - mirrors Status cache pattern
   // ===========================================================================
 
   /**
-   * Get types for a specific entity type from metadata.types.
+   * Get categories for a specific entity type from metadata.categories.
    * Results are cached per entity_type to avoid redundant RPC calls.
    */
-  public getTypesForEntity(entityType: string): Observable<TypeOption[]> {
-    const cached = this.typesCache.get(entityType);
+  public getCategoriesForEntity(entityType: string): Observable<CategoryOption[]> {
+    const cached = this.categoriesCache.get(entityType);
     if (cached) {
       return cached;
     }
 
-    if (this.loadingTypes.has(entityType)) {
+    if (this.loadingCategories.has(entityType)) {
       return of([]);
     }
 
-    this.loadingTypes.add(entityType);
+    this.loadingCategories.add(entityType);
 
-    const type$ = this.http.post<TypeOption[]>(
-      getPostgrestUrl() + 'rpc/get_types_for_entity',
+    const category$ = this.http.post<CategoryOption[]>(
+      getPostgrestUrl() + 'rpc/get_categories_for_entity',
       { p_entity_type: entityType }
     ).pipe(
-      map(types => types.map(t => ({
-        id: t.id,
-        display_name: t.display_name,
-        color: t.color
+      map(categories => categories.map(c => ({
+        id: c.id,
+        display_name: c.display_name,
+        color: c.color
       }))),
-      tap(types => {
-        this.typeOptionsCache.update(cache => {
+      tap(categories => {
+        this.categoryOptionsCache.update(cache => {
           const newCache = new Map(cache);
-          newCache.set(entityType, types);
+          newCache.set(entityType, categories);
           return newCache;
         });
       }),
       catchError(err => {
-        console.error(`Failed to load types for entity type '${entityType}':`, err);
+        console.error(`Failed to load categories for entity type '${entityType}':`, err);
         return of([]);
       }),
       finalize(() => {
-        this.loadingTypes.delete(entityType);
+        this.loadingCategories.delete(entityType);
       }),
       shareReplay({ bufferSize: 1, refCount: false })
     );
 
-    this.typesCache.set(entityType, type$);
-    return type$;
+    this.categoriesCache.set(entityType, category$);
+    return category$;
   }
 
   /**
-   * Get cached type options synchronously. Returns empty array if not loaded.
-   * Use ensureTypeOptionsLoaded() to trigger loading if needed.
+   * Get cached category options synchronously. Returns empty array if not loaded.
+   * Use ensureCategoryOptionsLoaded() to trigger loading if needed.
    */
-  public getTypeOptionsSync(entityType: string): TypeOption[] {
-    return this.typeOptionsCache().get(entityType) || [];
+  public getCategoryOptionsSync(entityType: string): CategoryOption[] {
+    return this.categoryOptionsCache().get(entityType) || [];
   }
 
   /**
-   * Ensure type options are loaded for an entity type.
+   * Ensure category options are loaded for an entity type.
    * Triggers loading if not already cached or loading.
    */
-  public ensureTypeOptionsLoaded(entityType: string): void {
-    if (this.typeOptionsCache().has(entityType)) {
+  public ensureCategoryOptionsLoaded(entityType: string): void {
+    if (this.categoryOptionsCache().has(entityType)) {
       return;
     }
-    if (this.loadingTypes.has(entityType)) {
+    if (this.loadingCategories.has(entityType)) {
       return;
     }
-    this.getTypesForEntity(entityType).subscribe();
+    this.getCategoriesForEntity(entityType).subscribe();
   }
 
   /**
-   * Invalidate type options cache.
+   * Invalidate category options cache.
    */
-  public invalidateTypeCache(entityType?: string): void {
+  public invalidateCategoryCache(entityType?: string): void {
     if (entityType) {
-      this.typesCache.delete(entityType);
-      this.typeOptionsCache.update(cache => {
+      this.categoriesCache.delete(entityType);
+      this.categoryOptionsCache.update(cache => {
         const newCache = new Map(cache);
         newCache.delete(entityType);
         return newCache;
       });
     } else {
-      this.typesCache.clear();
-      this.typeOptionsCache.set(new Map());
+      this.categoriesCache.clear();
+      this.categoryOptionsCache.set(new Map());
     }
   }
 
@@ -501,10 +501,10 @@ export class SchemaService {
       return EntityPropertyType.Status;
     }
 
-    // Type detection: Integer FK with type_entity_type configured in metadata.properties (v0.34.0)
+    // Category detection: Integer FK with category_entity_type configured in metadata.properties (v0.34.0)
     // Like Status but for non-workflow categorization (rich enums). Must come before ForeignKeyName.
-    if (val.type_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
-      return EntityPropertyType.Type;
+    if (val.category_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
+      return EntityPropertyType.Category;
     }
 
     // System type detection: UUID foreign keys to metadata tables (File, User, Payment types)
@@ -578,9 +578,9 @@ export class SchemaService {
       return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color)`;
     }
 
-    // Type type: Embed type data from metadata.types table (v0.34.0)
-    if (prop.type === EntityPropertyType.Type) {
-      return `${prop.column_name}:types!${prop.column_name}(id,display_name,color)`;
+    // Category: Embed category data from metadata.categories table (v0.34.0)
+    if (prop.type === EntityPropertyType.Category) {
+      return `${prop.column_name}:categories!${prop.column_name}(id,display_name,color)`;
     }
 
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
@@ -620,8 +620,8 @@ export class SchemaService {
       return prop.column_name;
     }
 
-    // Type fields also need just the ID for edit forms (dropdown value, v0.34.0)
-    if (prop.type === EntityPropertyType.Type) {
+    // Category fields also need just the ID for edit forms (dropdown value, v0.34.0)
+    if (prop.type === EntityPropertyType.Category) {
       return prop.column_name;
     }
 
@@ -723,7 +723,7 @@ export class SchemaService {
             EntityPropertyType.Money,
             EntityPropertyType.User,
             EntityPropertyType.Status,  // Status uses same filter pattern as ForeignKeyName
-            EntityPropertyType.Type     // Type uses same filter pattern as Status (v0.34.0)
+            EntityPropertyType.Category  // Category uses same filter pattern as Status (v0.34.0)
           ];
           return supportedTypes.includes(p.type);
         });

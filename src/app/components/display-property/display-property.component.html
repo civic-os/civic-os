@@ -222,12 +222,12 @@
         {{ datum()?.display_name }}
       </span>
     }
-    @if (propType() == EntityPropertyType.Type) {
+    @if (propType() == EntityPropertyType.Category) {
       <span
         class="badge badge-lg h-auto min-h-[2rem]"
         [style.background-color]="datum()?.color || '#3B82F6'"
         [style.border-color]="datum()?.color || '#3B82F6'"
-        [style.color]="getTypeTextColor()">
+        [style.color]="getCategoryTextColor()">
         {{ datum()?.display_name }}
       </span>
     }

@@ -41,11 +41,11 @@ BEGIN
     WHERE entity_type = 'time_off_request' AND display_name = 'Pending';
   SELECT id INTO v_re_pending_id FROM metadata.statuses
     WHERE entity_type = 'reimbursement' AND display_name = 'Pending';
-  -- Look up type IDs for time_entry (uses Type system, not Status)
-  SELECT id INTO v_te_clock_in_id FROM metadata.types
-    WHERE entity_type = 'time_entry' AND type_key = 'clock_in';
-  SELECT id INTO v_te_clock_out_id FROM metadata.types
-    WHERE entity_type = 'time_entry' AND type_key = 'clock_out';
+  -- Look up category IDs for time_entry (uses Category system, not Status)
+  SELECT id INTO v_te_clock_in_id FROM metadata.categories
+    WHERE entity_type = 'time_entry' AND category_key = 'clock_in';
+  SELECT id INTO v_te_clock_out_id FROM metadata.categories
+    WHERE entity_type = 'time_entry' AND category_key = 'clock_out';
 
   -- Clear any existing system default so the unique index allows our new default
   UPDATE metadata.dashboards SET is_default = FALSE WHERE is_default = TRUE;

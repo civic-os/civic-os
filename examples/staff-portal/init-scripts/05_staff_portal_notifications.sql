@@ -1369,9 +1369,9 @@ BEGIN
   IF NEW.onboarding_status_id = v_all_approved_id
      AND (OLD.onboarding_status_id IS NULL OR OLD.onboarding_status_id != v_all_approved_id) THEN
 
-    -- Look up role and site
-    SELECT sr.display_name INTO v_role_name
-      FROM staff_roles sr WHERE sr.id = NEW.role_id;
+    -- Look up role (from Category system) and site
+    SELECT c.display_name INTO v_role_name
+      FROM metadata.categories c WHERE c.id = NEW.role_id;
     SELECT s.display_name INTO v_site_name
       FROM sites s WHERE s.id = NEW.site_id;
 

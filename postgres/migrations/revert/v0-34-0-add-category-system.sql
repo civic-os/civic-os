@@ -1,9 +1,9 @@
--- Revert civic_os:v0-34-0-add-type-system from pg
+-- Revert civic_os:v0-34-0-add-category-system from pg
 
 BEGIN;
 
 -- ============================================================================
--- 1. RESTORE schema_cache_versions (remove 'types' entry)
+-- 1. RESTORE schema_cache_versions (remove 'categories' entry)
 -- ============================================================================
 
 DROP VIEW IF EXISTS public.schema_cache_versions;
@@ -39,21 +39,21 @@ GRANT SELECT ON public.schema_cache_versions TO authenticated, web_anon;
 
 
 -- ============================================================================
--- 2. DROP public.types VIEW
+-- 2. DROP public.categories VIEW
 -- ============================================================================
 
-DROP VIEW IF EXISTS public.types;
+DROP VIEW IF EXISTS public.categories;
 
 
 -- ============================================================================
 -- 3. DROP validation trigger function
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS public.validate_type_entity_type();
+DROP FUNCTION IF EXISTS public.validate_category_entity_type();
 
 
 -- ============================================================================
--- 4. RESTORE schema_properties VIEW (remove type_entity_type)
+-- 4. RESTORE schema_properties VIEW (remove category_entity_type)
 -- ============================================================================
 
 CREATE OR REPLACE VIEW public.schema_properties AS
@@ -154,33 +154,33 @@ GRANT SELECT ON public.schema_properties TO web_anon, authenticated;
 
 
 -- ============================================================================
--- 5. REMOVE type_entity_type FROM metadata.properties
+-- 5. REMOVE category_entity_type FROM metadata.properties
 -- ============================================================================
 
-ALTER TABLE metadata.properties DROP COLUMN IF EXISTS type_entity_type;
+ALTER TABLE metadata.properties DROP COLUMN IF EXISTS category_entity_type;
 
 
 -- ============================================================================
 -- 6. DROP helper functions
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS public.get_type_id(TEXT, TEXT);
-DROP FUNCTION IF EXISTS public.get_types_for_entity(TEXT);
+DROP FUNCTION IF EXISTS public.get_category_id(TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.get_categories_for_entity(TEXT);
 
 
 -- ============================================================================
--- 7. DROP type_key trigger function
+-- 7. DROP category_key trigger function
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS metadata.set_type_key() CASCADE;
+DROP FUNCTION IF EXISTS metadata.set_category_key() CASCADE;
 
 
 -- ============================================================================
 -- 8. DROP tables (CASCADE removes policies)
 -- ============================================================================
 
-DROP TABLE IF EXISTS metadata.types CASCADE;
-DROP TABLE IF EXISTS metadata.type_categories CASCADE;
+DROP TABLE IF EXISTS metadata.categories CASCADE;
+DROP TABLE IF EXISTS metadata.category_groups CASCADE;
 
 
 -- ============================================================================

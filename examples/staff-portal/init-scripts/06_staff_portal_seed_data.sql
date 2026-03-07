@@ -5,7 +5,7 @@
 -- This runs after schema, permissions, and notifications are set up.
 -- ============================================================================
 
--- NOTE: Staff roles are now managed by the Type system (metadata.types
+-- NOTE: Staff roles are now managed by the Category system (metadata.categories
 -- with entity_type='staff_role') and seeded in 01_staff_portal_schema.sql.
 
 -- ============================================================================

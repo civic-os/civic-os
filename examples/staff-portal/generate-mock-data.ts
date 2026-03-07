@@ -36,11 +36,11 @@ interface StatusInfo {
   is_initial: boolean;
 }
 
-interface TypeInfo {
+interface CategoryInfo {
   id: number;
   entity_type: string;
   display_name: string;
-  type_key: string;
+  category_key: string;
 }
 
 class StaffPortalMockDataGenerator {
@@ -48,7 +48,7 @@ class StaffPortalMockDataGenerator {
   private client?: Client;
   private sqlStatements: string[] = [];
   private statusMap: Map<string, StatusInfo[]> = new Map();
-  private typeMap: Map<string, TypeInfo[]> = new Map();
+  private categoryMap: Map<string, CategoryInfo[]> = new Map();
 
   // Generated data stored for FK references
   private userIds: string[] = [];
@@ -95,29 +95,29 @@ class StaffPortalMockDataGenerator {
     console.log(`Fetched ${result.rows.length} statuses across ${this.statusMap.size} entity types`);
   }
 
-  async fetchTypes() {
+  async fetchCategories() {
     if (!this.client) throw new Error('Database not connected');
     const result = await this.client.query(
-      `SELECT id, entity_type, display_name, type_key
-       FROM metadata.types
+      `SELECT id, entity_type, display_name, category_key
+       FROM metadata.categories
        WHERE entity_type IN ('time_entry', 'staff_role')
        ORDER BY entity_type, sort_order`
     );
     for (const row of result.rows) {
-      if (!this.typeMap.has(row.entity_type)) {
-        this.typeMap.set(row.entity_type, []);
+      if (!this.categoryMap.has(row.entity_type)) {
+        this.categoryMap.set(row.entity_type, []);
       }
-      this.typeMap.get(row.entity_type)!.push(row);
+      this.categoryMap.get(row.entity_type)!.push(row);
     }
-    console.log(`Fetched ${result.rows.length} types across ${this.typeMap.size} entity types`);
+    console.log(`Fetched ${result.rows.length} categories across ${this.categoryMap.size} entity types`);
   }
 
-  private getTypeId(entityType: string, typeKey: string): number {
-    const types = this.typeMap.get(entityType);
-    if (!types) throw new Error(`No types for entity_type: ${entityType}`);
-    const type = types.find(t => t.type_key === typeKey);
-    if (!type) throw new Error(`No type with key '${typeKey}' for ${entityType}`);
-    return type.id;
+  private getCategoryId(entityType: string, categoryKey: string): number {
+    const categories = this.categoryMap.get(entityType);
+    if (!categories) throw new Error(`No categories for entity_type: ${entityType}`);
+    const category = categories.find(t => t.category_key === categoryKey);
+    if (!category) throw new Error(`No category with key '${categoryKey}' for ${entityType}`);
+    return category.id;
   }
 
   private getStatusId(entityType: string, statusKey: string): number {
@@ -335,8 +335,8 @@ class StaffPortalMockDataGenerator {
     for (let i = 0; i < count; i++) {
       const fullName = faker.person.fullName();
       const siteId = faker.helpers.arrayElement([1, 2, 3]);
-      const staffRoleTypes = this.typeMap.get('staff_role') || [];
-      const roleId = faker.helpers.arrayElement(staffRoleTypes.map(t => t.id));
+      const staffRoleCategories = this.categoryMap.get('staff_role') || [];
+      const roleId = faker.helpers.arrayElement(staffRoleCategories.map(t => t.id));
       const staffId = i + 1;
 
       const email = i < userIdEntries.length
@@ -400,7 +400,7 @@ class StaffPortalMockDataGenerator {
 
       records.push({
         staff_member_id: staffId,
-        entry_type_id: this.getTypeId('time_entry', isClockIn ? 'clock_in' : 'clock_out'),
+        entry_type_id: this.getCategoryId('time_entry', isClockIn ? 'clock_in' : 'clock_out'),
         entry_time: baseDate.toISOString(),
       });
     }
@@ -905,7 +905,7 @@ class StaffPortalMockDataGenerator {
 
       await this.connect();
       await this.fetchStatuses();
-      await this.fetchTypes();
+      await this.fetchCategories();
 
       if (!sqlOnly) {
         await this.truncateTables();
@@ -931,7 +931,7 @@ class StaffPortalMockDataGenerator {
         }
       }
 
-      // 2. Staff members (references seed data: sites 1-3, staff_role types from metadata.types)
+      // 2. Staff members (references seed data: sites 1-3, staff_role categories from metadata.categories)
       const staffMembers = this.generateStaffMembers(userEmails);
       if (sqlOnly) {
         this.addInsertSQL('staff_members', staffMembers);

@@ -4,18 +4,18 @@
 -- This schema tracks organizations, contacts, projects, and their broader impact categories
 -- PostGIS is installed in the postgis schema by core Civic OS scripts and is accessible via search_path
 -- NOTE: Requires Civic OS v0.15.0+ (Status Type System)
--- NOTE: Requires Civic OS v0.34.0+ (Type system for non-workflow categorization)
+-- NOTE: Requires Civic OS v0.34.0+ (Category system for non-workflow categorization)
 
 -- =====================================================
--- TYPE SYSTEM CONFIGURATION
--- Uses centralized metadata.types for non-workflow categorization (v0.34.0+)
+-- CATEGORY SYSTEM CONFIGURATION
+-- Uses centralized metadata.categories for non-workflow categorization (v0.34.0+)
 -- =====================================================
 
-INSERT INTO metadata.type_categories (entity_type, description)
+INSERT INTO metadata.category_groups (entity_type, description)
 VALUES ('organization_type', 'Categories for organizations')
 ON CONFLICT (entity_type) DO NOTHING;
 
-INSERT INTO metadata.types (entity_type, display_name, color, sort_order) VALUES
+INSERT INTO metadata.categories (entity_type, display_name, color, sort_order) VALUES
   ('organization_type', 'Academic', '#3B82F6', 1),
   ('organization_type', 'Non-Profit', '#22C55E', 2),
   ('organization_type', 'Government', '#8B5CF6', 3),
@@ -187,7 +187,7 @@ ALTER TABLE "public"."broader_impact_categories" ADD CONSTRAINT "broader_impact_
 
 -- Organizations foreign keys
 ALTER TABLE "public"."organizations" ADD CONSTRAINT "organizations_organization_type_id_fkey"
-  FOREIGN KEY (organization_type_id) REFERENCES metadata.types(id) NOT VALID;
+  FOREIGN KEY (organization_type_id) REFERENCES metadata.categories(id) NOT VALID;
 ALTER TABLE "public"."organizations" VALIDATE CONSTRAINT "organizations_organization_type_id_fkey";
 
 -- Contacts foreign keys

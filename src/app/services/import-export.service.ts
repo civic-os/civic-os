@@ -174,7 +174,7 @@ export class ImportExportService {
     if (property.type === EntityPropertyType.Status) {
       return `${property.column_name}(display_name)`;
     }
-    if (property.type === EntityPropertyType.Type) {
+    if (property.type === EntityPropertyType.Category) {
       return `${property.column_name}(display_name)`;
     }
     return property.column_name;
@@ -219,8 +219,8 @@ export class ImportExportService {
             exportRow[prop.display_name] = value;
           }
         }
-        // Type columns - identical to Status (has id, display_name, and color)
-        else if (prop.type === EntityPropertyType.Type) {
+        // Category columns - identical to Status (has id, display_name, and color)
+        else if (prop.type === EntityPropertyType.Category) {
           if (value && typeof value === 'object' && 'id' in value) {
             exportRow[prop.display_name] = value.id;
             exportRow[prop.display_name + ' (Name)'] = value.display_name;
@@ -423,7 +423,7 @@ export class ImportExportService {
       case EntityPropertyType.ForeignKeyName:
       case EntityPropertyType.User:
       case EntityPropertyType.Status:
-      case EntityPropertyType.Type:
+      case EntityPropertyType.Category:
         return `Select from "${prop.display_name} Options" sheet or use ID`;
 
       case EntityPropertyType.Date:
@@ -468,14 +468,14 @@ export class ImportExportService {
           operator: 'eq',
           value: prop.status_entity_type || ''
         }];
-      } else if (prop.type === EntityPropertyType.Type) {
-        tableName = 'types';
+      } else if (prop.type === EntityPropertyType.Category) {
+        tableName = 'categories';
         columnName = 'id';
-        // Filter types by entity_type to only show relevant options
+        // Filter categories by entity_type to only show relevant options
         filters = [{
           column: 'entity_type',
           operator: 'eq',
-          value: prop.type_entity_type || ''
+          value: prop.category_entity_type || ''
         }];
       } else {
         tableName = prop.join_table;
@@ -547,7 +547,7 @@ export class ImportExportService {
       p.type === EntityPropertyType.ForeignKeyName ||
       p.type === EntityPropertyType.User ||
       p.type === EntityPropertyType.Status ||
-      p.type === EntityPropertyType.Type
+      p.type === EntityPropertyType.Category
     );
 
     if (referenceProps.length === 0) {
@@ -575,14 +575,14 @@ export class ImportExportService {
           operator: 'eq',
           value: prop.status_entity_type || ''
         }];
-      } else if (prop.type === EntityPropertyType.Type) {
-        tableName = 'types';
+      } else if (prop.type === EntityPropertyType.Category) {
+        tableName = 'categories';
         columnName = 'id';
-        lookupKey = `type_${prop.type_entity_type}`;
+        lookupKey = `category_${prop.category_entity_type}`;
         filters = [{
           column: 'entity_type',
           operator: 'eq',
-          value: prop.type_entity_type || ''
+          value: prop.category_entity_type || ''
         }];
       } else {
         tableName = prop.join_table;

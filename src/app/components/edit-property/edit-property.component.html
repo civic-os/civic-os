@@ -87,19 +87,19 @@
     }
   }
 
-  @if (propType() == EntityPropertyType.Type) {
-    @if (typeOptions$ | async; as typeOptions) {
+  @if (propType() == EntityPropertyType.Category) {
+    @if (categoryOptions$ | async; as categoryOptions) {
       <select
         class="select w-full"
         [id]="prop().column_name"
         [formControlName]="prop().column_name"
-        [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedTypeColor(typeOptions)"
-        [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedTypeColor(typeOptions) ? '2px' : null)"
-        [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedTypeBackgroundColor(typeOptions)">
+        [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryColor(categoryOptions)"
+        [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedCategoryColor(categoryOptions) ? '2px' : null)"
+        [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryBackgroundColor(categoryOptions)">
         @if (prop().is_nullable) {
-          <option [value]="null">Select a Type</option>
+          <option [value]="null">Select a Category</option>
         }
-        @for (option of typeOptions; track option.id) {
+        @for (option of categoryOptions; track option.id) {
           <option [value]="option.id">{{ option.text }}</option>
         }
       </select>

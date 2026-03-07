@@ -63,7 +63,7 @@ export class EditPropertyComponent {
 
   public selectOptions$?: Observable<{id: number, text: string}[]>;
   public statusOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
-  public typeOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
+  public categoryOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
 
   propType = computed(() => this.prop().type);
 
@@ -143,14 +143,14 @@ export class EditPropertyComponent {
         }));
     }
 
-    // Load Type options from cached SchemaService (v0.34.0)
-    if(this.propType() == EntityPropertyType.Type && prop.type_entity_type) {
-      this.typeOptions$ = this.schema.getTypesForEntity(prop.type_entity_type)
-        .pipe(map(types => {
-          return types.map(t => ({
-            id: t.id,
-            text: t.display_name,
-            color: t.color
+    // Load Category options from cached SchemaService (v0.34.0)
+    if(this.propType() == EntityPropertyType.Category && prop.category_entity_type) {
+      this.categoryOptions$ = this.schema.getCategoriesForEntity(prop.category_entity_type)
+        .pipe(map(categories => {
+          return categories.map(c => ({
+            id: c.id,
+            text: c.display_name,
+            color: c.color
           }));
         }));
     }
@@ -222,9 +222,9 @@ export class EditPropertyComponent {
   }
 
   /**
-   * Get the color of the currently selected type option (mirrors status color)
+   * Get the color of the currently selected category option (mirrors status color)
    */
-  getSelectedTypeColor(options: {id: number, text: string, color: string | null}[]): string | null {
+  getSelectedCategoryColor(options: {id: number, text: string, color: string | null}[]): string | null {
     const selectedId = this.form().get(this.prop().column_name)?.value;
     if (!selectedId) return null;
     const selected = options.find(o => o.id === +selectedId);
@@ -232,10 +232,10 @@ export class EditPropertyComponent {
   }
 
   /**
-   * Get a semi-transparent background for the selected type (mirrors status bg)
+   * Get a semi-transparent background for the selected category (mirrors status bg)
    */
-  getSelectedTypeBackgroundColor(options: {id: number, text: string, color: string | null}[]): string | null {
-    const color = this.getSelectedTypeColor(options);
+  getSelectedCategoryBackgroundColor(options: {id: number, text: string, color: string | null}[]): string | null {
+    const color = this.getSelectedCategoryColor(options);
     if (!color) return null;
     const hex = color.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);

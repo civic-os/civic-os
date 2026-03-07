@@ -821,7 +821,7 @@ describe('ImportExportService', () => {
       FilePDF: 20,
       Payment: 21,
       Status: 22,
-      Type: 23,
+      Category: 23,
       RecurringTimeSlot: 24
     };
 
