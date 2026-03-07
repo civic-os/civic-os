@@ -59,6 +59,13 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Limit UI Selectors based on Workflow
 - [ ] Set up Record Defaults (On Create)
 
+### Categorization
+- [ ] **Tag System** - First-class M:M categorization using the Type system
+  - [ ] Tags as Type values assignable to entities via framework-managed junction tables
+  - [ ] Colored badge display with multi-select UI on Detail/Edit pages
+  - [ ] Admin management of tag categories (reuses Type admin UI)
+  - [ ] Use case: `broader_impact_categories` in broader-impacts example currently requires a standalone table + junction table per entity; a Tag system would centralize this
+
 ### Logic
 - [x] **Entity Action Buttons** (v0.18.0) - Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions
   - [x] Database schema (`metadata.entity_actions`, `metadata.entity_action_roles` tables) and migration

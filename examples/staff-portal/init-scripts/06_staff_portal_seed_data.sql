@@ -5,16 +5,8 @@
 -- This runs after schema, permissions, and notifications are set up.
 -- ============================================================================
 
--- ============================================================================
--- STAFF ROLES
--- ============================================================================
-
-INSERT INTO staff_roles (display_name, sort_order) VALUES
-  ('Lead Teacher', 1),
-  ('Assistant Teacher', 2),
-  ('Site Coordinator', 3),
-  ('Administrative Support', 4)
-ON CONFLICT (display_name) DO NOTHING;
+-- NOTE: Staff roles are now managed by the Type system (metadata.types
+-- with entity_type='staff_role') and seeded in 01_staff_portal_schema.sql.
 
 -- ============================================================================
 -- DOCUMENT REQUIREMENTS

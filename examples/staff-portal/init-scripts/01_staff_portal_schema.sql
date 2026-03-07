@@ -59,7 +59,8 @@ ON CONFLICT DO NOTHING;
 
 -- Register type entity types
 INSERT INTO metadata.type_categories (entity_type, description) VALUES
-  ('time_entry', 'Clock in/out entry types')
+  ('time_entry', 'Clock in/out entry types'),
+  ('staff_role', 'Position types for program staff')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- time_entry types (categorization, not workflow — no is_initial/is_terminal)
@@ -68,20 +69,19 @@ INSERT INTO metadata.types (entity_type, display_name, description, color, sort_
   ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, 'clock_out')
 ON CONFLICT DO NOTHING;
 
+-- staff_role types (position categorization)
+INSERT INTO metadata.types (entity_type, display_name, color, sort_order) VALUES
+  ('staff_role', 'Lead Teacher', '#3B82F6', 1),
+  ('staff_role', 'Assistant Teacher', '#22C55E', 2),
+  ('staff_role', 'Site Coordinator', '#8B5CF6', 3),
+  ('staff_role', 'Administrative Support', '#F59E0B', 4)
+ON CONFLICT DO NOTHING;
+
 -- ============================================================================
 -- TABLES
 -- ============================================================================
 
--- 1. staff_roles: Reference table for position types
-CREATE TABLE staff_roles (
-  id SERIAL PRIMARY KEY,
-  display_name TEXT NOT NULL UNIQUE,
-  sort_order INT DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- 2. sites: Program locations (lead_id FK added after staff_members exists)
+-- 1. sites: Program locations (lead_id FK added after staff_members exists)
 CREATE TABLE sites (
   id BIGSERIAL PRIMARY KEY,
   display_name TEXT NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE staff_members (
   email email_address NOT NULL UNIQUE,
   user_id UUID NULL REFERENCES metadata.civic_os_users(id),
   site_id BIGINT NOT NULL REFERENCES sites(id),
-  role_id INT NOT NULL REFERENCES staff_roles(id),
+  role_id INT NOT NULL REFERENCES metadata.types(id),
   pay_rate MONEY,
   start_date DATE,
   onboarding_status_id INT NOT NULL DEFAULT get_initial_status('staff_onboarding') REFERENCES metadata.statuses(id),
@@ -267,17 +267,6 @@ CREATE INDEX idx_offboarding_feedback_staff_member_id ON offboarding_feedback(st
 -- TIMESTAMP TRIGGERS
 -- Standard Civic OS pattern: set_created_at() and set_updated_at() on all tables
 -- ============================================================================
-
--- staff_roles
-CREATE TRIGGER set_created_at_trigger
-  BEFORE INSERT ON staff_roles
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_created_at();
-
-CREATE TRIGGER set_updated_at_trigger
-  BEFORE INSERT OR UPDATE ON staff_roles
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_updated_at();
 
 -- sites
 CREATE TRIGGER set_created_at_trigger
@@ -609,8 +598,8 @@ AS $$
 DECLARE
   v_role_name TEXT;
 BEGIN
-  -- Look up the staff member's role display_name
-  SELECT display_name INTO v_role_name FROM staff_roles WHERE id = NEW.role_id;
+  -- Look up the staff member's role display_name from the Type system
+  SELECT display_name INTO v_role_name FROM metadata.types WHERE id = NEW.role_id;
 
   -- For each requirement where applies_to_roles is empty/null (all roles)
   -- or the staff member's role is in the array, create a document record
@@ -781,8 +770,9 @@ GRANT EXECUTE ON FUNCTION update_onboarding_status() TO authenticated;
 -- ============================================================================
 -- ROW LEVEL SECURITY
 -- ============================================================================
--- RLS is NOT enabled on reference tables (staff_roles, sites, document_requirements)
+-- RLS is NOT enabled on reference tables (sites, document_requirements)
 -- since all authenticated users can read these freely.
+-- staff_roles has been migrated to the Type system (metadata.types).
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -998,7 +988,6 @@ CREATE POLICY delete_offboarding_feedback ON offboarding_feedback
 -- ============================================================================
 
 -- Reference tables: all authenticated (and anonymous) can read
-GRANT SELECT ON staff_roles TO web_anon, authenticated;
 GRANT SELECT ON sites TO web_anon, authenticated;
 GRANT SELECT ON document_requirements TO web_anon, authenticated;
 
@@ -1012,7 +1001,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON reimbursements TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON offboarding_feedback TO authenticated;
 
 -- Manager/admin can also modify reference tables
-GRANT INSERT, UPDATE, DELETE ON staff_roles TO authenticated;
 GRANT INSERT, UPDATE, DELETE ON sites TO authenticated;
 GRANT INSERT, UPDATE, DELETE ON document_requirements TO authenticated;
 
@@ -1040,7 +1028,7 @@ CREATE INDEX idx_incident_reports_search ON incident_reports USING GIN(civic_os_
 -- ============================================================================
 
 -- Entity descriptions
-UPDATE metadata.entities SET description = 'Position types for staff members' WHERE table_name = 'staff_roles';
+-- staff_roles table migrated to Type system (metadata.types with entity_type='staff_role')
 UPDATE metadata.entities SET description = 'Summer program locations' WHERE table_name = 'sites';
 UPDATE metadata.entities SET description = 'Staff members in the summer education program' WHERE table_name = 'staff_members';
 UPDATE metadata.entities SET description = 'Required documents that staff must submit' WHERE table_name = 'document_requirements';

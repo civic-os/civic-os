@@ -9,13 +9,6 @@
 -- =====================================================
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
-VALUES ('staff_roles', 'Staff Roles', 'Position types for program staff', 1)
-ON CONFLICT (table_name) DO UPDATE SET
-  display_name = EXCLUDED.display_name,
-  description = EXCLUDED.description,
-  sort_order = EXCLUDED.sort_order;
-
-INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
 VALUES ('sites', 'Sites', 'Program locations', 2)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
@@ -77,23 +70,6 @@ ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
   sort_order = EXCLUDED.sort_order;
-
--- =====================================================
--- PROPERTY METADATA (staff_roles)
--- =====================================================
-
-INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width, show_on_list, show_on_create, show_on_edit, show_on_detail)
-VALUES
-  ('staff_roles', 'display_name', 'Role Name', 1, 1, TRUE, TRUE, TRUE, TRUE),
-  ('staff_roles', 'sort_order', 'Display Order', 2, 1, TRUE, TRUE, TRUE, TRUE)
-ON CONFLICT (table_name, column_name) DO UPDATE SET
-  display_name = EXCLUDED.display_name,
-  sort_order = EXCLUDED.sort_order,
-  column_width = EXCLUDED.column_width,
-  show_on_list = EXCLUDED.show_on_list,
-  show_on_create = EXCLUDED.show_on_create,
-  show_on_edit = EXCLUDED.show_on_edit,
-  show_on_detail = EXCLUDED.show_on_detail;
 
 -- =====================================================
 -- PROPERTY METADATA (sites)
@@ -322,6 +298,9 @@ WHERE table_name = 'reimbursements' AND column_name = 'status_id';
 
 UPDATE metadata.properties SET type_entity_type = 'time_entry'
 WHERE table_name = 'time_entries' AND column_name = 'entry_type_id';
+
+UPDATE metadata.properties SET type_entity_type = 'staff_role'
+WHERE table_name = 'staff_members' AND column_name = 'role_id';
 
 -- =====================================================
 -- FILTERABLE & SORTABLE PROPERTIES

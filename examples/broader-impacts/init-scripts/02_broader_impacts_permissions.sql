@@ -25,31 +25,6 @@ WHERE NOT EXISTS (
 --   - has_permission(table_name, permission) - checks table-level permissions
 
 -- =====================================================
--- RLS POLICIES: ORGANIZATION TYPES
--- =====================================================
-
-CREATE POLICY "organization_types: read permission" ON "public"."organization_types"
-  FOR SELECT
-  TO PUBLIC
-  USING (has_permission('organization_types', 'read'));
-
-CREATE POLICY "organization_types: create permission" ON "public"."organization_types"
-  FOR INSERT
-  TO PUBLIC
-  WITH CHECK (has_permission('organization_types', 'create'));
-
-CREATE POLICY "organization_types: update permission" ON "public"."organization_types"
-  FOR UPDATE
-  TO PUBLIC
-  USING (has_permission('organization_types', 'update'))
-  WITH CHECK (has_permission('organization_types', 'update'));
-
-CREATE POLICY "organization_types: delete permission" ON "public"."organization_types"
-  FOR DELETE
-  TO PUBLIC
-  USING (has_permission('organization_types', 'delete'));
-
--- =====================================================
 -- RLS POLICIES: ORGANIZATIONS
 -- =====================================================
 
@@ -98,31 +73,6 @@ CREATE POLICY "contacts: delete permission" ON "public"."contacts"
   FOR DELETE
   TO PUBLIC
   USING (has_permission('contacts', 'delete'));
-
--- =====================================================
--- RLS POLICIES: PROJECT STATUSES
--- =====================================================
-
-CREATE POLICY "project_statuses: read permission" ON "public"."project_statuses"
-  FOR SELECT
-  TO PUBLIC
-  USING (has_permission('project_statuses', 'read'));
-
-CREATE POLICY "project_statuses: create permission" ON "public"."project_statuses"
-  FOR INSERT
-  TO PUBLIC
-  WITH CHECK (has_permission('project_statuses', 'create'));
-
-CREATE POLICY "project_statuses: update permission" ON "public"."project_statuses"
-  FOR UPDATE
-  TO PUBLIC
-  USING (has_permission('project_statuses', 'update'))
-  WITH CHECK (has_permission('project_statuses', 'update'));
-
-CREATE POLICY "project_statuses: delete permission" ON "public"."project_statuses"
-  FOR DELETE
-  TO PUBLIC
-  USING (has_permission('project_statuses', 'delete'));
 
 -- =====================================================
 -- RLS POLICIES: INTEREST CENTERS

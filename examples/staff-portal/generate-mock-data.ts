@@ -21,7 +21,7 @@ interface MockDataConfig {
 
 const DEFAULT_CONFIG: MockDataConfig = {
   recordsPerEntity: {},
-  excludeTables: ['staff_roles', 'sites', 'document_requirements', 'staff_documents'],
+  excludeTables: ['sites', 'document_requirements', 'staff_documents'],
   outputFormat: 'insert',
   outputPath: './staff-portal-mock-data.sql',
   generateUsers: true,
@@ -100,7 +100,7 @@ class StaffPortalMockDataGenerator {
     const result = await this.client.query(
       `SELECT id, entity_type, display_name, type_key
        FROM metadata.types
-       WHERE entity_type IN ('time_entry')
+       WHERE entity_type IN ('time_entry', 'staff_role')
        ORDER BY entity_type, sort_order`
     );
     for (const row of result.rows) {
@@ -335,7 +335,8 @@ class StaffPortalMockDataGenerator {
     for (let i = 0; i < count; i++) {
       const fullName = faker.person.fullName();
       const siteId = faker.helpers.arrayElement([1, 2, 3]);
-      const roleId = faker.helpers.arrayElement([1, 2, 3, 4]);
+      const staffRoleTypes = this.typeMap.get('staff_role') || [];
+      const roleId = faker.helpers.arrayElement(staffRoleTypes.map(t => t.id));
       const staffId = i + 1;
 
       const email = i < userIdEntries.length
@@ -930,7 +931,7 @@ class StaffPortalMockDataGenerator {
         }
       }
 
-      // 2. Staff members (references seed data: sites 1-3, staff_roles 1-4)
+      // 2. Staff members (references seed data: sites 1-3, staff_role types from metadata.types)
       const staffMembers = this.generateStaffMembers(userEmails);
       if (sqlOnly) {
         this.addInsertSQL('staff_members', staffMembers);

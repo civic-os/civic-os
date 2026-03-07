@@ -8,28 +8,6 @@
 -- 4. Permission configuration
 
 -- =====================================================
--- SEED DATA: ORGANIZATION TYPES
--- =====================================================
-
-INSERT INTO public.organization_types (display_name, description) VALUES
-  ('Academic', 'Universities, colleges, and research institutions'),
-  ('Non-Profit', 'Non-profit organizations and NGOs'),
-  ('Government', 'Government agencies and departments'),
-  ('Corporate', 'For-profit companies and corporations'),
-  ('Foundation', 'Philanthropic foundations and grant-making organizations');
-
--- =====================================================
--- SEED DATA: PROJECT STATUSES
--- =====================================================
-
-INSERT INTO public.project_statuses (display_name, description) VALUES
-  ('Planning', 'Project is in the planning phase'),
-  ('Active', 'Project is currently active and ongoing'),
-  ('Completed', 'Project has been successfully completed'),
-  ('On Hold', 'Project is temporarily paused'),
-  ('Cancelled', 'Project has been cancelled');
-
--- =====================================================
 -- SEED DATA: INTEREST CENTERS
 -- =====================================================
 
@@ -73,9 +51,7 @@ INSERT INTO metadata.entities (table_name, display_name, description, sort_order
   ('contacts', 'Contacts', 'Individual contacts and collaborators', 20),
   ('projects', 'Projects', 'Research and engagement projects', 30),
   ('interest_centers', 'Interest Centers', 'Areas of focus and interest', 40),
-  ('broader_impact_categories', 'Impact Categories', 'Categories of broader societal impact', 50),
-  ('organization_types', 'Organization Types', 'Types of organizations (lookup table)', 60),
-  ('project_statuses', 'Project Statuses', 'Project status values (lookup table)', 70)
+  ('broader_impact_categories', 'Impact Categories', 'Categories of broader societal impact', 50)
 ON CONFLICT (table_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
       description = EXCLUDED.description,
@@ -146,6 +122,18 @@ ON CONFLICT (table_name, column_name) DO UPDATE
       sort_order = EXCLUDED.sort_order;
 
 -- =====================================================
+-- TYPE/STATUS ENTITY TYPE CONFIGURATION
+-- =====================================================
+-- Configure FK columns to use the Type/Status systems so the frontend
+-- renders colored badge dropdowns via the framework RPCs
+
+UPDATE metadata.properties SET type_entity_type = 'organization_type'
+WHERE table_name = 'organizations' AND column_name = 'organization_type_id';
+
+UPDATE metadata.properties SET status_entity_type = 'project'
+WHERE table_name = 'projects' AND column_name = 'status_id';
+
+-- =====================================================
 -- PERMISSIONS CONFIGURATION
 -- =====================================================
 
@@ -158,8 +146,6 @@ FROM (VALUES
   ('projects'),
   ('interest_centers'),
   ('broader_impact_categories'),
-  ('organization_types'),
-  ('project_statuses'),
   ('organization_broader_impact_categories'),
   ('contact_projects'),
   ('contact_broader_impact_categories'),

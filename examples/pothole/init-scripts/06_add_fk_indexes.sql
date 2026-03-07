@@ -36,13 +36,13 @@ CREATE INDEX IF NOT EXISTS idx_issue_tags_issue_id ON "issue_tags"(issue_id);
 CREATE INDEX IF NOT EXISTS idx_issue_tags_tag_id ON "issue_tags"(tag_id);
 
 -- Index comments
-COMMENT ON INDEX idx_issues_status IS 'Optimize inverse relationship queries for IssueStatus -> Issue';
+COMMENT ON INDEX idx_issues_status IS 'Optimize inverse relationship queries for metadata.statuses -> Issue';
 COMMENT ON INDEX idx_issues_created_user IS 'Optimize inverse relationship queries for civic_os_users -> Issue (created by)';
 COMMENT ON INDEX idx_issues_work_package IS 'Optimize inverse relationship queries for WorkPackage -> Issue';
 COMMENT ON INDEX idx_bids_owner IS 'Optimize inverse relationship queries for civic_os_users -> Bid (owner)';
 COMMENT ON INDEX idx_bids_work_package IS 'Optimize inverse relationship queries for WorkPackage -> Bid';
 COMMENT ON INDEX idx_work_details_issue IS 'Optimize inverse relationship queries for Issue -> WorkDetail';
 COMMENT ON INDEX idx_work_details_added_by IS 'Optimize inverse relationship queries for civic_os_users -> WorkDetail (added by)';
-COMMENT ON INDEX idx_work_packages_status IS 'Optimize inverse relationship queries for WorkPackageStatus -> WorkPackage';
+COMMENT ON INDEX idx_work_packages_status IS 'Optimize inverse relationship queries for metadata.statuses -> WorkPackage';
 COMMENT ON INDEX idx_issue_tags_issue_id IS 'Optimize M:M junction queries for Issue -> Tags';
 COMMENT ON INDEX idx_issue_tags_tag_id IS 'Optimize M:M junction queries for Tags -> Issues';

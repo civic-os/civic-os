@@ -10,10 +10,7 @@
     "contact_broader_impact_categories": 120,
     "project_broader_impact_categories": 80
   },
-  "excludeTables": [
-    "organization_types",
-    "project_statuses"
-  ],
+  "excludeTables": [],
   "outputFormat": "insert",
   "generateUsers": false,
   "userCount": 10,

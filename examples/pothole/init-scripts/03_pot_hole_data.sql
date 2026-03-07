@@ -1,24 +1,25 @@
 -- =====================================================
 -- Pot Hole Observation System - Seed Data
 -- =====================================================
+-- NOTE: IssueStatus and WorkPackageStatus data is now managed by the
+-- framework Status Type System (metadata.statuses) and seeded in
+-- 01_pot_hole_schema.sql.
 
--- Seed IssueStatus data
-INSERT INTO "public"."IssueStatus" ("id", "created_at", "display_name") VALUES
-  ('1', '2024-12-14 20:58:32.638955+00', 'New'),
-  ('2', '2024-12-14 21:02:44.44308+00', 'Verification'),
-  ('3', '2024-12-14 21:04:23.589205+00', 'Re-estimate'),
-  ('4', '2024-12-14 21:05:50.549546+00', 'Repair Queue'),
-  ('5', '2024-12-14 21:06:05.12863+00', 'Batched for Quote'),
-  ('6', '2024-12-14 21:06:15.078694+00', 'Bid Accepted'),
-  ('7', '2024-12-14 21:06:24.374326+00', 'Completed'),
-  ('8', '2024-12-14 21:06:28.683431+00', 'Duplicate');
+-- =====================================================
+-- STATUS ENTITY TYPE CONFIGURATION
+-- =====================================================
+-- Configure status columns to use the Status Type System so the frontend
+-- renders colored badge dropdowns via the framework RPCs
 
--- Seed WorkPackageStatus data
-INSERT INTO "public"."WorkPackageStatus" ("id", "created_at", "display_name") VALUES
-  ('2', '2024-12-14 21:29:56.694099+00', 'New'),
-  ('3', '2024-12-14 21:30:12.753812+00', 'Competitive'),
-  ('4', '2024-12-14 21:30:47.936383+00', 'Awarded'),
-  ('5', '2024-12-14 21:30:53.014772+00', 'Not Selected');
+INSERT INTO metadata.properties (table_name, column_name, status_entity_type)
+VALUES ('Issue', 'status', 'issue')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET status_entity_type = EXCLUDED.status_entity_type;
+
+INSERT INTO metadata.properties (table_name, column_name, status_entity_type)
+VALUES ('WorkPackage', 'status', 'work_package')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET status_entity_type = EXCLUDED.status_entity_type;
 
 -- Seed Tag data (for many-to-many relationship example)
 INSERT INTO public."Tag" (display_name, color, description) VALUES

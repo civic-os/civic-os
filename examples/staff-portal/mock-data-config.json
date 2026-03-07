@@ -9,6 +9,6 @@
     "staff_tasks": 25
   },
   "excludeTables": [
-    "staff_roles", "sites", "document_requirements", "staff_documents"
+    "sites", "document_requirements", "staff_documents"
   ]
 }

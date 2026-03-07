@@ -13,8 +13,6 @@
     "maxLng": -83.653
   },
   "excludeTables": [
-    "IssueStatus",
-    "WorkPackageStatus",
     "Tag",
     "time_slot_series",
     "time_slot_series_groups",
