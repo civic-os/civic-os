@@ -759,7 +759,7 @@ export interface SeriesInstance {
     entity_table: string;
     entity_id?: number | null;
     is_exception: boolean;
-    exception_type?: 'modified' | 'rescheduled' | 'cancelled' | 'conflict_skipped' | null;
+    exception_type?: 'modified' | 'rescheduled' | 'cancelled' | 'conflict_skipped' | 'insert_failed' | null;
     original_time_slot?: string | null;
     exception_reason?: string | null;
     exception_at?: string | null;

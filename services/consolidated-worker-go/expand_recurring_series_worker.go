@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+	"regexp"
+	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 	"github.com/teambition/rrule-go"
@@ -56,6 +60,12 @@ type SeriesRecord struct {
 	CreatedBy        *string
 }
 
+// TableColumnInfo caches column existence checks for a target table.
+// Queried once per expansion to avoid per-INSERT schema lookups.
+type TableColumnInfo struct {
+	HasCreatedBy bool
+}
+
 // ============================================================================
 // Worker Implementation: Expand Recurring Series Worker
 // ============================================================================
@@ -93,8 +103,18 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 		return fmt.Errorf("failed to check schema drift: %w", err)
 	}
 
-	if len(driftIssues) > 0 {
-		log.Printf("[Job %d] Schema drift detected, pausing series: %v", job.ID, driftIssues)
+	// Separate hard drift (missing/extra columns) from JWT warnings
+	var hardDrift []string
+	for _, issue := range driftIssues {
+		if isJWTWarning(issue) {
+			log.Printf("[Job %d] JWT warning (non-blocking): %s", job.ID, issue)
+		} else {
+			hardDrift = append(hardDrift, issue)
+		}
+	}
+
+	if len(hardDrift) > 0 {
+		log.Printf("[Job %d] Schema drift detected, pausing series: %v", job.ID, hardDrift)
 		err = w.pauseSeriesWithReason(ctx, series.ID, "Schema drift detected")
 		if err != nil {
 			log.Printf("[Job %d] Error pausing series: %v", job.ID, err)
@@ -102,10 +122,17 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 
 		// Notify series creator about schema drift (non-blocking, optional)
 		if series.CreatedBy != nil {
-			w.notifySeriesSchemasDrift(ctx, series, driftIssues, job.ID)
+			w.notifySeriesSchemasDrift(ctx, series, hardDrift, job.ID)
 		}
 
 		return nil // Don't fail the job, just skip expansion
+	}
+
+	// 2b. Check target table columns (once per expansion)
+	colInfo, err := w.getTableColumnInfo(ctx, series.EntityTable)
+	if err != nil {
+		log.Printf("[Job %d] Error checking table columns: %v", job.ID, err)
+		return fmt.Errorf("failed to check table columns: %w", err)
 	}
 
 	// 3. Parse RRULE and generate occurrences
@@ -129,6 +156,7 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 	// 5. Create new instances
 	created := 0
 	skipped := 0
+	failed := 0
 
 	for _, occDate := range occurrences {
 		dateKey := occDate.Format("2006-01-02")
@@ -150,17 +178,21 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 		}
 		record[series.TimeSlotProperty] = timeSlot
 
-		// Insert entity record
-		entityID, err := w.insertEntityRecord(ctx, series.EntityTable, record, series.CreatedBy)
+		// Insert entity record (in a transaction with JWT GUC)
+		entityID, err := w.insertEntityRecord(ctx, series.EntityTable, record, series.CreatedBy, colInfo)
 		if err != nil {
-			// Check if it's a conflict error (GIST exclusion constraint)
-			log.Printf("[Job %d] Failed to insert entity for %s: %v", job.ID, dateKey, err)
-			// Create junction record marking as conflict_skipped
-			err = w.createInstanceRecord(ctx, series.ID, occDate, series.EntityTable, nil, true, "conflict_skipped")
+			errType := classifyInsertError(err)
+			log.Printf("[Job %d] Failed to insert entity for %s (%s): %v", job.ID, dateKey, errType, err)
+			// Create junction record with accurate error classification
+			err = w.createInstanceRecord(ctx, series.ID, occDate, series.EntityTable, nil, true, errType)
 			if err != nil {
-				log.Printf("[Job %d] Failed to create skipped instance: %v", job.ID, err)
+				log.Printf("[Job %d] Failed to create exception instance: %v", job.ID, err)
 			}
-			skipped++
+			if errType == "conflict_skipped" {
+				skipped++
+			} else {
+				failed++
+			}
 			continue
 		}
 
@@ -183,7 +215,7 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 	}
 
 	duration := time.Since(startTime)
-	log.Printf("[Job %d] ✓ Completed: %d created, %d skipped (conflicts), took %v", job.ID, created, skipped, duration)
+	log.Printf("[Job %d] ✓ Completed: %d created, %d conflict_skipped, %d insert_failed, took %v", job.ID, created, skipped, failed, duration)
 
 	return nil
 }
@@ -308,8 +340,46 @@ func (w *ExpandRecurringSeriesWorker) getExistingInstanceDates(ctx context.Conte
 	return dates, rows.Err()
 }
 
-// insertEntityRecord inserts a new entity record and returns its ID
-func (w *ExpandRecurringSeriesWorker) insertEntityRecord(ctx context.Context, tableName string, record map[string]interface{}, createdBy *string) (int64, error) {
+// getTableColumnInfo queries information_schema once to check which standard
+// columns exist on the target table. Called once per expansion, not per INSERT.
+func (w *ExpandRecurringSeriesWorker) getTableColumnInfo(ctx context.Context, tableName string) (*TableColumnInfo, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1 FROM information_schema.columns
+			WHERE table_schema = 'public' AND table_name = $1 AND column_name = 'created_by'
+		)
+	`
+	info := &TableColumnInfo{}
+	err := w.dbPool.QueryRow(ctx, query, tableName).Scan(&info.HasCreatedBy)
+	return info, err
+}
+
+// insertEntityRecord inserts a new entity record and returns its ID.
+// Each INSERT runs in its own transaction with JWT GUC set so that
+// current_user_id() returns the series creator's UUID. One tx per occurrence
+// ensures a single conflict doesn't roll back all inserts.
+func (w *ExpandRecurringSeriesWorker) insertEntityRecord(ctx context.Context, tableName string, record map[string]interface{}, createdBy *string, colInfo *TableColumnInfo) (int64, error) {
+	// Begin a transaction so we can set the JWT GUC
+	tx, err := w.dbPool.Begin(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx) //nolint:errcheck // rollback is a no-op after commit
+
+	// Set JWT claims GUC so current_user_id() works for column defaults.
+	// The 'true' arg scopes to this transaction; auto-resets when conn returns to pool.
+	// UUID format is validated as defense-in-depth against JSON injection.
+	if createdBy != nil {
+		if !uuidPattern.MatchString(*createdBy) {
+			return 0, fmt.Errorf("invalid created_by UUID format: %s", *createdBy)
+		}
+		claimsJSON := fmt.Sprintf(`{"sub":"%s","role":"authenticated"}`, *createdBy)
+		_, err = tx.Exec(ctx, "SELECT set_config('request.jwt.claims', $1, true)", claimsJSON)
+		if err != nil {
+			return 0, fmt.Errorf("failed to set JWT GUC: %w", err)
+		}
+	}
+
 	// Build INSERT query dynamically
 	columns := make([]string, 0, len(record)+1)
 	values := make([]interface{}, 0, len(record)+1)
@@ -323,8 +393,8 @@ func (w *ExpandRecurringSeriesWorker) insertEntityRecord(ctx context.Context, ta
 		i++
 	}
 
-	// Add created_by if provided
-	if createdBy != nil {
+	// Only add created_by if the column actually exists on the target table
+	if createdBy != nil && colInfo.HasCreatedBy {
 		columns = append(columns, "created_by")
 		values = append(values, *createdBy)
 		placeholders = append(placeholders, fmt.Sprintf("$%d", i))
@@ -338,8 +408,16 @@ func (w *ExpandRecurringSeriesWorker) insertEntityRecord(ctx context.Context, ta
 	)
 
 	var entityID int64
-	err := w.dbPool.QueryRow(ctx, query, values...).Scan(&entityID)
-	return entityID, err
+	err = tx.QueryRow(ctx, query, values...).Scan(&entityID)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return 0, fmt.Errorf("failed to commit: %w", err)
+	}
+
+	return entityID, nil
 }
 
 // createInstanceRecord creates a junction record
@@ -451,6 +529,32 @@ func joinStrings(strs []string, sep string) string {
 		result += sep + strs[i]
 	}
 	return result
+}
+
+// uuidPattern validates UUID format to prevent JSON injection in the JWT GUC.
+// The created_by column is UUID type in PostgreSQL so values are pre-validated,
+// but this is defense-in-depth for the fmt.Sprintf into JSON.
+var uuidPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
+
+// classifyInsertError inspects a PostgreSQL error to determine if it was a
+// legitimate time-slot conflict (exclusion_violation 23P01) or some other
+// failure like a missing column or NOT NULL violation. This prevents the
+// worker from silently mislabeling all errors as "conflict_skipped".
+func classifyInsertError(err error) string {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23P01" {
+		return "conflict_skipped"
+	}
+	return "insert_failed"
+}
+
+// isJWTWarning returns true if a schema drift issue string describes a
+// NOT NULL column with a current_user_id() default. These columns will
+// resolve correctly at runtime when the worker sets the JWT GUC, so they
+// should not cause the series to pause.
+func isJWTWarning(issue string) bool {
+	return strings.Contains(issue, "current_user_id()") &&
+		strings.Contains(issue, "NOT NULL")
 }
 
 // notifySeriesSchemasDrift attempts to send a notification to the series creator

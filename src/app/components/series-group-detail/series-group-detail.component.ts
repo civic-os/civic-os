@@ -317,7 +317,8 @@ type EditTab = 'info' | 'schedule' | 'template';
                 >
                   <span
                     class="material-symbols-outlined text-base"
-                    [class.text-warning]="instance.is_exception"
+                    [class.text-error]="instance.exception_type === 'insert_failed'"
+                    [class.text-warning]="instance.is_exception && instance.exception_type !== 'insert_failed'"
                     [class.text-base-content/50]="!instance.is_exception"
                   >
                     {{ getInstanceIcon(instance) }}
@@ -326,7 +327,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                     <p class="text-sm truncate">{{ formatOccurrenceDate(instance.occurrence_date) }}</p>
                     <div class="flex items-center gap-1 flex-wrap">
                       @if (instance.is_exception) {
-                        <span class="badge badge-warning badge-xs">
+                        <span class="badge badge-xs" [class.badge-error]="instance.exception_type === 'insert_failed'" [class.badge-warning]="instance.exception_type !== 'insert_failed'">
                           {{ getExceptionLabel(instance) }}
                         </span>
                       }
@@ -926,6 +927,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
   getInstanceIcon(instance: SeriesInstanceSummary): string {
     if (instance.exception_type === 'cancelled') return 'event_busy';
     if (instance.exception_type === 'rescheduled') return 'event_repeat';
+    if (instance.exception_type === 'insert_failed') return 'error_outline';
     if (instance.is_exception) return 'edit_calendar';
     return 'event';
   }
@@ -936,6 +938,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
       case 'rescheduled': return 'Rescheduled';
       case 'modified': return 'Modified';
       case 'conflict_skipped': return 'Skipped';
+      case 'insert_failed': return 'Failed';
       default: return 'Exception';
     }
   }

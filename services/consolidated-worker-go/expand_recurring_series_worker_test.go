@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // ============================================================================
@@ -618,5 +621,72 @@ func TestConvertToUTC_EmptySlice(t *testing.T) {
 
 	if len(result) != 0 {
 		t.Errorf("convertToUTC(empty) should return empty slice, got %d elements", len(result))
+	}
+}
+
+// ============================================================================
+// classifyInsertError Tests
+// ============================================================================
+
+func TestClassifyInsertError_ExclusionViolation(t *testing.T) {
+	// PostgreSQL error code 23P01 = exclusion_violation (GIST constraint)
+	pgErr := &pgconn.PgError{Code: "23P01", Message: "conflicting key value"}
+	result := classifyInsertError(pgErr)
+	if result != "conflict_skipped" {
+		t.Errorf("classifyInsertError(23P01) = %q, want %q", result, "conflict_skipped")
+	}
+}
+
+func TestClassifyInsertError_UniqueViolation(t *testing.T) {
+	// 23505 = unique_violation — should NOT be classified as conflict
+	pgErr := &pgconn.PgError{Code: "23505", Message: "duplicate key value"}
+	result := classifyInsertError(pgErr)
+	if result != "insert_failed" {
+		t.Errorf("classifyInsertError(23505) = %q, want %q", result, "insert_failed")
+	}
+}
+
+func TestClassifyInsertError_UndefinedColumn(t *testing.T) {
+	// 42703 = undefined_column (e.g., adding created_by to a table that doesn't have it)
+	pgErr := &pgconn.PgError{Code: "42703", Message: "column \"created_by\" does not exist"}
+	result := classifyInsertError(pgErr)
+	if result != "insert_failed" {
+		t.Errorf("classifyInsertError(42703) = %q, want %q", result, "insert_failed")
+	}
+}
+
+func TestClassifyInsertError_NotNullViolation(t *testing.T) {
+	// 23502 = not_null_violation (e.g., requestor_id NULL because current_user_id() is NULL)
+	pgErr := &pgconn.PgError{Code: "23502", Message: "null value in column \"requestor_id\""}
+	result := classifyInsertError(pgErr)
+	if result != "insert_failed" {
+		t.Errorf("classifyInsertError(23502) = %q, want %q", result, "insert_failed")
+	}
+}
+
+func TestClassifyInsertError_NonPgError(t *testing.T) {
+	// Non-PostgreSQL errors (network, timeout, etc.) should be insert_failed
+	err := fmt.Errorf("connection reset by peer")
+	result := classifyInsertError(err)
+	if result != "insert_failed" {
+		t.Errorf("classifyInsertError(non-pg) = %q, want %q", result, "insert_failed")
+	}
+}
+
+// ============================================================================
+// isJWTWarning Tests
+// ============================================================================
+
+func TestIsJWTWarning_TrueForJWTDefault(t *testing.T) {
+	issue := "requestor_id: NOT NULL column with current_user_id() default — requires JWT context at runtime"
+	if !isJWTWarning(issue) {
+		t.Errorf("isJWTWarning(%q) = false, want true", issue)
+	}
+}
+
+func TestIsJWTWarning_FalseForHardDrift(t *testing.T) {
+	issue := "room_id: Required field missing from template"
+	if isJWTWarning(issue) {
+		t.Errorf("isJWTWarning(%q) = true, want false", issue)
 	}
 }
