@@ -821,7 +821,8 @@ describe('ImportExportService', () => {
       FilePDF: 20,
       Payment: 21,
       Status: 22,
-      RecurringTimeSlot: 23
+      Type: 23,
+      RecurringTimeSlot: 24
     };
 
     it('should have matching enum keys', () => {
@@ -858,7 +859,7 @@ describe('ImportExportService', () => {
           '  1. import-validation.worker.ts\n' +
           '  2. EXPECTED_WORKER_ENUM_VALUES in this test'
         )
-        .toBe(24); // Unknown(0) through RecurringTimeSlot(23) = 24 types
+        .toBe(25); // Unknown(0) through RecurringTimeSlot(24) = 25 types
     });
   });
 

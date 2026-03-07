@@ -174,6 +174,9 @@ export class ImportExportService {
     if (property.type === EntityPropertyType.Status) {
       return `${property.column_name}(display_name)`;
     }
+    if (property.type === EntityPropertyType.Type) {
+      return `${property.column_name}(display_name)`;
+    }
     return property.column_name;
   }
 
@@ -209,6 +212,15 @@ export class ImportExportService {
         }
         // Status columns - identical to FK (has id, display_name, and color)
         else if (prop.type === EntityPropertyType.Status) {
+          if (value && typeof value === 'object' && 'id' in value) {
+            exportRow[prop.display_name] = value.id;
+            exportRow[prop.display_name + ' (Name)'] = value.display_name;
+          } else {
+            exportRow[prop.display_name] = value;
+          }
+        }
+        // Type columns - identical to Status (has id, display_name, and color)
+        else if (prop.type === EntityPropertyType.Type) {
           if (value && typeof value === 'object' && 'id' in value) {
             exportRow[prop.display_name] = value.id;
             exportRow[prop.display_name + ' (Name)'] = value.display_name;
@@ -411,6 +423,7 @@ export class ImportExportService {
       case EntityPropertyType.ForeignKeyName:
       case EntityPropertyType.User:
       case EntityPropertyType.Status:
+      case EntityPropertyType.Type:
         return `Select from "${prop.display_name} Options" sheet or use ID`;
 
       case EntityPropertyType.Date:
@@ -454,6 +467,15 @@ export class ImportExportService {
           column: 'entity_type',
           operator: 'eq',
           value: prop.status_entity_type || ''
+        }];
+      } else if (prop.type === EntityPropertyType.Type) {
+        tableName = 'types';
+        columnName = 'id';
+        // Filter types by entity_type to only show relevant options
+        filters = [{
+          column: 'entity_type',
+          operator: 'eq',
+          value: prop.type_entity_type || ''
         }];
       } else {
         tableName = prop.join_table;
@@ -524,7 +546,8 @@ export class ImportExportService {
     const referenceProps = properties.filter(p =>
       p.type === EntityPropertyType.ForeignKeyName ||
       p.type === EntityPropertyType.User ||
-      p.type === EntityPropertyType.Status
+      p.type === EntityPropertyType.Status ||
+      p.type === EntityPropertyType.Type
     );
 
     if (referenceProps.length === 0) {
@@ -551,6 +574,15 @@ export class ImportExportService {
           column: 'entity_type',
           operator: 'eq',
           value: prop.status_entity_type || ''
+        }];
+      } else if (prop.type === EntityPropertyType.Type) {
+        tableName = 'types';
+        columnName = 'id';
+        lookupKey = `type_${prop.type_entity_type}`;
+        filters = [{
+          column: 'entity_type',
+          operator: 'eq',
+          value: prop.type_entity_type || ''
         }];
       } else {
         tableName = prop.join_table;

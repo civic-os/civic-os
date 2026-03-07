@@ -1544,4 +1544,127 @@ describe('EditPropertyComponent', () => {
       });
     });
   });
+
+  describe('Type (Rich Enum)', () => {
+    const mockTypeOptions = [
+      { id: 1, text: 'Clock In', color: '#22C55E' },
+      { id: 2, text: 'Clock Out', color: '#6B7280' },
+      { id: 3, text: 'No Color', color: null }
+    ];
+
+    beforeEach(() => {
+      mockDataService.callRpc.and.returnValue(of([
+        { id: 1, display_name: 'Clock In', color: '#22C55E' },
+        { id: 2, display_name: 'Clock Out', color: '#6B7280' },
+        { id: 3, display_name: 'No Color', color: null }
+      ]));
+    });
+
+    describe('getSelectedTypeColor()', () => {
+      it('should return color of selected type', () => {
+        const typeProp = createMockProperty({
+          column_name: 'entry_type_id',
+          type: EntityPropertyType.Type,
+          type_entity_type: 'time_entry'
+        });
+        const formGroup = new FormGroup({
+          entry_type_id: new FormControl(1) // Clock In
+        });
+        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedTypeColor(mockTypeOptions);
+        expect(color).toBe('#22C55E');
+      });
+
+      it('should return null when no type selected', () => {
+        const typeProp = createMockProperty({
+          column_name: 'entry_type_id',
+          type: EntityPropertyType.Type,
+          type_entity_type: 'time_entry'
+        });
+        const formGroup = new FormGroup({
+          entry_type_id: new FormControl(null)
+        });
+        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedTypeColor(mockTypeOptions);
+        expect(color).toBeNull();
+      });
+
+      it('should return null when selected type has no color', () => {
+        const typeProp = createMockProperty({
+          column_name: 'entry_type_id',
+          type: EntityPropertyType.Type,
+          type_entity_type: 'time_entry'
+        });
+        const formGroup = new FormGroup({
+          entry_type_id: new FormControl(3) // No Color type
+        });
+        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedTypeColor(mockTypeOptions);
+        expect(color).toBeNull();
+      });
+
+      it('should handle string type_id (from select element)', () => {
+        const typeProp = createMockProperty({
+          column_name: 'entry_type_id',
+          type: EntityPropertyType.Type,
+          type_entity_type: 'time_entry'
+        });
+        const formGroup = new FormGroup({
+          entry_type_id: new FormControl('2') // String value from select
+        });
+        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const color = component.getSelectedTypeColor(mockTypeOptions);
+        expect(color).toBe('#6B7280');
+      });
+    });
+
+    describe('getSelectedTypeBackgroundColor()', () => {
+      it('should return rgba color with 15% opacity', () => {
+        const typeProp = createMockProperty({
+          column_name: 'entry_type_id',
+          type: EntityPropertyType.Type,
+          type_entity_type: 'time_entry'
+        });
+        const formGroup = new FormGroup({
+          entry_type_id: new FormControl(1) // Clock In - #22C55E
+        });
+        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const bgColor = component.getSelectedTypeBackgroundColor(mockTypeOptions);
+        // #22C55E = rgb(34, 197, 94)
+        expect(bgColor).toBe('rgba(34, 197, 94, 0.15)');
+      });
+
+      it('should return null when no type selected', () => {
+        const typeProp = createMockProperty({
+          column_name: 'entry_type_id',
+          type: EntityPropertyType.Type,
+          type_entity_type: 'time_entry'
+        });
+        const formGroup = new FormGroup({
+          entry_type_id: new FormControl(null)
+        });
+        fixture.componentRef.setInput('property', typeProp);
+        fixture.componentRef.setInput('formGroup', formGroup);
+        component.ngOnInit();
+
+        const bgColor = component.getSelectedTypeBackgroundColor(mockTypeOptions);
+        expect(bgColor).toBeNull();
+      });
+    });
+  });
 });

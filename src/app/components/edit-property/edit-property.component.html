@@ -87,6 +87,25 @@
     }
   }
 
+  @if (propType() == EntityPropertyType.Type) {
+    @if (typeOptions$ | async; as typeOptions) {
+      <select
+        class="select w-full"
+        [id]="prop().column_name"
+        [formControlName]="prop().column_name"
+        [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedTypeColor(typeOptions)"
+        [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedTypeColor(typeOptions) ? '2px' : null)"
+        [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedTypeBackgroundColor(typeOptions)">
+        @if (prop().is_nullable) {
+          <option [value]="null">Select a Type</option>
+        }
+        @for (option of typeOptions; track option.id) {
+          <option [value]="option.id">{{ option.text }}</option>
+        }
+      </select>
+    }
+  }
+
   @if (propType() == EntityPropertyType.GeoPoint) {
     <app-geo-point-map
       mode="edit"

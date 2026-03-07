@@ -203,7 +203,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                       <td class="text-right py-1">
                         @if (!resolved || !resolved.display) {
                           <span class="text-base-content/40">—</span>
-                        } @else if (resolved.type === EntityPropertyType.Status) {
+                        } @else if (resolved.type === EntityPropertyType.Status || resolved.type === EntityPropertyType.Type) {
                           <span
                             class="badge badge-sm text-white"
                             [style.background-color]="resolved.color || '#3B82F6'">
@@ -733,6 +733,34 @@ export class SeriesGroupDetailComponent implements OnChanges {
               resolved.set(prop.column_name, {
                 raw: rawValue,
                 display: `Status #${rawValue}`,
+                type: propType
+              });
+              return of(undefined);
+            })
+          )
+        );
+      }
+      // Handle Type type - fetch from types table (v0.34.0)
+      else if (propType === EntityPropertyType.Type && prop.type_entity_type) {
+        fetchObservables.push(
+          this.dataService.getData({
+            key: 'types',
+            fields: ['id', 'display_name', 'color'],
+            filters: [{ column: 'id', operator: 'eq', value: rawValue }]
+          }).pipe(
+            map((types: any[]) => {
+              const type = types[0];
+              resolved.set(prop.column_name, {
+                raw: rawValue,
+                display: type?.display_name || `Type #${rawValue}`,
+                type: propType,
+                color: type?.color
+              });
+            }),
+            catchError(() => {
+              resolved.set(prop.column_name, {
+                raw: rawValue,
+                display: `Type #${rawValue}`,
                 type: propType
               });
               return of(undefined);

@@ -109,4 +109,12 @@ export class DisplayPropertyComponent {
     const color = this.datum()?.color || '#3B82F6';
     return getContrastTextColor(color);
   }
+
+  /**
+   * Get contrast text color for type badge (same logic as status).
+   */
+  getTypeTextColor(): string {
+    const color = this.datum()?.color || '#3B82F6';
+    return getContrastTextColor(color);
+  }
 }

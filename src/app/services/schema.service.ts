@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, TypeValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
@@ -30,6 +30,17 @@ import { ConstraintMessage } from '../interfaces/api';
  * Simplified version of StatusValue for UI components.
  */
 export interface StatusOption {
+  id: number;
+  display_name: string;
+  color: string | null;
+}
+
+/**
+ * Type option for dropdowns and filters.
+ * Same shape as StatusOption (both are colored badge enums).
+ * Added in v0.34.0.
+ */
+export interface TypeOption {
   id: number;
   display_name: string;
   color: string | null;
@@ -58,6 +69,12 @@ export class SchemaService {
 
   // Legacy observable cache - kept for backward compatibility
   private statusesCache = new Map<string, Observable<StatusOption[]>>();
+
+  // Type cache: keyed by entity_type (e.g., 'time_entry', 'building_type')
+  // Signal-based cache for synchronous access (mirrors status pattern, v0.34.0)
+  private typeOptionsCache = signal<Map<string, TypeOption[]>>(new Map());
+  private loadingTypes = new Set<string>();
+  private typesCache = new Map<string, Observable<TypeOption[]>>();
 
   // Static text cache (v0.17.0)
   private staticTextCache$?: Observable<StaticText[]>;
@@ -369,6 +386,95 @@ export class SchemaService {
     }
   }
 
+  // ===========================================================================
+  // TYPE CACHE (v0.34.0) - mirrors Status cache pattern
+  // ===========================================================================
+
+  /**
+   * Get types for a specific entity type from metadata.types.
+   * Results are cached per entity_type to avoid redundant RPC calls.
+   */
+  public getTypesForEntity(entityType: string): Observable<TypeOption[]> {
+    const cached = this.typesCache.get(entityType);
+    if (cached) {
+      return cached;
+    }
+
+    if (this.loadingTypes.has(entityType)) {
+      return of([]);
+    }
+
+    this.loadingTypes.add(entityType);
+
+    const type$ = this.http.post<TypeOption[]>(
+      getPostgrestUrl() + 'rpc/get_types_for_entity',
+      { p_entity_type: entityType }
+    ).pipe(
+      map(types => types.map(t => ({
+        id: t.id,
+        display_name: t.display_name,
+        color: t.color
+      }))),
+      tap(types => {
+        this.typeOptionsCache.update(cache => {
+          const newCache = new Map(cache);
+          newCache.set(entityType, types);
+          return newCache;
+        });
+      }),
+      catchError(err => {
+        console.error(`Failed to load types for entity type '${entityType}':`, err);
+        return of([]);
+      }),
+      finalize(() => {
+        this.loadingTypes.delete(entityType);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+
+    this.typesCache.set(entityType, type$);
+    return type$;
+  }
+
+  /**
+   * Get cached type options synchronously. Returns empty array if not loaded.
+   * Use ensureTypeOptionsLoaded() to trigger loading if needed.
+   */
+  public getTypeOptionsSync(entityType: string): TypeOption[] {
+    return this.typeOptionsCache().get(entityType) || [];
+  }
+
+  /**
+   * Ensure type options are loaded for an entity type.
+   * Triggers loading if not already cached or loading.
+   */
+  public ensureTypeOptionsLoaded(entityType: string): void {
+    if (this.typeOptionsCache().has(entityType)) {
+      return;
+    }
+    if (this.loadingTypes.has(entityType)) {
+      return;
+    }
+    this.getTypesForEntity(entityType).subscribe();
+  }
+
+  /**
+   * Invalidate type options cache.
+   */
+  public invalidateTypeCache(entityType?: string): void {
+    if (entityType) {
+      this.typesCache.delete(entityType);
+      this.typeOptionsCache.update(cache => {
+        const newCache = new Map(cache);
+        newCache.delete(entityType);
+        return newCache;
+      });
+    } else {
+      this.typesCache.clear();
+      this.typeOptionsCache.set(new Map());
+    }
+  }
+
   public getPropertiesForEntity(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getProperties().pipe(map(props => {
       return props.filter(p => p.table_name == table.table_name);
@@ -393,6 +499,12 @@ export class SchemaService {
     // This takes precedence over generic ForeignKeyName to show status badges instead of plain text
     if (val.status_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
       return EntityPropertyType.Status;
+    }
+
+    // Type detection: Integer FK with type_entity_type configured in metadata.properties (v0.34.0)
+    // Like Status but for non-workflow categorization (rich enums). Must come before ForeignKeyName.
+    if (val.type_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
+      return EntityPropertyType.Type;
     }
 
     // System type detection: UUID foreign keys to metadata tables (File, User, Payment types)
@@ -466,6 +578,11 @@ export class SchemaService {
       return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color)`;
     }
 
+    // Type type: Embed type data from metadata.types table (v0.34.0)
+    if (prop.type === EntityPropertyType.Type) {
+      return `${prop.column_name}:types!${prop.column_name}(id,display_name,color)`;
+    }
+
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
     return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
       (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + prop.join_column + ',display_name)' :
@@ -500,6 +617,11 @@ export class SchemaService {
 
     // Status fields also need just the ID for edit forms (dropdown value)
     if (prop.type === EntityPropertyType.Status) {
+      return prop.column_name;
+    }
+
+    // Type fields also need just the ID for edit forms (dropdown value, v0.34.0)
+    if (prop.type === EntityPropertyType.Type) {
       return prop.column_name;
     }
 
@@ -600,7 +722,8 @@ export class SchemaService {
             EntityPropertyType.IntegerNumber,
             EntityPropertyType.Money,
             EntityPropertyType.User,
-            EntityPropertyType.Status  // Status uses same filter pattern as ForeignKeyName
+            EntityPropertyType.Status,  // Status uses same filter pattern as ForeignKeyName
+            EntityPropertyType.Type     // Type uses same filter pattern as Status (v0.34.0)
           ];
           return supportedTypes.includes(p.type);
         });

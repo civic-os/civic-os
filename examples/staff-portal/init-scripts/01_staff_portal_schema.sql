@@ -1,26 +1,26 @@
 -- ============================================================================
 -- STAFF PORTAL EXAMPLE
 -- A staff management portal for a summer education program.
--- Demonstrates: Status types, file uploads, RLS with role-based visibility,
---   SECURITY DEFINER helpers, denormalized fields, auto-generated documents,
---   onboarding status aggregation, text search.
+-- Demonstrates: Status types, Type system, file uploads, RLS with role-based
+--   visibility, SECURITY DEFINER helpers, denormalized fields, auto-generated
+--   documents, onboarding status aggregation, text search.
 -- ============================================================================
 -- NOTE: Requires Civic OS v0.15.0+ (Status Type System)
 -- NOTE: Requires Civic OS v0.25.0+ (status_key for programmatic lookups)
+-- NOTE: Requires Civic OS v0.34.0+ (Type system for non-workflow categorization)
 -- ============================================================================
 
 -- ============================================================================
 -- STATUS TYPE SYSTEM CONFIGURATION
--- Uses centralized metadata.statuses instead of per-entity lookup tables
+-- Uses centralized metadata.statuses for workflow state tracking
 -- ============================================================================
 
--- Register status entity types
+-- Register status entity types (workflow statuses only)
 INSERT INTO metadata.status_types (entity_type, description) VALUES
   ('staff_onboarding', 'Onboarding progress for staff members'),
   ('staff_document', 'Document submission and review status'),
   ('time_off_request', 'Time off request approval status'),
-  ('reimbursement', 'Reimbursement request approval status'),
-  ('time_entry', 'Time entry type (clock in/out)')
+  ('reimbursement', 'Reimbursement request approval status')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- staff_onboarding statuses
@@ -52,10 +52,20 @@ INSERT INTO metadata.statuses (entity_type, display_name, description, color, so
   ('reimbursement', 'Denied', 'Reimbursement denied', '#EF4444', 3, FALSE, TRUE)
 ON CONFLICT DO NOTHING;
 
--- time_entry statuses (category, not workflow)
-INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal, status_key) VALUES
-  ('time_entry', 'Clock In', 'Staff member clocked in', '#22C55E', 1, TRUE, FALSE, 'clock_in'),
-  ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, FALSE, FALSE, 'clock_out')
+-- ============================================================================
+-- TYPE SYSTEM CONFIGURATION
+-- Uses centralized metadata.types for non-workflow categorization (v0.34.0+)
+-- ============================================================================
+
+-- Register type entity types
+INSERT INTO metadata.type_categories (entity_type, description) VALUES
+  ('time_entry', 'Clock in/out entry types')
+ON CONFLICT (entity_type) DO NOTHING;
+
+-- time_entry types (categorization, not workflow — no is_initial/is_terminal)
+INSERT INTO metadata.types (entity_type, display_name, description, color, sort_order, type_key) VALUES
+  ('time_entry', 'Clock In', 'Staff member clocked in', '#22C55E', 1, 'clock_in'),
+  ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, 'clock_out')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -133,7 +143,7 @@ CREATE TABLE time_entries (
   id BIGSERIAL PRIMARY KEY,
   display_name TEXT,
   staff_member_id BIGINT NOT NULL REFERENCES staff_members(id),
-  entry_type_id INT NOT NULL DEFAULT get_initial_status('time_entry') REFERENCES metadata.statuses(id),
+  entry_type_id INT NOT NULL REFERENCES metadata.types(id),
   entry_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   staff_name TEXT NOT NULL,
   site_name TEXT NOT NULL,

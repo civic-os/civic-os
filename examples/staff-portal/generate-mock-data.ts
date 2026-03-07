@@ -36,11 +36,19 @@ interface StatusInfo {
   is_initial: boolean;
 }
 
+interface TypeInfo {
+  id: number;
+  entity_type: string;
+  display_name: string;
+  type_key: string;
+}
+
 class StaffPortalMockDataGenerator {
   private config: MockDataConfig;
   private client?: Client;
   private sqlStatements: string[] = [];
   private statusMap: Map<string, StatusInfo[]> = new Map();
+  private typeMap: Map<string, TypeInfo[]> = new Map();
 
   // Generated data stored for FK references
   private userIds: string[] = [];
@@ -75,7 +83,7 @@ class StaffPortalMockDataGenerator {
     const result = await this.client.query(
       `SELECT id, entity_type, display_name, status_key, is_initial
        FROM metadata.statuses
-       WHERE entity_type IN ('staff_onboarding', 'staff_document', 'time_off_request', 'reimbursement', 'staff_task', 'time_entry')
+       WHERE entity_type IN ('staff_onboarding', 'staff_document', 'time_off_request', 'reimbursement', 'staff_task')
        ORDER BY entity_type, sort_order`
     );
     for (const row of result.rows) {
@@ -85,6 +93,31 @@ class StaffPortalMockDataGenerator {
       this.statusMap.get(row.entity_type)!.push(row);
     }
     console.log(`Fetched ${result.rows.length} statuses across ${this.statusMap.size} entity types`);
+  }
+
+  async fetchTypes() {
+    if (!this.client) throw new Error('Database not connected');
+    const result = await this.client.query(
+      `SELECT id, entity_type, display_name, type_key
+       FROM metadata.types
+       WHERE entity_type IN ('time_entry')
+       ORDER BY entity_type, sort_order`
+    );
+    for (const row of result.rows) {
+      if (!this.typeMap.has(row.entity_type)) {
+        this.typeMap.set(row.entity_type, []);
+      }
+      this.typeMap.get(row.entity_type)!.push(row);
+    }
+    console.log(`Fetched ${result.rows.length} types across ${this.typeMap.size} entity types`);
+  }
+
+  private getTypeId(entityType: string, typeKey: string): number {
+    const types = this.typeMap.get(entityType);
+    if (!types) throw new Error(`No types for entity_type: ${entityType}`);
+    const type = types.find(t => t.type_key === typeKey);
+    if (!type) throw new Error(`No type with key '${typeKey}' for ${entityType}`);
+    return type.id;
   }
 
   private getStatusId(entityType: string, statusKey: string): number {
@@ -366,7 +399,7 @@ class StaffPortalMockDataGenerator {
 
       records.push({
         staff_member_id: staffId,
-        entry_type_id: this.getStatusId('time_entry', isClockIn ? 'clock_in' : 'clock_out'),
+        entry_type_id: this.getTypeId('time_entry', isClockIn ? 'clock_in' : 'clock_out'),
         entry_time: baseDate.toISOString(),
       });
     }
@@ -871,6 +904,7 @@ class StaffPortalMockDataGenerator {
 
       await this.connect();
       await this.fetchStatuses();
+      await this.fetchTypes();
 
       if (!sqlOnly) {
         await this.truncateTables();

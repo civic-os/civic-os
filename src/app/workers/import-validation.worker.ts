@@ -70,7 +70,8 @@ const EntityPropertyType = {
   FilePDF: 20,
   Payment: 21,
   Status: 22,
-  RecurringTimeSlot: 23
+  Type: 23,
+  RecurringTimeSlot: 24
 };
 
 interface ImportError {
@@ -375,6 +376,7 @@ function validateProperty(
     case EntityPropertyType.ForeignKeyName:
     case EntityPropertyType.User:
     case EntityPropertyType.Status:
+    case EntityPropertyType.Type:
       return validateForeignKey(prop, value, fkLookups, rowNumber, displayName, rowErrors);
 
     case EntityPropertyType.GeoPoint:
@@ -757,12 +759,15 @@ function validateForeignKey(
   // Determine lookup table name based on property type:
   // - User: always 'civic_os_users'
   // - Status: 'status_<entity_type>' (e.g., 'status_issues') for entity-specific statuses
+  // - Type: 'type_<entity_type>' (e.g., 'type_time_entry') for entity-specific types
   // - FK: the join_table directly
   let tableName: string;
   if (prop.type === EntityPropertyType.User) {
     tableName = 'civic_os_users';
   } else if (prop.type === EntityPropertyType.Status) {
     tableName = `status_${prop.status_entity_type}`;
+  } else if (prop.type === EntityPropertyType.Type) {
+    tableName = `type_${prop.type_entity_type}`;
   } else {
     tableName = prop.join_table;
   }

@@ -1265,6 +1265,223 @@ describe('SchemaService', () => {
     });
   });
 
+  // =========================================================================
+  // TYPE OPTIONS CACHING TESTS (v0.34.0+)
+  // =========================================================================
+  describe('Type Options Caching', () => {
+    const mockTypeOptions = [
+      { id: 1, display_name: 'Clock In', color: '#22c55e' },
+      { id: 2, display_name: 'Clock Out', color: '#6b7280' }
+    ];
+
+    describe('getTypesForEntity()', () => {
+      it('should fetch types via RPC for given entity type', (done) => {
+        service.getTypesForEntity('time_entry').subscribe(types => {
+          expect(types.length).toBe(2);
+          expect(types[0].display_name).toBe('Clock In');
+          expect(types[1].display_name).toBe('Clock Out');
+          done();
+        });
+
+        const req = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_types_for_entity') &&
+          req.body.p_entity_type === 'time_entry'
+        );
+        expect(req.request.method).toBe('POST');
+        req.flush(mockTypeOptions);
+      });
+
+      it('should cache type options per entity type', (done) => {
+        service.getTypesForEntity('time_entry').subscribe(() => {
+          service.getTypesForEntity('time_entry').subscribe(cachedTypes => {
+            expect(cachedTypes.length).toBe(2);
+            done();
+          });
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req.flush(mockTypeOptions);
+      });
+
+      it('should maintain separate caches for different entity types', (done) => {
+        const buildingTypes = [
+          { id: 10, display_name: 'Commercial', color: '#3b82f6' },
+          { id: 11, display_name: 'Residential', color: '#8b5cf6' }
+        ];
+
+        service.getTypesForEntity('time_entry').subscribe(() => {
+          service.getTypesForEntity('building').subscribe(types => {
+            expect(types.length).toBe(2);
+            expect(types[0].display_name).toBe('Commercial');
+            done();
+          });
+
+          const buildingReq = httpMock.expectOne(req =>
+            req.url.includes('rpc/get_types_for_entity') &&
+            req.body.p_entity_type === 'building'
+          );
+          buildingReq.flush(buildingTypes);
+        });
+
+        const timeEntryReq = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_types_for_entity') &&
+          req.body.p_entity_type === 'time_entry'
+        );
+        timeEntryReq.flush(mockTypeOptions);
+      });
+
+      it('should handle HTTP errors gracefully', (done) => {
+        service.getTypesForEntity('invalid_entity').subscribe(types => {
+          expect(types).toEqual([]);
+          done();
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req.error(new ProgressEvent('error'), { status: 404, statusText: 'Not Found' });
+      });
+
+      it('should populate signal cache when data loads', (done) => {
+        expect(service.getTypeOptionsSync('time_entry')).toEqual([]);
+
+        service.getTypesForEntity('time_entry').subscribe(() => {
+          const cached = service.getTypeOptionsSync('time_entry');
+          expect(cached.length).toBe(2);
+          expect(cached[0].display_name).toBe('Clock In');
+          done();
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req.flush(mockTypeOptions);
+      });
+
+      it('should prevent duplicate concurrent requests', () => {
+        const sub1 = service.getTypesForEntity('time_entry').subscribe();
+        const sub2 = service.getTypesForEntity('time_entry').subscribe();
+        const sub3 = service.getTypesForEntity('time_entry').subscribe();
+
+        const requests = httpMock.match(req => req.url.includes('rpc/get_types_for_entity'));
+        expect(requests.length).toBe(1);
+
+        requests[0].flush(mockTypeOptions);
+
+        sub1.unsubscribe();
+        sub2.unsubscribe();
+        sub3.unsubscribe();
+      });
+    });
+
+    describe('getTypeOptionsSync()', () => {
+      it('should return empty array when entity type not loaded', () => {
+        const result = service.getTypeOptionsSync('unloaded_entity');
+        expect(result).toEqual([]);
+      });
+
+      it('should return cached options after load completes', (done) => {
+        service.getTypesForEntity('time_entry').subscribe(() => {
+          const result = service.getTypeOptionsSync('time_entry');
+          expect(result.length).toBe(2);
+          expect(result[0].id).toBe(1);
+          expect(result[0].display_name).toBe('Clock In');
+          expect(result[0].color).toBe('#22c55e');
+          done();
+        });
+
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req.flush(mockTypeOptions);
+      });
+    });
+
+    describe('ensureTypeOptionsLoaded()', () => {
+      it('should trigger HTTP request when entity type not cached', () => {
+        service.ensureTypeOptionsLoaded('time_entry');
+
+        const req = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_types_for_entity') &&
+          req.body.p_entity_type === 'time_entry'
+        );
+        expect(req).toBeTruthy();
+        req.flush(mockTypeOptions);
+      });
+
+      it('should not trigger HTTP request when already cached', () => {
+        service.getTypesForEntity('time_entry').subscribe();
+        const req = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req.flush(mockTypeOptions);
+
+        service.ensureTypeOptionsLoaded('time_entry');
+
+        httpMock.expectNone(req => req.url.includes('rpc/get_types_for_entity'));
+      });
+
+      it('should not trigger duplicate request when already loading', () => {
+        service.ensureTypeOptionsLoaded('time_entry');
+        service.ensureTypeOptionsLoaded('time_entry');
+        service.ensureTypeOptionsLoaded('time_entry');
+
+        const requests = httpMock.match(req => req.url.includes('rpc/get_types_for_entity'));
+        expect(requests.length).toBe(1);
+
+        requests[0].flush(mockTypeOptions);
+      });
+    });
+
+    describe('invalidateTypeCache()', () => {
+      it('should clear cache for specific entity type', () => {
+        service.getTypesForEntity('time_entry').subscribe();
+        const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req1.flush(mockTypeOptions);
+
+        expect(service.getTypeOptionsSync('time_entry').length).toBe(2);
+
+        service.invalidateTypeCache('time_entry');
+
+        expect(service.getTypeOptionsSync('time_entry')).toEqual([]);
+      });
+
+      it('should allow fresh HTTP request after invalidation', (done) => {
+        service.getTypesForEntity('time_entry').subscribe();
+        const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req1.flush(mockTypeOptions);
+
+        service.invalidateTypeCache('time_entry');
+
+        service.getTypesForEntity('time_entry').subscribe(types => {
+          expect(types.length).toBe(2);
+          done();
+        });
+
+        const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_types_for_entity'));
+        req2.flush(mockTypeOptions);
+      });
+
+      it('should clear all type caches when no entity type specified', () => {
+        const buildingTypes = [{ id: 10, display_name: 'Commercial', color: '#3b82f6' }];
+
+        service.getTypesForEntity('time_entry').subscribe();
+        const req1 = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_types_for_entity') &&
+          req.body.p_entity_type === 'time_entry'
+        );
+        req1.flush(mockTypeOptions);
+
+        service.getTypesForEntity('building').subscribe();
+        const req2 = httpMock.expectOne(req =>
+          req.url.includes('rpc/get_types_for_entity') &&
+          req.body.p_entity_type === 'building'
+        );
+        req2.flush(buildingTypes);
+
+        expect(service.getTypeOptionsSync('time_entry').length).toBe(2);
+        expect(service.getTypeOptionsSync('building').length).toBe(1);
+
+        service.invalidateTypeCache();
+
+        expect(service.getTypeOptionsSync('time_entry')).toEqual([]);
+        expect(service.getTypeOptionsSync('building')).toEqual([]);
+      });
+    });
+  });
+
   describe('Many-to-Many Detection', () => {
     it('should detect junction table with exactly 2 FKs and only metadata columns', () => {
       const tables = [createMockEntity({ table_name: 'issue_tags' })];

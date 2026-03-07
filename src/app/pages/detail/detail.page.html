@@ -399,6 +399,16 @@
                             }
                           </select>
                         }
+                        @case ('type') {
+                          <select
+                            class="select select-bordered w-full"
+                            [formControlName]="param.param_name">
+                            <option [ngValue]="null">-- Select --</option>
+                            @for (option of actionParamOptions()[param.param_name]; track option.id) {
+                              <option [ngValue]="option.id">{{ option.display_name }}</option>
+                            }
+                          </select>
+                        }
                         @case ('foreign_key') {
                           <select
                             class="select select-bordered w-full"

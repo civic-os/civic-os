@@ -63,6 +63,7 @@ export class EditPropertyComponent {
 
   public selectOptions$?: Observable<{id: number, text: string}[]>;
   public statusOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
+  public typeOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
 
   propType = computed(() => this.prop().type);
 
@@ -142,6 +143,18 @@ export class EditPropertyComponent {
         }));
     }
 
+    // Load Type options from cached SchemaService (v0.34.0)
+    if(this.propType() == EntityPropertyType.Type && prop.type_entity_type) {
+      this.typeOptions$ = this.schema.getTypesForEntity(prop.type_entity_type)
+        .pipe(map(types => {
+          return types.map(t => ({
+            id: t.id,
+            text: t.display_name,
+            color: t.color
+          }));
+        }));
+    }
+
     // Load existing file reference if this is a file field
     // This is a one-time load on init, similar to loading FK options above
     if (this.propType() === EntityPropertyType.File ||
@@ -201,6 +214,29 @@ export class EditPropertyComponent {
     if (!color) return null;
 
     // Convert hex to RGB and add transparency
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.15)`;
+  }
+
+  /**
+   * Get the color of the currently selected type option (mirrors status color)
+   */
+  getSelectedTypeColor(options: {id: number, text: string, color: string | null}[]): string | null {
+    const selectedId = this.form().get(this.prop().column_name)?.value;
+    if (!selectedId) return null;
+    const selected = options.find(o => o.id === +selectedId);
+    return selected?.color || null;
+  }
+
+  /**
+   * Get a semi-transparent background for the selected type (mirrors status bg)
+   */
+  getSelectedTypeBackgroundColor(options: {id: number, text: string, color: string | null}[]): string | null {
+    const color = this.getSelectedTypeColor(options);
+    if (!color) return null;
     const hex = color.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);

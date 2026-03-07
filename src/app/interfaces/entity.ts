@@ -112,6 +112,10 @@ export interface SchemaEntityProperty {
     // When present, indicates this is a Status type column
     status_entity_type?: string;
 
+    // Type system configuration (v0.34.0)
+    // When present, indicates this is a Type column (rich enum, not workflow)
+    type_entity_type?: string;
+
     // Recurring time slot configuration (v0.19.0)
     // When true and udt_name is 'time_slot', enables recurring series UI
     is_recurring?: boolean;
@@ -141,6 +145,7 @@ export enum EntityPropertyType {
     FilePDF,
     Payment,
     Status,
+    Type,               // v0.34.0 - Rich enum for categorization (not workflow)
     RecurringTimeSlot,  // v0.19.0 - TimeSlot with recurring series support
 }
 
@@ -149,6 +154,18 @@ export enum EntityPropertyType {
  * Returned when a Status property type is embedded in entity data via PostgREST.
  */
 export interface StatusValue {
+    id: number;
+    display_name: string;
+    color: string | null;  // hex_color, nullable
+}
+
+/**
+ * Type value from metadata.types table.
+ * Returned when a Type property type is embedded in entity data via PostgREST.
+ * Same shape as StatusValue (both are colored badge enums).
+ * Added in v0.34.0.
+ */
+export interface TypeValue {
     id: number;
     display_name: string;
     color: string | null;  // hex_color, nullable
@@ -551,7 +568,7 @@ export type ActionParamType =
     | 'text' | 'text_short' | 'number' | 'boolean'
     | 'money' | 'date' | 'datetime' | 'datetime_local'
     | 'color' | 'email' | 'telephone'
-    | 'status' | 'foreign_key' | 'user' | 'file'
+    | 'status' | 'type' | 'foreign_key' | 'user' | 'file'
     | 'geo_point' | 'time_slot';
 
 /**
@@ -593,6 +610,9 @@ export interface EntityActionParam {
 
     /** For status type: entity_type discriminator for statuses lookup */
     status_entity_type?: string;
+
+    /** For type param: entity_type discriminator for types lookup */
+    type_entity_type?: string;
 
     /** For file type: accepted file category ('image', 'pdf', 'any') */
     file_type?: string;
