@@ -311,6 +311,64 @@ describe('NavButtonsWidgetComponent', () => {
     });
   });
 
+  describe('getRouterLink', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('widget', createMockWidget({
+        buttons: [{ text: 'Test', url: '/' }]
+      }));
+      fixture.detectChanges();
+    });
+
+    it('should return the full URL when there are no query params', () => {
+      expect(component.getRouterLink('/view/issues')).toBe('/view/issues');
+    });
+
+    it('should return path before query string', () => {
+      expect(component.getRouterLink('/create/time_entries?entry_type=clock_in')).toBe('/create/time_entries');
+    });
+
+    it('should handle URLs with multiple query params', () => {
+      expect(component.getRouterLink('/create/tasks?status=open&site_id=5')).toBe('/create/tasks');
+    });
+
+    it('should handle root path', () => {
+      expect(component.getRouterLink('/')).toBe('/');
+    });
+  });
+
+  describe('getQueryParams', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('widget', createMockWidget({
+        buttons: [{ text: 'Test', url: '/' }]
+      }));
+      fixture.detectChanges();
+    });
+
+    it('should return null when there are no query params', () => {
+      expect(component.getQueryParams('/view/issues')).toBeNull();
+    });
+
+    it('should parse a single query param', () => {
+      const params = component.getQueryParams('/create/time_entries?entry_type=clock_in');
+      expect(params).toEqual({ entry_type: 'clock_in' });
+    });
+
+    it('should parse multiple query params', () => {
+      const params = component.getQueryParams('/create/tasks?status=open&site_id=5');
+      expect(params).toEqual({ status: 'open', site_id: '5' });
+    });
+
+    it('should decode URI-encoded values', () => {
+      const params = component.getQueryParams('/search?q=hello%20world');
+      expect(params).toEqual({ q: 'hello world' });
+    });
+
+    it('should handle params with no value', () => {
+      const params = component.getQueryParams('/page?flag');
+      expect(params).toEqual({ flag: '' });
+    });
+  });
+
   describe('Full Configuration', () => {
     it('should render complete widget with header, description, and multiple buttons', () => {
       fixture.componentRef.setInput('widget', createMockWidget({

@@ -18,6 +18,7 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Params } from '@angular/router';
 import { DashboardWidget, NavButtonsWidgetConfig } from '../../../interfaces/dashboard';
 
 /**
@@ -41,6 +42,31 @@ export class NavButtonsWidgetComponent {
   config = computed<NavButtonsWidgetConfig>(() => {
     return this.widget().config as NavButtonsWidgetConfig;
   });
+
+  /**
+   * Extract the path portion of a URL (before any query string).
+   */
+  getRouterLink(url: string): string {
+    const qIndex = url.indexOf('?');
+    return qIndex === -1 ? url : url.substring(0, qIndex);
+  }
+
+  /**
+   * Parse query parameters from a URL string, or return null if none exist.
+   */
+  getQueryParams(url: string): Params | null {
+    const qIndex = url.indexOf('?');
+    if (qIndex === -1) return null;
+    const params: Params = {};
+    const searchStr = url.substring(qIndex + 1);
+    for (const pair of searchStr.split('&')) {
+      const [key, value] = pair.split('=');
+      if (key) {
+        params[decodeURIComponent(key)] = value !== undefined ? decodeURIComponent(value) : '';
+      }
+    }
+    return params;
+  }
 
   /**
    * Get the DaisyUI button class based on the variant

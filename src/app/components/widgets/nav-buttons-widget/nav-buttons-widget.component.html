@@ -26,7 +26,8 @@
 
   <div class="flex flex-wrap gap-2">
     @for (button of config().buttons; track button.url) {
-      <a [routerLink]="button.url"
+      <a [routerLink]="getRouterLink(button.url)"
+         [queryParams]="getQueryParams(button.url)"
          [class]="getButtonClass(button.variant)">
         @if (button.icon) {
           <span class="material-symbols-outlined" aria-hidden="true">{{ button.icon }}</span>
