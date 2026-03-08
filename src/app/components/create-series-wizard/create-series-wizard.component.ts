@@ -25,7 +25,9 @@ import {
   inject,
   OnChanges,
   SimpleChanges,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -96,7 +98,7 @@ import { RRule } from 'rrule';
           </ul>
 
           <!-- Step Content -->
-          <div class="flex-1 overflow-y-auto">
+          <div class="flex-1 overflow-y-auto" #stepContent>
             <!-- Step 1: Series Info -->
             @if (currentStep() === 1) {
               <form [formGroup]="infoForm" class="space-y-4">
@@ -370,6 +372,8 @@ export class CreateSeriesWizardComponent implements OnChanges {
   @Output() created = new EventEmitter<CreateSeriesResult>();
   @Output() cancel = new EventEmitter<void>();
 
+  @ViewChild('stepContent') stepContent!: ElementRef<HTMLDivElement>;
+
   // Wizard state
   currentStep = signal(1);
   steps = [
@@ -485,9 +489,10 @@ export class CreateSeriesWizardComponent implements OnChanges {
         return;
       }
 
-      // Add control with default value
-      const validators = prop.is_nullable === false ? [Validators.required] : [];
-      this.templateForm.addControl(prop.column_name, this.fb.control(null, validators));
+      // Add control with type-appropriate default value and validators
+      const defaultValue = SchemaService.getDefaultValueForProperty(prop);
+      const validators = SchemaService.getFormValidatorsForProperty(prop);
+      this.templateForm.addControl(prop.column_name, this.fb.control(defaultValue, validators));
     });
   }
 
@@ -521,6 +526,7 @@ export class CreateSeriesWizardComponent implements OnChanges {
     const next = this.currentStep() + 1;
     if (next <= 4) {
       this.currentStep.set(next);
+      this.scrollContentToTop();
 
       // Load preview when entering step 4
       if (next === 4) {
@@ -533,6 +539,15 @@ export class CreateSeriesWizardComponent implements OnChanges {
     const prev = this.currentStep() - 1;
     if (prev >= 1) {
       this.currentStep.set(prev);
+      this.scrollContentToTop();
+    }
+  }
+
+  private scrollContentToTop(): void {
+    // The cos-modal-box is the scrollable container (overflow-y: auto with max-height)
+    const modalBox = this.stepContent?.nativeElement?.closest('.cos-modal-box');
+    if (modalBox) {
+      modalBox.scrollTo({ top: 0 });
     }
   }
 

@@ -353,7 +353,8 @@ export class SeriesEditorModalComponent implements OnChanges {
 
     // Add controls for each template property (use show_on_edit filtered list)
     props.forEach(prop => {
-      const value = template[prop.column_name] ?? null;
+      const fallback = SchemaService.getDefaultValueForProperty(prop);
+      const value = template[prop.column_name] ?? fallback;
       templateGroup.addControl(prop.column_name, this.fb.control(value));
     });
   }

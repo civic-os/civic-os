@@ -216,6 +216,40 @@ describe('CreateSeriesWizardComponent', () => {
       expect(component.templateForm.contains('internal_notes')).toBe(false);
     });
 
+    it('should initialize boolean controls with false instead of null', () => {
+      const propsWithBoolean: SchemaEntityProperty[] = [
+        ...mockProperties,
+        createMockProperty({
+          table_name: 'test_entity',
+          column_name: 'is_active',
+          type: EntityPropertyType.Boolean,
+          display_name: 'Active',
+          is_nullable: false,
+          show_on_create: true,
+          show_on_edit: true
+        })
+      ];
+
+      component.timeSlotPropertyName.set('time_slot');
+      component.infoForm.patchValue({ entity_table: 'test_entity' });
+      component.availableEntities = [
+        createMockEntity({
+          table_name: 'test_entity',
+          display_name: 'Test Entity',
+          recurring_property_name: 'time_slot'
+        }) as any
+      ];
+
+      mockSchemaService.getProperties.and.returnValue(of(propsWithBoolean));
+      component.onEntityTypeChange();
+
+      // Boolean should be initialized with false, not null
+      expect(component.templateForm.get('is_active')?.value).toBe(false);
+      // Form should be valid without user interaction on the boolean field
+      // (required validator accepts false but rejects null)
+      expect(component.templateForm.get('is_active')?.valid).toBe(true);
+    });
+
     it('should NOT create form control for time slot property', () => {
       component.timeSlotPropertyName.set('time_slot');
       component.infoForm.patchValue({ entity_table: 'test_entity' });
