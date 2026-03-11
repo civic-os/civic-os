@@ -1735,7 +1735,7 @@ Rich enum categorization system for non-workflow properties. While the Status sy
 **When to Use Category vs Status vs Custom Table**:
 - **Category**: Simple categorization with colored badges and admin-managed values. Use when the categories are display-oriented and don't carry extra data beyond a name, color, and sort order. Examples: entry types (Clock In/Clock Out), building types, staff roles.
 - **Status**: Workflow state tracking. Use when records progress through a lifecycle. Has `is_initial`/`is_terminal`, allowed transitions, causal bindings. Examples: Pending → Approved → Completed.
-- **Custom lookup table**: Use when categories need extended properties that influence behavior — e.g., a `resource_types` table with `hourly_rate`, `capacity`, or `requires_approval` columns. Categories only store `display_name`, `color`, `sort_order`, and `description`. If you need additional columns that drive business logic, a dedicated table with its own schema is the right choice.
+- **Custom lookup table**: Use when categories need extended properties that influence behavior — e.g., a `resource_types` table with `hourly_rate`, `capacity`, or `requires_approval` columns. Categories only store `display_name`, `color`, `sort_order`, and `description`. If you need additional columns that drive business logic, a dedicated table with its own schema is the right choice. Also use a custom table when you need **multi-select categorization** (M:M) — the Category system is single-value only (one category per record via FK). M:M auto-detection requires both tables to be in the `public` schema, and `metadata.categories` is in the `metadata` schema.
 
 #### Quick Setup
 

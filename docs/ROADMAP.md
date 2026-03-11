@@ -20,6 +20,8 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Add Color PropertyType
 - [ ] Configurable Entity Menu (Nesting, Hiding, Singular/Plural names)
 - [ ] **Cascading Dropdowns** - Filter FK dropdown options based on another field's selection (e.g., category → subcategory)
+- [ ] **M:M on Create/Edit Pages** - Multi-select checkbox component for many-to-many relationships on Create and Edit forms, not just Detail pages. Currently M:M associations require a two-step workflow (create record, then edit associations on Detail page). Affects every Civic OS app with M:M relationships. *(Identified via IC pilot)*
+- [ ] **Dependent/Filtered M:M Options** - Filter M:M checkbox options based on another field's value (e.g., when creating a referral, only show service categories the selected partner provides). Metadata config like `filter_by_field` + `filter_through_table`. *(Identified via IC pilot)*
 
 #### List Pages
 - [X] Add pagination
@@ -75,6 +77,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Frontend integration (ActionBarComponent with overflow, confirmation modals, loading states)
   - [x] Example implementation in community-center (Approve/Deny/Cancel reservation workflow)
   - [ ] User context in visibility/enabled conditions (e.g., `$user.role`, `$user.id` for ownership checks)
+  - [ ] **Multi-select action parameters** - Extend `metadata.entity_action_params` to support `multi_select` / `checkbox_list` parameter types, enabling composite actions that create a parent record + M:M associations in one RPC call (e.g., "Refer Client" action creates referral + selects service categories in a single modal). *(Identified via IC pilot)*
 
 - [x] **First-Class Notes System** - Polymorphic notes for any entity (v0.16.0, see `docs/development/ENTITY_NOTES.md`)
   - [x] Database schema (`metadata.entity_notes` table, polymorphic design)
@@ -185,6 +188,8 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Utilities
 - [x] Build notification service (v0.11.0 - database templates, River-based worker, email via AWS SES)
+  - [ ] **External recipient notifications** - Send email/SMS to non-system users (e.g., partners, vendors, applicants who don't have accounts). Currently notifications can only target `civic_os_users`. Common pattern: property change trigger fires on status change → enqueues email to an external contact's email address from the record. *(Identified via IC pilot)*
+  - [ ] **Multi-recipient notifications** - Send a single notification to multiple recipients (system users and/or external contacts) in one call. Currently `send_notification()` accepts one `p_user_id UUID`. Use case: a referral event notifies both the partner ("you have a new referral for Client X") and the client ("you've been referred to Partner Y") from one trigger. Could accept `p_user_ids UUID[]` and/or `p_external_emails TEXT[]`. *(Identified via IC pilot)*
 
 - [ ] **Multi-Tenancy** - First-class support for multi-tenant applications
   - [ ] Row-level tenant isolation with `tenant_id` column and automatic RLS
