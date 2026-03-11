@@ -1860,6 +1860,110 @@ ORDER BY created_at DESC;
 
 **Important**: This filter applies ONLY when `SKIP_TEST_EMAILS=true`. In local development with Inbucket, leave it disabled (`false`) so you can test the full notification flow with mock data.
 
+### SMS via Telnyx (v0.35.0+)
+
+Civic OS sends transactional SMS via **Telnyx** — a single API key, no SDK, no AWS dependency.
+
+#### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `SMS_ENABLED` | `false` | Global on/off switch. Set to `true` to activate SMS delivery. |
+| `SMS_FAKE_MODE` | `false` | When `true`, logs SMS to worker stdout instead of calling Telnyx. |
+| `TELNYX_API_KEY` | _(empty)_ | API key from the Telnyx Mission Control Portal. |
+| `TELNYX_FROM_NUMBER` | _(empty)_ | Your Telnyx phone number in E.164 format (e.g., `+18005551234`). |
+
+**Rules:**
+- `SMS_ENABLED=false` → SMS channel is skipped entirely (no API calls)
+- `SMS_ENABLED=true, SMS_FAKE_MODE=true` → SMS is "sent" to worker logs (dev mode)
+- `SMS_ENABLED=true, SMS_FAKE_MODE=false` → Real Telnyx delivery; `TELNYX_API_KEY` and `TELNYX_FROM_NUMBER` are required
+
+All docker-compose examples ship with `SMS_ENABLED=false, SMS_FAKE_MODE=true` as safe defaults.
+
+#### Getting Telnyx Credentials
+
+1. Sign up at [telnyx.com](https://telnyx.com) (free trial includes test SMS credits)
+2. **Create an API key**: Mission Control → Auth → API Keys → Add API Key
+3. **Get a phone number**: Numbers → Search & Buy → choose a Long Code (~$1/month) or Toll-Free (~$2/month)
+4. Set in `.env`:
+   ```bash
+   SMS_ENABLED=true
+   SMS_FAKE_MODE=false
+   TELNYX_API_KEY=KEY017...
+   TELNYX_FROM_NUMBER=+18005551234
+   ```
+
+#### Origination Number Types
+
+| Type | Cost | Best for |
+|---|---|---|
+| Long Code | ~$1/month | Low-volume transactional (<300 msg/day) |
+| Toll-Free | ~$2/month | Better deliverability, higher throughput |
+| Short Code | ~$500–1000/month | High-volume campaigns — not needed here |
+
+For Civic OS transactional use (appointment reminders, status updates), a Long Code is sufficient.
+
+#### Phone Number Format
+
+The worker normalizes phone numbers to E.164 before sending:
+- `5551234567` → `+15551234567`
+- `(555) 123-4567` → `+15551234567`
+- `+15551234567` → passed through as-is
+- International numbers starting with `+` are passed through unchanged
+
+Civic OS stores phone numbers in `civic_os_users` (Keycloak-synced). The format normalized by `formatE164()` in the worker.
+
+#### SMS Message Length
+
+Standard SMS segments are **160 characters** (GSM-7 encoding). Telnyx automatically concatenates multi-segment messages (each additional segment costs ~$0.004–0.006). Keep templates under 160 chars when possible.
+
+Use the `{{ .Entity.field }}` template syntax in `sms_template` column of `metadata.notification_templates`.
+
+#### STOP Handling and Opt-Out
+
+When a recipient texts **STOP** to your Telnyx number, the carrier blocks all future messages (TCPA compliance). The worker detects this from the Telnyx API response and **passively syncs** it back to the database:
+
+```sql
+-- Set automatically by the worker on opted-out error
+UPDATE metadata.notification_preferences
+SET sms_opted_out = true
+WHERE user_id = $1 AND channel = 'sms';
+```
+
+The `notification_preferences.sms_opted_out` column (added in v0.35.0) tracks this separately from `enabled`:
+
+| Column | What it means | Who sets it |
+|---|---|---|
+| `enabled = false` | User turned off SMS in preferences | User (settings UI) |
+| `sms_opted_out = true` | Carrier-level STOP block | Worker (automatic) |
+
+Both conditions prevent SMS delivery. To re-enable after a STOP, the user must text **START** to your Telnyx number, which lifts the carrier block. A future UI improvement may show a warning when `sms_opted_out = true`.
+
+#### Dev Smoke Test
+
+```bash
+# Set in examples/community-center/.env (or any example):
+SMS_ENABLED=true
+SMS_FAKE_MODE=true
+
+# Restart worker
+docker-compose restart consolidated-worker
+
+# Trigger a notification that includes 'sms' in its channels array
+# Check worker logs:
+docker logs community_center_consolidated_worker | grep "FAKE SMS"
+```
+
+Expected output:
+```
+[Job 42] ╔══════════════════════════════════════════════╗
+[Job 42] ║  FAKE SMS (not sent)                        ║
+[Job 42] ║  To:   +15551234567                         ║
+[Job 42] ║  From: (TELNYX_FROM_NUMBER)                 ║
+[Job 42] ║  Text: Your appointment is tomorrow at 2pm… ║
+[Job 42] ╚══════════════════════════════════════════════╝
+```
+
 ### SMTP Email Provider Setup
 
 The notification system uses standard SMTP protocol, allowing you to use **any email provider**:

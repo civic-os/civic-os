@@ -9,7 +9,7 @@ This guide covers deploying Civic OS to production environments using Docker con
 - `CLAUDE.md` - Developer quick-reference for building applications
 - `docs/AUTHENTICATION.md` - Keycloak setup and RBAC configuration
 
-**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2025 Civic OS, L3C. See the LICENSE file for full terms.
+**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2026 Civic OS, L3C. See the LICENSE file for full terms.
 
 ---
 
@@ -41,14 +41,9 @@ Civic OS uses a containerized architecture with five main components:
 5. **Consolidated Worker** - Go microservice combining:
    - S3 presigned URL generation for file uploads
    - Thumbnail generation for images and PDFs
-   - Email notification delivery via SMTP
-
-**Optional Components** (feature-specific):
-6. **Payment Worker** - Go microservice for Stripe payment processing with HTTP webhook endpoint (port 8080)
-   - Only required if using payment processing features
-   - Handles payment intent creation via River job queue
-   - Exposes HTTP endpoint for Stripe webhook callbacks with signature verification
-   - Requires `STRIPE_API_KEY` and `STRIPE_WEBHOOK_SECRET` environment variables
+   - Email/SMS notification delivery
+   - Stripe payment processing with HTTP webhook endpoint (port 8080, optional — requires `STRIPE_API_KEY` and `STRIPE_WEBHOOK_SECRET`)
+   - User provisioning via Keycloak service account
 
 All components are configured via environment variables, enabling the same container images to run across dev, staging, and production environments.
 
@@ -126,16 +121,15 @@ GRANT CONNECT ON DATABASE civic_os_prod TO authenticator;
                 │ Port 5432           │
                 └──────┬──────────────┘
                        │
-              ┌────────┴────────┐
-              │                 │
-        ┌─────▼─────┐    ┌─────▼──────────┐
-        │Consolidated│   │Payment Worker  │
-        │Worker (Go) │   │(Go + HTTP)     │
-        │           │    │Port 8080       │
-        └───────────┘    │(Optional)      │
-                         └────────────────┘
+                      │
+        ┌─────▼──────────┐
+        │Consolidated    │
+        │Worker (Go)     │
+        │Port 8080       │
+        │(webhooks)      │
+        └────────────────┘
 ```
-**Note**: Payment Worker is optional and only required if using payment processing features.
+**Note**: Payment webhook endpoint on the consolidated worker is optional and only active when Stripe credentials are configured.
 
 ### High-Availability Architecture (Kubernetes)
 
@@ -147,24 +141,23 @@ GRANT CONNECT ON DATABASE civic_os_prod TO authenticator;
              │
     ┌────────┴────────────────┐
     │         │                │
-┌───▼────┐  ┌▼────────┐  ┌───▼────────┐
-│Frontend│  │PostgREST│  │Payment HTTP│
-│ (3x)   │  │  (3x)   │  │  (2x)      │
-└────────┘  └────┬────┘  └─────┬──────┘
-                 │              │
-          ┌──────▼──────────────▼──────┐
-          │ PostgreSQL                 │
-          │ (StatefulSet + PVC)        │
-          └──────┬─────────────────────┘
+┌───▼────┐  ┌▼────────┐
+│Frontend│  │PostgREST│
+│ (3x)   │  │  (3x)   │
+└────────┘  └────┬────┘
                  │
-        ┌────────┴────────┐
-        │                 │
-  ┌─────▼─────┐    ┌─────▼─────┐
-  │Consolidated│   │Payment     │
-  │Worker (3x) │   │Worker (2x) │
-  └────────────┘   └────────────┘
+          ┌──────▼──────────────┐
+          │ PostgreSQL          │
+          │ (StatefulSet + PVC) │
+          └──────┬──────────────┘
+                 │
+          ┌──────▼──────────┐
+          │Consolidated     │
+          │Worker (3x)      │
+          │(+ webhook HTTP) │
+          └─────────────────┘
 ```
-**Note**: Payment Worker components are optional and only required if using payment processing features.
+**Note**: Payment webhook endpoint on consolidated worker is optional and only active when Stripe credentials are configured.
 
 ---
 
@@ -525,32 +518,32 @@ spec:
         - containerPort: 80
 ```
 
-### Step 7: Deploy Payment Worker (Optional)
+### Step 7: Deploy Consolidated Worker
 
-**IMPORTANT**: Only deploy if using payment processing features (v0.13.0+). Requires Stripe credentials.
+The consolidated worker handles file storage (S3 presigning + thumbnails), notifications, user provisioning, and optionally payment processing. If using payments, add the Stripe environment variables below.
 
-**payment-worker-deployment.yaml:**
+**consolidated-worker-deployment.yaml:**
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-worker
+  name: consolidated-worker
   namespace: civic-os-prod
 spec:
   replicas: 2  # For high availability
   selector:
     matchLabels:
-      app: payment-worker
-      component: payment-worker
+      app: consolidated-worker
+      component: consolidated-worker
   template:
     metadata:
       labels:
-        app: payment-worker
-        component: payment-worker
+        app: consolidated-worker
+        component: consolidated-worker
     spec:
       containers:
-      - name: payment-worker
-        image: ghcr.io/civic-os/payment-worker:latest  # Pin to specific version for reproducible builds
+      - name: consolidated-worker
+        image: ghcr.io/civic-os/consolidated-worker:latest  # Pin to specific version for reproducible builds
         env:
         # Database Configuration
         - name: DATABASE_URL
@@ -565,39 +558,58 @@ spec:
         - name: DB_MIN_CONNS
           value: "1"
 
-        # Stripe Configuration (REQUIRED)
+        # S3 / File Storage Configuration
+        - name: S3_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: civic-os-config
+              key: S3_BUCKET
+        - name: S3_REGION
+          value: "us-east-1"
+
+        # Notification Configuration
+        - name: SMTP_HOST
+          value: "email-smtp.us-east-1.amazonaws.com"
+        - name: SMTP_PORT
+          value: "587"
+
+        # Stripe Configuration (OPTIONAL — omit if not using payments)
         - name: STRIPE_API_KEY
           valueFrom:
             secretKeyRef:
               name: stripe-credentials
               key: api-key
+              optional: true
         - name: STRIPE_WEBHOOK_SECRET
           valueFrom:
             secretKeyRef:
               name: stripe-credentials
               key: webhook-secret
+              optional: true
 
-        # Payment Configuration
+        # Worker Configuration
         - name: PAYMENT_CURRENCY
           value: "USD"
         - name: RIVER_WORKER_COUNT
           value: "1"
         - name: WEBHOOK_PORT
           value: "8080"
+        - name: THUMBNAIL_MAX_WORKERS
+          value: "4"
 
         ports:
         - name: webhook
           containerPort: 8080
           protocol: TCP
 
-        # Resource limits (tune based on traffic)
+        # Resource limits (tune based on traffic — see Performance section)
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
             cpu: 500m
-            memory: 256Mi
+            memory: 768Mi
+          limits:
+            cpu: 2000m
+            memory: 1536Mi
 
         # Health checks
         livenessProbe:
@@ -616,11 +628,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: payment-worker
+  name: consolidated-worker
   namespace: civic-os-prod
 spec:
   selector:
-    app: payment-worker
+    app: consolidated-worker
   ports:
   - name: webhook
     port: 8080
@@ -629,9 +641,9 @@ spec:
   type: ClusterIP
 ```
 
-**Apply payment worker:**
+**Apply consolidated worker:**
 ```bash
-kubectl apply -f payment-worker-deployment.yaml
+kubectl apply -f consolidated-worker-deployment.yaml
 ```
 
 ### Step 8: Create Ingress
@@ -673,7 +685,7 @@ spec:
         pathType: Exact
         backend:
           service:
-            name: payment-worker
+            name: consolidated-worker
             port:
               number: 8080
       # PostgREST API (all other requests)
@@ -699,13 +711,13 @@ kubectl apply -f configmap.yaml
 kubectl apply -f postgres-statefulset.yaml
 kubectl apply -f postgrest-deployment.yaml
 kubectl apply -f frontend-deployment.yaml
-kubectl apply -f payment-worker-deployment.yaml  # Optional: Only if using payments
+kubectl apply -f consolidated-worker-deployment.yaml
 kubectl apply -f ingress.yaml
 ```
 
 ### Stripe Webhook Configuration (Production)
 
-After deploying the payment-worker service, configure Stripe to send webhooks to your production endpoint:
+After deploying the consolidated-worker service with Stripe credentials, configure Stripe to send webhooks to your production endpoint:
 
 **Step 1: Create Webhook Endpoint in Stripe Dashboard**
 1. Go to https://dashboard.stripe.com/webhooks
@@ -728,8 +740,8 @@ kubectl create secret generic stripe-credentials \
   --from-literal=webhook-secret='whsec_YOUR_PRODUCTION_WEBHOOK_SECRET' \
   --dry-run=client -o yaml | kubectl apply -n civic-os-prod -f -
 
-# Restart payment-worker to pick up new secret
-kubectl rollout restart deployment/payment-worker -n civic-os-prod
+# Restart consolidated-worker to pick up new secret
+kubectl rollout restart deployment/consolidated-worker -n civic-os-prod
 ```
 
 **Step 3: Test Webhook Delivery**
@@ -738,7 +750,7 @@ After deployment, use Stripe Dashboard to send a test webhook:
 1. Go to your webhook endpoint in Stripe Dashboard
 2. Click "Send test webhook"
 3. Select `payment_intent.succeeded`
-4. Check payment-worker logs: `kubectl logs -l app=payment-worker -n civic-os-prod`
+4. Check consolidated-worker logs: `kubectl logs -l app=consolidated-worker -n civic-os-prod`
 5. Verify 200 OK response in Stripe Dashboard
 
 ---
@@ -1086,7 +1098,7 @@ services:
 - **Read-only filesystems** where possible
 - **Resource limits** on all containers
 
-### 6. Payment Webhook Security (if using payment-worker)
+### 6. Payment Webhook Security (if using payment processing)
 
 **CRITICAL**: The payment webhook endpoint is publicly accessible by design (Stripe must be able to send events). Security is enforced through multiple layers:
 
@@ -1103,7 +1115,7 @@ services:
 - Use cert-manager or similar for automatic certificate renewal
 
 **Request Size Limits:**
-- Webhook payloads are limited to 64KB (enforced by payment-worker)
+- Webhook payloads are limited to 64KB (enforced by consolidated-worker)
 - Ingress should enforce 1MB limit to prevent abuse
 - Prevents memory exhaustion attacks
 
@@ -1113,7 +1125,7 @@ services:
 - Prevents double-processing of events from Stripe retries
 
 **Network Isolation:**
-- Payment-worker should NOT have direct internet access (only database + Stripe API)
+- Consolidated-worker should NOT have direct internet access (only database + Stripe API + S3 + SMTP)
 - Use egress firewall rules to restrict outbound connections
 - Only allow connections to Stripe API endpoints (api.stripe.com)
 
@@ -1137,8 +1149,8 @@ location /webhooks/stripe {
     proxy_send_timeout 5s;
     proxy_read_timeout 10s;
 
-    # Forward to payment-worker
-    proxy_pass http://payment-worker:8080;
+    # Forward to consolidated-worker
+    proxy_pass http://consolidated-worker:8080;
 }
 ```
 
@@ -1298,14 +1310,14 @@ ALTER SYSTEM SET log_min_duration_statement = 1000;  -- Log queries > 1s
 SELECT pg_reload_conf();
 ```
 
-### Payment Worker Issues (if deployed)
+### Payment Processing Issues (if using payments)
 
 **Webhook 400 errors in Stripe Dashboard:**
 ```bash
-# Check payment-worker logs for signature verification failures
-docker logs payment-worker
+# Check consolidated-worker logs for signature verification failures
+docker logs consolidated-worker
 # OR for Kubernetes:
-kubectl logs -l app=payment-worker -n civic-os-prod
+kubectl logs -l app=consolidated-worker -n civic-os-prod
 
 # Common causes:
 # 1. Wrong webhook secret (test vs live mode mismatch)
@@ -1316,7 +1328,7 @@ kubectl logs -l app=payment-worker -n civic-os-prod
 **Webhook 500 errors:**
 ```bash
 # Check for database connection issues
-docker exec -it payment-worker /bin/sh -c 'echo "SELECT 1" | psql $DATABASE_URL'
+docker exec -it consolidated-worker /bin/sh -c 'echo "SELECT 1" | psql $DATABASE_URL'
 
 # Check for missing payment records (webhook received for non-existent payment)
 docker exec -it postgres_db psql -U postgres -d civic_os_prod -c \
@@ -1330,7 +1342,7 @@ docker exec -it postgres_db psql -U postgres -d civic_os_prod -c \
   "SELECT id, kind, state, errors FROM metadata.river_job WHERE kind = 'create_payment_intent' ORDER BY created_at DESC LIMIT 10;"
 
 # Check Stripe API connectivity
-docker exec -it payment-worker /bin/sh -c 'curl -s https://api.stripe.com/healthcheck'
+docker exec -it consolidated-worker /bin/sh -c 'curl -s https://api.stripe.com/healthcheck'
 ```
 
 **Health check failing:**
@@ -1338,7 +1350,7 @@ docker exec -it payment-worker /bin/sh -c 'curl -s https://api.stripe.com/health
 # Test health endpoint directly
 curl http://localhost:8081/health
 # OR for Kubernetes:
-kubectl port-forward svc/payment-worker 8080:8080 -n civic-os-prod
+kubectl port-forward svc/consolidated-worker 8080:8080 -n civic-os-prod
 curl http://localhost:8080/health
 
 # Expected: {"status":"healthy"}

@@ -838,7 +838,49 @@ When tests hang or timeout, follow these steps:
 - [Marble Testing](https://rxjs.dev/guide/testing/marble-testing)
 - [Schema-Driven UI Patterns](https://medium.com/expedia-group-tech/schema-driven-uis-dd8fdb516120)
 
+## PostgREST API Testing with JWT Generation
+
+For full-loop API testing with different roles, permissions, and users, you can generate JWTs by reading the secret from the example's `.env` file.
+
+### Workflow
+
+1. Read `PGRST_JWT_SECRET` from the example `.env` (e.g., `examples/community-center/.env`)
+2. Generate JWT with desired claims:
+   - `sub` - User UUID
+   - `role` - PostgreSQL role (`authenticated` or `web_anon`)
+   - `civic_os_roles` - Application roles array (e.g., `["user", "editor", "admin"]`)
+3. Call PostgREST API with `Authorization: Bearer <token>`
+4. Verify RLS enforcement and permission checks
+
+### What You Can Test
+
+- **RLS policies** with different user IDs (e.g., users can only see their own records)
+- **Permission checks** for different roles (`user`, `editor`, `admin`)
+- **Anonymous vs authenticated** access (use `web_anon` role for anonymous)
+- **Multi-tenant scenarios** (different user UUIDs)
+
+### Example (using Node.js `jsonwebtoken`)
+
+```bash
+# Read the secret
+PGRST_JWT_SECRET=$(grep PGRST_JWT_SECRET examples/community-center/.env | cut -d= -f2)
+
+# Generate a token (example using node)
+node -e "
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { sub: 'test-user-uuid', role: 'authenticated', civic_os_roles: ['user', 'admin'] },
+  '$PGRST_JWT_SECRET',
+  { expiresIn: '1h' }
+);
+console.log(token);
+"
+
+# Use the token
+curl -H "Authorization: Bearer <token>" http://localhost:3000/my_table
+```
+
 ---
 
-**Last Updated**: 2025-10-06
+**Last Updated**: 2026-03-11
 **Maintainer**: Development Team

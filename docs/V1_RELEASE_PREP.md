@@ -95,7 +95,7 @@ PostgreSQL `money` type returns locale-formatted strings like `"$150.00"`. This 
 
 ### Deferred to v2.0
 
-1. Views as entities (requires `schema_entities` changes)
+1. ~~Views as entities~~ — Implemented as Virtual Entities in v0.28.0
 2. Multi-tenant support
 3. Audit logging system
 

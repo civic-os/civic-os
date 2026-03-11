@@ -53,14 +53,14 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Bulk user import from CSV/Excel via the import modal
 
 ### Workflow
-- [ ] Build table structure for attaching workflow to Entity (Use Properties table)
-- [ ] Build Trigger rules to restrict transitions
+- [x] Build table structure for attaching workflow to Entity (Status system v0.15.0, status_transitions v0.33.0)
+- [ ] Build Trigger rules to restrict transitions (`status_transitions` table exists but frontend doesn't filter status dropdowns)
 - [ ] Create Override Workflow permission
 - [ ] Limit UI Selectors based on Workflow
 - [ ] Set up Record Defaults (On Create)
 
 ### Categorization
-- [ ] **Tag System** - First-class M:M categorization using the Type system
+- [ ] **Tag System** - First-class M:M categorization using the Category system
   - [ ] Tags as Type values assignable to entities via framework-managed junction tables
   - [ ] Colored badge display with multi-select UI on Detail/Edit pages
   - [ ] Admin management of tag categories (reuses Type admin UI)
@@ -147,7 +147,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
     - [ ] Export diagram as image (PNG/SVG)
     - [ ] Minimap for navigation in large schemas
 - [ ] Advanced Form Validation by use of RPCs
-- [x] Add Static Text blocks (v0.17.0 - markdown content via `metadata.static_text`, see `docs/design/STATIC_TEXT_FEATURE.md`)
+- [x] Add Static Text blocks (v0.17.0 - markdown content via `metadata.static_text`, see `docs/development/STATIC_TEXT_FEATURE.md`)
 - [ ] Add customizable template pages (primarily for PDF)
 - [ ] Research safe database schema editing, sandboxing
 - [ ] One-to-One relationship created as child record

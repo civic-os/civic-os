@@ -19,7 +19,7 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 
 **Key Concept**: Instead of manually building UI for each table, Civic OS reads database schema metadata from `schema_entities` and `schema_properties` views to automatically generate forms, tables, and validation.
 
-**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2025 Civic OS, L3C. See the LICENSE file for full terms.
+**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2026 Civic OS, L3C. See the LICENSE file for full terms.
 
 ## Architecture
 
@@ -43,11 +43,7 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name
-- `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access
-  - **Unified View Architecture**: The `civic_os_users` view in `public` schema combines data from `metadata.civic_os_users` (public profile) and `metadata.civic_os_users_private` (private contact info)
-  - **API Response**: `{id, display_name, full_name, phone, email}` where private fields (`full_name`, `phone`, `email`) are NULL unless user views own record or has `civic_os_users_private:read` permission
-  - **Storage**: Actual tables reside in `metadata` schema for namespace organization; view provides backward-compatible API surface
-  - **Profile Management**: User profile data (name, email, phone) is managed in Keycloak (single source of truth) and synced to Civic OS on login via `refresh_current_user()` RPC. The "Account Settings" menu item links to Keycloak's account console with referrer params for easy return. Phone number requires custom user attribute and JWT mapper configuration (see `docs/AUTHENTICATION.md` Step 5).
+- `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
 - `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
 - `Boolean`: `bool` → Checkbox
@@ -67,21 +63,15 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Telephone Type** (`phone_number`): US 10-digit format. UI shows formatted (XXX) XXX-XXXX with masked input.
 
-**TimeSlot Type** (`TimeSlot`): Use the `time_slot` domain for appointment scheduling, reservations, and time-based bookings. The domain wraps PostgreSQL's `tstzrange` (timestamp range with timezone). Database stores UTC timestamps, UI displays in user's local timezone. Display component formats ranges intelligently (same-day: "Mar 15, 2025 2:00 PM - 4:00 PM" vs multi-day: "Mar 15, 2025 2:00 PM - Mar 17, 2025 11:00 AM"). Edit component provides two datetime-local inputs with validation (end must be after start).
+**TimeSlot Type** (`TimeSlot`): Use the `time_slot` domain (wraps `tstzrange`) for scheduling. Database stores UTC, UI displays local timezone. Edit provides two datetime-local inputs with validation.
 
-**Calendar Integration**: Entities with `time_slot` columns can enable calendar visualization. Set `show_calendar=true` and `calendar_property_name` in `metadata.entities` to show calendar view on List pages. Detail pages automatically display calendar sections for related entities with TimeSlot properties. Requires Civic OS v0.9.0+ (includes `time_slot` domain and `btree_gist` extension).
-
-**Overlap Prevention**: Use GIST exclusion constraints to prevent double-booking at database level. Requires `btree_gist` extension (v0.9.0+). See `docs/development/CALENDAR_INTEGRATION.md` for SQL examples and `examples/community-center/` for working example.
+**Calendar Integration** (v0.9.0+): Enable via `show_calendar=true` and `calendar_property_name` in `metadata.entities`. Supports overlap prevention via GIST exclusion constraints. See `docs/development/CALENDAR_INTEGRATION.md` for details and `examples/community-center/` for working example.
 
 **iCal Subscription Feeds** (v0.27.0+): Export public calendar events as subscribable iCal feeds. Uses RFC 5545 helper functions (`format_ical_event()`, `wrap_ical_feed()`) with PostgREST media type handlers. Calendar apps (Google Calendar, Apple, Outlook) can subscribe to `/rpc/your_feed_function`. See `docs/INTEGRATOR_GUIDE.md` (iCal Calendar Feeds section) for implementation guide.
 
-**Status Type** (`Status`): Framework-provided status and workflow system using centralized `metadata.statuses` table with `entity_type` discriminator. Frontend detects via `status_entity_type` in `metadata.properties` and renders colored badges/dropdowns. Features: `is_initial` for default status, `is_terminal` for workflow end states, `sort_order` for dropdown ordering, `status_key` for stable programmatic references (v0.25.0+). Allowed transitions can be declared via `metadata.status_transitions` with optional RPC binding (v0.33.0+). Use `get_initial_status('entity_type')` or `get_status_id('entity_type', 'status_key')` helpers for column defaults and lookups. Requires v0.15.0+.
+**Status Type** (`Status`, v0.15.0+): Centralized workflow system using `metadata.statuses` table with `entity_type` discriminator. Features colored badges/dropdowns, `is_initial`/`is_terminal` states, allowed transitions (v0.33.0+), and `status_key` for programmatic references. See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) and `docs/development/STATUS_TYPE_SYSTEM.md` for design.
 
-See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) for Quick Setup SQL, `docs/development/STATUS_TYPE_SYSTEM.md` for design, and `examples/community-center/` for working example.
-
-**Category** (`Category`): Rich enum categorization system using centralized `metadata.categories` table with `entity_type` discriminator. No workflow semantics (no `is_initial`/`is_terminal`, no transitions, no causal bindings). Frontend detects via `category_entity_type` in `metadata.properties` and renders colored badge dropdowns. Use for simple categorization where values only need a name, color, and sort order (entry types, building types, staff roles). If categories need extended properties that drive behavior (e.g., `hourly_rate`, `capacity`), use a custom lookup table instead. Helper functions: `get_category_id('entity_type', 'category_key')`. Requires v0.34.0+.
-
-See `docs/INTEGRATOR_GUIDE.md` (Category System section) for Quick Setup SQL and `examples/staff-portal/` for working example (`time_entry` entity uses Category for Clock In/Clock Out).
+**Category** (`Category`, v0.34.0+): Simple enum categorization using `metadata.categories` table with `entity_type` discriminator. No workflow semantics (unlike Status). Use for name/color/sort_order values; use a custom lookup table if categories need extended properties. See `docs/INTEGRATOR_GUIDE.md` (Category System section) and `examples/staff-portal/`.
 
 **Entity Notes** (v0.16.0+): Polymorphic notes system any entity can opt into. Features permission-isolated notes (`{entity}:notes:read/create`), system notes for audit trails, Markdown formatting, and export support. Enable via `SELECT enable_entity_notes('entity_type')`. See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete guide.
 
@@ -89,11 +79,7 @@ See `docs/INTEGRATOR_GUIDE.md` (Category System section) for Quick Setup SQL and
 
 See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and `examples/community-center/init-scripts/12_static_text_example.sql` for working example.
 
-**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Perfect for workflow transitions (Approve/Deny/Cancel), status changes, or custom business logic. Features include: conditional visibility/enablement based on record state, confirmation modals, role-based permissions (managed via Permissions page), and customizable icons/colors. RPC functions must accept `p_entity_id BIGINT` and return `JSONB` with `success`, `message`, and optionally `refresh` or `navigate`. Conditions use JSONB expressions with operators: `eq`, `ne`, `in`, `gt`, `lt`, `gte`, `lte`, `is_null`, `is_not_null`.
-
-**Action Parameters** (v0.32.0+): Actions can accept user-provided parameters via `metadata.entity_action_params` table. Parameters render as form fields in the confirmation modal (actions with parameters always show the modal). Supported param types: `text`, `text_short`, `number`, `boolean`, `money`, `date`, `datetime`, `datetime_local`, `color`, `email`, `telephone`, `status`, `category`, `foreign_key`, `user`, `file`, `geo_point`, `time_slot`. RPC functions receive params as additional arguments with `DEFAULT NULL` for backwards compatibility. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. Not supported as params: `ManyToMany` (junction table management), `Payment` (display-only), `RecurringTimeSlot` (requires series context).
-
-See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) for complete implementation guide, `docs/development/ENTITY_ACTIONS.md` for action parameters details, and `examples/community-center/init-scripts/13_entity_actions.sql` for working example.
+**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports conditional visibility, confirmation modals, role-based permissions, and customizable icons/colors. **Action Parameters** (v0.32.0+) allow user-provided form fields in modals via `metadata.entity_action_params`. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
 **Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedule system. Enable via `supports_recurring=true` and `recurring_property_name` in `metadata.entities`. Architecture: Series Groups → Series (RRULE + template) → Instances. Edit scope dialogs support "This only", "This and future", and "All" modifications. Managed at `/admin/recurring-schedules`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture.
 
@@ -101,36 +87,19 @@ See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) for complete impl
 
 **System Introspection** (v0.23.0+): Auto-generated documentation for RPC functions, database triggers, and notification workflows. Features permission-filtered views (`schema_functions`, `schema_triggers`, `schema_entity_dependencies`, `schema_notifications`), static code analysis for entity effect detection, and admin-only views (`schema_permissions_matrix`, `schema_scheduled_functions`). Register functions via `metadata.auto_register_function()`. See `docs/INTEGRATOR_GUIDE.md` (System Introspection section) for complete guide and `examples/mottpark/init-scripts/13_mpra_introspection.sql` for working example.
 
-**Source Code Block Visualization** (v0.29.0+): Read-only Blockly-based visualization of PL/pgSQL functions and SQL views. Go worker parses source via `libpg_query` into AST JSON stored in `metadata.parsed_source_code`. Frontend: `AstToBlocklyService` maps AST nodes to custom Blockly blocks (`sql-blocks.ts`), `BlocklyViewerComponent` lazy-loads Blockly with DaisyUI theme integration. Pages: Entity Code (`/entity-code/:entity`), System Functions (`/system-functions`), System Policies (`/system-policies`). See `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md` for architecture, AST node mapping reference, and future work backlog.
+**Source Code Block Visualization** (v0.29.0+): Read-only Blockly-based visualization of PL/pgSQL functions and SQL views. Pages: Entity Code (`/entity-code/:entity`), System Functions (`/system-functions`), System Policies (`/system-policies`). See `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md` for architecture and AST node mapping reference.
 
-**Schema Decisions (ADR)** (v0.30.0+): Database-native architectural decision records for tracking schema evolution rationale. Decisions link to arrays of entity types (`entity_types NAME[]`) and/or property names (`property_names NAME[]`) via `metadata.schema_decisions` table, supporting cross-entity decisions. Uses append-only supersession model (decisions are never edited, only superseded by newer decisions). Use `create_schema_decision()` RPC in init scripts alongside schema changes. **Every schema change should include a `create_schema_decision()` call documenting the rationale.** Before modifying any entity's schema, **query existing decisions first**: `SELECT * FROM schema_decisions WHERE 'entity_name' = ANY(entity_types) AND status = 'accepted'`. Admin-only write access via RLS; all authenticated users can read. See `docs/INTEGRATOR_GUIDE.md` (Schema Decisions section) for complete guide and `examples/mottpark/init-scripts/24_mpra_schema_decisions.sql` for working example.
+**Schema Decisions (ADR)** (v0.30.0+): Database-native architectural decision records via `metadata.schema_decisions` table. **Every schema change should include a `create_schema_decision()` call documenting the rationale.** Before modifying any entity's schema, **query existing decisions first**. See `docs/INTEGRATOR_GUIDE.md` (Schema Decisions section) for complete guide.
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
 
-**Payment Type** (`Payment`): UUID foreign key to `payments.transactions` table for Stripe-based payment processing. Metadata-driven architecture enables payments on any entity via `payment_initiation_rpc` configuration in `metadata.entities`. Frontend automatically displays payment badges on List pages and "Pay Now" button on Detail pages when configured. Payment workflow: user clicks "Pay Now" → framework calls configured RPC → RPC validates and creates payment record → River job creates Stripe PaymentIntent → modal displays Stripe Elements → webhook updates status. Requires Civic OS v0.13.0+ with consolidated worker service. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete implementation guide and `examples/community-center/init-scripts/10_payment_integration.sql` for working example.
+**Payment Type** (`Payment`, v0.13.0+): Stripe-based payment processing via UUID FK to `payments.transactions`. Enable on any entity via `payment_initiation_rpc` in `metadata.entities`. Frontend auto-displays payment badges on List pages and "Pay Now" button on Detail pages. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete workflow and `examples/community-center/` for working example.
 
 **Consolidated Worker Architecture**: File storage, thumbnail generation, payment processing, and notification features run in a single Go + River microservice with a shared PostgreSQL connection pool (4 connections vs 12 with separate services). Provides at-least-once delivery, automatic retries with exponential backoff, row-level locking, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
 
-**Geography (GeoPoint) Type**: When adding a geography column, you must create a paired computed field function `<column_name>_text` that returns `ST_AsText()`. PostgREST exposes this as a virtual field. Data format: Insert/Update uses EWKT `"SRID=4326;POINT(lng lat)"`, Read receives WKT `"POINT(lng lat)"`.
+**Geography (GeoPoint) Type**: Requires a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and map dark mode details.
 
-**Map Dark Mode**: Maps automatically switch between light and dark tile layers based on the current DaisyUI theme. The `ThemeService` (`src/app/services/theme.service.ts`) **dynamically calculates theme luminance** by reading the `--b1` CSS variable (base background color) and applying the YIQ brightness formula. This works with **any DaisyUI theme** (including custom themes) without hardcoded theme names. Light themes use OpenStreetMap tiles; dark themes use ESRI World Dark Gray tiles. `GeoPointMapComponent` subscribes to theme changes via MutationObserver on the `data-theme` attribute and swaps tile layers dynamically without page reload.
-
-**DateTime vs DateTimeLocal - Timezone Handling**:
-
-These two timestamp types have fundamentally different timezone behaviors:
-
-- **DateTime** (`timestamp without time zone`): Stores "wall clock" time with NO timezone context
-  - Database stores exactly what user enters (e.g., "10:30 AM" → "10:30 AM")
-  - No timezone conversion on load or submit
-  - Use for: Scheduled events, business hours, appointment slots (where timezone doesn't matter)
-
-- **DateTimeLocal** (`timestamptz`): Stores absolute point in time in UTC
-  - User enters time in THEIR local timezone (e.g., "5:30 PM EST")
-  - Frontend converts to UTC before sending to database (e.g., "10:30 PM UTC")
-  - On load, converts UTC back to user's local timezone for display
-  - Use for: Created/updated timestamps, events tied to specific moments in time
-
-**CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions. Modifying this code can cause data integrity issues. See extensive inline comments and tests for implementation details.
+**DateTime vs DateTimeLocal - Timezone Handling**: `DateTime` (`timestamp`) stores wall-clock time with no conversion; `DateTimeLocal` (`timestamptz`) converts between user's local timezone and UTC. **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions — modifying this code can cause data integrity issues. See `docs/development/DATETIME_HANDLING.md` for details.
 
 **Many-to-Many Relationships**: Auto-detected from junction tables. **CRITICAL**: Junction tables MUST use composite primary keys (NOT surrogate IDs). Renders on Detail pages with `ManyToManyEditorComponent`. Requires CREATE/DELETE permissions on junction table. See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details and SQL examples.
 
@@ -150,17 +119,7 @@ The home page (`/`) displays configurable dashboards with extensible widget type
 
 **Current**: ✅ View dashboards ✅ Markdown widgets ✅ Filtered list widgets ✅ Map widgets with clustering ✅ Calendar widgets ❌ Management UI ❌ Auto-refresh
 
-**Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern.
-
-**Widget Types**:
-- `markdown` - Static content with optional HTML
-- `filtered_list` - Entity records in table format with filters, sorting, pagination
-- `map` - Geographic data on interactive map with optional clustering
-- `calendar` - Time-slotted events on interactive calendar with month/week/day views
-- `dashboard_navigation` - Sequential prev/next navigation for storymap flows
-- `nav_buttons` - Flexible navigation buttons with header, description, icons, and configurable styles
-
-See `docs/development/DASHBOARD_WIDGETS.md` for complete widget configuration reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
+**Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern. See `docs/development/DASHBOARD_WIDGETS.md` for complete widget type reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
 
 ## Development Commands
 
@@ -300,29 +259,11 @@ All API calls use PostgREST conventions:
 
 The `SchemaService.propertyToSelectString()` method builds PostgREST-compatible select strings for foreign keys and user references.
 
-**API Testing with JWT Generation**: For full-loop API testing with different roles, permissions, and users, you can generate JWTs by reading the secret from the example's `.env` file (e.g., `examples/community-center/.env`). This allows testing:
-- RLS policies with different user IDs
-- Permission checks for different roles (`user`, `editor`, `admin`)
-- Anonymous vs authenticated access
-- Multi-tenant scenarios
-
-Example workflow:
-1. Read `PGRST_JWT_SECRET` from `.env`
-2. Generate JWT with desired claims (`sub`, `role`, `civic_os_roles`)
-3. Call PostgREST API with `Authorization: Bearer <token>`
-4. Verify RLS enforcement and permission checks
+**API Testing with JWT Generation**: Generate JWTs from the example `.env` secret to test RLS policies, permissions, and multi-tenant scenarios. See `docs/development/TESTING.md` (PostgREST API Testing section) for workflow.
 
 ## Built-in PostgreSQL Functions
 
-Civic OS provides helper functions for JWT data extraction (`current_user_id()`, `current_user_email()`), RBAC checks (`has_permission()`, `is_admin()`), programmatic metadata configuration (`upsert_entity_metadata()`, `set_role_permission()`), and causal binding registration (`add_status_transition()`, `add_property_change_trigger()`).
-
-**Example**: RLS policy using JWT helper
-```sql
-CREATE POLICY "Users see own records" ON my_table
-  FOR SELECT TO authenticated USING (user_id = current_user_id());
-```
-
-See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters and examples.
+Civic OS provides helper functions for JWT data extraction (`current_user_id()`, `current_user_email()`), RBAC checks (`has_permission()`, `is_admin()`), programmatic metadata configuration (`upsert_entity_metadata()`, `set_role_permission()`), and causal binding registration (`add_status_transition()`, `add_property_change_trigger()`). See `docs/INTEGRATOR_GUIDE.md` for complete function reference with parameters and examples.
 
 ## Authentication & RBAC
 
@@ -358,8 +299,6 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 
 **Troubleshooting RBAC**: See `docs/TROUBLESHOOTING.md` for debugging JWT roles and permissions issues.
 
-**Role Impersonation** (v0.26.0+): Admins can impersonate other roles via Settings modal to test RLS policies. When active, `X-Impersonate-Roles` header is sent with HTTP requests, causing `get_user_roles()` to return impersonated roles instead of JWT roles. State persists in localStorage. See `ImpersonationService` for implementation.
-
 ## Common Patterns
 
 ### Adding a New Entity to the UI
@@ -369,19 +308,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
    - **Sensitive tables** (payments, private data): Grant only to `authenticated`, withhold from `web_anon`
 
    When `web_anon` has no privileges, anonymous users see a "Sign in to view this record" prompt instead of the data.
-3. **IMPORTANT: Create indexes on all foreign key columns** (PostgreSQL does NOT auto-index FKs)
-   ```sql
-   -- Example: For a table with foreign keys
-   CREATE TABLE issues (
-     id SERIAL PRIMARY KEY,
-     status_id INT REFERENCES statuses(id),
-     user_id UUID REFERENCES civic_os_users(id)
-   );
-
-   -- REQUIRED: Add indexes for FK columns (needed for inverse relationships and performance)
-   CREATE INDEX idx_issues_status_id ON issues(status_id);
-   CREATE INDEX idx_issues_user_id ON issues(user_id);
-   ```
+3. **IMPORTANT: Create indexes on all foreign key columns** (PostgreSQL does NOT auto-index FKs). See `docs/INTEGRATOR_GUIDE.md` for index examples.
 4. Navigate to `/view/your_table_name` - UI auto-generates
 5. (Optional) Add entries to `metadata.entities` and `metadata.properties` for custom display names, ordering, etc.
 
@@ -493,26 +420,7 @@ export class MyPageComponent {
 - **DaisyUI 5** component library (themes: light, dark, corporate, nord, emerald)
 - Global styles in `src/styles.css`
 
-**IMPORTANT: This project uses DaisyUI 5, not DaisyUI 4.** Many class names changed between versions. Common differences:
-
-| DaisyUI 4 | DaisyUI 5 |
-|-----------|-----------|
-| `tabs-lifted` | `tabs-lift` |
-| `tabs-bordered` | `tabs-border` |
-| `tabs-boxed` | `tabs-box` |
-| `card-bordered` | `card-border` |
-| `card-compact` | `card-sm` |
-| `btn-group` | `join` (+ `join-item` on children) |
-| `btn-group-vertical` | `join-vertical` |
-| `input-group` | `join` |
-| `<li class="disabled">` (menu) | `<li class="menu-disabled">` |
-| `<tr class="hover">` (table) | `<tr class="hover:bg-base-200">` |
-| `form-control` | `fieldset` (structural change) |
-| `label-text` | `label` |
-
-**Note:** `form-control` and `label-text` are widely used in this codebase but don't exist in DaisyUI 5. The forms still render acceptably due to Tailwind defaults, but this is technical debt to address.
-
-When adding DaisyUI components, always verify class names against the [DaisyUI 5 documentation](https://daisyui.com/components/). The v5 docs use the pattern `$$class` in examples to indicate the actual class name.
+**IMPORTANT: This project uses DaisyUI 5, not DaisyUI 4.** Many class names changed between versions. See `docs/development/ANGULAR.md` (DaisyUI 5 Migration section) for the full v4→v5 mapping table. Always verify class names against the [DaisyUI 5 documentation](https://daisyui.com/components/).
 
 ## TypeScript Configuration
 
