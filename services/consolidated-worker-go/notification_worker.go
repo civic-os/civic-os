@@ -53,12 +53,12 @@ type SMTPConfig struct {
 // NotificationWorker implements the River Worker interface
 type NotificationWorker struct {
 	river.WorkerDefaults[NotificationArgs]
-	dbPool          *pgxpool.Pool
-	renderer        *Renderer
-	smtpConfig      *SMTPConfig
-	telnyxClient    *TelnyxClient // nil when SMS_ENABLED=false or SMS_FAKE_MODE=true
-	smsFakeMode     bool          // true = log to stdout instead of calling Telnyx
-	smsFromNumber   string        // displayed in fake-mode logs
+	dbPool        *pgxpool.Pool
+	renderer      *Renderer
+	smtpConfig    *SMTPConfig
+	telnyxClient  *TelnyxClient // nil when SMS_ENABLED=false or SMS_FAKE_MODE=true
+	smsFakeMode   bool          // true = log to stdout instead of calling Telnyx
+	smsFromNumber string        // displayed in fake-mode logs
 }
 
 // Work executes the notification job
