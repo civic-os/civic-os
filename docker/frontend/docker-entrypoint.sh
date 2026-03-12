@@ -23,6 +23,7 @@ echo "  STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:+pk_***${STRIPE_PUBLISH
 echo "  MATOMO_URL: $MATOMO_URL"
 echo "  MATOMO_SITE_ID: $MATOMO_SITE_ID"
 echo "  MATOMO_ENABLED: $MATOMO_ENABLED"
+echo "  SMS_CONFIGURED: $SMS_CONFIGURED"
 echo ""
 
 # Generate inline config script
@@ -56,6 +57,9 @@ window.civicOsConfig = {
     url: '${MATOMO_URL}',
     siteId: '${MATOMO_SITE_ID}',
     enabled: '${MATOMO_ENABLED}' === 'true'
+  },
+  sms: {
+    configured: '${SMS_CONFIGURED}' === 'true'
   }
 };
 </script>

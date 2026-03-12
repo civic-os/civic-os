@@ -46,22 +46,29 @@
         </div>
       }
 
-      <!-- SMS Notifications -->
-      @if (smsPreference(); as sms) {
-        <div class="mb-4">
-          <label class="flex items-start cursor-pointer gap-3">
-            <input
-              type="checkbox"
-              class="checkbox flex-shrink-0 mt-0.5"
-              [checked]="sms.enabled"
-              (change)="onSmsToggle($any($event.target).checked)"
-            />
-            <span>SMS notifications</span>
-          </label>
-          <p class="text-xs opacity-70 mt-1 ml-9">
-            Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
-          </p>
-        </div>
+      <!-- SMS Notifications (only shown when SMS is configured system-wide) -->
+      @if (smsConfigured) {
+        @if (smsPreference(); as sms) {
+          <div class="mb-4">
+            <label class="flex items-start cursor-pointer gap-3">
+              <input
+                type="checkbox"
+                class="checkbox flex-shrink-0 mt-0.5"
+                [checked]="sms.enabled"
+                (change)="onSmsToggle($any($event.target).checked)"
+              />
+              <span>SMS notifications</span>
+            </label>
+            <p class="text-xs opacity-70 mt-1 ml-9">
+              Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
+            </p>
+            <!-- TODO: Replace "Civic OS" with the configured org name once org name is available to the frontend -->
+            <p class="text-xs opacity-70 mt-1 ml-9">
+              By enabling SMS notifications, you consent to receive transactional text messages from Civic OS.
+              Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help.
+            </p>
+          </div>
+        }
       }
 
       @if (!emailPreference() && !smsPreference()) {

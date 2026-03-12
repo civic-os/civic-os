@@ -53,9 +53,12 @@ type SMTPConfig struct {
 // NotificationWorker implements the River Worker interface
 type NotificationWorker struct {
 	river.WorkerDefaults[NotificationArgs]
-	dbPool     *pgxpool.Pool
-	renderer   *Renderer
-	smtpConfig *SMTPConfig
+	dbPool          *pgxpool.Pool
+	renderer        *Renderer
+	smtpConfig      *SMTPConfig
+	telnyxClient    *TelnyxClient // nil when SMS_ENABLED=false or SMS_FAKE_MODE=true
+	smsFakeMode     bool          // true = log to stdout instead of calling Telnyx
+	smsFromNumber   string        // displayed in fake-mode logs
 }
 
 // Work executes the notification job
@@ -112,9 +115,16 @@ func (w *NotificationWorker) Work(ctx context.Context, job *river.Job[Notificati
 			}
 
 		case "sms":
-			// Phase 2: SMS implementation
-			log.Printf("[Job %d] SMS channel not yet implemented", job.ID)
-			channelsFailed = append(channelsFailed, "sms")
+			if err := w.sendSMS(ctx, job.ID, job.Args.UserID, prefs, rendered); err != nil {
+				log.Printf("[Job %d] Failed to send SMS: %v", job.ID, err)
+				channelsFailed = append(channelsFailed, "sms")
+				// Only surface transient errors to River for retry
+				if telnyxErr, ok := err.(*TelnyxError); !ok || !telnyxErr.IsPermanent {
+					lastError = err
+				}
+			} else {
+				channelsSent = append(channelsSent, "sms")
+			}
 
 		default:
 			log.Printf("[Job %d] Unknown channel: %s", job.ID, channel)
@@ -148,6 +158,7 @@ type UserPreferences struct {
 	EmailEnabled bool
 	Phone        string
 	SMSEnabled   bool
+	SMSOoptedOut bool // true = carrier-level STOP; worker will skip SMS silently
 }
 
 // IsEnabled checks if a channel is enabled for the user
@@ -156,7 +167,8 @@ func (p *UserPreferences) IsEnabled(channel string) bool {
 	case "email":
 		return p.EmailEnabled && p.Email != ""
 	case "sms":
-		return p.SMSEnabled && p.Phone != ""
+		// Skip if user disabled OR if they've been opted out at carrier level
+		return p.SMSEnabled && !p.SMSOoptedOut && p.Phone != ""
 	default:
 		return false
 	}
@@ -185,9 +197,19 @@ func (w *NotificationWorker) getUserPreferences(ctx context.Context, userID stri
 		prefs.EmailEnabled = true // Default to enabled
 	}
 
-	// Future: Get SMS preference
-	// For now, SMS is always disabled
-	prefs.SMSEnabled = false
+	// Get SMS preference and phone number from the canonical source (civic_os_users_private).
+	// civic_os_users_private is Keycloak-synced; notification_preferences.phone_number is deprecated.
+	smsErr := w.dbPool.QueryRow(ctx, `
+		SELECT np.enabled, np.sms_opted_out, COALESCE(cup.phone, '')
+		FROM metadata.notification_preferences np
+		JOIN metadata.civic_os_users_private cup ON cup.id = np.user_id
+		WHERE np.user_id = $1 AND np.channel = 'sms'
+	`, userID).Scan(&prefs.SMSEnabled, &prefs.SMSOoptedOut, &prefs.Phone)
+
+	if smsErr != nil {
+		// No SMS preference row or no private user record — SMS remains disabled
+		prefs.SMSEnabled = false
+	}
 
 	return &prefs, nil
 }
@@ -358,6 +380,68 @@ func isTestEmail(email string) bool {
 	}
 
 	return false
+}
+
+// sendSMS delivers an SMS notification, handling fake mode and opt-out sync.
+// Returns nil on success; returns *TelnyxError on Telnyx failures.
+func (w *NotificationWorker) sendSMS(ctx context.Context, jobID int64, userID string, prefs *UserPreferences, rendered *RenderedNotification) error {
+	if rendered.SMS == "" {
+		log.Printf("[Job %d] SMS template is empty, skipping SMS", jobID)
+		return nil
+	}
+
+	phone, err := formatE164(prefs.Phone)
+	if err != nil {
+		return &TelnyxError{IsPermanent: true, Message: fmt.Sprintf("invalid phone number: %v", err)}
+	}
+
+	if w.smsFakeMode {
+		// Dev mode: log to stdout instead of calling Telnyx
+		log.Printf("[Job %d] ╔══════════════════════════════════════════════╗", jobID)
+		log.Printf("[Job %d] ║  FAKE SMS (not sent)                        ║", jobID)
+		log.Printf("[Job %d] ║  To:   %-37s║", jobID, phone)
+		fromDisplay := w.smsFromNumber
+		if fromDisplay == "" {
+			fromDisplay = "(TELNYX_FROM_NUMBER not set)"
+		}
+		log.Printf("[Job %d] ║  From: %-37s║", jobID, fromDisplay)
+		log.Printf("[Job %d] ║  Text: %-37s║", jobID, truncate(rendered.SMS, 37))
+		log.Printf("[Job %d] ╚══════════════════════════════════════════════╝", jobID)
+		return nil
+	}
+
+	if w.telnyxClient == nil {
+		log.Printf("[Job %d] SMS_ENABLED=true but no Telnyx client configured — skipping", jobID)
+		return nil
+	}
+
+	telnyxErr := w.telnyxClient.Send(phone, rendered.SMS)
+	if telnyxErr == nil {
+		return nil // success
+	}
+
+	if telnyxErr.IsOptedOut {
+		// Passively sync carrier-level opt-out to DB so future sends are skipped immediately
+		log.Printf("[Job %d] ⚠️  SMS opt-out detected for user — setting sms_opted_out=true in DB", jobID)
+		_, dbErr := w.dbPool.Exec(ctx, `
+			UPDATE metadata.notification_preferences
+			SET sms_opted_out = true
+			WHERE user_id = $1 AND channel = 'sms'
+		`, userID)
+		if dbErr != nil {
+			log.Printf("[Job %d] Warning: failed to update sms_opted_out: %v", jobID, dbErr)
+		}
+	}
+
+	return telnyxErr
+}
+
+// truncate shortens a string to maxLen characters, adding "…" if needed.
+func truncate(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen-1] + "…"
 }
 
 // markNotificationSent updates notification status to 'sent'

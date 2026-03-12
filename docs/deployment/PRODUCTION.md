@@ -196,6 +196,11 @@ FRONTEND_PORT=80
 FRONTEND_POSTGREST_URL=https://api.yourdomain.com/
 SWAGGER_URL=https://api.yourdomain.com:8080  # Swagger UI for API docs link in About modal
 
+# SMS UI Configuration (Optional, v0.35.0+)
+# Set to true if SMS notifications are enabled on the consolidated-worker
+# When false, the SMS preferences section is hidden in the Settings modal
+SMS_CONFIGURED=false
+
 # Map Configuration (Optional)
 MAP_DEFAULT_LAT=43.0125
 MAP_DEFAULT_LNG=-83.6875
@@ -230,6 +235,15 @@ SMTP_USERNAME=your-ses-smtp-username
 SMTP_PASSWORD=your-ses-smtp-password
 SMTP_FROM=notifications@yourdomain.com  # Must be verified with your SMTP provider
 NOTIFICATION_TIMEZONE=America/New_York  # Optional, default: UTC
+
+# ======================================
+# SMS Configuration (Optional, v0.35.0+)
+# Required only if using SMS notification channel via Telnyx
+# ======================================
+SMS_ENABLED=false                        # Set to true to activate SMS delivery
+SMS_FAKE_MODE=false                      # Set to true for dev mode (logs to stdout instead of sending)
+TELNYX_API_KEY=KEY...                    # From https://portal.telnyx.com
+TELNYX_FROM_NUMBER=+18005551234          # Your Telnyx origination number (E.164 format, toll-free recommended)
 
 # ======================================
 # Payment Worker Configuration (Optional)
@@ -382,6 +396,7 @@ data:
   MAP_DEFAULT_ZOOM: "13"
   S3_ENDPOINT: "https://s3.yourdomain.com"
   S3_BUCKET: "civic-os-files-prod"
+  SMS_CONFIGURED: "false"
 ```
 
 ### Step 3: Create Secrets

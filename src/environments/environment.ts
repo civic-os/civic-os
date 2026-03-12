@@ -42,5 +42,8 @@ export const environment: Environment = {
         url: '',  // Empty = disabled in base environment
         siteId: '',
         enabled: false
+    },
+    sms: {
+        configured: false
     }
 };

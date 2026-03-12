@@ -55,6 +55,9 @@ declare global {
         siteId: string;
         enabled: boolean;
       };
+      sms?: {
+        configured: boolean;
+      };
     };
   }
 }
@@ -138,6 +141,19 @@ export function getMatomoConfig(): { url: string | null; siteId: string | null; 
     url: config?.url || null,
     siteId: config?.siteId || null,
     enabled: config?.enabled ?? true  // Default to enabled if not specified
+  };
+}
+
+/**
+ * Get SMS configuration.
+ * Used to determine if SMS notifications are available system-wide.
+ *
+ * @returns SMS config object with configured flag. Returns false if not configured.
+ */
+export function getSmsConfig(): { configured: boolean } {
+  const config = window.civicOsConfig?.sms || environment.sms;
+  return {
+    configured: config?.configured ?? false
   };
 }
 

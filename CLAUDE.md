@@ -348,11 +348,11 @@ See `docs/INTEGRATOR_GUIDE.md` (Validation System section) for SQL examples and 
 
 ### Notification System
 
-**Version**: v0.11.0+
+**Version**: v0.11.0+ (email), v0.35.0+ (SMS via Telnyx)
 
-Send multi-channel notifications (email, SMS) to users using database-managed templates with Go template syntax and a River-based Go microservice. Features include: template management UI at `/notifications/templates`, real-time validation, HTML preview, polymorphic entity references, and automatic retries with exponential backoff.
+Send multi-channel notifications (email, SMS) to users using database-managed templates with Go template syntax and a River-based Go microservice. Features include: template management UI at `/notifications/templates`, real-time validation, HTML preview, polymorphic entity references, and automatic retries with exponential backoff. SMS delivery uses Telnyx (no SDK, stdlib HTTP only) with passive STOP/opt-out sync via `sms_opted_out` column.
 
-See `docs/INTEGRATOR_GUIDE.md` (Notification System section) for Quick Start SQL examples and template patterns, `docs/development/NOTIFICATIONS.md` for complete architecture and AWS SES setup, and `examples/pothole/init-scripts/08_notification_templates.sql` for working examples.
+See `docs/INTEGRATOR_GUIDE.md` (Notification System section) for Quick Start SQL examples and template patterns, `docs/development/NOTIFICATIONS.md` for complete architecture, SMTP/Telnyx setup, and `examples/pothole/init-scripts/08_notification_templates.sql` for working examples.
 
 ### Visual Diagramming with JointJS
 

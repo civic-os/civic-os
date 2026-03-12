@@ -233,6 +233,32 @@ func (r *Renderer) buildContext(entity map[string]interface{}) map[string]interf
 	}
 }
 
+// formatE164 normalizes a phone number to E.164 format (+1XXXXXXXXXX for US).
+// - 10-digit bare number → +1XXXXXXXXXX
+// - Already starts with + → passed through as-is (international numbers)
+// - Anything else → error
+func formatE164(phone string) (string, error) {
+	// Strip all non-digit characters (spaces, dashes, parens, dots)
+	digits := regexp.MustCompile(`\D`).ReplaceAllString(phone, "")
+
+	if len(digits) == 10 {
+		return "+1" + digits, nil
+	}
+
+	if len(digits) == 11 && digits[0] == '1' {
+		// Already includes country code (e.g., "15551234567")
+		return "+" + digits, nil
+	}
+
+	// Check if the original already had a leading '+' with digits
+	stripped := regexp.MustCompile(`[^\d+]`).ReplaceAllString(phone, "")
+	if len(stripped) > 0 && stripped[0] == '+' {
+		return stripped, nil
+	}
+
+	return "", fmt.Errorf("cannot format phone number to E.164: %q (got %d digits)", phone, len(digits))
+}
+
 // renderText renders a text template (for subject, text body, SMS)
 func (r *Renderer) renderText(templateStr string, context map[string]interface{}) (string, error) {
 	tmpl, err := textTemplate.New("text").

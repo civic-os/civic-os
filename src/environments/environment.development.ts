@@ -42,5 +42,8 @@ export const environment: Environment = {
         url: 'https://stats.civic-os.org',
         siteId: '7',
         enabled: true
+    },
+    sms: {
+        configured: true
     }
 };

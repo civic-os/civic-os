@@ -64,6 +64,12 @@ func main() {
 	smtpReplyTo := getEnv("SMTP_REPLY_TO", "") // Optional Reply-To address
 	skipTestEmails := getEnvBool("SKIP_TEST_EMAILS", false)
 
+	// SMS Configuration (Telnyx)
+	smsEnabled := getEnvBool("SMS_ENABLED", false)
+	smsFakeMode := getEnvBool("SMS_FAKE_MODE", false)
+	telnyxAPIKey := getEnv("TELNYX_API_KEY", "")
+	telnyxFromNumber := getEnv("TELNYX_FROM_NUMBER", "")
+
 	// Keycloak Service Account Configuration (optional - backward compatible)
 	keycloakAdminURL := getEnv("KEYCLOAK_ADMIN_URL", "")
 	keycloakRealm := getEnv("KEYCLOAK_REALM", "civic-os-dev")
@@ -99,6 +105,15 @@ func main() {
 	}
 	log.Printf("[Init]   SMTP Auth: %v", smtpUsername != "")
 	log.Printf("[Init]   Skip Test Emails: %v", skipTestEmails)
+	if smsEnabled {
+		if smsFakeMode {
+			log.Printf("[Init]   SMS: enabled (FAKE MODE — logs to stdout)")
+		} else {
+			log.Printf("[Init]   SMS: enabled (Telnyx from=%s)", telnyxFromNumber)
+		}
+	} else {
+		log.Printf("[Init]   SMS: disabled")
+	}
 	if keycloakAdminURL != "" {
 		log.Printf("[Init]   Keycloak Admin URL: %s", keycloakAdminURL)
 		log.Printf("[Init]   Keycloak Realm: %s", keycloakRealm)
@@ -190,6 +205,16 @@ func main() {
 	renderer := NewRenderer(siteURL, timezone)
 	log.Println("[Init] ✓ Template renderer initialized")
 
+	// Telnyx SMS Client (optional)
+	var telnyxClient *TelnyxClient
+	if smsEnabled && !smsFakeMode {
+		if telnyxAPIKey == "" || telnyxFromNumber == "" {
+			log.Fatal("[Init] SMS_ENABLED=true with SMS_FAKE_MODE=false requires TELNYX_API_KEY and TELNYX_FROM_NUMBER")
+		}
+		telnyxClient = NewTelnyxClient(telnyxAPIKey, telnyxFromNumber)
+		log.Printf("[Init] ✓ Telnyx SMS client initialized (from=%s)", telnyxFromNumber)
+	}
+
 	// ===========================================================================
 	// 5b. Initialize Keycloak Client (optional)
 	// ===========================================================================
@@ -224,9 +249,12 @@ func main() {
 
 	// Notification Worker (notifications queue, priority 1)
 	river.AddWorker(workers, &NotificationWorker{
-		dbPool:     dbPool,
-		renderer:   renderer,
-		smtpConfig: smtpConfig,
+		dbPool:        dbPool,
+		renderer:      renderer,
+		smtpConfig:    smtpConfig,
+		telnyxClient:  telnyxClient,
+		smsFakeMode:   smsFakeMode,
+		smsFromNumber: telnyxFromNumber, // populated even in fake mode for log display
 	})
 	log.Println("[Init] ✓ NotificationWorker registered (queue: notifications, priority 1)")
 

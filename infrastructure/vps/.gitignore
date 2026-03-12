@@ -2,3 +2,6 @@
 .env
 .env.*
 !.env.example
+
+# Python virtual environment (for setup-monitors.py)
+.venv/

@@ -40,7 +40,9 @@ describe('UserManagementPage', () => {
       'assignUserRole',
       'revokeUserRole',
       'hasUserManagementAccess',
-      'updateUserInfo'
+      'updateUserInfo',
+      'getNotificationPreferences',
+      'updateNotificationPreference'
     ]);
     mockImportExportService = jasmine.createSpyObj('ImportExportService', [
       'validateFileSize',
@@ -58,6 +60,8 @@ describe('UserManagementPage', () => {
     mockUserService.updateUserInfo.and.returnValue(of({ success: true }));
     mockUserService.assignUserRole.and.returnValue(of({ success: true }));
     mockUserService.revokeUserRole.and.returnValue(of({ success: true }));
+    mockUserService.getNotificationPreferences.and.returnValue(of([]));
+    mockUserService.updateNotificationPreference.and.returnValue(of({ success: true }));
 
     await TestBed.configureTestingModule({
       imports: [UserManagementPage],
@@ -239,7 +243,7 @@ describe('UserManagementPage', () => {
         first_name: 'Failed', last_name: 'User',
         email: 'fail@test.com', phone: null, status: 'failed',
         error_message: 'Keycloak connection refused', roles: null, created_at: '2025-01-01',
-        provision_id: 42
+        provision_id: 42, email_notif_enabled: null, sms_notif_enabled: null, sms_opted_out: null
       };
 
       component.viewError(mockUser);
@@ -262,7 +266,10 @@ describe('UserManagementPage', () => {
       error_message: null,
       roles: ['user', 'editor'],
       created_at: '2025-01-01',
-      provision_id: null
+      provision_id: null,
+      email_notif_enabled: true,
+      sms_notif_enabled: null,
+      sms_opted_out: null
     };
 
     const mockPendingUser: ManagedUser = {
@@ -277,7 +284,10 @@ describe('UserManagementPage', () => {
       error_message: null,
       roles: ['user'],
       created_at: '2025-01-02',
-      provision_id: 99
+      provision_id: 99,
+      email_notif_enabled: null,
+      sms_notif_enabled: null,
+      sms_opted_out: null
     };
 
     it('should populate edit signals from user data', () => {
@@ -397,6 +407,44 @@ describe('UserManagementPage', () => {
 
       expect(component.editLoading()).toBe(false);
     });
+
+    it('should load notification preferences when opening edit modal', () => {
+      mockUserService.getNotificationPreferences.and.returnValue(of([
+        { channel: 'email' as const, enabled: true, email_address: 'john@example.com', phone_number: null, sms_opted_out: false },
+        { channel: 'sms' as const, enabled: false, email_address: null, phone_number: '5551234567', sms_opted_out: false }
+      ]));
+
+      component.openEditModal(mockActiveUser);
+
+      expect(mockUserService.getNotificationPreferences).toHaveBeenCalledWith('uuid-123');
+      expect(component.editEmailNotif()?.enabled).toBe(true);
+      expect(component.editSmsNotif()?.enabled).toBe(false);
+      expect(component.editNotifLoading()).toBe(false);
+    });
+
+    it('should call updateNotificationPreference when toggling email', () => {
+      mockUserService.getNotificationPreferences.and.returnValue(of([
+        { channel: 'email' as const, enabled: true, email_address: 'john@example.com', phone_number: null, sms_opted_out: false }
+      ]));
+
+      component.openEditModal(mockActiveUser);
+      component.toggleEditNotifPref('email', false);
+
+      expect(mockUserService.updateNotificationPreference).toHaveBeenCalledWith('uuid-123', 'email', false);
+    });
+
+    it('should update local signal state on successful toggle', () => {
+      mockUserService.getNotificationPreferences.and.returnValue(of([
+        { channel: 'email' as const, enabled: true, email_address: 'john@example.com', phone_number: null, sms_opted_out: false }
+      ]));
+
+      component.openEditModal(mockActiveUser);
+      expect(component.editEmailNotif()?.enabled).toBe(true);
+
+      component.toggleEditNotifPref('email', false);
+
+      expect(component.editEmailNotif()?.enabled).toBe(false);
+    });
   });
 
   describe('Edit Role Toggle', () => {
@@ -412,7 +460,10 @@ describe('UserManagementPage', () => {
       error_message: null,
       roles: ['user', 'editor'],
       created_at: '2025-01-01',
-      provision_id: null
+      provision_id: null,
+      email_notif_enabled: true,
+      sms_notif_enabled: null,
+      sms_opted_out: null
     };
 
     it('should assign role when toggling unselected role', () => {
@@ -491,7 +542,10 @@ describe('UserManagementPage', () => {
       error_message: null,
       roles: ['user', 'editor'],
       created_at: '2025-01-01',
-      provision_id: null
+      provision_id: null,
+      email_notif_enabled: null,
+      sms_notif_enabled: null,
+      sms_opted_out: null
     };
 
     it('should return roles the current user cannot manage', () => {

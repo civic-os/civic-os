@@ -136,6 +136,12 @@ services:
       - SMTP_REPLY_TO=${SMTP_REPLY_TO:-}   # Optional: where replies should go
       - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}  # Set to true in production
 
+      # SMS Configuration (Telnyx) — disabled by default, set SMS_ENABLED=true to activate
+      - SMS_ENABLED=${SMS_ENABLED:-false}
+      - SMS_FAKE_MODE=${SMS_FAKE_MODE:-true}
+      - TELNYX_API_KEY=${TELNYX_API_KEY:-}
+      - TELNYX_FROM_NUMBER=${TELNYX_FROM_NUMBER:-}
+
       # Keycloak Configuration (for user provisioning and role management)
       - KEYCLOAK_ADMIN_URL=http://keycloak:8080
       - KEYCLOAK_REALM=civic-os-dev

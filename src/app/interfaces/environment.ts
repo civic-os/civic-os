@@ -40,5 +40,8 @@ export interface Environment {
         url: string,
         siteId: string,
         enabled: boolean
+    },
+    sms?: {
+        configured: boolean
     }
 }

@@ -12,7 +12,7 @@ This document describes the architecture and implementation plan for the Civic O
 
 The notification system allows applications to send notifications to users by calling a PostgreSQL function. The system supports:
 
-- **Multi-channel delivery**: Email (Phase 1), SMS (Phase 2)
+- **Multi-channel delivery**: Email (SMTP), SMS (Telnyx, v0.35.0+)
 - **Template system**: Database-managed templates with HTML/Text/SMS variants
 - **User preferences**: Per-user channel preferences
 - **Polymorphic entity references**: Link notifications to any entity type
@@ -52,7 +52,7 @@ Go Notification Worker
 4. **Go Worker** - River-based worker that renders and sends notifications
 5. **Template System** - Go templates with HTML/Text/SMS variants (NO caching for simplicity)
 6. **Template Validation** - Synchronous PostgreSQL RPC with per-part validation
-7. **Channel Adapters** - Email (SMTP), SMS (Twilio/AWS SNS)
+7. **Channel Adapters** - Email (SMTP), SMS (Telnyx)
 
 ## Architecture Decisions
 
@@ -871,7 +871,7 @@ services/notification-worker-go/
 ├── types.go             # Shared types and structs
 ├── channels/
 │   ├── email.go         # SMTP email sender
-│   └── sms.go           # SMS sender (stub for Phase 2)
+│   └── sms.go           # SMS sender (Telnyx, v0.35.0+)
 ├── go.mod
 ├── go.sum
 ├── Dockerfile
@@ -895,7 +895,7 @@ require (
     github.com/riverqueue/river/riverdriver/riverpgxv5 v0.25.0
 )
 // Note: Email uses Go stdlib net/smtp (no external dependencies)
-// Note: SMS support (Phase 2) may add Twilio SDK
+// Note: SMS uses Telnyx REST API via Go stdlib net/http (no SDK needed)
 ```
 
 ### main.go - Service Setup
@@ -1129,9 +1129,8 @@ func (w *NotificationWorker) Work(ctx context.Context, job *river.Job[Notificati
             }
 
         case "sms":
-            // Phase 2: SMS implementation
-            log.Printf("[Job %d] SMS channel not yet implemented", job.ID)
-            channelsFailed = append(channelsFailed, "sms")
+            // SMS delivery via Telnyx (v0.35.0+) — see sendSMS() method
+            w.sendSMS(ctx, job.ID, job.Args.UserID, prefs, rendered)
 
         default:
             log.Printf("[Job %d] Unknown channel: %s", job.ID, channel)
@@ -1430,7 +1429,7 @@ func (r *Renderer) RenderTemplate(tmpl *NotificationTemplate, entityData json.Ra
         return nil, fmt.Errorf("text render error: %w", err)
     }
 
-    // SMS (Phase 2)
+    // SMS
     sms := ""
     if tmpl.SMS != "" {
         sms, err = r.renderText(tmpl.SMS, context)
@@ -2041,15 +2040,7 @@ ORDER BY date DESC, count DESC;
 
 ## Future Phases
 
-### Phase 2: SMS Support
-
-- **Add Twilio/AWS SNS integration** (`channels/sms.go`)
-- **Update templates** to include SMS variant (160 character limit)
-- **Phone number validation** in user preferences
-- **Delivery receipts** and error handling
-- **Cost tracking** (SMS is expensive)
-
-### Phase 2: Automatic Field Extraction
+### Future: Automatic Field Extraction
 
 **Problem**: Currently, trigger functions manually build `entity_data` JSONB by explicitly listing each field:
 
@@ -3516,10 +3507,10 @@ func (w *NotificationWorker) getTemplate(name string) (*ParsedTemplate, error) {
 - Core notification sending capability
 - Real-time template validation as users type
 - Visual HTML preview before saving
-- Multi-channel foundation (email now, SMS Phase 2)
+- Multi-channel delivery (email via SMTP, SMS via Telnyx)
 - Production-ready error handling and retries
 
-**Defer to Phase 2 (~2 weeks):**
+**Future Enhancements:**
 - Bounce handling (track invalid emails)
 - Unsubscribe mechanism (CAN-SPAM compliance)
 - Template versioning (audit history)
@@ -3959,7 +3950,7 @@ ORDER BY scheduled_at ASC LIMIT 1;
 8. ✅ **Documentation**: Complete deployment and troubleshooting guides
 
 **Phase 1 Features:**
-- Multi-channel notifications (email Phase 1, SMS Phase 2)
+- Multi-channel notifications (email via SMTP, SMS via Telnyx v0.35.0+)
 - Go template engine (text/html) with XSS protection
 - Real-time validation with 500ms debouncing
 - HTML preview in sandboxed iframe

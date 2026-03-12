@@ -35,6 +35,10 @@ export interface ManagedUser {
   roles: string[] | null;
   created_at: string;
   provision_id: number | null;
+  // Notification status (from managed_users view, v0.35.0+)
+  email_notif_enabled: boolean | null;
+  sms_notif_enabled: boolean | null;
+  sms_opted_out: boolean | null;
 }
 
 export interface UpdateUserInfoRequest {
@@ -42,6 +46,14 @@ export interface UpdateUserInfoRequest {
   first_name: string;
   last_name: string;
   phone?: string;
+}
+
+export interface AdminNotificationPreference {
+  channel: 'email' | 'sms';
+  enabled: boolean;
+  email_address: string | null;
+  phone_number: string | null;
+  sms_opted_out: boolean;
 }
 
 export interface ManageableRole {
@@ -280,6 +292,42 @@ export class UserManagementService {
       }),
       catchError(error => {
         const message = error.error?.message || error.message || 'Failed to update user';
+        return of(<ApiResponse>{
+          success: false,
+          error: { message, humanMessage: message }
+        });
+      })
+    );
+  }
+
+  getNotificationPreferences(userId: string): Observable<AdminNotificationPreference[]> {
+    return this.http.post<AdminNotificationPreference[]>(
+      getPostgrestUrl() + 'rpc/admin_get_user_notification_preferences',
+      { p_user_id: userId }
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching notification preferences:', error);
+        return of([]);
+      })
+    );
+  }
+
+  updateNotificationPreference(userId: string, channel: string, enabled: boolean, clearOptedOut = false): Observable<ApiResponse> {
+    return this.http.post<any>(
+      getPostgrestUrl() + 'rpc/admin_update_notification_preference',
+      { p_user_id: userId, p_channel: channel, p_enabled: enabled, p_clear_opted_out: clearOptedOut }
+    ).pipe(
+      map(response => {
+        if (response?.success === false) {
+          return <ApiResponse>{
+            success: false,
+            error: { message: response.error, humanMessage: response.error }
+          };
+        }
+        return <ApiResponse>{ success: true };
+      }),
+      catchError(error => {
+        const message = error.error?.message || error.message || 'Failed to update preference';
         return of(<ApiResponse>{
           success: false,
           error: { message, humanMessage: message }

@@ -23,7 +23,7 @@ import { NotificationService, type NotificationPreference } from '../../services
 import { AuthService } from '../../services/auth.service';
 import { ImpersonationService } from '../../services/impersonation.service';
 import { PermissionsService, Role } from '../../services/permissions.service';
-import { getMatomoConfig } from '../../config/runtime';
+import { getMatomoConfig, getSmsConfig } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
@@ -44,6 +44,8 @@ export class SettingsModalComponent {
   private readonly analyticsService = inject(AnalyticsService);
   private readonly notificationService = inject(NotificationService);
   private readonly matomoConfig = getMatomoConfig();
+  private readonly smsConfig = getSmsConfig();
+  smsConfigured = this.smsConfig.configured;
 
   // Public services for template access
   readonly auth = inject(AuthService);

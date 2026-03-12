@@ -1144,22 +1144,24 @@ WHERE table_name = 'issues';
 
 ### Notification System
 
-**Version**: v0.11.0+
+**Version**: v0.11.0+ (email), v0.35.0+ (SMS via Telnyx)
 
 Send multi-channel notifications (email, SMS) to users using database-managed templates and a River-based microservice.
 
 **Features**:
 - Database-managed templates with Go template syntax
-- Multi-channel delivery (email via AWS SES, SMS in Phase 2)
+- Multi-channel delivery: email via SMTP, SMS via Telnyx (v0.35.0+)
 - Template validation and HTML preview UI
-- User notification preferences
+- User notification preferences with per-channel control
+- Passive STOP/opt-out sync for SMS (`sms_opted_out` column)
 - Polymorphic entity references (link notifications to any entity)
 - Automatic retries with exponential backoff
 
 **Requirements**:
 - Civic OS v0.11.0+ (notification worker + schema)
-- AWS SES account with verified sender email
+- SMTP provider (AWS SES or equivalent) with verified sender email
 - PostgreSQL database with River queue (`metadata.river_job`)
+- (SMS) Telnyx account with API key and origination number (toll-free recommended)
 
 #### Email Sender Configuration
 
@@ -1468,6 +1470,8 @@ LIMIT 20;
 
 **Default Preferences**: When users are created, a trigger automatically creates default preferences (email enabled). Custom applications can modify this behavior by updating the `create_default_notification_preferences()` trigger function.
 
+**SMS Opt-Out** (v0.35.0+): The `notification_preferences.sms_opted_out` column tracks carrier-level STOP blocks separately from `enabled`. When a user texts STOP, Telnyx rejects delivery and the worker automatically sets `sms_opted_out = true`. Both `enabled = false` and `sms_opted_out = true` prevent SMS delivery. The user must text START to their carrier to reverse a STOP block.
+
 #### Monitoring & Troubleshooting
 
 **Check notification status**:
@@ -1605,7 +1609,7 @@ SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;
 4. Verify AWS SES sender email and move out of sandbox mode
 5. Configure SPF/DKIM DNS records for deliverability
 
-See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, AWS SES setup, and Phase 2 roadmap (SMS, bounce handling, unsubscribe mechanism).
+See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, SMTP setup, and Telnyx SMS configuration.
 
 ### Status Type System
 

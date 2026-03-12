@@ -20,8 +20,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, switchMap, of, debounceTime, startWith, combineLatest, Observable, map } from 'rxjs';
-import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest } from '../../services/user-management.service';
+import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest, AdminNotificationPreference } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
+import { getSmsConfig } from '../../config/runtime';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../interfaces/import';
 
@@ -94,6 +95,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
+                <th class="w-16">Notif</th>
                 <th>Roles</th>
                 <th>Status</th>
                 <th></th>
@@ -112,6 +114,31 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                     } @else {
                       <span class="text-base-content/40">-</span>
                     }
+                  </td>
+                  <td>
+                    <div class="flex gap-0.5">
+                      @if (user.email_notif_enabled !== null) {
+                        <span class="material-symbols-outlined text-sm"
+                              [class.opacity-30]="!user.email_notif_enabled"
+                              [title]="'Email ' + (user.email_notif_enabled ? 'enabled' : 'disabled')">
+                          mail
+                        </span>
+                      }
+                      @if (smsConfigured && user.sms_notif_enabled !== null) {
+                        @if (user.sms_opted_out) {
+                          <span class="material-symbols-outlined text-sm text-warning"
+                                title="SMS blocked by carrier (user must text START)">
+                            sms_failed
+                          </span>
+                        } @else {
+                          <span class="material-symbols-outlined text-sm"
+                                [class.opacity-30]="!user.sms_notif_enabled"
+                                [title]="'SMS ' + (user.sms_notif_enabled ? 'enabled' : 'disabled')">
+                            sms
+                          </span>
+                        }
+                      }
+                    </div>
                   </td>
                   <td>
                     <div class="flex flex-wrap gap-1">
@@ -325,6 +352,70 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             </div>
           }
 
+          <!-- Divider -->
+          <div class="divider">Notifications</div>
+
+          <!-- Notification Preferences Section -->
+          @if (editNotifLoading()) {
+            <div class="text-sm opacity-70">Loading notification preferences...</div>
+          } @else {
+            <!-- Email Notification Toggle -->
+            @if (editEmailNotif(); as emailNotif) {
+              <label class="flex items-start cursor-pointer gap-3 mb-3">
+                <input
+                  type="checkbox"
+                  class="checkbox flex-shrink-0 mt-0.5"
+                  [checked]="emailNotif.enabled"
+                  (change)="toggleEditNotifPref('email', $any($event.target).checked)"
+                />
+                <div>
+                  <span>Email notifications</span>
+                  @if (emailNotif.email_address) {
+                    <p class="text-xs opacity-70">{{ emailNotif.email_address }}</p>
+                  }
+                </div>
+              </label>
+            }
+
+            <!-- SMS Notification Toggle (only when SMS is configured) -->
+            @if (smsConfigured) {
+              @if (editSmsNotif(); as smsNotif) {
+                <label class="flex items-start cursor-pointer gap-3 mb-3"
+                       [class.opacity-50]="smsNotif.sms_opted_out">
+                  <input
+                    type="checkbox"
+                    class="checkbox flex-shrink-0 mt-0.5"
+                    [checked]="smsNotif.enabled"
+                    [disabled]="smsNotif.sms_opted_out"
+                    (change)="toggleEditNotifPref('sms', $any($event.target).checked)"
+                  />
+                  <div>
+                    <span>SMS notifications</span>
+                    @if (smsNotif.phone_number) {
+                      <p class="text-xs opacity-70">
+                        {{ formatPhone(smsNotif.phone_number) }}
+                      </p>
+                    }
+                  </div>
+                </label>
+                @if (smsNotif.sms_opted_out) {
+                  <div class="alert alert-warning text-xs py-2 mt-1">
+                    <span class="material-symbols-outlined text-sm">sms_failed</span>
+                    <span>Carrier blocked — user must text START to re-enable SMS</span>
+                  </div>
+                  <button class="btn btn-xs btn-warning btn-outline mt-1"
+                          (click)="clearSmsOptedOut()">
+                    Clear opt-out &amp; retry
+                  </button>
+                }
+              }
+            }
+
+            @if (!editEmailNotif() && !editSmsNotif()) {
+              <p class="text-sm opacity-70">No notification preferences found for this user.</p>
+            }
+          }
+
           @if (editError()) {
             <div class="alert alert-error mt-4 text-sm">{{ editError() }}</div>
           }
@@ -394,6 +485,13 @@ export class UserManagementPage {
   editPhone = signal('');
   editRoles = signal<Set<string>>(new Set());
   editRolesLoading = signal<Set<string>>(new Set());
+
+  // Notification preferences for edit modal
+  readonly smsConfigured = getSmsConfig().configured;
+  editNotifPrefs = signal<AdminNotificationPreference[]>([]);
+  editNotifLoading = signal(false);
+  editEmailNotif = signal<AdminNotificationPreference | undefined>(undefined);
+  editSmsNotif = signal<AdminNotificationPreference | undefined>(undefined);
 
   // Error detail modal
   showErrorModal = signal(false);
@@ -525,6 +623,21 @@ export class UserManagementPage {
     this.editError.set(undefined);
     this.editLoading.set(false);
     this.showEditModal.set(true);
+
+    // Load notification preferences
+    this.editNotifLoading.set(true);
+    this.editNotifPrefs.set([]);
+    this.editEmailNotif.set(undefined);
+    this.editSmsNotif.set(undefined);
+    this.userService.getNotificationPreferences(user.id).subscribe({
+      next: (prefs) => {
+        this.editNotifPrefs.set(prefs);
+        this.editEmailNotif.set(prefs.find(p => p.channel === 'email'));
+        this.editSmsNotif.set(prefs.find(p => p.channel === 'sms'));
+        this.editNotifLoading.set(false);
+      },
+      error: () => this.editNotifLoading.set(false)
+    });
   }
 
   closeEditModal(): void {
@@ -570,6 +683,39 @@ export class UserManagementPage {
         this.editError.set(undefined);
       } else {
         this.editError.set(response.error?.humanMessage || 'Failed to update role');
+      }
+    });
+  }
+
+  toggleEditNotifPref(channel: string, enabled: boolean): void {
+    const user = this.editUser();
+    if (!user?.id) return;
+
+    this.userService.updateNotificationPreference(user.id, channel, enabled).subscribe(response => {
+      if (response.success) {
+        if (channel === 'email') {
+          const pref = this.editEmailNotif();
+          if (pref) this.editEmailNotif.set({ ...pref, enabled });
+        } else if (channel === 'sms') {
+          const pref = this.editSmsNotif();
+          if (pref) this.editSmsNotif.set({ ...pref, enabled });
+        }
+      } else {
+        this.editError.set(response.error?.humanMessage || 'Failed to update notification preference');
+      }
+    });
+  }
+
+  clearSmsOptedOut(): void {
+    const user = this.editUser();
+    if (!user?.id) return;
+
+    this.userService.updateNotificationPreference(user.id, 'sms', true, true).subscribe(response => {
+      if (response.success) {
+        const pref = this.editSmsNotif();
+        if (pref) this.editSmsNotif.set({ ...pref, enabled: true, sms_opted_out: false });
+      } else {
+        this.editError.set(response.error?.humanMessage || 'Failed to clear SMS opt-out');
       }
     });
   }
