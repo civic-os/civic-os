@@ -192,6 +192,14 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] **External recipient notifications** - Send email/SMS to non-system users (e.g., partners, vendors, applicants who don't have accounts). Currently notifications can only target `civic_os_users`. Common pattern: property change trigger fires on status change → enqueues email to an external contact's email address from the record. *(Identified via IC pilot)*
   - [ ] **Multi-recipient notifications** - Send a single notification to multiple recipients (system users and/or external contacts) in one call. Currently `send_notification()` accepts one `p_user_id UUID`. Use case: a referral event notifies both the partner ("you have a new referral for Client X") and the client ("you've been referred to Partner Y") from one trigger. Could accept `p_user_ids UUID[]` and/or `p_external_emails TEXT[]`. *(Identified via IC pilot)*
 
+- [ ] **Outbound Webhooks** - HTTP callbacks to external systems on entity events
+  - [ ] `metadata.webhooks` table (URL, entity_type, event_type, secret, active flag)
+  - [ ] Integration with causal bindings (status transitions, property change triggers)
+  - [ ] HMAC signature verification for webhook consumers
+  - [ ] Retry with exponential backoff via consolidated Go worker
+  - [ ] Webhook delivery log with status tracking
+  - [ ] Admin management UI for registering/testing webhook endpoints
+
 - [ ] **Multi-Tenancy** - First-class support for multi-tenant applications
   - [ ] Row-level tenant isolation with `tenant_id` column and automatic RLS
   - [ ] Tenant context detection (subdomain, header, or JWT-based)
