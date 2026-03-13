@@ -4,7 +4,7 @@
 **Application**: Staff Portal
 **Domain**: `ffsc.pilot.civic-os.org` → vanity `staff.freedomschoolscollab.org`
 **Payments**: Not enabled
-**Civic OS Version**: 0.36.0
+**Civic OS Version**: 0.38.0
 
 ## Infrastructure
 
@@ -20,7 +20,7 @@
 ## SQL Scripts Applied
 
 These files are the offline record of what is installed in the production database.
-They originate from `examples/staff-portal/init-scripts/` at v0.34.2, plus instance-specific patches.
+They originate from `examples/staff-portal/init-scripts/` at v0.34.2, plus instance-specific patches through v0.38.0.
 
 | Script | Description |
 |--------|-------------|
@@ -36,8 +36,11 @@ They originate from `examples/staff-portal/init-scripts/` at v0.34.2, plus insta
 | `11_staff_portal_dashboards.sql` | Dashboard widgets (Staff Portal + Admin Overview) |
 | `12_role_key_patch.sql` | Update `get_users_with_role()` to use `role_key` instead of `display_name` (v0.36.0) |
 | `13_role_renames_and_bookkeeper.sql` | Rename editor→"Site Coordinator", user→"Seasonal Staff", create Bookkeeper role (v0.36.0) |
+| `14_ffsc_updates.sql` | Incident reports, bookkeeper perms, staff directory, welcome page, task priorities, role-default dashboards (v0.37.0) |
+| `15_staff_member_user_link.sql` | Staff member user_id required, auto-computed display_name, task mass assignment expansion (v0.37.0) |
+| `16_staff_roles_promotion.sql` | Staff roles promoted to public table with M:M junction for document requirements (v0.38.0) |
 
-Future FFSC-specific customizations go into new numbered scripts (e.g., `14_ffsc_*.sql`).
+Future FFSC-specific customizations go into new numbered scripts (e.g., `17_ffsc_*.sql`).
 
 ## Deployment Steps
 
@@ -250,5 +253,8 @@ instances/ffsc/
 ├── 11_staff_portal_dashboards.sql
 ├── 12_role_key_patch.sql                  # v0.36.0 role_key migration
 ├── 13_role_renames_and_bookkeeper.sql     # v0.36.0 role renames + new role
-└── 14_ffsc_site_customizations.sql        # (future) FFSC-specific changes
+├── 14_ffsc_updates.sql                    # v0.37.0 incident reports, bookkeeper, staff directory, dashboards
+├── 15_staff_member_user_link.sql          # v0.37.0 staff member identity + task mass assignment
+├── 16_staff_roles_promotion.sql           # v0.38.0 staff roles to public table + document requirements
+└── 17_ffsc_*.sql                          # (future) FFSC-specific changes
 ```

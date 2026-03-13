@@ -46,6 +46,9 @@ Thumbs.db
 # Example environment files
 examples/*/.env
 
+# Prod environment files
+instances/**/*.sql
+
 # Accessibility testing artifacts
 backstop_data/
 baseline-lighthouse.html
