@@ -23,7 +23,7 @@ WHERE display_name = 'editor';
 -- Create manager role (if it doesn't already exist)
 INSERT INTO metadata.roles (display_name, description)
 SELECT 'manager', 'Program manager with full staff management capabilities'
-WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE display_name = 'manager');
+WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE role_key = 'manager');
 
 -- =====================================================
 -- CREATE PERMISSIONS
@@ -90,7 +90,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'sites'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create/update for manager, admin
@@ -100,7 +100,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'sites'
   AND p.permission IN ('create', 'update')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Delete for admin only
@@ -110,7 +110,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'sites'
   AND p.permission = 'delete'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -124,7 +124,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_members'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create/update/delete for manager, admin
@@ -134,7 +134,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_members'
   AND p.permission IN ('create', 'update', 'delete')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -148,7 +148,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'document_requirements'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create/update/delete for manager, admin
@@ -158,7 +158,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'document_requirements'
   AND p.permission IN ('create', 'update', 'delete')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -172,7 +172,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_documents'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Update for user, editor, manager, admin
@@ -182,7 +182,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_documents'
   AND p.permission = 'update'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create/delete for manager, admin
@@ -192,7 +192,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_documents'
   AND p.permission IN ('create', 'delete')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -206,7 +206,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_entries'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create for user, editor, manager, admin
@@ -216,7 +216,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_entries'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Update for editor, manager, admin
@@ -226,7 +226,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_entries'
   AND p.permission = 'update'
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Delete for manager, admin
@@ -236,7 +236,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_entries'
   AND p.permission = 'delete'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -250,7 +250,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_off_requests'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create for user, manager, admin
@@ -260,7 +260,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_off_requests'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'manager', 'admin')
+  AND r.role_key IN ('user', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Update for editor, manager, admin
@@ -270,7 +270,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_off_requests'
   AND p.permission = 'update'
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Delete for manager, admin
@@ -280,7 +280,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'time_off_requests'
   AND p.permission = 'delete'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -294,7 +294,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'incident_reports'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create for user, editor, manager, admin
@@ -304,7 +304,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'incident_reports'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Update/delete for manager, admin
@@ -314,7 +314,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'incident_reports'
   AND p.permission IN ('update', 'delete')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -328,7 +328,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reimbursements'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create for user, admin
@@ -338,7 +338,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reimbursements'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'admin')
+  AND r.role_key IN ('user', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Update for editor, manager, admin
@@ -348,7 +348,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reimbursements'
   AND p.permission = 'update'
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Delete for admin only
@@ -358,7 +358,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reimbursements'
   AND p.permission = 'delete'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -373,7 +373,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'offboarding_feedback'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'manager', 'admin')
+  AND r.role_key IN ('user', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Create for user, manager, admin
@@ -383,7 +383,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'offboarding_feedback'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'manager', 'admin')
+  AND r.role_key IN ('user', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Update/delete for manager, admin
@@ -393,7 +393,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'offboarding_feedback'
   AND p.permission IN ('update', 'delete')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
@@ -409,7 +409,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'civic_os_users_private'
   AND p.permission = 'read'
-  AND r.display_name = 'manager'
+  AND r.role_key = 'manager'
 ON CONFLICT DO NOTHING;
 
 -- NOTE: clock_in/clock_out action permissions are configured in

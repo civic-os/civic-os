@@ -368,7 +368,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'reservation_requests'
   AND ea.action_name IN ('approve', 'deny', 'cancel')
-  AND r.display_name IN ('editor', 'admin')
+  AND r.role_key IN ('editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 

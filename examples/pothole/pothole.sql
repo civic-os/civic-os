@@ -714,7 +714,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('Bid', 'Issue', 'IssueStatus', 'WorkDetail', 'WorkPackage', 'WorkPackageStatus', 'Tag', 'issue_tags')
   AND p.permission = 'read'
-  AND r.display_name IN ('anonymous', 'user', 'editor', 'admin')
+  AND r.role_key IN ('anonymous', 'user', 'editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant create/update to authenticated users (user, editor, admin)
@@ -724,7 +724,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('Bid', 'Issue', 'IssueStatus', 'WorkDetail', 'WorkPackage', 'WorkPackageStatus', 'Tag', 'issue_tags')
   AND p.permission IN ('create', 'update')
-  AND r.display_name IN ('user', 'editor', 'admin')
+  AND r.role_key IN ('user', 'editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant delete to editors and admins only
@@ -734,7 +734,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('Bid', 'Issue', 'IssueStatus', 'WorkDetail', 'WorkPackage', 'WorkPackageStatus', 'Tag', 'issue_tags')
   AND p.permission = 'delete'
-  AND r.display_name IN ('editor', 'admin')
+  AND r.role_key IN ('editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Notify PostgREST to reload schema cache

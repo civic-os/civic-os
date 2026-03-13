@@ -38,7 +38,7 @@ BEGIN
   INNER JOIN metadata.civic_os_users_private up ON up.id = u.id
   INNER JOIN metadata.user_roles ur ON ur.user_id = u.id
   INNER JOIN metadata.roles r ON r.id = ur.role_id
-  WHERE r.display_name = p_role_name
+  WHERE r.role_key = p_role_name
     AND up.email IS NOT NULL;
 END;
 $$;
@@ -942,7 +942,7 @@ BEGIN
     WHERE sm.id = NEW.staff_member_id;
 
   -- Look up requirement name
-  SELECT dr.display_name INTO v_requirement_name
+  SELECT dr.role_key INTO v_requirement_name
     FROM document_requirements dr
     WHERE dr.id = NEW.requirement_id;
 

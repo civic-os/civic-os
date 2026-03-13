@@ -181,7 +181,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_tasks'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- editor: create, update
@@ -191,7 +191,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_tasks'
   AND p.permission IN ('create', 'update')
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- manager/admin: delete
@@ -201,7 +201,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_tasks'
   AND p.permission = 'delete'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -437,7 +437,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'staff_tasks'
   AND ea.action_name = 'start'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Complete: user, editor, manager, admin
@@ -447,7 +447,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'staff_tasks'
   AND ea.action_name = 'complete'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Cancel: editor, manager, admin
@@ -457,7 +457,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'staff_tasks'
   AND ea.action_name = 'cancel'
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================

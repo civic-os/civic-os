@@ -48,8 +48,8 @@ describe('PermissionsPage', () => {
     // Default: user is admin
     mockPermissionsService.isAdmin.and.returnValue(of(true));
     mockPermissionsService.getRoles.and.returnValue(of([
-      { id: 1, name: 'admin', display_name: 'Admin' },
-      { id: 2, name: 'editor', display_name: 'Editor' }
+      { id: 1, display_name: 'Admin', role_key: 'admin' },
+      { id: 2, display_name: 'Editor', role_key: 'editor' }
     ]));
     mockPermissionsService.getTables.and.returnValue(of(['issues', 'users', 'reservations:notes']));
     mockPermissionsService.getRolePermissions.and.returnValue(of([]));
@@ -155,7 +155,7 @@ describe('PermissionsPage', () => {
     beforeEach(() => {
       // Setup mock for delegation tests
       mockPermissionsService.getRoleCanManage.and.returnValue(of([
-        { managed_role_id: 2, managed_role_name: 'Editor' }
+        { managed_role_id: 2, managed_role_name: 'Editor', managed_role_key: 'editor' }
       ]));
       mockPermissionsService.setRoleCanManage.and.returnValue(of({ success: true }));
       mockPermissionsService.deleteRole.and.returnValue(of({ success: true, message: 'Role deleted' }));
@@ -228,7 +228,7 @@ describe('PermissionsPage', () => {
       // Since roles() comes from computed data signal, we test the service call directly
       mockPermissionsService.deleteRole.and.returnValue(of({ success: true }));
       mockPermissionsService.getRoles.and.returnValue(of([
-        { id: 1, display_name: 'admin' }
+        { id: 1, display_name: 'admin', role_key: 'admin' }
       ]));
 
       component.submitDeleteRole();

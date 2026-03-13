@@ -259,7 +259,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'public_calendar_events'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================

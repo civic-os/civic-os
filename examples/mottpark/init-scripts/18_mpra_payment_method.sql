@@ -396,7 +396,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'reservation_payments'
   AND ea.action_name LIKE 'record_%'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- =============================================================================

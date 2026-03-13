@@ -267,7 +267,8 @@ WHERE conrelid::regclass::text = 'your_table_name';
 
 Fields:
 - `id` (SERIAL PK) - Unique role identifier
-- `display_name` - Role name (should match Keycloak role name)
+- `role_key` (VARCHAR, UNIQUE, immutable) - Programmatic identifier used in JWT matching, SQL lookups, and permission checks. Auto-generated from `display_name` on INSERT (snake_case). Cannot be changed after creation.
+- `display_name` - Human-readable label shown in UI. Can be freely renamed without breaking RBAC.
 - `description` - Optional description of role's purpose
 
 **Default Roles** (created in baseline migration):
@@ -311,12 +312,18 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.payments TO authenticated;
 
 **Creating Custom Roles**:
 ```sql
--- Via SQL
+-- Via SQL (role_key auto-generated as 'moderator' from display_name)
 INSERT INTO metadata.roles (display_name, description)
-VALUES ('moderator', 'Can review and approve submissions');
+VALUES ('Moderator', 'Can review and approve submissions');
 
--- Via RPC
-SELECT create_role('moderator', 'Can review and approve submissions');
+-- Via RPC (returns role_key for programmatic use)
+SELECT create_role('Content Moderator', 'Can review and approve submissions');
+-- Returns: { success: true, role_id: 5, role_key: 'content_moderator' }
+```
+
+**Helper function**: Look up a role ID by its stable key:
+```sql
+SELECT get_role_id('moderator');  -- Returns the role's SMALLINT id
 ```
 
 ---
@@ -346,15 +353,16 @@ Fields:
 **Example**: Grant permissions to custom role
 ```sql
 -- Grant moderator role READ and UPDATE on issues table
+-- Use get_role_id() helper or role_key for stable lookups
 SELECT set_role_permission(
-  (SELECT id FROM metadata.roles WHERE display_name = 'moderator'),
+  get_role_id('moderator'),
   'issues',
   'READ',
   TRUE
 );
 
 SELECT set_role_permission(
-  (SELECT id FROM metadata.roles WHERE display_name = 'moderator'),
+  get_role_id('moderator'),
   'issues',
   'UPDATE',
   TRUE
@@ -514,8 +522,11 @@ Fields:
 - `get_role_can_manage(p_manager_role_id)` - Returns which roles a given role can manage
 
 **Role Lifecycle**:
-- `create_role()` - Creates a role in Civic OS and enqueues a `sync_keycloak_role` job to create it in Keycloak
-- `delete_role()` - Deletes a custom role (built-in roles `admin`, `user`, `editor`, `anonymous` are protected) and enqueues a Keycloak sync job to remove it
+- `create_role(display_name, description)` - Creates a role, auto-generates `role_key` (snake_case from display_name), and enqueues a `sync_keycloak_role` job to create it in Keycloak. Returns `{ success, role_id, role_key }`.
+- `delete_role(role_id)` - Deletes a custom role (built-in roles with `role_key` in `admin`, `user`, `editor`, `anonymous` are protected) and enqueues a Keycloak sync job to remove it
+- `get_role_id(role_key)` - Returns role's SMALLINT id by its stable key
+- `metadata.get_users_by_role(role_keys[])` - Returns user IDs for all users holding any of the given roles. Internal helper (not exposed via PostgREST API) — call from SECURITY DEFINER functions.
+- `metadata.send_notification_to_role(role_keys[], template, entity_type, entity_id, entity_data, channels)` - Sends a notification to every user holding any of the given roles. Returns count. Internal helper — call from SECURITY DEFINER functions.
 
 **UI**: "Role Delegation" tab on the Permissions page (`/permissions`). Shows a checkbox matrix where admins configure which roles can manage which. The "Delete Selected Role" button allows removing custom roles.
 
@@ -861,35 +872,35 @@ Check permissions and roles from application code (via PostgREST) or RLS policie
 - Checks if current user has specified permission on table
 - Permission values: 'CREATE', 'READ', 'UPDATE', 'DELETE'
 - Returns FALSE for anonymous requests
-- **Use case**: Dynamic permission checks in RLS policies or application logic
+- **Use case**: RLS policies, RPC authorization checks, any access control logic
+- **Preferred over `is_admin()`** because it integrates with the Permissions UI (`/permissions`), allowing admins to reconfigure access at runtime without SQL changes
 
 **`is_admin()`** → BOOLEAN
 - Checks if current user has 'admin' role
 - Returns FALSE for anonymous requests
-- **Use case**: Admin-only features and RLS policies
+- **Use case**: Framework-level guards only (e.g., protecting `metadata.*` management RPCs)
+- **WARNING**: `is_admin()` creates a hardcoded authorization check that bypasses the Permissions UI. Use `has_permission()` instead for application tables — this allows admins to delegate access to non-admin roles without modifying SQL.
 
 **Examples**:
 
-RLS policy using permission check:
+RLS policies (prefer `has_permission()` for all application tables):
 ```sql
 CREATE POLICY "Users with read permission can view"
   ON sensitive_table FOR SELECT
-  USING (has_permission('sensitive_table', 'READ'));
+  USING (has_permission('sensitive_table', 'read'));
 
-CREATE POLICY "Admins bypass all restrictions"
-  ON sensitive_table FOR ALL
-  USING (is_admin());
+CREATE POLICY "Users with update permission can modify"
+  ON sensitive_table FOR UPDATE
+  USING (has_permission('sensitive_table', 'update'))
+  WITH CHECK (has_permission('sensitive_table', 'update'));
 ```
 
-Complex role-based logic:
+Combining permission check with row-level conditions:
 ```sql
-CREATE POLICY "Moderators and admins can approve"
+CREATE POLICY "Authorized users can approve pending submissions"
   ON submissions FOR UPDATE
   USING (
-    status = 'pending' AND (
-      'moderator' = ANY(get_user_roles()) OR
-      is_admin()
-    )
+    status = 'pending' AND has_permission('submissions', 'update')
   );
 ```
 
@@ -979,23 +990,12 @@ SELECT upsert_property_metadata('issues', 'status_id', 'Status', NULL, 1, 2, TRU
 
 Seed script configuring RBAC:
 ```sql
--- Create custom role
-SELECT create_role('moderator', 'Can review and approve content');
+-- Create custom role (auto-generates role_key 'moderator')
+SELECT create_role('Moderator', 'Can review and approve content');
 
--- Grant permissions
-SELECT set_role_permission(
-  (SELECT id FROM metadata.roles WHERE display_name = 'moderator'),
-  'submissions',
-  'READ',
-  TRUE
-);
-
-SELECT set_role_permission(
-  (SELECT id FROM metadata.roles WHERE display_name = 'moderator'),
-  'submissions',
-  'UPDATE',
-  TRUE
-);
+-- Grant permissions using get_role_id() helper
+SELECT set_role_permission(get_role_id('moderator'), 'submissions', 'READ', TRUE);
+SELECT set_role_permission(get_role_id('moderator'), 'submissions', 'UPDATE', TRUE);
 ```
 
 ---
@@ -2158,7 +2158,7 @@ DO $$
 DECLARE
   v_editor_id SMALLINT;
 BEGIN
-  SELECT id INTO v_editor_id FROM metadata.roles WHERE display_name = 'editor';
+  SELECT id INTO v_editor_id FROM metadata.roles WHERE role_key = 'editor';
 
   -- Series groups (containers)
   PERFORM set_role_permission(v_editor_id, 'time_slot_series_groups', 'read', TRUE);
@@ -4482,16 +4482,17 @@ CREATE POLICY "my_table: authorized delete" ON my_table
      );
    ```
 
-2. **Public read, authenticated write** (lookup tables):
+2. **Public read, restricted write** (lookup tables):
    ```sql
    CREATE POLICY "my_table: public read" ON my_table
      FOR SELECT TO web_anon, authenticated
      USING (true);
 
-   CREATE POLICY "my_table: admin insert" ON my_table
+   CREATE POLICY "my_table: authorized insert" ON my_table
      FOR INSERT TO authenticated
-     WITH CHECK (is_admin());
+     WITH CHECK (has_permission('my_table', 'create'));
    ```
+   Then grant CREATE on `my_table` to admin (and optionally manager) via the Permissions UI or `set_role_permission()`.
 
 3. **Conditional access** (published vs draft):
    ```sql

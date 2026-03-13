@@ -160,7 +160,7 @@ SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.permission = 'read'
-  AND r.display_name IN ('user', 'collaborator')
+  AND r.role_key IN ('user', 'collaborator')
 ON CONFLICT (permission_id, role_id) DO NOTHING;
 
 -- Assign FULL permissions to admin role
@@ -168,7 +168,7 @@ INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
-WHERE r.display_name = 'admin'
+WHERE r.role_key = 'admin'
 ON CONFLICT (permission_id, role_id) DO NOTHING;
 
 -- =====================================================

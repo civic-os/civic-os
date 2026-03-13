@@ -790,7 +790,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'staff_members'
   AND ea.action_name IN ('clock_in', 'clock_out')
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Time off approve/deny: site_lead, manager, admin
@@ -800,7 +800,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'time_off_requests'
   AND ea.action_name IN ('approve', 'deny')
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Document submit: user, editor, manager, admin (all roles with staff_documents:update)
@@ -810,7 +810,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'staff_documents'
   AND ea.action_name = 'submit'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Document approve/request_revision: manager, admin
@@ -820,7 +820,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'staff_documents'
   AND ea.action_name IN ('approve', 'request_revision')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Reimbursement approve/deny: manager, admin
@@ -830,7 +830,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'reimbursements'
   AND ea.action_name IN ('approve', 'deny')
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 

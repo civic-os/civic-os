@@ -422,7 +422,7 @@ SELECT ea.id, r.id
 FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'reservation_requests'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -569,9 +569,9 @@ DECLARE
   v_admin_id SMALLINT;
   v_user_id SMALLINT;
 BEGIN
-  SELECT id INTO v_manager_id FROM metadata.roles WHERE display_name = 'manager';
-  SELECT id INTO v_admin_id FROM metadata.roles WHERE display_name = 'admin';
-  SELECT id INTO v_user_id FROM metadata.roles WHERE display_name = 'user';
+  SELECT id INTO v_manager_id FROM metadata.roles WHERE role_key = 'manager';
+  SELECT id INTO v_admin_id FROM metadata.roles WHERE role_key = 'admin';
+  SELECT id INTO v_user_id FROM metadata.roles WHERE role_key = 'user';
 
   -- Manager: read and create notes
   PERFORM set_role_permission(v_manager_id, 'reservation_requests:notes', 'read', TRUE);
@@ -744,7 +744,7 @@ DECLARE
   v_role_id SMALLINT;
 BEGIN
   FOR v_role_id IN
-    SELECT id FROM metadata.roles WHERE display_name IN ('editor', 'manager', 'admin')
+    SELECT id FROM metadata.roles WHERE role_key IN ('editor', 'manager', 'admin')
   LOOP
     -- Series groups (containers)
     PERFORM set_role_permission(v_role_id, 'time_slot_series_groups', 'read', TRUE);
@@ -923,12 +923,12 @@ WHERE table_name = 'reservation_requests'
 ORDER BY sort_order;
 
 -- Verify action permissions
-SELECT ea.action_name, r.display_name as role
+SELECT ea.action_name, r.role_key as role
 FROM metadata.entity_action_roles ear
 JOIN metadata.entity_actions ea ON ear.entity_action_id = ea.id
 JOIN metadata.roles r ON ear.role_id = r.id
 WHERE ea.table_name = 'reservation_requests'
-ORDER BY ea.sort_order, r.display_name;
+ORDER BY ea.sort_order, r.role_key;
 
 -- Verify static text blocks
 SELECT id, LEFT(content, 50) || '...' as content_preview, sort_order, 

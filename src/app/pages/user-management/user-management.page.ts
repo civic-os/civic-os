@@ -63,7 +63,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                 (ngModelChange)="onRoleFilterChange($event)">
           <option value="all">All roles</option>
           @for (role of manageableRoles(); track role.role_id) {
-            <option [value]="role.display_name">{{ role.display_name }}</option>
+            <option [value]="role.role_key">{{ role.display_name }}</option>
           }
         </select>
         <select class="select select-bordered"
@@ -239,8 +239,8 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
               @for (role of manageableRoles(); track role.role_id) {
                 <label class="cursor-pointer flex items-center gap-1">
                   <input type="checkbox" class="checkbox checkbox-sm"
-                         [checked]="isRoleSelected(role.display_name)"
-                         (change)="toggleRole(role.display_name)" />
+                         [checked]="isRoleSelected(role.role_key)"
+                         (change)="toggleRole(role.role_key)" />
                   <span class="text-sm">{{ role.display_name }}</span>
                 </label>
               }
@@ -334,11 +334,11 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             @for (role of manageableRoles(); track role.role_id) {
               <label class="cursor-pointer flex items-center gap-1.5">
                 <input type="checkbox" class="checkbox checkbox-sm"
-                       [checked]="editRoles().has(role.display_name)"
-                       [disabled]="editRolesLoading().has(role.display_name)"
-                       (change)="toggleEditRole(role.display_name)" />
+                       [checked]="editRoles().has(role.role_key)"
+                       [disabled]="editRolesLoading().has(role.role_key)"
+                       (change)="toggleEditRole(role.role_key)" />
                 <span class="text-sm">{{ role.display_name }}</span>
-                @if (editRolesLoading().has(role.display_name)) {
+                @if (editRolesLoading().has(role.role_key)) {
                   <span class="loading loading-spinner loading-xs"></span>
                 }
               </label>
@@ -646,7 +646,7 @@ export class UserManagementPage {
   }
 
   getNonManageableRoles(): string[] {
-    const manageable = new Set(this.manageableRoles().map(r => r.display_name));
+    const manageable = new Set(this.manageableRoles().map(r => r.role_key));
     return Array.from(this.editRoles()).filter(r => !manageable.has(r));
   }
 

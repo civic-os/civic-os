@@ -126,7 +126,7 @@ BEGIN
     -- overlapping time slots. This prevents Stripe payments from being initiated
     -- on requests that can no longer win the slot.
     FOR v_competing IN
-      SELECT rr.id, rr.display_name, rp.id AS deposit_payment_id
+      SELECT rr.id, rr.role_key, rp.id AS deposit_payment_id
       FROM reservation_requests rr
       JOIN reservation_payments rp ON rp.reservation_request_id = rr.id
       JOIN reservation_payment_types rpt ON rp.payment_type_id = rpt.id
@@ -772,7 +772,7 @@ BEGIN
       FROM metadata.civic_os_users u
       JOIN metadata.user_roles ur ON u.id = ur.user_id
       JOIN metadata.roles r ON ur.role_id = r.id
-      WHERE r.display_name IN ('manager', 'admin')
+      WHERE r.role_key IN ('manager', 'admin')
     LOOP
       PERFORM create_notification(
         p_user_id := v_manager_id,
@@ -842,7 +842,7 @@ BEGIN
       FROM metadata.civic_os_users u
       JOIN metadata.user_roles ur ON u.id = ur.user_id
       JOIN metadata.roles r ON ur.role_id = r.id
-      WHERE r.display_name IN ('manager', 'admin')
+      WHERE r.role_key IN ('manager', 'admin')
     LOOP
       PERFORM create_notification(
         p_user_id := v_manager_id,

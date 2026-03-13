@@ -70,8 +70,8 @@ describe('PermissionsService', () => {
   describe('getRoles()', () => {
     it('should call get_roles RPC function', (done) => {
       const mockRoles = [
-        { id: 1, display_name: 'admin', description: 'Administrator' },
-        { id: 2, display_name: 'user', description: 'Regular user' }
+        { id: 1, display_name: 'admin', description: 'Administrator', role_key: 'admin' },
+        { id: 2, display_name: 'user', description: 'Regular user', role_key: 'user' }
       ];
 
       service.getRoles().subscribe(roles => {
@@ -319,8 +319,8 @@ describe('PermissionsService', () => {
   describe('getRoleCanManage()', () => {
     it('should POST to get_role_can_manage RPC with role ID', (done) => {
       const mockDelegations = [
-        { managed_role_id: 2, managed_role_name: 'editor' },
-        { managed_role_id: 3, managed_role_name: 'user' }
+        { managed_role_id: 2, managed_role_name: 'editor', managed_role_key: 'editor' },
+        { managed_role_id: 3, managed_role_name: 'user', managed_role_key: 'user' }
       ];
 
       service.getRoleCanManage(1).subscribe(delegations => {

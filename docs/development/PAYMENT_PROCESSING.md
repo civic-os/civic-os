@@ -2289,7 +2289,7 @@ CALL set_role_permission('billing_staff', 'payment_transactions', 'read', true);
 
 -- Assign to user
 INSERT INTO metadata.user_roles (user_id, role_id)
-SELECT 'user-uuid-here', id FROM metadata.roles WHERE name = 'billing_staff';
+SELECT 'user-uuid-here', id FROM metadata.roles WHERE role_key = 'billing_staff';
 ```
 
 **Grant refund permission to admins only:**

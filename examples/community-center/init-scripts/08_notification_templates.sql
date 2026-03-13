@@ -31,7 +31,7 @@ BEGIN
   INNER JOIN metadata.civic_os_users_private up ON up.id = u.id
   INNER JOIN metadata.user_roles ur ON ur.user_id = u.id
   INNER JOIN metadata.roles r ON r.id = ur.role_id
-  WHERE r.display_name = p_role_name
+  WHERE r.role_key = p_role_name
     AND up.email IS NOT NULL;
 END;
 $$;
@@ -608,7 +608,7 @@ BEGIN
     ),
     'resource', jsonb_build_object(
       'id', r.id,
-      'display_name', r.display_name,
+      'display_name', r.role_key,
       'description', r.description,
       'hourly_rate', r.hourly_rate,
       'capacity', r.capacity
@@ -666,7 +666,7 @@ BEGIN
     ),
     'resource', jsonb_build_object(
       'id', r.id,
-      'display_name', r.display_name,
+      'display_name', r.role_key,
       'description', r.description,
       'hourly_rate', r.hourly_rate,
       'capacity', r.capacity
@@ -738,13 +738,13 @@ BEGIN
       ),
       'resource', jsonb_build_object(
         'id', r.id,
-        'display_name', r.display_name,
+        'display_name', r.role_key,
         'hourly_rate', r.hourly_rate
       ),
       'reviewed_by', CASE WHEN NEW.reviewed_by IS NOT NULL THEN
         jsonb_build_object(
           'id', reviewer.id,
-          'display_name', reviewer.display_name
+          'display_name', reviewer.role_key
         )
       ELSE NULL END
     )
@@ -807,12 +807,12 @@ BEGIN
       ),
       'resource', jsonb_build_object(
         'id', r.id,
-        'display_name', r.display_name
+        'display_name', r.role_key
       ),
       'reviewed_by', CASE WHEN NEW.reviewed_by IS NOT NULL THEN
         jsonb_build_object(
           'id', reviewer.id,
-          'display_name', reviewer.display_name
+          'display_name', reviewer.role_key
         )
       ELSE NULL END
     )
@@ -875,7 +875,7 @@ BEGIN
       ),
       'resource', jsonb_build_object(
         'id', r.id,
-        'display_name', r.display_name
+        'display_name', r.role_key
       )
     )
     INTO v_request_data

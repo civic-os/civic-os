@@ -27,6 +27,7 @@ export interface Role {
   id: number;
   display_name: string;
   description?: string;
+  role_key: string;
 }
 
 export interface RolePermission {
@@ -52,6 +53,7 @@ export interface EntityActionPermission {
 export interface RoleDelegation {
   managed_role_id: number;
   managed_role_name: string;
+  managed_role_key: string;
 }
 
 @Injectable({

@@ -292,19 +292,22 @@
     <!-- Form -->
     <div class="mb-4">
       <label class="label" for="role-name">
-        <span class="font-semibold">Role Name *</span>
+        <span class="font-semibold">Display Name *</span>
       </label>
       <input
         id="role-name"
         type="text"
         class="input input-bordered w-full"
-        placeholder="e.g., editor, moderator, viewer"
-        [ngModel]="newRoleName()"
-        (ngModelChange)="newRoleName.set($event)"
+        placeholder="e.g., Content Editor, Site Manager"
+        [ngModel]="newRoleDisplayName()"
+        (ngModelChange)="newRoleDisplayName.set($event)"
         [disabled]="createLoading()" />
-      <div class="text-warning text-sm mt-1">
-        Must match exactly with your Keycloak role configuration
-      </div>
+      @if (newRoleKeyPreview()) {
+        <div class="text-sm mt-1 text-base-content/60">
+          Key: <code class="bg-base-200 px-1 rounded">{{ newRoleKeyPreview() }}</code>
+          <span class="text-xs">(used for JWT matching &amp; Keycloak sync)</span>
+        </div>
+      }
     </div>
 
     <div class="mb-6">

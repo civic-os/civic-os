@@ -37,7 +37,7 @@ DO $$
 DECLARE
   v_editor_id SMALLINT;
 BEGIN
-  SELECT id INTO v_editor_id FROM metadata.roles WHERE display_name = 'editor';
+  SELECT id INTO v_editor_id FROM metadata.roles WHERE role_key = 'editor';
 
   IF v_editor_id IS NOT NULL THEN
     -- Series groups

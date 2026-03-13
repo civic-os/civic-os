@@ -167,7 +167,7 @@ RETURNS TABLE(holiday_name TEXT, holiday_date DATE) AS $$
 BEGIN
   RETURN QUERY
   SELECT 
-    r.display_name::TEXT,
+    r.role_key::TEXT,
     calculate_holiday_date(r.*, p_year)
   FROM holiday_rules r
   WHERE r.is_active = TRUE
@@ -294,7 +294,7 @@ BEGIN
   FROM metadata.civic_os_users u
   JOIN metadata.user_roles ur ON u.id = ur.user_id
   JOIN metadata.roles r ON ur.role_id = r.id
-  WHERE r.display_name = 'admin'
+  WHERE r.role_key = 'admin'
   LIMIT 1;
   
   -- Fallback to any user if no admin exists yet
@@ -520,7 +520,7 @@ BEGIN
   FROM metadata.civic_os_users u
   JOIN metadata.user_roles ur ON u.id = ur.user_id
   JOIN metadata.roles r ON ur.role_id = r.id
-  WHERE r.display_name = 'admin'
+  WHERE r.role_key = 'admin'
   LIMIT 1;
   
   IF v_admin_user_id IS NULL THEN

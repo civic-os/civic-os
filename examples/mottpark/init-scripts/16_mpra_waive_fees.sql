@@ -289,7 +289,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'reservation_requests'
   AND ea.action_name = 'waive_all_fees'
-  AND r.display_name = 'manager'
+  AND r.role_key = 'manager'
 ON CONFLICT DO NOTHING;
 
 -- Also grant to admin for consistency
@@ -299,7 +299,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'reservation_requests'
   AND ea.action_name = 'waive_all_fees'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------

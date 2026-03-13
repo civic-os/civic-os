@@ -951,7 +951,7 @@ BEGIN
     FROM metadata.civic_os_users u
     JOIN metadata.user_roles ur ON u.id = ur.user_id
     JOIN metadata.roles r ON ur.role_id = r.id
-    WHERE r.display_name IN ('manager', 'admin')
+    WHERE r.role_key IN ('manager', 'admin')
   LOOP
     PERFORM create_notification(
       p_user_id := v_manager_id,
@@ -1058,11 +1058,11 @@ CREATE TRIGGER reservation_status_change_notification
 -- Ensure roles exist (using conditional INSERT since there's no unique constraint on display_name)
 INSERT INTO metadata.roles (display_name, description)
 SELECT 'manager', 'Can approve/deny/cancel reservation requests and view all details'
-WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE display_name = 'manager');
+WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE role_key = 'manager');
 
 INSERT INTO metadata.roles (display_name, description)
 SELECT 'admin', 'Full system access including fee adjustments and holiday management'
-WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE display_name = 'admin');
+WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE role_key = 'admin');
 
 -- =====================================================
 -- CREATE PERMISSIONS
@@ -1093,7 +1093,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_payment_types'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant read permission on reservation_requests to staff roles only
@@ -1104,7 +1104,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'read'
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant create permission for reservation_requests to authenticated users
@@ -1114,7 +1114,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'editor', 'manager', 'admin')
+  AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant update permission on reservation_requests to managers and admins (approve/deny/cancel)
@@ -1124,7 +1124,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'update'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant delete permission on reservation_requests to admins only
@@ -1134,7 +1134,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'delete'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Grant read permission on reservation_payments to staff roles only
@@ -1145,7 +1145,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_payments'
   AND p.permission = 'read'
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant create/update on reservation_payments to editors and managers (mark as paid/waived)
@@ -1155,7 +1155,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_payments'
   AND p.permission IN ('create', 'update')
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant delete on reservation_payments to admins only
@@ -1165,7 +1165,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_payments'
   AND p.permission = 'delete'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Grant recurring schedule permissions to editor/manager/admin
@@ -1174,7 +1174,7 @@ SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('time_slot_series_groups', 'time_slot_series', 'time_slot_instances')
-  AND r.display_name IN ('editor', 'manager', 'admin')
+  AND r.role_key IN ('editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant core payment permissions to manager/admin
@@ -1185,7 +1185,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'payment_transactions'
   AND p.permission = 'read'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- payment_refunds:read - View refund status and history
@@ -1195,7 +1195,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'payment_refunds'
   AND p.permission = 'read'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- payment_refunds:create - Initiate refunds (manager can process refunds)
@@ -1205,7 +1205,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'payment_refunds'
   AND p.permission = 'create'
-  AND r.display_name IN ('manager', 'admin')
+  AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================

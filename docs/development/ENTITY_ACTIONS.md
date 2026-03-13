@@ -652,7 +652,7 @@ RETURNS BOOLEAN AS $$
     FROM metadata.protected_rpc_roles prr
     JOIN metadata.roles r ON r.id = prr.role_id
     WHERE prr.rpc_function = p_rpc_function
-    AND r.display_name = ANY(public.get_user_roles())
+    AND r.role_key = ANY(public.get_user_roles())
   );
 $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 
@@ -951,7 +951,7 @@ INSERT INTO metadata.protected_rpcs (rpc_function, description)
 VALUES ('reject_pothole_fix', 'Reject a pothole repair request');
 
 INSERT INTO metadata.protected_rpc_roles (rpc_function, role_id)
-SELECT 'reject_pothole_fix', id FROM metadata.roles WHERE display_name IN ('editor', 'admin');
+SELECT 'reject_pothole_fix', id FROM metadata.roles WHERE role_key IN ('editor', 'admin');
 
 INSERT INTO metadata.entity_actions (
   table_name, action_name, display_name, rpc_function,

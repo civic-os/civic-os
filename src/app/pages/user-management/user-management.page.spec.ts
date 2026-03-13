@@ -53,8 +53,8 @@ describe('UserManagementPage', () => {
     // Default mocks
     mockUserService.getManagedUsers.and.returnValue(of([]));
     mockUserService.getManageableRoles.and.returnValue(of([
-      { role_id: 1, display_name: 'user', description: 'Basic user' },
-      { role_id: 2, display_name: 'editor', description: 'Can edit' }
+      { role_id: 1, display_name: 'user', description: 'Basic user', role_key: 'user' },
+      { role_id: 2, display_name: 'editor', description: 'Can edit', role_key: 'editor' }
     ]));
     mockUserService.createUser.and.returnValue(of({ success: true }));
     mockUserService.updateUserInfo.and.returnValue(of({ success: true }));

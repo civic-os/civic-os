@@ -279,9 +279,9 @@ Civic OS provides helper functions for JWT data extraction (`current_user_id()`,
 
 All example docker-compose files include a pre-configured Keycloak service. The shared instance at `auth.civic-os.org` is available as an alternative (see `docs/AUTHENTICATION.md`).
 
-**RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
+**RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). Each role has an immutable `role_key` (programmatic identifier for JWT matching and SQL lookups) and a freely-editable `display_name` (human label). Use `get_role_id(role_key)` helper for lookups. PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
 
-**Default Roles**: `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)
+**Default Roles** (by `role_key`): `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)
 
 **Admin Features** (require `admin` role):
 - **Permissions Page** (`/permissions`) - Manage role-based table permissions, entity action permissions, and role delegation (v0.31.0+)

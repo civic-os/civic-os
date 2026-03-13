@@ -132,9 +132,9 @@ The PostgreSQL `get_user_roles()` function cannot extract roles from the JWT cla
 
 ### Problem: User provisioning fails with "role not found" error
 
-**Cause:** The `initial_roles` array contains a role name that doesn't exist in `metadata.roles`.
+**Cause:** The `initial_roles` array contains a `role_key` that doesn't exist in `metadata.roles`.
 
-**Fix:** Verify role names match exactly: `SELECT display_name FROM metadata.roles ORDER BY 1;`
+**Fix:** Verify role keys match exactly: `SELECT role_key, display_name FROM metadata.roles ORDER BY 1;`
 
 ### Problem: Role changes not syncing to Keycloak
 

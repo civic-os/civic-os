@@ -431,7 +431,7 @@ BEGIN
       FROM metadata.civic_os_users u
       JOIN metadata.user_roles ur ON u.id = ur.user_id
       JOIN metadata.roles r ON ur.role_id = r.id
-      WHERE r.display_name IN ('manager', 'admin')
+      WHERE r.role_key IN ('manager', 'admin')
     LOOP
       PERFORM create_notification(
         p_user_id := v_manager_id,
@@ -499,7 +499,7 @@ BEGIN
       FROM metadata.civic_os_users u
       JOIN metadata.user_roles ur ON u.id = ur.user_id
       JOIN metadata.roles r ON ur.role_id = r.id
-      WHERE r.display_name IN ('manager', 'admin')
+      WHERE r.role_key IN ('manager', 'admin')
     LOOP
       PERFORM create_notification(
         p_user_id := v_manager_id,

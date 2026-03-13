@@ -16,7 +16,7 @@
 INSERT INTO metadata.roles (display_name, description)
 SELECT 'collaborator', 'Collaborator with full read access to all data'
 WHERE NOT EXISTS (
-  SELECT 1 FROM metadata.roles WHERE display_name = 'collaborator'
+  SELECT 1 FROM metadata.roles WHERE role_key = 'collaborator'
 );
 
 -- Note: This deployment uses existing Civic OS RBAC functions:

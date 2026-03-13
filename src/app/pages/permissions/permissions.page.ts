@@ -102,12 +102,20 @@ export class PermissionsPage {
 
   // Modal state for creating roles
   showCreateModal = signal(false);
-  newRoleName = signal('');
+  newRoleDisplayName = signal('');
   newRoleDescription = signal('');
   createLoading = signal(false);
   createError = signal<string | undefined>(undefined);
   successMessage = signal<string | undefined>(undefined);
   newlyCreatedRoleName = signal<string | undefined>(undefined);
+
+  /** Preview the role_key that will be auto-generated from the display name */
+  computeRoleKey(displayName: string): string {
+    return displayName.trim().replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase();
+  }
+
+  /** Computed preview of role_key for the create modal */
+  newRoleKeyPreview = computed(() => this.computeRoleKey(this.newRoleDisplayName()));
 
   // Keycloak admin URL (master is the admin realm, target realm comes after the hash)
   keycloakRolesUrl = `${environment.keycloak.url}/admin/master/console/#/${environment.keycloak.realm}/roles`;
@@ -270,7 +278,7 @@ export class PermissionsPage {
 
   openCreateRoleModal() {
     // Reset form state
-    this.newRoleName.set('');
+    this.newRoleDisplayName.set('');
     this.newRoleDescription.set('');
     this.createError.set(undefined);
     this.successMessage.set(undefined);
@@ -282,23 +290,19 @@ export class PermissionsPage {
     this.showCreateModal.set(false);
   }
 
-  validateRoleName(name: string): string | undefined {
+  validateDisplayName(name: string): string | undefined {
     if (!name || name.trim() === '') {
-      return 'Role name is required';
-    }
-    // Allow alphanumeric, underscore, hyphen
-    if (!/^[a-zA-Z0-9_-]+$/.test(name.trim())) {
-      return 'Role name can only contain letters, numbers, underscores, and hyphens';
+      return 'Display name is required';
     }
     return undefined;
   }
 
   submitCreateRole() {
-    const roleName = this.newRoleName().trim();
+    const displayName = this.newRoleDisplayName().trim();
     const description = this.newRoleDescription().trim();
 
     // Validate
-    const validationError = this.validateRoleName(roleName);
+    const validationError = this.validateDisplayName(displayName);
     if (validationError) {
       this.createError.set(validationError);
       return;
@@ -308,14 +312,14 @@ export class PermissionsPage {
     this.createError.set(undefined);
     this.createLoading.set(true);
 
-    this.permissionsService.createRole(roleName, description || undefined).subscribe({
+    this.permissionsService.createRole(displayName, description || undefined).subscribe({
       next: (response) => {
         this.createLoading.set(false);
         if (response.success && response.roleId) {
           // Success! Close modal and show success message
           this.showCreateModal.set(false);
-          this.successMessage.set(`Role '${roleName}' created successfully!`);
-          this.newlyCreatedRoleName.set(roleName);
+          this.successMessage.set(`Role '${displayName}' created successfully!`);
+          this.newlyCreatedRoleName.set(displayName);
 
           // Reload roles and auto-select the new role
           this.permissionsService.getRoles().subscribe({
@@ -430,7 +434,7 @@ export class PermissionsPage {
   delegationManagedIds = signal<Set<number>>(new Set());
 
   /** Roles eligible for delegation (excludes 'anonymous' — framework-only permission role). */
-  delegationRoles = computed(() => this.roles().filter(r => r.display_name !== 'anonymous'));
+  delegationRoles = computed(() => this.roles().filter(r => r.role_key !== 'anonymous'));
 
   // Delete role state
   showDeleteModal = signal(false);

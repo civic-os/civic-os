@@ -60,6 +60,7 @@ export interface ManageableRole {
   role_id: number;
   display_name: string;
   description: string | null;
+  role_key: string;
 }
 
 export interface ProvisionUserRequest {

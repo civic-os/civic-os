@@ -446,7 +446,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('resources', 'reservations')
   AND p.permission = 'read'
-  AND r.display_name IN ('anonymous', 'user', 'editor', 'admin')
+  AND r.role_key IN ('anonymous', 'user', 'editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant read permission to reservation_requests for authenticated users (they see own via RLS)
@@ -456,7 +456,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'read'
-  AND r.display_name IN ('user', 'editor', 'admin')
+  AND r.role_key IN ('user', 'editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant create permission to authenticated users for reservation_requests
@@ -466,7 +466,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'create'
-  AND r.display_name IN ('user', 'editor', 'admin')
+  AND r.role_key IN ('user', 'editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant update permission to editors and admins for reservation_requests (approve/deny)
@@ -476,7 +476,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'reservation_requests'
   AND p.permission = 'update'
-  AND r.display_name IN ('editor', 'admin')
+  AND r.role_key IN ('editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant create/update/delete to editors and admins for resources
@@ -486,7 +486,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'resources'
   AND p.permission IN ('create', 'update', 'delete')
-  AND r.display_name IN ('editor', 'admin')
+  AND r.role_key IN ('editor', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Grant delete to admins only for reservation_requests and reservations
@@ -496,7 +496,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name IN ('reservation_requests', 'reservations')
   AND p.permission = 'delete'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Notify PostgREST to reload schema cache

@@ -340,7 +340,7 @@ SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'manager_events'
-  AND r.display_name = 'manager'
+  AND r.role_key = 'manager'
 ON CONFLICT (permission_id, role_id) DO NOTHING;
 
 -- Grant to admin role
@@ -349,7 +349,7 @@ SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'manager_events'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT (permission_id, role_id) DO NOTHING;
 
 -- Validations for aliased columns

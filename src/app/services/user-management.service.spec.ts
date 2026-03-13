@@ -292,8 +292,8 @@ describe('UserManagementService', () => {
   describe('getManageableRoles()', () => {
     it('should POST to get_manageable_roles RPC', (done) => {
       const mockRoles = [
-        { role_id: 1, display_name: 'user', description: 'Basic user' },
-        { role_id: 2, display_name: 'editor', description: 'Can edit' }
+        { role_id: 1, display_name: 'user', description: 'Basic user', role_key: 'user' },
+        { role_id: 2, display_name: 'editor', description: 'Can edit', role_key: 'editor' }
       ];
 
       service.getManageableRoles().subscribe(roles => {
