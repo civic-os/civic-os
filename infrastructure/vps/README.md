@@ -144,7 +144,29 @@ SITE_URL=https://events.mottpark.org
 
 The vanity domain's DNS must have a CNAME (or A record) pointing to the droplet. Caddy auto-provisions a Let's Encrypt cert for it.
 
-### 6. Configure Database Firewall
+### 6. Configure S3 CORS (required for file uploads)
+
+File uploads use presigned URLs — the browser PUTs files directly to S3/Spaces. Without CORS, the browser blocks these requests.
+
+In DigitalOcean console → Spaces → your bucket → Settings → CORS Configuration:
+
+| Origin | Allowed Methods | Allowed Headers | Max Age |
+|--------|----------------|-----------------|---------|
+| `https://{APP_DOMAIN}` | `GET, PUT` | `*` | `3600` |
+
+If using a vanity domain, add that origin too. If multiple instances share a bucket, include all origins in one CORS config (S3 replaces, not appends).
+
+### 7. Configure Keycloak Realm Email (required for welcome emails and password resets)
+
+Keycloak uses its own SMTP config for all user-facing emails (welcome, password reset, verify email) — this is **separate** from the worker's `SMTP_*` env vars.
+
+In Keycloak admin → your realm → **Realm Settings → Email** tab:
+- From / From Display Name matching your app
+- SMTP Host, Port, StartTLS, and credentials (can reuse the same SES credentials from `.env`)
+
+Without this, users are created in Keycloak successfully but never receive these emails.
+
+### 8. Configure Database Firewall
 
 DigitalOcean Managed PostgreSQL blocks all connections by default. You must add the VPS IP to the trusted sources:
 
