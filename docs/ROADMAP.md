@@ -19,6 +19,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Live update page as Schema is updated
 - [x] Add Color PropertyType
 - [ ] Configurable Entity Menu (Nesting, Hiding, Singular/Plural names)
+- [ ] **Time PropertyType** - Add `Time` to `EntityPropertyType` for PostgreSQL `time` columns. Render native `<input type="time">` on Create/Edit, formatted display on Detail/List. Currently `time` falls through to `Unknown` and is not editable. *(Identified via FFSC incident_reports.incident_time)*
 - [ ] **Cascading Dropdowns** - Filter FK dropdown options based on another field's selection (e.g., category → subcategory)
 - [ ] **M:M on Create/Edit Pages** - Multi-select checkbox component for many-to-many relationships on Create and Edit forms, not just Detail pages. Currently M:M associations require a two-step workflow (create record, then edit associations on Detail page). Affects every Civic OS app with M:M relationships. *(Identified via IC pilot)*
 - [ ] **Dependent/Filtered M:M Options** - Filter M:M checkbox options based on another field's value (e.g., when creating a referral, only show service categories the selected partner provides). Metadata config like `filter_by_field` + `filter_through_table`. *(Identified via IC pilot)*

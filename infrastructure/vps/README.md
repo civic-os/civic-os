@@ -186,6 +186,29 @@ doctl databases firewalls list {DB_ID}
 doctl databases firewalls append 00888968-a952-430c-9895-1d263de733c2 --rule ip_addr:165.227.80.192
 ```
 
+### 9. Create MCP Read-Only Role (optional, for Claude Code / AI tooling)
+
+To allow MCP database servers (e.g., `@anthropic/postgres-mcp`) to query the database safely, create a read-only role:
+
+```sql
+-- Create the role with a strong password
+CREATE ROLE civic_os_mcp_readonly WITH LOGIN PASSWORD 'your-secure-password';
+
+-- Grant read access to all existing tables in metadata and public schemas
+GRANT USAGE ON SCHEMA metadata TO civic_os_mcp_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA metadata TO civic_os_mcp_readonly;
+GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
+
+-- Auto-grant read access to future tables
+ALTER DEFAULT PRIVILEGES IN SCHEMA metadata GRANT SELECT TO civic_os_mcp_readonly;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT TO civic_os_mcp_readonly;
+```
+
+Use this role's connection string in your MCP server configuration. The role has **read-only** access — it cannot insert, update, or delete data.
+
+> **Note**: `ALTER DEFAULT PRIVILEGES` applies to tables created by the role that runs it (usually `postgres`). If tables are created by a different role, you may need to re-run the `GRANT SELECT ON ALL TABLES` statements after schema changes.
+
 ## Files
 
 | File | Purpose |

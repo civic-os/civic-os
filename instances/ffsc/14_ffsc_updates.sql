@@ -23,25 +23,11 @@ BEGIN;
 -- Complete the TODOs from script 13. Bookkeeper gets read-only access to
 -- financial and staff data, plus update on reimbursements for response notes.
 
--- Direct SQL inserts (init scripts run as superuser without JWT context,
--- so set_role_permission() which requires is_admin() cannot be used here)
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name = 'reimbursements'
-  AND p.permission IN ('read', 'update')
-  AND r.role_key = 'bookkeeper'
-ON CONFLICT DO NOTHING;
-
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name IN ('time_entries', 'staff_members', 'sites')
-  AND p.permission = 'read'
-  AND r.role_key = 'bookkeeper'
-ON CONFLICT DO NOTHING;
+SELECT set_role_permission(get_role_id('bookkeeper'), 'reimbursements', 'read', true);
+SELECT set_role_permission(get_role_id('bookkeeper'), 'reimbursements', 'update', true);
+SELECT set_role_permission(get_role_id('bookkeeper'), 'time_entries', 'read', true);
+SELECT set_role_permission(get_role_id('bookkeeper'), 'staff_members', 'read', true);
+SELECT set_role_permission(get_role_id('bookkeeper'), 'sites', 'read', true);
 
 -- Role delegation: admin and manager can assign/revoke bookkeeper
 INSERT INTO metadata.role_can_manage (manager_role_id, managed_role_id)
@@ -596,6 +582,7 @@ SELECT
   sm.id,
   sm.display_name,
   sm.email,
+  sm.phone_number,
   c.display_name AS staff_role,
   s.display_name AS site_name
 FROM staff_members sm
@@ -618,26 +605,19 @@ INSERT INTO metadata.properties (table_name, column_name, display_name, sort_ord
 VALUES
   ('staff_directory', 'display_name',  'Name',       1, TRUE, TRUE, FALSE, TRUE),
   ('staff_directory', 'email',         'Email',      2, TRUE, TRUE, FALSE, TRUE),
-  ('staff_directory', 'staff_role',    'Staff Role', 3, TRUE, TRUE, TRUE,  TRUE),
-  ('staff_directory', 'site_name',     'Site',       4, TRUE, TRUE, TRUE,  TRUE)
+  ('staff_directory', 'phone_number',  'Phone',      3, TRUE, TRUE, FALSE, FALSE),
+  ('staff_directory', 'staff_role',    'Staff Role', 4, TRUE, TRUE, TRUE,  TRUE),
+  ('staff_directory', 'site_name',     'Site',       5, TRUE, TRUE, TRUE,  TRUE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   sort_order = EXCLUDED.sort_order;
 
 -- Permissions: all authenticated users can read
--- Ensure the permission exists, then grant to all roles
-INSERT INTO metadata.permissions (table_name, permission)
-VALUES ('staff_directory', 'read')
-ON CONFLICT (table_name, permission) DO NOTHING;
-
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, r.id
-FROM metadata.permissions p
-CROSS JOIN metadata.roles r
-WHERE p.table_name = 'staff_directory'
-  AND p.permission = 'read'
-  AND r.role_key IN ('user', 'editor', 'manager', 'admin', 'bookkeeper')
-ON CONFLICT DO NOTHING;
+SELECT set_role_permission(get_role_id('user'), 'staff_directory', 'read', true);
+SELECT set_role_permission(get_role_id('editor'), 'staff_directory', 'read', true);
+SELECT set_role_permission(get_role_id('manager'), 'staff_directory', 'read', true);
+SELECT set_role_permission(get_role_id('admin'), 'staff_directory', 'read', true);
+SELECT set_role_permission(get_role_id('bookkeeper'), 'staff_directory', 'read', true);
 
 -- =============================================================================
 -- 3H. PILOT STORY ON WELCOME DASHBOARD

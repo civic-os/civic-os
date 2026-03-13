@@ -49,10 +49,12 @@ class StaffPortalMockDataGenerator {
   private sqlStatements: string[] = [];
   private statusMap: Map<string, StatusInfo[]> = new Map();
   private categoryMap: Map<string, CategoryInfo[]> = new Map();
+  private staffRoles: { id: number; display_name: string }[] = [];
 
   // Generated data stored for FK references
   private userIds: string[] = [];
   private staffMemberIds: number[] = [];
+  private staffMemberRoleMap: Map<number, number> = new Map(); // staff_id -> role_id
   private staffMemberSiteMap: Map<number, number> = new Map(); // staff_id -> site_id
   private preservedUsers: { pub: any[]; priv: any[] } = { pub: [], priv: [] };
   private keycloakTestUsers: { id: string; display_name: string; email: string }[] = [];
@@ -100,7 +102,7 @@ class StaffPortalMockDataGenerator {
     const result = await this.client.query(
       `SELECT id, entity_type, display_name, category_key
        FROM metadata.categories
-       WHERE entity_type IN ('time_entry', 'staff_role')
+       WHERE entity_type IN ('time_entry', 'task_priority')
        ORDER BY entity_type, sort_order`
     );
     for (const row of result.rows) {
@@ -110,6 +112,15 @@ class StaffPortalMockDataGenerator {
       this.categoryMap.get(row.entity_type)!.push(row);
     }
     console.log(`Fetched ${result.rows.length} categories across ${this.categoryMap.size} entity types`);
+  }
+
+  async fetchStaffRoles() {
+    if (!this.client) throw new Error('Database not connected');
+    const result = await this.client.query(
+      `SELECT id, display_name FROM staff_roles ORDER BY sort_order`
+    );
+    this.staffRoles = result.rows;
+    console.log(`Fetched ${this.staffRoles.length} staff roles`);
   }
 
   private getCategoryId(entityType: string, categoryKey: string): number {
@@ -240,6 +251,7 @@ class StaffPortalMockDataGenerator {
     const tables = [
       'staff_tasks', 'offboarding_feedback', 'reimbursements', 'incident_reports',
       'time_off_requests', 'time_entries', 'staff_documents', 'staff_members',
+      'document_requirement_roles',
     ];
 
     for (const table of tables) {
@@ -335,13 +347,11 @@ class StaffPortalMockDataGenerator {
     for (let i = 0; i < count; i++) {
       const fullName = faker.person.fullName();
       const siteId = faker.helpers.arrayElement([1, 2, 3]);
-      const staffRoleCategories = this.categoryMap.get('staff_role') || [];
-      const roleId = faker.helpers.arrayElement(staffRoleCategories.map(t => t.id));
+      const roleId = faker.helpers.arrayElement(this.staffRoles.map(r => r.id));
       const staffId = i + 1;
 
-      const email = i < userIdEntries.length
-        ? userIdEntries[i][1]
-        : faker.internet.email({ firstName: fullName.split(' ')[0], provider: 'ffsc.example.com' }).toLowerCase();
+      // user_id is required — skip staff members beyond available users
+      if (i >= userIdEntries.length) break;
 
       const payRate = faker.number.float({ min: 15, max: 35, fractionDigits: 2 });
       const startDate = faker.date.between({
@@ -350,22 +360,18 @@ class StaffPortalMockDataGenerator {
       }).toISOString().split('T')[0];
 
       const record: any = {
-        display_name: fullName,
-        email,
+        display_name: fullName, // trigger overwrites as "FullName - SiteName"
+        user_id: userIdEntries[i][0],
         site_id: siteId,
         role_id: roleId,
         pay_rate: payRate,
         start_date: startDate,
       };
 
-      // Directly link to user account if one was generated for this staff member
-      if (i < userIdEntries.length) {
-        record.user_id = userIdEntries[i][0];
-      }
-
       records.push(record);
 
       this.staffMemberIds.push(staffId);
+      this.staffMemberRoleMap.set(staffId, roleId);
       this.staffMemberSiteMap.set(staffId, siteId);
     }
 
@@ -526,7 +532,6 @@ class StaffPortalMockDataGenerator {
         reported_by_id: staffId,
         site_id: siteId,
         incident_date: faker.date.between({ from: '2026-06-15', to: '2026-08-15' }).toISOString().split('T')[0],
-        incident_time: `${faker.number.int({ min: 8, max: 17 })}:${String(faker.number.int({ min: 0, max: 59 })).padStart(2, '0')}:00`,
         description: descriptions[i % descriptions.length],
         people_involved: faker.helpers.arrayElement(peopleInvolved),
         action_taken: faker.helpers.arrayElement(actionsTaken),
@@ -661,6 +666,14 @@ class StaffPortalMockDataGenerator {
         statusId = this.getStatusId('staff_task', 'cancelled');
       }
 
+      // Priority distribution: 20% high, 50% medium, 30% low
+      const pRand = Math.random();
+      const priorityId = pRand < 0.2
+        ? this.getCategoryId('task_priority', 'high')
+        : pRand < 0.7
+          ? this.getCategoryId('task_priority', 'medium')
+          : this.getCategoryId('task_priority', 'low');
+
       const dueDate = faker.datatype.boolean({ probability: 0.8 })
         ? faker.date.between({ from: '2026-06-20', to: '2026-08-30' }).toISOString().split('T')[0]
         : null;
@@ -672,6 +685,7 @@ class StaffPortalMockDataGenerator {
         site_id: siteId,
         due_date: dueDate,
         status_id: statusId,
+        priority_id: priorityId,
         completion_notes: completionNotes,
         completed_at: completedAt,
       });
@@ -727,6 +741,38 @@ class StaffPortalMockDataGenerator {
       });
     }
 
+    return records;
+  }
+
+  // ── Document Requirement Roles (M:M junction) ─────────
+
+  private async generateDocumentRequirementRoles(): Promise<any[]> {
+    if (!this.client) return [];
+
+    // Fetch document requirements to assign roles
+    const result = await this.client.query(
+      `SELECT id, display_name FROM document_requirements ORDER BY id`
+    );
+    const records: any[] = [];
+
+    console.log(`Generating document requirement role assignments...`);
+
+    for (const req of result.rows) {
+      // 70% of requirements apply to all roles (no junction rows)
+      // 30% apply to specific roles (1-2 roles)
+      if (Math.random() < 0.3) {
+        const roleCount = faker.number.int({ min: 1, max: 2 });
+        const selectedRoles = faker.helpers.arrayElements(this.staffRoles, roleCount);
+        for (const role of selectedRoles) {
+          records.push({
+            document_requirement_id: req.id,
+            staff_role_id: role.id,
+          });
+        }
+      }
+    }
+
+    console.log(`  ${records.length} role-specific assignments (remaining requirements apply to all roles)`);
     return records;
   }
 
@@ -906,6 +952,7 @@ class StaffPortalMockDataGenerator {
       await this.connect();
       await this.fetchStatuses();
       await this.fetchCategories();
+      await this.fetchStaffRoles();
 
       if (!sqlOnly) {
         await this.truncateTables();
@@ -931,7 +978,16 @@ class StaffPortalMockDataGenerator {
         }
       }
 
-      // 2. Staff members (references seed data: sites 1-3, staff_role categories from metadata.categories)
+      // 2. Document requirement roles (M:M junction — must run BEFORE staff_members
+      // because auto_create_staff_documents trigger reads junction rows on INSERT)
+      const drRoles = await this.generateDocumentRequirementRoles();
+      if (sqlOnly) {
+        this.addInsertSQL('document_requirement_roles', drRoles);
+      } else {
+        await this.insertRecords('document_requirement_roles', drRoles);
+      }
+
+      // 3. Staff members (references seed data: sites 1-3, staff_roles table)
       const staffMembers = this.generateStaffMembers(userEmails);
       if (sqlOnly) {
         this.addInsertSQL('staff_members', staffMembers);
@@ -939,7 +995,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('staff_members', staffMembers);
       }
 
-      // 3. Time entries (references staff_members; trigger populates staff_name/site_name)
+      // 4. Time entries
       const timeEntries = this.generateTimeEntries();
       if (sqlOnly) {
         this.addInsertSQL('time_entries', timeEntries);
@@ -947,7 +1003,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('time_entries', timeEntries);
       }
 
-      // 4. Time off requests
+      // 5. Time off requests
       const timeOffRequests = this.generateTimeOffRequests();
       if (sqlOnly) {
         this.addInsertSQL('time_off_requests', timeOffRequests);
@@ -955,7 +1011,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('time_off_requests', timeOffRequests);
       }
 
-      // 5. Incident reports
+      // 6. Incident reports
       const incidentReports = this.generateIncidentReports();
       if (sqlOnly) {
         this.addInsertSQL('incident_reports', incidentReports);
@@ -963,7 +1019,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('incident_reports', incidentReports);
       }
 
-      // 6. Reimbursements
+      // 7. Reimbursements
       const reimbursements = this.generateReimbursements();
       if (sqlOnly) {
         this.addInsertSQL('reimbursements', reimbursements);
@@ -971,7 +1027,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('reimbursements', reimbursements);
       }
 
-      // 7. Staff tasks
+      // 8. Staff tasks
       const staffTasks = this.generateStaffTasks();
       if (sqlOnly) {
         this.addInsertSQL('staff_tasks', staffTasks);
@@ -979,7 +1035,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('staff_tasks', staffTasks);
       }
 
-      // 8. Offboarding feedback (unique per staff member)
+      // 9. Offboarding feedback (unique per staff member)
       const feedback = this.generateOffboardingFeedback();
       if (sqlOnly) {
         this.addInsertSQL('offboarding_feedback', feedback);
@@ -987,7 +1043,7 @@ class StaffPortalMockDataGenerator {
         await this.insertRecords('offboarding_feedback', feedback);
       }
 
-      // 9. Update some staff_documents to various statuses for realistic onboarding progress
+      // 10. Update some staff_documents to various statuses for realistic onboarding progress
       // (staff_documents are auto-created by trigger in Pending status)
       if (!sqlOnly && this.client) {
         await this.progressStaffDocuments();
@@ -1010,6 +1066,7 @@ class StaffPortalMockDataGenerator {
           `DELETE FROM public.time_entries;`,
           `DELETE FROM public.staff_documents;`,
           `DELETE FROM public.staff_members;`,
+          `DELETE FROM public.document_requirement_roles;`,
           `DELETE FROM metadata.civic_os_users_private;`,
           `DELETE FROM metadata.civic_os_users;`,
           '',
