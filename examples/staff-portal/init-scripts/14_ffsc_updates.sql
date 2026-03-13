@@ -652,9 +652,6 @@ SET config = jsonb_build_object(
 WHERE dashboard_id = (SELECT id FROM metadata.dashboards WHERE display_name = 'Welcome' LIMIT 1)
   AND widget_type = 'markdown';
 
--- Hide title on the Welcome dashboard for a cleaner landing experience
-UPDATE metadata.dashboards SET show_title = FALSE WHERE display_name = 'Welcome';
-
 -- =============================================================================
 -- 3I. DASHBOARD ROLE DEFAULTS CONFIGURATION
 -- =============================================================================
@@ -675,6 +672,34 @@ WHERE r.role_key = 'bookkeeper' AND d.display_name = 'Staff Portal'
 ON CONFLICT (role_id) DO UPDATE SET
   dashboard_id = EXCLUDED.dashboard_id,
   priority = EXCLUDED.priority;
+
+-- =============================================================================
+-- 3J. FFSC BANNER ON ALL DASHBOARDS
+-- =============================================================================
+-- Add ffsc-banner image widget at the top of every dashboard and hide titles.
+-- The static asset with slug 'ffsc-banner' must be uploaded via the admin UI
+-- before this widget will render.
+
+-- Bump existing widgets down to make room for banner at sort_order = 1
+UPDATE metadata.dashboard_widgets
+SET sort_order = sort_order + 1
+WHERE dashboard_id IN (
+  SELECT id FROM metadata.dashboards
+  WHERE display_name IN ('Welcome', 'Staff Portal', 'Admin Overview')
+);
+
+-- Insert banner widget at sort_order 1 on each dashboard
+INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
+SELECT d.id, 'image', NULL,
+  jsonb_build_object('staticAsset', 'ffsc-banner', 'altText', 'Flint Freedom Schools Collaborative'),
+  1, 2, 2
+FROM metadata.dashboards d
+WHERE d.display_name IN ('Welcome', 'Staff Portal', 'Admin Overview');
+
+-- Hide titles on all dashboards for a cleaner look
+UPDATE metadata.dashboards
+SET show_title = FALSE
+WHERE display_name IN ('Welcome', 'Staff Portal', 'Admin Overview');
 
 -- =============================================================================
 -- NOTIFY POSTGREST
