@@ -25,10 +25,12 @@ export interface Dashboard {
   description: string | null;
   is_default: boolean;
   is_public: boolean;
+  show_title?: boolean;
   sort_order: number;
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  is_role_default?: boolean;
   widgets?: DashboardWidget[];  // Embedded widgets from PostgREST
 }
 

@@ -134,6 +134,12 @@ services:
       SMTP_REPLY_TO: ${SMTP_REPLY_TO:-}
       SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-true}
 
+      # SMS Configuration (Telnyx) — disabled by default
+      SMS_ENABLED: ${SMS_ENABLED:-false}
+      SMS_FAKE_MODE: ${SMS_FAKE_MODE:-false}
+      TELNYX_API_KEY: ${TELNYX_API_KEY:-}
+      TELNYX_FROM_NUMBER: ${TELNYX_FROM_NUMBER:-}
+
       # Keycloak Service Account (v0.31.0+ — required for User Management)
       KEYCLOAK_ADMIN_URL: ${KEYCLOAK_URL:-}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-}
@@ -224,6 +230,9 @@ services:
       MATOMO_URL: ${MATOMO_URL:-}
       MATOMO_SITE_ID: ${MATOMO_SITE_ID:-}
       MATOMO_ENABLED: ${MATOMO_ENABLED:-false}
+
+      # SMS notifications (frontend UI toggle)
+      SMS_CONFIGURED: ${SMS_CONFIGURED:-false}
     networks:
       - civic-os-network
     healthcheck:

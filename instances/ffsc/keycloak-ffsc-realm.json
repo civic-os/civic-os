@@ -1,0 +1,214 @@
+{
+  "realm": "ffsc",
+  "displayName": "FFSC Staff Portal",
+  "enabled": true,
+  "sslRequired": "external",
+
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "registrationAllowed": false,
+  "verifyEmail": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "rememberMe": true,
+
+  "accessTokenLifespan": 43200,
+  "ssoSessionIdleTimeout": 43200,
+  "ssoSessionMaxLifespan": 86400,
+  "ssoSessionIdleTimeoutRememberMe": 604800,
+  "ssoSessionMaxLifespanRememberMe": 2592000,
+  "revokeRefreshToken": false,
+  "refreshTokenMaxReuse": 0,
+
+  "defaultSignatureAlgorithm": "RS256",
+
+  "bruteForceProtected": true,
+  "failureFactor": 10,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "maxDeltaTimeSeconds": 43200,
+
+  "passwordPolicy": "length(8)",
+
+  "eventsEnabled": true,
+  "eventsListeners": ["jboss-logging"],
+  "enabledEventTypes": [
+    "LOGIN",
+    "LOGIN_ERROR",
+    "LOGOUT",
+    "REGISTER",
+    "REGISTER_ERROR",
+    "UPDATE_PASSWORD",
+    "UPDATE_PROFILE"
+  ],
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Standard authenticated user - assigned to all new users by default"
+      },
+      {
+        "name": "editor",
+        "description": "Site lead - can review documents and manage site staff"
+      },
+      {
+        "name": "manager",
+        "description": "Program manager - full staff management capabilities"
+      },
+      {
+        "name": "admin",
+        "description": "Full administrative access including permissions and user management"
+      },
+      {
+        "name": "bookkeeper",
+        "description": "Financial oversight: reimbursements, payment approvals"
+      },
+      {
+        "name": "offline_access",
+        "description": "${role_offline-access}"
+      },
+      {
+        "name": "uma_authorization",
+        "description": "${role_uma_authorization}"
+      },
+      {
+        "name": "default-roles-ffsc",
+        "description": "${role_default-roles}",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "offline_access",
+            "uma_authorization",
+            "user"
+          ],
+          "client": {
+            "account": [
+              "view-profile",
+              "manage-account"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "defaultRole": {
+    "name": "default-roles-ffsc",
+    "description": "${role_default-roles}",
+    "composite": true
+  },
+
+  "clients": [
+    {
+      "clientId": "ffsc-client",
+      "name": "FFSC Staff Portal",
+      "description": "Civic OS frontend for FFSC pilot deployment",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "rootUrl": "",
+      "baseUrl": "",
+      "redirectUris": [
+        "https://staff.freedomschoolscollab.org/*",
+        "https://ffsc.pilot.civic-os.org/*"
+      ],
+      "webOrigins": [
+        "https://staff.freedomschoolscollab.org",
+        "https://ffsc.pilot.civic-os.org"
+      ],
+      "attributes": {
+        "backchannel.logout.session.required": "true",
+        "frontchannel.logout.session.required": "true"
+      },
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "phone",
+        "offline_access"
+      ]
+    },
+    {
+      "clientId": "civic-os-service-account",
+      "name": "Civic OS Service Account",
+      "description": "Service account for consolidated worker - user provisioning and role management",
+      "enabled": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "protocol": "openid-connect",
+      "secret": "GENERATE_NEW_SECRET_IN_KEYCLOAK",
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": []
+    }
+  ],
+
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": {},
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"phoneNumber\",\"displayName\":\"Phone Number\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
+          ]
+        }
+      }
+    ]
+  },
+
+  "users": [
+    {
+      "username": "service-account-civic-os-service-account",
+      "enabled": true,
+      "serviceAccountClientId": "civic-os-service-account",
+      "realmRoles": ["default-roles-ffsc"],
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "view-realm", "manage-realm"]
+      }
+    }
+  ],
+
+  "clientScopeMappings": {
+    "realm-management": [
+      {
+        "client": "civic-os-service-account",
+        "roles": ["manage-users", "view-users", "view-realm", "manage-realm"]
+      }
+    ]
+  },
+
+  "browserFlow": "browser",
+  "registrationFlow": "registration",
+  "directGrantFlow": "direct grant",
+  "resetCredentialsFlow": "reset credentials",
+  "clientAuthenticationFlow": "clients",
+
+  "loginTheme": "keycloak.v2",
+  "internationalizationEnabled": false,
+  "userManagedAccessAllowed": false
+}

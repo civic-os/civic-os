@@ -53,3 +53,5 @@ v0-35-0-admin-notification-prefs [v0-35-0-add-sms-opted-out] 2026-03-12T12:00:00
 v0-36-0-add-role-key [v0-35-0-admin-notification-prefs] 2026-03-12T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add role_key column for stable programmatic reference and JWT matching
 v0-36-0-notification-role-helpers [v0-36-0-add-role-key] 2026-03-13T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add get_users_by_role() and send_notification_to_role() helpers
 v0-36-0-keycloak-sync-triggers [v0-36-0-notification-role-helpers] 2026-03-13T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Move Keycloak sync to triggers, refactor refresh_current_user to diff-based
+v0-37-0-dashboard-features [v0-36-0-keycloak-sync-triggers] 2026-03-13T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add show_title toggle and role-based default dashboards
+v0-37-0-fix-sms-preference-trigger [v0-37-0-dashboard-features] 2026-03-13T21:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix SMS preference trigger to fire on phone update, backfill existing users

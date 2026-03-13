@@ -29,12 +29,14 @@
   @if (!loading() && !error() && dashboard()) {
     <div class="dashboard-container">
       <!-- Dashboard Header -->
-      <div class="dashboard-header mb-6">
-        <h1 class="text-3xl font-bold text-base-content">{{ dashboard()!.display_name }}</h1>
-        @if (dashboard()!.description) {
-          <p class="text-base-content/70 mt-2">{{ dashboard()!.description }}</p>
-        }
-      </div>
+      @if (dashboard()!.show_title !== false) {
+        <div class="dashboard-header mb-6">
+          <h1 class="text-3xl font-bold text-base-content">{{ dashboard()!.display_name }}</h1>
+          @if (dashboard()!.description) {
+            <p class="text-base-content/70 mt-2">{{ dashboard()!.description }}</p>
+          }
+        </div>
+      }
 
       <!-- Widgets Grid -->
       @if (widgets().length > 0) {

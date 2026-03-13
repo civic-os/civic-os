@@ -13,6 +13,8 @@
 --      Keycloak sync is automatic via trg_roles_sync_keycloak trigger (v0.36.0+)
 -- =============================================================================
 
+BEGIN;
+
 -- -----------------------------------------------------------------------------
 -- 1. Rename display names (role_key is immutable, no other changes needed)
 -- -----------------------------------------------------------------------------
@@ -52,3 +54,5 @@ VALUES ('Bookkeeper', 'Financial oversight: reimbursements, payment approvals');
 -- VALUES
 --   (get_role_id('admin'), get_role_id('bookkeeper')),
 --   (get_role_id('manager'), get_role_id('bookkeeper'));
+
+COMMIT;

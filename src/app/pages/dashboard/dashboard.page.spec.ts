@@ -637,6 +637,96 @@ describe('DashboardPage', () => {
   });
 
   describe('Edge Cases', () => {
+    it('should hide dashboard header when show_title is false', (done) => {
+      const mockDashboard = createMockDashboard({
+        id: 1,
+        display_name: 'Hidden Title Dashboard',
+        description: 'Should not be visible',
+        show_title: false,
+        widgets: [
+          {
+            id: 1, dashboard_id: 1, widget_type: 'markdown', title: 'Widget',
+            entity_key: null, refresh_interval_seconds: null, sort_order: 0,
+            width: 2, height: 1, config: { content: 'Test' },
+            created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z'
+          }
+        ]
+      });
+
+      mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
+
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
+
+      setTimeout(() => {
+        fixture.detectChanges();
+
+        const compiled = fixture.nativeElement as HTMLElement;
+        const header = compiled.querySelector('.dashboard-header');
+
+        expect(header).toBeNull();
+        // Widgets should still render
+        expect(compiled.querySelector('.widgets-grid')).toBeTruthy();
+        done();
+      }, 10);
+    });
+
+    it('should show dashboard header when show_title is true', (done) => {
+      const mockDashboard = createMockDashboard({
+        id: 1,
+        display_name: 'Visible Title Dashboard',
+        show_title: true,
+        widgets: []
+      });
+
+      mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
+
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
+
+      setTimeout(() => {
+        fixture.detectChanges();
+
+        const compiled = fixture.nativeElement as HTMLElement;
+        const header = compiled.querySelector('.dashboard-header');
+
+        expect(header).toBeTruthy();
+        expect(header?.textContent).toContain('Visible Title Dashboard');
+        done();
+      }, 10);
+    });
+
+    it('should show dashboard header when show_title is undefined (default)', (done) => {
+      const mockDashboard = createMockDashboard({
+        id: 1,
+        display_name: 'Default Title Dashboard',
+        // show_title not set — should default to showing
+        widgets: []
+      });
+
+      mockDashboardService.getDashboard.and.returnValue(of(mockDashboard));
+
+      paramMapSubject.next(convertToParamMap({ id: '1' }));
+
+      fixture = TestBed.createComponent(DashboardPage);
+      component = fixture.componentInstance;
+
+      setTimeout(() => {
+        fixture.detectChanges();
+
+        const compiled = fixture.nativeElement as HTMLElement;
+        const header = compiled.querySelector('.dashboard-header');
+
+        expect(header).toBeTruthy();
+        expect(header?.textContent).toContain('Default Title Dashboard');
+        done();
+      }, 10);
+    });
+
     it('should handle dashboard with description as null', (done) => {
       const dashboardNoDesc = createMockDashboard({
         display_name: 'Test Dashboard',

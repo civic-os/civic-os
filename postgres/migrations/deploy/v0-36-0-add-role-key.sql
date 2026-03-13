@@ -787,7 +787,7 @@ $$;
 
 
 -- 6n. public.managed_users VIEW — v0-31-0 section 16
--- Changed: array_agg uses role_key instead of display_name
+-- Changed: array_agg uses display_name for human-readable role labels
 DROP VIEW IF EXISTS public.managed_users;
 
 CREATE VIEW public.managed_users
@@ -805,7 +805,7 @@ SELECT
     'active'::TEXT AS status,
     NULL::TEXT AS error_message,
     COALESCE(
-        (SELECT array_agg(r.role_key ORDER BY r.role_key)
+        (SELECT array_agg(r.display_name ORDER BY r.display_name)
          FROM metadata.user_roles ur
          JOIN metadata.roles r ON r.id = ur.role_id
          WHERE ur.user_id = u.id
@@ -854,7 +854,7 @@ WHERE up.status NOT IN ('completed');
 COMMENT ON VIEW public.managed_users IS
     'Combined view of all users for admin User Management page. Active users
      from civic_os_users UNION pending/failed provisioning requests.
-     roles array contains role_key values (not display_name).
+     roles array contains display_name values (human-readable labels).
      Updated in v0.36.0.';
 
 GRANT SELECT ON public.managed_users TO authenticated;
