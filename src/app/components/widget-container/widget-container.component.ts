@@ -69,6 +69,11 @@ export class WidgetContainerComponent {
     return this.widget().title;
   });
 
+  // Visual-only widgets (image) don't need card chrome
+  borderless = computed(() => {
+    return this.widget().widget_type === 'image';
+  });
+
   // Inputs to pass to dynamic widget component
   widgetInputs = computed(() => {
     return {

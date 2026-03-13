@@ -1,0 +1,349 @@
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold">Static Assets</h1>
+      <p class="text-base-content/60 mt-1">Manage responsive images for dashboard widgets</p>
+    </div>
+    @if (!loading()) {
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <span class="material-symbols-outlined text-base">add_photo_alternate</span>
+        Upload Image
+      </button>
+    }
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-error mb-4" role="alert">
+      <span>{{ error() }}</span>
+      <button class="btn btn-sm btn-ghost" (click)="error.set(undefined)">Dismiss</button>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center min-h-[400px]">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  }
+
+  <!-- Assets Table -->
+  @if (!loading() && !error()) {
+    @if (hasAssets()) {
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th class="w-20">Preview</th>
+              <th>Name</th>
+              <th>Slug</th>
+              <th>Crops</th>
+              <th>Created</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (asset of assets(); track asset.id) {
+              <tr>
+                <td>
+                  @if (getThumbnailUrl(asset)) {
+                    <div class="avatar">
+                      <div class="w-16 h-12 rounded">
+                        <img [src]="getThumbnailUrl(asset)" [alt]="asset.display_name" class="object-cover" />
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="w-16 h-12 rounded bg-base-200 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-base-content/30">image</span>
+                    </div>
+                  }
+                </td>
+                <td>
+                  <div class="font-medium">{{ asset.display_name }}</div>
+                  @if (asset.alt_text) {
+                    <div class="text-sm text-base-content/60 truncate max-w-xs">{{ asset.alt_text }}</div>
+                  }
+                </td>
+                <td>
+                  <code class="text-sm bg-base-200 px-2 py-0.5 rounded">{{ asset.slug }}</code>
+                </td>
+                <td>
+                  <div class="flex gap-1">
+                    @if (asset.desktop_file_id) {
+                      <div class="badge badge-sm badge-primary">Desktop</div>
+                    }
+                    @if (asset.tablet_file_id) {
+                      <div class="badge badge-sm badge-secondary">Tablet</div>
+                    }
+                    @if (asset.mobile_file_id) {
+                      <div class="badge badge-sm badge-accent">Mobile</div>
+                    }
+                    @if (!hasCrops(asset)) {
+                      <span class="text-base-content/40 text-sm">No crops</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="text-sm text-base-content/70">{{ formatDate(asset.created_at) }}</div>
+                </td>
+                <td class="text-right">
+                  <div class="flex gap-1 justify-end">
+                    <button class="btn btn-sm btn-ghost" (click)="openEditModal(asset)" title="Re-crop">
+                      <span class="material-symbols-outlined text-base">crop</span>
+                    </button>
+                    <button class="btn btn-sm btn-ghost text-error" (click)="confirmDelete(asset)" title="Delete">
+                      <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Widget config hint -->
+      <div class="mt-6 p-4 bg-base-200 rounded-lg text-sm text-base-content/70">
+        <strong>Usage:</strong> Reference assets in dashboard widget config by slug:
+        <code class="bg-base-300 px-1 rounded">{{ '{"static_asset": "your-slug-here"}' }}</code>
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4">add_photo_alternate</span>
+        <h3 class="text-xl font-semibold mb-2">No static assets yet</h3>
+        <p class="text-base-content/60 mb-4">Upload your first image to use in dashboard widgets.</p>
+        <button class="btn btn-primary" (click)="openCreateModal()">Upload Image</button>
+      </div>
+    }
+  }
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- Create / Edit Modal (full crop workflow)                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<cos-modal
+  [isOpen]="showCreateModal()"
+  (closed)="closeModals()"
+  [size]="cropStep().startsWith('crop') ? 'lg' : 'md'"
+  [closeOnBackdrop]="!saving()">
+
+  <!-- Close button (always visible unless saving) -->
+  @if (!saving()) {
+    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            (click)="closeModals()" title="Close">
+      <span class="material-symbols-outlined text-base">close</span>
+    </button>
+  }
+
+  <!-- Step: Upload -->
+  @if (cropStep() === 'upload') {
+    <h3 class="font-bold text-lg mb-4">Upload Image</h3>
+
+    <div class="form-control mb-4">
+      <label class="label"><span class="label-text">Image File</span></label>
+      <input type="file" class="file-input file-input-bordered w-full"
+             accept="image/*" (change)="onFileSelected($event)" />
+    </div>
+
+    <div class="form-control mb-4">
+      <label class="label"><span class="label-text">Name</span></label>
+      <input type="text" class="input input-bordered w-full"
+             [ngModel]="assetName()" (ngModelChange)="assetName.set($event)"
+             placeholder="e.g., Homepage Hero Banner" />
+    </div>
+
+    <div class="form-control mb-4">
+      <label class="label"><span class="label-text">Alt Text (accessibility)</span></label>
+      <input type="text" class="input input-bordered w-full"
+             [ngModel]="assetAltText()" (ngModelChange)="assetAltText.set($event)"
+             placeholder="Describe the image for screen readers" />
+    </div>
+
+    <div class="cos-modal-action">
+      <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
+      <button class="btn btn-primary" (click)="proceedToProfile()"
+              [disabled]="!imageFile() || !assetName()">
+        Next: Choose Crop Profile
+        <span class="material-symbols-outlined text-base">arrow_forward</span>
+      </button>
+    </div>
+  }
+
+  <!-- Step: Profile Selection -->
+  @if (cropStep() === 'profile') {
+    <h3 class="font-bold text-lg mb-4">
+      {{ isEditing() ? 'Re-crop: ' + assetName() : 'Choose Crop Profile' }}
+    </h3>
+    <p class="text-base-content/60 mb-4">
+      Select how the image should be cropped for different screen sizes.
+    </p>
+
+    <div class="grid grid-cols-1 gap-3 mb-6">
+      @for (profile of presetProfiles; track profile.name) {
+        <button
+          class="btn btn-outline justify-start h-auto py-3 px-4"
+          [class.btn-primary]="selectedProfile().name === profile.name"
+          (click)="selectProfile(profile)">
+          <div class="text-left">
+            <div class="font-medium">{{ profile.name }}</div>
+            <div class="text-xs opacity-70">{{ profile.description }}</div>
+            <div class="text-xs mt-1 font-mono">
+              Desktop {{ formatRatio(profile.breakpoints.desktop) }} ·
+              Tablet {{ formatRatio(profile.breakpoints.tablet) }} ·
+              Mobile {{ formatRatio(profile.breakpoints.mobile) }}
+            </div>
+          </div>
+        </button>
+      }
+    </div>
+
+    @if (isEditing()) {
+      <div class="form-control mb-4">
+        <label class="label"><span class="label-text">Name</span></label>
+        <input type="text" class="input input-bordered w-full"
+               [ngModel]="assetName()" (ngModelChange)="assetName.set($event)" />
+      </div>
+      <div class="form-control mb-4">
+        <label class="label"><span class="label-text">Alt Text</span></label>
+        <input type="text" class="input input-bordered w-full"
+               [ngModel]="assetAltText()" (ngModelChange)="assetAltText.set($event)" />
+      </div>
+    }
+
+    <div class="cos-modal-action">
+      @if (!isEditing()) {
+        <button class="btn btn-ghost" (click)="cropStep.set('upload')">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          Back
+        </button>
+      } @else {
+        <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
+      }
+      <button class="btn btn-primary" (click)="proceedToCropping()">
+        Start Cropping
+        <span class="material-symbols-outlined text-base">crop</span>
+      </button>
+    </div>
+  }
+
+  <!-- Step: Crop (Desktop / Tablet / Mobile) -->
+  @if (cropStep().startsWith('crop-')) {
+    <div class="flex justify-between items-center mb-4 pr-8">
+      <h3 class="font-bold text-lg">
+        Crop for {{ currentCropBreakpoint()?.label }}
+      </h3>
+      <div class="flex gap-1">
+        @for (step of [1, 2, 3]; track step) {
+          <div class="badge"
+               [class.badge-primary]="getCropStepNumber() === step"
+               [class.badge-ghost]="getCropStepNumber() !== step">
+            {{ step }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 text-sm mb-4">
+      <span class="text-base-content/60">
+        Drag to adjust the crop area.
+      </span>
+      <button class="btn btn-xs btn-ghost gap-1" (click)="toggleRatioLock()"
+              [title]="ratioLocked() ? 'Unlock aspect ratio for freeform cropping' : 'Lock to default aspect ratio'">
+        @if (ratioLocked()) {
+          <span class="material-symbols-outlined text-base">lock</span>
+          {{ currentCropBreakpoint()?.label }}
+        } @else {
+          <span class="material-symbols-outlined text-base">lock_open</span>
+          @if (liveRatioDisplay()) {
+            {{ liveRatioDisplay() }}
+          } @else {
+            Freeform
+          }
+        }
+      </button>
+    </div>
+
+    <div class="cropper-container">
+      <image-cropper
+        [imageFile]="imageFile()!"
+        [imageURL]="originalImageUrl() || ''"
+        [maintainAspectRatio]="ratioLocked()"
+        [aspectRatio]="currentAspectRatio()"
+        [cropper]="currentCropperPosition()"
+        [resizeToWidth]="1200"
+        format="jpeg"
+        [autoCrop]="true"
+        (imageCropped)="onImageCropped($event)"
+        (imageLoaded)="onImageLoaded($event)"
+        (cropperReady)="onCropperReady()"
+        (loadImageFailed)="onLoadImageFailed()"
+      ></image-cropper>
+    </div>
+
+    <div class="cos-modal-action mt-4">
+      <button class="btn btn-ghost" (click)="goBackCrop()">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Back
+      </button>
+      <button class="btn btn-primary" (click)="confirmCrop()">
+        @if (cropStep() === 'crop-mobile') {
+          <span class="material-symbols-outlined text-base">save</span>
+          Save Asset
+        } @else {
+          Next Breakpoint
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Step: Saving -->
+  @if (cropStep() === 'saving') {
+    <h3 class="font-bold text-lg mb-4">Saving Asset...</h3>
+    <div class="flex flex-col items-center gap-4 py-8">
+      <span class="loading loading-spinner loading-lg"></span>
+      <p class="text-base-content/60">{{ saveProgress() }}</p>
+    </div>
+  }
+</cos-modal>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- Delete Confirmation Modal                                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<cos-modal
+  [isOpen]="!!deletingAsset()"
+  (closed)="closeModals()"
+  size="sm"
+  [closeOnBackdrop]="!deleteLoading()">
+  @if (deletingAsset()) {
+    <h3 class="font-bold text-lg mb-4">Delete Asset?</h3>
+
+    @if (deleteError()) {
+      <div class="alert alert-error mb-4">
+        <span>{{ deleteError() }}</span>
+      </div>
+    }
+
+    <p class="mb-2">
+      Are you sure you want to delete <strong>{{ deletingAsset()!.display_name }}</strong>?
+    </p>
+    <p class="text-sm text-base-content/60 mb-4">
+      Slug: <code>{{ deletingAsset()!.slug }}</code> — any dashboard widgets referencing this asset will show an error.
+    </p>
+
+    <div class="cos-modal-action">
+      <button class="btn" (click)="closeModals()" [disabled]="deleteLoading()">Cancel</button>
+      <button class="btn btn-error" (click)="deleteAsset()" [disabled]="deleteLoading()">
+        @if (deleteLoading()) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Deleting...
+        } @else {
+          <span class="material-symbols-outlined text-base">delete</span>
+          Delete
+        }
+      </button>
+    </div>
+  }
+</cos-modal>

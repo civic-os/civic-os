@@ -1,0 +1,6 @@
+.cropper-container {
+  max-height: 500px;
+  overflow: hidden;
+  border-radius: var(--rounded-box, 0.5rem);
+  border: 1px solid oklch(var(--bc) / 0.1);
+}

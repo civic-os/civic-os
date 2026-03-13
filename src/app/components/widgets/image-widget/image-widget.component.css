@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.image-widget-picture {
+  display: block;
+  width: 100%;
+}
+
+.image-widget-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--rounded-box, 0.5rem);
+}
+
+.image-widget-link {
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.image-widget-link:hover {
+  opacity: 0.9;
+}

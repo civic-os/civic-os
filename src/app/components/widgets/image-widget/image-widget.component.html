@@ -1,0 +1,42 @@
+<!-- Image Widget: Art-directed responsive display via <picture> -->
+@if (isLoading()) {
+  <div class="flex items-center justify-center p-8">
+    <span class="loading loading-spinner loading-md"></span>
+  </div>
+} @else if (error()) {
+  <div class="alert alert-warning text-sm">
+    <span class="material-symbols-outlined text-base">image_not_supported</span>
+    <span>{{ error() }}</span>
+  </div>
+} @else if (asset()) {
+  <!--
+    Art-directed responsive images using <picture>/<source>.
+    Browser picks the first <source> whose media query matches.
+    Desktop (>=1024px) > Tablet (>=768px) > Mobile (fallback <img>).
+    Within each source, srcset provides resolution variants (400w, 800w).
+    Images are pre-cropped, so they display at their natural aspect ratio.
+  -->
+  @if (linkUrl()) {
+    <a [routerLink]="linkUrl()" class="block image-widget-link">
+      <picture class="image-widget-picture">
+        @if (hasBreakpointCrop('desktop')) {
+          <source media="(min-width: 1024px)" [srcset]="getSrcsetForBreakpoint('desktop')" sizes="100vw" />
+        }
+        @if (hasBreakpointCrop('tablet')) {
+          <source media="(min-width: 768px)" [srcset]="getSrcsetForBreakpoint('tablet')" sizes="100vw" />
+        }
+        <img [src]="fallbackSrc()" [alt]="altText()" class="image-widget-img" loading="lazy" />
+      </picture>
+    </a>
+  } @else {
+    <picture class="image-widget-picture">
+      @if (hasBreakpointCrop('desktop')) {
+        <source media="(min-width: 1024px)" [srcset]="getSrcsetForBreakpoint('desktop')" sizes="100vw" />
+      }
+      @if (hasBreakpointCrop('tablet')) {
+        <source media="(min-width: 768px)" [srcset]="getSrcsetForBreakpoint('tablet')" sizes="100vw" />
+      }
+      <img [src]="fallbackSrc()" [alt]="altText()" class="image-widget-img" loading="lazy" />
+    </picture>
+  }
+}

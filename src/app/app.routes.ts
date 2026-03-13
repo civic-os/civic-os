@@ -97,6 +97,12 @@ export const routes: Routes = [
         canActivate: [schemaVersionGuard, authGuard]
     },
     {
+        path: 'admin/static-assets',
+        loadComponent: () => import('./pages/static-assets/static-assets.page')
+            .then(m => m.StaticAssetsPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
         path: 'admin/recurring-schedules',
         component: SeriesGroupManagementPage,
         canActivate: [schemaVersionGuard, authGuard]

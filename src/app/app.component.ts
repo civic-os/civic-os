@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
 import { SchemaEntityTable } from './interfaces/entity';
 import { AuthService } from './services/auth.service';
 import { UserManagementService } from './services/user-management.service';
+import { StaticAssetsService } from './services/static-assets.service';
 import { DashboardSelectorComponent } from './components/dashboard-selector/dashboard-selector.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
@@ -57,6 +58,7 @@ export class AppComponent {
   public themeService = inject(ThemeService);
   public impersonation = inject(ImpersonationService);
   private userManagement = inject(UserManagementService);
+  private staticAssets = inject(StaticAssetsService);
 
   public drawerOpen: boolean = false;
   title = 'frontend';
@@ -118,12 +120,21 @@ export class AppComponent {
     { initialValue: false }
   );
 
+  public hasStaticAssetPermission = toSignal(
+    this.staticAssets.hasStaticAssetAccess().pipe(
+      catchError(() => of(false))
+    ),
+    { initialValue: false }
+  );
+
   // Show Admin section if user is admin OR has access to feature-specific pages
   public showAdminSection = computed(() => {
     // Admin always sees the section
     if (this.auth.isAdmin()) return true;
     // Non-admins see it if they have user management access
     if (this.hasUserManagementPermission()) return true;
+    // Non-admins see it if they have static asset access
+    if (this.hasStaticAssetPermission()) return true;
     // Non-admins see it if they have recurring schedule access
     if (this.hasRecurringEntities() && this.hasRecurringSchedulePermission()) return true;
     // Non-admins see it if they have payment access
@@ -213,6 +224,11 @@ export class AppComponent {
 
   public navigateToUserManagement() {
     this.router.navigate(['admin', 'users']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToStaticAssets() {
+    this.router.navigate(['admin', 'static-assets']);
     this.drawerOpen = false;
   }
 

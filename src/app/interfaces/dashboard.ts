@@ -233,3 +233,96 @@ export interface NavButtonsWidgetConfig {
     variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'link';  // Button style (default: 'outline')
   }>;
 }
+
+/**
+ * Configuration for image widget (v0.38.0).
+ * Displays a static image asset with art-directed responsive crops.
+ * Uses <picture>/<source> elements for breakpoint-aware display.
+ * Stored in dashboard_widgets.config as JSONB.
+ */
+export interface ImageWidgetConfig {
+  // The slug of the static asset to display (required)
+  // References metadata.static_assets.slug
+  static_asset: string;
+
+  // Optional CSS object-fit for the image (default: 'cover')
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none';
+
+  // Optional max height constraint (e.g., '300px', '50vh')
+  maxHeight?: string;
+
+  // Optional link URL — clicking the image navigates here
+  linkUrl?: string;
+}
+
+/**
+ * Static asset record from metadata.static_assets table.
+ * Represents an uploaded image with art-directed responsive crops.
+ */
+export interface StaticAsset {
+  id: string;       // UUID
+  slug: string;
+  display_name: string;
+  alt_text: string | null;
+  original_file_id: string;    // UUID FK to metadata.files
+  desktop_file_id: string | null;
+  tablet_file_id: string | null;
+  mobile_file_id: string | null;
+  crop_state: CropState | null;
+  created_by: string | null;   // UUID
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Crop coordinates per breakpoint, stored in static_assets.crop_state JSONB.
+ * Used to restore previous crop selections when re-editing.
+ */
+export interface CropState {
+  desktop?: CropCoordinates;
+  tablet?: CropCoordinates;
+  mobile?: CropCoordinates;
+  /** Name of the selected crop preset profile (e.g., "Card Image", "Hero Banner") */
+  profileName?: string;
+}
+
+/**
+ * Crop coordinates for a single breakpoint.
+ * Describes the region of the original image that was cropped.
+ */
+export interface CropCoordinates {
+  x: number;       // Left offset in pixels (relative to original image)
+  y: number;       // Top offset in pixels
+  width: number;   // Crop width in pixels
+  height: number;  // Crop height in pixels
+  ratio: number;   // Aspect ratio (width/height), e.g., 1.778 for 16:9
+  /** Viewport-relative crop box position for restoring via ngx-image-cropper [cropper] input */
+  cropperPosition?: { x1: number; y1: number; x2: number; y2: number };
+  /** Whether the aspect ratio was unlocked (freeform) when this crop was made */
+  ratioLocked?: boolean;
+}
+
+/**
+ * Breakpoint definition for the crop workflow.
+ * Defines the named breakpoints and their default aspect ratios.
+ */
+export interface CropBreakpoint {
+  key: 'desktop' | 'tablet' | 'mobile';
+  label: string;          // e.g., 'Desktop (16:9)'
+  ratio: number;          // Width/height ratio
+  mediaQuery: string;     // CSS media query for <source> element
+}
+
+/**
+ * Preset crop profiles for common use cases.
+ * Pre-fills the 3 breakpoint aspect ratios as a UX convenience.
+ */
+export interface CropPresetProfile {
+  name: string;           // e.g., 'Hero Banner'
+  description: string;
+  breakpoints: {
+    desktop: number;      // Aspect ratio for desktop
+    tablet: number;       // Aspect ratio for tablet
+    mobile: number;       // Aspect ratio for mobile
+  };
+}

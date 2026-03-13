@@ -1,5 +1,5 @@
 <!-- Widget Container with DaisyUI Card Styling -->
-<div class="widget-container card bg-base-100 shadow-md">
+<div class="widget-container" [class.card]="!borderless()" [class.bg-base-100]="!borderless()" [class.shadow-md]="!borderless()">
   <!-- Widget Title (Optional) -->
   @if (title()) {
     <div class="card-header px-4 py-2 border-b border-base-300">

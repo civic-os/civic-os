@@ -30,6 +30,7 @@ import { MapWidgetComponent } from './components/widgets/map-widget/map-widget.c
 import { DashboardNavigationWidgetComponent } from './components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component';
 import { CalendarWidgetComponent } from './components/widgets/calendar-widget/calendar-widget.component';
 import { NavButtonsWidgetComponent } from './components/widgets/nav-buttons-widget/nav-buttons-widget.component';
+import { ImageWidgetComponent } from './components/widgets/image-widget/image-widget.component';
 import { provideMarkdown } from 'ngx-markdown';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
@@ -103,6 +104,7 @@ export const appConfig: ApplicationConfig = {
       registry.register('dashboard_navigation', DashboardNavigationWidgetComponent); // Phase 2
       registry.register('calendar', CalendarWidgetComponent);           // Phase 2
       registry.register('nav_buttons', NavButtonsWidgetComponent);      // Phase 2
+      registry.register('image', ImageWidgetComponent);                  // v0.38.0
     })
   ]
 };

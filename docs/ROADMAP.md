@@ -99,6 +99,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 ### Dashboards (Phased Development)
 - [x] **Phase 1 - Core Infrastructure**: Database schema, widget registry, markdown widget, static dashboard with navigation
 - [x] **Phase 2 - Dynamic Widgets**: Filtered list widget, map widget with clustering, calendar widget, auto-refresh infrastructure
+- [x] **Static Assets & Image Widget** (v0.38.0): Upload images with responsive breakpoint crops (desktop 16:9, tablet 4:3, mobile 1:1), art-directed `<picture>` display widget, crop presets (Hero Banner, Card Image, Square Only), freeform aspect ratio with lock/unlock toggle, crop position memory across breakpoint navigation. Admin page at `/admin/static-assets`.
 - [ ] **Phase 3 - Management**: Dashboard management UI, widget editor, user preferences, global filter bar
   - [ ] **Role-based default dashboards** - `default_for_roles TEXT[]` column on `metadata.dashboards` so different roles land on different dashboards (e.g., staff → Staff Portal, managers → Admin Overview)
 - [ ] **Phase 4 - Polish**: Drag-and-drop reordering, dashboard templates, embedded links, mobile optimizations

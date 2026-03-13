@@ -201,6 +201,17 @@
                 </a>
               </li>
             }
+            <!-- Static Assets (permission-based) -->
+            @if (hasStaticAssetPermission()) {
+              <li (click)="navigateToStaticAssets()">
+                <a [class.menu-active]="isRouteActive('/admin/static-assets')"
+                   [class.font-bold]="isRouteActive('/admin/static-assets')"
+                   [class.opacity-85]="!isRouteActive('/admin/static-assets')">
+                  <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                  Static Assets
+                </a>
+              </li>
+            }
             <!-- Feature-specific items (shown based on entity config + user permissions) -->
             @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
               <li (click)="navigateToRecurringSchedules()">

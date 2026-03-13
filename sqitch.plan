@@ -55,3 +55,4 @@ v0-36-0-notification-role-helpers [v0-36-0-add-role-key] 2026-03-13T12:00:00Z Da
 v0-36-0-keycloak-sync-triggers [v0-36-0-notification-role-helpers] 2026-03-13T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Move Keycloak sync to triggers, refactor refresh_current_user to diff-based
 v0-37-0-dashboard-features [v0-36-0-keycloak-sync-triggers] 2026-03-13T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add show_title toggle and role-based default dashboards
 v0-37-0-fix-sms-preference-trigger [v0-37-0-dashboard-features] 2026-03-13T21:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix SMS preference trigger to fire on phone update, backfill existing users
+v0-38-0-add-static-assets [v0-37-0-fix-sms-preference-trigger] 2026-03-13T22:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add static assets with responsive breakpoint crops and image dashboard widget
