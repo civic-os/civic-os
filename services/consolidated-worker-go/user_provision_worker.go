@@ -237,7 +237,7 @@ func (w *UserProvisionWorker) insertUserRoles(ctx context.Context, keycloakUserI
 			INSERT INTO metadata.user_roles (user_id, role_id, synced_at)
 			SELECT $1, r.id, NOW()
 			FROM metadata.roles r
-			WHERE r.display_name = $2
+			WHERE r.role_key = $2
 			ON CONFLICT (user_id, role_id) DO UPDATE SET synced_at = NOW()
 		`, keycloakUserID, roleName)
 		if err != nil {
