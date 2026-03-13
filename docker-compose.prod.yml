@@ -176,6 +176,12 @@ services:
       S3_ENDPOINT: ${S3_PUBLIC_ENDPOINT}
       S3_BUCKET: ${S3_BUCKET:-civic-os-files}
 
+      # SMS UI configuration (optional, v0.35.0+)
+      SMS_CONFIGURED: ${SMS_CONFIGURED:-false}
+
+      # Theme configuration (optional)
+      DEFAULT_THEME: ${DEFAULT_THEME:-corporate}
+
       # Analytics configuration (optional)
       MATOMO_URL: ${MATOMO_URL:-}
       MATOMO_SITE_ID: ${MATOMO_SITE_ID:-}

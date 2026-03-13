@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,8 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, signal, computed, WritableSignal, Signal } from '@angular/core';
+import { Injectable, signal, computed, effect, WritableSignal, Signal } from '@angular/core';
 import { parse, sRGB } from '@texel/color';
+import { getThemeConfig } from '../config/runtime';
 
 export interface MapTileConfig {
   tileUrl: string;
@@ -46,8 +47,8 @@ export class ThemeService {
   // localStorage key for theme persistence
   private readonly STORAGE_KEY = 'civic-os-theme';
 
-  // Default theme
-  private readonly DEFAULT_THEME = 'corporate';
+  // Default theme (from runtime config or hardcoded fallback)
+  private readonly DEFAULT_THEME = getThemeConfig().defaultTheme;
 
   // Current theme signal (writable)
   private readonly _theme: WritableSignal<string>;
@@ -74,6 +75,15 @@ export class ThemeService {
       // Trigger recomputation when theme changes
       const currentTheme = this._theme();
       return this.calculateIsDarkTheme();
+    });
+
+    // Toggle theme-light / theme-dark CSS classes on <html> for class-based selectors
+    // (e.g., Prism.js syntax highlighting) that work across all 35+ themes
+    effect(() => {
+      if (typeof document === 'undefined') return;
+      const dark = this.isDark();
+      document.documentElement.classList.toggle('theme-dark', dark);
+      document.documentElement.classList.toggle('theme-light', !dark);
     });
 
     // Watch for external theme attribute changes on document element

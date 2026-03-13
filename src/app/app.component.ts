@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -68,6 +68,9 @@ export class AppComponent {
 
   // Control settings modal visibility
   showSettingsModal = signal(false);
+
+  // Which tab the settings modal opens to ('preferences' or 'colors')
+  settingsInitialTab = signal('preferences');
 
   // Control about modal visibility
   showAboutModal = signal(false);
@@ -243,9 +246,18 @@ export class AppComponent {
   }
 
   /**
-   * Open the settings modal
+   * Open the settings modal on the Preferences tab
    */
   public openSettings() {
+    this.settingsInitialTab.set('preferences');
+    this.showSettingsModal.set(true);
+  }
+
+  /**
+   * Open the settings modal on the Colors tab
+   */
+  public openSettingsOnColors() {
+    this.settingsInitialTab.set('colors');
     this.showSettingsModal.set(true);
   }
 

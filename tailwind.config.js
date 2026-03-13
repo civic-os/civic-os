@@ -42,7 +42,15 @@ module.exports = {
   plugins: [
     require('@tailwindcss/typography'),
     require("daisyui")({
-      themes: ["light", "dark", "corporate", "nord", "emerald"]
+      themes: [
+        "light", "dark", "corporate", "nord", "emerald",
+        "abyss", "acid", "aqua", "autumn", "black",
+        "bumblebee", "business", "caramellatte", "cmyk", "coffee",
+        "cupcake", "cyberpunk", "dim", "dracula", "fantasy",
+        "forest", "garden", "halloween", "lemonade", "lofi",
+        "luxury", "night", "pastel", "retro", "silk",
+        "sunset", "synthwave", "valentine", "winter", "wireframe"
+      ]
     })
   ]
 }

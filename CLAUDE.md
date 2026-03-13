@@ -417,7 +417,9 @@ export class MyPageComponent {
 ## Styling
 
 - **Tailwind CSS** for utility classes
-- **DaisyUI 5** component library (themes: light, dark, corporate, nord, emerald)
+- **DaisyUI 5** component library — all 35 built-in themes enabled. Default: `corporate`. Configurable per deployment via `DEFAULT_THEME` Docker env var. Users choose their theme in Settings > Colors.
+- Theme constants in `src/app/constants/themes.ts` — recommended list, auto-detection, label helper
+- `ThemeService` toggles `theme-light`/`theme-dark` CSS classes on `<html>` for scalable light/dark selectors (used by Prism.js in `src/styles.css`)
 - Global styles in `src/styles.css`
 
 **IMPORTANT: This project uses DaisyUI 5, not DaisyUI 4.** Many class names changed between versions. See `docs/development/ANGULAR.md` (DaisyUI 5 Migration section) for the full v4→v5 mapping table. Always verify class names against the [DaisyUI 5 documentation](https://daisyui.com/components/).

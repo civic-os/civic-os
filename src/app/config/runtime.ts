@@ -58,6 +58,9 @@ declare global {
       sms?: {
         configured: boolean;
       };
+      theme?: {
+        defaultTheme: string;
+      };
     };
   }
 }
@@ -182,4 +185,17 @@ export function getApiDocsUrl(): string {
  */
 export function getStripePublishableKey(): string {
   return window.civicOsConfig?.stripe.publishableKey || environment.stripe.publishableKey;
+}
+
+/**
+ * Get theme configuration.
+ * Used by ThemeService to determine the default theme.
+ *
+ * @returns Theme config object with defaultTheme. Falls back to 'corporate' if not configured.
+ */
+export function getThemeConfig(): { defaultTheme: string } {
+  const config = window.civicOsConfig?.theme || environment.theme;
+  return {
+    defaultTheme: config?.defaultTheme || 'corporate'
+  };
 }

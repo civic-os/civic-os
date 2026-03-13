@@ -110,8 +110,18 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 | `MAP_DEFAULT_ZOOM` | No | `13` | Default map zoom level |
 | `S3_ENDPOINT` | Yes* | `http://localhost:9000` | S3-compatible storage endpoint (browser-accessible URL) |
 | `S3_BUCKET` | Yes* | `civic-os-files` | S3 bucket name for file storage |
+| `SMS_CONFIGURED` | No | `false` | Show SMS notification preferences in Settings modal |
+| `DEFAULT_THEME` | No | `corporate` | Default DaisyUI color theme for new users (before they choose their own). See [Available Themes](#available-themes) |
 
 *Required if using file upload features (v0.5.0+)
+
+### Available Themes
+
+The frontend includes all 35 DaisyUI 5 themes. Users can change their theme anytime via Settings > Colors. The `DEFAULT_THEME` env var sets what new users see before they've made a choice.
+
+**Light themes:** `light`, `corporate`, `emerald`, `nord`, `acid`, `aqua`, `autumn`, `bumblebee`, `caramellatte`, `cmyk`, `cupcake`, `fantasy`, `garden`, `lemonade`, `lofi`, `pastel`, `retro`, `silk`, `valentine`, `winter`, `wireframe`
+
+**Dark themes:** `dark`, `dim`, `abyss`, `black`, `business`, `coffee`, `cyberpunk`, `dracula`, `forest`, `halloween`, `luxury`, `night`, `sunset`, `synthwave`
 
 ### PostgREST Container
 

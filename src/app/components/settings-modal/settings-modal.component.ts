@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -25,6 +25,7 @@ import { ImpersonationService } from '../../services/impersonation.service';
 import { PermissionsService, Role } from '../../services/permissions.service';
 import { getMatomoConfig, getSmsConfig } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { ThemePickerComponent } from '../theme-picker/theme-picker.component';
 
 /**
  * Settings modal component for user preferences.
@@ -35,7 +36,7 @@ import { CosModalComponent } from '../cos-modal/cos-modal.component';
  */
 @Component({
   selector: 'app-settings-modal',
-  imports: [CommonModule, FormsModule, CosModalComponent],
+  imports: [CommonModule, FormsModule, CosModalComponent, ThemePickerComponent],
   templateUrl: './settings-modal.component.html',
   styleUrl: './settings-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -55,8 +56,14 @@ export class SettingsModalComponent {
   // Input: Control visibility of modal
   showModal = input.required<boolean>();
 
+  // Input: Which tab to show when modal opens ('preferences' or 'colors')
+  initialTab = input<string>('preferences');
+
   // Output: Notify parent to close modal
   closeModal = output<void>();
+
+  // State: Currently selected tab
+  selectedTab = signal<string>('preferences');
 
   // State: Analytics enabled/disabled preference
   analyticsEnabled = signal<boolean>(true);
@@ -79,9 +86,10 @@ export class SettingsModalComponent {
     // Load initial preference from localStorage
     this.analyticsEnabled.set(this.analyticsService.getUserPreference());
 
-    // Load preferences and roles when modal opens
+    // Load preferences and roles when modal opens, reset tab to initialTab
     effect(() => {
       if (this.showModal()) {
+        this.selectedTab.set(this.initialTab());
         this.loadNotificationPreferences();
 
         // Load available roles for admins

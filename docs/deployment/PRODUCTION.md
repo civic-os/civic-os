@@ -201,6 +201,12 @@ SWAGGER_URL=https://api.yourdomain.com:8080  # Swagger UI for API docs link in A
 # When false, the SMS preferences section is hidden in the Settings modal
 SMS_CONFIGURED=false
 
+# Theme Configuration (Optional)
+# Sets the default DaisyUI color theme for new users (before they pick their own).
+# Users can always change via Settings > Colors. All 35 DaisyUI 5 themes available.
+# See docker/README.md for the full list of light and dark theme names.
+DEFAULT_THEME=corporate
+
 # Map Configuration (Optional)
 MAP_DEFAULT_LAT=43.0125
 MAP_DEFAULT_LNG=-83.6875
@@ -397,6 +403,7 @@ data:
   S3_ENDPOINT: "https://s3.yourdomain.com"
   S3_BUCKET: "civic-os-files-prod"
   SMS_CONFIGURED: "false"
+  DEFAULT_THEME: "corporate"
 ```
 
 ### Step 3: Create Secrets

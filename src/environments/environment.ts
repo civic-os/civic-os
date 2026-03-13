@@ -45,5 +45,8 @@ export const environment: Environment = {
     },
     sms: {
         configured: false
+    },
+    theme: {
+        defaultTheme: 'corporate'
     }
 };

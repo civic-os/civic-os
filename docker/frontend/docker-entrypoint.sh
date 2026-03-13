@@ -24,6 +24,7 @@ echo "  MATOMO_URL: $MATOMO_URL"
 echo "  MATOMO_SITE_ID: $MATOMO_SITE_ID"
 echo "  MATOMO_ENABLED: $MATOMO_ENABLED"
 echo "  SMS_CONFIGURED: $SMS_CONFIGURED"
+echo "  DEFAULT_THEME: $DEFAULT_THEME"
 echo ""
 
 # Generate inline config script
@@ -60,6 +61,9 @@ window.civicOsConfig = {
   },
   sms: {
     configured: '${SMS_CONFIGURED}' === 'true'
+  },
+  theme: {
+    defaultTheme: '${DEFAULT_THEME}' || 'corporate'
   }
 };
 </script>

@@ -161,7 +161,7 @@ describe('AppComponent', () => {
       expect(app.themeService).toBe(mockThemeService);
     });
 
-    it('should render theme dropdown with bindings', () => {
+    it('should render palette icon button for theme picker', () => {
       const fixture = TestBed.createComponent(AppComponent);
       fixture.detectChanges();
 
@@ -184,14 +184,16 @@ describe('AppComponent', () => {
       });
 
       const compiled = fixture.nativeElement as HTMLElement;
-      const themeInputs = compiled.querySelectorAll('.theme-controller');
+      const paletteButton = compiled.querySelector('button[aria-label="Change theme"]');
 
-      // Should have 5 theme options (corporate, light, dark, nord, emerald)
-      expect(themeInputs.length).toBe(5);
+      expect(paletteButton).toBeTruthy();
+      // Old theme dropdown should no longer exist
+      expect(compiled.querySelectorAll('.theme-controller').length).toBe(0);
     });
 
-    it('should mark corporate theme as checked by default', () => {
+    it('should open settings modal on Colors tab when palette button is clicked', () => {
       const fixture = TestBed.createComponent(AppComponent);
+      const app = fixture.componentInstance;
       fixture.detectChanges();
 
       // Handle HTTP requests
@@ -213,15 +215,17 @@ describe('AppComponent', () => {
       });
 
       const compiled = fixture.nativeElement as HTMLElement;
-      const corporateInput = compiled.querySelector('input[value="corporate"]') as HTMLInputElement;
+      const paletteButton = compiled.querySelector('button[aria-label="Change theme"]') as HTMLButtonElement;
 
-      expect(corporateInput).toBeTruthy();
-      expect(corporateInput.checked).toBe(true);
+      paletteButton.click();
+
+      expect(app.showSettingsModal()).toBe(true);
+      expect(app.settingsInitialTab()).toBe('colors');
     });
 
-    it('should call themeService.setTheme when theme radio button changes', () => {
+    it('should default settingsInitialTab to preferences', () => {
       const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
+      const app = fixture.componentInstance;
 
       // Handle HTTP requests
       const allReqs = httpMock.match(() => true);
@@ -241,14 +245,11 @@ describe('AppComponent', () => {
         }
       });
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const darkInput = compiled.querySelector('input[value="dark"]') as HTMLInputElement;
+      expect(app.settingsInitialTab()).toBe('preferences');
 
-      // Simulate clicking the dark theme radio button
-      darkInput.click();
-
-      // Verify setTheme was called with 'dark'
-      expect(mockThemeService.setTheme).toHaveBeenCalledWith('dark');
+      // Profile menu "Preferences" keeps the default
+      app.openSettings();
+      expect(app.settingsInitialTab()).toBe('preferences');
     });
   });
 

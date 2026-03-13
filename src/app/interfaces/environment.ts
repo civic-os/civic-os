@@ -43,5 +43,8 @@ export interface Environment {
     },
     sms?: {
         configured: boolean
+    },
+    theme?: {
+        defaultTheme: string
     }
 }
