@@ -4,7 +4,7 @@
 **Application**: Staff Portal
 **Domain**: `ffsc.pilot.civic-os.org` → vanity `staff.freedomschoolscollab.org`
 **Payments**: Not enabled
-**Civic OS Version**: 0.38.1
+**Civic OS Version**: 0.38.2
 
 ## Infrastructure
 
