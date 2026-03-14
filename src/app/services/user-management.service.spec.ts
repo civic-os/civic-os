@@ -458,7 +458,7 @@ describe('UserManagementService', () => {
 
       service.hasUserManagementAccess().subscribe(result => {
         expect(result).toBe(true);
-        expect(mockAuthService.hasPermission).toHaveBeenCalledWith('civic_os_users_private', 'read');
+        expect(mockAuthService.hasPermission).toHaveBeenCalledWith('civic_os_users_private', 'update');
         done();
       });
     });
