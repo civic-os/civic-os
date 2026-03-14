@@ -123,11 +123,13 @@ $$;
 -- PostgreSQL does not allow CREATE OR REPLACE VIEW to change column types.
 
 DROP VIEW IF EXISTS staff_directory;
-CREATE VIEW staff_directory AS
+CREATE VIEW staff_directory
+WITH (security_invoker = true) AS
 SELECT
   sm.id,
   cup.display_name,
   cup.email,
+  cup.phone AS phone_number,
   sm.role_id,
   sr.display_name AS staff_role,
   sm.site_id,
@@ -137,7 +139,7 @@ JOIN metadata.civic_os_users_private cup ON cup.id = sm.user_id
 LEFT JOIN staff_roles sr ON sr.id = sm.role_id
 LEFT JOIN sites s ON s.id = sm.site_id;
 
--- Re-grant after CREATE OR REPLACE
+-- Re-grant after DROP + CREATE
 GRANT SELECT ON staff_directory TO authenticated;
 
 -- =============================================================================
@@ -178,6 +180,14 @@ SET category_entity_type = NULL,
     join_table = 'staff_roles',
     join_column = 'display_name'
 WHERE table_name = 'staff_directory' AND column_name = 'role_id';
+
+-- staff_directory.phone_number — added to VIEW from civic_os_users_private
+INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_detail, show_on_create, show_on_edit)
+VALUES ('staff_directory', 'phone_number', 'Phone', 3, TRUE, TRUE, FALSE, FALSE)
+ON CONFLICT (table_name, column_name) DO UPDATE SET
+  display_name = EXCLUDED.display_name,
+  sort_order = EXCLUDED.sort_order,
+  show_on_list = EXCLUDED.show_on_list;
 
 -- =============================================================================
 -- 12. GRANTS + RLS + PERMISSIONS

@@ -743,7 +743,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
   SET filterable = TRUE, category_entity_type = 'staff_role', show_on_list = FALSE;
 
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_detail, show_on_create, show_on_edit, filterable, join_table, join_column)
-VALUES ('staff_directory', 'site_id', 'Site Filter', 6, FALSE, FALSE, FALSE, FALSE, TRUE, 'sites', 'id')
+VALUES ('staff_directory', 'site_id', 'Site Filter', 6, FALSE, FALSE, FALSE, FALSE, TRUE, 'sites', 'display_name')
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET filterable = TRUE, join_table = 'sites', join_column = 'id', show_on_list = FALSE;
 

@@ -209,7 +209,8 @@ export class ListPage implements OnInit, OnDestroy {
         this.sortState$,
         this.filters$,
         this.pagination$,
-        this.calendarState$
+        this.calendarState$,
+        this.filterProperties$
       ]).pipe(
         // Batch synchronous emissions during initialization
         debounceTime(0),
@@ -229,7 +230,7 @@ export class ListPage implements OnInit, OnDestroy {
                  JSON.stringify(prevCalendarState) === JSON.stringify(currCalendarState);
         }),
         tap(() => this.isLoading.set(true)),
-        switchMap(([entity, props, search, sortState, filters, pagination, calendarState]) => {
+        switchMap(([entity, props, search, sortState, filters, pagination, calendarState, filterProps]) => {
           if (props && props.length > 0 && p['entityKey']) {
             let columns = props
               .map(x => SchemaService.propertyToSelectString(x));
@@ -249,8 +250,12 @@ export class ListPage implements OnInit, OnDestroy {
             }
 
             // Filter out any filters that don't match current entity's columns
-            const validColumnNames = props.map(p => p.column_name);
-            let validFilters = filters.filter(f => validColumnNames.includes(f.column));
+            // Include both list-visible and filterable-only columns (e.g., hidden FK columns on VIEWs)
+            const validColumnNames = new Set([
+              ...props.map(p => p.column_name),
+              ...filterProps.map(p => p.column_name)
+            ]);
+            let validFilters = filters.filter(f => validColumnNames.has(f.column));
 
             // Add calendar date range filter if calendar is shown and state is set
             if (entity?.show_calendar && entity?.calendar_property_name && calendarState) {
@@ -436,9 +441,10 @@ export class ListPage implements OnInit, OnDestroy {
   // Range filters (gte+lte pairs) are merged into single chips
   public filterChips$: Observable<FilterChip[]> = combineLatest([
     this.filters$,
-    this.displayProperties$
+    this.displayProperties$,
+    this.filterProperties$
   ]).pipe(
-    map(([filters, props]) => {
+    map(([filters, props, filterProps]) => {
       if (filters.length === 0) return [];
 
       // Group filters by column
@@ -453,8 +459,11 @@ export class ListPage implements OnInit, OnDestroy {
       // Build chips, merging range filters
       const chips: FilterChip[] = [];
 
+      // Build combined property lookup (display props + filter-only props)
+      const allProps = [...props, ...filterProps.filter(fp => !props.some(p => p.column_name === fp.column_name))];
+
       columnGroups.forEach((filtersForColumn, column) => {
-        const prop = props.find(p => p.column_name === column);
+        const prop = allProps.find(p => p.column_name === column);
         const columnLabel = prop?.display_name || column;
 
         // Check if this is a range filter (has gte and/or lte)
@@ -600,13 +609,11 @@ export class ListPage implements OnInit, OnDestroy {
       const filterableColumns = new Set(filterableProps.map(p => p.column_name));
       allFilters = currentFilters.filter(f => !filterableColumns.has(f.column));
     } else {
-      // FilterBar is updating specific columns
-      // Get columns that FilterBar is explicitly updating
-      const updatedColumns = new Set(filters.map(f => f.column));
-
-      // Preserve filters for columns NOT being updated by FilterBar
-      // This handles filters from Related Records or other sources that FilterBar doesn't know about
-      const preservedFilters = currentFilters.filter(f => !updatedColumns.has(f.column));
+      // FilterBar is updating — all filterable columns are managed by FilterBar
+      // Preserve only filters for non-filterable columns (e.g., from Related Records)
+      const filterableProps = this.filterablePropertiesSignal();
+      const filterableColumns = new Set(filterableProps.map(p => p.column_name));
+      const preservedFilters = currentFilters.filter(f => !filterableColumns.has(f.column));
 
       // Combine preserved filters with new filters from FilterBar
       allFilters = [...preservedFilters, ...filters];

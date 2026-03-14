@@ -691,7 +691,7 @@ WHERE dashboard_id IN (
 -- Insert banner widget at sort_order 1 on each dashboard
 INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width, height)
 SELECT d.id, 'image', NULL,
-  jsonb_build_object('staticAsset', 'ffsc-banner', 'altText', 'Flint Freedom Schools Collaborative'),
+  jsonb_build_object('static_asset', 'ffsc-banner', 'altText', 'Flint Freedom Schools Collaborative'),
   1, 2, 2
 FROM metadata.dashboards d
 WHERE d.display_name IN ('Welcome', 'Staff Portal', 'Admin Overview');

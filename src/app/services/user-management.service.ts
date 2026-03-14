@@ -338,7 +338,7 @@ export class UserManagementService {
   }
 
   hasUserManagementAccess(): Observable<boolean> {
-    return this.auth.hasPermission('civic_os_users_private', 'read').pipe(
+    return this.auth.hasPermission('civic_os_users_private', 'update').pipe(
       catchError(() => of(false))
     );
   }
