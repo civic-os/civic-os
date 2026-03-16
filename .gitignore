@@ -46,8 +46,8 @@ Thumbs.db
 # Example environment files
 examples/*/.env
 
-# Prod environment files
-instances/**/*.sql
+# Instance configs (managed in private deployments repo)
+instances/
 
 # Accessibility testing artifacts
 backstop_data/

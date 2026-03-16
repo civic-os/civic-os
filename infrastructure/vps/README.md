@@ -5,6 +5,8 @@ Deploy Civic OS to a single VPS (DigitalOcean Droplet) with:
 - **docker-rollout** for zero-downtime deployments
 - **Managed PostgreSQL** for database (external)
 
+> **Note**: Production instance configs (SQL scripts, deployment docs, Keycloak realms) and operational `.env` files are managed in the private `deployments` repository.
+
 ## Architecture
 
 ```
