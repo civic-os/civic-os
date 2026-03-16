@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-const telnyxAPIURL = "https://api.telnyx.com/v2/messages"
+var telnyxAPIURL = "https://api.telnyx.com/v2/messages"
+
+// setTelnyxAPIURL overrides the API endpoint (used by tests with httptest).
+func setTelnyxAPIURL(url string) { telnyxAPIURL = url }
 
 // TelnyxClient sends transactional SMS via the Telnyx REST API.
 // Uses stdlib net/http — no external dependencies.
