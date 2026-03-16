@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # Civic OS VPS Deployment Script
@@ -131,5 +131,5 @@ log_info "Deployment complete!"
 echo ""
 echo "Your application is available at:"
 echo "  Frontend: https://\${APP_DOMAIN}"
-echo "  API:      https://api.\${APP_DOMAIN}"
-echo "  Docs:     https://docs.\${APP_DOMAIN}"
+echo "  API:      https://\${APP_DOMAIN}/_/api/"
+echo "  Docs:     https://\${APP_DOMAIN}/_/docs/"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # Civic OS VPS Provisioning Script
