@@ -200,7 +200,7 @@ SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'TABLE_NAME'
-  AND r.display_name = 'admin'
+  AND r.role_key = 'admin'
 ON CONFLICT DO NOTHING;
 
 -- Example: Grant read permission to all users (including anonymous)
@@ -210,7 +210,7 @@ ON CONFLICT DO NOTHING;
 -- CROSS JOIN metadata.roles r
 -- WHERE p.table_name = 'TABLE_NAME'
 --   AND p.permission = 'read'
---   AND r.display_name IN ('anonymous', 'user', 'editor', 'admin')
+--   AND r.role_key IN ('anonymous', 'user', 'editor', 'admin')
 -- ON CONFLICT DO NOTHING;
 
 -- Example: Grant create/update to authenticated users
@@ -220,7 +220,7 @@ ON CONFLICT DO NOTHING;
 -- CROSS JOIN metadata.roles r
 -- WHERE p.table_name = 'TABLE_NAME'
 --   AND p.permission IN ('create', 'update')
---   AND r.display_name IN ('user', 'editor', 'admin')
+--   AND r.role_key IN ('user', 'editor', 'admin')
 -- ON CONFLICT DO NOTHING;
 
 -- Example: Grant delete to editors only
@@ -230,7 +230,7 @@ ON CONFLICT DO NOTHING;
 -- CROSS JOIN metadata.roles r
 -- WHERE p.table_name = 'TABLE_NAME'
 --   AND p.permission = 'delete'
---   AND r.display_name IN ('editor', 'admin')
+--   AND r.role_key IN ('editor', 'admin')
 -- ON CONFLICT DO NOTHING;
 
 -- Notify PostgREST to reload schema cache

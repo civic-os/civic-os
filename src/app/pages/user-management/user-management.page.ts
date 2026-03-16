@@ -143,7 +143,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                   <td>
                     <div class="flex flex-wrap gap-1">
                       @for (role of user.roles || []; track role) {
-                        <span class="badge badge-sm badge-outline">{{ role }}</span>
+                        <span class="badge badge-sm badge-outline">{{ getRoleDisplayName(role) }}</span>
                       }
                     </div>
                   </td>
@@ -344,13 +344,6 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
               </label>
             }
           </div>
-          @if (getNonManageableRoles().length > 0) {
-            <div class="mt-2 flex flex-wrap gap-1">
-              @for (role of getNonManageableRoles(); track role) {
-                <span class="badge badge-sm badge-ghost" title="You cannot manage this role">{{ role }}</span>
-              }
-            </div>
-          }
 
           <!-- Divider -->
           <div class="divider">Notifications</div>
@@ -645,9 +638,9 @@ export class UserManagementPage {
     this.loadUsers();
   }
 
-  getNonManageableRoles(): string[] {
-    const manageable = new Set(this.manageableRoles().map(r => r.role_key));
-    return Array.from(this.editRoles()).filter(r => !manageable.has(r));
+  getRoleDisplayName(roleKey: string): string {
+    const role = this.manageableRoles().find(r => r.role_key === roleKey);
+    return role?.display_name ?? roleKey;
   }
 
   toggleEditRole(roleName: string): void {

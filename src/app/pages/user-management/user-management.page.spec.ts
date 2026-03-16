@@ -529,36 +529,14 @@ describe('UserManagementPage', () => {
     });
   });
 
-  describe('Non-Manageable Roles', () => {
-    const mockActiveUser: ManagedUser = {
-      id: 'uuid-123',
-      display_name: 'John D.',
-      full_name: 'John Doe',
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john@example.com',
-      phone: null,
-      status: 'active',
-      error_message: null,
-      roles: ['user', 'editor'],
-      created_at: '2025-01-01',
-      provision_id: null,
-      email_notif_enabled: null,
-      sms_notif_enabled: null,
-      sms_opted_out: null
-    };
-
-    it('should return roles the current user cannot manage', () => {
-      const userWithAdmin = { ...mockActiveUser, roles: ['user', 'editor', 'admin'] as string[] };
-      component.openEditModal(userWithAdmin);
-
-      expect(component.getNonManageableRoles()).toEqual(['admin']);
+  describe('getRoleDisplayName()', () => {
+    it('should return display_name for known role keys', () => {
+      expect(component.getRoleDisplayName('user')).toBe('user');
+      expect(component.getRoleDisplayName('editor')).toBe('editor');
     });
 
-    it('should return empty array when all roles are manageable', () => {
-      component.openEditModal(mockActiveUser);
-
-      expect(component.getNonManageableRoles()).toEqual([]);
+    it('should fall back to raw key for unknown roles', () => {
+      expect(component.getRoleDisplayName('unknown_role')).toBe('unknown_role');
     });
   });
 
