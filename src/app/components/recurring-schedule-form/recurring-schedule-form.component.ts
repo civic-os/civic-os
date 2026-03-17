@@ -248,7 +248,12 @@ export class RecurringScheduleFormComponent implements OnInit {
     if (valueDate && (!endDate || endDate <= valueDate)) {
       const startDate = new Date(valueDate.getTime());
       startDate.setHours(startDate.getHours() + 1);
-      this.dtendInternal.set(this.formatDateTimeLocal(startDate.toISOString()));
+      // Format directly from Date's local components — avoid toISOString() which
+      // converts to UTC and relies on formatDateTimeLocal to convert back
+      const pad = (n: number) => String(n).padStart(2, '0');
+      this.dtendInternal.set(
+        `${startDate.getFullYear()}-${pad(startDate.getMonth() + 1)}-${pad(startDate.getDate())}T${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`
+      );
     }
 
     this.emitValue();
@@ -302,15 +307,25 @@ export class RecurringScheduleFormComponent implements OnInit {
   }
 
   /**
-   * Format ISO timestamp for datetime-local input.
+   * Format timestamp string for datetime-local input.
+   * Uses direct string extraction to avoid timezone conversion via new Date().
    */
   private formatDateTimeLocal(isoString: string): string {
-    const date = new Date(isoString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    if (!isoString) return '';
+
+    // Direct extraction: "2026-05-05T17:00:00" or "2026-05-05 17:00:00" → "2026-05-05T17:00"
+    const match = isoString.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+    if (match) {
+      return `${match[1]}T${match[2]}`;
+    }
+
+    // Fallback for ISO strings with timezone (e.g., "2026-05-05T21:00:00+00:00")
+    const parsed = parseDatetimeLocal(isoString);
+    if (parsed) {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+    }
+
+    return '';
   }
 }

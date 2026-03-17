@@ -434,10 +434,7 @@ export class SeriesGroupManagementPage implements OnInit {
   }
 
   onGroupUpdated(group: SeriesGroup): void {
-    // Update local state with new group info
-    this.selectedGroup.set(group);
-
-    // Update in the groups list
+    // Optimistically update top-level fields (name, description, color) for instant UI feedback
     const groups = this.groups();
     const index = groups.findIndex(g => g.id === group.id);
     if (index >= 0) {
@@ -446,6 +443,11 @@ export class SeriesGroupManagementPage implements OnInit {
       this.groups.set(updatedGroups);
       this.updateFilteredGroups();
     }
+
+    // Reload full detail from API to get updated current_version (schedule, template, instances).
+    // The optimistic update above covers display_name/description/color immediately,
+    // while this API call refreshes nested data like dtstart, rrule, duration, etc.
+    this.loadGroupDetail(group.id);
   }
 
   onDeleteGroup(group: SeriesGroup): void {

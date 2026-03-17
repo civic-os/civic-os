@@ -324,12 +324,21 @@ export class SeriesEditorModalComponent implements OnChanges {
     if (this.series) {
       const dtstart = this.formatDateTimeLocal(this.series.dtstart);
       const duration = this.parseDuration(this.series.duration);
-      const dtstartDate = parseDatetimeLocal(this.series.dtstart);
+
+      // Calculate dtend by parsing dtstart and adding duration.
+      // Use parseDatetimeLocal(dtstart) — NOT this.series.dtstart — because dtstart
+      // is already formatted as "YYYY-MM-DDTHH:MM" which parseDatetimeLocal handles
+      // as local time without timezone conversion.
+      let dtend = '';
+      const dtstartDate = parseDatetimeLocal(dtstart);
       if (dtstartDate) {
         dtstartDate.setHours(dtstartDate.getHours() + duration.hours);
         dtstartDate.setMinutes(dtstartDate.getMinutes() + duration.minutes);
+        // Format directly from Date's local components — do NOT use toISOString()
+        // which converts to UTC and would corrupt the value on round-trip
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        dtend = `${dtstartDate.getFullYear()}-${pad(dtstartDate.getMonth() + 1)}-${pad(dtstartDate.getDate())}T${pad(dtstartDate.getHours())}:${pad(dtstartDate.getMinutes())}`;
       }
-      const dtend = dtstartDate ? this.formatDateTimeLocal(dtstartDate.toISOString()) : '';
 
       this.scheduleValue.set({
         dtstart,
@@ -401,14 +410,33 @@ export class SeriesEditorModalComponent implements OnChanges {
            (prop.column_width !== undefined && prop.column_width > 1);
   }
 
+  /**
+   * Convert a timestamp string to datetime-local input format ("YYYY-MM-DDTHH:MM").
+   *
+   * IMPORTANT: dtstart is wall-clock local time (TIMESTAMP, not TIMESTAMPTZ).
+   * We must parse the string directly without going through new Date(), which
+   * would apply timezone conversion and corrupt the value.
+   * For TIMESTAMPTZ strings (with timezone suffix like +00:00), we fall back to
+   * parseDatetimeLocal which handles both formats correctly.
+   */
   private formatDateTimeLocal(isoString: string): string {
-    try {
-      const date = new Date(isoString);
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-    } catch {
-      return '';
+    if (!isoString) return '';
+
+    // Try direct string extraction first (avoids timezone conversion)
+    // Matches: "2026-05-05T17:00", "2026-05-05T17:00:00", "2026-05-05 17:00:00"
+    const match = isoString.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+    if (match) {
+      return `${match[1]}T${match[2]}`;
     }
+
+    // Fallback: use parseDatetimeLocal for strings with timezone suffixes
+    const parsed = parseDatetimeLocal(isoString);
+    if (parsed) {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+    }
+
+    return '';
   }
 
   private parseDuration(isoDuration: string): { hours: number; minutes: number } {
