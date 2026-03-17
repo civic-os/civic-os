@@ -1,4 +1,4 @@
--- Revert civic_os:v0-39-0-recurring-dtstart-local-time from pg
+-- Revert civic_os:v0-38-5-recurring-dtstart-local-time from pg
 --
 -- Convert dtstart back from TIMESTAMP to TIMESTAMPTZ and restore
 -- the original function signatures.

@@ -111,6 +111,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ${SMTP_FROM}
       SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-true}  # Prevent sending to @example.com in production
+      # Recurring Series Configuration
+      RECURRING_SERIES_HORIZON_DAYS: ${RECURRING_SERIES_HORIZON_DAYS:-90}
     depends_on:
       postgres:
         condition: service_healthy

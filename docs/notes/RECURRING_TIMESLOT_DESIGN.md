@@ -1,8 +1,8 @@
 # Recurring TimeSlot System Design Document
 
-> **Status**: Design Document (not yet implemented)
-> **Target Version**: v0.16.0+
-> **Last Updated**: November 2025
+> **Status**: Implemented (v0.19.0+, updated v0.38.5)
+> **Version**: v0.19.0+
+> **Last Updated**: March 2026
 
 ## Executive Summary
 
@@ -175,11 +175,11 @@ CREATE TABLE metadata.time_slot_series (
   rrule TEXT NOT NULL,
 
   -- Series anchor point
-  dtstart TIMESTAMPTZ NOT NULL,  -- First occurrence start time (UTC)
+  dtstart TIMESTAMP NOT NULL,  -- First occurrence start (wall-clock local time, NOT UTC)
   duration INTERVAL NOT NULL,    -- Duration of each occurrence
 
-  -- Optional timezone for display (IANA timezone name)
-  timezone TEXT,  -- e.g., "America/New_York"
+  -- IANA timezone for RRULE expansion and tstzrange construction
+  timezone TEXT NOT NULL,  -- e.g., "America/New_York" (required, pairs with dtstart)
 
   -- Series status (for pause/notify on schema drift)
   status VARCHAR(20) NOT NULL DEFAULT 'active'
@@ -678,17 +678,15 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 
 #### Default Horizon
 
-- **Creation time**: Expand 6 months ahead (default, configurable per-deployment)
+- **Creation time**: Expand 90 days ahead (configurable via `RECURRING_SERIES_HORIZON_DAYS` env var, default 90)
 - **Maximum "until never" limit**: 2 years ahead (prevents runaway expansion)
 
 #### Configuration
 
-```sql
--- Add to metadata.settings table (or deployment env vars)
-INSERT INTO metadata.settings (key, value, description) VALUES
-  ('recurring_default_horizon_months', '6', 'Default expansion horizon for new series'),
-  ('recurring_max_horizon_months', '24', 'Maximum expansion for "never ending" series'),
-  ('recurring_allow_infinite_series', 'true', 'Allow series without UNTIL/COUNT');
+```
+Configured via environment variable on the consolidated worker:
+- `RECURRING_SERIES_HORIZON_DAYS=90` (default, in docker-compose)
+- SQL functions accept `p_expand_horizon_days INTEGER DEFAULT 90` parameter for per-call override
 ```
 
 **Admin Option: Disable "Until Never"**
@@ -708,6 +706,8 @@ When disabled, the Recurrence Rule Editor component will:
 - Validate RRULE contains either COUNT or UNTIL clause before submission
 
 #### Scheduled Expansion Task (River Job)
+
+> **Note**: The periodic scheduled expansion below is a design-phase concept not yet implemented. Current expansion is on-demand via River jobs triggered by series creation/modification.
 
 A River periodic job maintains expansion horizons for all active series:
 
@@ -784,8 +784,8 @@ WHERE occurrence_date < NOW() - INTERVAL '2 years'
 
 ### Storage Model
 
-- `dtstart` stores the first occurrence in **UTC** (`TIMESTAMPTZ`)
-- `timezone` stores the IANA timezone for RRULE expansion (e.g., `"America/New_York"`)
+- `dtstart` stores the first occurrence as **wall-clock local time** (`TIMESTAMP`, no timezone conversion)
+- `timezone` stores the IANA timezone for RRULE expansion and tstzrange construction (e.g., `"America/New_York"`)
 - Entity `time_slot` values are always stored as **UTC** (`TIMESTAMPTZ` range)
 
 ### Expansion Algorithm
@@ -822,6 +822,12 @@ The system uses the **wall clock** approach for DST transitions:
 
 ## Conflict Preview & Resolution
 
+> **Implementation Status (v0.38.5):**
+> - **Backend**: `preview_recurring_conflicts()` RPC and `ConflictPreviewComponent` exist and work.
+> - **edit-recurring-time-slot**: Conflict preview is wired up — users can click "Preview Schedule" to see conflicts before saving.
+> - **create-series-wizard**: **NOT YET IMPLEMENTED.** The wizard shows occurrence dates without conflict checking. Conflicts are enforced server-side via GIST exclusion constraints — conflicting slots are silently skipped at expansion time.
+> - **To wire it up**: Call `RecurringService.previewConflicts()` in the wizard's `loadPreview()` method and merge results into `previewOccurrences`. The RPC, service method, and UI component all exist; they just need to be connected. See `edit-recurring-time-slot.component.ts` for the working pattern.
+
 ### The Conflict Problem
 
 When a user creates "every Monday 2-4pm for 6 months", some Mondays may already have conflicting bookings. The GIST exclusion constraint would reject the batch INSERT.
@@ -845,7 +851,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER;
 ```
 
-### Conflict Resolution UX
+### Conflict Resolution UX (Design Target)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -2056,7 +2062,7 @@ CREATE FUNCTION update_series_template(...);
 |------|--------|------------|
 | RRULE edge cases (DST, leap years) | Incorrect occurrence times | Battle-tested libraries (go-rrule, rrule.js) |
 | Storage bloat from expansion | Database growth | Bounded horizon, cleanup job |
-| GIST constraint failures | Failed expansion | Preview conflicts before commit |
+| GIST constraint failures | Failed expansion | Preview conflicts before commit (partially implemented — see Conflict Preview section) |
 | Complex exception state machine | Bugs, inconsistencies | Clear enums, extensive tests |
 | Series splits create confusion | UX issues | Groups unify split series visually |
 | Orphaned entity records | Data integrity | RPC handles deletion atomically |
@@ -2092,9 +2098,9 @@ This section summarizes all key design decisions for quick reference.
 
 | Aspect | Decision |
 |--------|----------|
-| Default horizon | 6 months ahead |
+| Default horizon | 90 days ahead (configurable via `RECURRING_SERIES_HORIZON_DAYS` env var) |
 | Max infinite horizon | 2 years (configurable) |
-| Scheduled refresh | Weekly River job, extends by 3 months |
+| Scheduled refresh | Not yet implemented; current expansion is on-demand via River jobs |
 | On-demand | Calendar navigation triggers expansion |
 | Admin control | Can disable "until never" via `metadata.settings` |
 

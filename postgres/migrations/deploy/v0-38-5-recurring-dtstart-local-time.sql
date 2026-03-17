@@ -1,4 +1,4 @@
--- Deploy civic_os:v0-39-0-recurring-dtstart-local-time
+-- Deploy civic_os:v0-38-5-recurring-dtstart-local-time
 --
 -- Fix recurring schedules timezone bugs:
 -- 1. Change dtstart from TIMESTAMPTZ to TIMESTAMP (wall-clock local time)
@@ -242,7 +242,7 @@ COMMENT ON FUNCTION public.create_recurring_series(TEXT, TEXT, TEXT, NAME, JSONB
     'Creates a new recurring series with group, series record, and triggers expansion.
      dtstart is wall-clock local time (TIMESTAMP), timezone stored separately.
      Returns JSONB with group_id and series_id.
-     Changed from TIMESTAMPTZ to TIMESTAMP in v0.39.0.';
+     Changed from TIMESTAMPTZ to TIMESTAMP in v0.38.5.';
 
 GRANT EXECUTE ON FUNCTION public.create_recurring_series(TEXT, TEXT, TEXT, NAME, JSONB, TEXT, TIMESTAMP, INTERVAL, TEXT, NAME, BOOLEAN, BOOLEAN) TO authenticated;
 

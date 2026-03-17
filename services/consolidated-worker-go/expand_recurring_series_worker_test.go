@@ -69,6 +69,57 @@ func TestParsePGInterval_SimpleHoursMinutesSeconds(t *testing.T) {
 }
 
 // ----------------------------------------------------------------------------
+// parsePGInterval Multi-Day Tests (Step 1 fix)
+// ----------------------------------------------------------------------------
+
+func TestParsePGInterval_MultiDayFormat(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected time.Duration
+	}{
+		{
+			name:     "1 day 2 hours",
+			input:    "1 day 02:00:00",
+			expected: 26 * time.Hour,
+		},
+		{
+			name:     "2 days exactly",
+			input:    "2 days 00:00:00",
+			expected: 48 * time.Hour,
+		},
+		{
+			name:     "1 day 30 minutes",
+			input:    "1 day 00:30:00",
+			expected: 24*time.Hour + 30*time.Minute,
+		},
+		{
+			name:     "7 days 12 hours",
+			input:    "7 days 12:00:00",
+			expected: 180 * time.Hour,
+		},
+		{
+			name:     "0 days prefix (edge case)",
+			input:    "0 days 02:00:00",
+			expected: 2 * time.Hour,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parsePGInterval(tt.input)
+			if err != nil {
+				t.Errorf("parsePGInterval(%q) returned error: %v", tt.input, err)
+				return
+			}
+			if result != tt.expected {
+				t.Errorf("parsePGInterval(%q) = %v, want %v", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// ----------------------------------------------------------------------------
 // joinStrings Tests
 // ----------------------------------------------------------------------------
 
@@ -741,6 +792,35 @@ func TestGenerateOccurrences_DSTTransition_FallBack(t *testing.T) {
 		if occurrences[i].Hour() != 19 {
 			t.Errorf("Post-fallback occurrence %d: expected UTC hour 19, got %d", i, occurrences[i].Hour())
 		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// DST Fall-Back Ambiguity Test (Step 3)
+// Documents Go's deterministic behavior for ambiguous wall-clock times
+// ----------------------------------------------------------------------------
+
+func TestConvertToUTC_DSTFallBackAmbiguousTime(t *testing.T) {
+	// 1:30 AM ET on Nov 1, 2026 is ambiguous: it exists in both EDT (UTC-4) and EST (UTC-5).
+	// Go's time.Date picks the FIRST offset (EDT/daylight time), so 1:30 AM → 5:30 AM UTC.
+	// The rrule-go library also uses time.Date the same way, so behavior is consistent.
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		t.Fatalf("Failed to load timezone: %v", err)
+	}
+
+	// Simulate what convertToUTC does: create time.Date with the ambiguous local time
+	ambiguousTime := time.Date(2026, 11, 1, 1, 30, 0, 0, time.UTC)
+	result := convertToUTC([]time.Time{ambiguousTime}, loc)
+
+	if len(result) != 1 {
+		t.Fatalf("Expected 1 result, got %d", len(result))
+	}
+
+	// Go picks EDT (first/daylight offset, UTC-4): 1:30 AM EDT = 5:30 AM UTC
+	if result[0].Hour() != 5 || result[0].Minute() != 30 {
+		t.Errorf("DST fall-back ambiguous time: expected 05:30 UTC (EDT), got %02d:%02d UTC",
+			result[0].Hour(), result[0].Minute())
 	}
 }
 

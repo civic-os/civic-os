@@ -9,13 +9,14 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { RecurringService } from './recurring.service';
 import { RRuleConfig } from '../interfaces/entity';
 
 describe('RecurringService', () => {
   let service: RecurringService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -27,6 +28,13 @@ describe('RecurringService', () => {
       ]
     });
     service = TestBed.inject(RecurringService);
+    httpMock = TestBed.inject(HttpTestingController);
+    (window as any).civicOsConfig = { postgrestUrl: 'http://test/' };
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    delete (window as any).civicOsConfig;
   });
 
   it('should be created', () => {
@@ -303,6 +311,117 @@ describe('RecurringService', () => {
       expect(result.frequency).toBe('WEEKLY');
       expect(result.interval).toBe(1); // Default
       expect(result.byDay).toBeUndefined();
+    });
+  });
+
+  // ============================================================================
+  // HTTP Method Tests
+  // ============================================================================
+
+  describe('HTTP Methods', () => {
+    it('should POST to rpc/get_series_membership', () => {
+      service.getSeriesMembership('reservations', 42).subscribe(result => {
+        expect(result.is_member).toBe(true);
+      });
+
+      const req = httpMock.expectOne('http://test/rpc/get_series_membership');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        p_entity_table: 'reservations',
+        p_entity_id: 42
+      });
+      req.flush({ is_member: true, series_id: 1, group_id: 1 });
+    });
+
+    it('should POST to rpc/create_recurring_series', () => {
+      const params = {
+        groupName: 'Test Series',
+        entityTable: 'reservations',
+        entityTemplate: { room_id: 5 },
+        rrule: 'FREQ=WEEKLY;BYDAY=MO;COUNT=10',
+        dtstart: '2026-04-28T17:00',
+        duration: 'PT1H',
+        timezone: 'America/New_York'
+      };
+
+      service.createSeries(params).subscribe();
+
+      const req = httpMock.expectOne('http://test/rpc/create_recurring_series');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.p_group_name).toBe('Test Series');
+      expect(req.request.body.p_dtstart).toBe('2026-04-28T17:00');
+      expect(req.request.body.p_rrule).toBe('FREQ=WEEKLY;BYDAY=MO;COUNT=10');
+      expect(req.request.body.p_entity_template).toEqual({ room_id: 5 });
+      req.flush({ success: true, group_id: 1, series_id: 1, message: 'Created' });
+    });
+
+    it('should GET schema_series_groups with order', () => {
+      service.getSeriesGroups().subscribe();
+
+      const req = httpMock.expectOne('http://test/schema_series_groups?order=updated_at.desc');
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('should POST to rpc/preview_recurring_conflicts', () => {
+      const params = {
+        entityTable: 'reservations',
+        scopeColumn: 'resource_id',
+        scopeValue: '5',
+        timeSlotColumn: 'time_slot',
+        occurrences: [['2026-01-01T10:00:00Z', '2026-01-01T11:00:00Z']] as [string, string][]
+      };
+
+      service.previewConflicts(params).subscribe();
+
+      const req = httpMock.expectOne('http://test/rpc/preview_recurring_conflicts');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.p_entity_table).toBe('reservations');
+      expect(req.request.body.p_scope_column).toBe('resource_id');
+      req.flush([]);
+    });
+
+    it('should POST to rpc/update_series_schedule', () => {
+      service.updateSeriesSchedule(1, '2026-04-28T17:00', 'PT2H', 'FREQ=WEEKLY;BYDAY=TU').subscribe();
+
+      const req = httpMock.expectOne('http://test/rpc/update_series_schedule');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.p_series_id).toBe(1);
+      expect(req.request.body.p_dtstart).toBe('2026-04-28T17:00');
+      expect(req.request.body.p_duration).toBe('PT2H');
+      expect(req.request.body.p_rrule).toBe('FREQ=WEEKLY;BYDAY=TU');
+      req.flush({ success: true });
+    });
+
+    it('should POST to rpc/delete_series_with_instances', () => {
+      service.deleteSeries(42).subscribe();
+
+      const req = httpMock.expectOne('http://test/rpc/delete_series_with_instances');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ p_series_id: 42 });
+      req.flush({ success: true });
+    });
+
+    it('should POST to rpc/reschedule_occurrence', () => {
+      service.rescheduleOccurrence('reservations', 10, '[2026-01-15T14:00:00Z,2026-01-15T16:00:00Z)').subscribe();
+
+      const req = httpMock.expectOne('http://test/rpc/reschedule_occurrence');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.p_entity_table).toBe('reservations');
+      expect(req.request.body.p_entity_id).toBe(10);
+      expect(req.request.body.p_new_time_slot).toBe('[2026-01-15T14:00:00Z,2026-01-15T16:00:00Z)');
+      req.flush({ success: true });
+    });
+
+    it('should POST to rpc/cancel_series_occurrence', () => {
+      service.cancelOccurrence('reservations', 10, 'Holiday').subscribe();
+
+      const req = httpMock.expectOne('http://test/rpc/cancel_series_occurrence');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.p_entity_table).toBe('reservations');
+      expect(req.request.body.p_entity_id).toBe(10);
+      expect(req.request.body.p_reason).toBe('Holiday');
+      req.flush({ success: true });
     });
   });
 });

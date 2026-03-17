@@ -1,4 +1,4 @@
--- Verify civic_os:v0-39-0-recurring-dtstart-local-time on pg
+-- Verify civic_os:v0-38-5-recurring-dtstart-local-time on pg
 
 BEGIN;
 

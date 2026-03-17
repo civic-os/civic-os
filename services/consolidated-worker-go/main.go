@@ -77,6 +77,9 @@ func main() {
 	keycloakServiceClientSecret := getEnv("KEYCLOAK_SERVICE_CLIENT_SECRET", "")
 	keycloakClientID := getEnv("KEYCLOAK_CLIENT_ID", "civic-os-dev-client") // For redirect URIs
 
+	// Recurring Series Configuration
+	recurringSeriesHorizonDays := getEnvInt("RECURRING_SERIES_HORIZON_DAYS", 90)
+
 	// Validate SMTP_FROM at startup (fail-fast)
 	_, envelopeFrom := parseEmailAddress(smtpFrom)
 	if !isValidEmail(envelopeFrom) {
@@ -123,6 +126,7 @@ func main() {
 	}
 	log.Printf("[Init]   DB Max Connections: %d", dbMaxConns)
 	log.Printf("[Init]   DB Min Connections: %d", dbMinConns)
+	log.Printf("[Init]   Recurring Series Horizon Days: %d", recurringSeriesHorizonDays)
 
 	// Load timezone for notification worker
 	timezone, err := time.LoadLocation(notificationTimezone)
@@ -275,7 +279,8 @@ func main() {
 
 	// Expand Recurring Series Worker (recurring queue)
 	river.AddWorker(workers, &ExpandRecurringSeriesWorker{
-		dbPool: dbPool,
+		dbPool:                     dbPool,
+		recurringSeriesHorizonDays: recurringSeriesHorizonDays,
 	})
 	log.Println("[Init] ✓ ExpandRecurringSeriesWorker registered (queue: recurring)")
 

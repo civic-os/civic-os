@@ -39,6 +39,7 @@ import { RecurringService } from '../../services/recurring.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 import { RecurrenceRuleEditorComponent } from '../recurrence-rule-editor/recurrence-rule-editor.component';
 import { ConflictPreviewComponent, ConflictPreviewResult } from '../conflict-preview/conflict-preview.component';
+import { RRule } from 'rrule';
 
 /**
  * Value structure for RecurringTimeSlotEditComponent.
@@ -460,22 +461,46 @@ export class EditRecurringTimeSlotComponent implements ControlValueAccessor, Val
     return `[${startDate.toISOString()},${endDate.toISOString()})`;
   }
 
-  private generateOccurrencesForPreview(): Array<[string, string]> {
-    // For preview, generate first 20 occurrences (or until RRULE ends)
-    // This is a simplified frontend calculation - actual expansion happens server-side
-    // Use Safari-safe parsing for datetime-local strings
+  /**
+   * Generate occurrence preview using rrule.js for accurate BYDAY/BYSETPOS/BYMONTHDAY expansion.
+   * Falls back to simple frequency-based preview if RRULE parsing fails.
+   */
+  generateOccurrencesForPreview(): Array<[string, string]> {
     const start = parseDatetimeLocal(this.startDateTime());
     const end = parseDatetimeLocal(this.endDateTime());
     if (!start || !end) return [];
     const duration = end.getTime() - start.getTime();
 
-    const occurrences: Array<[string, string]> = [];
-    const rrule = this.rrule();
+    try {
+      const rruleStr = this.rrule();
+      if (!rruleStr) return [];
 
-    // Parse frequency from RRULE
-    const freqMatch = rrule.match(/FREQ=(\w+)/);
-    const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
-    const countMatch = rrule.match(/COUNT=(\d+)/);
+      const rule = RRule.fromString(
+        `DTSTART:${start.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}\n${rruleStr}`
+      );
+      const dates = rule.all((_, i) => i < 20);
+
+      return dates.map(d => {
+        const occEnd = new Date(d.getTime() + duration);
+        return [d.toISOString(), occEnd.toISOString()] as [string, string];
+      });
+    } catch {
+      // Fallback to simple frequency-based preview if RRULE parsing fails
+      return this.generateSimplePreview(start, duration);
+    }
+  }
+
+  /**
+   * Simple frequency-only preview fallback when RRULE parsing fails.
+   * Does not handle BYDAY, BYSETPOS, etc.
+   */
+  private generateSimplePreview(start: Date, duration: number): Array<[string, string]> {
+    const occurrences: Array<[string, string]> = [];
+    const rruleStr = this.rrule();
+
+    const freqMatch = rruleStr.match(/FREQ=(\w+)/);
+    const intervalMatch = rruleStr.match(/INTERVAL=(\d+)/);
+    const countMatch = rruleStr.match(/COUNT=(\d+)/);
 
     const freq = freqMatch?.[1] || 'WEEKLY';
     const interval = parseInt(intervalMatch?.[1] || '1', 10);
@@ -487,7 +512,6 @@ export class EditRecurringTimeSlotComponent implements ControlValueAccessor, Val
       const occEnd = new Date(current.getTime() + duration);
       occurrences.push([occStart.toISOString(), occEnd.toISOString()]);
 
-      // Advance based on frequency
       switch (freq) {
         case 'DAILY':
           current.setDate(current.getDate() + interval);

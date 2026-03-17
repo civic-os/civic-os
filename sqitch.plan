@@ -58,3 +58,5 @@ v0-37-0-fix-sms-preference-trigger [v0-37-0-dashboard-features] 2026-03-13T21:00
 v0-38-0-add-static-assets [v0-37-0-fix-sms-preference-trigger] 2026-03-13T22:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add static assets with responsive breakpoint crops and image dashboard widget
 v0-38-4-fix-admin-notif-pref-permission [v0-38-0-add-static-assets] 2026-03-16T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix admin_get_user_notification_preferences permission: read → update
 v0-38-4-fix-role-key-view [v0-38-4-fix-admin-notif-pref-permission] 2026-03-16T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix managed_users VIEW to use role_key and add role_key immutability trigger
+v0-38-5-recurring-dtstart-local-time [v0-38-4-fix-role-key-view] 2026-03-16T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix recurring dtstart from TIMESTAMPTZ to TIMESTAMP for timezone handling
+v0-38-5-configurable-expand-horizon [v0-38-5-recurring-dtstart-local-time] 2026-03-17T00:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add configurable expansion horizon parameter to recurring series functions

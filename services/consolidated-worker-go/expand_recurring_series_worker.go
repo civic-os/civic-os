@@ -73,7 +73,8 @@ type TableColumnInfo struct {
 // ExpandRecurringSeriesWorker implements River's Worker interface
 type ExpandRecurringSeriesWorker struct {
 	river.WorkerDefaults[ExpandRecurringSeriesArgs]
-	dbPool *pgxpool.Pool
+	dbPool                     *pgxpool.Pool
+	recurringSeriesHorizonDays int
 }
 
 // Work executes the series expansion job
@@ -178,12 +179,13 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 		}
 		record[series.TimeSlotProperty] = timeSlot
 
-		// Insert entity record (in a transaction with JWT GUC)
-		entityID, err := w.insertEntityRecord(ctx, series.EntityTable, record, series.CreatedBy, colInfo)
+		// Insert entity + junction record atomically in a single transaction.
+		// This prevents orphaned entities if the junction INSERT fails.
+		entityID, err := w.insertEntityWithInstance(ctx, series, occDate, record, colInfo)
 		if err != nil {
 			errType := classifyInsertError(err)
 			log.Printf("[Job %d] Failed to insert entity for %s (%s): %v", job.ID, dateKey, errType, err)
-			// Create junction record with accurate error classification
+			// Create exception junction record (outside the failed tx) for tracking
 			err = w.createInstanceRecord(ctx, series.ID, occDate, series.EntityTable, nil, true, errType)
 			if err != nil {
 				log.Printf("[Job %d] Failed to create exception instance: %v", job.ID, err)
@@ -196,13 +198,7 @@ func (w *ExpandRecurringSeriesWorker) Work(ctx context.Context, job *river.Job[E
 			continue
 		}
 
-		// Create junction record
-		err = w.createInstanceRecord(ctx, series.ID, occDate, series.EntityTable, &entityID, false, "")
-		if err != nil {
-			log.Printf("[Job %d] Failed to create instance record: %v", job.ID, err)
-			// Rollback entity? For now, just log
-			continue
-		}
+		_ = entityID // Used for logging below
 
 		created++
 	}
@@ -429,6 +425,83 @@ func (w *ExpandRecurringSeriesWorker) insertEntityRecord(ctx context.Context, ta
 	return entityID, nil
 }
 
+// insertEntityWithInstance atomically inserts an entity record AND its junction
+// record in a single transaction. This prevents orphaned entities when the
+// junction INSERT fails (e.g., due to a unique constraint on series_id + occurrence_date).
+func (w *ExpandRecurringSeriesWorker) insertEntityWithInstance(
+	ctx context.Context, series *SeriesRecord, occDate time.Time,
+	record map[string]interface{}, colInfo *TableColumnInfo,
+) (int64, error) {
+	tx, err := w.dbPool.Begin(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx) //nolint:errcheck // rollback is a no-op after commit
+
+	// Set JWT claims GUC so current_user_id() works for column defaults
+	if series.CreatedBy != nil {
+		if !uuidPattern.MatchString(*series.CreatedBy) {
+			return 0, fmt.Errorf("invalid created_by UUID format: %s", *series.CreatedBy)
+		}
+		claimsJSON := fmt.Sprintf(`{"sub":"%s","role":"authenticated"}`, *series.CreatedBy)
+		_, err = tx.Exec(ctx, "SELECT set_config('request.jwt.claims', $1, true)", claimsJSON)
+		if err != nil {
+			return 0, fmt.Errorf("failed to set JWT GUC: %w", err)
+		}
+	}
+
+	// 1. Build and execute entity INSERT
+	columns := make([]string, 0, len(record)+1)
+	values := make([]interface{}, 0, len(record)+1)
+	placeholders := make([]string, 0, len(record)+1)
+
+	i := 1
+	for col, val := range record {
+		columns = append(columns, col)
+		values = append(values, val)
+		placeholders = append(placeholders, fmt.Sprintf("$%d", i))
+		i++
+	}
+
+	if series.CreatedBy != nil && colInfo.HasCreatedBy {
+		columns = append(columns, "created_by")
+		values = append(values, *series.CreatedBy)
+		placeholders = append(placeholders, fmt.Sprintf("$%d", i))
+	}
+
+	entityQuery := fmt.Sprintf(
+		"INSERT INTO public.%s (%s) VALUES (%s) RETURNING id",
+		series.EntityTable,
+		joinStrings(columns, ", "),
+		joinStrings(placeholders, ", "),
+	)
+
+	var entityID int64
+	err = tx.QueryRow(ctx, entityQuery, values...).Scan(&entityID)
+	if err != nil {
+		return 0, err
+	}
+
+	// 2. Insert junction record in the same transaction
+	instanceQuery := `
+		INSERT INTO metadata.time_slot_instances
+		(series_id, occurrence_date, entity_table, entity_id, is_exception, exception_type)
+		VALUES ($1, $2, $3, $4, $5, NULLIF($6, ''))
+		ON CONFLICT (series_id, occurrence_date) DO NOTHING
+	`
+	_, err = tx.Exec(ctx, instanceQuery,
+		series.ID, occDate.Format("2006-01-02"), series.EntityTable, &entityID, false, "")
+	if err != nil {
+		return 0, fmt.Errorf("failed to create instance record: %w", err)
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return 0, fmt.Errorf("failed to commit: %w", err)
+	}
+
+	return entityID, nil
+}
+
 // createInstanceRecord creates a junction record
 func (w *ExpandRecurringSeriesWorker) createInstanceRecord(ctx context.Context, seriesID int64, occDate time.Time, entityTable string, entityID *int64, isException bool, exceptionType string) error {
 	query := `
@@ -520,6 +593,20 @@ func parsePGInterval(interval string) (time.Duration, error) {
 	_, err = fmt.Sscanf(interval, "%d:%d:%d", &hours, &minutes, &seconds)
 	if err == nil {
 		return time.Duration(hours)*time.Hour +
+			time.Duration(minutes)*time.Minute +
+			time.Duration(seconds)*time.Second, nil
+	}
+
+	// Try "N day(s) HH:MM:SS" format (PostgreSQL multi-day interval output)
+	var days int
+	_, err = fmt.Sscanf(interval, "%d day %d:%d:%d", &days, &hours, &minutes, &seconds)
+	if err != nil {
+		// Try plural "days"
+		_, err = fmt.Sscanf(interval, "%d days %d:%d:%d", &days, &hours, &minutes, &seconds)
+	}
+	if err == nil {
+		return time.Duration(days)*24*time.Hour +
+			time.Duration(hours)*time.Hour +
 			time.Duration(minutes)*time.Minute +
 			time.Duration(seconds)*time.Second, nil
 	}

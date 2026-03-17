@@ -99,7 +99,7 @@ BEGIN
         'notes', 'Auto-generated from recurring series. Please approve to create reservation.'
       ),
       p_rrule := 'FREQ=WEEKLY;BYDAY=TU,TH;COUNT=12',
-      p_dtstart := (NOW() + INTERVAL '1 day')::timestamptz,
+      p_dtstart := (NOW() + INTERVAL '1 day')::timestamp,
       p_duration := 'PT1H',
       p_timezone := 'America/New_York',
       p_time_slot_property := 'time_slot',
@@ -146,7 +146,7 @@ BEGIN
         'notes', 'Auto-generated from recurring series. High priority - board members attending.'
       ),
       p_rrule := 'FREQ=MONTHLY;BYDAY=1MO;COUNT=6',
-      p_dtstart := (DATE_TRUNC('month', NOW()) + INTERVAL '1 month' + INTERVAL '19 hours')::timestamptz,
+      p_dtstart := (DATE_TRUNC('month', NOW()) + INTERVAL '1 month' + INTERVAL '19 hours')::timestamp,
       p_duration := 'PT2H',
       p_timezone := 'America/New_York',
       p_time_slot_property := 'time_slot',

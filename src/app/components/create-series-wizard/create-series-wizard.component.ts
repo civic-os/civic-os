@@ -33,7 +33,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SchemaService } from '../../services/schema.service';
 import { RecurringService, CreateSeriesParams } from '../../services/recurring.service';
-import { SchemaEntityTable, SchemaEntityProperty, ConflictInfo, CreateSeriesResult } from '../../interfaces/entity';
+import { SchemaEntityTable, SchemaEntityProperty, CreateSeriesResult } from '../../interfaces/entity';
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
@@ -271,26 +271,17 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                   </div>
 
                   <!-- Occurrences Preview -->
+                  <!-- Note: Conflicts are enforced server-side via GIST exclusion constraints.
+                       Preview shows scheduled dates only; conflicting slots are skipped at creation time. -->
                   <div class="border rounded-lg">
-                    <div class="p-3 bg-base-200 border-b flex items-center justify-between">
+                    <div class="p-3 bg-base-200 border-b">
                       <span class="font-medium">Upcoming Occurrences</span>
-                      @if (conflictCount() > 0) {
-                        <span class="badge badge-warning">{{ conflictCount() }} conflicts</span>
-                      }
                     </div>
                     <div class="max-h-48 overflow-y-auto">
                       @for (occ of previewOccurrences().slice(0, 20); track occ.start) {
-                        <div class="flex items-center gap-3 p-3 border-b last:border-b-0"
-                             [class.bg-error/5]="occ.hasConflict">
-                          @if (occ.hasConflict) {
-                            <span class="material-symbols-outlined text-error text-sm">cancel</span>
-                          } @else {
-                            <span class="material-symbols-outlined text-success text-sm">check_circle</span>
-                          }
+                        <div class="flex items-center gap-3 p-3 border-b last:border-b-0">
+                          <span class="material-symbols-outlined text-base-content/40 text-sm">event</span>
                           <span class="text-sm flex-1">{{ formatDateTime(occ.start) }}</span>
-                          @if (occ.hasConflict) {
-                            <span class="badge badge-error badge-sm">Conflict</span>
-                          }
                         </div>
                       }
                       @if (previewOccurrences().length > 20) {
@@ -300,16 +291,6 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                       }
                     </div>
                   </div>
-
-                  @if (conflictCount() > 0) {
-                    <div class="alert alert-warning">
-                      <span class="material-symbols-outlined">warning</span>
-                      <div>
-                        <p class="font-medium">{{ conflictCount() }} conflicts detected</p>
-                        <p class="text-sm">Conflicting occurrences will be skipped during creation.</p>
-                      </div>
-                    </div>
-                  }
 
                   @if (createError()) {
                     <div class="alert alert-error">
@@ -411,8 +392,7 @@ export class CreateSeriesWizardComponent implements OnChanges {
   // Preview state
   loadingPreview = signal(false);
   previewError = signal<string | null>(null);
-  previewOccurrences = signal<Array<{ start: string; end: string; hasConflict: boolean }>>([]);
-  conflictCount = computed(() => this.previewOccurrences().filter(o => o.hasConflict).length);
+  previewOccurrences = signal<Array<{ start: string; end: string }>>([]);
 
   // Creation state
   creating = signal(false);
@@ -576,11 +556,9 @@ export class CreateSeriesWizardComponent implements OnChanges {
       const occurrences = dates.map(d => {
         const start = d.toISOString();
         const end = new Date(d.getTime() + durationMs).toISOString();
-        return { start, end, hasConflict: false };
+        return { start, end };
       });
 
-      // TODO: Check for conflicts via API
-      // For now, just show the occurrences without conflict check
       this.previewOccurrences.set(occurrences);
       this.loadingPreview.set(false);
 

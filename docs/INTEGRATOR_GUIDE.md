@@ -2116,9 +2116,9 @@ Enable RFC 5545 RRULE-compliant recurring schedules for time-slotted entities. S
 
 **Features**:
 - Entity-level configuration via `supports_recurring` and `recurring_property_name`
-- RRULE validation with DoS prevention (max 1000 occurrences, 5-year horizon)
+- RRULE validation with DoS prevention (max 1000 occurrences, 90-day default expansion horizon (configurable))
 - Series management UI at `/admin/recurring-schedules` (editor/admin only)
-- Conflict preview before series creation
+- Conflict preview before series creation (available on single-event edit; not yet wired into create-series-wizard)
 - Edit scope dialogs: "This only", "This and future", "All"
 - Exception handling (cancel, reschedule, modify individual occurrences)
 - Go worker for background instance expansion
@@ -2196,13 +2196,16 @@ SELECT create_recurring_series(
     'attendee_count', 15
   ),
   p_rrule := 'FREQ=WEEKLY;BYDAY=TU,TH;COUNT=12',
-  p_dtstart := '2025-01-07T18:00:00'::timestamptz,
+  p_dtstart := '2025-01-07T18:00:00'::timestamp,
   p_duration := 'PT1H',  -- 1 hour duration
   p_timezone := 'America/New_York',
   p_time_slot_property := 'time_slot',
   p_expand_now := TRUE,
   p_skip_conflicts := TRUE
 );
+
+-- Optional: Custom expansion horizon (default: 90 days)
+-- p_expand_horizon_days := 180  -- Expand 180 days ahead instead of 90
 ```
 
 #### Core Tables
@@ -2223,6 +2226,9 @@ SELECT create_recurring_series(
 | `split_series_from_date()` | "This and future" edits |
 | `update_series_template()` | "All" edits |
 | `cancel_series_occurrence()` | Mark single instance as cancelled |
+| `update_series_schedule()` | Update schedule (new RRULE, dtstart, duration) |
+| `reschedule_occurrence()` | Reschedule single occurrence |
+| `delete_series_with_instances()` | Delete series and all instances |
 
 #### Complete Example
 
