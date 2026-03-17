@@ -140,6 +140,9 @@ services:
       TELNYX_API_KEY: ${TELNYX_API_KEY:-}
       TELNYX_FROM_NUMBER: ${TELNYX_FROM_NUMBER:-}
 
+      # Recurring Series Configuration
+      RECURRING_SERIES_HORIZON_DAYS: ${RECURRING_SERIES_HORIZON_DAYS:-90}
+
       # Keycloak Service Account (v0.31.0+ — required for User Management)
       KEYCLOAK_ADMIN_URL: ${KEYCLOAK_URL:-}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-}
