@@ -261,6 +261,11 @@ func (w *ExpandRecurringSeriesWorker) fetchSeries(ctx context.Context, seriesID 
 
 // generateOccurrences parses RRULE and returns occurrence times in UTC.
 // Handles timezone-aware expansion for wall-clock DST handling.
+//
+// dtstart is stored as TIMESTAMP (wall-clock local time) in the database.
+// pgx reads it as time.Time tagged with UTC, but the numeric values represent
+// local wall-clock time. We use these values directly for RRULE expansion,
+// then convertToUTC() handles per-occurrence DST conversion for storage.
 func (w *ExpandRecurringSeriesWorker) generateOccurrences(series *SeriesRecord, until time.Time) ([]time.Time, error) {
 	// Determine the timezone for expansion
 	// When a timezone is specified, we expand in that local time to respect DST transitions
@@ -275,11 +280,15 @@ func (w *ExpandRecurringSeriesWorker) generateOccurrences(series *SeriesRecord, 
 		}
 	}
 
-	// Convert dtstart to the target timezone for wall-clock aware expansion
-	localDtstart := series.Dtstart.In(loc)
+	// dtstart is already wall-clock local time (stored as TIMESTAMP in DB).
+	// pgx tags it as UTC but the numeric values ARE the local time.
+	// Use directly — no In(loc) conversion needed.
+	localDtstart := series.Dtstart
+
+	// expand_until comes from River job args as UTC, convert to local for comparison
 	localUntil := until.In(loc)
 
-	// Parse RRULE string with timezone-aware dtstart
+	// Parse RRULE string with wall-clock dtstart
 	ruleStr := fmt.Sprintf("DTSTART:%s\nRRULE:%s",
 		localDtstart.Format("20060102T150405"),
 		series.RRULE)

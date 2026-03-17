@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -40,6 +40,7 @@ import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { RecurringService } from '../../services/recurring.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 /** Resolved template value with display info */
 interface ResolvedValue {
@@ -1054,16 +1055,19 @@ export class SeriesGroupDetailComponent implements OnChanges {
       this.editError.set(null);
 
       // Initialize schedule values via signal
+      // dtstart from PostgREST is already local wall-clock time (TIMESTAMP), just slice to datetime-local format
       let dtstart = '';
       let dtend = '';
       if (cv?.dtstart) {
-        dtstart = this.formatDateTimeLocal(new Date(cv.dtstart).toISOString());
+        dtstart = cv.dtstart.slice(0, 16);
       }
       if (cv?.dtstart && cv?.duration) {
-        const startDate = new Date(cv.dtstart);
+        const startDate = parseDatetimeLocal(cv.dtstart);
         const durationMs = this.parseDurationToMs(cv.duration);
-        const endDate = new Date(startDate.getTime() + durationMs);
-        dtend = this.formatDateTimeLocal(endDate.toISOString());
+        if (startDate) {
+          const endDate = new Date(startDate.getTime() + durationMs);
+          dtend = this.formatDateTimeLocal(endDate.toISOString());
+        }
       }
       this.editScheduleValue.set({
         dtstart,
@@ -1096,21 +1100,42 @@ export class SeriesGroupDetailComponent implements OnChanges {
   }
 
   /**
-   * Format ISO string for datetime-local input (YYYY-MM-DDTHH:MM)
+   * Format date string for datetime-local input (YYYY-MM-DDTHH:MM).
+   * Uses local time methods to ensure correct timezone handling.
    */
   private formatDateTimeLocal(isoStr: string): string {
-    return isoStr.slice(0, 16);
+    try {
+      const date = new Date(isoStr);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    } catch {
+      return '';
+    }
   }
 
   /**
    * Parse ISO 8601 duration to milliseconds
    */
   private parseDurationToMs(duration: string): number {
-    const match = duration.match(/PT(\d+)H?(\d*)M?/);
-    if (!match) return 60 * 60 * 1000; // Default 1 hour
-    const hours = match[1] ? parseInt(match[1]) : 0;
-    const minutes = match[2] ? parseInt(match[2]) : 0;
-    return (hours * 60 + minutes) * 60 * 1000;
+    if (!duration) return 60 * 60 * 1000;
+
+    // ISO 8601 format: "PT2H", "PT1H30M"
+    const isoMatch = duration.match(/PT(\d+)H?(\d*)M?/);
+    if (isoMatch) {
+      const hours = isoMatch[1] ? parseInt(isoMatch[1]) : 0;
+      const minutes = isoMatch[2] ? parseInt(isoMatch[2]) : 0;
+      return (hours * 60 + minutes) * 60 * 1000;
+    }
+
+    // PostgreSQL interval format: "HH:MM:SS" (returned by PostgREST)
+    const pgMatch = duration.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (pgMatch) {
+      const hours = parseInt(pgMatch[1]);
+      const minutes = parseInt(pgMatch[2]);
+      return (hours * 60 + minutes) * 60 * 1000;
+    }
+
+    return 60 * 60 * 1000; // Default 1 hour
   }
 
   cancelEdit(): void {
@@ -1137,7 +1162,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
       // Use split_series_from_date for dated changes
       // Get template values from reactive FormGroup (used by EditPropertyComponent)
       const newTemplate = tab === 'template' ? this.getFilteredTemplateValue() : undefined;
-      const dtstart = schedule.dtstart ? new Date(schedule.dtstart).toISOString() : cv?.dtstart || '';
+      const dtstart = schedule.dtstart || cv?.dtstart || '';
 
       this.recurringService.splitSeries({
         seriesId,
@@ -1194,7 +1219,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
 
     // Update schedule if on schedule tab
     if (tab === 'schedule' && seriesId) {
-      const dtstart = schedule.dtstart ? new Date(schedule.dtstart).toISOString() : cv?.dtstart;
+      const dtstart = schedule.dtstart || cv?.dtstart;
       updates.push(
         this.recurringService.updateSeriesSchedule(
           seriesId,

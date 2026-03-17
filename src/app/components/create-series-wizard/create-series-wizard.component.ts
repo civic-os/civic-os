@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -39,6 +39,7 @@ import { EditPropertyComponent } from '../edit-property/edit-property.component'
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { catchError, of, forkJoin, map } from 'rxjs';
 import { RRule } from 'rrule';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 /**
  * Create Series Wizard Component
@@ -560,7 +561,12 @@ export class CreateSeriesWizardComponent implements OnChanges {
       // Generate occurrences using rrule.js
       const schedule = this.scheduleValue();
       const rruleStr = schedule.rrule;
-      const dtstart = new Date(schedule.dtstart);
+      const dtstart = parseDatetimeLocal(schedule.dtstart);
+      if (!dtstart) {
+        this.previewError.set('Invalid start date');
+        this.loadingPreview.set(false);
+        return;
+      }
       const durationMs = this.getDurationMs();
 
       // Parse RRULE and generate occurrences
@@ -591,7 +597,10 @@ export class CreateSeriesWizardComponent implements OnChanges {
   private getDurationMs(): number {
     const schedule = this.scheduleValue();
     if (!schedule.dtstart || !schedule.dtend) return 60 * 60 * 1000; // Default 1 hour
-    return new Date(schedule.dtend).getTime() - new Date(schedule.dtstart).getTime();
+    const start = parseDatetimeLocal(schedule.dtstart);
+    const end = parseDatetimeLocal(schedule.dtend);
+    if (!start || !end) return 60 * 60 * 1000;
+    return end.getTime() - start.getTime();
   }
 
   createSeries(): void {
@@ -608,7 +617,7 @@ export class CreateSeriesWizardComponent implements OnChanges {
       entityTable: this.infoForm.value.entity_table,
       entityTemplate: this.templateForm.value,
       rrule: schedule.rrule,
-      dtstart: new Date(schedule.dtstart).toISOString(),
+      dtstart: schedule.dtstart,
       duration: schedule.duration,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       timeSlotProperty: this.timeSlotPropertyName(),

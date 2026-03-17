@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -266,6 +266,57 @@ describe('CreateSeriesWizardComponent', () => {
 
       // Time slot is managed by the recurrence system, not the template
       expect(component.templateForm.contains('time_slot')).toBe(false);
+    });
+  });
+
+  describe('datetime-local handling (v0.39.0 TIMESTAMP fix)', () => {
+    it('createSeries sends datetime-local string directly without UTC conversion', () => {
+      // Setup entity selection
+      component.entityProperties.set(mockProperties);
+      component.timeSlotPropertyName.set('time_slot');
+      component.infoForm.patchValue({
+        display_name: 'Test Series',
+        entity_table: 'test_entity'
+      });
+
+      // Set schedule with datetime-local strings (no Z suffix)
+      component.scheduleValue.set({
+        dtstart: '2026-04-28T17:00',
+        dtend: '2026-04-28T19:00',
+        rrule: 'FREQ=WEEKLY;BYDAY=TU;COUNT=3',
+        duration: 'PT2H',
+        isValid: true
+      });
+
+      mockRecurringService.createSeries.and.returnValue(of({
+        success: true,
+        group_id: 1,
+        series_id: 1,
+        message: 'Created'
+      }));
+
+      component.createSeries();
+
+      expect(mockRecurringService.createSeries).toHaveBeenCalled();
+      const params = mockRecurringService.createSeries.calls.first().args[0];
+      // dtstart should be the raw datetime-local string, NOT an ISO UTC string
+      expect(params.dtstart).toBe('2026-04-28T17:00');
+      expect(params.dtstart).not.toContain('Z');
+    });
+
+    it('getDurationMs calculates correctly from datetime-local strings', () => {
+      component.scheduleValue.set({
+        dtstart: '2026-04-28T17:00',
+        dtend: '2026-04-28T19:00',
+        rrule: 'FREQ=WEEKLY;COUNT=1',
+        duration: 'PT2H',
+        isValid: true
+      });
+
+      // Access private method via bracket notation
+      const durationMs = (component as any).getDurationMs();
+      // 2 hours = 7200000ms
+      expect(durationMs).toBe(7200000);
     });
   });
 });

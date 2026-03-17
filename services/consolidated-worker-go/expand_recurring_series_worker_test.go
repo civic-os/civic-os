@@ -483,14 +483,14 @@ func TestGenerateOccurrences_WithTimezone_America_NewYork(t *testing.T) {
 	w := &ExpandRecurringSeriesWorker{}
 
 	// Daily for 3 days at 2 PM local time in New York
+	// With TIMESTAMP storage, dtstart is wall-clock time tagged as UTC by pgx:
+	// 14:00 local = time.Date(2026, 1, 5, 14, 0, 0, 0, time.UTC)
 	tz := "America/New_York"
 	loc, _ := time.LoadLocation("America/New_York")
 
-	// dtstart is 2 PM local in New York (EST = UTC-5)
-	localStart := time.Date(2026, 1, 5, 14, 0, 0, 0, loc) // 2 PM EST = 7 PM UTC
 	series := &SeriesRecord{
 		RRULE:    "FREQ=DAILY;COUNT=3",
-		Dtstart:  localStart.UTC(), // Store as UTC
+		Dtstart:  time.Date(2026, 1, 5, 14, 0, 0, 0, time.UTC), // Wall-clock: 2 PM local
 		Timezone: &tz,
 	}
 
@@ -500,9 +500,9 @@ func TestGenerateOccurrences_WithTimezone_America_NewYork(t *testing.T) {
 		t.Fatalf("generateOccurrences failed: %v", err)
 	}
 
-	// Verify we get at least 2 occurrences (rrule.Between behavior may vary)
-	if len(occurrences) < 2 {
-		t.Errorf("Expected at least 2 occurrences, got %d", len(occurrences))
+	// Must get exactly 3 occurrences (no off-by-one with TIMESTAMP storage)
+	if len(occurrences) != 3 {
+		t.Errorf("Expected exactly 3 occurrences, got %d", len(occurrences))
 		for i, occ := range occurrences {
 			t.Logf("  Occurrence %d: %v (local: %v)", i, occ, occ.In(loc))
 		}
@@ -586,6 +586,160 @@ func TestGenerateOccurrences_WithNilTimezone_UsesUTC(t *testing.T) {
 	for i, occ := range occurrences {
 		if occ.Hour() != 12 {
 			t.Errorf("Occurrence %d: UTC hour is %d, expected 12", i, occ.Hour())
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// First Occurrence & DST Regression Tests (v0.39.0)
+// ----------------------------------------------------------------------------
+
+func TestGenerateOccurrences_FirstOccurrenceIncluded(t *testing.T) {
+	w := &ExpandRecurringSeriesWorker{}
+
+	// Regression test: With TIMESTAMPTZ storage, the first occurrence was skipped
+	// because Between(localDtstart, ...) used the UTC instant which was after
+	// the RRULE DTSTART in local time. With TIMESTAMP, both values match.
+	tz := "America/New_York"
+	loc, _ := time.LoadLocation("America/New_York")
+
+	// User picked Tuesday April 28, 2026 at 5:00 PM local
+	// With TIMESTAMP storage, pgx reads this as time.Date(2026, 4, 28, 17, 0, 0, 0, time.UTC)
+	series := &SeriesRecord{
+		RRULE:    "FREQ=WEEKLY;BYDAY=TU;COUNT=3",
+		Dtstart:  time.Date(2026, 4, 28, 17, 0, 0, 0, time.UTC), // Wall-clock: 5 PM local
+		Timezone: &tz,
+	}
+
+	until := time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)
+	occurrences, err := w.generateOccurrences(series, until)
+	if err != nil {
+		t.Fatalf("generateOccurrences failed: %v", err)
+	}
+
+	// Must get exactly 3 occurrences
+	if len(occurrences) != 3 {
+		t.Fatalf("Expected exactly 3 occurrences, got %d", len(occurrences))
+	}
+
+	// First occurrence must be April 28 (not May 5)
+	first := occurrences[0].In(loc)
+	if first.Month() != time.April || first.Day() != 28 {
+		t.Errorf("First occurrence should be April 28, got %s", first.Format("January 2"))
+	}
+
+	// Verify all 3 dates: April 28, May 5, May 12
+	expectedDays := []int{28, 5, 12}
+	expectedMonths := []time.Month{time.April, time.May, time.May}
+	for i, occ := range occurrences {
+		local := occ.In(loc)
+		if local.Month() != expectedMonths[i] || local.Day() != expectedDays[i] {
+			t.Errorf("Occurrence %d: expected %s %d, got %s %d",
+				i, expectedMonths[i], expectedDays[i], local.Month(), local.Day())
+		}
+		// All should be at 5 PM local
+		if local.Hour() != 17 {
+			t.Errorf("Occurrence %d: expected 17:00 local, got %02d:00", i, local.Hour())
+		}
+	}
+}
+
+func TestGenerateOccurrences_DSTTransition_SpringForward(t *testing.T) {
+	w := &ExpandRecurringSeriesWorker{}
+
+	// Series crosses DST spring-forward (March 8, 2026 in US)
+	// Before: EST (UTC-5), After: EDT (UTC-4)
+	tz := "America/New_York"
+	loc, _ := time.LoadLocation("America/New_York")
+
+	// Weekly on Sundays at 2 PM local, starting March 1
+	series := &SeriesRecord{
+		RRULE:    "FREQ=WEEKLY;BYDAY=SU;COUNT=6",
+		Dtstart:  time.Date(2026, 3, 1, 14, 0, 0, 0, time.UTC), // Wall-clock: 2 PM local
+		Timezone: &tz,
+	}
+
+	until := time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)
+	occurrences, err := w.generateOccurrences(series, until)
+	if err != nil {
+		t.Fatalf("generateOccurrences failed: %v", err)
+	}
+
+	if len(occurrences) != 6 {
+		t.Fatalf("Expected 6 occurrences, got %d", len(occurrences))
+	}
+
+	// All occurrences should preserve 2 PM wall-clock time
+	// Before DST (March 1, 8): 14:00 EST = 19:00 UTC
+	// After DST (March 15+): 14:00 EDT = 18:00 UTC
+	for i, occ := range occurrences {
+		local := occ.In(loc)
+		if local.Hour() != 14 {
+			t.Errorf("Occurrence %d (%s): expected 14:00 local, got %02d:00",
+				i, local.Format("2006-01-02"), local.Hour())
+		}
+	}
+
+	// Verify UTC hours shift at DST boundary
+	// March 1 is before spring-forward: 14:00 EST = 19:00 UTC
+	if occurrences[0].Hour() != 19 {
+		t.Errorf("Pre-DST occurrence 0: expected UTC hour 19, got %d", occurrences[0].Hour())
+	}
+	// March 8 spring-forward happens at 2 AM, so 14:00 is already EDT: 14:00 EDT = 18:00 UTC
+	// March 15+ are also EDT: 14:00 EDT = 18:00 UTC
+	for i := 1; i < 6; i++ {
+		if occurrences[i].Hour() != 18 {
+			t.Errorf("Post-DST occurrence %d: expected UTC hour 18, got %d", i, occurrences[i].Hour())
+		}
+	}
+}
+
+func TestGenerateOccurrences_DSTTransition_FallBack(t *testing.T) {
+	w := &ExpandRecurringSeriesWorker{}
+
+	// Series crosses DST fall-back (November 1, 2026 in US)
+	// Before: EDT (UTC-4), After: EST (UTC-5)
+	tz := "America/New_York"
+	loc, _ := time.LoadLocation("America/New_York")
+
+	// Weekly on Sundays at 2 PM local, starting Oct 25
+	series := &SeriesRecord{
+		RRULE:    "FREQ=WEEKLY;BYDAY=SU;COUNT=4",
+		Dtstart:  time.Date(2026, 10, 25, 14, 0, 0, 0, time.UTC), // Wall-clock: 2 PM local
+		Timezone: &tz,
+	}
+
+	until := time.Date(2027, 12, 31, 0, 0, 0, 0, time.UTC)
+	occurrences, err := w.generateOccurrences(series, until)
+	if err != nil {
+		t.Fatalf("generateOccurrences failed: %v", err)
+	}
+
+	if len(occurrences) != 4 {
+		t.Fatalf("Expected 4 occurrences, got %d", len(occurrences))
+	}
+
+	// All should preserve 2 PM wall-clock time
+	for i, occ := range occurrences {
+		local := occ.In(loc)
+		if local.Hour() != 14 {
+			t.Errorf("Occurrence %d (%s): expected 14:00 local, got %02d:00",
+				i, local.Format("2006-01-02"), local.Hour())
+		}
+	}
+
+	// Oct 25: 14:00 EDT = 18:00 UTC
+	if occurrences[0].Hour() != 18 {
+		t.Errorf("Pre-fallback occurrence 0: expected UTC hour 18, got %d", occurrences[0].Hour())
+	}
+	// Nov 1: 14:00 EST = 19:00 UTC (after fall-back)
+	if occurrences[1].Hour() != 19 {
+		t.Errorf("Post-fallback occurrence 1: expected UTC hour 19, got %d", occurrences[1].Hour())
+	}
+	// Nov 8, 15: also EST = 19:00 UTC
+	for i := 2; i < 4; i++ {
+		if occurrences[i].Hour() != 19 {
+			t.Errorf("Post-fallback occurrence %d: expected UTC hour 19, got %d", i, occurrences[i].Hour())
 		}
 	}
 }

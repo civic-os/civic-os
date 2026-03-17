@@ -608,7 +608,7 @@ BEGIN
     ),
     'resource', jsonb_build_object(
       'id', r.id,
-      'display_name', r.role_key,
+      'display_name', r.display_name,
       'description', r.description,
       'hourly_rate', r.hourly_rate,
       'capacity', r.capacity
@@ -666,7 +666,7 @@ BEGIN
     ),
     'resource', jsonb_build_object(
       'id', r.id,
-      'display_name', r.role_key,
+      'display_name', r.display_name,
       'description', r.description,
       'hourly_rate', r.hourly_rate,
       'capacity', r.capacity
@@ -738,13 +738,13 @@ BEGIN
       ),
       'resource', jsonb_build_object(
         'id', r.id,
-        'display_name', r.role_key,
+        'display_name', r.display_name,
         'hourly_rate', r.hourly_rate
       ),
       'reviewed_by', CASE WHEN NEW.reviewed_by IS NOT NULL THEN
         jsonb_build_object(
           'id', reviewer.id,
-          'display_name', reviewer.role_key
+          'display_name', reviewer.display_name
         )
       ELSE NULL END
     )
@@ -807,12 +807,12 @@ BEGIN
       ),
       'resource', jsonb_build_object(
         'id', r.id,
-        'display_name', r.role_key
+        'display_name', r.display_name
       ),
       'reviewed_by', CASE WHEN NEW.reviewed_by IS NOT NULL THEN
         jsonb_build_object(
           'id', reviewer.id,
-          'display_name', reviewer.role_key
+          'display_name', reviewer.display_name
         )
       ELSE NULL END
     )
@@ -875,7 +875,7 @@ BEGIN
       ),
       'resource', jsonb_build_object(
         'id', r.id,
-        'display_name', r.role_key
+        'display_name', r.display_name
       )
     )
     INTO v_request_data

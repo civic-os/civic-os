@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -37,6 +37,7 @@ import { SchemaService } from '../../services/schema.service';
 import { RecurringService } from '../../services/recurring.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { parseDatetimeLocal } from '../../utils/date.utils';
 
 /**
  * Series Editor Modal
@@ -323,10 +324,12 @@ export class SeriesEditorModalComponent implements OnChanges {
     if (this.series) {
       const dtstart = this.formatDateTimeLocal(this.series.dtstart);
       const duration = this.parseDuration(this.series.duration);
-      const dtstartDate = new Date(this.series.dtstart);
-      dtstartDate.setHours(dtstartDate.getHours() + duration.hours);
-      dtstartDate.setMinutes(dtstartDate.getMinutes() + duration.minutes);
-      const dtend = this.formatDateTimeLocal(dtstartDate.toISOString());
+      const dtstartDate = parseDatetimeLocal(this.series.dtstart);
+      if (dtstartDate) {
+        dtstartDate.setHours(dtstartDate.getHours() + duration.hours);
+        dtstartDate.setMinutes(dtstartDate.getMinutes() + duration.minutes);
+      }
+      const dtend = dtstartDate ? this.formatDateTimeLocal(dtstartDate.toISOString()) : '';
 
       this.scheduleValue.set({
         dtstart,
@@ -409,12 +412,27 @@ export class SeriesEditorModalComponent implements OnChanges {
   }
 
   private parseDuration(isoDuration: string): { hours: number; minutes: number } {
+    if (!isoDuration) return { hours: 1, minutes: 0 };
+
     // Parse ISO 8601 duration like "PT1H" or "PT1H30M"
-    const match = isoDuration?.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-    return {
-      hours: parseInt(match?.[1] || '1', 10),
-      minutes: parseInt(match?.[2] || '0', 10)
-    };
+    const isoMatch = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+    if (isoMatch?.[1] || isoMatch?.[2]) {
+      return {
+        hours: parseInt(isoMatch[1] || '0', 10),
+        minutes: parseInt(isoMatch[2] || '0', 10)
+      };
+    }
+
+    // Parse PostgreSQL interval format "HH:MM:SS" (returned by PostgREST)
+    const pgMatch = isoDuration.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (pgMatch) {
+      return {
+        hours: parseInt(pgMatch[1], 10),
+        minutes: parseInt(pgMatch[2], 10)
+      };
+    }
+
+    return { hours: 1, minutes: 0 };
   }
 
   onSave(): void {
@@ -438,7 +456,7 @@ export class SeriesEditorModalComponent implements OnChanges {
     const seriesUpdate: Partial<Series> = {
       id: this.series.id,
       entity_template: formValue.template,
-      dtstart: new Date(schedule.dtstart).toISOString(),
+      dtstart: schedule.dtstart,
       duration: schedule.duration,
       rrule: schedule.rrule
     };
