@@ -2,7 +2,7 @@
 
 **Status:** ⚠️ Partially Superseded
 **Created:** 2026-03-03
-**Superseded by:** `SYSTEM_MAP_PLAN.md` — replanned after Session 3. The zoom model (D3) expanded from 3 to 5 levels, sessions 4–7 replaced the original sessions 4–6, and the map metaphor became the organizing principle. Foundational decisions D1–D2, D4–D10, and principles P1–P6 remain current.
+**Superseded by:** `SYSTEM_MAP_PLAN.md` — replanned after Session 3, revised in Session 4. The zoom model (D3) expanded from 3 levels to 4 levels with L4 siblings (Lifecycle Detail and Execution Trace as peers below Entity Overview). Sessions 4–7 replaced the original sessions 4–6, and the map metaphor became the organizing principle. Navigation shell designed in Session 4 (`SYSTEM_MAP_NAVIGATION_DESIGN.md`). Foundational decisions D1–D2, D4–D10, and principles P1–P6 remain current (P1 refined: structural/causal distinction starts at Level 2, not Level 1).
 **Author:** Design Discussion with Claude
 **Target:** Phase 2 (Introspection) and Phase 3 (Visual Builder)
 
@@ -49,6 +49,8 @@ The primary navigation axis is **entity-centric**. Entities are the most concret
 System-wide cross-cutting views (dependency graph, permission matrix, notification catalog) supplement entity navigation but do not replace it.
 
 ### D3: Three Zoom Levels
+
+> **⚠️ Updated:** Expanded to four levels with L4 siblings in `SYSTEM_MAP_PLAN.md` §2. Application → Entity-to-Entity → Entity Overview → Lifecycle Detail | Execution Trace. See `SYSTEM_MAP_NAVIGATION_DESIGN.md` for the full navigation design.
 
 Navigation follows Shneiderman's mantra — overview first, zoom and filter, details on demand — implemented as three semantic zoom levels:
 
@@ -349,7 +351,7 @@ These items require dedicated design sessions to resolve.
 
 ### O1: Statechart Rendering Technology — ✅ Resolved (Session 2)
 
-**Decision:** Dual renderer. JointJS for the full interactive canvas at `/schema-editor/entity/:type/workflow` (reuses ERD patterns, provides Phase 3 editing for free). Lightweight Angular + static SVG for the inline embed on entity introspection pages. Both share the same layout algorithm and visual encoding. See `STATECHART_VISUALIZATION_DESIGN.md` S2-D1.
+**Decision:** Dual renderer. JointJS for the full interactive canvas at `/system-map/entity/:type/workflow` (reuses ERD patterns, provides Phase 3 editing for free). Lightweight Angular + static SVG for the inline embed on entity introspection pages. Both share the same layout algorithm and visual encoding. See `STATECHART_VISUALIZATION_DESIGN.md` S2-D1.
 
 ### O2: Causal Chain UI Component
 

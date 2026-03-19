@@ -1,9 +1,9 @@
 # Entity Context Diagram — Session 3 Design Decisions
 
 **Status:** ✅ Design Complete (r3)
-**Session:** 3 of 6 (Entity Context Diagram)
+**Session:** 3 of 7 (Entity Context Diagram)
 **Depends on:** Session 1 (property change triggers — v0.33.0), Session 2 (statechart visualization — design complete)
-**Prerequisite for:** Session 4 (causal chain UI)
+**Prerequisite for:** Session 4 (navigation shell — ✅ complete), Session 6 (causal chain UI)
 
 **Resolves open questions from Session 2:**
 - **S2→S3-Q1** (Statechart listener panel vs. context diagram overlap) — Resolved: the context diagram shows only cross-entity causal effects between domain entities; entity-internal effects remain on the statechart's listener panel (S3-D6)
@@ -48,7 +48,7 @@ One focal entity at center. Related domain entities arranged around it in zones:
 
 Entities within each zone are distributed along a ±54° arc from the zone's primary angle. The hub radius is 280 units in a 960×640 viewport, giving generous spacing.
 
-**Route:** `/schema-editor/entity/:type/context` — part of a navigable Entity Map feature where each entity's context diagram is a directly addressable view.
+**Route:** `/system-map/entity/:type/context` — part of a navigable System Map where each entity's context diagram is a directly addressable view. (Route updated from `/schema-editor/...` in Session 4, S4-D1.)
 
 ### S3-D3: Edge Aggregation
 
@@ -126,15 +126,15 @@ Clicking a causal edge opens a popover with:
 
 | Action | Target |
 |--------|--------|
-| Click peripheral → "Re-center" | Context diagram for that entity (`/schema-editor/entity/:type/context`) |
-| Click peripheral → "View lifecycle" | Statechart (`/schema-editor/entity/:type/workflow`) |
-| Click edge → "View causal chains" | Session 4 trace (`/introspection/entity/:type/chains?target=:target_type`) |
+| Click peripheral → "Re-center" | Context diagram for that entity (`/system-map/entity/:type/context`) |
+| Click peripheral → "View lifecycle" | Statechart (`/system-map/entity/:type/workflow`) |
+| Click edge → "View causal chains" | Session 6 trace (`/system-map/entity/:type/trace?target=:target_type`) |
 
 Re-centering is the primary exploration pattern. Browser back button returns to previous center. This creates a navigable entity map where each node is an addressable view.
 
 ### S3-D10: Rendering Technology
 
-JointJS for the full canvas at `/schema-editor/entity/:type/context`, consistent with ERD and statechart. Hub-and-spoke layout uses direct coordinate math (not Dagre — no rank structure needed).
+JointJS for the full canvas at `/system-map/entity/:type/context`, consistent with ERD and statechart. Hub-and-spoke layout uses direct coordinate math (not Dagre — no rank structure needed).
 
 Inline embed deferred — will be addressed when the intermediate "entity overview" zoom level is designed.
 
@@ -201,19 +201,21 @@ Additional changes in r3:
 
 ## Inputs to Future Sessions
 
-### For Session 4 (Causal Chain UI):
+### For Session 6 (Causal Chain UI):
 
-1. **Edge popovers are the entry point.** Each function in the popover links to its trace view. Cross-entity chains start at the focal entity and cross the boundary the context diagram visualizes.
+1. **Edge popovers are the entry point.** Each function in the popover links to its trace view. Cross-entity chains start at the focal entity and cross the boundary the context diagram visualizes. The trace route is `/system-map/entity/:type/trace?target=:target_type` (S4-D1).
 
 2. **Arrow direction is the trace direction.** A forward arrow (source → target) means the trace follows function execution from the source entity's lifecycle event into the target entity. The trace view should follow this same left-to-right / cause-to-effect orientation.
+
+3. **Lifecycle Detail and Execution Trace are L4 siblings** (Session 4 revision). Traces are reachable from Context Diagram edge popovers, Entity Overview, and Lifecycle — they do not require passing through Lifecycle. The Trace Index (`/system-map/entity/:type/trace`) lists all automation entry points.
 
 ### For Mid-Session Replan:
 
 1. **Missing zoom level.** An "entity overview" page between context diagram and statechart should show: properties with types (including the special types that are capabilities — status columns, file FKs, calendar/map/notes flags), inline embed of the statechart, inline embed of the context diagram, validations, and configuration. This is the page Session 2 referenced as the host for inline embeds.
 
-2. **The zoom hierarchy is:** Application (ERD) → Entity-to-entity (Context Diagram) → Entity overview (???) → Lifecycle detail (Statechart) → Execution trace (Causal Chain).
+2. **The zoom hierarchy is:** Application (ERD) → Entity-to-entity (Context Diagram) → Entity overview → Detail views: Lifecycle (Statechart) | Execution trace (Causal Chain). Lifecycle and Execution Trace are L4 siblings, not a linear chain. See `SYSTEM_MAP_NAVIGATION_DESIGN.md` for the revised hierarchy.
 
-### For Session 6 (Phase 3 Editing):
+### For Session 7 (Phase 3 Editing):
 
 1. **Context diagram edits cross-entity automation.** Drawing a new causal edge means: "when this entity's property changes, write to that entity." The Phase 3 affordance is wiring triggers and effects between entities.
 
