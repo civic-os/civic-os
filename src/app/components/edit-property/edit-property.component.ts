@@ -350,7 +350,8 @@ export class EditPropertyComponent {
         file,
         this.entityType(),
         this.entityId(),
-        true // Wait for thumbnails
+        true, // Wait for thumbnails
+        this.prop().column_name  // Track which property this file belongs to
       );
 
       // Store file reference ID in form control

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -63,7 +63,8 @@ export class FileUploadService {
     file: File,
     entityType: string,
     entityId: string,
-    waitForThumbnails = false
+    waitForThumbnails = false,
+    propertyName?: string
   ): Promise<FileReference> {
     // Generate unique key for this upload request
     const uploadKey = `${entityType}:${entityId}:${file.name}`;
@@ -75,7 +76,7 @@ export class FileUploadService {
     }
 
     // Start new upload and track the promise
-    const uploadPromise = this.performUpload(file, entityType, entityId, waitForThumbnails);
+    const uploadPromise = this.performUpload(file, entityType, entityId, waitForThumbnails, propertyName);
 
     this.inFlightUploads.set(uploadKey, uploadPromise);
 
@@ -95,7 +96,8 @@ export class FileUploadService {
     file: File,
     entityType: string,
     entityId: string,
-    waitForThumbnails: boolean
+    waitForThumbnails: boolean,
+    propertyName?: string
   ): Promise<FileReference> {
     // Step 1: Request presigned upload URL
     const requestId = await this.requestUploadUrl(file.name, file.type, entityType, entityId);
@@ -107,7 +109,7 @@ export class FileUploadService {
     await this.uploadToS3(url, file);
 
     // Step 4: Create file record in database
-    const fileRecord = await this.createFileRecord(file_id, file.name, file.type, file.size, entityType, entityId, url);
+    const fileRecord = await this.createFileRecord(file_id, file.name, file.type, file.size, entityType, entityId, url, propertyName);
 
     // Step 5: Optionally wait for thumbnail generation
     if (waitForThumbnails && file.type.startsWith('image/')) {
@@ -189,8 +191,9 @@ export class FileUploadService {
   }
 
   /**
-   * Create file record in database
-   * Extracts S3 key and bucket name from presigned URL
+   * Create file record in database via RPC
+   * Extracts S3 key and bucket name from presigned URL.
+   * Uses create_file_record RPC (admin pattern: VIEWs for reads, RPCs for writes).
    */
   private async createFileRecord(
     fileId: string,
@@ -199,7 +202,8 @@ export class FileUploadService {
     fileSize: number,
     entityType: string,
     entityId: string,
-    presignedUrl: string
+    presignedUrl: string,
+    propertyName?: string
   ): Promise<FileReference> {
     // Extract S3 bucket and key from presigned URL (before query params)
     // For path-style URLs: http://host/bucket/key
@@ -214,32 +218,28 @@ export class FileUploadService {
     const s3Bucket = pathParts[0];  // First segment is bucket name
     const s3Key = pathParts.slice(1).join('/');  // Rest is the S3 key
 
-    const body = {
-      id: fileId,
-      entity_type: entityType,
-      entity_id: entityId,
-      file_name: fileName,
-      file_type: fileType,
-      file_size: fileSize,
-      s3_bucket: s3Bucket,
-      s3_original_key: s3Key,
-      thumbnail_status: fileType.startsWith('image/') || fileType === 'application/pdf' ? 'pending' : 'not_applicable'
+    const body: Record<string, any> = {
+      p_id: fileId,
+      p_entity_type: entityType,
+      p_entity_id: entityId,
+      p_file_name: fileName,
+      p_file_type: fileType,
+      p_file_size: fileSize,
+      p_s3_bucket: s3Bucket,
+      p_s3_original_key: s3Key,
+      p_thumbnail_status: fileType.startsWith('image/') || fileType === 'application/pdf' ? 'pending' : 'not_applicable'
     };
 
-    const response = await firstValueFrom(
-      this.http.post<FileReference[]>(
-        `${this.apiUrl}files`,
-        body,
-        {
-          headers: {
-            'Prefer': 'return=representation'
-          }
-        }
+    if (propertyName) {
+      body['p_property_name'] = propertyName;
+    }
+
+    return await firstValueFrom(
+      this.http.post<FileReference>(
+        `${this.apiUrl}rpc/create_file_record`,
+        body
       )
     );
-
-    // PostgREST returns an array even for single inserts
-    return response[0];
   }
 
   /**
@@ -294,12 +294,12 @@ export class FileUploadService {
   }
 
   /**
-   * Delete file (soft delete)
+   * Delete file via RPC (ownership or admin check enforced server-side)
    * Note: Actual S3 cleanup should be handled by backend cleanup job
    */
   async deleteFile(fileId: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete(`${this.apiUrl}files?id=eq.${fileId}`)
+      this.http.post(`${this.apiUrl}rpc/delete_file_record`, { p_file_id: fileId })
     );
   }
 

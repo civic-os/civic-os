@@ -130,6 +130,13 @@ export class AppComponent {
     { initialValue: false }
   );
 
+  public hasFilePermission = toSignal(
+    this.auth.hasPermission('files', 'read').pipe(
+      catchError(() => of(false))
+    ),
+    { initialValue: false }
+  );
+
   // Show Admin section if user is admin OR has access to feature-specific pages
   public showAdminSection = computed(() => {
     // Admin always sees the section
@@ -142,6 +149,8 @@ export class AppComponent {
     if (this.hasRecurringEntities() && this.hasRecurringSchedulePermission()) return true;
     // Non-admins see it if they have payment access
     if (this.hasPaymentEntities() && this.hasPaymentPermission()) return true;
+    // Non-admins see it if they have file admin access
+    if (this.hasFilePermission()) return true;
     return false;
   });
 
@@ -232,6 +241,11 @@ export class AppComponent {
 
   public navigateToStaticAssets() {
     this.router.navigate(['admin', 'static-assets']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToFilesAdmin() {
+    this.router.navigate(['admin', 'files']);
     this.drawerOpen = false;
   }
 

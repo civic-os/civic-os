@@ -123,6 +123,7 @@ BEGIN
     -- Only send notification if issue has an assigned user
     IF NEW."created_user" IS NOT NULL THEN
         -- Build issue data JSONB (fetch embedded relationships)
+        -- Uses metadata.statuses (unified status system) instead of legacy IssueStatus table
         SELECT jsonb_build_object(
             'id', NEW.id,
             'display_name', NEW."display_name",
@@ -135,7 +136,7 @@ BEGIN
             )
         )
         INTO v_issue_data
-        FROM "IssueStatus" s
+        FROM metadata.statuses s
         WHERE s.id = NEW."status";
 
         -- Create notification
@@ -183,6 +184,7 @@ BEGIN
        AND NEW."created_user" IS NOT NULL THEN
 
         -- Build issue data JSONB (fetch embedded relationships)
+        -- Uses metadata.statuses (unified status system) instead of legacy IssueStatus table
         SELECT jsonb_build_object(
             'id', NEW.id,
             'display_name', NEW."display_name",
@@ -195,7 +197,7 @@ BEGIN
             )
         )
         INTO v_issue_data
-        FROM "IssueStatus" s
+        FROM metadata.statuses s
         WHERE s.id = NEW."status";
 
         -- Create notification

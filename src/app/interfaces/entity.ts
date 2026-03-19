@@ -66,6 +66,7 @@ export interface FileReference {
     s3_thumbnail_large_key?: string;
     thumbnail_status: 'pending' | 'processing' | 'completed' | 'failed' | 'not_applicable';
     thumbnail_error?: string;
+    property_name?: string;  // Column name of entity property referencing this file (v0.39.0)
     created_at: string;
     updated_at: string;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -141,13 +141,14 @@ describe('FileUploadService', () => {
   });
 
   describe('deleteFile', () => {
-    it('should delete file by ID', async () => {
+    it('should delete file by ID via RPC', async () => {
       const fileId = '019a1781-bc15-706b-99ee-6b62b24e223c';
 
       const promise = service.deleteFile(fileId);
 
-      const req = httpMock.expectOne(r => r.url.includes(`files?id=eq.${fileId}`));
-      expect(req.request.method).toBe('DELETE');
+      const req = httpMock.expectOne(r => r.url.includes('rpc/delete_file_record'));
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ p_file_id: fileId });
       req.flush({});
 
       await promise;
@@ -227,10 +228,10 @@ describe('FileUploadService', () => {
       // Small delay before file creation
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      // Step 4: Create file record
-      const reqCreate = httpMock.expectOne(r => r.url.endsWith('files'));
+      // Step 4: Create file record via RPC
+      const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
       expect(reqCreate.request.method).toBe('POST');
-      reqCreate.flush([mockFileRef]);
+      reqCreate.flush(mockFileRef);
 
       // Wait for interval polling to start (1000ms delay before first poll)
       await new Promise(resolve => setTimeout(resolve, 1050));
@@ -303,9 +304,9 @@ describe('FileUploadService', () => {
       reqS3.flush({});
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      // Create file record
-      const reqCreate = httpMock.expectOne(r => r.url.endsWith('files'));
-      reqCreate.flush([mockFileRef]);
+      // Create file record via RPC
+      const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
+      reqCreate.flush(mockFileRef);
 
       const result = await promise;
       expect(result).toEqual(mockFileRef);
@@ -332,6 +333,80 @@ describe('FileUploadService', () => {
 
       await expectAsync(promise).toBeRejectedWithError('Timeout waiting for upload URL');
     }, 15000); // 15 second timeout for this test
+
+    it('should include propertyName in file record when provided', async () => {
+      const file = new File(['test'], 'doc.pdf', { type: 'application/pdf' });
+      const entityType = 'staff_documents';
+      const entityId = '5';
+      const requestId = 'req-prop';
+      const fileId = '019b2222-aaaa-7777-bbbb-ccccddddeeee';
+      const presignedUrl = 'http://localhost:9000/civic-os-files/staff_documents/5/' + fileId + '/original.pdf?sig=x';
+
+      const mockFileRef: FileReference = {
+        id: fileId, entity_type: entityType, entity_id: entityId,
+        file_name: 'doc.pdf', file_type: 'application/pdf', file_size: 4,
+        s3_bucket: 'civic-os-files', s3_key_prefix: '', s3_original_key: 'key/original.pdf',
+        thumbnail_status: 'pending', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
+      };
+
+      const promise = service.uploadFile(file, entityType, entityId, false, 'resume');
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
+      reqUrl.flush(requestId);
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
+      reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqS3 = httpMock.expectOne(presignedUrl);
+      reqS3.flush({});
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
+      expect(reqCreate.request.body.p_property_name).toBe('resume');
+      reqCreate.flush(mockFileRef);
+
+      await promise;
+    });
+
+    it('should omit propertyName from file record when not provided', async () => {
+      const file = new File(['test'], 'doc.pdf', { type: 'application/pdf' });
+      const entityType = 'staff_documents';
+      const entityId = '5';
+      const requestId = 'req-noprop';
+      const fileId = '019b3333-aaaa-7777-bbbb-ccccddddeeee';
+      const presignedUrl = 'http://localhost:9000/civic-os-files/staff_documents/5/' + fileId + '/original.pdf?sig=y';
+
+      const mockFileRef: FileReference = {
+        id: fileId, entity_type: entityType, entity_id: entityId,
+        file_name: 'doc.pdf', file_type: 'application/pdf', file_size: 4,
+        s3_bucket: 'civic-os-files', s3_key_prefix: '', s3_original_key: 'key/original.pdf',
+        thumbnail_status: 'pending', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
+      };
+
+      const promise = service.uploadFile(file, entityType, entityId, false);
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqUrl = httpMock.expectOne(r => r.url.includes('request_upload_url'));
+      reqUrl.flush(requestId);
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqPoll = httpMock.expectOne(r => r.url.includes('get_upload_url'));
+      reqPoll.flush([{ status: 'completed', url: presignedUrl, file_id: fileId, error: null }]);
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqS3 = httpMock.expectOne(presignedUrl);
+      reqS3.flush({});
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const reqCreate = httpMock.expectOne(r => r.url.includes('rpc/create_file_record'));
+      expect(reqCreate.request.body.p_property_name).toBeUndefined();
+      reqCreate.flush(mockFileRef);
+
+      await promise;
+    });
 
     it('should handle presigned URL request failure', async () => {
       const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });

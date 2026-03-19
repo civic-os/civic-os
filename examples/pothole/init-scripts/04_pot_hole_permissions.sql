@@ -62,5 +62,15 @@ WHERE p.table_name IN ('Bid', 'Issue', 'WorkDetail', 'WorkPackage', 'Tag', 'issu
   AND r.role_key IN ('editor', 'admin')
 ON CONFLICT DO NOTHING;
 
+-- Grant files:read to admin role (for File Administration page)
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'files'
+  AND p.permission = 'read'
+  AND r.role_key = 'admin'
+ON CONFLICT DO NOTHING;
+
 -- Notify PostgREST to reload schema cache
 NOTIFY pgrst, 'reload schema';

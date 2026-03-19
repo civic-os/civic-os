@@ -103,6 +103,12 @@ export const routes: Routes = [
         canActivate: [schemaVersionGuard, authGuard]
     },
     {
+        path: 'admin/files',
+        loadComponent: () => import('./pages/admin-files/admin-files.page')
+            .then(m => m.AdminFilesPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
         path: 'admin/recurring-schedules',
         component: SeriesGroupManagementPage,
         canActivate: [schemaVersionGuard, authGuard]

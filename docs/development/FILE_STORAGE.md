@@ -378,8 +378,19 @@ See `examples/pothole/init-scripts/07_add_file_fields.sql` for complete example 
 - `Issue.photo` (image field)
 - `WorkPackage.report_pdf` (PDF field)
 
+## File Administration (v0.39.0)
+
+Admin page at `/admin/files` provides centralized file browsing with two modes:
+- **All Files**: Direct query with file type, date range, and filename search filters
+- **Entity Files**: Two-phase query — filter entities → extract linked file UUIDs → query files by ID
+
+Requires `files:read` permission (admin role by default). Uses `property_name` column to track which entity property each file was uploaded through, hybrid RLS policy with `can_view_entity_record()`, and `get_file_storage_stats()` RPC for storage summary.
+
+See `docs/notes/ADMIN_PAGE_PITFALLS.md` for architecture patterns and lessons learned.
+
 ## Related Documentation
 
 - Main documentation: `CLAUDE.md` - Property Type System section
 - Research notes: `docs/notes/FILE_STORAGE_OPTIONS.md` - Historical design decisions (v0.5.0 planning)
-- Migration: `postgres/migrations/deploy/v0-5-0-add-file-storage.sql`
+- Admin page lessons: `docs/notes/ADMIN_PAGE_PITFALLS.md` - Reactive architecture and testing patterns (v0.39.0)
+- Migrations: `postgres/migrations/deploy/v0-5-0-add-file-storage.sql` (core), `v0-39-0-add-file-admin.sql` (admin features)

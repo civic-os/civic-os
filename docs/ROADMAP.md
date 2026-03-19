@@ -16,6 +16,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Add User Profile and management (via Keycloak account console)
 - [x] Add Login/Logout Screens (uses Keycloak Auth)
 - [x] Add File/Image data types (S3-based with thumbnails)
+- [x] Add File Administration page with tiered RLS and storage stats (`/admin/files`)
 - [x] Live update page as Schema is updated
 - [x] Add Color PropertyType
 - [ ] Configurable Entity Menu (Nesting, Hiding, Singular/Plural names)

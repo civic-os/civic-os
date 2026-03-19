@@ -91,7 +91,7 @@ See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and 
 
 **Schema Decisions (ADR)** (v0.30.0+): Database-native architectural decision records via `metadata.schema_decisions` table. **Every schema change should include a `create_schema_decision()` call documenting the rationale.** Before modifying any entity's schema, **query existing decisions first**. See `docs/INTEGRATOR_GUIDE.md` (Schema Decisions section) for complete guide.
 
-**File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. See `docs/development/FILE_STORAGE.md` for complete implementation guide including adding file properties to your schema, validation types, and configuration
+**File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. **File Administration** (v0.39.0): Admin page at `/admin/files` for browsing all files with two modes (All Files with inline filters, Entity Files with two-phase query), `property_name` tracking, hybrid RLS, storage stats. See `docs/development/FILE_STORAGE.md` for complete implementation guide and `docs/notes/ADMIN_PAGE_PITFALLS.md` for architecture patterns.
 
 **Payment Type** (`Payment`, v0.13.0+): Stripe-based payment processing via UUID FK to `payments.transactions`. Enable on any entity via `payment_initiation_rpc` in `metadata.entities`. Frontend auto-displays payment badges on List pages and "Pay Now" button on Detail pages. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete workflow and `examples/community-center/` for working example.
 
@@ -147,6 +147,8 @@ grep -B 5 -A 10 "FAILED" /tmp/test-output.txt          # Get failure context
 This avoids re-running the full test suite (30+ seconds) when investigating multiple failures.
 
 See `docs/development/TESTING.md` for comprehensive testing guidelines, best practices, and troubleshooting.
+
+**Functional tests** (`tests/functional/`): Bash scripts that test migrations, RLS policies, and PostgREST integration against a live database. Key rules: never modify schema in test scripts (use migrations), create dummy files for uploads, and clean up FK references before deleting records. See `docs/notes/ADMIN_PAGE_PITFALLS.md` (Functional Testing section).
 
 **⚠️ MANDATORY: Run Tests Before Committing**
 
@@ -289,11 +291,12 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
+- **File Administration** (`/admin/files`) - Browse all uploaded files with All Files (inline filters) and Entity Files (two-phase query) modes. Requires `files:read` permission. (v0.39.0+)
 - **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only.
 
 **Role Delegation** (v0.31.0+): Admin-configurable matrix controlling which roles can assign/revoke which other roles. Configured via "Role Delegation" tab on Permissions page. Uses `metadata.role_can_manage` table. The `anonymous` role is excluded from delegation (framework-only permission role). See `docs/INTEGRATOR_GUIDE.md` (Role Delegation section) for details.
 
-**Admin Page Architecture**: Admin pages (User Management, Permissions, Entity/Property Management) use **read-only VIEWs** for data retrieval and **RPCs** for mutations. System views like `managed_users` are excluded from `schema_entities` via its WHERE clause so they don't appear in the sidebar or Schema Editor ERD. This pattern avoids the complexity of INSTEAD OF triggers while keeping PostgREST's native filtering/pagination for reads.
+**Admin Page Architecture**: Admin pages (User Management, Permissions, Entity/Property Management) use **read-only VIEWs** for data retrieval and **RPCs** for mutations. System views like `managed_users` are excluded from `schema_entities` via its WHERE clause so they don't appear in the sidebar or Schema Editor ERD. This pattern avoids the complexity of INSTEAD OF triggers while keeping PostgREST's native filtering/pagination for reads. **Before building a new admin page**, read `docs/notes/ADMIN_PAGE_PITFALLS.md` for common mistakes with multi-phase data loading, reactive state, and `<select>` binding.
 
 **Keycloak Service Account** (v0.31.0+): The consolidated worker uses a `civic-os-service-account` client (client credentials flow) for Keycloak API access. This enables user provisioning (creating Keycloak users) and role sync (creating/deleting realm roles). See `docs/AUTHENTICATION.md` (Step 8) for setup.
 
@@ -389,6 +392,8 @@ export class MyComponent {
 ```
 
 **Template**: Access signal values with `()` syntax: `@if (loading()) { <span class="loading"></span> }`
+
+**Multi-phase data loading**: For pages that load data in stages (e.g., load schema → query entities → query files), use multiple `effect()` instances where each reads signals written by the prior effect. Do NOT chain imperative method calls — async timing will break. See `docs/notes/ADMIN_PAGE_PITFALLS.md` for the pattern and common mistakes.
 
 ### OnPush + Async Pipe Pattern
 

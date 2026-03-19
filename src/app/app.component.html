@@ -202,6 +202,17 @@
                 </a>
               </li>
             }
+            <!-- Files (permission-based) -->
+            @if (hasFilePermission()) {
+              <li (click)="navigateToFilesAdmin()">
+                <a [class.menu-active]="isRouteActive('/admin/files')"
+                   [class.font-bold]="isRouteActive('/admin/files')"
+                   [class.opacity-85]="!isRouteActive('/admin/files')">
+                  <span class="material-symbols-outlined" aria-hidden="true">folder_open</span>
+                  Files
+                </a>
+              </li>
+            }
             <!-- Feature-specific items (shown based on entity config + user permissions) -->
             @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
               <li (click)="navigateToRecurringSchedules()">

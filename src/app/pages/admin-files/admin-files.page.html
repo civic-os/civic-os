@@ -1,0 +1,273 @@
+<div class="container mx-auto p-6">
+  <!-- Title + Stats Badges -->
+  <div class="flex items-center gap-3 mb-4">
+    <h1 class="text-3xl font-bold">File Administration</h1>
+    @if (canViewFiles()) {
+      <div class="badge badge-ghost gap-1">
+        <span class="material-symbols-outlined text-sm">inventory_2</span>
+        {{ totalFileCount() | number }}
+      </div>
+      <div class="badge badge-ghost gap-1">
+        <span class="material-symbols-outlined text-sm">hard_drive</span>
+        {{ formatFileSize(totalFileSize()) }}
+      </div>
+    }
+  </div>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Permission Check -->
+  @if (!canViewFiles()) {
+    <div class="alert alert-warning">
+      <span class="material-symbols-outlined">lock</span>
+      <span>You do not have permission to view files. Contact an administrator to request access.</span>
+    </div>
+  } @else {
+
+    <!-- Entity Selector + Filters Row -->
+    <div class="flex flex-wrap items-end gap-4 mb-6">
+      <!-- Entity Type Dropdown -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">View</span>
+        </label>
+        <select
+          #entitySelect
+          class="select select-bordered select-sm"
+          (change)="onEntitySelectedByValue(entitySelect.value)">
+          <option value="all" [selected]="currentEntityType() === 'all'">All Files</option>
+          @for (entity of entityOptions(); track entity.value) {
+            <option [value]="entity.value" [selected]="currentEntityType() === entity.value">{{ entity.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- File Filters (always visible) -->
+      <!-- File Type Filter -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">File Type</span>
+        </label>
+        <select
+          class="select select-bordered select-sm"
+          [ngModel]="currentFileTypeFilter()"
+          (ngModelChange)="onFileTypeFilterChange($event)">
+          @for (option of fileTypeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">Date Range</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            type="date"
+            class="input input-bordered input-sm w-36"
+            [ngModel]="currentDateFrom()"
+            (ngModelChange)="onDateFromChange($event)"
+            title="From date" />
+          <span class="text-base-content/50">—</span>
+          <input
+            type="date"
+            class="input input-bordered input-sm w-36"
+            [ngModel]="currentDateTo()"
+            (ngModelChange)="onDateToChange($event)"
+            title="To date" />
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="form-control w-64">
+        <label class="label py-1">
+          <span class="label-text font-semibold">&nbsp;</span>
+        </label>
+        <label class="input input-bordered input-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+          <input
+            type="text"
+            placeholder="Search filename..."
+            class="grow bg-transparent border-none outline-none"
+            [ngModel]="currentSearch()"
+            (ngModelChange)="onSearchChange($event)" />
+        </label>
+      </div>
+
+      <!-- Spacer pushes filter button + refresh to the right -->
+      <div class="flex-grow"></div>
+
+      <!-- Entity Files Mode: FilterBar (inline, right-aligned) -->
+      @if (currentEntityType() !== 'all' && filterableProperties().length > 0) {
+        <app-filter-bar
+          [properties]="filterableProperties()"
+          [entityKey]="currentEntityType()"
+          [currentFilters]="entityFilters()"
+          (filtersChange)="onEntityFiltersChange($event)">
+        </app-filter-bar>
+      }
+
+      <!-- Refresh -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">&nbsp;</span>
+        </label>
+        <button
+          class="btn btn-sm btn-square btn-ghost"
+          (click)="refresh()"
+          [disabled]="loading()"
+          title="Refresh">
+          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    @if (loading()) {
+      <div class="flex justify-center items-center min-h-[400px]">
+        <div class="flex items-center gap-2">
+          <span class="loading loading-spinner loading-lg"></span>
+          @if (loadingPhase() === 'searching-entities') {
+            <span class="text-base-content/60">Searching entities...</span>
+          } @else if (loadingPhase() === 'loading-files') {
+            <span class="text-base-content/60">Loading files...</span>
+          }
+        </div>
+      </div>
+    } @else {
+      <!-- Files Table -->
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>
+                <input type="checkbox"
+                  class="checkbox checkbox-sm"
+                  [checked]="isAllSelected()"
+                  (change)="toggleSelectAll()" />
+              </th>
+              <th>Preview</th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('file_name')">
+                <div class="flex items-center gap-1">
+                  Filename
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('file_name') }}</span>
+                </div>
+              </th>
+              <th>Entity</th>
+              @if (currentEntityType() !== 'all') {
+                <th>Linked Property</th>
+              }
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('file_type')">
+                <div class="flex items-center gap-1">
+                  Type
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('file_type') }}</span>
+                </div>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('file_size')">
+                <div class="flex items-center gap-1">
+                  Size
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('file_size') }}</span>
+                </div>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
+                <div class="flex items-center gap-1">
+                  Uploaded
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (file of files(); track file.id) {
+              <tr>
+                <!-- Checkbox -->
+                <td>
+                  <input type="checkbox"
+                    class="checkbox checkbox-sm"
+                    [checked]="selectedFileIds().has(file.id)"
+                    (change)="toggleFileSelection(file.id)" />
+                </td>
+                <!-- Preview -->
+                <td>
+                  @if (getThumbnailUrl(file)) {
+                    <div class="w-10 h-10 rounded overflow-hidden">
+                      <img [src]="getThumbnailUrl(file)" [alt]="file.file_name"
+                        class="w-full h-full object-cover" />
+                    </div>
+                  } @else {
+                    <div class="w-10 h-10 rounded bg-base-200 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-base-content/40">{{ getFileIcon(file.file_type) }}</span>
+                    </div>
+                  }
+                </td>
+                <!-- Filename -->
+                <td>
+                  <a [href]="getS3Url(file.s3_original_key)" target="_blank"
+                    class="link link-primary text-sm" [title]="file.file_name">
+                    {{ file.file_name }}
+                  </a>
+                </td>
+                <!-- Entity -->
+                <td>
+                  <a [routerLink]="getEntityRoute(file)"
+                    class="link link-primary text-sm flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                    {{ getEntityDisplayName(file) }}
+                  </a>
+                </td>
+                <!-- Linked Property (Entity Files mode only) -->
+                @if (currentEntityType() !== 'all') {
+                  <td class="text-sm text-base-content/60">
+                    {{ getPropertyDisplayName(file) }}
+                  </td>
+                }
+                <!-- Type -->
+                <td class="text-sm whitespace-nowrap">{{ file.file_type }}</td>
+                <!-- Size -->
+                <td class="text-sm whitespace-nowrap">{{ formatFileSize(file.file_size) }}</td>
+                <!-- Uploaded -->
+                <td class="text-sm whitespace-nowrap">{{ file.created_at | date:'short' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="currentEntityType() !== 'all' ? 8 : 7" class="text-center py-8 text-base-content/60">
+                  No files found
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Download Selected -->
+      @if (selectedFileIds().size > 0) {
+        <div class="mt-4">
+          <button class="btn btn-sm btn-primary" (click)="downloadSelected()">
+            <span class="material-symbols-outlined text-base">download</span>
+            Download Selected ({{ selectedFileIds().size }})
+          </button>
+        </div>
+      }
+
+      <!-- Pagination -->
+      <div class="mt-4">
+        <app-pagination
+          [currentPage]="currentPage()"
+          [pageSize]="currentPageSize()"
+          [totalCount]="totalCount()"
+          [loading]="loading()"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)">
+        </app-pagination>
+      </div>
+    }
+  }
+</div>
