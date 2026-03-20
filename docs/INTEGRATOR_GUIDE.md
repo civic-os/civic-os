@@ -117,6 +117,54 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 ---
 
+### Common Metadata Pitfalls
+
+**`metadata.properties` is override-only — always INSERT, never UPDATE**
+
+The `schema_properties` VIEW joins `information_schema.columns` with `metadata.properties` via LEFT JOIN. Rows in `metadata.properties` don't exist until you create them — they're overrides, not a complete registry. A plain `UPDATE` will silently affect zero rows.
+
+```sql
+-- WRONG — will match 0 rows if no override exists yet
+UPDATE metadata.properties SET filterable = TRUE
+WHERE table_name = 'issues' AND column_name = 'status_id';
+
+-- CORRECT — creates the override row, or updates it if it exists
+INSERT INTO metadata.properties (table_name, column_name, filterable)
+VALUES ('issues', 'status_id', TRUE)
+ON CONFLICT (table_name, column_name) DO UPDATE SET filterable = EXCLUDED.filterable;
+```
+
+**`public.civic_os_users` is a VIEW — use `metadata.civic_os_users` for foreign keys**
+
+The user table lives in the `metadata` schema. The `public.civic_os_users` object is a VIEW (for PostgREST access) and cannot be referenced in foreign key constraints:
+
+```sql
+-- WRONG — "is not a table"
+user_id UUID REFERENCES civic_os_users(id)
+
+-- CORRECT
+user_id UUID REFERENCES metadata.civic_os_users(id)
+```
+
+**PostGIS `spatial_ref_sys` table leaks into the API**
+
+PostGIS grants `PUBLIC` read access to `spatial_ref_sys`, which means PostgREST exposes it as an entity. Hide it in your permissions script:
+
+```sql
+REVOKE ALL ON spatial_ref_sys FROM PUBLIC, web_anon, authenticated;
+```
+
+**Two-layer permission system**
+
+Both layers must be configured for access to work:
+
+1. **PostgreSQL role grants** (`GRANT ... TO authenticated`) — the floor that PostgREST enforces
+2. **RBAC metadata** (`metadata.permissions` + `metadata.permission_roles`) — the fine-grained ceiling that RLS policies enforce per-role
+
+If a user gets "permission denied", check the PG grants first. If they can query via SQL but the UI blocks them, check the RBAC metadata.
+
+---
+
 ### Validation System
 
 **`metadata.validations`** - Defines frontend validation rules applied before API submission

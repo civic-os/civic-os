@@ -586,6 +586,31 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ---
 
+## Social Login: Microsoft / Azure AD
+
+Keycloak can delegate authentication to Microsoft Azure AD, letting users sign in with their organizational Microsoft accounts.
+
+### Setup
+
+1. **Azure App Registration**: In the Azure portal, create an App Registration with redirect URI `https://<your-keycloak>/realms/<realm>/broker/microsoft/endpoint`
+2. **Keycloak Identity Provider**: In the Keycloak admin console, go to **Identity providers** → **Add provider** → **OpenID Connect v1.0** (not the legacy "Microsoft" type)
+3. **Set alias to `microsoft`**: This exact alias makes Keycloak display the Microsoft logo on the login button
+4. **Configure endpoints** using your Azure tenant ID:
+   - Authorization URL: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`
+   - Token URL: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`
+5. **Client ID and Secret**: From the Azure App Registration
+6. **Default Scopes**: `openid profile email`
+
+### Common Pitfalls
+
+**Use tenant-specific endpoints, not `/common/`**: Azure's `/common/` discovery document returns `{tenantid}` as a literal placeholder in the issuer field. Keycloak validates the JWT issuer against this value and fails. Always use `https://login.microsoftonline.com/{your-actual-tenant-id}/oauth2/v2.0/...`.
+
+**Client Authentication method**: Under the provider's **Advanced** settings, set **Client Authentication** to "Client secret sent as post" (`client_secret_post`). Azure AD's v2.0 token endpoint may reject Basic auth headers.
+
+**Debugging "Unexpected error when authenticating with identity provider"**: This generic error means the token exchange failed server-side. The Keycloak admin UI Events tab won't show it — check container logs (`docker compose logs keycloak`) for the Java stack trace. Also check browser DevTools Network tab for error parameters in the redirect URL.
+
+---
+
 ## Reference Links
 
 - **Keycloak Documentation**: https://www.keycloak.org/documentation

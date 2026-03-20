@@ -294,6 +294,40 @@ curl -sL https://raw.githubusercontent.com/wowu/docker-rollout/main/docker-rollo
 chmod +x ~/.docker/cli-plugins/docker-rollout
 ```
 
+### Bundled PostgreSQL: Role Creation Before Migrations
+
+When bundling PostgreSQL in the Docker Compose (instead of using managed PostgreSQL), the `authenticator`, `web_anon`, and `authenticated` database roles must be created **before** running migrations. The baseline migration GRANTs to these roles, and will fail if they don't exist:
+
+```bash
+docker compose exec postgres psql -U postgres -d <dbname> -c "
+  CREATE ROLE web_anon NOLOGIN;
+  CREATE ROLE authenticated NOLOGIN;
+  CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD '<password>';
+  GRANT web_anon TO authenticator;
+  GRANT authenticated TO authenticator;"
+```
+
+Then run migrations, then apply instance-specific SQL scripts (tables, permissions, metadata).
+
+### SSH Multiplexing (Recommended)
+
+Deploying via repeated `ssh host 'command'` calls can trigger fail2ban's brute force detection. Configure SSH multiplexing in `~/.ssh/config` to reuse a single connection:
+
+```
+Host my-instance
+  HostName <droplet-ip>
+  User deploy
+  ControlMaster auto
+  ControlPath ~/.ssh/sockets/%r@%h-%p
+  ControlPersist 30m
+```
+
+Create the sockets directory: `mkdir -p ~/.ssh/sockets`
+
+### PostgREST JWKS Auto-Fetch
+
+The Civic OS PostgREST image includes an entrypoint script that automatically fetches the JWKS from Keycloak on startup using `KEYCLOAK_URL` and `KEYCLOAK_REALM` environment variables. No volume mount or manual `curl` step is needed — the JWKS is re-fetched on every container restart, which handles Keycloak key rotation automatically.
+
 ## Security Notes
 
 - **Firewall**: UFW is configured to allow only ports 22, 80, 443
