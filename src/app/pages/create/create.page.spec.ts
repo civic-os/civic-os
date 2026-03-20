@@ -413,14 +413,15 @@ describe('CreatePage', () => {
       mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
     });
 
-    it('should reset form and navigate to current entity create', (done) => {
+    it('should close success modal, reset form with defaults, and navigate', (done) => {
       component.properties$.subscribe(() => {
+        component.showSuccessModal.set(true);
         component.createForm?.patchValue({ name: 'Old Value' });
-        spyOn(component.createForm!, 'reset');
 
         component.navToCreate();
 
-        expect(component.createForm?.reset).toHaveBeenCalled();
+        expect(component.showSuccessModal()).toBe(false);
+        expect(component.createForm?.get('name')?.value).toBeNull();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Issue']);
         done();
       });
@@ -428,12 +429,26 @@ describe('CreatePage', () => {
 
     it('should navigate to specified entity create', (done) => {
       component.properties$.subscribe(() => {
-        spyOn(component.createForm!, 'reset');
-
         component.navToCreate('Status');
 
-        expect(component.createForm?.reset).toHaveBeenCalled();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Status']);
+        done();
+      });
+    });
+
+    it('should reset boolean fields to false, not null', (done) => {
+      mockSchemaService.getPropsForCreate.and.returnValue(
+        of([MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.boolean])
+      );
+
+      component.properties$.subscribe(() => {
+        // Simulate user having filled out the form
+        component.createForm?.patchValue({ name: 'Test', is_active: true });
+
+        component.navToCreate();
+
+        expect(component.createForm?.get('is_active')?.value).toBe(false);
+        expect(component.createForm?.get('name')?.value).toBeNull();
         done();
       });
     });

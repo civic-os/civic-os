@@ -277,8 +277,20 @@ export class CreatePage {
   }
 
   navToCreate(key?: string) {
-    this.createForm?.reset();
-    if(key) {
+    this.showSuccessModal.set(false);
+
+    // Reset form with proper defaults (boolean → false, others → null)
+    // FormGroup.reset() without args sets all controls to null, which breaks
+    // boolean fields (null instead of false) and hits NOT NULL constraints.
+    if (this.createForm && this.currentProps.length > 0) {
+      const defaults: Record<string, any> = {};
+      this.currentProps.forEach(p => {
+        defaults[p.column_name] = SchemaService.getDefaultValueForProperty(p);
+      });
+      this.createForm.reset(defaults);
+    }
+
+    if (key) {
       this.router.navigate(['create', key]);
     } else {
       this.router.navigate(['create', this.entityKey]);
