@@ -7,7 +7,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
 import { ImageWidgetComponent } from './image-widget.component';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 import { AuthService } from '../../../services/auth.service';
@@ -35,7 +34,7 @@ describe('ImageWidgetComponent', () => {
 
   beforeEach(async () => {
     const mockAuth = jasmine.createSpyObj('AuthService', ['hasPermission']);
-    mockAuth.hasPermission.and.returnValue(of(false));
+    mockAuth.hasPermission.and.returnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [ImageWidgetComponent],

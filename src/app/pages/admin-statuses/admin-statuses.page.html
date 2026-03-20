@@ -1,0 +1,547 @@
+<!-- Status Administration Page -->
+<div class="p-4 md:p-6 max-w-6xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6">Status Administration</h1>
+
+  <!-- Success Alert -->
+  @if (successMessage()) {
+    <div class="alert alert-success mb-4 relative">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ successMessage() }}</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  }
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-error mb-4 relative">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissError()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="flex justify-center items-center min-h-[400px]">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else {
+    <!-- Entity Type Selector + Actions -->
+    <div class="flex flex-wrap gap-3 items-end mb-6">
+      <div class="form-control flex-1 min-w-[200px]">
+        <label class="label"><span class="font-semibold">Status Type</span></label>
+        <select #entitySelect
+                class="select select-bordered w-full"
+                (change)="onEntityTypeChange(entitySelect.value)">
+          @if (!selectedEntityType()) {
+            <option value="" disabled [selected]="!selectedEntityType()">Select a type...</option>
+          }
+          @for (type of statusTypes(); track type.entity_type) {
+            <option [value]="type.entity_type" [selected]="selectedEntityType() === type.entity_type">
+              {{ type.display_name || type.entity_type }} ({{ type.status_count }})
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="flex gap-2">
+        <button class="btn btn-primary btn-sm" (click)="openCreateTypeModal()">
+          <span class="material-symbols-outlined text-sm">add</span>
+          Add Type
+        </button>
+        @if (selectedEntityType()) {
+          <button class="btn btn-sm" (click)="openEditTypeModal()">
+            <span class="material-symbols-outlined text-sm">edit</span>
+          </button>
+          <button class="btn btn-error btn-sm" (click)="openDeleteTypeModal()">
+            <span class="material-symbols-outlined text-sm">delete</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Type Description -->
+    @if (selectedType()?.description) {
+      <p class="text-base-content/60 text-sm mb-4">{{ selectedType()?.description }}</p>
+    }
+
+    <!-- Tabs -->
+    @if (selectedEntityType()) {
+      <div role="tablist" class="tabs tabs-lift tabs-lg mb-6">
+        <button role="tab" class="tab" [class.tab-active]="activeTab() === 'statuses'" (click)="switchTab('statuses')">
+          Statuses
+        </button>
+        <button role="tab" class="tab" [class.tab-active]="activeTab() === 'transitions'" (click)="switchTab('transitions')">
+          Transitions
+        </button>
+      </div>
+
+      <!-- Statuses Tab -->
+      @if (activeTab() === 'statuses') {
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">Statuses</h2>
+          <button class="btn btn-primary btn-sm" (click)="openCreateStatusModal()">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Add Status
+          </button>
+        </div>
+
+        @if (statuses().length === 0) {
+          <div class="alert alert-info">
+            <span class="material-symbols-outlined">info</span>
+            <span>No statuses defined for this type yet. Click "Add Status" to create one.</span>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Color</th>
+                  <th>Display Name</th>
+                  <th>Key</th>
+                  <th>Initial</th>
+                  <th>Terminal</th>
+                  <th>Sort</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (status of statuses(); track status.id) {
+                  <tr>
+                    <td>
+                      <div class="w-6 h-6 rounded-full border border-base-300"
+                           [style.backgroundColor]="status.color || '#3B82F6'"></div>
+                    </td>
+                    <td class="font-medium">{{ status.display_name }}</td>
+                    <td><code class="bg-base-200 px-1 rounded text-sm">{{ status.status_key }}</code></td>
+                    <td>
+                      @if (status.is_initial) {
+                        <span class="badge badge-success badge-sm">Initial</span>
+                      }
+                    </td>
+                    <td>
+                      @if (status.is_terminal) {
+                        <span class="badge badge-error badge-sm">Terminal</span>
+                      }
+                    </td>
+                    <td>{{ status.sort_order }}</td>
+                    <td>
+                      <div class="flex gap-1">
+                        <button class="btn btn-ghost btn-sm" (click)="openEditStatusModal(status)" title="Edit">
+                          <span class="material-symbols-outlined text-sm">edit</span>
+                        </button>
+                        <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteStatusModal(status)" title="Delete">
+                          <span class="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+
+      <!-- Transitions Tab -->
+      @if (activeTab() === 'transitions') {
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">Transitions</h2>
+          <button class="btn btn-primary btn-sm" (click)="openCreateTransitionModal()" [disabled]="statuses().length < 2">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Add Transition
+          </button>
+        </div>
+
+        @if (statuses().length < 2) {
+          <div class="alert alert-warning">
+            <span class="material-symbols-outlined">warning</span>
+            <span>At least 2 statuses are required to create transitions.</span>
+          </div>
+        } @else if (transitions().length === 0) {
+          <div class="alert alert-info">
+            <span class="material-symbols-outlined">info</span>
+            <span>No transitions defined yet. Click "Add Transition" to define allowed status changes.</span>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>From</th>
+                  <th></th>
+                  <th>To</th>
+                  <th>Label</th>
+                  <th>RPC</th>
+                  <th>Enabled</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (transition of transitions(); track transition.id) {
+                  <tr>
+                    <td>
+                      <span class="badge gap-1" [style.backgroundColor]="transition.from_color || '#3B82F6'" [style.color]="'white'">
+                        {{ transition.from_display_name }}
+                      </span>
+                    </td>
+                    <td><span class="material-symbols-outlined text-base-content/40">arrow_forward</span></td>
+                    <td>
+                      <span class="badge gap-1" [style.backgroundColor]="transition.to_color || '#3B82F6'" [style.color]="'white'">
+                        {{ transition.to_display_name }}
+                      </span>
+                    </td>
+                    <td>{{ transition.display_name || '—' }}</td>
+                    <td>
+                      @if (transition.on_transition_rpc) {
+                        <code class="bg-base-200 px-1 rounded text-sm">{{ transition.on_transition_rpc }}</code>
+                      } @else {
+                        <span class="text-base-content/30">—</span>
+                      }
+                    </td>
+                    <td>
+                      <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                             [checked]="transition.is_enabled" disabled>
+                    </td>
+                    <td>
+                      <div class="flex gap-1">
+                        <button class="btn btn-ghost btn-sm" (click)="openEditTransitionModal(transition)" title="Edit">
+                          <span class="material-symbols-outlined text-sm">edit</span>
+                        </button>
+                        <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteTransitionModal(transition)" title="Delete">
+                          <span class="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    } @else if (statusTypes().length === 0) {
+      <div class="alert alert-info">
+        <span class="material-symbols-outlined">info</span>
+        <span>No status types defined yet. Click "Add Type" to create one.</span>
+      </div>
+    }
+  }
+</div>
+
+<!-- Type Create/Edit Modal -->
+<cos-modal [isOpen]="showTypeModal()" (closed)="closeTypeModal()">
+  <h3 class="font-bold text-lg mb-4">
+    {{ editingType() ? 'Edit Status Type' : 'Create Status Type' }}
+  </h3>
+
+  @if (typeError()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ typeError() }}</span>
+    </div>
+  }
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Entity Type</span></label>
+    <input type="text"
+           class="input input-bordered w-full"
+           [value]="typeForm().entityType"
+           (input)="updateTypeFormField('entityType', $any($event.target).value)"
+           [disabled]="!!editingType()"
+           placeholder="e.g. issues_status">
+    @if (!editingType()) {
+      <label class="label"><span class="text-base-content/60 text-xs">Lowercase letters, numbers, underscores. Cannot be changed after creation.</span></label>
+    }
+  </div>
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Display Name</span></label>
+    <input type="text"
+           class="input input-bordered w-full"
+           [value]="typeForm().displayName"
+           (input)="updateTypeFormField('displayName', $any($event.target).value)"
+           placeholder="e.g. Issue Status">
+    <label class="label"><span class="text-base-content/60 text-xs">Human-readable label shown in the dropdown. Defaults to entity type if empty.</span></label>
+  </div>
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Description</span></label>
+    <textarea class="textarea textarea-bordered w-full"
+              [value]="typeForm().description"
+              (input)="updateTypeFormField('description', $any($event.target).value)"
+              placeholder="Optional description"></textarea>
+  </div>
+
+  <div class="cos-modal-action">
+    <button class="btn" (click)="closeTypeModal()" [disabled]="typeSaving()">Cancel</button>
+    <button class="btn btn-primary" (click)="submitType()" [disabled]="typeSaving()">
+      @if (typeSaving()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Saving...
+      } @else {
+        {{ editingType() ? 'Update' : 'Create' }}
+      }
+    </button>
+  </div>
+</cos-modal>
+
+<!-- Status Create/Edit Modal -->
+<cos-modal [isOpen]="showStatusModal()" (closed)="closeStatusModal()">
+  <h3 class="font-bold text-lg mb-4">
+    {{ editingStatus() ? 'Edit Status' : 'Create Status' }}
+  </h3>
+
+  @if (statusError()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ statusError() }}</span>
+    </div>
+  }
+
+  <!-- Key (read-only, edit only) -->
+  @if (editingStatus()) {
+    <div class="form-control mb-4">
+      <label class="label"><span class="font-semibold">Key</span></label>
+      <input type="text"
+             class="input input-bordered w-full"
+             [value]="editingStatus()?.status_key"
+             disabled>
+      <label class="label"><span class="text-base-content/60 text-xs">Auto-generated. Cannot be changed.</span></label>
+    </div>
+  }
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Display Name</span></label>
+    <input type="text"
+           class="input input-bordered w-full"
+           [value]="statusForm().displayName"
+           (input)="updateStatusFormField('displayName', $any($event.target).value)"
+           placeholder="e.g. Open">
+  </div>
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Description</span></label>
+    <textarea class="textarea textarea-bordered w-full"
+              [value]="statusForm().description"
+              (input)="updateStatusFormField('description', $any($event.target).value)"
+              placeholder="Optional description"></textarea>
+  </div>
+
+  <div class="flex gap-4 mb-4">
+    <div class="form-control flex-1">
+      <label class="label"><span class="font-semibold">Color</span></label>
+      <div class="flex items-center gap-2">
+        <input type="color"
+               class="w-10 h-10 rounded cursor-pointer border border-base-300"
+               [value]="statusForm().color"
+               (input)="updateStatusFormField('color', $any($event.target).value)">
+        <input type="text"
+               class="input input-bordered w-28"
+               [value]="statusForm().color"
+               (input)="updateStatusFormField('color', $any($event.target).value)"
+               placeholder="#3B82F6">
+      </div>
+    </div>
+    <div class="form-control w-24">
+      <label class="label"><span class="font-semibold">Sort Order</span></label>
+      <input type="number"
+             class="input input-bordered w-full"
+             [value]="statusForm().sortOrder"
+             (input)="updateStatusSortOrder(+$any($event.target).value)">
+    </div>
+  </div>
+
+  <div class="flex gap-6 mb-4">
+    <label class="label cursor-pointer gap-2">
+      <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+             [checked]="statusForm().isInitial"
+             (change)="updateStatusBool('isInitial', $any($event.target).checked)">
+      <span class="font-semibold">Initial Status</span>
+    </label>
+    <label class="label cursor-pointer gap-2">
+      <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+             [checked]="statusForm().isTerminal"
+             (change)="updateStatusBool('isTerminal', $any($event.target).checked)">
+      <span class="font-semibold">Terminal Status</span>
+    </label>
+  </div>
+  @if (statusForm().isInitial) {
+    <p class="text-sm text-base-content/60 mb-4">Setting this as Initial will clear any other initial status in this type.</p>
+  }
+
+  <div class="cos-modal-action">
+    <button class="btn" (click)="closeStatusModal()" [disabled]="statusSaving()">Cancel</button>
+    <button class="btn btn-primary" (click)="submitStatus()" [disabled]="statusSaving()">
+      @if (statusSaving()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Saving...
+      } @else {
+        {{ editingStatus() ? 'Update' : 'Create' }}
+      }
+    </button>
+  </div>
+</cos-modal>
+
+<!-- Transition Create/Edit Modal -->
+<cos-modal [isOpen]="showTransitionModal()" (closed)="closeTransitionModal()">
+  <h3 class="font-bold text-lg mb-4">
+    {{ editingTransition() ? 'Edit Transition' : 'Create Transition' }}
+  </h3>
+
+  @if (transitionError()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ transitionError() }}</span>
+    </div>
+  }
+
+  <div class="flex gap-4 mb-4">
+    <div class="form-control flex-1">
+      <label class="label"><span class="font-semibold">From Status</span></label>
+      <select class="select select-bordered w-full"
+              [value]="transitionForm().fromStatusId"
+              (change)="updateTransitionStatusId('fromStatusId', +$any($event.target).value)">
+        @for (status of nonTerminalStatuses(); track status.id) {
+          <option [value]="status.id" [selected]="transitionForm().fromStatusId === status.id">
+            {{ status.display_name }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="flex items-end pb-3">
+      <span class="material-symbols-outlined text-base-content/40">arrow_forward</span>
+    </div>
+    <div class="form-control flex-1">
+      <label class="label"><span class="font-semibold">To Status</span></label>
+      <select class="select select-bordered w-full"
+              [value]="transitionForm().toStatusId"
+              (change)="updateTransitionStatusId('toStatusId', +$any($event.target).value)">
+        @for (status of statuses(); track status.id) {
+          <option [value]="status.id" [selected]="transitionForm().toStatusId === status.id">
+            {{ status.display_name }}
+          </option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Label</span></label>
+    <input type="text"
+           class="input input-bordered w-full"
+           [value]="transitionForm().displayName"
+           (input)="updateTransitionFormField('displayName', $any($event.target).value)"
+           placeholder="e.g. Close Issue">
+  </div>
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">Description</span></label>
+    <textarea class="textarea textarea-bordered w-full"
+              [value]="transitionForm().description"
+              (input)="updateTransitionFormField('description', $any($event.target).value)"
+              placeholder="Optional description"></textarea>
+  </div>
+
+  <div class="form-control mb-4">
+    <label class="label"><span class="font-semibold">On Transition RPC</span></label>
+    <input type="text"
+           class="input input-bordered w-full"
+           [value]="transitionForm().onTransitionRpc"
+           (input)="updateTransitionFormField('onTransitionRpc', $any($event.target).value)"
+           placeholder="Optional function name">
+    <label class="label"><span class="text-base-content/60 text-xs">PostgreSQL function called when this transition executes.</span></label>
+  </div>
+
+  <div class="flex gap-4 mb-4">
+    <div class="form-control w-24">
+      <label class="label"><span class="font-semibold">Sort Order</span></label>
+      <input type="number"
+             class="input input-bordered w-full"
+             [value]="transitionForm().sortOrder"
+             (input)="updateTransitionSortOrder(+$any($event.target).value)">
+    </div>
+    <label class="label cursor-pointer gap-2 items-end pb-3">
+      <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+             [checked]="transitionForm().isEnabled"
+             (change)="updateTransitionEnabled($any($event.target).checked)">
+      <span class="font-semibold">Enabled</span>
+    </label>
+  </div>
+
+  <div class="cos-modal-action">
+    <button class="btn" (click)="closeTransitionModal()" [disabled]="transitionSaving()">Cancel</button>
+    <button class="btn btn-primary" (click)="submitTransition()" [disabled]="transitionSaving()">
+      @if (transitionSaving()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Saving...
+      } @else {
+        {{ editingTransition() ? 'Update' : 'Create' }}
+      }
+    </button>
+  </div>
+</cos-modal>
+
+<!-- Delete Type Confirmation -->
+<cos-modal [isOpen]="showDeleteTypeModal()" (closed)="closeDeleteTypeModal()" size="sm">
+  <h3 class="font-bold text-lg mb-4">Delete Status Type</h3>
+  <p>Are you sure you want to delete the status type <strong>{{ selectedEntityType() }}</strong>?</p>
+  <p class="text-sm text-base-content/60 mt-2">This will also delete all statuses and transitions in this type. This action cannot be undone.</p>
+
+  <div class="cos-modal-action">
+    <button class="btn" (click)="closeDeleteTypeModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button class="btn btn-error" (click)="submitDeleteType()" [disabled]="deleteLoading()">
+      @if (deleteLoading()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Deleting...
+      } @else {
+        Delete Type
+      }
+    </button>
+  </div>
+</cos-modal>
+
+<!-- Delete Status Confirmation -->
+<cos-modal [isOpen]="showDeleteStatusModal()" (closed)="closeDeleteStatusModal()" size="sm">
+  <h3 class="font-bold text-lg mb-4">Delete Status</h3>
+  <p>Are you sure you want to delete the status <strong>{{ deletingStatus()?.display_name }}</strong>?</p>
+  <p class="text-sm text-base-content/60 mt-2">Records and transitions referencing this status may be affected.</p>
+
+  <div class="cos-modal-action">
+    <button class="btn" (click)="closeDeleteStatusModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button class="btn btn-error" (click)="submitDeleteStatus()" [disabled]="deleteLoading()">
+      @if (deleteLoading()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Deleting...
+      } @else {
+        Delete Status
+      }
+    </button>
+  </div>
+</cos-modal>
+
+<!-- Delete Transition Confirmation -->
+<cos-modal [isOpen]="showDeleteTransitionModal()" (closed)="closeDeleteTransitionModal()" size="sm">
+  <h3 class="font-bold text-lg mb-4">Delete Transition</h3>
+  <p>Are you sure you want to delete the transition
+    <strong>{{ deletingTransition()?.from_display_name }}</strong>
+    &rarr;
+    <strong>{{ deletingTransition()?.to_display_name }}</strong>?
+  </p>
+
+  <div class="cos-modal-action">
+    <button class="btn" (click)="closeDeleteTransitionModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button class="btn btn-error" (click)="submitDeleteTransition()" [disabled]="deleteLoading()">
+      @if (deleteLoading()) {
+        <span class="loading loading-spinner loading-sm"></span>
+        Deleting...
+      } @else {
+        Delete Transition
+      }
+    </button>
+  </div>
+</cos-modal>

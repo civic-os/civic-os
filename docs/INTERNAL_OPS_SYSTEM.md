@@ -250,8 +250,8 @@ CREATE INDEX idx_scheduled_contacts_time_slot ON scheduled_contacts USING GIST(t
 
 ```sql
 -- Client lifecycle (6 statuses)
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('client', 'Client lifecycle from lead to active/inactive');
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('client', 'Client', 'Client lifecycle from lead to active/inactive');
 
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
 VALUES
@@ -264,8 +264,8 @@ VALUES
   ('client', 'Lost',      '#EF4444', 7, FALSE, TRUE);
 
 -- Project lifecycle (3 statuses)
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('project', 'Project lifecycle status');
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('project', 'Project', 'Project lifecycle status');
 
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
 VALUES
@@ -274,8 +274,8 @@ VALUES
   ('project', 'Completed', '#6B7280', 3, FALSE, TRUE);
 
 -- Design doc lifecycle (3 statuses)
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('design_doc', 'Design document lifecycle status');
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('design_doc', 'Design Doc', 'Design document lifecycle status');
 
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
 VALUES
@@ -284,8 +284,8 @@ VALUES
   ('design_doc', 'Archived', '#6B7280', 3, FALSE, TRUE);
 
 -- Scheduled contact workflow (3 statuses)
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('scheduled_contact', 'Scheduled contact workflow');
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('scheduled_contact', 'Scheduled Contact', 'Scheduled contact workflow');
 
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
 VALUES

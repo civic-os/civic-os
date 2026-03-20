@@ -84,7 +84,7 @@ describe('SeriesGroupManagementPage', () => {
     mockRecurringService.describeRRule.and.returnValue('Weekly');
     mockSchemaService.getEntities.and.returnValue(of([]));
     mockSchemaService.getProperties.and.returnValue(of([]));
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
 
     return TestBed.configureTestingModule({
       imports: [SeriesGroupManagementPage],
@@ -123,7 +123,7 @@ describe('SeriesGroupManagementPage', () => {
 
     it('should not load groups when read permission is denied', () => {
       mockAuthService.hasPermission.and.callFake((_table: string, action: string) => {
-        return of(action === 'read' ? false : false);
+        return false;
       });
 
       fixture.detectChanges();

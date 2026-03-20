@@ -19,7 +19,7 @@ import { Component, input, computed, inject, ChangeDetectionStrategy, signal, ef
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval, firstValueFrom } from 'rxjs';
+import { interval } from 'rxjs';
 import { DashboardWidget, CalendarWidgetConfig } from '../../../interfaces/dashboard';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../time-slot-calendar/time-slot-calendar.component';
 import { DataService } from '../../../services/data.service';
@@ -143,14 +143,8 @@ export class CalendarWidgetComponent {
   /**
    * Check if user has CREATE permission on the entity
    */
-  private async checkCreatePermission(entityKey: string): Promise<void> {
-    try {
-      const hasPermission = await firstValueFrom(this.authService.hasPermission(entityKey, 'create'));
-      this.hasCreatePermission.set(hasPermission);
-    } catch (err) {
-      console.error('Error checking CREATE permission:', err);
-      this.hasCreatePermission.set(false);
-    }
+  private checkCreatePermission(entityKey: string): void {
+    this.hasCreatePermission.set(this.authService.hasPermission(entityKey, 'create'));
   }
 
   /**

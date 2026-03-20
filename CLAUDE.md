@@ -292,6 +292,8 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
 - **File Administration** (`/admin/files`) - Browse all uploaded files with All Files (inline filters) and Entity Files (two-phase query) modes. Requires `files:read` permission. (v0.39.0+)
+- **Status Administration** (`/admin/statuses`) - Manage status types, status values (color, sort order, initial/terminal flags), and allowed transitions. Permission-gated via `metadata.statuses` CRUD permissions. (v0.40.0+)
+- **Category Administration** (`/admin/categories`) - Manage category groups and category values (color, sort order). Permission-gated via `metadata.categories` CRUD permissions. (v0.40.0+)
 - **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only.
 
 **Role Delegation** (v0.31.0+): Admin-configurable matrix controlling which roles can assign/revoke which other roles. Configured via "Role Delegation" tab on Permissions page. Uses `metadata.role_can_manage` table. The `anonymous` role is excluded from delegation (framework-only permission role). See `docs/INTEGRATOR_GUIDE.md` (Role Delegation section) for details.

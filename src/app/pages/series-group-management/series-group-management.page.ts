@@ -26,7 +26,7 @@ import { AuthService } from '../../services/auth.service';
 import { SeriesGroupDetailComponent } from '../../components/series-group-detail/series-group-detail.component';
 import { CreateSeriesWizardComponent } from '../../components/create-series-wizard/create-series-wizard.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
-import { of, forkJoin } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 /**
@@ -286,21 +286,18 @@ export class SeriesGroupManagementPage implements OnInit {
   filteredGroups = signal<SeriesGroup[]>([]);
 
   ngOnInit(): void {
-    // Check permissions
-    forkJoin([
-      this.authService.hasPermission('time_slot_series_groups', 'read'),
-      this.authService.hasPermission('time_slot_series_groups', 'create')
-    ]).subscribe(([hasRead, hasCreate]: [boolean, boolean]) => {
-      this.hasPermission.set(hasRead);
-      this.hasCreatePermission.set(hasCreate);
+    // Check permissions (synchronous cache lookup)
+    const hasRead = this.authService.hasPermission('time_slot_series_groups', 'read');
+    const hasCreate = this.authService.hasPermission('time_slot_series_groups', 'create');
+    this.hasPermission.set(hasRead);
+    this.hasCreatePermission.set(hasCreate);
 
-      if (hasRead) {
-        this.loadGroups();
-        this.loadRecurringEntities();
-      } else {
-        this.loading.set(false);
-      }
-    });
+    if (hasRead) {
+      this.loadGroups();
+      this.loadRecurringEntities();
+    } else {
+      this.loading.set(false);
+    }
 
     // Check for groupId in route
     this.route.params.subscribe(params => {

@@ -16,11 +16,11 @@
 -- ============================================================================
 
 -- Register status entity types (workflow statuses only)
-INSERT INTO metadata.status_types (entity_type, description) VALUES
-  ('staff_onboarding', 'Onboarding progress for staff members'),
-  ('staff_document', 'Document submission and review status'),
-  ('time_off_request', 'Time off request approval status'),
-  ('reimbursement', 'Reimbursement request approval status')
+INSERT INTO metadata.status_types (entity_type, display_name, description) VALUES
+  ('staff_onboarding', 'Staff Onboarding', 'Onboarding progress for staff members'),
+  ('staff_document', 'Staff Document', 'Document submission and review status'),
+  ('time_off_request', 'Time Off Request', 'Time off request approval status'),
+  ('reimbursement', 'Reimbursement', 'Reimbursement request approval status')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- staff_onboarding statuses
@@ -58,9 +58,9 @@ ON CONFLICT DO NOTHING;
 -- ============================================================================
 
 -- Register category entity types
-INSERT INTO metadata.category_groups (entity_type, description) VALUES
-  ('time_entry', 'Clock in/out entry categories'),
-  ('staff_role', 'Position categories for program staff')
+INSERT INTO metadata.category_groups (entity_type, display_name, description) VALUES
+  ('time_entry', 'Time Entry', 'Clock in/out entry categories'),
+  ('staff_role', 'Staff Role', 'Position categories for program staff')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- time_entry categories (categorization, not workflow — no is_initial/is_terminal)

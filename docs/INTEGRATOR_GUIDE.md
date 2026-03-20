@@ -1681,8 +1681,8 @@ Framework-provided status and workflow system. Instead of creating separate stat
 
 ```sql
 -- 1. Register entity type
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('issue', 'Status values for issue tracking');
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('issue', 'Issue', 'Status values for issue tracking');
 
 -- 2. Add status values
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal)
@@ -1706,11 +1706,14 @@ WHERE table_name = 'issues' AND column_name = 'status_id';
 
 #### Schema Reference
 
+**Admin UI**: Status types, values, and transitions can be managed via the Status Administration page at `/admin/statuses` (v0.40.0+). Requires `metadata.statuses` CRUD permissions.
+
 **`metadata.status_types`** - Registers valid entity types for statuses
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `entity_type` | NAME | Entity type identifier (PK) |
+| `display_name` | TEXT | Human-readable label for admin UI (v0.40.0+). Falls back to `entity_type` if NULL |
 | `description` | TEXT | Human-readable description |
 
 **`metadata.statuses`** - Status values per entity type
@@ -1793,8 +1796,8 @@ Rich enum categorization system for non-workflow properties. While the Status sy
 
 ```sql
 -- 1. Register the category group
-INSERT INTO metadata.category_groups (entity_type, description)
-VALUES ('time_entry', 'Clock in/out entry types');
+INSERT INTO metadata.category_groups (entity_type, display_name, description)
+VALUES ('time_entry', 'Time Entry', 'Clock in/out entry types');
 
 -- 2. Define category values with colors
 INSERT INTO metadata.categories (entity_type, display_name, description, color, sort_order, category_key)
@@ -1817,10 +1820,13 @@ WHERE table_name = 'time_entries' AND column_name = 'entry_type_id';
 
 #### Schema Reference
 
+**Admin UI**: Category groups and values can be managed via the Category Administration page at `/admin/categories` (v0.40.0+). Requires `metadata.categories` CRUD permissions.
+
 **`metadata.category_groups`** — Registry of entity types that use the Category system:
 | Column | Type | Description |
 |--------|------|-------------|
 | `entity_type` | `TEXT PRIMARY KEY` | Identifier matching your entity concept |
+| `display_name` | `TEXT` | Human-readable label for admin UI (v0.40.0+). Falls back to `entity_type` if NULL |
 | `description` | `TEXT` | Human-readable description |
 
 **`metadata.categories`** — Category values with display properties:

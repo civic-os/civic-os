@@ -15,8 +15,8 @@ BEGIN;
 -- ============================================================================
 
 -- Register 'reservation_request' as a valid status entity type
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('reservation_request', 'Status values for Mott Park clubhouse reservation requests')
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('reservation_request', 'Reservation Request', 'Status values for Mott Park clubhouse reservation requests')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- Insert statuses for reservation requests
@@ -32,8 +32,8 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- Register 'reservation_payment' as a valid status entity type
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('reservation_payment', 'Status values for reservation payment tracking')
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('reservation_payment', 'Reservation Payment', 'Status values for reservation payment tracking')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- Insert statuses for reservation payments

@@ -20,7 +20,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { AdminPaymentsPage } from './admin-payments.page';
 import { AuthService } from '../../services/auth.service';
 
@@ -69,8 +68,8 @@ describe('AdminPaymentsPage', () => {
 
   beforeEach(async () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['hasPermission']);
-    // Default to having permissions
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    // Default to having permissions (synchronous boolean)
+    mockAuthService.hasPermission.and.returnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [AdminPaymentsPage],
@@ -284,9 +283,9 @@ describe('AdminPaymentsPage', () => {
       // Override permission to false
       mockAuthService.hasPermission.and.callFake((table: string, perm: string) => {
         if (table === 'payment_refunds' && perm === 'create') {
-          return of(false);
+          return false;
         }
-        return of(true);
+        return true;
       });
 
       // Create new fixture to pick up permission change

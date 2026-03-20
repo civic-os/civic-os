@@ -11,8 +11,8 @@
 -- Uses centralized metadata.categories for non-workflow categorization (v0.34.0+)
 -- =====================================================
 
-INSERT INTO metadata.category_groups (entity_type, description)
-VALUES ('organization_type', 'Categories for organizations')
+INSERT INTO metadata.category_groups (entity_type, display_name, description)
+VALUES ('organization_type', 'Organization Type', 'Categories for organizations')
 ON CONFLICT (entity_type) DO NOTHING;
 
 INSERT INTO metadata.categories (entity_type, display_name, color, sort_order) VALUES
@@ -28,8 +28,8 @@ ON CONFLICT DO NOTHING;
 -- Uses centralized metadata.statuses for workflow state tracking (v0.15.0+)
 -- =====================================================
 
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('project', 'Status values for broader impact projects')
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('project', 'Project', 'Status values for broader impact projects')
 ON CONFLICT (entity_type) DO NOTHING;
 
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal) VALUES

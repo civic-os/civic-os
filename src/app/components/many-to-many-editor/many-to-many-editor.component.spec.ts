@@ -41,7 +41,7 @@ describe('ManyToManyEditorComponent', () => {
 
     // Default mock return values
     mockDataService.getData.and.returnValue(of(MOCK_RELATED_DATA));
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
     mockDataService.addManyToManyRelation.and.returnValue(of({ success: true }));
     mockDataService.removeManyToManyRelation.and.returnValue(of({ success: true }));
 
@@ -120,8 +120,8 @@ describe('ManyToManyEditorComponent', () => {
     });
 
     it('should set canEdit to false if create permission is missing', (done) => {
-      mockAuthService.hasPermission.and.callFake((table, permission) => {
-        return of(permission !== 'create');
+      mockAuthService.hasPermission.and.callFake((table: string, permission: string) => {
+        return permission !== 'create';
       });
 
       fixture.componentRef.setInput('entityId', 1);
@@ -137,8 +137,8 @@ describe('ManyToManyEditorComponent', () => {
     });
 
     it('should set canEdit to false if delete permission is missing', (done) => {
-      mockAuthService.hasPermission.and.callFake((table, permission) => {
-        return of(permission !== 'delete');
+      mockAuthService.hasPermission.and.callFake((table: string, permission: string) => {
+        return permission !== 'delete';
       });
 
       fixture.componentRef.setInput('entityId', 1);
@@ -200,8 +200,9 @@ describe('ManyToManyEditorComponent', () => {
     });
 
     it('should hide Edit button when canEdit is false', (done) => {
-      mockAuthService.hasPermission.and.returnValue(of(false));
-      fixture.componentRef.setInput('entityId', 2);
+      mockAuthService.hasPermission.and.returnValue(false);
+      // Re-set property to trigger the effect that re-checks permissions
+      fixture.componentRef.setInput('property', { ...MOCK_M2M_PROPERTY });
       fixture.detectChanges();
 
       setTimeout(() => {

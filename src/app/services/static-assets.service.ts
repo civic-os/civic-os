@@ -75,10 +75,8 @@ export class StaticAssetsService {
    * Used by the sidebar to conditionally show the menu item.
    * Follows the same pattern as UserManagementService.hasUserManagementAccess().
    */
-  hasStaticAssetAccess(): Observable<boolean> {
-    return this.auth.hasPermission('static_assets', 'create').pipe(
-      catchError(() => of(false))
-    );
+  hasStaticAssetAccess(): boolean {
+    return this.auth.hasPermission('static_assets', 'create');
   }
 
   /**

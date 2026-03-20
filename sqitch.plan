@@ -61,3 +61,4 @@ v0-38-4-fix-role-key-view [v0-38-4-fix-admin-notif-pref-permission] 2026-03-16T1
 v0-38-5-recurring-dtstart-local-time [v0-38-4-fix-role-key-view] 2026-03-16T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix recurring dtstart from TIMESTAMPTZ to TIMESTAMP for timezone handling
 v0-38-5-configurable-expand-horizon [v0-38-5-recurring-dtstart-local-time] 2026-03-17T00:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add configurable expansion horizon parameter to recurring series functions
 v0-39-0-add-file-admin [v0-38-5-configurable-expand-horizon] 2026-03-18T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add file admin: property_name tracking, tiered RLS, storage stats RPC
+v0-40-0-status-category-admin-rpcs [v0-39-0-add-file-admin] 2026-03-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add status/category admin CRUD RPCs, permission caching RPC, metadata RLS upgrade

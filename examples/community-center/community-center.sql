@@ -38,8 +38,8 @@
 -- ============================================================================
 
 -- Register 'reservation_request' as a valid status entity type
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('reservation_request', 'Status values for community center reservation requests')
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('reservation_request', 'Reservation Request', 'Status values for community center reservation requests')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- Insert statuses for reservation requests

@@ -19,7 +19,7 @@ import { Component, input, signal, inject, output, ChangeDetectionStrategy, effe
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { forkJoin, Observable, of, firstValueFrom } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { SchemaEntityProperty } from '../../interfaces/entity';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
@@ -105,18 +105,13 @@ export class ManyToManyEditorComponent {
     });
   }
 
-  private async checkPermissions() {
+  private checkPermissions() {
     const meta = this.property().many_to_many_meta;
     if (!meta) return;
 
-    try {
-      const hasCreate = await firstValueFrom(this.authService.hasPermission(meta.junctionTable, 'create'));
-      const hasDelete = await firstValueFrom(this.authService.hasPermission(meta.junctionTable, 'delete'));
-      this.canEdit.set(hasCreate && hasDelete);
-    } catch (err) {
-      console.error('Error checking permissions:', err);
-      this.canEdit.set(false);
-    }
+    const hasCreate = this.authService.hasPermission(meta.junctionTable, 'create');
+    const hasDelete = this.authService.hasPermission(meta.junctionTable, 'delete');
+    this.canEdit.set(hasCreate && hasDelete);
   }
 
   private loadAvailableOptions() {

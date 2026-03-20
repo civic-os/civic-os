@@ -21,7 +21,7 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
-import { forkJoin, of, switchMap, map, catchError, BehaviorSubject } from 'rxjs';
+import { of, switchMap, map, catchError, BehaviorSubject } from 'rxjs';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { AuthService } from '../../services/auth.service';
 import { getPostgrestUrl } from '../../config/runtime';
@@ -109,15 +109,9 @@ export class AdminPaymentsPage {
   private router = inject(Router);
 
   // Permission checks
-  canViewPayments = toSignal(
-    this.auth.hasPermission('payment_transactions', 'read'),
-    { initialValue: false }
-  );
+  canViewPayments = computed(() => this.auth.hasPermission('payment_transactions', 'read'));
 
-  canCreateRefunds = toSignal(
-    this.auth.hasPermission('payment_refunds', 'create'),
-    { initialValue: false }
-  );
+  canCreateRefunds = computed(() => this.auth.hasPermission('payment_refunds', 'create'));
 
   // UI state
   loading = signal(true);
@@ -157,50 +151,44 @@ export class AdminPaymentsPage {
   // Load payments data
   payments = toSignal(
     this.reloadTrigger.pipe(
-      switchMap(() =>
-        this.auth.hasPermission('payment_transactions', 'read').pipe(
-          switchMap(hasPermission => {
-            if (!hasPermission) {
-              this.loading.set(false);
-              this.error.set('You do not have permission to view payments');
-              return of([]);
+      switchMap(() => {
+        if (!this.auth.hasPermission('payment_transactions', 'read')) {
+          this.loading.set(false);
+          this.error.set('You do not have permission to view payments');
+          return of([] as PaymentTransaction[]);
+        }
+
+        this.loading.set(true);
+        this.error.set(undefined);
+
+        // Build query params
+        const params = this.buildQueryParams();
+
+        return this.http.get<PaymentTransaction[]>(
+          `${getPostgrestUrl()}payment_transactions?${params}`,
+          { headers: { 'Prefer': 'count=exact' }, observe: 'response' }
+        ).pipe(
+          map(response => {
+            // Extract total count from Content-Range header
+            const contentRange = response.headers.get('Content-Range');
+            if (contentRange) {
+              const match = contentRange.match(/\/(\d+|\*)/);
+              if (match && match[1] !== '*') {
+                this.totalCount.set(parseInt(match[1], 10));
+              }
             }
 
-            this.loading.set(true);
-            this.error.set(undefined);
-
-            // Build query params
-            const params = this.buildQueryParams();
-
-            return forkJoin({
-              payments: this.http.get<PaymentTransaction[]>(
-                `${getPostgrestUrl()}payment_transactions?${params}`,
-                { headers: { 'Prefer': 'count=exact' }, observe: 'response' }
-              ),
-            }).pipe(
-              map(({ payments }) => {
-                // Extract total count from Content-Range header
-                const contentRange = payments.headers.get('Content-Range');
-                if (contentRange) {
-                  const match = contentRange.match(/\/(\d+|\*)/);
-                  if (match && match[1] !== '*') {
-                    this.totalCount.set(parseInt(match[1], 10));
-                  }
-                }
-
-                this.loading.set(false);
-                return payments.body || [];
-              }),
-              catchError(err => {
-                this.loading.set(false);
-                this.error.set('Failed to load payments');
-                console.error('Error loading payments:', err);
-                return of([]);
-              })
-            );
+            this.loading.set(false);
+            return response.body || [];
+          }),
+          catchError(err => {
+            this.loading.set(false);
+            this.error.set('Failed to load payments');
+            console.error('Error loading payments:', err);
+            return of([] as PaymentTransaction[]);
           })
-        )
-      )
+        );
+      })
     ),
     { initialValue: [] }
   );

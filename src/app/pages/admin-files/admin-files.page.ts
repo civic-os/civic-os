@@ -16,7 +16,6 @@
  */
 
 import { Component, inject, signal, computed, effect, untracked, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -72,10 +71,7 @@ export class AdminFilesPage implements OnInit, OnDestroy {
   private readonly apiUrl = getPostgrestUrl();
 
   // Permission
-  canViewFiles = toSignal(
-    this.auth.hasPermission('files', 'read').pipe(catchError(() => of(false))),
-    { initialValue: false }
-  );
+  canViewFiles = computed(() => this.auth.hasPermission('files', 'read'));
 
   // Data + loading
   loading = signal(true);

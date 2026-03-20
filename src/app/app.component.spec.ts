@@ -20,7 +20,6 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
 import { AppComponent } from './app.component';
 import { AuthService } from './services/auth.service';
 import { ThemeService } from './services/theme.service';
@@ -40,8 +39,8 @@ describe('AppComponent', () => {
       userRoles: []
     });
     mockAuthService.authenticated.and.returnValue(false);
-    // Default hasPermission to return false (as Observable)
-    mockAuthService.hasPermission.and.returnValue(of(false));
+    // Default hasPermission to return false (synchronous boolean)
+    mockAuthService.hasPermission.and.returnValue(false);
     // Default isRealAdmin to return false
     mockAuthService.isRealAdmin.and.returnValue(false);
 

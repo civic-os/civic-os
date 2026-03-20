@@ -19,8 +19,8 @@ BEGIN;
 -- =============================================================================
 
 -- First register the entity type
-INSERT INTO metadata.status_types (entity_type, description)
-VALUES ('payment_method', 'Payment method types for tracking how payments were received')
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('payment_method', 'Payment Method', 'Payment method types for tracking how payments were received')
 ON CONFLICT (entity_type) DO NOTHING;
 
 -- Then add the status values

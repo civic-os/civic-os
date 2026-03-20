@@ -25,6 +25,7 @@ import { AuthService } from '../../services/auth.service';
 import { ImportExportService } from '../../services/import-export.service';
 import { SimpleMarkdownPipe } from '../../pipes/simple-markdown.pipe';
 
+
 /**
  * Component for displaying and managing entity notes.
  * Shows on Detail pages when entity has enable_notes=true.
@@ -137,11 +138,9 @@ export class EntityNotesComponent {
     this.error.set(undefined);
 
     try {
-      // Check permissions and admin status
-      const [hasRead, hasCreate] = await Promise.all([
-        firstValueFrom(this.authService.hasPermission(this.entityType() + ':notes', 'read')),
-        firstValueFrom(this.authService.hasPermission(this.entityType() + ':notes', 'create'))
-      ]);
+      // Check permissions (synchronous cache lookup) and admin status
+      const hasRead = this.authService.hasPermission(this.entityType() + ':notes', 'read');
+      const hasCreate = this.authService.hasPermission(this.entityType() + ':notes', 'create');
 
       this.canRead.set(hasRead);
       this.canCreate.set(hasCreate);

@@ -19,7 +19,6 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
 import { UserManagementService } from './user-management.service';
 import { AuthService } from './auth.service';
 
@@ -35,7 +34,7 @@ describe('UserManagementService', () => {
     };
 
     mockAuthService = jasmine.createSpyObj('AuthService', ['hasPermission']);
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
 
     TestBed.configureTestingModule({
       providers: [
@@ -453,23 +452,19 @@ describe('UserManagementService', () => {
   });
 
   describe('hasUserManagementAccess()', () => {
-    it('should delegate to AuthService.hasPermission', (done) => {
-      mockAuthService.hasPermission.and.returnValue(of(true));
+    it('should delegate to AuthService.hasPermission', () => {
+      mockAuthService.hasPermission.and.returnValue(true);
 
-      service.hasUserManagementAccess().subscribe(result => {
-        expect(result).toBe(true);
-        expect(mockAuthService.hasPermission).toHaveBeenCalledWith('civic_os_users_private', 'update');
-        done();
-      });
+      const result = service.hasUserManagementAccess();
+      expect(result).toBe(true);
+      expect(mockAuthService.hasPermission).toHaveBeenCalledWith('civic_os_users_private', 'update');
     });
 
-    it('should return false when permission denied', (done) => {
-      mockAuthService.hasPermission.and.returnValue(of(false));
+    it('should return false when permission denied', () => {
+      mockAuthService.hasPermission.and.returnValue(false);
 
-      service.hasUserManagementAccess().subscribe(result => {
-        expect(result).toBe(false);
-        done();
-      });
+      const result = service.hasUserManagementAccess();
+      expect(result).toBe(false);
     });
   });
 });

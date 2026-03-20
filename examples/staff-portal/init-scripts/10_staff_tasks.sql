@@ -11,8 +11,8 @@
 -- STATUS TYPE SYSTEM
 -- ============================================================================
 
-INSERT INTO metadata.status_types (entity_type, description) VALUES
-  ('staff_task', 'Task assignment lifecycle')
+INSERT INTO metadata.status_types (entity_type, display_name, description) VALUES
+  ('staff_task', 'Staff Task', 'Task assignment lifecycle')
 ON CONFLICT (entity_type) DO NOTHING;
 
 INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal, status_key) VALUES

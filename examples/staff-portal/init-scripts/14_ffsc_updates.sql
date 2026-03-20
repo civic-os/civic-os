@@ -224,8 +224,8 @@ UPDATE metadata.properties SET show_on_create = FALSE
 WHERE table_name = 'incident_reports' AND column_name = 'reported_by_id';
 
 -- 3D.3: Add Status workflow (New → Reviewed → Closed)
-INSERT INTO metadata.status_types (entity_type, description) VALUES
-  ('incident_report', 'Incident report review lifecycle')
+INSERT INTO metadata.status_types (entity_type, display_name, description) VALUES
+  ('incident_report', 'Incident Report', 'Incident report review lifecycle')
 ON CONFLICT (entity_type) DO NOTHING;
 
 INSERT INTO metadata.statuses (entity_type, display_name, description, color, sort_order, is_initial, is_terminal, status_key) VALUES
@@ -312,8 +312,8 @@ END $$;
 -- =============================================================================
 -- Adds color-coded priority using the Category system (rich enums).
 
-INSERT INTO metadata.category_groups (entity_type, description) VALUES
-  ('task_priority', 'Priority levels for task assignments')
+INSERT INTO metadata.category_groups (entity_type, display_name, description) VALUES
+  ('task_priority', 'Task Priority', 'Priority levels for task assignments')
 ON CONFLICT (entity_type) DO NOTHING;
 
 INSERT INTO metadata.categories (entity_type, display_name, color, sort_order, category_key) VALUES

@@ -18,7 +18,7 @@
 import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
-import { filter, of, catchError } from 'rxjs';
+import { filter } from 'rxjs';
 import { SchemaService } from './services/schema.service';
 import { VersionService } from './services/version.service';
 import { ThemeService } from './services/theme.service';
@@ -102,40 +102,19 @@ export class AppComponent {
 
   // Permission signals for feature access (v0.25.1)
   // These check if the user has read permission on the underlying tables
-  public hasRecurringSchedulePermission = toSignal(
-    this.auth.hasPermission('time_slot_series', 'read').pipe(
-      catchError(() => of(false))
-    ),
-    { initialValue: false }
-  );
+  public hasRecurringSchedulePermission = computed(() => this.auth.hasPermission('time_slot_series', 'read'));
 
-  public hasPaymentPermission = toSignal(
-    this.auth.hasPermission('payment_transactions', 'read').pipe(
-      catchError(() => of(false))
-    ),
-    { initialValue: false }
-  );
+  public hasPaymentPermission = computed(() => this.auth.hasPermission('payment_transactions', 'read'));
 
-  public hasUserManagementPermission = toSignal(
-    this.userManagement.hasUserManagementAccess().pipe(
-      catchError(() => of(false))
-    ),
-    { initialValue: false }
-  );
+  public hasUserManagementPermission = computed(() => this.userManagement.hasUserManagementAccess());
 
-  public hasStaticAssetPermission = toSignal(
-    this.staticAssets.hasStaticAssetAccess().pipe(
-      catchError(() => of(false))
-    ),
-    { initialValue: false }
-  );
+  public hasStaticAssetPermission = computed(() => this.staticAssets.hasStaticAssetAccess());
 
-  public hasFilePermission = toSignal(
-    this.auth.hasPermission('files', 'read').pipe(
-      catchError(() => of(false))
-    ),
-    { initialValue: false }
-  );
+  public hasFilePermission = computed(() => this.auth.hasPermission('files', 'read'));
+
+  public hasStatusAdminPermission = computed(() => this.auth.hasPermission('metadata.statuses', 'update'));
+
+  public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
 
   // Show Admin section if user is admin OR has access to feature-specific pages
   public showAdminSection = computed(() => {
@@ -151,6 +130,9 @@ export class AppComponent {
     if (this.hasPaymentEntities() && this.hasPaymentPermission()) return true;
     // Non-admins see it if they have file admin access
     if (this.hasFilePermission()) return true;
+    // Non-admins see it if they have status/category admin access
+    if (this.hasStatusAdminPermission()) return true;
+    if (this.hasCategoryAdminPermission()) return true;
     return false;
   });
 
@@ -246,6 +228,16 @@ export class AppComponent {
 
   public navigateToFilesAdmin() {
     this.router.navigate(['admin', 'files']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToStatusAdmin() {
+    this.router.navigate(['admin', 'statuses']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToCategoryAdmin() {
+    this.router.navigate(['admin', 'categories']);
     this.drawerOpen = false;
   }
 

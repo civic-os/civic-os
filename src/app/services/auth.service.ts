@@ -23,7 +23,7 @@ import { SchemaService } from './schema.service';
 import { AnalyticsService } from './analytics.service';
 import { ImpersonationService } from './impersonation.service';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 @Injectable({
@@ -46,6 +46,19 @@ export class AuthService {
   realUserRoles = signal<string[]>([]);
 
   /**
+   * Cached permissions from the database.
+   * Map key is table_name, value is a Set of permission strings ('create', 'read', 'update', 'delete').
+   * Populated on login via loadPermissions(), cleared on logout/auth error.
+   */
+  private permissionsCache = signal<Map<string, Set<string>>>(new Map());
+
+  /** Whether permissions have been loaded from the database. */
+  permissionsLoaded = signal(false);
+
+  /** Whether permissions are currently being fetched. */
+  private permissionsLoading = signal(false);
+
+  /**
    * Effective roles - returns impersonated roles if impersonation is active, otherwise real JWT roles.
    * Use this for all permission checks in the UI.
    */
@@ -65,6 +78,7 @@ export class AuthService {
 
         if (this.authenticated()) {
           this.loadUserRoles();
+          this.loadPermissions();
           this.data.refreshCurrentUser().subscribe({
             next: (result) => {
               if (!result.success) {
@@ -99,6 +113,7 @@ export class AuthService {
       if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
         this.authenticated.set(false);
         this.realUserRoles.set([]);
+        this.clearPermissionsCache();
 
         // Clear impersonation state on logout
         // State is cleared immediately; audit logging is best-effort
@@ -117,6 +132,7 @@ export class AuthService {
         // withAutoRefreshToken handles the login redirect, so we don't call keycloak.login() here.
         this.authenticated.set(false);
         this.realUserRoles.set([]);
+        this.clearPermissionsCache();
         this.impersonation.stopImpersonation().subscribe();
         this.analytics.trackEvent('Auth', 'RefreshError');
       }
@@ -208,25 +224,73 @@ export class AuthService {
 
   /**
    * Check if the current user has a specific permission on a table.
-   * Calls the PostgreSQL has_permission RPC function.
+   * Performs a synchronous lookup against the cached permissions loaded at login.
+   *
+   * Returns false (safe default) when permissions have not yet been loaded.
+   * Security note: this is purely UI gating — RLS at the database layer is the real enforcement.
    *
    * @param tableName The name of the table to check
    * @param permission The permission to check: 'create', 'read', 'update', or 'delete'
-   * @returns Observable<boolean> - true if user has the permission, false otherwise
+   * @returns boolean - true if user has the permission, false otherwise
    */
-  hasPermission(tableName: string, permission: string): Observable<boolean> {
-    return this.http.post<boolean>(
-      getPostgrestUrl() + 'rpc/has_permission',
-      {
-        p_table_name: tableName,
-        p_permission: permission
+  hasPermission(tableName: string, permission: string): boolean {
+    const perms = this.permissionsCache().get(tableName);
+    return perms?.has(permission) ?? false;
+  }
+
+  /**
+   * Load all permissions for the current user from the database.
+   * Calls the get_current_user_permissions RPC and populates the cache.
+   * Called automatically on Keycloak Ready event after loadUserRoles().
+   */
+  private loadPermissions(): void {
+    if (this.permissionsLoading()) return;
+    this.permissionsLoading.set(true);
+
+    this.http.post<{ table_name: string; permission: string }[]>(
+      getPostgrestUrl() + 'rpc/get_current_user_permissions',
+      {}
+    ).subscribe({
+      next: (rows) => {
+        const cache = new Map<string, Set<string>>();
+        for (const row of rows) {
+          let perms = cache.get(row.table_name);
+          if (!perms) {
+            perms = new Set<string>();
+            cache.set(row.table_name, perms);
+          }
+          perms.add(row.permission);
+        }
+        this.permissionsCache.set(cache);
+        this.permissionsLoaded.set(true);
+        this.permissionsLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading permissions:', err);
+        this.permissionsLoaded.set(true);
+        this.permissionsLoading.set(false);
       }
-    ).pipe(
-      catchError((error) => {
-        console.error(`Error checking permission ${permission} on ${tableName}:`, error);
-        return of(false);
-      })
-    );
+    });
+  }
+
+  /**
+   * Clear the permissions cache. Called on logout and auth errors.
+   */
+  private clearPermissionsCache(): void {
+    this.permissionsCache.set(new Map());
+    this.permissionsLoaded.set(false);
+    this.permissionsLoading.set(false);
+  }
+
+  /**
+   * Refresh the permissions cache by clearing it and re-fetching from the database.
+   * Exposed publicly for PermissionsPage to call after mutations.
+   */
+  refreshPermissions(): void {
+    this.clearPermissionsCache();
+    if (this.authenticated()) {
+      this.loadPermissions();
+    }
   }
 
   login() {

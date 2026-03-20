@@ -57,7 +57,7 @@ describe('AdminFilesPage', () => {
 
   beforeEach(async () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['hasPermission']);
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
 
     mockSchemaService = jasmine.createSpyObj('SchemaService', [
       'getEntities', 'getProperties', 'getEntity', 'getPropertiesForEntity'
@@ -128,7 +128,7 @@ describe('AdminFilesPage', () => {
 
   describe('Permission Gate', () => {
     it('should show error when no permission', () => {
-      mockAuthService.hasPermission.and.returnValue(of(false));
+      mockAuthService.hasPermission.and.returnValue(false);
       fixture = TestBed.createComponent(AdminFilesPage);
       component = fixture.componentInstance;
 

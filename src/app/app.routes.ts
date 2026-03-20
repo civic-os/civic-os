@@ -109,6 +109,18 @@ export const routes: Routes = [
         canActivate: [schemaVersionGuard, authGuard]
     },
     {
+        path: 'admin/statuses',
+        loadComponent: () => import('./pages/admin-statuses/admin-statuses.page')
+            .then(m => m.AdminStatusesPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
+        path: 'admin/categories',
+        loadComponent: () => import('./pages/admin-categories/admin-categories.page')
+            .then(m => m.AdminCategoriesPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
         path: 'admin/recurring-schedules',
         component: SeriesGroupManagementPage,
         canActivate: [schemaVersionGuard, authGuard]

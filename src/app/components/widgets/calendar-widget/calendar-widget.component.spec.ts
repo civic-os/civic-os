@@ -120,7 +120,7 @@ describe('CalendarWidgetComponent', () => {
     // Default mock responses
     mockDataService.getData.and.returnValue(of(mockRecords as any));
     mockSchemaService.getProperties.and.returnValue(of(mockProperties as any));
-    mockAuthService.hasPermission.and.returnValue(of(true)); // Default: user has permission
+    mockAuthService.hasPermission.and.returnValue(true); // Default: user has permission
     mockRouter.createUrlTree.and.returnValue({} as any);
     mockRouter.serializeUrl.and.returnValue('/view/reservations/1');
 
@@ -477,7 +477,7 @@ describe('CalendarWidgetComponent', () => {
       }
     };
 
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
 
     fixture.componentRef.setInput('widget', widgetWithButton);
     fixture.detectChanges();
@@ -498,7 +498,7 @@ describe('CalendarWidgetComponent', () => {
       }
     };
 
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
 
     fixture.componentRef.setInput('widget', widgetNoButton);
     fixture.detectChanges();
@@ -518,7 +518,7 @@ describe('CalendarWidgetComponent', () => {
       }
     };
 
-    mockAuthService.hasPermission.and.returnValue(of(false));
+    mockAuthService.hasPermission.and.returnValue(false);
 
     // Re-create component to pick up new permission mock
     fixture = TestBed.createComponent(CalendarWidgetComponent);
@@ -544,7 +544,7 @@ describe('CalendarWidgetComponent', () => {
       }
     };
 
-    mockAuthService.hasPermission.and.returnValue(of(true));
+    mockAuthService.hasPermission.and.returnValue(true);
 
     fixture.componentRef.setInput('widget', customWidget);
     fixture.detectChanges();

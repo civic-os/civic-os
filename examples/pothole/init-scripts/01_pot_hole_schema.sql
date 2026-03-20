@@ -10,9 +10,9 @@
 -- Uses centralized metadata.statuses for workflow state tracking (v0.15.0+)
 -- =====================================================
 
-INSERT INTO metadata.status_types (entity_type, description) VALUES
-  ('issue', 'Status values for pothole issues'),
-  ('work_package', 'Status values for pothole work packages')
+INSERT INTO metadata.status_types (entity_type, display_name, description) VALUES
+  ('issue', 'Issue', 'Status values for pothole issues'),
+  ('work_package', 'Work Package', 'Status values for pothole work packages')
 ON CONFLICT (entity_type) DO NOTHING;
 
 INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, is_initial, is_terminal) VALUES

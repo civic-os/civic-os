@@ -58,6 +58,9 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Workflow
 - [x] Build table structure for attaching workflow to Entity (Status system v0.15.0, status_transitions v0.33.0)
+- [x] Status Admin UI (`/admin/statuses`) - Manage status types, values, and transitions (v0.40.0)
+- [x] Category Admin UI (`/admin/categories`) - Manage category groups and values (v0.40.0)
+- [ ] State diagram tab on Status Admin (JointJS statechart: colored status nodes, transition edges)
 - [ ] Build Trigger rules to restrict transitions (`status_transitions` table exists but frontend doesn't filter status dropdowns)
 - [ ] Create Override Workflow permission
 - [ ] Limit UI Selectors based on Workflow
@@ -163,7 +166,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Use postgres Schemas to builder larger, modular apps
 
 ### Workflow
-- [ ] Build automatic generation of Workflow diagrams showing how workflows operate
+- [ ] Build automatic generation of Workflow diagrams showing how workflows operate (see "State Diagram on Status Admin" above)
 
 ### Logic
 - [~] **Source Code Block Visualization** (v0.29.0) - Read-only Blockly-based visualization of PL/pgSQL functions and SQL views

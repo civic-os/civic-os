@@ -155,6 +155,30 @@
                   Permissions
                 </a>
               </li>
+            }
+            <!-- Status Admin (permission-based) -->
+            @if (hasStatusAdminPermission()) {
+              <li (click)="navigateToStatusAdmin()">
+                <a [class.menu-active]="isRouteActive('/admin/statuses')"
+                   [class.font-bold]="isRouteActive('/admin/statuses')"
+                   [class.opacity-85]="!isRouteActive('/admin/statuses')">
+                  <span class="material-symbols-outlined" aria-hidden="true">checklist</span>
+                  Statuses
+                </a>
+              </li>
+            }
+            <!-- Category Admin (permission-based) -->
+            @if (hasCategoryAdminPermission()) {
+              <li (click)="navigateToCategoryAdmin()">
+                <a [class.menu-active]="isRouteActive('/admin/categories')"
+                   [class.font-bold]="isRouteActive('/admin/categories')"
+                   [class.opacity-85]="!isRouteActive('/admin/categories')">
+                  <span class="material-symbols-outlined" aria-hidden="true">category</span>
+                  Categories
+                </a>
+              </li>
+            }
+            @if (auth.isAdmin()) {
               <li (click)="navigateToNotificationTemplates()">
                 <a [class.menu-active]="isRouteActive('/notifications/templates')"
                    [class.font-bold]="isRouteActive('/notifications/templates')"

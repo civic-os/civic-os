@@ -6,7 +6,6 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
 import { StaticAssetsService, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from './static-assets.service';
 import { AuthService } from './auth.service';
 
@@ -16,7 +15,7 @@ describe('StaticAssetsService', () => {
 
   beforeEach(() => {
     const mockAuth = jasmine.createSpyObj('AuthService', ['hasPermission']);
-    mockAuth.hasPermission.and.returnValue(of(false));
+    mockAuth.hasPermission.and.returnValue(false);
 
     TestBed.configureTestingModule({
       providers: [
@@ -130,22 +129,19 @@ describe('StaticAssetsService', () => {
   describe('hasStaticAssetAccess', () => {
     it('should delegate to AuthService.hasPermission', () => {
       const mockAuth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-      mockAuth.hasPermission.and.returnValue(of(true));
+      mockAuth.hasPermission.and.returnValue(true);
 
-      service.hasStaticAssetAccess().subscribe(result => {
-        expect(result).toBe(true);
-      });
-
+      const result = service.hasStaticAssetAccess();
+      expect(result).toBe(true);
       expect(mockAuth.hasPermission).toHaveBeenCalledWith('static_assets', 'create');
     });
 
     it('should return false when permission denied', () => {
       const mockAuth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-      mockAuth.hasPermission.and.returnValue(of(false));
+      mockAuth.hasPermission.and.returnValue(false);
 
-      service.hasStaticAssetAccess().subscribe(result => {
-        expect(result).toBe(false);
-      });
+      const result = service.hasStaticAssetAccess();
+      expect(result).toBe(false);
     });
   });
 
