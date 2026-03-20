@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakService, ReadyArgs, typeEventArgs } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { DataService } from './data.service';
@@ -234,7 +234,7 @@ export class AuthService {
    * @returns boolean - true if user has the permission, false otherwise
    */
   hasPermission(tableName: string, permission: string): boolean {
-    const perms = this.permissionsCache().get(tableName);
+    const perms = untracked(() => this.permissionsCache()).get(tableName);
     return perms?.has(permission) ?? false;
   }
 
