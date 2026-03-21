@@ -123,8 +123,9 @@ export class EditPage {
       if (data && this.currentProps.length > 0) {
         // Create form with actual data values, not defaults
         // M:M properties are filtered out, so just map regular properties
+        // Exclude structural-only props (e.g. display_name fetched for header but not editable)
         const formConfig = Object.fromEntries(
-          this.currentProps.map(p => [
+          this.currentProps.filter(p => p.show_on_edit !== false).map(p => [
             p.column_name,
             new FormControl(
               this.transformValueForControl(p, (data as any)[p.column_name]),

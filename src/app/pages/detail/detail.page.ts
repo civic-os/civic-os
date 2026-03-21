@@ -177,9 +177,9 @@ export class DetailPage {
     }
   }));
 
-  // Separate regular properties from M:M properties
+  // Separate regular properties from M:M properties, excluding structural-only props
   public regularProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
-    map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany))
+    map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany && p.show_on_detail !== false))
   );
 
   public manyToManyProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(

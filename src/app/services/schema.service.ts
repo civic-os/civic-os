@@ -645,6 +645,17 @@ export class SchemaService {
     // Everything else uses the column name directly
     return prop.column_name;
   }
+  /**
+   * Ensure display_name is always fetched — used structurally for page headers,
+   * map markers, calendar titles, and delete confirmation modals.
+   */
+  private static ensureStructuralProps(allProps: SchemaEntityProperty[], visibleProps: SchemaEntityProperty[]): void {
+    const dnProp = allProps.find(p => p.column_name === 'display_name');
+    if (dnProp && !visibleProps.includes(dnProp)) {
+      visibleProps.push(dnProp);
+    }
+  }
+
   public getPropsForList(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
@@ -660,6 +671,9 @@ export class SchemaService {
           }
         }
 
+        // Ensure display_name is always fetched for map markers and calendar titles
+        SchemaService.ensureStructuralProps(props, visibleProps);
+
         // Properties are pre-sorted by sort_order in getProperties()
         return visibleProps;
       }));
@@ -668,7 +682,12 @@ export class SchemaService {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
         // Properties are pre-sorted by sort_order in getProperties()
-        return props.filter(p => p.show_on_detail !== false);
+        const visibleProps = props.filter(p => p.show_on_detail !== false);
+
+        // Ensure display_name is always fetched for page header and delete modal
+        SchemaService.ensureStructuralProps(props, visibleProps);
+
+        return visibleProps;
       }));
   }
   public getPropsForCreate(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
@@ -691,7 +710,7 @@ export class SchemaService {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
         // Properties are pre-sorted by sort_order in getProperties()
-        return props.filter(p =>{
+        const visibleProps = props.filter(p =>{
           // Exclude auto-managed timestamp fields (created_at, updated_at)
           // These are managed by database triggers and should never be in edit forms
           if (p.column_name === 'created_at' || p.column_name === 'updated_at') {
@@ -701,6 +720,11 @@ export class SchemaService {
             p.is_updatable &&
             p.show_on_edit !== false;
         });
+
+        // Ensure display_name is always fetched for page header
+        SchemaService.ensureStructuralProps(props, visibleProps);
+
+        return visibleProps;
       }));
   }
   public getPropsForFilter(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
@@ -1185,8 +1209,12 @@ export class SchemaService {
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
       map(([props, staticTexts]) => {
+        // Re-filter: structural props (e.g. display_name) are fetched for headers
+        // but should not render as property cards
+        const renderableProps = props.filter(p => p.show_on_detail !== false);
+
         // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = props.map(p => ({
+        const taggedProps: PropertyItem[] = renderableProps.map(p => ({
           ...p,
           itemType: 'property' as const
         }));
@@ -1243,8 +1271,12 @@ export class SchemaService {
       this.getStaticTextForEntity(table.table_name)
     ]).pipe(
       map(([props, staticTexts]) => {
+        // Re-filter: structural props (e.g. display_name) are fetched for headers
+        // but should not render as form fields
+        const renderableProps = props.filter(p => p.show_on_edit !== false);
+
         // Add itemType discriminator to properties
-        const taggedProps: PropertyItem[] = props.map(p => ({
+        const taggedProps: PropertyItem[] = renderableProps.map(p => ({
           ...p,
           itemType: 'property' as const
         }));
