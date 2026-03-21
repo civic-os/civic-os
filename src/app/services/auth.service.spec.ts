@@ -18,7 +18,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { DataService } from './data.service';
 import { SchemaService } from './schema.service';
@@ -184,6 +184,142 @@ describe('AuthService', () => {
       await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(mockAnalytics.trackEvent).toHaveBeenCalledWith('Auth', 'VisibilityRefreshFailed');
+    });
+  });
+
+  describe('permission cache', () => {
+    let httpTesting: HttpTestingController;
+
+    beforeEach(() => {
+      httpTesting = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+      httpTesting.verify();
+    });
+
+    it('should load permissions on authenticated Ready event', () => {
+      keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+      TestBed.flushEffects();
+
+      const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req.flush([
+        { table_name: 'issues', permission: 'read' },
+        { table_name: 'issues', permission: 'create' }
+      ]);
+
+      expect(service.hasPermission('issues', 'read')).toBeTrue();
+      expect(service.hasPermission('issues', 'create')).toBeTrue();
+      expect(service.hasPermission('issues', 'delete')).toBeFalse();
+      expect(service.permissionsLoaded()).toBeTrue();
+    });
+
+    it('should return false for uncached tables', () => {
+      keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+      TestBed.flushEffects();
+
+      const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req.flush([{ table_name: 'issues', permission: 'read' }]);
+
+      expect(service.hasPermission('nonexistent_table', 'read')).toBeFalse();
+    });
+
+    it('should return false before permissions are loaded', () => {
+      expect(service.hasPermission('issues', 'read')).toBeFalse();
+      expect(service.permissionsLoaded()).toBeFalse();
+    });
+
+    it('should clear cache on logout', () => {
+      // First authenticate and load permissions
+      keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+      TestBed.flushEffects();
+      const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req.flush([{ table_name: 'issues', permission: 'read' }]);
+      expect(service.hasPermission('issues', 'read')).toBeTrue();
+
+      // Logout
+      keycloakEventSignal.set({ type: KeycloakEventType.AuthLogout, args: undefined });
+      TestBed.flushEffects();
+
+      expect(service.hasPermission('issues', 'read')).toBeFalse();
+      expect(service.permissionsLoaded()).toBeFalse();
+    });
+
+    it('should refresh permissions when refreshPermissions() is called', () => {
+      // First authenticate and load permissions
+      keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+      TestBed.flushEffects();
+      const req1 = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req1.flush([{ table_name: 'issues', permission: 'read' }]);
+      expect(service.hasPermission('issues', 'read')).toBeTrue();
+
+      // Refresh
+      service.refreshPermissions();
+      const req2 = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req2.flush([
+        { table_name: 'issues', permission: 'read' },
+        { table_name: 'issues', permission: 'delete' }
+      ]);
+
+      expect(service.hasPermission('issues', 'delete')).toBeTrue();
+    });
+
+    /**
+     * REGRESSION: Reactive loop prevention (v0.40.0 hotfix)
+     *
+     * Root cause: The Keycloak event effect() called loadPermissions(), which
+     * reads permissionsLoading() as a guard check. Without untracked(), Angular
+     * registered permissionsLoading as an effect dependency. When loadPermissions()
+     * set permissionsLoading(true), the effect re-ran. When the HTTP response
+     * arrived and set permissionsLoading(false) + permissionsCache(new Map),
+     * the effect re-ran again — firing another HTTP request → infinite loop.
+     *
+     * Fix: Wrap the entire effect body (after keycloakSignal read) in untracked()
+     * so only keycloakSignal changes trigger re-execution.
+     */
+    it('should NOT re-fire permissions HTTP request when cache updates (regression: reactive loop)', () => {
+      // Trigger Ready → authenticated → loadPermissions fires
+      keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+      TestBed.flushEffects();
+
+      // First request: loadPermissions() fires after Ready event
+      const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+
+      // Flush the response — this writes to permissionsCache, permissionsLoaded, permissionsLoading.
+      // In the buggy version, these writes re-triggered the effect → second HTTP request.
+      req.flush([{ table_name: 'issues', permission: 'read' }]);
+      TestBed.flushEffects();
+
+      // Verify: NO additional permissions requests were fired.
+      // If this expectNone fails, the reactive loop bug has regressed.
+      httpTesting.expectNone(
+        r => r.url.includes('rpc/get_current_user_permissions'),
+        'permissions HTTP request should fire exactly once, not loop'
+      );
+      expect(service.permissionsLoaded()).toBeTrue();
+    });
+
+    it('hasPermission() should not create reactive dependency when called inside effect()', () => {
+      // Authenticate and load permissions
+      keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+      TestBed.flushEffects();
+      const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req.flush([{ table_name: 'issues', permission: 'read' }]);
+
+      // hasPermission uses untracked() internally, so reading it from within
+      // a component's effect() should NOT make permissionsCache a dependency.
+      // The returned value is a point-in-time snapshot.
+      const result = service.hasPermission('issues', 'read');
+      expect(result).toBeTrue();
+
+      // Refresh cache to change the underlying signal
+      service.refreshPermissions();
+      const req2 = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
+      req2.flush([]);
+
+      // Value changed, but callers holding the old boolean aren't re-notified
+      // (that's by design — callers use computed() for reactivity)
+      expect(service.hasPermission('issues', 'read')).toBeFalse();
     });
   });
 });

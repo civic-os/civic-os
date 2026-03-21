@@ -71,71 +71,76 @@ export class AuthService {
 
   constructor() {
     effect(() => {
+      // Read the Keycloak event signal — this is the ONLY reactive dependency.
+      // Everything below is imperative side effects and must NOT register
+      // additional signal dependencies (which would cause re-entry loops).
       const keycloakEvent = this.keycloakSignal();
 
-      if (keycloakEvent.type === KeycloakEventType.Ready) {
-        this.authenticated.set(typeEventArgs<ReadyArgs>(keycloakEvent.args));
+      untracked(() => {
+        if (keycloakEvent.type === KeycloakEventType.Ready) {
+          this.authenticated.set(typeEventArgs<ReadyArgs>(keycloakEvent.args));
 
-        if (this.authenticated()) {
-          this.loadUserRoles();
-          this.loadPermissions();
-          this.data.refreshCurrentUser().subscribe({
-            next: (result) => {
-              if (!result.success) {
-                console.error('Failed to refresh user data:', result.error);
-              }
-            },
-            error: (err) => console.error('Error refreshing user data:', err)
-          });
+          if (this.authenticated()) {
+            this.loadUserRoles();
+            this.loadPermissions();
+            this.data.refreshCurrentUser().subscribe({
+              next: (result) => {
+                if (!result.success) {
+                  console.error('Failed to refresh user data:', result.error);
+                }
+              },
+              error: (err) => console.error('Error refreshing user data:', err)
+            });
 
-          // Track login and set user ID for analytics
-          const tokenParsed = this.keycloak.tokenParsed;
-          if (tokenParsed?.sub) {
-            this.analytics.setUserId(tokenParsed.sub);
+            // Track login and set user ID for analytics
+            const tokenParsed = this.keycloak.tokenParsed;
+            if (tokenParsed?.sub) {
+              this.analytics.setUserId(tokenParsed.sub);
+            }
+            this.analytics.trackEvent('Auth', 'Login');
+          } else {
+            // Not authenticated - clear any stale impersonation state
+            // This handles: browser closed while impersonating, token expired, etc.
+            // Impersonation requires a valid session, so clear it when there isn't one
+            this.impersonation.stopImpersonation().subscribe();
           }
-          this.analytics.trackEvent('Auth', 'Login');
-        } else {
-          // Not authenticated - clear any stale impersonation state
-          // This handles: browser closed while impersonating, token expired, etc.
-          // Impersonation requires a valid session, so clear it when there isn't one
-          this.impersonation.stopImpersonation().subscribe();
+
+          // IMPORTANT: Do NOT call schema.refreshCache() here
+          // Calling refreshCache() on Ready event causes duplicate HTTP requests:
+          //   1. App init → SchemaService loads schema (first request)
+          //   2. Keycloak Ready → refreshCache() clears cache (happens almost immediately)
+          //   3. Components re-subscribe → SchemaService loads schema again (duplicate request)
+          // Schema cache is loaded on-demand when components first request it.
+          // The schemaVersionGuard handles subsequent updates when RBAC permissions change.
         }
 
-        // IMPORTANT: Do NOT call schema.refreshCache() here
-        // Calling refreshCache() on Ready event causes duplicate HTTP requests:
-        //   1. App init → SchemaService loads schema (first request)
-        //   2. Keycloak Ready → refreshCache() clears cache (happens almost immediately)
-        //   3. Components re-subscribe → SchemaService loads schema again (duplicate request)
-        // Schema cache is loaded on-demand when components first request it.
-        // The schemaVersionGuard handles subsequent updates when RBAC permissions change.
-      }
+        if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
+          this.authenticated.set(false);
+          this.realUserRoles.set([]);
+          this.clearPermissionsCache();
 
-      if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
-        this.authenticated.set(false);
-        this.realUserRoles.set([]);
-        this.clearPermissionsCache();
+          // Clear impersonation state on logout
+          // State is cleared immediately; audit logging is best-effort
+          this.impersonation.stopImpersonation().subscribe();
 
-        // Clear impersonation state on logout
-        // State is cleared immediately; audit logging is best-effort
-        this.impersonation.stopImpersonation().subscribe();
+          // Track logout and reset user ID
+          this.analytics.trackEvent('Auth', 'Logout');
+          this.analytics.resetUserId();
 
-        // Track logout and reset user ID
-        this.analytics.trackEvent('Auth', 'Logout');
-        this.analytics.resetUserId();
+          // Refresh schema cache when user logs out
+          this.schema.refreshCache();
+        }
 
-        // Refresh schema cache when user logs out
-        this.schema.refreshCache();
-      }
-
-      if (keycloakEvent.type === KeycloakEventType.AuthRefreshError) {
-        // Token refresh failed - update auth state and clear impersonation.
-        // withAutoRefreshToken handles the login redirect, so we don't call keycloak.login() here.
-        this.authenticated.set(false);
-        this.realUserRoles.set([]);
-        this.clearPermissionsCache();
-        this.impersonation.stopImpersonation().subscribe();
-        this.analytics.trackEvent('Auth', 'RefreshError');
-      }
+        if (keycloakEvent.type === KeycloakEventType.AuthRefreshError) {
+          // Token refresh failed - update auth state and clear impersonation.
+          // withAutoRefreshToken handles the login redirect, so we don't call keycloak.login() here.
+          this.authenticated.set(false);
+          this.realUserRoles.set([]);
+          this.clearPermissionsCache();
+          this.impersonation.stopImpersonation().subscribe();
+          this.analytics.trackEvent('Auth', 'RefreshError');
+        }
+      });
     });
 
     this.setupVisibilityChangeListener();
