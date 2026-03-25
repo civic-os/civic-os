@@ -80,7 +80,7 @@ The existing Schema Editor ERD (`SCHEMA_EDITOR_DESIGN.md`) predates the System M
 | Entity sidebar (search, filter, minimap) | **Navigation shell** | Persistent across levels |
 | Relationship lines (FK detail, cardinality) | **Application** (unified, no arrows/cardinality) + **Entity-to-Entity** (with causal overlay) | Application: all connections uniform. Detail in popovers at L2+ |
 | Toolbar (layout, zoom, export) | **Application** | Canvas controls in sidebar Section 2 |
-| Inspector panel (right side) | **Removed at Application level** | Returns in Phase 3 edit mode (Session 7) |
+| Inspector panel (right side) | **Removed at Application level** | Returns in Phase 3 edit mode (Session 8) |
 
 ---
 
@@ -157,12 +157,13 @@ Key outcomes:
 
 Completed. See §4 for outcomes and `ENTITY_OVERVIEW_DESIGN.md` for full design.
 
-### Session 6: Causal Chain UI + Permissions Layer
+### Session 6: Causal Chain UI (Trace Index + Execution Trace)
 
-**Scope:** Two related topics combined. The causal chain is the Execution Trace (L4 sibling to Lifecycle). The permissions layer is the role overlay at Application and Entity-to-Entity levels.
+**Scope:** The Execution Trace visualization — the L4 sibling to Lifecycle Detail. Includes the Trace Index page design and the step-by-step causal chain visualization.
 
-**Causal chain questions:**
-- Trace Index page design: grouping, sorting, filtering of entry points (S4-D4 established its existence; Session 6 designs the content)
+**Key questions:**
+- Trace Index page design: grouping, sorting, filtering of entry points (S4-D4 established its existence; this session designs the content)
+- Trace category icons: finalize visual vocabulary for transition automations, property change triggers, entity actions (placeholders from S5-D8)
 - Entry points: statechart popover → "View full causal chain", context diagram edge popover → "View causal chains", entity action → chain for that action, property change trigger → chain for that trigger
 - The graph walk algorithm (D9 from original design): joining `rpc_entity_effects` to `property_change_triggers` on `(table_name, property_name)`
 - Multiple entry points for one transition (Mott Park's 5 pathways to Paid)
@@ -172,14 +173,7 @@ Completed. See §4 for outcomes and `ENTITY_OVERVIEW_DESIGN.md` for full design.
 - Blockly integration (O7): link to existing visualization, embed, or just show description?
 - Card layout for event-function-effect sequence
 
-**Permissions layer questions:**
-- Role selector UI at Application and Entity-to-Entity levels
-- Opacity/transparency mechanics for inaccessible entities
-- What "no access" looks like (grayed out? hidden? badge?)
-- Application level has no causal overlay toggle (S4-D6: unified topology) — how does role overlay interact with that?
-- Whether edge visibility changes with role overlay at Context Diagram level
-
-**Output:** `CAUSAL_CHAIN_DESIGN.md` + `PERMISSIONS_LAYER_DESIGN.md` (or combined if scope allows)
+**Output:** `CAUSAL_CHAIN_DESIGN.md`
 
 **Inputs from prior sessions:**
 - S2-D5 transition popover ("View full causal chain →" button)
@@ -187,12 +181,37 @@ Completed. See §4 for outcomes and `ENTITY_OVERVIEW_DESIGN.md` for full design.
 - S3-D8 edge detail popover ("View causal chains →" button)
 - S4-D1 trace route: `/system-map/entity/:type/trace?transition=X&target=Y&action=Z`
 - S4-D4 Trace Index page and L4 breadcrumb dropdown
-- S4-D6 no structural/causal distinction at Application level
 - D4 causal chain anatomy (event → function → effects)
 - D9 effect-event duality and graph walk algorithm
 - P5 inline expansion at entity boundaries
+- S5-D8 Traces summary section (entry point counts, individual links, placeholder icons)
+- P7 display name principle, P8 PropRef badge pattern
 
-### Session 7: Phase 3 Editing Affordances
+### Session 7: Permissions Layer
+
+**Scope:** Permissions as a cross-cutting layer that overlays existing views at every level. Depends on Session 6 (the trace visualization must be designed before defining how role filtering applies to it).
+
+**Key questions:**
+- Role selector UI at Application and Entity-to-Entity levels
+- Opacity/transparency mechanics for inaccessible entities
+- What "no access" looks like (grayed out? hidden? badge?)
+- Application level has no causal overlay toggle (S4-D6: unified topology) — how does role overlay interact with that?
+- Whether edge visibility changes with role overlay at Context Diagram level
+- Lifecycle Detail: how are role-restricted transitions visualized?
+- Execution Trace: how do conditions/permissions annotations interact with role selector?
+- Sidebar behavior under role overlay
+- Default state vs. admin view
+
+**Output:** `PERMISSIONS_LAYER_DESIGN.md`
+
+**Inputs from prior sessions:**
+- S4-D6 no structural/causal distinction at Application level
+- S5-D7 Permissions section on Entity Overview ("custom rules" vocabulary, CRUD matrix, role display names)
+- Session 6 output (trace visualization that permissions overlay applies to)
+- O6 progressive disclosure levels by role
+- P7 display name principle (role display names throughout)
+
+### Session 8: Phase 3 Editing Affordances
 
 **Scope:** Review all designed surfaces and specify exactly which elements become editable, what controls they need, and what the migration generation strategy looks like.
 
@@ -227,10 +246,10 @@ Mapped from `INTROSPECTION_UX_DESIGN.md` §6 to their resolution location:
 | O3 | Context diagram layout | ✅ Session 3 (S3-D2: hub layout with zones) |
 | O4 | All-transition status listeners | ✅ Session 2 (S2-D6: effect categories on `property_change_triggers`) |
 | O5 | Property change trigger execution model | Out of scope (backend implementation, not UX design) |
-| O6 | Progressive disclosure levels by role | Session 6 (permissions layer) |
+| O6 | Progressive disclosure levels by role | Session 7 (permissions layer) |
 | O7 | Integration with existing Blockly visualization | Session 6 (causal chain — decide link vs embed vs description) |
 | O8 | Dashboard-entity cross-references | Deferred (future enhancement, not in current plan) |
-| O9 | Phase 3 cross-entity effect-event detection | Session 7 |
+| O9 | Phase 3 cross-entity effect-event detection | Session 8 |
 | O10 | Portable status references in property change triggers | Deferred (implementation detail, track separately) |
 
 ---
@@ -241,8 +260,8 @@ Pre-implementation tasks that should be completed before the sessions that depen
 
 | Item | Description | Depends on | Needed before |
 |------|-------------|-----------|---------------|
-| S3-M1 | Rename `'behavioral'` → `'causal'` in `schema_entity_dependencies` view CTEs | Session 3 decision | Session 7 (Phase 3 editing) |
-| S2-D10 | Rename `on_transition_rpc` → `caused_by_rpc` on `metadata.status_transitions` | Session 2 decision | Session 7 (Phase 3 editing) |
+| S3-M1 | Rename `'behavioral'` → `'causal'` in `schema_entity_dependencies` view CTEs | Session 3 decision | Session 8 (Phase 3 editing) |
+| S2-D10 | Rename `on_transition_rpc` → `caused_by_rpc` on `metadata.status_transitions` | Session 2 decision | Session 8 (Phase 3 editing) |
 | S2-D6 | Add `effect_category` column to `metadata.property_change_triggers` | Session 2 decision | Implementation of statechart or context diagram |
 
 ---
@@ -292,9 +311,9 @@ From `INTROSPECTION_UX_DESIGN.md` §5:
 | `CAUSAL_BINDINGS_EXAMPLES.md` | Test data — all causal bindings across examples | ✅ Reference |
 | `SCHEMA_EDITOR_DESIGN.md` | Existing ERD — source material for Session 4 decomposition | ✅ Reference (superseded by `/system-map`) |
 | `ENTITY_OVERVIEW_DESIGN.md` | Session 5 output — entity home page | ✅ Complete |
-| `CAUSAL_CHAIN_DESIGN.md` | Session 6 output — execution trace UI + trace index | 📋 Upcoming |
-| `PERMISSIONS_LAYER_DESIGN.md` | Session 6 output — role overlay mechanics | 📋 Upcoming |
-| `PHASE3_EDITING_DESIGN.md` | Session 7 output — view-to-edit bridge | 📋 Upcoming |
+| `CAUSAL_CHAIN_DESIGN.md` | Session 6 output — trace index + execution trace UI | 📋 Upcoming |
+| `PERMISSIONS_LAYER_DESIGN.md` | Session 7 output — role overlay mechanics | 📋 Upcoming |
+| `PHASE3_EDITING_DESIGN.md` | Session 8 output — view-to-edit bridge | 📋 Upcoming |
 
 ---
 
