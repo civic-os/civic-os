@@ -3,7 +3,7 @@
 **Status:** 📋 Active plan
 **Created:** 2026-03-06
 **Supersedes:** Work Session Plan (§7) in `INTROSPECTION_UX_DESIGN.md`
-**Context:** Sessions 1–4 completed; hierarchy revised in Session 4 (L4 siblings replace linear L4→L5)
+**Context:** Sessions 1–5 completed; hierarchy revised in Session 4 (L4 siblings replace linear L4→L5)
 
 ---
 
@@ -134,36 +134,28 @@ Key outcomes:
 - Trace Index page (`/system-map/entity/:type/trace`) lists all automation entry points grouped by source
 - Phase 3 forward reference: view/edit mode toggle, cursor vocabulary shift (`zoom-in` → `default`)
 
+### Session 5: Entity Overview ✅ (Design Complete)
+
+**Deliverable:** `ENTITY_OVERVIEW_DESIGN.md` — 9 decisions (S5-D1 through S5-D9), prototype
+
+Key outcomes:
+- Scrolling sections page with condensed/expanded pattern — each section has a compact summary (always visible) and an expanded detail view
+- Seven sections: Identity (header), Capabilities, Properties (with validations integrated), Connections, Permissions, Lifecycle (conditional), Traces (conditional)
+- No inline context diagram embed — embedding a shallower zoom level contradicts the map metaphor; Context Diagram is one breadcrumb click away
+- Inline statechart is simplified (nodes and edges only, no annotations) with click-anywhere zoom-in to L4
+- Connections grouped by entity with structural-first, behavioral-second ordering; full-sentence labels with mid-sentence arrows
+- User-facing terminology: "Structural" and "Behavioral" (internal term remains "causal")
+- Display name principle: all named objects use metadata display names; database identifiers are power-user secondary detail only
+- PropRef badge pattern: property references outside the Properties section render as badges to distinguish from prose
+- `(?)` tooltip on property references matches existing app pattern for field descriptions
+
 ---
 
 ## 5. Upcoming Sessions
 
-### Session 5: Entity Overview
+### Session 5: Entity Overview ✅
 
-**Scope:** Design the entity's "home page" — the zoom level between Context Diagram and detail views. This is where users land when they click the focal node on a Context Diagram.
-
-**Key questions to resolve:**
-- Section layout: properties, capabilities, validations, permissions, inline embeds
-- All inspector panel content migrates here (S4-D7)
-- Inline statechart embed (S2-D1 lightweight SVG) — size, interactivity, click-through
-- Inline context diagram embed — same questions
-- Capabilities display (status columns, file FKs, calendar/map/notes/payments/search flags)
-- Permissions section: CRUD matrix for this entity, RLS policy summaries, action permissions
-- Progressive disclosure: what's always visible vs. expandable
-- Trace entry points: how entity actions and property change triggers link to traces
-
-**Output:** `ENTITY_OVERVIEW_DESIGN.md`
-
-**Inputs from prior sessions:**
-- S2-D1 inline embed spec (lightweight SVG renderer)
-- S3-D7 node contents (display name + lifecycle line — this is the compact version)
-- S3-r3 changelog (capabilities removed from context diagram, deferred to this level)
-- ERD inspector panel (Properties/Relations/Validations/Permissions tabs) — all content migrates here (S4-D7)
-- S4-D2 click-through: focal node → Entity Overview (`zoom-in` cursor)
-- S4-D3 entity box content: name + description + capability icons at Application level; full detail here
-- S4-D4 breadcrumb: `🗺️ > {Entity} > Overview`; sidebar Section 2 shows page table of contents
-- S4-D5 sidebar: Entity Overview gets anchor links to sections as Section 2 content
-- `INTROSPECTION_UX_DESIGN.md` §3.2 Entity Level sections table
+Completed. See §4 for outcomes and `ENTITY_OVERVIEW_DESIGN.md` for full design.
 
 ### Session 6: Causal Chain UI + Permissions Layer
 
@@ -261,7 +253,7 @@ These decisions from `INTROSPECTION_UX_DESIGN.md` remain in effect. They are not
 
 | Decision | Summary | Status |
 |----------|---------|--------|
-| D1 | Two relationship categories: structural and causal | ✅ Standing |
+| D1 | Two relationship categories: structural and causal | ✅ Standing. User-facing labels: "Structural" and "Behavioral" (Session 5). Internal term remains "causal." |
 | D2 | Entity-centric navigation as primary axis | ✅ Standing |
 | D3 | Three zoom levels → five → **four with L4 siblings** (see §2) | 🔄 Updated (Session 4) |
 | D4 | Causal chain anatomy: event → function → effects | ✅ Standing |
@@ -282,6 +274,8 @@ From `INTROSPECTION_UX_DESIGN.md` §5:
 - **P4:** Show the happy path, annotate the conditions
 - **P5:** Inline expansion at entity boundaries
 - **P6:** Every view is a future editing surface
+- **P7:** Display name principle — all named objects (entities, properties, roles, functions, actions, statuses) use metadata display names in the UI; database identifiers appear only in secondary technical detail (Session 5)
+- **P8:** Property reference badge — property display names referenced outside the Properties section render as `PropRef` badges to distinguish named references from prose (Session 5)
 
 ---
 
@@ -297,7 +291,7 @@ From `INTROSPECTION_UX_DESIGN.md` §5:
 | `SYSTEM_INTROSPECTION_DESIGN.md` | Database layer — tables, views, static analysis | ✅ Reference |
 | `CAUSAL_BINDINGS_EXAMPLES.md` | Test data — all causal bindings across examples | ✅ Reference |
 | `SCHEMA_EDITOR_DESIGN.md` | Existing ERD — source material for Session 4 decomposition | ✅ Reference (superseded by `/system-map`) |
-| `ENTITY_OVERVIEW_DESIGN.md` | Session 5 output — entity home page | 📋 Upcoming |
+| `ENTITY_OVERVIEW_DESIGN.md` | Session 5 output — entity home page | ✅ Complete |
 | `CAUSAL_CHAIN_DESIGN.md` | Session 6 output — execution trace UI + trace index | 📋 Upcoming |
 | `PERMISSIONS_LAYER_DESIGN.md` | Session 6 output — role overlay mechanics | 📋 Upcoming |
 | `PHASE3_EDITING_DESIGN.md` | Session 7 output — view-to-edit bridge | 📋 Upcoming |

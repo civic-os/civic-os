@@ -243,6 +243,8 @@ sqitch deploy dev --verify      # Re-deploy
 - Adding custom domains
 - Schema changes that affect UI generation
 
+**Future Direction**: Declarative schema management (pgschema) evaluated as a Sqitch replacement to provide single-source-of-truth schema files. Deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md` for full research.
+
 ## Production Deployment & Containerization
 
 Civic OS provides production-ready Docker containers (frontend, postgrest, migrations) with runtime configuration via environment variables. Containers are versioned and multi-architecture (amd64, arm64), automatically built and published to GitHub Container Registry.
@@ -463,6 +465,7 @@ When creating new documentation files, follow this structure:
 - User guides → `docs/`
 - Developer guides → `docs/development/`
 - Bug postmortems, research notes → `docs/notes/`
+- **Prefer formal docs over MEMORY files**: Research, decisions, and knowledge should be captured in `docs/` files (checked into the repo) rather than in Claude auto-memory. Auto-memory is for quick operational reminders only.
 - **Never** create markdown files in the root directory (except README.md and CLAUDE.md)
 
 ## Git Commit Guidelines

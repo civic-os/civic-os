@@ -202,6 +202,8 @@ Each supplementary view deep-links back to entity-level views.
 
 ### 3.2 Entity Level
 
+> **⚠️ Superseded by Session 5.** The section inventory below was the initial sketch. `ENTITY_OVERVIEW_DESIGN.md` (Session 5) is the authoritative design for the Entity Overview page, including condensed/expanded layout, section ordering, and all content decisions.
+
 **Primary view: Entity introspection page** with sections:
 
 | Section | Content | Data Source |
