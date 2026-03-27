@@ -1098,6 +1098,7 @@ Each param row defines:
 **Type-specific columns**:
 - `join_table` + `join_column` — For `foreign_key` type (dropdown source)
 - `status_entity_type` — For `status` type (statuses discriminator)
+- `category_entity_type` — For `category` type (categories discriminator, v0.41.1)
 - `file_type` — For `file` type (`image`, `pdf`, `any`)
 
 ### Supported Parameter Types
@@ -1116,6 +1117,7 @@ Each param row defines:
 | `email` | `<input type="email">` | Email |
 | `telephone` | `<input type="tel">` | Telephone |
 | `status` | `<select>` from statuses | Status |
+| `category` | `<select>` from categories | Category |
 | `foreign_key` | `<select>` from join_table | ForeignKeyName |
 | `user` | `<select>` from civic_os_users | User |
 | `file` | File input (presigned URL) | File/FileImage/FilePDF |
