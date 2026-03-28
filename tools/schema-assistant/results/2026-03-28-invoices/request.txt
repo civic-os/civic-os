@@ -1,0 +1,1 @@
+Add an 'invoices' entity for tracking client invoices. It needs a client FK, amount (money), invoice_date (date), a status workflow (Draft, Sent, Paid, Overdue, Cancelled), and a notes text field.

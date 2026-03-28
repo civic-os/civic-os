@@ -1,0 +1,11 @@
+
+Safety Validation Results
+────────────────────────────────────────
+
+✓ All statements are safe
+
+  36 safe  1 review  0 dangerous
+  37 total statements
+
+  ⚠ Unrecognized statement type — requires manual review
+    ```  This creates a complete invoices entity with:  **Key Features:** - **5-s...

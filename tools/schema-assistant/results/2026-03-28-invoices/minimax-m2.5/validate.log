@@ -1,0 +1,14 @@
+
+Safety Validation Results
+────────────────────────────────────────
+
+✓ All statements are safe
+
+  28 safe  2 review  0 dangerous
+  30 total statements
+
+  ⚠ Unrecognized statement type — requires manual review
+    -- [TRIGGERS] Timestamp triggers CREATE TRIGGER set_created_at_trigger   BEFO...
+
+  ⚠ Unrecognized statement type — requires manual review
+    ```  **Design Summary:** - Added `invoices` table with client FK, amount (mon...

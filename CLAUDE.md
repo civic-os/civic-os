@@ -330,6 +330,7 @@ Override property metadata in `metadata.properties` to customize UI: `display_na
 2. Update `SchemaService.getPropertyType()` to detect the type
 3. Add rendering logic to `DisplayPropertyComponent`
 4. Add input control to `EditPropertyComponent`
+5. **Update Schema Assistant prompts**: If the new type should be available to LLM-generated schemas, add it to `tools/schema-assistant/prompts/system.md` (Custom Domains / type list) and update few-shot examples if relevant
 
 ### Metadata Tables Reference
 
@@ -342,6 +343,8 @@ Configure Civic OS behavior via metadata tables:
 - **`metadata.property_change_triggers`** - Property-level event-to-function bindings (v0.33.0+)
 
 See `docs/INTEGRATOR_GUIDE.md` for complete metadata architecture, field descriptions, and configuration patterns.
+
+**LLM Schema Assistant** (v0.42.0+): CLI tool that generates Civic OS schema SQL from natural language using LLM providers (Anthropic, OpenAI, OpenRouter). Includes safety validator (whitelist/blacklist/review-tier), context assembly from PostgREST schema state, and cost tracking. See `docs/notes/LLM_SCHEMA_ASSISTANT_DESIGN.md` for full architecture and `tools/schema-assistant/` for implementation. **Maintenance note**: When modifying metadata table structures, the Integrator Guide, or adding new property types, the Schema Assistant's system prompt (`tools/schema-assistant/prompts/system.md`) and few-shot examples (`tools/schema-assistant/prompts/examples/`) must be updated to match.
 
 ### Creating Records with Pre-filled Fields (Query Param Pattern)
 

@@ -13,6 +13,9 @@ This guide is for system administrators and integrators setting up and configuri
 - `docs/deployment/PRODUCTION.md` - Production deployment and containerization
 - `postgres/migrations/README.md` - Sqitch migrations and schema management
 - `docs/AUTHENTICATION.md` - Keycloak setup and RBAC configuration
+- `docs/notes/LLM_SCHEMA_ASSISTANT_DESIGN.md` - LLM Schema Assistant architecture
+
+> **⚠️ Schema Assistant Dependency**: This guide is the source of truth for the LLM Schema Assistant's system prompt (`tools/schema-assistant/prompts/system.md`). When adding new patterns, metadata tables, or configuration options here, also update the Schema Assistant's condensed prompt and few-shot examples so the LLM can generate correct SQL for new features.
 
 ---
 

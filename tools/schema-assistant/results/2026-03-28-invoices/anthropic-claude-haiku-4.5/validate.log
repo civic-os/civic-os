@@ -1,0 +1,17 @@
+
+Safety Validation Results
+────────────────────────────────────────
+
+✓ All statements are safe
+
+  33 safe  3 review  0 dangerous
+  36 total statements
+
+  ⚠ Unrecognized statement type — requires manual review
+    ```  **Key Points**:  1. **Status Workflow**: 5-state flow with Draft (initia...
+
+  ⚠ Unrecognized statement type — requires manual review
+    editors/admins can create/update;
+
+  ⚠ Unrecognized statement type — requires manual review
+    only admins can delete.  4. **Validations**: Both CHECK constraints (backend ...

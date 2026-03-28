@@ -1,0 +1,11 @@
+
+Safety Validation Results
+────────────────────────────────────────
+
+✓ All statements are safe
+
+  37 safe  1 review  0 dangerous
+  38 total statements
+
+  ⚠ Unrecognized statement type — requires manual review
+    ``` COMMIT;

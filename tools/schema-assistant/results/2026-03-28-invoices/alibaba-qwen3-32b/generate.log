@@ -1,0 +1,6 @@
+Assembling context...
+Context: 68,363 tokens (estimated)
+Provider: digitalocean/alibaba-qwen3-32b
+Generating schema...
+
+Error: 400 This model's maximum context length is 40960 tokens. However, you requested 73278 tokens (65086 in the messages, 8192 in the completion). Please reduce the length of the messages or completion. (Request ID: 2ce743db-920b-418b-88d6-592678a18992)
