@@ -1,0 +1,59 @@
+id: design-complete-system
+level: 3
+title: "Design a complete multi-entity system from scratch"
+starting_state: baseline
+request: |
+  Design a volunteer management system with the following entities:
+
+  1. Volunteers - name, email (email_address domain), phone (phone_number domain),
+     availability notes, status workflow (Applied, Approved, Active, Inactive)
+
+  2. Events - name, description, event_date (date), location (text),
+     max_volunteers (integer), status workflow (Planning, Open, Full, Completed, Cancelled)
+
+  3. Assignments - junction between Volunteers and Events with a
+     hours_worked (integer, nullable) and notes field
+
+  Volunteers is sensitive (no anonymous access). Events is public.
+  Assignments needs read/create/delete only (no update).
+  Include proper FK indexes, RLS, permissions, validations, and schema decisions.
+
+expected_outputs:
+  tables:
+    - name: volunteers
+      required_columns: [id, display_name, email, phone, availability_notes, status, created_by]
+    - name: events
+      required_columns: [id, display_name, description, event_date, location, max_volunteers, status]
+    - name: assignments
+      required_columns: [volunteer_id, event_id]
+  status_types:
+    - entity_type: volunteer
+      min_count: 4
+    - entity_type: event
+      min_count: 5
+  rls_policies:
+    - table: volunteers
+      min_count: 4
+    - table: events
+      min_count: 4
+    - table: assignments
+      min_count: 3
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('volunteers', 'events', 'assignments')"
+    expected: 3
+  - sql: "SELECT count(*) FROM metadata.statuses WHERE entity_type = 'volunteer'"
+    expected_min: 4
+  - sql: "SELECT count(*) FROM metadata.statuses WHERE entity_type = 'event'"
+    expected_min: 5
+  - sql: "SELECT count(*) FROM metadata.entities WHERE table_name IN ('volunteers', 'events')"
+    expected_min: 2
+  - sql: "SELECT count(*) FROM metadata.permissions WHERE table_name IN ('volunteers', 'events', 'assignments')"
+    expected_min: 10
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'volunteers'"
+    expected_value: "true"
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'events'"
+    expected_value: "true"
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'assignments'"
+    expected_value: "true"

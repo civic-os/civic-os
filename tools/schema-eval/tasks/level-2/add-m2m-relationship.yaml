@@ -1,0 +1,40 @@
+id: add-m2m-relationship
+level: 2
+title: "Add a many-to-many relationship via junction table"
+starting_state: pothole
+request: |
+  Create a 'labels' lookup table and a many-to-many relationship between
+  WorkPackages and Labels. The labels table needs: id, display_name, color (hex_color).
+  The junction table 'work_package_labels' must use a composite primary key (no surrogate ID).
+  Both tables need full RBAC: anonymous read, authenticated CRUD, editor+ delete.
+  Junction table needs only read, create, delete policies (no update).
+
+expected_outputs:
+  tables:
+    - name: labels
+      required_columns: [id, display_name, color]
+    - name: work_package_labels
+      required_columns: [work_package_id, label_id]
+      composite_pk: true
+  rls_policies:
+    - table: labels
+      min_count: 4
+    - table: work_package_labels
+      min_count: 3
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM information_schema.tables WHERE table_name = 'labels'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.tables WHERE table_name = 'work_package_labels'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.columns WHERE table_name = 'labels' AND column_name = 'color'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.table_constraints WHERE table_name = 'work_package_labels' AND constraint_type = 'PRIMARY KEY'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.key_column_usage kcu JOIN information_schema.table_constraints tc ON kcu.constraint_name = tc.constraint_name WHERE tc.table_name = 'work_package_labels' AND tc.constraint_type = 'PRIMARY KEY'"
+    expected: 2
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'labels'"
+    expected_value: "true"
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'work_package_labels'"
+    expected_value: "true"

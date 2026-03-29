@@ -1,0 +1,38 @@
+id: add-category
+level: 1
+title: "Add a category type to an existing entity"
+starting_state: pothole
+request: |
+  Add a 'severity' category to the Issue table with values:
+  - Critical (red #DC2626, sort 1)
+  - Major (orange #F97316, sort 2)
+  - Minor (yellow #F59E0B, sort 3)
+  - Cosmetic (gray #6B7280, sort 4)
+  Add the severity column as a nullable integer FK to metadata.categories.
+  Include the FK index, metadata property configuration, and a schema decision.
+
+expected_outputs:
+  category_groups:
+    - entity_type: issue_severity
+  categories:
+    - entity_type: issue_severity
+      min_count: 4
+  columns:
+    - table: issues
+      name: severity
+      type: integer
+      nullable: true
+  indexes:
+    - table: issues
+      column: severity
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM metadata.category_groups WHERE entity_type = 'issue_severity'"
+    expected: 1
+  - sql: "SELECT count(*) FROM metadata.categories WHERE entity_type = 'issue_severity'"
+    expected: 4
+  - sql: "SELECT column_name FROM information_schema.columns WHERE table_name = 'Issue' AND column_name = 'severity'"
+    expected_value: "severity"
+  - sql: "SELECT count(*) FROM pg_indexes WHERE tablename = 'Issue' AND indexdef LIKE '%severity%'"
+    expected_min: 1

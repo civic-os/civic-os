@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import type { AssembledContext } from '../providers/provider.js';
 import type { SchemaConnectionConfig } from '../config.js';
 import { readSchemaState } from './schema-reader.js';
+import { readSchemaStateFromDB, readSchemaStateAsSQL } from './db-schema-reader.js';
 import { detectFeatures, getRelevantSections } from './guide-sections.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -24,6 +25,7 @@ const PROMPTS_DIR = resolve(__dirname, '../../prompts');
 export async function assembleContext(
   request: string,
   schemaConfig?: SchemaConnectionConfig,
+  dbUrl?: string,
 ): Promise<AssembledContext> {
   // Load system prompt
   const systemPrompt = await readFile(resolve(PROMPTS_DIR, 'system.md'), 'utf-8');
@@ -44,9 +46,13 @@ export async function assembleContext(
   let schemaState = '';
   let schemaDecisions = '';
 
-  if (schemaConfig) {
+  // Read schema state from PostgREST or direct DB connection
+  const schemaSource = schemaConfig ? 'postgrest' : dbUrl ? 'db' : null;
+  if (schemaSource) {
     try {
-      const fullState = await readSchemaState(schemaConfig);
+      const fullState = schemaSource === 'postgrest'
+        ? await readSchemaState(schemaConfig!)
+        : await readSchemaStateFromDB(dbUrl!);
       // Split out decisions section if present
       const decisionsIdx = fullState.indexOf('### Recent Schema Decisions');
       if (decisionsIdx !== -1) {
@@ -57,7 +63,7 @@ export async function assembleContext(
       }
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      console.warn(`Warning: Could not read schema state: ${msg}`);
+      console.warn(`Warning: Could not read schema state (${schemaSource}): ${msg}`);
       console.warn('Proceeding without schema context (the LLM will generate from scratch).');
     }
   }

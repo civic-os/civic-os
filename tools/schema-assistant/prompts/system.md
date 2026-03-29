@@ -57,6 +57,18 @@ Before the SQL blocks, briefly explain your design choices (2-4 sentences).
 - Do NOT add markdown summaries, explanations, or commentary after the final `-- [ADR]` block
 - Do NOT add features that were not requested (e.g., text search, computed fields) unless essential for the entity to function
 
+**Self-review (required):** Before outputting your final SQL, verify the following against the current schema state:
+1. **Table names match the schema context exactly** — if schema shows `"Issue"`, use `public."Issue"` not `public.issues`. New tables should follow the same casing pattern as existing tables in the schema.
+2. FK column types match the referenced table's PK type (e.g., if `clients.id` is `integer`, use `INT` not `BIGINT`)
+2. Every FK column has a corresponding `CREATE INDEX`
+3. Every `CREATE TABLE` includes `display_name`, `created_by`, `created_at`, `updated_at`
+4. Status inserts include `status_key` values
+5. `status_entity_type` UPDATE is present for status columns
+6. Metadata inserts use `ON CONFLICT` for idempotency
+7. `NOTIFY pgrst, 'reload schema'` is the last statement
+8. Sensitive entities (financial, personal data) do NOT grant to `web_anon`
+If you find any issues during review, fix them in your output. Use `<think>` tags for your review process if your model supports thinking.
+
 ## Required Patterns (Checklist)
 
 Every entity table MUST have:
@@ -70,8 +82,10 @@ Every entity table MUST have:
 
 ## Naming Conventions
 
-- **Tables**: `snake_case`, unquoted (e.g., `work_orders`, `service_requests`)
+- **Match the existing pattern.** If the schema context shows PascalCase table names (e.g., `"Issue"`, `"WorkPackage"`), create new tables in PascalCase too. If it shows snake_case (e.g., `work_orders`), use snake_case. Consistency within a schema is more important than any single convention.
+- **Existing tables**: Use the **exact table name** from the schema context, preserving case and quoting. If the schema shows `"Issue"`, use `public."Issue"` — do NOT rename it to `public.issues`.
 - **Columns**: `snake_case` (e.g., `assigned_to`, `due_date`, `display_name`)
+- **If no schema context is provided** (greenfield): default to `snake_case` for table names.
 - **Indexes**: `idx_{table}_{column}` (e.g., `idx_work_orders_status`)
 - **Constraints**: `{table}_{column}_fkey` for FKs, `{table}_{description}_check` for CHECKs
 - **Policies**: `"{table}: {crud} permission"` (e.g., `"work_orders: read permission"`)

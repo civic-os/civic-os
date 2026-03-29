@@ -2,7 +2,7 @@
 
 import OpenAI from 'openai';
 import { ProviderConfig, ProviderName, MODEL_PRICING } from '../config.js';
-import { extractSQLBlocks } from '../output/sql-extractor.js';
+import { extractSQLBlocks, stripThinkingTags } from '../output/sql-extractor.js';
 import type {
   SchemaAssistantProvider, AssembledContext, LLMResponse,
   TokenUsage, CostEstimate,
@@ -58,10 +58,13 @@ export class OpenAICompatibleProvider implements SchemaAssistantProvider {
       outputTokens: response.usage?.completion_tokens ?? 0,
     };
 
-    const sqlBlocks = extractSQLBlocks(rawResponse);
+    // Strip thinking tags and markdown fences
+    const { cleaned, thinking } = stripThinkingTags(rawResponse);
+    const sqlBlocks = extractSQLBlocks(cleaned);
 
-    const firstBlockIndex = rawResponse.indexOf('-- [');
-    const reasoning = firstBlockIndex > 0 ? rawResponse.substring(0, firstBlockIndex).trim() : '';
+    const firstBlockIndex = cleaned.indexOf('-- [');
+    const preamble = firstBlockIndex > 0 ? cleaned.substring(0, firstBlockIndex).trim() : '';
+    const reasoning = [thinking, preamble].filter(Boolean).join('\n\n');
 
     // OpenRouter provides cost in custom header — but the SDK response object
     // doesn't expose headers directly. Fall back to estimated cost.

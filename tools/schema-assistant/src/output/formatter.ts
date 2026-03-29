@@ -90,6 +90,24 @@ export async function writeOutputFile(response: LLMResponse, filePath: string): 
   await writeFile(filePath, header + script + footer, 'utf-8');
 }
 
+/** Write the raw LLM response (including reasoning/thinking) to a file. */
+export async function writeRawResponse(response: LLMResponse, filePath: string): Promise<void> {
+  const header = [
+    `Model: ${response.model}`,
+    `Tokens: ${response.usage.inputTokens} in / ${response.usage.outputTokens} out`,
+    `Cost: $${response.cost.totalCost.toFixed(4)}`,
+    `Latency: ${(response.latencyMs / 1000).toFixed(1)}s`,
+    `Date: ${new Date().toISOString()}`,
+    '',
+    '--- REASONING ---',
+    response.reasoning || '(none)',
+    '',
+    '--- RAW RESPONSE ---',
+    response.rawResponse,
+  ].join('\n');
+  await writeFile(filePath, header, 'utf-8');
+}
+
 function truncate(s: string, maxLen: number): string {
   const oneLine = s.replace(/\n/g, ' ').trim();
   if (oneLine.length <= maxLen) return oneLine;

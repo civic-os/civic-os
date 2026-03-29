@@ -1,0 +1,32 @@
+id: add-notification-workflow
+level: 3
+title: "Add a status-triggered notification template"
+starting_state: pothole
+request: |
+  Create a notification template that sends an email when an Issue's status
+  changes to 'Completed'. The template should:
+  - Use entity_type 'issue'
+  - Have a subject line: "Issue {{.display_name}} has been resolved"
+  - Have an HTML body that includes the issue display_name and a link
+  - Be triggered by the status change (configure a status transition
+    from any status to 'Completed' with an RPC binding)
+  - Register the notification function via metadata.auto_register_function()
+
+  Also add a status transition record from 'Repair Queue' to 'Completed'
+  with the notification function as the rpc_function_name.
+
+expected_outputs:
+  notification_templates:
+    - entity_type: issue
+      channel: email
+  status_transitions:
+    - entity_type: issue
+      from_status: Repair Queue
+      to_status: Completed
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM metadata.notification_templates WHERE entity_type = 'issue'"
+    expected_min: 1
+  - sql: "SELECT count(*) FROM metadata.status_transitions WHERE entity_type = 'issue'"
+    expected_min: 1

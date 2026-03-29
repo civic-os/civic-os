@@ -1,0 +1,30 @@
+id: add-column
+level: 1
+title: "Add a priority column to an existing entity"
+starting_state: pothole
+request: |
+  Add a 'priority' integer column to the Issue table. It should be nullable
+  and default to null. Add a frontend validation with min value 1 and max value 5.
+  Add a CHECK constraint to enforce the range at the database level.
+
+expected_outputs:
+  columns:
+    - table: issues
+      name: priority
+      type: integer
+      nullable: true
+  validations:
+    - table: issues
+      column: priority
+      types: [min, max]
+  constraints:
+    - table: issues
+      pattern: "priority.*BETWEEN|priority.*>=.*<=|priority.*>.*<"
+
+verification_queries:
+  - sql: "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = 'Issue' AND column_name = 'priority'"
+    expected_columns: { data_type: "integer", is_nullable: "YES" }
+  - sql: "SELECT count(*) FROM metadata.validations WHERE table_name = 'Issue' AND column_name = 'priority'"
+    expected_min: 2
+  - sql: "SELECT count(*) FROM metadata.constraint_messages WHERE table_name = 'Issue' AND column_name = 'priority'"
+    expected_min: 1

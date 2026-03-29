@@ -1,0 +1,55 @@
+# Evaluation database + PostgREST for Schema Assistant model testing.
+# PostgREST provides the same schema context that production instances expose.
+#
+# Usage:
+#   docker compose -f src/docker/docker-compose.eval.yml up -d
+#   docker compose -f src/docker/docker-compose.eval.yml down -v
+
+services:
+  eval-pg:
+    platform: linux/amd64
+    build:
+      context: ../../../../docker/dev-postgres
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_DB: civic_os_eval
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: evalpass
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d civic_os_eval"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    volumes:
+      # Mount the init scripts that create the authenticator role and run migrations
+      - ../../../../examples/pothole/init-scripts/00_create_authenticator.sh:/docker-entrypoint-initdb.d/00_create_authenticator.sh:ro
+      # Mount Sqitch files for migrations (same structure as pothole docker-compose)
+      - ../../../../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
+      - ../../../../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
+      - ../../../../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
+      # Mount pothole init scripts for tasks that need starting_state: pothole
+      - ../../../../examples/pothole/init-scripts:/pothole-init:ro
+
+  eval-postgrest:
+    image: postgrest/postgrest:latest
+    ports:
+      - "3001:3000"
+    environment:
+      PGRST_DB_URI: postgres://authenticator:evalpass@eval-pg:5432/civic_os_eval
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web_anon
+      # Simple symmetric JWT secret for eval (no Keycloak needed)
+      PGRST_JWT_SECRET: "civic-os-eval-jwt-secret-at-least-32-characters-long"
+      PGRST_JWT_AUD: ""
+      PGRST_OPENAPI_SERVER_PROXY_URI: "http://localhost:3001"
+      PGRST_LOG_LEVEL: "warn"
+      # Disable the pre-request hook (requires JWT claims we don't need for eval)
+      # PGRST_DB_PRE_REQUEST: ""
+    depends_on:
+      eval-pg:
+        condition: service_healthy
+    restart: unless-stopped

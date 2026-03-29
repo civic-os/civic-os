@@ -8,7 +8,7 @@ import { resolveProviderConfig, type ProviderName } from './config.js';
 import { createProvider } from './providers/provider.js';
 import { assembleContext } from './context/assembler.js';
 import { validateSQL, generateReverts } from './safety/validator.js';
-import { formatTerminalOutput, writeOutputFile } from './output/formatter.js';
+import { formatTerminalOutput, writeOutputFile, writeRawResponse } from './output/formatter.js';
 import { blocksToScript } from './output/sql-extractor.js';
 
 const program = new Command();
@@ -30,6 +30,7 @@ program
   .option('--base-url <url>', 'Custom API base URL')
   .option('--postgrest-url <url>', 'PostgREST URL for reading current schema')
   .option('--jwt <token>', 'JWT for authenticated PostgREST access')
+  .option('--db-url <url>', 'Direct PostgreSQL URL for reading schema (alternative to PostgREST)')
   .option('-o, --output <file>', 'Write SQL output to file')
   .option('--no-safety', 'Skip safety validation (not recommended)')
   .option('--reverts', 'Generate revert scripts alongside forward SQL')
@@ -37,12 +38,12 @@ program
     try {
       console.log(chalk.dim('Assembling context...'));
 
-      // Assemble context
+      // Assemble context (PostgREST or direct DB connection)
       const schemaConfig = opts.postgrestUrl
         ? { postgrestUrl: opts.postgrestUrl, jwt: opts.jwt }
         : undefined;
 
-      const context = await assembleContext(opts.request, schemaConfig);
+      const context = await assembleContext(opts.request, schemaConfig, opts.dbUrl);
 
       console.log(chalk.dim(`Context: ${estimateTokens(context)} tokens (estimated)`));
       console.log(chalk.dim(`Provider: ${opts.provider}/${opts.model}`));
@@ -70,7 +71,11 @@ program
       // Write to file if requested
       if (opts.output) {
         await writeOutputFile(response, opts.output);
+        // Save raw response (including reasoning/thinking) alongside the SQL
+        const rawPath = opts.output.replace(/\.sql$/, '.raw.txt');
+        await writeRawResponse(response, rawPath);
         console.log(chalk.green(`\nSQL written to ${opts.output}`));
+        console.log(chalk.dim(`Raw response: ${rawPath}`));
       }
 
       // Generate reverts if requested
@@ -106,6 +111,7 @@ program
   .requiredOption('-r, --request <text>', 'Natural language description of the schema change')
   .option('--postgrest-url <url>', 'PostgREST URL for reading current schema')
   .option('--jwt <token>', 'JWT for authenticated PostgREST access')
+  .option('--db-url <url>', 'Direct PostgreSQL URL for reading schema (alternative to PostgREST)')
   .requiredOption('-o, --output <dir>', 'Output directory for context files', '/tmp/schema-assistant')
   .action(async (opts) => {
     try {
@@ -118,7 +124,7 @@ program
         ? { postgrestUrl: opts.postgrestUrl, jwt: opts.jwt }
         : undefined;
 
-      const context = await assembleContext(opts.request, schemaConfig);
+      const context = await assembleContext(opts.request, schemaConfig, opts.dbUrl);
 
       // Write the full prompt as a single file that Claude Code can read
       const promptParts: string[] = [];

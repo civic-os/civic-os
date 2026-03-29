@@ -1,0 +1,37 @@
+id: create-entity-with-search
+level: 2
+title: "Create an entity with full-text search"
+starting_state: baseline
+request: |
+  Create a 'knowledge_articles' entity for a knowledge base. It needs:
+  - A title (display_name)
+  - A body (text, long content)
+  - An author (UUID FK to civic_os_users, defaults to current user)
+  - A published_at date (nullable, null means draft)
+  - Full-text search across title and body using civic_os_text_search tsvector column
+  Public read access (including anonymous), only editors can create/update, admins delete.
+  Configure search_fields in metadata.entities.
+
+expected_outputs:
+  tables:
+    - name: knowledge_articles
+      required_columns: [id, display_name, body, author, published_at, civic_os_text_search, created_by, created_at, updated_at]
+  metadata_entities:
+    - table_name: knowledge_articles
+      search_fields: true
+  indexes:
+    - column: civic_os_text_search
+      type: gin
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM information_schema.tables WHERE table_name = 'knowledge_articles'"
+    expected: 1
+  - sql: "SELECT data_type FROM information_schema.columns WHERE table_name = 'knowledge_articles' AND column_name = 'civic_os_text_search'"
+    expected_value: "tsvector"
+  - sql: "SELECT count(*) FROM pg_indexes WHERE tablename = 'knowledge_articles' AND indexdef LIKE '%gin%text_search%'"
+    expected_min: 1
+  - sql: "SELECT search_fields IS NOT NULL FROM metadata.entities WHERE table_name = 'knowledge_articles'"
+    expected_value: "true"
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'knowledge_articles'"
+    expected_value: "true"

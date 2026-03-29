@@ -1,0 +1,65 @@
+id: data-migration
+level: 3
+title: "Migrate a text column to a Category type"
+starting_state: pothole
+setup_sql: |
+  -- Seed 50 Issue rows with text priority values
+  INSERT INTO public."Issue" (display_name, status, created_user)
+  SELECT
+    'Test Issue ' || i,
+    (SELECT id FROM metadata.statuses WHERE entity_type = 'issue' AND is_initial = TRUE LIMIT 1),
+    '00000000-0000-0000-0000-000000000000'
+  FROM generate_series(1, 50) AS i
+  ON CONFLICT DO NOTHING;
+
+  -- Add a text priority column and seed data
+  ALTER TABLE public."Issue" ADD COLUMN IF NOT EXISTS priority_text VARCHAR(20);
+  UPDATE public."Issue" SET priority_text = CASE
+    WHEN id % 3 = 0 THEN 'High'
+    WHEN id % 3 = 1 THEN 'Medium'
+    ELSE 'Low'
+  END WHERE priority_text IS NULL;
+
+schema_hints:
+  distinct_values:
+    priority_text: ["High", "Medium", "Low"]
+  row_count: 50
+
+request: |
+  The Issue table has a VARCHAR column called 'priority_text' with values
+  'High', 'Medium', and 'Low' (approximately equal distribution across 50 rows).
+  Migrate this to use the Category type system:
+  1. Create category group 'issue_priority' with categories High (red), Medium (yellow), Low (green)
+  2. Add a new 'priority' INT column with FK to metadata.categories
+  3. Migrate existing data: map each text value to the corresponding category ID
+  4. Drop the old priority_text column
+  5. Add FK index and metadata property configuration
+
+expected_outputs:
+  category_groups:
+    - entity_type: issue_priority
+  categories:
+    - entity_type: issue_priority
+      min_count: 3
+  columns:
+    - table: issues
+      name: priority
+      type: integer
+  indexes:
+    - table: issues
+      column: priority
+  data_migration:
+    - table: issues
+      column: priority
+      expected_not_null_count: 50
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM metadata.categories WHERE entity_type = 'issue_priority'"
+    expected: 3
+  - sql: "SELECT count(*) FROM information_schema.columns WHERE table_name = 'Issue' AND column_name = 'priority'"
+    expected: 1
+  - sql: "SELECT count(*) FROM public.\"Issue\" WHERE priority IS NOT NULL"
+    expected: 50
+  - sql: "SELECT count(*) FROM information_schema.columns WHERE table_name = 'Issue' AND column_name = 'priority_text'"
+    expected: 0

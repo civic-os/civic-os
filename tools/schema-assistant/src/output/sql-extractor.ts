@@ -22,6 +22,35 @@ const CATEGORY_ORDER: Record<SQLCategory, number> = {
 const VALID_CATEGORIES = new Set(Object.keys(CATEGORY_ORDER));
 
 /**
+ * Strip thinking/reasoning tags from model output.
+ * DeepSeek R1, QwQ, and similar reasoning models wrap chain-of-thought
+ * in <think>...</think> or <reasoning>...</reasoning> tags.
+ */
+export function stripThinkingTags(response: string): { cleaned: string; thinking: string } {
+  let thinking = '';
+  let cleaned = response;
+
+  // Strip <think>...</think> (DeepSeek R1, QwQ)
+  const thinkMatch = cleaned.match(/<think>([\s\S]*?)<\/think>/gi);
+  if (thinkMatch) {
+    thinking = thinkMatch.map(m => m.replace(/<\/?think>/gi, '').trim()).join('\n\n');
+    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  }
+
+  // Strip <reasoning>...</reasoning>
+  const reasonMatch = cleaned.match(/<reasoning>([\s\S]*?)<\/reasoning>/gi);
+  if (reasonMatch) {
+    thinking += '\n\n' + reasonMatch.map(m => m.replace(/<\/?reasoning>/gi, '').trim()).join('\n\n');
+    cleaned = cleaned.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '').trim();
+  }
+
+  // Strip stray markdown code fences that some models add around the SQL
+  cleaned = cleaned.replace(/^```sql\s*/gm, '').replace(/^```\s*$/gm, '');
+
+  return { cleaned: cleaned.trim(), thinking: thinking.trim() };
+}
+
+/**
  * Extract labeled SQL blocks from an LLM response.
  *
  * Expected format:

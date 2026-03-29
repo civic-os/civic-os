@@ -1,0 +1,28 @@
+id: add-validation
+level: 1
+title: "Add validation rules to an existing column"
+starting_state: pothole
+request: |
+  Add validation rules to the Issue table's display_name column:
+  - Required (cannot be empty)
+  - Minimum length of 5 characters
+  - Maximum length of 200 characters
+  Add both frontend metadata validations and backend CHECK constraints
+  with friendly error messages.
+
+expected_outputs:
+  validations:
+    - table: issues
+      column: display_name
+      types: [required, minLength, maxLength]
+  constraints:
+    - table: issues
+      pattern: "display_name.*trim|display_name.*length|display_name.*char_length"
+  constraint_messages:
+    min_count: 2
+
+verification_queries:
+  - sql: "SELECT count(*) FROM metadata.validations WHERE table_name = 'Issue' AND column_name = 'display_name'"
+    expected_min: 3
+  - sql: "SELECT count(*) FROM metadata.constraint_messages WHERE table_name = 'Issue' AND column_name = 'display_name'"
+    expected_min: 2

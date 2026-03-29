@@ -1,0 +1,26 @@
+id: change-status-flow
+level: 1
+title: "Add a new status value to an existing workflow"
+starting_state: pothole
+request: |
+  Add two new status values to the 'issue' status workflow:
+  - 'On Hold' with color #F59E0B, sort_order 4, non-terminal
+  - 'Deferred' with color #8B5CF6, sort_order 5, non-terminal
+  These go between 'Re-estimate' and 'Repair Queue' in the workflow.
+  Use status_key values 'on_hold' and 'deferred'.
+
+expected_outputs:
+  statuses:
+    - entity_type: issue
+      new_values: [On Hold, Deferred]
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM metadata.statuses WHERE entity_type = 'issue' AND display_name = 'On Hold'"
+    expected: 1
+  - sql: "SELECT count(*) FROM metadata.statuses WHERE entity_type = 'issue' AND display_name = 'Deferred'"
+    expected: 1
+  - sql: "SELECT status_key FROM metadata.statuses WHERE entity_type = 'issue' AND display_name = 'On Hold'"
+    expected_value: "on_hold"
+  - sql: "SELECT is_terminal FROM metadata.statuses WHERE entity_type = 'issue' AND display_name = 'On Hold'"
+    expected_value: "false"

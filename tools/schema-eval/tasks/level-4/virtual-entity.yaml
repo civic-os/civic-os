@@ -1,0 +1,34 @@
+id: virtual-entity
+level: 4
+title: "Create a virtual entity with INSTEAD OF triggers"
+starting_state: pothole
+request: |
+  Create a virtual entity 'issue_summary' as a PostgreSQL VIEW that provides
+  a simplified interface to the Issue table. The view should:
+  - Show: id, display_name, status (as display text, not ID), created_at, location_text
+  - Be backed by INSTEAD OF triggers for INSERT and UPDATE that map back to the Issue table
+  - Set the default status to 'New' on insert
+  - Register in metadata.entities (VIEWs are not auto-discovered)
+  - Configure metadata.properties for the view columns
+  - Use security_invoker = true
+  - Grant to web_anon and authenticated
+  - Add RLS policies (the view inherits base table RLS via security_invoker)
+
+expected_outputs:
+  views:
+    - name: issue_summary
+      security_invoker: true
+  triggers:
+    - view: issue_summary
+      types: [INSERT, UPDATE]
+  metadata_entities:
+    - table_name: issue_summary
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM information_schema.views WHERE table_name = 'issue_summary'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.triggers WHERE event_object_table = 'issue_summary'"
+    expected_min: 2
+  - sql: "SELECT count(*) FROM metadata.entities WHERE table_name = 'issue_summary'"
+    expected: 1

@@ -1,0 +1,44 @@
+id: payment-integration
+level: 4
+title: "Add payment integration to an existing entity"
+starting_state: pothole
+request: |
+  Add payment processing to the WorkPackage entity. This requires:
+  1. Add a payment_transaction_id UUID column (FK to payments.transactions, nullable)
+  2. Create a payment initiation RPC function 'initiate_work_package_payment'
+     that takes p_entity_id BIGINT and:
+     - Looks up the work package and its total_cost
+     - Uses payments.check_existing_payment() for idempotency
+     - Uses payments.create_and_link_payment() to create the payment record
+     - Must be SECURITY DEFINER with proper authorization checks
+  3. Configure metadata.entities with payment_initiation_rpc = 'initiate_work_package_payment'
+  4. Create an index on payment_transaction_id (partial, WHERE NOT NULL)
+  5. Grant EXECUTE on the RPC to authenticated role
+
+expected_outputs:
+  columns:
+    - table: work_packages
+      name: payment_transaction_id
+      type: uuid
+      nullable: true
+  functions:
+    - name: initiate_work_package_payment
+      security_definer: true
+  metadata_entities:
+    - table_name: work_packages
+      payment_initiation_rpc: initiate_work_package_payment
+  indexes:
+    - table: work_packages
+      column: payment_transaction_id
+      partial: true
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM information_schema.columns WHERE table_name = 'WorkPackage' AND column_name = 'payment_transaction_id'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.routines WHERE routine_name = 'initiate_work_package_payment'"
+    expected: 1
+  - sql: "SELECT count(*) FROM pg_indexes WHERE tablename = 'WorkPackage' AND indexdef LIKE '%payment_transaction_id%'"
+    expected_min: 1
+  - sql: "SELECT payment_initiation_rpc FROM metadata.entities WHERE table_name = 'WorkPackage'"
+    expected_value: "initiate_work_package_payment"

@@ -2,7 +2,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { ProviderConfig, MODEL_PRICING } from '../config.js';
-import { extractSQLBlocks } from '../output/sql-extractor.js';
+import { extractSQLBlocks, stripThinkingTags } from '../output/sql-extractor.js';
 import type {
   SchemaAssistantProvider, AssembledContext, LLMResponse,
   TokenUsage, CostEstimate,
@@ -44,11 +44,14 @@ export class AnthropicProvider implements SchemaAssistantProvider {
       cacheWriteTokens: (response.usage as unknown as Record<string, number>).cache_creation_input_tokens,
     };
 
-    const sqlBlocks = extractSQLBlocks(rawResponse);
+    // Strip thinking tags and markdown fences
+    const { cleaned, thinking } = stripThinkingTags(rawResponse);
+    const sqlBlocks = extractSQLBlocks(cleaned);
 
-    // Extract reasoning (text before first SQL block)
-    const firstBlockIndex = rawResponse.indexOf('-- [');
-    const reasoning = firstBlockIndex > 0 ? rawResponse.substring(0, firstBlockIndex).trim() : '';
+    // Extract reasoning: explicit thinking tags + text before first SQL block
+    const firstBlockIndex = cleaned.indexOf('-- [');
+    const preamble = firstBlockIndex > 0 ? cleaned.substring(0, firstBlockIndex).trim() : '';
+    const reasoning = [thinking, preamble].filter(Boolean).join('\n\n');
 
     return {
       rawResponse,

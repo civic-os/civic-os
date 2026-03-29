@@ -1,0 +1,63 @@
+id: create-entity-with-status
+level: 2
+title: "Create a new entity with status workflow"
+starting_state: baseline
+request: |
+  Create a 'work_orders' entity for tracking maintenance work orders.
+  It needs:
+  - A status workflow: Open, In Progress, Complete, Cancelled
+  - An assigned_to user field (UUID FK to civic_os_users)
+  - A due_date (date)
+  - A description (text)
+  - A priority category: High, Medium, Low
+  Anonymous users can read, authenticated users can create/update,
+  only editors and admins can delete.
+
+expected_outputs:
+  tables:
+    - name: work_orders
+      required_columns: [id, display_name, description, due_date, status, assigned_to, priority, created_by, created_at, updated_at]
+  status_types:
+    - entity_type: work_order
+      min_count: 4
+  category_groups:
+    - entity_type: work_order_priority
+  categories:
+    - entity_type: work_order_priority
+      min_count: 3
+  metadata_entities:
+    - table_name: work_orders
+  metadata_properties:
+    min_count: 6
+  rls_policies:
+    min_count: 4
+  permissions:
+    - { table: work_orders, permission: read }
+    - { table: work_orders, permission: create }
+    - { table: work_orders, permission: update }
+    - { table: work_orders, permission: delete }
+  indexes:
+    fk_columns_indexed: true
+  notify_pgrst: true
+
+verification_queries:
+  - sql: "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'work_orders'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.columns WHERE table_name = 'work_orders' AND column_name = 'display_name'"
+    expected: 1
+  - sql: "SELECT count(*) FROM information_schema.columns WHERE table_name = 'work_orders' AND column_name = 'created_by'"
+    expected: 1
+  - sql: "SELECT count(*) FROM metadata.statuses WHERE entity_type = 'work_order'"
+    expected_min: 4
+  - sql: "SELECT count(*) FROM metadata.categories WHERE entity_type = 'work_order_priority'"
+    expected_min: 3
+  - sql: "SELECT count(*) FROM metadata.entities WHERE table_name = 'work_orders'"
+    expected: 1
+  - sql: "SELECT count(*) FROM metadata.properties WHERE table_name = 'work_orders'"
+    expected_min: 6
+  - sql: "SELECT count(*) FROM metadata.permissions WHERE table_name = 'work_orders'"
+    expected: 4
+  - sql: "SELECT rowsecurity FROM pg_tables WHERE tablename = 'work_orders'"
+    expected_value: "true"
+  - sql: "SELECT count(*) FROM pg_indexes WHERE tablename = 'work_orders'"
+    expected_min: 3
