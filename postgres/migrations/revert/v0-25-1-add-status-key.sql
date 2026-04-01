@@ -6,7 +6,8 @@ BEGIN;
 -- 6. RESTORE public.statuses VIEW (remove status_key column)
 -- ============================================================================
 
-CREATE OR REPLACE VIEW public.statuses AS
+DROP VIEW IF EXISTS public.statuses;
+CREATE VIEW public.statuses AS
 SELECT
   id,
   entity_type,

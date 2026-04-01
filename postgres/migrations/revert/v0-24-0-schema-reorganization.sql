@@ -173,7 +173,8 @@ RETURNS TABLE (
   ORDER BY sort_order;
 $$ LANGUAGE SQL STABLE;
 
-CREATE OR REPLACE FUNCTION public.get_status_entity_types()
+DROP FUNCTION IF EXISTS public.get_status_entity_types();
+CREATE FUNCTION public.get_status_entity_types()
 RETURNS TABLE (entity_type VARCHAR(100)) AS $$
   SELECT DISTINCT entity_type FROM metadata.status_types ORDER BY entity_type;
 $$ LANGUAGE SQL STABLE;

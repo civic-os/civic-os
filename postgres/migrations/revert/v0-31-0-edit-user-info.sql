@@ -13,7 +13,9 @@ DROP FUNCTION IF EXISTS public.update_user_info(UUID, TEXT, TEXT, TEXT);
 -- 2. RESTORE managed_users VIEW (v0.31.0 version, without first_name/last_name)
 -- ============================================================================
 
-CREATE OR REPLACE VIEW public.managed_users
+-- Must DROP first — removing columns from VIEW requires DROP + CREATE
+DROP VIEW IF EXISTS public.managed_users;
+CREATE VIEW public.managed_users
 WITH (security_invoker = true) AS
 
 -- Active users (fully provisioned, have Keycloak accounts)

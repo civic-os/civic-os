@@ -20,8 +20,8 @@ BEGIN;
 -- ============================================================================
 -- schema_properties depends on schema_entities via subquery, so drop it first
 
-DROP VIEW IF EXISTS public.schema_properties;
-DROP VIEW IF EXISTS public.schema_entities;
+DROP VIEW IF EXISTS public.schema_properties CASCADE;
+DROP VIEW IF EXISTS public.schema_entities CASCADE;
 
 
 -- ============================================================================

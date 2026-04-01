@@ -215,7 +215,7 @@ BEGIN
     RETURN ARRAY['anonymous'];
   END IF;
 
-  -- Get real roles from JWT (removed dead 'myclient' fallback in v0.41.2)
+  -- Get real roles from JWT (removed dead client-specific fallback in v0.41.2)
   BEGIN
     IF jwt_claims->'realm_access'->'roles' IS NOT NULL THEN
       SELECT ARRAY(SELECT json_array_elements_text(jwt_claims->'realm_access'->'roles'))
@@ -273,7 +273,7 @@ BEGIN
     RETURN FALSE;
   END IF;
 
-  -- Get roles directly from JWT (removed dead 'myclient' fallback in v0.41.2)
+  -- Get roles directly from JWT (removed dead client-specific fallback in v0.41.2)
   BEGIN
     IF jwt_claims->'realm_access'->'roles' IS NOT NULL THEN
       SELECT ARRAY(SELECT json_array_elements_text(jwt_claims->'realm_access'->'roles'))

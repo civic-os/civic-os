@@ -56,7 +56,9 @@ DROP FUNCTION IF EXISTS public.validate_category_entity_type();
 -- 4. RESTORE schema_properties VIEW (remove category_entity_type)
 -- ============================================================================
 
-CREATE OR REPLACE VIEW public.schema_properties AS
+-- Must DROP first — CREATE OR REPLACE cannot remove columns from a VIEW
+DROP VIEW IF EXISTS public.schema_properties CASCADE;
+CREATE VIEW public.schema_properties AS
 SELECT
   columns.table_catalog,
   columns.table_schema,
