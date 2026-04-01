@@ -26,9 +26,6 @@ DROP FUNCTION IF EXISTS public.get_file_storage_stats();
 -- Drop trigram index
 DROP INDEX IF EXISTS metadata.idx_files_file_name_trgm;
 
--- Drop property_name column
-ALTER TABLE metadata.files DROP COLUMN IF EXISTS property_name;
-
 -- Remove files permissions
 DELETE FROM metadata.permission_roles
 WHERE permission_id IN (
@@ -36,8 +33,13 @@ WHERE permission_id IN (
 );
 DELETE FROM metadata.permissions WHERE table_name = 'files';
 
--- Restore original VIEW (definer, with INSERT/UPDATE grants)
+-- Drop VIEW before column (VIEW depends on property_name via SELECT *)
 DROP VIEW IF EXISTS public.files;
+
+-- Drop property_name column
+ALTER TABLE metadata.files DROP COLUMN IF EXISTS property_name;
+
+-- Restore original VIEW (definer, with INSERT/UPDATE grants)
 CREATE VIEW public.files AS SELECT * FROM metadata.files;
 
 GRANT SELECT ON public.files TO web_anon, authenticated;
