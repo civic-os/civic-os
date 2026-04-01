@@ -36,6 +36,13 @@ export const impersonationInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
+  // Never send impersonation header to system RPCs that must use real roles.
+  // refresh_current_user() syncs JWT roles to the database — if it sees
+  // impersonated roles, it will revoke the admin's real roles permanently.
+  if (req.url.includes('/rpc/refresh_current_user')) {
+    return next(req);
+  }
+
   // Get the header value (null if not impersonating)
   const headerValue = impersonationService.headerValue();
   if (!headerValue) {

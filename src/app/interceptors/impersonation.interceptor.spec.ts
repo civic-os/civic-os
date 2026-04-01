@@ -89,6 +89,34 @@ describe('impersonationInterceptor', () => {
     req.flush({});
   });
 
+  it('should not add header for refresh_current_user RPC even when impersonating', () => {
+    // Set up active impersonation
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      active: true,
+      roles: ['user']
+    }));
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(withInterceptors([impersonationInterceptor])),
+        provideHttpClientTesting(),
+        ImpersonationService
+      ]
+    });
+
+    http = TestBed.inject(HttpClient);
+    httpMock = TestBed.inject(HttpTestingController);
+
+    // refresh_current_user must always use real JWT roles, never impersonated
+    http.post(`${getPostgrestUrl()}rpc/refresh_current_user`, {}).subscribe();
+
+    const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/refresh_current_user`);
+    expect(req.request.headers.has('X-Impersonate-Roles')).toBeFalse();
+    req.flush({});
+  });
+
   it('should not add header for non-PostgREST requests', () => {
     // Set up active impersonation
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
