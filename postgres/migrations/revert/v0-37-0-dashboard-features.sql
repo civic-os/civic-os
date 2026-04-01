@@ -6,7 +6,10 @@ BEGIN;
 -- 1. RESTORE get_dashboards() without is_role_default / show_title
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION public.get_dashboards()
+-- Must DROP first — return type changed (deploy added show_title + is_role_default columns)
+DROP FUNCTION IF EXISTS public.get_dashboards();
+
+CREATE FUNCTION public.get_dashboards()
 RETURNS TABLE (
   id INT,
   display_name VARCHAR(100),
