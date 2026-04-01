@@ -14,9 +14,26 @@ UPDATE metadata.time_slot_series
 SET dtstart = (dtstart::TIMESTAMP AT TIME ZONE timezone)
 WHERE timezone IS NOT NULL AND timezone != '';
 
+-- Drop dependent views before type change (CASCADE handles transitive deps like schema_series_groups)
+DROP VIEW IF EXISTS metadata.series_groups_summary CASCADE;
+DROP VIEW IF EXISTS public.time_slot_series;
+
 -- For rows without timezone, assume UTC
 ALTER TABLE metadata.time_slot_series
     ALTER COLUMN dtstart TYPE TIMESTAMPTZ USING dtstart::TIMESTAMPTZ;
+
+-- Recreate view with original column type
+CREATE OR REPLACE VIEW public.time_slot_series
+WITH (security_invoker = true)
+AS
+SELECT
+    id, group_id, version_number, effective_from, effective_until,
+    entity_table, entity_template, rrule, dtstart, duration, timezone,
+    time_slot_property, status, expanded_until, created_by, created_at,
+    template_updated_at, template_updated_by
+FROM metadata.time_slot_series;
+
+GRANT SELECT ON public.time_slot_series TO web_anon, authenticated;
 
 
 -- ============================================================================

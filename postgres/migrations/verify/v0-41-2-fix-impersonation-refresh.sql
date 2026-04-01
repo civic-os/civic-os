@@ -32,7 +32,9 @@ BEGIN
     RAISE EXCEPTION 'refresh_current_user() does not use get_real_user_roles()';
   END IF;
 
-  IF v_source LIKE '%get_user_roles()%' THEN
+  -- Check for active call to get_user_roles() (not in comments)
+  -- The := assignment distinguishes an actual call from the comment
+  IF v_source LIKE '%:= public.get_user_roles()%' THEN
     RAISE EXCEPTION 'refresh_current_user() still uses get_user_roles() (should use get_real_user_roles)';
   END IF;
 END $$;

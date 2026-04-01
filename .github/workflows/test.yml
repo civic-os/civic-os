@@ -94,24 +94,17 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Test rollback to previous migration
+      - name: Test full revert to zero
         run: |
-          # Get list of migrations
-          MIGRATION_COUNT=$(sqitch plan --format '%n' | wc -l)
+          echo "Reverting ALL migrations to test revert scripts..."
+          sqitch revert db:pg://postgres:postgres@localhost:5432/civic_os_test -y
 
-          if [ "$MIGRATION_COUNT" -gt 1 ]; then
-            echo "Testing rollback to previous migration"
-            sqitch revert db:pg://postgres:postgres@localhost:5432/civic_os_test --to @HEAD^ -y
-
-            # Show status after revert
-            sqitch status db:pg://postgres:postgres@localhost:5432/civic_os_test
-          else
-            echo "Only one migration found, skipping rollback test"
-          fi
+          # Verify clean state
+          sqitch status db:pg://postgres:postgres@localhost:5432/civic_os_test
         env:
           PGPASSWORD: postgres
 
-      - name: Re-deploy migrations (test idempotency)
+      - name: Re-deploy all migrations (test full round-trip)
         run: |
           sqitch deploy db:pg://postgres:postgres@localhost:5432/civic_os_test --verify
         env:
@@ -201,6 +194,19 @@ jobs:
       - name: Test migration deployment (as restricted user)
         run: |
           echo "Running migrations as doadmin (non-superuser)..."
+          sqitch deploy db:pg://doadmin:doadmin@localhost:5432/civic_os_test --verify
+        env:
+          PGPASSWORD: doadmin
+
+      - name: Test full revert to zero (as restricted user)
+        run: |
+          echo "Reverting ALL migrations to test revert scripts..."
+          sqitch revert db:pg://doadmin:doadmin@localhost:5432/civic_os_test -y
+        env:
+          PGPASSWORD: doadmin
+
+      - name: Re-deploy all migrations (test full round-trip)
+        run: |
           sqitch deploy db:pg://doadmin:doadmin@localhost:5432/civic_os_test --verify
         env:
           PGPASSWORD: doadmin
