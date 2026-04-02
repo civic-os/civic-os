@@ -120,9 +120,10 @@ DROP SCHEMA IF EXISTS metadata CASCADE;
 REVOKE authenticated FROM authenticator;
 REVOKE web_anon FROM authenticator;
 
--- Drop PostGIS
+-- PostGIS cleanup
+-- NOTE: PostGIS is installed by the container/host, not by this migration.
+-- Only revoke the USAGE grant we added; do NOT drop the extension or schema
+-- as that can hang on large databases and is not ours to remove.
 REVOKE USAGE ON SCHEMA postgis FROM PUBLIC;
-DROP EXTENSION IF EXISTS postgis CASCADE;
-DROP SCHEMA IF EXISTS postgis CASCADE;
 
 COMMIT;

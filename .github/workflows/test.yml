@@ -95,6 +95,7 @@ jobs:
           PGPASSWORD: postgres
 
       - name: Test full revert to zero
+        timeout-minutes: 5
         run: |
           echo "Reverting ALL migrations to test revert scripts..."
           sqitch revert db:pg://postgres:postgres@localhost:5432/civic_os_test -y
@@ -199,6 +200,7 @@ jobs:
           PGPASSWORD: doadmin
 
       - name: Test full revert to zero (as restricted user)
+        timeout-minutes: 5
         run: |
           echo "Reverting ALL migrations to test revert scripts..."
           sqitch revert db:pg://doadmin:doadmin@localhost:5432/civic_os_test -y
