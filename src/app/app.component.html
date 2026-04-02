@@ -13,7 +13,7 @@
         </label>
       </div>
       <div class="flex-1">
-        <a class="btn btn-ghost text-xl">Civic OS</a>
+        <a class="btn btn-ghost text-xl">{{ appTitle }}</a>
       </div>
       <div class="flex-none">
         <!-- Dashboard Selector (only shown on dashboard pages) -->
@@ -67,7 +67,7 @@
               <li><a (click)="this.auth.login()">Log In</a></li>
             }
             <li class="border-t border-base-300 my-1"></li>
-            <li><a (click)="openAbout()">About Civic OS</a></li>
+            <li><a (click)="openAbout()">About {{ appTitle }}</a></li>
           </ul>
         </details>
       </div>

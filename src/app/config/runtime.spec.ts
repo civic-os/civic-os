@@ -20,7 +20,9 @@ import {
   getKeycloakConfig,
   getMapConfig,
   getS3Config,
-  getKeycloakAccountUrl
+  getKeycloakAccountUrl,
+  getAppTitle,
+  getFaviconUrl
 } from './runtime';
 
 describe('Runtime Configuration Helpers', () => {
@@ -216,6 +218,46 @@ describe('Runtime Configuration Helpers', () => {
 
       // Verify full URL structure
       expect(accountUrl).toMatch(/^https:\/\/keycloak\.test\.com\/realms\/my-realm\/account\?referrer=my-client-id&referrer_uri=.+$/);
+    });
+  });
+
+  describe('getAppTitle', () => {
+    it('should return title from window.civicOsConfig when set', () => {
+      window.civicOsConfig = {
+        postgrestUrl: '',
+        swaggerUrl: '',
+        keycloak: { url: '', realm: '', clientId: '' },
+        map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' },
+        appTitle: 'My City Portal'
+      };
+
+      expect(getAppTitle()).toBe('My City Portal');
+    });
+
+    it('should fall back to default when window.civicOsConfig is not set', () => {
+      expect(getAppTitle()).toBe('Civic OS');
+    });
+  });
+
+  describe('getFaviconUrl', () => {
+    it('should return favicon URL from window.civicOsConfig when set', () => {
+      window.civicOsConfig = {
+        postgrestUrl: '',
+        swaggerUrl: '',
+        keycloak: { url: '', realm: '', clientId: '' },
+        map: { tileUrl: '', attribution: '', defaultCenter: [0, 0], defaultZoom: 10 },
+        s3: { endpoint: '', bucket: '' },
+        stripe: { publishableKey: 'pk_test_mock' },
+        faviconUrl: 'https://example.com/icon.png'
+      };
+
+      expect(getFaviconUrl()).toBe('https://example.com/icon.png');
+    });
+
+    it('should return empty string when not configured', () => {
+      expect(getFaviconUrl()).toBe('');
     });
   });
 });

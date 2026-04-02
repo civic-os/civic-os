@@ -236,6 +236,11 @@ services:
 
       # SMS notifications (frontend UI toggle)
       SMS_CONFIGURED: ${SMS_CONFIGURED:-false}
+
+      # Application branding (optional)
+      DEFAULT_THEME: ${DEFAULT_THEME:-corporate}
+      APP_TITLE: ${APP_TITLE:-Civic OS}
+      FAVICON_URL: ${FAVICON_URL:-}
     networks:
       - civic-os-network
     healthcheck:

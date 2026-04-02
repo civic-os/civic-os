@@ -34,7 +34,7 @@ import { StaticAssetsService } from './services/static-assets.service';
 import { DashboardSelectorComponent } from './components/dashboard-selector/dashboard-selector.component';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
-import { getKeycloakAccountUrl } from './config/runtime';
+import { getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './config/runtime';
 
 @Component({
     selector: 'app-root',
@@ -61,7 +61,7 @@ export class AppComponent {
   private staticAssets = inject(StaticAssetsService);
 
   public drawerOpen: boolean = false;
-  title = 'frontend';
+  appTitle = getAppTitle();
 
   // Track if current route is a dashboard page (home or /dashboard/:id)
   isDashboardRoute = signal(false);
@@ -137,6 +137,16 @@ export class AppComponent {
   });
 
   constructor() {
+    // Set page title and favicon from runtime config
+    document.title = this.appTitle;
+    const faviconUrl = getFaviconUrl();
+    if (faviconUrl) {
+      const link = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+      if (link) {
+        link.href = faviconUrl;
+      }
+    }
+
     // Check initial route
     this.checkIfDashboardRoute(this.router.url);
 

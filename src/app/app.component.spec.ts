@@ -111,7 +111,7 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'frontend' title`, () => {
+  it(`should have the default app title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
 
@@ -135,7 +135,7 @@ describe('AppComponent', () => {
     const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
     constraintMsgsReqs.forEach(req => req.flush([]));
 
-    expect(app.title).toEqual('frontend');
+    expect(app.appTitle).toEqual('Civic OS');
   });
 
   describe('Theme Integration', () => {

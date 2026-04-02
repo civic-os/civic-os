@@ -112,6 +112,8 @@ docker build -t civic-os-postgrest:local -f docker/postgrest/Dockerfile .
 | `S3_BUCKET` | Yes* | `civic-os-files` | S3 bucket name for file storage |
 | `SMS_CONFIGURED` | No | `false` | Show SMS notification preferences in Settings modal |
 | `DEFAULT_THEME` | No | `corporate` | Default DaisyUI color theme for new users (before they choose their own). See [Available Themes](#available-themes) |
+| `APP_TITLE` | No | `Civic OS` | Application name shown in browser tab, navbar, and modals |
+| `FAVICON_URL` | No | (built-in) | URL for custom favicon. Can be absolute URL or path to file mounted in container |
 
 *Required if using file upload features (v0.5.0+)
 

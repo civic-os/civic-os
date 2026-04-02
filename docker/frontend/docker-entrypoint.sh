@@ -25,6 +25,8 @@ echo "  MATOMO_SITE_ID: $MATOMO_SITE_ID"
 echo "  MATOMO_ENABLED: $MATOMO_ENABLED"
 echo "  SMS_CONFIGURED: $SMS_CONFIGURED"
 echo "  DEFAULT_THEME: $DEFAULT_THEME"
+echo "  APP_TITLE: $APP_TITLE"
+echo "  FAVICON_URL: $FAVICON_URL"
 echo ""
 
 # Generate inline config script
@@ -64,7 +66,9 @@ window.civicOsConfig = {
   },
   theme: {
     defaultTheme: '${DEFAULT_THEME}' || 'corporate'
-  }
+  },
+  appTitle: '$(echo "${APP_TITLE}" | sed "s/'/\\\\'/g")' || 'Civic OS',
+  faviconUrl: '${FAVICON_URL}'
 };
 </script>
 EOF
@@ -84,6 +88,19 @@ awk '
 mv /tmp/index.html.new /usr/share/nginx/html/index.html
 
 echo "✓ Configuration injected into index.html"
+
+# Replace page title if APP_TITLE is set
+if [ -n "$APP_TITLE" ] && [ "$APP_TITLE" != "Civic OS" ]; then
+  sed -i "s|<title>Civic OS</title>|<title>${APP_TITLE}</title>|" /usr/share/nginx/html/index.html
+  echo "✓ Page title set to: $APP_TITLE"
+fi
+
+# Replace favicon URL if FAVICON_URL is set
+if [ -n "$FAVICON_URL" ]; then
+  sed -i "s|href=\"favicon.ico\"|href=\"${FAVICON_URL}\"|" /usr/share/nginx/html/index.html
+  echo "✓ Favicon URL set to: $FAVICON_URL"
+fi
+
 echo ""
 
 # Substitute runtime URLs into nginx CSP configuration

@@ -184,6 +184,10 @@ services:
       # Theme configuration (optional)
       DEFAULT_THEME: ${DEFAULT_THEME:-corporate}
 
+      # Application branding (optional)
+      APP_TITLE: ${APP_TITLE:-Civic OS}
+      FAVICON_URL: ${FAVICON_URL:-}
+
       # Analytics configuration (optional)
       MATOMO_URL: ${MATOMO_URL:-}
       MATOMO_SITE_ID: ${MATOMO_SITE_ID:-}

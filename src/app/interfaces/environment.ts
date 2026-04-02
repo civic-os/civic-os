@@ -46,5 +46,7 @@ export interface Environment {
     },
     theme?: {
         defaultTheme: string
-    }
+    },
+    appTitle?: string,
+    faviconUrl?: string
 }

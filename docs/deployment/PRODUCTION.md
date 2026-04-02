@@ -207,6 +207,12 @@ SMS_CONFIGURED=false
 # See docker/README.md for the full list of light and dark theme names.
 DEFAULT_THEME=corporate
 
+# Application Branding (Optional)
+# APP_TITLE sets the name shown in the browser tab, navbar, and modals.
+# FAVICON_URL overrides the built-in favicon (leave empty to use default).
+APP_TITLE=Civic OS
+FAVICON_URL=
+
 # Map Configuration (Optional)
 MAP_DEFAULT_LAT=43.0125
 MAP_DEFAULT_LNG=-83.6875

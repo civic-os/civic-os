@@ -59,7 +59,9 @@ ENV POSTGREST_URL=http://localhost:3000/ \
     MAP_ATTRIBUTION="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors" \
     MAP_DEFAULT_LAT=43.0125 \
     MAP_DEFAULT_LNG=-83.6875 \
-    MAP_DEFAULT_ZOOM=13
+    MAP_DEFAULT_ZOOM=13 \
+    APP_TITLE="Civic OS" \
+    FAVICON_URL=""
 
 # Expose port 80
 EXPOSE 80

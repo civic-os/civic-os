@@ -30,7 +30,7 @@
             [(ngModel)]="analyticsEnabled"
             (change)="onAnalyticsToggle()"
           />
-          <span>Share anonymous usage data to help improve Civic OS</span>
+          <span>Share anonymous usage data to help improve {{ appTitle }}</span>
         </label>
         <p class="text-xs opacity-70 mt-1 ml-9">
           We collect page views and feature usage statistics. No personal information or data content is tracked.
@@ -80,9 +80,8 @@
               <p class="text-xs opacity-70 mt-1 ml-9">
                 Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
               </p>
-              <!-- TODO: Replace "Civic OS" with the configured org name once org name is available to the frontend -->
               <p class="text-xs opacity-70 mt-1 ml-9">
-                By enabling SMS notifications, you consent to receive transactional text messages from Civic OS.
+                By enabling SMS notifications, you consent to receive transactional text messages from {{ appTitle }}.
                 Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help.
               </p>
             </div>

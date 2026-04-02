@@ -4620,7 +4620,7 @@ Civic OS provides production-ready Docker containers for all components:
 
 > **Note:** For production deployments, pin to specific versions (e.g., `v0.14.0`) to ensure reproducible builds. Check [GitHub Releases](https://github.com/civic-os/civic-os-frontend/releases) for available versions.
 
-**Runtime Configuration**: All instances use environment variables for configuration (PostgREST URL, Keycloak settings, S3 credentials, etc.). No rebuild required for deployment.
+**Runtime Configuration**: All instances use environment variables for configuration (PostgREST URL, Keycloak settings, S3 credentials, etc.). No rebuild required for deployment. Instances can be branded with `APP_TITLE` (page title, navbar, modals) and `FAVICON_URL` (custom favicon). See `docker/README.md` for the full environment variable reference.
 
 **Consolidated Worker Architecture (v0.11.0+)**: File storage, thumbnail generation, and notification features run in a single Go microservice with a shared PostgreSQL connection pool (4 connections vs 12 with separate services). Uses PostgreSQL-based River job queue for reliable background processing. See File Storage System and Notification System sections above for architecture details.
 

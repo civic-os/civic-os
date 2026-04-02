@@ -48,5 +48,7 @@ export const environment: Environment = {
     },
     theme: {
         defaultTheme: 'corporate'
-    }
+    },
+    appTitle: 'Civic OS',
+    faviconUrl: ''
 };

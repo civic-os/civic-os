@@ -61,6 +61,8 @@ declare global {
       theme?: {
         defaultTheme: string;
       };
+      appTitle?: string;
+      faviconUrl?: string;
     };
   }
 }
@@ -198,4 +200,24 @@ export function getThemeConfig(): { defaultTheme: string } {
   return {
     defaultTheme: config?.defaultTheme || 'corporate'
   };
+}
+
+/**
+ * Get the configured application title.
+ * Used for page title, navbar brand, about modal, and settings modal.
+ *
+ * @returns Application title string (default: "Civic OS")
+ */
+export function getAppTitle(): string {
+  return window.civicOsConfig?.appTitle || environment.appTitle || 'Civic OS';
+}
+
+/**
+ * Get the configured favicon URL.
+ * When set, overrides the built-in favicon.ico.
+ *
+ * @returns Favicon URL, or empty string if using the default
+ */
+export function getFaviconUrl(): string {
+  return window.civicOsConfig?.faviconUrl || environment.faviconUrl || '';
 }
