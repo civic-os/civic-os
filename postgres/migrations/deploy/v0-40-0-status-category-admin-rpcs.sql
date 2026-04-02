@@ -587,6 +587,8 @@ GRANT EXECUTE ON FUNCTION public.delete_status_transition(INT) TO authenticated;
 
 -- Re-expose get_status_entity_types in public schema
 -- (v0-24-0 moved it to metadata; StatusAdminService needs PostgREST access)
+-- Must DROP first — return type changed from single column to multi-column
+DROP FUNCTION IF EXISTS public.get_status_entity_types();
 CREATE OR REPLACE FUNCTION public.get_status_entity_types()
 RETURNS TABLE (
   entity_type TEXT,

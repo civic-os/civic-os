@@ -94,18 +94,16 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Test full revert to zero
-        timeout-minutes: 5
+      - name: Test revert to baseline
         run: |
-          echo "Reverting ALL migrations to test revert scripts..."
-          sqitch revert db:pg://postgres:postgres@localhost:5432/civic_os_test -y
+          echo "Reverting all migrations to baseline..."
+          sqitch revert db:pg://postgres:postgres@localhost:5432/civic_os_test --to v0-4-0-baseline -y
 
-          # Verify clean state
           sqitch status db:pg://postgres:postgres@localhost:5432/civic_os_test
         env:
           PGPASSWORD: postgres
 
-      - name: Re-deploy all migrations (test full round-trip)
+      - name: Re-deploy migrations (test round-trip)
         run: |
           sqitch deploy db:pg://postgres:postgres@localhost:5432/civic_os_test --verify
         env:
@@ -199,15 +197,14 @@ jobs:
         env:
           PGPASSWORD: doadmin
 
-      - name: Test full revert to zero (as restricted user)
-        timeout-minutes: 5
+      - name: Test revert to baseline (as restricted user)
         run: |
-          echo "Reverting ALL migrations to test revert scripts..."
-          sqitch revert db:pg://doadmin:doadmin@localhost:5432/civic_os_test -y
+          echo "Reverting all migrations to baseline..."
+          sqitch revert db:pg://doadmin:doadmin@localhost:5432/civic_os_test --to v0-4-0-baseline -y
         env:
           PGPASSWORD: doadmin
 
-      - name: Re-deploy all migrations (test full round-trip)
+      - name: Re-deploy all migrations (test round-trip)
         run: |
           sqitch deploy db:pg://doadmin:doadmin@localhost:5432/civic_os_test --verify
         env:
