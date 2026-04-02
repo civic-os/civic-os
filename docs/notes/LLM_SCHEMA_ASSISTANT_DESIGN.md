@@ -629,3 +629,13 @@ These items are acknowledged but explicitly out of scope for the four phases abo
   entity creation that generates SQL through the assistant pipeline
 - **Continuous eval on new model releases** — Automated re-runs of the eval suite when
   new model versions are released, with regression alerts if scores drop
+
+## Related: Deterministic Schema SDK
+
+The eval harness (Phase 2) demonstrated that 65% of schema operations are fully
+parameterizable — structured inputs can produce guaranteed-correct SQL without LLM
+involvement. This finding led to the **Migration-First SDK** design, where the LLM's
+role shifts from SQL generator to parameter extractor.
+
+See `docs/notes/DETERMINISTIC_SCHEMA_SDK_DESIGN.md` for the complete architecture,
+operation audit, and phased implementation plan.
