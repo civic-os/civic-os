@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,4 +22,4 @@
  * This file is generated from package.json by scripts/update-version.js
  * Run 'npm run update-version' to regenerate after version changes.
  */
-export const APP_VERSION = '0.41.1';
+export const APP_VERSION = '0.41.2';

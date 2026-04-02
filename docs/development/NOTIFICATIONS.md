@@ -3929,8 +3929,8 @@ ORDER BY scheduled_at ASC LIMIT 1;
 
 ---
 
-**Document Status**: ✅ Implemented in v0.11.0
-**Last Updated**: 2025-11-07
+**Document Status**: ✅ Implemented in v0.11.0, SMS via Telnyx in v0.35.0
+**Last Updated**: 2026-04-02
 **Author**: Civic OS Team
 
 **Architecture Summary:**
