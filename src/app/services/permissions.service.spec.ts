@@ -401,16 +401,17 @@ describe('PermissionsService', () => {
   });
 
   describe('deleteRole()', () => {
-    it('should POST to delete_role RPC with role ID', (done) => {
+    it('should POST to delete_role RPC with role ID and return affected_users', (done) => {
       service.deleteRole(5).subscribe(response => {
         expect(response.success).toBe(true);
+        expect(response.body?.affected_users).toBe(3);
         done();
       });
 
       const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ p_role_id: 5 });
-      req.flush({ success: true, message: 'Role "volunteer" deleted' });
+      req.flush({ success: true, message: 'Role "volunteer" deleted', affected_users: 3 });
     });
 
     it('should handle built-in role error', (done) => {

@@ -298,7 +298,7 @@ export class PermissionsService {
             error: { message: response.error, humanMessage: response.error }
           };
         }
-        return <ApiResponse>{ success: true };
+        return <ApiResponse>{ success: true, body: { affected_users: response.affected_users ?? 0 } };
       }),
       catchError((error) => {
         return of(<ApiResponse>{

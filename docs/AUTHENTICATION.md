@@ -620,6 +620,27 @@ Keycloak can delegate authentication to Microsoft Azure AD, letting users sign i
 
 ---
 
+## Role Impersonation (v0.26.0+)
+
+Admins can test RLS policies and permission configurations as different roles without logging out.
+
+**How to use**: Settings modal (gear icon) → select roles to impersonate → Start Impersonation. An orange "Impersonating" badge appears in the navbar. Click "Stop Impersonation" to return to your real roles.
+
+**How it works**:
+- Frontend sends an `X-Impersonate-Roles` header on PostgREST requests when impersonation is active
+- The database `get_user_roles()` function checks this header and returns impersonated roles instead of JWT roles — but **only if the real JWT contains `admin`**
+- A non-admin sending the header is silently ignored — no privilege escalation is possible
+- All RLS policies and `has_permission()` checks then operate against the impersonated roles
+
+**Safety guarantees** (v0.41.2+):
+- `refresh_current_user()` uses `get_real_user_roles()` which **ignores the impersonation header**, ensuring role sync always operates on the user's real JWT roles
+- The frontend interceptor explicitly excludes `/rpc/refresh_current_user` from receiving the impersonation header as a secondary safeguard
+- Audit logging (`log_impersonation()`) uses `is_real_admin()` which also ignores the header
+
+**Audit trail**: Impersonation start/stop events are logged to `metadata.admin_audit_log` with user ID, email, impersonated roles, and timestamp.
+
+---
+
 ## Next Steps
 
 After completing authentication setup:

@@ -296,7 +296,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 - **File Administration** (`/admin/files`) - Browse all uploaded files with All Files (inline filters) and Entity Files (two-phase query) modes. Requires `files:read` permission. (v0.39.0+)
 - **Status Administration** (`/admin/statuses`) - Manage status types, status values (color, sort order, initial/terminal flags), and allowed transitions. Permission-gated via `metadata.statuses` CRUD permissions. (v0.40.0+)
 - **Category Administration** (`/admin/categories`) - Manage category groups and category values (color, sort order). Permission-gated via `metadata.categories` CRUD permissions. (v0.40.0+)
-- **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only.
+- **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only. `refresh_current_user()` is excluded from impersonation to prevent role sync poisoning (v0.41.2 fix). See `docs/AUTHENTICATION.md` (Role Impersonation section).
 
 **Role Delegation** (v0.31.0+): Admin-configurable matrix controlling which roles can assign/revoke which other roles. Configured via "Role Delegation" tab on Permissions page. Uses `metadata.role_can_manage` table. The `anonymous` role is excluded from delegation (framework-only permission role). See `docs/INTEGRATOR_GUIDE.md` (Role Delegation section) for details.
 
@@ -345,6 +345,8 @@ Configure Civic OS behavior via metadata tables:
 See `docs/INTEGRATOR_GUIDE.md` for complete metadata architecture, field descriptions, and configuration patterns.
 
 **LLM Schema Assistant** (v0.42.0+): CLI tool that generates Civic OS schema SQL from natural language using LLM providers (Anthropic, OpenAI, OpenRouter). Includes safety validator (whitelist/blacklist/review-tier), context assembly from PostgREST schema state, and cost tracking. See `docs/notes/LLM_SCHEMA_ASSISTANT_DESIGN.md` for full architecture and `tools/schema-assistant/` for implementation. **Maintenance note**: When modifying metadata table structures, the Integrator Guide, or adding new property types, the Schema Assistant's system prompt (`tools/schema-assistant/prompts/system.md`) and few-shot examples (`tools/schema-assistant/prompts/examples/`) must be updated to match.
+
+**Deterministic Schema SDK** (planned): Research found 65% of schema operations (32/49) are fully parameterizable — structured inputs produce guaranteed-correct SQL without LLM involvement. The Migration-First SDK will generate complete deploy/revert SQL migration scripts from TypeScript, shifting the LLM's role from SQL generator to parameter extractor. See `docs/notes/DETERMINISTIC_SCHEMA_SDK_DESIGN.md` for architecture and phased plan.
 
 ### Creating Records with Pre-filled Fields (Query Param Pattern)
 

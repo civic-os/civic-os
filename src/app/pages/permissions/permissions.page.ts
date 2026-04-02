@@ -511,7 +511,9 @@ export class PermissionsPage {
         this.deleteLoading.set(false);
         if (response.success) {
           this.showDeleteModal.set(false);
-          this.successMessage.set(`Role '${roleName}' deleted successfully.`);
+          const affectedUsers = response.body?.affected_users ?? 0;
+          const affectedMsg = affectedUsers > 0 ? ` (${affectedUsers} user${affectedUsers === 1 ? '' : 's'} unassigned)` : '';
+          this.successMessage.set(`Role '${roleName}' deleted successfully.${affectedMsg}`);
           this.newlyCreatedRoleName.set(undefined);
           // Reload roles — select first available
           this.permissionsService.getRoles().subscribe({

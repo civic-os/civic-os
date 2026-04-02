@@ -574,7 +574,7 @@ Fields:
 
 **Role Lifecycle**:
 - `create_role(display_name, description)` - Creates a role, auto-generates `role_key` (snake_case from display_name), and enqueues a `sync_keycloak_role` job to create it in Keycloak. Returns `{ success, role_id, role_key }`.
-- `delete_role(role_id)` - Deletes a custom role (built-in roles with `role_key` in `admin`, `user`, `editor`, `anonymous` are protected) and enqueues a Keycloak sync job to remove it
+- `delete_role(role_id)` - Deletes a custom role (built-in roles with `role_key` in `admin`, `user`, `anonymous` are protected via both RPC check and database trigger) and enqueues a Keycloak sync job to remove it. User assignments CASCADE automatically. Returns `{ success, message, affected_users }` where `affected_users` is the count of users who had this role.
 - `get_role_id(role_key)` - Returns role's SMALLINT id by its stable key
 - `metadata.get_users_by_role(role_keys[])` - Returns user IDs for all users holding any of the given roles. Internal helper (not exposed via PostgREST API) — call from SECURITY DEFINER functions.
 - `metadata.send_notification_to_role(role_keys[], template, entity_type, entity_id, entity_data, channels)` - Sends a notification to every user holding any of the given roles. Returns count. Internal helper — call from SECURITY DEFINER functions.
@@ -917,7 +917,13 @@ Check permissions and roles from application code (via PostgREST) or RLS policie
 **`get_user_roles()`** → TEXT[]
 - Returns array of role names from JWT 'roles' claim
 - Returns empty array for anonymous requests
-- **Use case**: Complex authorization logic in RLS policies
+- When called by a real admin with the `X-Impersonate-Roles` header, returns impersonated roles instead
+- **Use case**: RLS policies, permission checks (respects impersonation for UI testing)
+
+**`get_real_user_roles()`** → TEXT[] *(v0.41.2+)*
+- Returns array of role names directly from JWT, **ignoring the impersonation header**
+- Used internally by `refresh_current_user()` to prevent impersonation from poisoning role sync
+- **Use case**: Any function that must always operate on the user's real identity (role sync, audit logging)
 
 **`has_permission(table_name TEXT, permission TEXT)`** → BOOLEAN
 - Checks if current user has specified permission on table
