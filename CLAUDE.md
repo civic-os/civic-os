@@ -57,14 +57,6 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `Telephone`: `phone_number` → Clickable tel: link with formatted display, masked input (XXX) XXX-XXXX
 - `TimeSlot`: `time_slot` (tstzrange) → Formatted date range display, dual datetime-local inputs with validation, optional calendar visualization
 
-**Color Type** (`hex_color`): RGB color values with `#RRGGBB` validation. UI shows color chip + picker.
-
-**Email Type** (`email_address`): RFC 5322 validation. UI shows clickable mailto: links.
-
-**Telephone Type** (`phone_number`): US 10-digit format. UI shows formatted (XXX) XXX-XXXX with masked input.
-
-**TimeSlot Type** (`TimeSlot`): Use the `time_slot` domain (wraps `tstzrange`) for scheduling. Database stores UTC, UI displays local timezone. Edit provides two datetime-local inputs with validation.
-
 **Calendar Integration** (v0.9.0+): Enable via `show_calendar=true` and `calendar_property_name` in `metadata.entities`. Supports overlap prevention via GIST exclusion constraints. See `docs/development/CALENDAR_INTEGRATION.md` for details and `examples/community-center/` for working example.
 
 **iCal Subscription Feeds** (v0.27.0+): Export public calendar events as subscribable iCal feeds. Uses RFC 5545 helper functions (`format_ical_event()`, `wrap_ical_feed()`) with PostgREST media type handlers. Calendar apps (Google Calendar, Apple, Outlook) can subscribe to `/rpc/your_feed_function`. See `docs/INTEGRATOR_GUIDE.md` (iCal Calendar Feeds section) for implementation guide.
@@ -75,23 +67,21 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Entity Notes** (v0.16.0+): Polymorphic notes system any entity can opt into. Features permission-isolated notes (`{entity}:notes:read/create`), system notes for audit trails, Markdown formatting, and export support. Enable via `SELECT enable_entity_notes('entity_type')`. See `docs/INTEGRATOR_GUIDE.md` (Entity Notes System section) for complete guide.
 
-**Static Text Blocks** (v0.17.0+): Display-only markdown content blocks on Detail, Create, and Edit pages. Blocks are stored in `metadata.static_text` table and interspersed with properties by `sort_order`. Supports full markdown (headers, lists, bold, italic, links) via `ngx-markdown`, configurable visibility (`show_on_detail`, `show_on_create`, `show_on_edit`), and 1-8 column width.
+**Static Text Blocks** (v0.17.0+): Display-only markdown content blocks interspersed with properties on Detail, Create, and Edit pages. See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide.
 
-See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and `examples/community-center/init-scripts/12_static_text_example.sql` for working example.
+**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. **Action Parameters** (v0.32.0+) allow user-provided form fields in modals. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
-**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports conditional visibility, confirmation modals, role-based permissions, and customizable icons/colors. **Action Parameters** (v0.32.0+) allow user-provided form fields in modals via `metadata.entity_action_params`. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
+**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedules. Enable via `supports_recurring=true` in `metadata.entities`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for architecture.
 
-**Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedule system. Enable via `supports_recurring=true` and `recurring_property_name` in `metadata.entities`. Architecture: Series Groups → Series (RRULE + template) → Instances. Edit scope dialogs support "This only", "This and future", and "All" modifications. Managed at `/admin/recurring-schedules`. Expansion horizon configurable via `RECURRING_SERIES_HORIZON_DAYS` env var (default 90 days). See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for complete architecture.
+**Virtual Entities** (v0.28.0+): PostgreSQL VIEWs with INSTEAD OF triggers behave like regular CRUD entities. See `docs/INTEGRATOR_GUIDE.md` (Virtual Entities section) for requirements and examples.
 
-**Virtual Entities** (v0.28.0+): PostgreSQL VIEWs with INSTEAD OF triggers can behave like regular entities (full CRUD support). Use cases: simplified form interfaces, auto-approval workflows, computed defaults. Requirements: VIEW must have INSTEAD OF triggers for INSERT/UPDATE/DELETE + explicit `metadata.entities` entry (VIEWs are not auto-discovered). FK columns auto-inherit from base tables via `view_column_usage`; computed columns need manual `metadata.properties.join_table/join_column` config. See `docs/INTEGRATOR_GUIDE.md` (Virtual Entities section) for complete guide and `examples/mottpark/init-scripts/22_mpra_manager_events.sql` for working example.
-
-**System Introspection** (v0.23.0+): Auto-generated documentation for RPC functions, database triggers, and notification workflows. Features permission-filtered views (`schema_functions`, `schema_triggers`, `schema_entity_dependencies`, `schema_notifications`), static code analysis for entity effect detection, and admin-only views (`schema_permissions_matrix`, `schema_scheduled_functions`). Register functions via `metadata.auto_register_function()`. See `docs/INTEGRATOR_GUIDE.md` (System Introspection section) for complete guide and `examples/mottpark/init-scripts/13_mpra_introspection.sql` for working example.
+**System Introspection** (v0.23.0+): Auto-generated documentation for RPCs, triggers, and notification workflows. Register functions via `metadata.auto_register_function()`. See `docs/INTEGRATOR_GUIDE.md` (System Introspection section).
 
 **Source Code Block Visualization** (v0.29.0+): Read-only Blockly-based visualization of PL/pgSQL functions and SQL views. Pages: Entity Code (`/entity-code/:entity`), System Functions (`/system-functions`), System Policies (`/system-policies`). See `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md` for architecture and AST node mapping reference.
 
 **Schema Decisions (ADR)** (v0.30.0+): Database-native architectural decision records via `metadata.schema_decisions` table. **Every schema change should include a `create_schema_decision()` call documenting the rationale.** Before modifying any entity's schema, **query existing decisions first**. See `docs/INTEGRATOR_GUIDE.md` (Schema Decisions section) for complete guide.
 
-**File Storage Types** (`FileImage`, `FilePDF`, `File`): UUID foreign keys to `metadata.files` table for S3-based file storage with automatic thumbnail generation. Architecture includes database tables, consolidated worker service (S3 signer + thumbnail generation), and presigned URL workflow. **File Administration** (v0.39.0): Admin page at `/admin/files` for browsing all files with two modes (All Files with inline filters, Entity Files with two-phase query), `property_name` tracking, hybrid RLS, storage stats. See `docs/development/FILE_STORAGE.md` for complete implementation guide and `docs/notes/ADMIN_PAGE_PITFALLS.md` for architecture patterns.
+**File Storage Types** (`FileImage`, `FilePDF`, `File`): S3-based file storage with automatic thumbnail generation via consolidated worker. **File Administration** (v0.39.0+): Admin page at `/admin/files` for browsing all files. See `docs/development/FILE_STORAGE.md` for implementation guide and `docs/notes/ADMIN_PAGE_PITFALLS.md` for architecture patterns.
 
 **Payment Type** (`Payment`, v0.13.0+): Stripe-based payment processing via UUID FK to `payments.transactions`. Enable on any entity via `payment_initiation_rpc` in `metadata.entities`. Frontend auto-displays payment badges on List pages and "Pay Now" button on Detail pages. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete workflow and `examples/community-center/` for working example.
 
@@ -105,11 +95,7 @@ See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide and 
 
 **Full-Text Search**: Add `civic_os_text_search` tsvector column (generated, indexed) and configure `metadata.entities.search_fields` array. Frontend automatically displays search input on List pages. See example tables for implementation pattern.
 
-**Excel Import/Export**: List pages include Import/Export buttons for bulk data operations. Export preserves filters/search/sort and includes foreign key display names. Import supports name-to-ID resolution for foreign keys with comprehensive validation. Requires CREATE permission. **Custom Import Mode** (v0.31.0+): `CustomImportConfig` abstraction enables non-entity imports (e.g., User Management bulk import) with inline validation and partial success handling.
-
-**Limitations**: No M:M relationships (use junction table import), 10MB file limit, 50,000 row export limit, INSERT only (no updates).
-
-See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for complete specification.
+**Excel Import/Export**: Bulk data operations on List pages with FK name resolution and validation. **Custom Import Mode** (v0.31.0+) for non-entity imports. See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for specification.
 
 ## Custom Dashboards
 
@@ -243,7 +229,7 @@ sqitch deploy dev --verify      # Re-deploy
 - Adding custom domains
 - Schema changes that affect UI generation
 
-**Future Direction**: Declarative schema management (pgschema) evaluated as a Sqitch replacement to provide single-source-of-truth schema files. Deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md` for full research.
+**Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 
 ## Production Deployment & Containerization
 
@@ -360,19 +346,11 @@ See `docs/INTEGRATOR_GUIDE.md` (Validation System section) for SQL examples and 
 
 ### Notification System
 
-**Version**: v0.11.0+ (email), v0.35.0+ (SMS via Telnyx)
-
-Send multi-channel notifications (email, SMS) to users using database-managed templates with Go template syntax and a River-based Go microservice. Features include: template management UI at `/notifications/templates`, real-time validation, HTML preview, polymorphic entity references, and automatic retries with exponential backoff. SMS delivery uses Telnyx (no SDK, stdlib HTTP only) with passive STOP/opt-out sync via `sms_opted_out` column.
-
-See `docs/INTEGRATOR_GUIDE.md` (Notification System section) for Quick Start SQL examples and template patterns, `docs/development/NOTIFICATIONS.md` for complete architecture, SMTP/Telnyx setup, and `examples/pothole/init-scripts/08_notification_templates.sql` for working examples.
+**Notification System** (v0.11.0+ email, v0.35.0+ SMS): Multi-channel notifications via database templates and River-based Go worker. See `docs/development/NOTIFICATIONS.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (Notification System section) for SQL examples.
 
 ### Visual Diagramming with JointJS
 
-**Reference Implementation**: Schema Editor (`/schema-editor`)
-
-The Schema Editor demonstrates best practices for integrating JointJS (MIT-licensed diagramming library) into Angular applications. Key patterns include: JointJS initialization, geometric port ordering, batching for routing stability, Metro router configuration, auto-layout integration, and theme integration. Use this pattern when building visual editors, workflow designers, or any feature requiring draggable, connectable visual elements.
-
-See `docs/development/JOINTJS_INTEGRATION.md` for complete integration guide, `docs/notes/SCHEMA_EDITOR_DESIGN.md` for design details, and `docs/notes/JOINTJS_TROUBLESHOOTING_LESSONS.md` for debugging tips
+**Reference Implementation**: Schema Editor (`/schema-editor`). Use this pattern when building visual editors or workflow designers. See `docs/development/JOINTJS_INTEGRATION.md` for integration guide and `docs/notes/SCHEMA_EDITOR_DESIGN.md` for design details.
 
 ## Angular 20 Critical Patterns
 
