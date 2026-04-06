@@ -167,7 +167,7 @@ RETURNS TABLE(holiday_name TEXT, holiday_date DATE) AS $$
 BEGIN
   RETURN QUERY
   SELECT 
-    r.role_key::TEXT,
+    r.display_name::TEXT,
     calculate_holiday_date(r.*, p_year)
   FROM holiday_rules r
   WHERE r.is_active = TRUE
