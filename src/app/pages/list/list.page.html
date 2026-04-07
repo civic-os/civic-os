@@ -153,15 +153,15 @@
               @if (data?.length) {
                 @for (row of data; track row) {
                   <tr
-                    [routerLink]="'/view/'+entityKey+'/'+row.id"
-                    class="pointer"
-                    [class.highlighted-row]="showMap() && highlightedRecordId() === row.id"
-                    [attr.data-record-id]="row.id"
+                    [routerLink]="isSummaryView() ? null : '/view/'+entityKey+'/'+row.id"
+                    [class.pointer]="!isSummaryView()"
+                    [class.highlighted-row]="!isSummaryView() && showMap() && highlightedRecordId() === row.id"
+                    [attr.data-record-id]="isSummaryView() ? null : row.id"
                     (mouseenter)="onRowHover(row.id)"
                     (mouseleave)="onRowHover(null)"
-                    tabindex="0"
-                    role="link"
-                    [attr.aria-label]="'View details for ' + entity.display_name"
+                    [attr.tabindex]="isSummaryView() ? null : 0"
+                    [attr.role]="isSummaryView() ? null : 'link'"
+                    [attr.aria-label]="isSummaryView() ? null : 'View details for ' + entity.display_name"
                     (keydown.enter)="onRowKeyPress($any($event), row.id)"
                     (keydown.space)="onRowKeyPress($any($event), row.id)">
                     @for (prop of props; track prop) {

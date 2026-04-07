@@ -102,7 +102,7 @@ export class EditPropertyComponent {
       .pipe(map(data => {
         return data.map(d => {
           return {
-            id: d.id,
+            id: d.id!,
             text: d.display_name,
           }
         });
@@ -123,7 +123,7 @@ export class EditPropertyComponent {
           // Prefer full_name if available (authorized), otherwise use display_name (public)
           const displayName = (d as any).full_name || d.display_name;
           return {
-            id: d.id,
+            id: d.id!,
             text: displayName,
           }
         });

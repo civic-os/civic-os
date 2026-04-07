@@ -291,7 +291,8 @@ export class ListPage implements OnInit, OnDestroy {
                 orderField: orderField,
                 orderDirection: sortState.direction || undefined,
                 filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
-                pagination: effectivePagination
+                pagination: effectivePagination,
+                isSummaryView: !!(entity?.is_view && !entity?.insert)
               }).pipe(
                 // Only set loading=false AFTER API data arrives, not after the initial clearing emission
                 tap(() => this.isLoading.set(false))
@@ -356,6 +357,13 @@ export class ListPage implements OnInit, OnDestroy {
 
   // Convert entity$ to signal for map configuration
   private entitySignal = toSignal(this.entity$);
+
+  // Summary VIEWs are read-only aggregates without id/created_at/updated_at.
+  // Rows are non-clickable (no detail page navigation).
+  public isSummaryView = computed(() => {
+    const e = this.entitySignal();
+    return !!(e?.is_view && !e?.insert);
+  });
 
   // Check if map should be shown
   public showMap = computed(() => {
@@ -842,6 +850,7 @@ export class ListPage implements OnInit, OnDestroy {
    * Handle marker click - scroll to and highlight the corresponding row
    */
   public onMarkerClick(recordId: number) {
+    if (this.isSummaryView()) return;
     // Always highlight the clicked marker record
     this.highlightedRecordId.set(recordId);
 
@@ -859,6 +868,7 @@ export class ListPage implements OnInit, OnDestroy {
    * Handle row hover - push to stream for debounced map updates
    */
   public onRowHover(recordId: number | null) {
+    if (this.isSummaryView()) return;
     this.rowHover$.next(recordId);
   }
 
@@ -866,6 +876,7 @@ export class ListPage implements OnInit, OnDestroy {
    * Handle keyboard navigation on table rows
    */
   public onRowKeyPress(event: KeyboardEvent, recordId: number) {
+    if (this.isSummaryView()) return;
     // Prevent default scrolling behavior for space key
     event.preventDefault();
     if (this.entityKey) {
@@ -896,6 +907,7 @@ export class ListPage implements OnInit, OnDestroy {
    * Navigate to detail page when calendar event is clicked
    */
   public onCalendarEventClick(event: CalendarEvent) {
+    if (this.isSummaryView()) return;
     if (this.entityKey) {
       this.router.navigate(['/view', this.entityKey, event.id]);
     }

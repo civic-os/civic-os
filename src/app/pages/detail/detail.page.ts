@@ -163,7 +163,14 @@ export class DetailPage {
     this.entityKey = p['entityKey'];
     this.entityId = p['entityId'];
     if(p['entityKey']) {
-      return this.schema.getEntity(p['entityKey']);
+      return this.schema.getEntity(p['entityKey']).pipe(
+        tap(entity => {
+          // Summary VIEWs (read-only, no id) don't have detail pages — redirect to list
+          if (entity?.is_view && !entity?.insert) {
+            this.router.navigate(['/view', this.entityKey], { replaceUrl: true });
+          }
+        })
+      );
     } else {
       return of(undefined);
     }

@@ -130,6 +130,33 @@ describe('DataService', () => {
       done();
     });
 
+    it('should NOT inject id when isSummaryView is true', (done) => {
+      service.getData({
+        key: 'issue_status_summary',
+        fields: ['display_name', 'issue_count'],
+        isSummaryView: true
+      }).subscribe();
+
+      const req = httpMock.expectOne(req => req.url.includes('issue_status_summary'));
+      expect(req.request.url).toContain('select=display_name,issue_count');
+      expect(req.request.url).not.toContain(',id');
+      req.flush([]);
+      done();
+    });
+
+    it('should still inject id when isSummaryView is false', (done) => {
+      service.getData({
+        key: 'Issue',
+        fields: ['name'],
+        isSummaryView: false
+      }).subscribe();
+
+      const req = httpMock.expectOne(req => req.url.includes('Issue'));
+      expect(req.request.url).toContain('select=name,id');
+      req.flush([]);
+      done();
+    });
+
     it('should build select parameter with multiple fields', (done) => {
       service.getData({
         key: 'Issue',
@@ -313,6 +340,21 @@ describe('DataService', () => {
       const req = httpMock.expectOne(req => req.url.includes('Issue'));
       expect(req.request.headers.get('Range')).toBe('100-199'); // (2-1)*100 = 100, end = 199
       req.flush([], { headers: { 'Content-Range': '100-199/350' } });
+      done();
+    });
+
+    it('should NOT inject id when isSummaryView is true', (done) => {
+      service.getDataPaginated({
+        key: 'issue_status_summary',
+        fields: ['display_name', 'issue_count'],
+        isSummaryView: true,
+        pagination: { page: 1, pageSize: 25 }
+      }).subscribe();
+
+      const req = httpMock.expectOne(req => req.url.includes('issue_status_summary'));
+      expect(req.request.url).toContain('select=display_name,issue_count');
+      expect(req.request.url).not.toContain(',id');
+      req.flush([], { headers: { 'Content-Range': '0-0/3' } });
       done();
     });
   });

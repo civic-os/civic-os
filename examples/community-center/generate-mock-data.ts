@@ -21,6 +21,7 @@ interface SchemaEntityTable {
   select: boolean;
   update: boolean;
   delete: boolean;
+  is_view: boolean;
 }
 
 interface SchemaEntityProperty {
@@ -666,6 +667,12 @@ class MockDataGenerator {
 
       if (this.config.excludeTables?.includes(tableName)) {
         console.log(`  Skipping ${tableName} (excluded)`);
+        continue;
+      }
+
+      // Skip VIEWs — their data is derived from other tables
+      if (entity.is_view) {
+        console.log(`Skipping ${tableName} (VIEW)`);
         continue;
       }
 

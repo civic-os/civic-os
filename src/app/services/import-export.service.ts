@@ -72,12 +72,14 @@ export class ImportExportService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // 1. Check row count (safety limit)
+      const isSummaryView = !!(entity.is_view && !entity.insert);
       const { totalCount } = await this.data.getDataPaginated({
         key: entity.table_name,
-        fields: ['id'],
+        fields: ['display_name'],
         filters: filters,
         searchQuery: searchQuery,
-        pagination: { page: 1, pageSize: 1 }
+        pagination: { page: 1, pageSize: 1 },
+        isSummaryView
       }).toPromise() || { totalCount: 0 };
 
       if (totalCount > this.MAX_EXPORT_ROWS) {
@@ -90,6 +92,17 @@ export class ImportExportService {
       // 2. Prepare properties: filter out generated columns and sort by sort_order
       const exportProperties = properties
         .filter(p => p.column_name !== 'civic_os_text_search') // Exclude generated tsvector column
+        .filter(p => {
+          // For VIEWs, skip hidden FK-type columns: they exist only for filter dropdowns.
+          // Their data is already in denormalized text columns. PostgREST cannot resolve
+          // FK embeddings through aggregate VIEWs (GROUP BY breaks FK detection).
+          if (entity.is_view && p.show_on_list === false &&
+              [EntityPropertyType.ForeignKeyName, EntityPropertyType.User,
+               EntityPropertyType.Status, EntityPropertyType.Category].includes(p.type)) {
+            return false;
+          }
+          return true;
+        })
         .sort((a, b) => a.sort_order - b.sort_order);
 
       // 3. Fetch ALL data (remove pagination)
@@ -110,7 +123,8 @@ export class ImportExportService {
         searchQuery: searchQuery,
         orderField: orderField,
         orderDirection: sortDirection,
-        filters: filters
+        filters: filters,
+        isSummaryView
       }).toPromise() || [];
 
       // 4. Transform data for export (add FK display columns)
@@ -122,7 +136,7 @@ export class ImportExportService {
       utils.book_append_sheet(workbook, worksheet, entity.display_name);
 
       // 6. If notes service provided, fetch notes and add as second worksheet
-      if (notesService && allData.length > 0) {
+      if (notesService && allData.length > 0 && allData[0]?.id != null) {
         try {
           // Extract entity IDs from exported data
           const entityIds = allData.map(row => String(row.id));

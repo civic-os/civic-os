@@ -28,7 +28,7 @@ import { AuthService } from '../../services/auth.service';
 import { NotesService } from '../../services/notes.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
+import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
 
 describe('ListPage', () => {
@@ -186,7 +186,8 @@ describe('ListPage', () => {
           orderField: undefined,
           orderDirection: undefined,
           filters: undefined,
-          pagination: { page: 1, pageSize: 25 }
+          pagination: { page: 1, pageSize: 25 },
+          isSummaryView: false
         });
         expect(component.dataSignal()).toEqual(mockData);
         done();
@@ -213,7 +214,8 @@ describe('ListPage', () => {
           orderField: undefined,
           orderDirection: undefined,
           filters: undefined,
-          pagination: { page: 1, pageSize: 25 }
+          pagination: { page: 1, pageSize: 25 },
+          isSummaryView: false
         });
         done();
       }, 50);
@@ -1015,6 +1017,59 @@ describe('ListPage', () => {
         expect(sunday.getDate()).toBe(23); // Sunday Nov 23
         expect(formatLocalDate(sunday)).toBe('2025-11-23');
       });
+    });
+  });
+
+  describe('isSummaryView computed signal', () => {
+    it('should be true when entity is_view and not insertable', () => {
+      const summaryEntity = createMockEntity({
+        table_name: 'issue_status_summary',
+        display_name: 'Issue Summary',
+        is_view: true,
+        insert: false,
+        update: false,
+        delete: false
+      });
+
+      mockSchemaService.getEntity.and.returnValue(of(summaryEntity));
+      mockSchemaService.getPropsForList.and.returnValue(of([]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+
+      routeParams.next({ entityKey: 'issue_status_summary' });
+      fixture.detectChanges();
+
+      expect(component.isSummaryView()).toBe(true);
+    });
+
+    it('should be false for regular tables', () => {
+      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
+      mockSchemaService.getPropsForList.and.returnValue(of([]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+
+      routeParams.next({ entityKey: 'Issue' });
+      fixture.detectChanges();
+
+      expect(component.isSummaryView()).toBe(false);
+    });
+
+    it('should be false for Virtual Entities (is_view but insertable)', () => {
+      const virtualEntity = createMockEntity({
+        table_name: 'active_projects',
+        display_name: 'Active Projects',
+        is_view: true,
+        insert: true,
+        update: true,
+        delete: true
+      });
+
+      mockSchemaService.getEntity.and.returnValue(of(virtualEntity));
+      mockSchemaService.getPropsForList.and.returnValue(of([]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+
+      routeParams.next({ entityKey: 'active_projects' });
+      fixture.detectChanges();
+
+      expect(component.isSummaryView()).toBe(false);
     });
   });
 

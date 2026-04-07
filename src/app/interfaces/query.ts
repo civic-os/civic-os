@@ -36,6 +36,7 @@ export interface DataQuery {
     filters?: FilterCriteria[];
     pagination?: PaginationParams;
     limit?: number;
+    isSummaryView?: boolean;
 }
 
 export interface PaginatedResponse<T> {

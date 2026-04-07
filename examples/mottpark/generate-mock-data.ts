@@ -21,7 +21,7 @@ interface SchemaEntityTable {
   select: boolean;
   update: boolean;
   delete: boolean;
-  is_view?: boolean;
+  is_view: boolean;
 }
 
 interface SchemaEntityProperty {
@@ -286,6 +286,10 @@ class MockDataGenerator {
 
     for (const entity of sortedEntities) {
       if (this.config.excludeTables?.includes(entity.table_name)) {
+        continue;
+      }
+      // Skip VIEWs — they don't hold data and can't be truncated
+      if (entity.is_view) {
         continue;
       }
 

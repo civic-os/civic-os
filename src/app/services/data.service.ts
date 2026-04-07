@@ -40,7 +40,7 @@ export class DataService {
   public getData(query: DataQuery): Observable<EntityData[]> {
     let args: string[] = [];
     if(query.fields) {
-      if(!query.fields.includes('id')) {
+      if(!query.isSummaryView && !query.fields.includes('id')) {
         query.fields.push('id');
       }
       args.push('select=' + query.fields.join(','));
@@ -86,7 +86,7 @@ export class DataService {
   public getDataPaginated(query: DataQuery): Observable<PaginatedResponse<EntityData>> {
     let args: string[] = [];
     if(query.fields) {
-      if(!query.fields.includes('id')) {
+      if(!query.isSummaryView && !query.fields.includes('id')) {
         query.fields.push('id');
       }
       args.push('select=' + query.fields.join(','));

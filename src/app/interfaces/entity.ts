@@ -225,12 +225,12 @@ export interface PaymentValue {
  * Valid types for entity property values.
  * Entities can have various column types that map to these TypeScript types.
  */
-export type EntityPropertyValue = string | number | boolean | null | object;
+export type EntityPropertyValue = string | number | boolean | null | undefined | object;
 
 export interface EntityData {
-    id: number,
-    created_at: string,
-    updated_at: string,
+    id?: number,
+    created_at?: string,
+    updated_at?: string,
     display_name: string,
     [key: string]: EntityPropertyValue; // Allow dynamic properties for entity-specific columns
 }

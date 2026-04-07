@@ -1129,4 +1129,206 @@ describe('ImportExportService', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('exportToExcel() - VIEW FK filtering', () => {
+    const viewEntity: SchemaEntityTable = {
+      ...mockEntity,
+      table_name: 'project_hours_summary',
+      display_name: 'Hours Summary',
+      is_view: true,
+      insert: false,
+      update: false,
+      delete: false
+    };
+
+    const visibleTextProp = createMockProperty({
+      table_name: 'project_hours_summary',
+      column_name: 'project',
+      display_name: 'Project',
+      sort_order: 1,
+      type: EntityPropertyType.TextShort,
+      show_on_list: true
+    });
+
+    const hiddenFkProp = createMockProperty({
+      table_name: 'project_hours_summary',
+      column_name: 'project_id',
+      display_name: 'Project',
+      sort_order: 90,
+      type: EntityPropertyType.ForeignKeyName,
+      data_type: 'int4',
+      udt_name: 'int4',
+      join_schema: 'public',
+      join_table: 'projects',
+      join_column: 'id',
+      show_on_list: false
+    });
+
+    const hiddenIdProp = createMockProperty({
+      table_name: 'project_hours_summary',
+      column_name: 'id',
+      display_name: 'Id',
+      sort_order: 0,
+      type: EntityPropertyType.IntegerNumber,
+      data_type: 'bigint',
+      udt_name: 'int8',
+      show_on_list: false
+    });
+
+    beforeEach(() => {
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 1 }));
+      mockDataService.getData.and.returnValue(of([{ id: 1, project: 'Test Project', project_id: 5, display_name: 'Test', created_at: '2025-01-01', updated_at: '2025-01-01' }]));
+    });
+
+    it('should exclude hidden FK properties from VIEW export', async () => {
+      const properties = [visibleTextProp, hiddenFkProp, hiddenIdProp];
+
+      await service.exportToExcel(viewEntity, properties);
+
+      const getDataCall = mockDataService.getData.calls.mostRecent();
+      const fields: string[] = getDataCall.args[0].fields;
+
+      // Hidden FK column should be excluded (would generate broken PostgREST embedding)
+      expect(fields).not.toContain(jasmine.stringContaining('projects!'));
+      // Visible text column and hidden non-FK column should be included
+      expect(fields).toContain('project');
+      expect(fields).toContain('id');
+    });
+
+    it('should keep hidden FK properties for regular table export', async () => {
+      const regularEntity = { ...mockEntity };
+      const properties = [
+        createMockProperty({
+          column_name: 'title',
+          display_name: 'Title',
+          sort_order: 1,
+          type: EntityPropertyType.TextShort,
+          show_on_list: true
+        }),
+        createMockProperty({
+          column_name: 'status_id',
+          display_name: 'Status',
+          sort_order: 90,
+          type: EntityPropertyType.ForeignKeyName,
+          data_type: 'int4',
+          udt_name: 'int4',
+          join_schema: 'public',
+          join_table: 'statuses',
+          join_column: 'id',
+          show_on_list: false
+        })
+      ];
+
+      await service.exportToExcel(regularEntity, properties);
+
+      const getDataCall = mockDataService.getData.calls.mostRecent();
+      const fields: string[] = getDataCall.args[0].fields;
+
+      // Regular table: hidden FK should still be included (PostgREST can resolve it)
+      expect(fields).toContain(jasmine.stringContaining('statuses!'));
+    });
+
+    it('should keep visible FK properties on VIEW export', async () => {
+      const visibleFkProp = createMockProperty({
+        table_name: 'project_hours_summary',
+        column_name: 'category_id',
+        display_name: 'Category',
+        sort_order: 5,
+        type: EntityPropertyType.ForeignKeyName,
+        data_type: 'int4',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'categories',
+        join_column: 'id',
+        show_on_list: true
+      });
+
+      const properties = [visibleTextProp, visibleFkProp];
+
+      await service.exportToExcel(viewEntity, properties);
+
+      const getDataCall = mockDataService.getData.calls.mostRecent();
+      const fields: string[] = getDataCall.args[0].fields;
+
+      // Visible FK on a VIEW should still be included
+      expect(fields).toContain(jasmine.stringContaining('categories!'));
+    });
+
+    it('should exclude hidden User and Status properties from VIEW export', async () => {
+      const hiddenUserProp = createMockProperty({
+        table_name: 'project_hours_summary',
+        column_name: 'assigned_to',
+        display_name: 'Assigned To',
+        sort_order: 91,
+        type: EntityPropertyType.User,
+        show_on_list: false
+      });
+
+      const hiddenStatusProp = createMockProperty({
+        table_name: 'project_hours_summary',
+        column_name: 'status_id',
+        display_name: 'Status',
+        sort_order: 92,
+        type: EntityPropertyType.Status,
+        status_entity_type: 'project_hours_summary',
+        show_on_list: false
+      });
+
+      const properties = [visibleTextProp, hiddenUserProp, hiddenStatusProp];
+
+      await service.exportToExcel(viewEntity, properties);
+
+      const getDataCall = mockDataService.getData.calls.mostRecent();
+      const fields: string[] = getDataCall.args[0].fields;
+
+      // Hidden User and Status columns should be excluded from VIEW export
+      expect(fields).not.toContain(jasmine.stringContaining('civic_os_users!'));
+      expect(fields).not.toContain(jasmine.stringContaining('statuses!'));
+      // Visible text column should remain
+      expect(fields).toContain('project');
+    });
+
+    it('should use display_name for row count check instead of id', async () => {
+      const properties = [visibleTextProp];
+
+      await service.exportToExcel(viewEntity, properties);
+
+      const paginatedCall = mockDataService.getDataPaginated.calls.mostRecent();
+      // Row count check should use display_name (always exists), not id (may not exist on VIEWs)
+      expect(paginatedCall.args[0].fields).toContain('display_name');
+      expect(paginatedCall.args[0].fields).not.toContain('id');
+    });
+
+    it('should pass isSummaryView flag on data queries for summary VIEWs', async () => {
+      const properties = [visibleTextProp];
+
+      await service.exportToExcel(viewEntity, properties);
+
+      const paginatedCall = mockDataService.getDataPaginated.calls.mostRecent();
+      const getDataCall = mockDataService.getData.calls.mostRecent();
+
+      expect(paginatedCall.args[0].isSummaryView).toBe(true);
+      expect(getDataCall.args[0].isSummaryView).toBe(true);
+    });
+
+    it('should not set isSummaryView for regular table exports', async () => {
+      const regularEntity = { ...mockEntity };
+      const properties = [
+        createMockProperty({
+          column_name: 'title',
+          display_name: 'Title',
+          sort_order: 1,
+          type: EntityPropertyType.TextShort
+        })
+      ];
+
+      await service.exportToExcel(regularEntity, properties);
+
+      const paginatedCall = mockDataService.getDataPaginated.calls.mostRecent();
+      const getDataCall = mockDataService.getData.calls.mostRecent();
+
+      expect(paginatedCall.args[0].isSummaryView).toBe(false);
+      expect(getDataCall.args[0].isSummaryView).toBe(false);
+    });
+  });
 });
