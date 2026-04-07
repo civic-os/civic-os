@@ -715,8 +715,9 @@ For full RBAC testing and production deployments, run your own Keycloak instance
 2. Start Keycloak: `docker-compose up -d keycloak`
 3. Access admin console: `http://localhost:8081` (admin/admin)
 4. Create realm, client, roles, and users (see AUTHENTICATION.md)
-5. Update `.env` with your Keycloak URL
-6. Fetch JWKS: `./fetch-keycloak-jwk.sh`
+5. **Review user registration model**: Open registration is enabled by default (new users get the `user` role). For admin-only registration, see [Restricting to Admin-Only Registration](../AUTHENTICATION.md#restricting-to-admin-only-registration)
+6. Update `.env` with your Keycloak URL
+7. Fetch JWKS: `./fetch-keycloak-jwk.sh`
 
 ---
 

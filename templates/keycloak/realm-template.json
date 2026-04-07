@@ -190,12 +190,57 @@
     ]
   },
 
+  "authenticationFlows": [
+    {
+      "alias": "auto-link first broker login",
+      "description": "First broker login flow that auto-creates new users and auto-links existing users by email. For admin-only registration, delete the 'Create User If Unique' execution in the Keycloak admin console.",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "idp-create-user-if-unique",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "flowAlias": "Auto-link existing",
+          "userSetupAllowed": false,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "alias": "Auto-link existing",
+      "description": "Auto-link to existing user matched by email from identity provider",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "idp-auto-link",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    }
+  ],
+
   "browserFlow": "browser",
   "registrationFlow": "registration",
   "directGrantFlow": "direct grant",
   "resetCredentialsFlow": "reset credentials",
   "clientAuthenticationFlow": "clients",
-  "firstBrokerLoginFlow": "first broker login",
+  "firstBrokerLoginFlow": "auto-link first broker login",
 
   "loginTheme": "keycloak.v2",
   "internationalizationEnabled": false,

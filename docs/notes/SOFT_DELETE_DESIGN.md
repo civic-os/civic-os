@@ -2,7 +2,7 @@
 
 **Version**: Proposed for v0.42.0+
 **Status**: Design
-**Related**: Entity Notes soft delete (`v0-16-0`), Status terminal states (`v0-15-0`), Bulk Actions (future)
+**Related**: Entity Notes soft delete (`v0-16-0`), Status terminal states (`v0-15-0`), User Provisioning (`v0-31-0`), Bulk Actions (future)
 
 ## Overview
 
@@ -441,15 +441,103 @@ Entities with status columns often accumulate "done" records (Closed, Completed,
 | Default behavior | Hidden for all users | Hidden only if entity opts in |
 | Recovery action | "Restore" (unarchive) | Change status (re-open) |
 
+## User Deactivation
+
+User deactivation is a natural extension of the soft delete system. Users are referenced as FK targets across the system (`created_by`, `assigned_to`, `requested_by`, etc.), so deactivation must preserve referential integrity while blocking login.
+
+### Two-System Sync
+
+Unlike regular entities, users exist in both Keycloak and the database. Deactivation must coordinate both:
+
+1. **Keycloak**: Disable the user (`PUT /admin/realms/{realm}/users/{id}` with `{"enabled": false}`). This preserves the UUID and blocks login. Keycloak's disable is its own soft delete — the account is fully intact and re-enableable.
+2. **Database**: Set `deleted_at` on `metadata.civic_os_users` (and `metadata.civic_os_users_private`). This triggers the standard soft delete visibility rules.
+
+Both operations are handled by the Go worker via a new `deactivate_user` River job, ensuring atomicity the same way user provisioning works today.
+
+### Database Changes
+
+Add `deleted_at` to the user tables:
+
+```sql
+ALTER TABLE metadata.civic_os_users
+  ADD COLUMN deleted_at TIMESTAMPTZ DEFAULT NULL;
+
+ALTER TABLE metadata.civic_os_users_private
+  ADD COLUMN deleted_at TIMESTAMPTZ DEFAULT NULL;
+```
+
+The `civic_os_users` VIEW (which application entities reference via FK) needs to continue exposing deactivated users for FK display resolution, but with the `deleted_at` value so the frontend can show visual indicators (dimmed name, "deactivated" badge). The RLS policy on `civic_os_users` currently allows everyone to read — this remains correct since FK JOINs from other entities must resolve regardless of the user's active state.
+
+### Cascade Policy on Deactivation
+
+When a user is deactivated, their records across the system need a policy decision. This is configurable per deployment via a `deactivate_user` RPC parameter:
+
+```sql
+CREATE OR REPLACE FUNCTION public.deactivate_user(
+  p_user_id UUID,
+  p_cascade_mode TEXT DEFAULT 'preserve'  -- 'preserve', 'archive', or 'nullify'
+)
+```
+
+| Mode | Behavior | Best for |
+|---|---|---|
+| `preserve` (default) | Leave all records untouched. FK references point to a deactivated user with visual indicator. | Audit-heavy environments, government |
+| `archive` | Soft-delete all records where the user is the primary owner (configurable per entity). Requires those entities to have `deleted_at`. | Clean separation when user leaves |
+| `nullify` | Set user FK columns to NULL on owned records. | Privacy-focused deployments (GDPR right to erasure) |
+
+**Owner detection**: Which FK column constitutes "ownership" is ambiguous. A `created_by` column is the most common indicator, but some entities have explicit owner columns (`assigned_to`, `requested_by`). The RPC accepts an optional `p_owner_columns TEXT[] DEFAULT ARRAY['created_by']` parameter. Integrators can override per deployment.
+
+**Cascade is not recursive**: Archiving a user's records follows the same rule as regular parent archiving — child records of those archived records are left in place.
+
+### Reactivation
+
+Reactivation reverses both operations:
+
+1. **Keycloak**: Re-enable the user (`{"enabled": true}`)
+2. **Database**: Set `deleted_at = NULL` on both user tables
+
+Records affected by `archive` or `nullify` cascade are **not automatically restored** — this is a deliberate one-way operation. An admin can manually unarchive individual records if needed.
+
+### Login Guard: Prevent Zombie Sync
+
+`refresh_current_user()` runs on every login and would re-upsert a deactivated user's record (setting `updated_at` but not clearing `deleted_at`). Add a guard:
+
+```sql
+-- Early exit in refresh_current_user():
+IF EXISTS (
+  SELECT 1 FROM metadata.civic_os_users
+  WHERE id = v_user_id AND deleted_at IS NOT NULL
+) THEN
+  RAISE EXCEPTION 'User account has been deactivated'
+    USING ERRCODE = '42501';
+END IF;
+```
+
+In practice, a deactivated Keycloak user can't obtain a JWT to reach PostgREST, so this is a defense-in-depth guard against race conditions (admin deactivates while user has an active session).
+
+### User Management Page Changes
+
+- **"Deactivate" button** on user detail/edit panel (replaces no-op today)
+- **Confirmation modal**: "Deactivate {name}? They will be unable to log in. Their existing records will be [preserved/archived/nullified]." (text varies by cascade mode)
+- **Active/Deactivated filter**: Same Active/Archived checkbox pattern from List page filter bar
+- **Visual treatment**: Deactivated users shown with reduced opacity and "Deactivated" badge
+- **"Reactivate" button**: Visible on deactivated users for admins
+
+### managed_users VIEW Update
+
+The `managed_users` VIEW needs to expose `deleted_at` from `civic_os_users_private` so the User Management page can filter and display deactivation state. Active users remain the default view.
+
 ## Edge Cases and Cascade Behavior
 
 ### Archiving a Parent Record
 
-Archiving a parent does **not** cascade to children. A permit with 5 inspections: archiving the permit leaves the inspections visible. This is intentional:
+Archiving a parent does **not** cascade to children by default. A permit with 5 inspections: archiving the permit leaves the inspections visible. This is intentional:
 
 - Cascade archives are hard to undo correctly
 - Related records may have independent business value
 - The FK reference to an archived parent is displayed with a visual indicator (dimmed name, "archived" badge)
+
+**Exception**: User deactivation supports optional cascade modes (`archive`, `nullify`) because user departure is a distinct lifecycle event where cleanup may be required. See [User Deactivation](#user-deactivation) for details.
 
 ### FK References to Archived Records
 

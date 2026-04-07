@@ -586,6 +586,68 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ---
 
+## User Registration Model
+
+> **Deployment Decision:** When setting up a new Civic OS instance, ask the deployer: *"Should new accounts be created only by admins, or can anyone sign up (defaulting to a basic user role)?"*
+
+### Default: Open Registration
+
+Out of the box, both the dev realm (`examples/keycloak/civic-os-dev.json`) and the production template (`templates/keycloak/realm-template.json`) ship with:
+
+- **Self-registration enabled** (`registrationAllowed: true`) — users can create accounts with email/password
+- **`auto-link first broker login` flow** — social login (Google, Microsoft, etc.) auto-creates a local Keycloak account on first use and auto-links to existing accounts by email
+- **Default `user` role** — all new accounts (self-registered or social) receive the `user` role automatically
+
+The User Provisioning system (`/admin/users`) still works alongside open registration — admins can pre-create accounts with specific roles while users can also self-register with the default role.
+
+### Restricting to Admin-Only Registration
+
+For staff portals, internal tools, and controlled-access deployments where only administrators should create accounts via `/admin/users`:
+
+**1. Disable self-registration:**
+
+Realm settings → Login → **User registration** = OFF
+
+| Setting (Realm settings → Login) | Recommended | Why |
+|---|---|---|
+| User registration | OFF | No self-signup |
+| Forgot password | ON (optional) | Email-verified reset doesn't create accounts |
+| Edit username | OFF | Prevents users changing their own username |
+
+**2. Remove social login auto-creation:**
+
+The `auto-link first broker login` flow ships with a **"Create User If Unique"** step that auto-creates accounts for new social logins. To prevent this:
+
+1. Go to Authentication → Flows → `auto-link first broker login`
+2. **Delete the "Create User If Unique"** execution step
+3. Leave the "Auto-link existing" sub-flow intact
+
+Before (default — allows new signups via social login):
+
+| Step | Type | Requirement |
+|---|---|---|
+| Create User If Unique | execution | Alternative |
+| Auto-link existing (sub-flow) | flow | Alternative |
+| └─ Automatically set existing user | step | Required |
+
+After (admin-only — links pre-existing accounts only):
+
+| Step | Type | Requirement |
+|---|---|---|
+| Auto-link existing (sub-flow) | flow | Alternative |
+| └─ Automatically set existing user | step | Required |
+
+**How it works after restricting:**
+- Admin pre-creates user in Civic OS with their corporate email → Go worker creates Keycloak account
+- User clicks "Sign in with Microsoft" → Keycloak matches the incoming email to the pre-existing account → links the identity, login succeeds
+- Unknown email via social login → no step can handle it → access denied
+
+**3. Ensure the service account client is configured** (see [Step 8](#step-8-create-service-account-client-v0310-required-for-user-provisioning)) — this becomes the sole path for account creation.
+
+**Optional — Disable Keycloak Account Console:** Keycloak exposes an account management UI at `https://<keycloak>/realms/<realm>/account/`. To prevent users from editing their own profile outside the app, disable the `account-console` client. Note: Civic OS links to this console for "Account Settings" — remove or redirect that link if disabled.
+
+---
+
 ## Social Login: Microsoft / Azure AD
 
 Keycloak can delegate authentication to Microsoft Azure AD, letting users sign in with their organizational Microsoft accounts.
@@ -600,6 +662,8 @@ Keycloak can delegate authentication to Microsoft Azure AD, letting users sign i
    - Token URL: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`
 5. **Client ID and Secret**: From the Azure App Registration
 6. **Default Scopes**: `openid profile email`
+7. **First login flow**: Set to `auto-link first broker login` (included in the Civic OS realm template — see [User Registration Model](#user-registration-model) for details)
+8. **Trust email**: ON — Azure AD has already verified the user's email, so Keycloak can skip redundant verification
 
 ### Common Pitfalls
 
