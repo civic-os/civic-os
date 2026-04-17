@@ -867,13 +867,13 @@ export class ImportExportService {
    *
    * @param roles Array of { display_name, description } for available roles
    */
-  generateUserImportTemplate(roles: { display_name: string; description: string | null }[]): void {
+  generateUserImportTemplate(roles: { role_key: string; display_name: string; description: string | null }[]): void {
     const hints: any = {
       'Email': 'Required. User email address',
       'First Name': 'Required. User first name',
       'Last Name': 'Required. User last name',
       'Phone': 'Optional. 10-digit phone number',
-      'Roles': 'Optional. Comma-separated role names (default: user)',
+      'Roles': 'Optional. Comma-separated role keys or display names (default: user)',
       'Send Welcome Email': 'Optional. true/false (default: true)',
       'Send Welcome SMS': 'Optional. true/false (default: false)'
     };
@@ -898,7 +898,8 @@ export class ImportExportService {
     // Add reference sheet for available roles
     if (roles.length > 0) {
       const roleData = roles.map(r => ({
-        'Role Name': r.display_name,
+        'Role Key': r.role_key,
+        'Display Name': r.display_name,
         'Description': r.description || ''
       }));
       const roleSheet = utils.json_to_sheet(roleData);

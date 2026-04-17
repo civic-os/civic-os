@@ -731,8 +731,8 @@ describe('ImportExportService', () => {
   describe('generateUserImportTemplate()', () => {
     it('should generate user import template with 6 column headers', () => {
       const roles = [
-        { display_name: 'user', description: 'Basic user' },
-        { display_name: 'editor', description: 'Can edit records' }
+        { role_key: 'user', display_name: 'user', description: 'Basic user' },
+        { role_key: 'editor', display_name: 'editor', description: 'Can edit records' }
       ];
 
       service.generateUserImportTemplate(roles);
@@ -747,8 +747,8 @@ describe('ImportExportService', () => {
 
     it('should include Available Roles reference sheet when roles provided', () => {
       const roles = [
-        { display_name: 'user', description: 'Basic user' },
-        { display_name: 'editor', description: 'Can edit records' }
+        { role_key: 'user', display_name: 'user', description: 'Can edit records' },
+        { role_key: 'editor', display_name: 'editor', description: 'Can edit records' }
       ];
 
       service.generateUserImportTemplate(roles);

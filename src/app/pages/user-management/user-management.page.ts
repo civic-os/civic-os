@@ -600,6 +600,7 @@ export class UserManagementPage {
         this.showCreateModal.set(false);
         this.successMessage.set(`User ${this.newUser.first_name} ${this.newUser.last_name} created. Provisioning in progress...`);
         this.loadUsers();
+        setTimeout(() => this.loadUsers(), 5000);
         setTimeout(() => this.successMessage.set(undefined), 5000);
       } else {
         this.createError.set(response.error?.humanMessage || 'Failed to create user');
@@ -793,7 +794,7 @@ export class UserManagementPage {
     { name: 'First Name', key: 'first_name', required: true, type: 'text', hint: 'Required. User first name' },
     { name: 'Last Name', key: 'last_name', required: true, type: 'text', hint: 'Required. User last name' },
     { name: 'Phone', key: 'phone', required: false, type: 'phone', hint: 'Optional. 10-digit phone number' },
-    { name: 'Roles', key: 'roles', required: false, type: 'comma-list', hint: 'Optional. Comma-separated role names (default: user)' },
+    { name: 'Roles', key: 'roles', required: false, type: 'comma-list', hint: 'Optional. Comma-separated role keys or display names (default: user)' },
     { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean', hint: 'Optional. true/false (default: true)' },
     { name: 'Send Welcome SMS', key: 'send_welcome_sms', required: false, type: 'boolean', hint: 'Optional. true/false (default: false)' }
   ];
@@ -847,6 +848,7 @@ export class UserManagementPage {
     this.showImportModal.set(false);
     this.successMessage.set(`${count} users submitted for provisioning.`);
     this.loadUsers();
+    setTimeout(() => this.loadUsers(), 5000);
     setTimeout(() => this.successMessage.set(undefined), 5000);
   }
 

@@ -66,3 +66,4 @@ v0-41-0-schema-functions-perf [v0-40-0-status-category-admin-rpcs] 2026-03-21T12
 v0-41-1-add-category-action-param-type [v0-41-0-schema-functions-perf] 2026-03-27T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add category as entity action param type (missed during v0.34.0 Category system)
 v0-41-2-fix-impersonation-refresh [v0-41-1-add-category-action-param-type] 2026-04-01T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix impersonation header poisoning refresh_current_user role sync
 v0-43-0-user-welcome-notification [v0-41-2-fix-impersonation-refresh] 2026-04-17T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Replace Keycloak welcome email with Civic OS notification template
+v0-43-1-resolve-role-key [v0-43-0-user-welcome-notification] 2026-04-17T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Accept both role_key and display_name in user provisioning and role RPCs
