@@ -541,9 +541,9 @@ describe('UserManagementPage', () => {
   });
 
   describe('Import Users', () => {
-    it('should have userImportConfig with 6 columns', () => {
+    it('should have userImportConfig with 7 columns', () => {
       expect(component.userImportConfig).toBeTruthy();
-      expect(component.userImportConfig.columns.length).toBe(6);
+      expect(component.userImportConfig.columns.length).toBe(7);
       expect(component.userImportConfig.title).toBe('Import Users');
     });
 
@@ -554,7 +554,7 @@ describe('UserManagementPage', () => {
 
     it('submitUserImport should transform rows to ProvisionUserRequest format', (done) => {
       const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: '5551234567', roles: ['editor'], send_welcome_email: false }
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: '5551234567', roles: ['editor'], send_welcome_email: false, send_welcome_sms: true }
       ];
 
       mockUserService.importUsersDetailed.and.returnValue(of({
@@ -569,7 +569,8 @@ describe('UserManagementPage', () => {
             last_name: 'User',
             phone: '5551234567',
             initial_roles: ['editor'],
-            send_welcome_email: false
+            send_welcome_email: false,
+            send_welcome_sms: true
           })
         ]);
         expect(result.success).toBe(true);
@@ -580,7 +581,7 @@ describe('UserManagementPage', () => {
 
     it('submitUserImport should default roles to ["user"] when not specified', (done) => {
       const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null }
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
       ];
 
       mockUserService.importUsersDetailed.and.returnValue(of({
@@ -596,7 +597,7 @@ describe('UserManagementPage', () => {
 
     it('submitUserImport should default send_welcome_email to true when not specified', (done) => {
       const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null }
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
       ];
 
       mockUserService.importUsersDetailed.and.returnValue(of({
@@ -606,6 +607,22 @@ describe('UserManagementPage', () => {
       component.submitUserImport(rows).subscribe(() => {
         const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
         expect(calledWith[0].send_welcome_email).toBe(true);
+        done();
+      });
+    });
+
+    it('submitUserImport should default send_welcome_sms to false when not specified', (done) => {
+      const rows = [
+        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
+      ];
+
+      mockUserService.importUsersDetailed.and.returnValue(of({
+        success: true, created_count: 1, error_count: 0, errors: []
+      }));
+
+      component.submitUserImport(rows).subscribe(() => {
+        const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
+        expect(calledWith[0].send_welcome_sms).toBe(false);
         done();
       });
     });

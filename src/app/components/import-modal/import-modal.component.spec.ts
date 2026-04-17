@@ -675,7 +675,8 @@ describe('ImportModalComponent', () => {
       { name: 'Last Name', key: 'last_name', required: true, type: 'text' },
       { name: 'Phone', key: 'phone', required: false, type: 'phone' },
       { name: 'Roles', key: 'roles', required: false, type: 'comma-list' },
-      { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean' }
+      { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean' },
+      { name: 'Send Welcome SMS', key: 'send_welcome_sms', required: false, type: 'boolean' }
     ];
 
     let mockCustomImport: CustomImportConfig;

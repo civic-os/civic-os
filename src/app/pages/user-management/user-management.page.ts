@@ -247,13 +247,21 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             </div>
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 flex flex-col gap-1">
             <label class="cursor-pointer flex items-center gap-2">
               <input type="checkbox" class="checkbox checkbox-sm"
                      [ngModel]="newUser.send_welcome_email"
                      (ngModelChange)="newUser.send_welcome_email = $event" />
-              <span class="text-sm">Send welcome email (set password link)</span>
+              <span class="text-sm">Send welcome email</span>
             </label>
+            @if (smsConfigured) {
+              <label class="cursor-pointer flex items-center gap-2">
+                <input type="checkbox" class="checkbox checkbox-sm"
+                       [ngModel]="newUser.send_welcome_sms"
+                       (ngModelChange)="newUser.send_welcome_sms = $event" />
+                <span class="text-sm">Send welcome SMS</span>
+              </label>
+            }
           </div>
 
           @if (createError()) {
@@ -786,7 +794,8 @@ export class UserManagementPage {
     { name: 'Last Name', key: 'last_name', required: true, type: 'text', hint: 'Required. User last name' },
     { name: 'Phone', key: 'phone', required: false, type: 'phone', hint: 'Optional. 10-digit phone number' },
     { name: 'Roles', key: 'roles', required: false, type: 'comma-list', hint: 'Optional. Comma-separated role names (default: user)' },
-    { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean', hint: 'Optional. true/false (default: true)' }
+    { name: 'Send Welcome Email', key: 'send_welcome_email', required: false, type: 'boolean', hint: 'Optional. true/false (default: true)' },
+    { name: 'Send Welcome SMS', key: 'send_welcome_sms', required: false, type: 'boolean', hint: 'Optional. true/false (default: false)' }
   ];
 
   /** Custom import configuration for the import modal */
@@ -816,7 +825,8 @@ export class UserManagementPage {
       last_name: row['last_name'],
       phone: row['phone'] || undefined,
       initial_roles: row['roles'] && row['roles'].length > 0 ? row['roles'] : ['user'],
-      send_welcome_email: row['send_welcome_email'] !== null ? row['send_welcome_email'] : true
+      send_welcome_email: row['send_welcome_email'] !== null ? row['send_welcome_email'] : true,
+      send_welcome_sms: row['send_welcome_sms'] !== null ? row['send_welcome_sms'] : false
     }));
 
     return this.userService.importUsersDetailed(users).pipe(
@@ -847,7 +857,8 @@ export class UserManagementPage {
       last_name: '',
       phone: undefined,
       initial_roles: ['user'],
-      send_welcome_email: true
+      send_welcome_email: true,
+      send_welcome_sms: false
     };
   }
 }

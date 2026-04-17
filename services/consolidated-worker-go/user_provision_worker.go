@@ -44,6 +44,7 @@ type provisionRequest struct {
 	Phone            *string
 	InitialRoles     []string
 	SendWelcomeEmail bool
+	SendWelcomeSMS   bool
 	Status           string
 	KeycloakUserID   *string
 	RequestedBy      *string // UUID of admin who created the invite
@@ -115,7 +116,7 @@ func (w *UserProvisionWorker) Work(ctx context.Context, job *river.Job[Provision
 	}
 
 	// 8. Send welcome notification if requested (via Civic OS notification system)
-	if req.SendWelcomeEmail {
+	if req.SendWelcomeEmail || req.SendWelcomeSMS {
 		if err := w.sendWelcomeNotification(ctx, keycloakUserID, req); err != nil {
 			// Don't fail the whole job for welcome notification - log and continue
 			log.Printf("[Job %d] Warning: failed to send welcome notification: %v", job.ID, err)
@@ -143,13 +144,15 @@ func (w *UserProvisionWorker) fetchProvisionRequest(ctx context.Context, id int6
 	err := w.dbPool.QueryRow(ctx, `
 		SELECT id, email::TEXT, first_name, last_name, phone::TEXT,
 		       to_json(initial_roles) AS initial_roles,
-		       send_welcome_email, status, keycloak_user_id::TEXT,
+		       send_welcome_email, send_welcome_sms,
+		       status, keycloak_user_id::TEXT,
 		       requested_by::TEXT
 		FROM metadata.user_provisioning
 		WHERE id = $1
 	`, id).Scan(
 		&req.ID, &req.Email, &req.FirstName, &req.LastName, &req.Phone,
-		&rolesJSON, &req.SendWelcomeEmail, &req.Status, &req.KeycloakUserID,
+		&rolesJSON, &req.SendWelcomeEmail, &req.SendWelcomeSMS,
+		&req.Status, &req.KeycloakUserID,
 		&req.RequestedBy,
 	)
 	if err != nil {
@@ -281,7 +284,9 @@ func (w *UserProvisionWorker) sendWelcomeNotification(ctx context.Context, keycl
 		"last_name":    req.LastName,
 		"display_name": formatPublicDisplayName(req.FirstName, req.LastName),
 		"email":        req.Email,
-		"roles":        strings.Join(req.InitialRoles, ", "),
+	}
+	if req.Phone != nil && *req.Phone != "" {
+		entityData["phone"] = *req.Phone
 	}
 	if invitedBy != "" {
 		entityData["invited_by"] = invitedBy
@@ -292,15 +297,41 @@ func (w *UserProvisionWorker) sendWelcomeNotification(ctx context.Context, keycl
 		return fmt.Errorf("failed to marshal entity data: %w", err)
 	}
 
+	// Build channels array based on which welcome options were selected
+	var channels []string
+	if req.SendWelcomeEmail {
+		channels = append(channels, "email")
+	}
+	if req.SendWelcomeSMS {
+		channels = append(channels, "sms")
+
+		// Force-enable SMS notification preference for new user.
+		// New users default to enabled=false, which would cause the
+		// NotificationWorker to silently skip the SMS. Since the admin
+		// explicitly checked "Send welcome SMS" and the user was just
+		// created (no chance to set preferences yet), this is safe.
+		_, err = w.dbPool.Exec(ctx, `
+			UPDATE metadata.notification_preferences
+			SET enabled = true
+			WHERE user_id = $1 AND channel = 'sms'
+		`, keycloakUserID)
+		if err != nil {
+			log.Printf("[UserProvision] Warning: failed to enable SMS preference for %s: %v", keycloakUserID, err)
+			// Continue anyway - the notification will be inserted
+		}
+	}
+
+	channelsLiteral := "{" + strings.Join(channels, ",") + "}"
+
 	// INSERT directly into metadata.notifications
 	// The enqueue_notification_job_trigger auto-enqueues the River job
 	_, err = w.dbPool.Exec(ctx, `
 		INSERT INTO metadata.notifications (
 			user_id, template_name, entity_data, channels
 		) VALUES (
-			$1, 'user_welcome', $2::JSONB, '{email}'
+			$1, 'user_welcome', $2::JSONB, $3::TEXT[]
 		)
-	`, keycloakUserID, string(entityDataJSON))
+	`, keycloakUserID, string(entityDataJSON), channelsLiteral)
 	if err != nil {
 		return fmt.Errorf("failed to insert welcome notification: %w", err)
 	}

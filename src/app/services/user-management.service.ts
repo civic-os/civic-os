@@ -70,6 +70,7 @@ export interface ProvisionUserRequest {
   phone?: string;
   initial_roles?: string[];
   send_welcome_email?: boolean;
+  send_welcome_sms?: boolean;
 }
 
 export interface BulkProvisionResult {
@@ -172,7 +173,8 @@ export class UserManagementService {
         p_last_name: user.last_name,
         p_phone: user.phone || null,
         p_initial_roles: user.initial_roles || ['user'],
-        p_send_welcome_email: user.send_welcome_email ?? true
+        p_send_welcome_email: user.send_welcome_email ?? true,
+        p_send_welcome_sms: user.send_welcome_sms ?? false
       }
     ).pipe(
       map(response => {

@@ -874,7 +874,8 @@ export class ImportExportService {
       'Last Name': 'Required. User last name',
       'Phone': 'Optional. 10-digit phone number',
       'Roles': 'Optional. Comma-separated role names (default: user)',
-      'Send Welcome Email': 'Optional. true/false (default: true)'
+      'Send Welcome Email': 'Optional. true/false (default: true)',
+      'Send Welcome SMS': 'Optional. true/false (default: false)'
     };
 
     const headers: any = {
@@ -883,7 +884,8 @@ export class ImportExportService {
       'Last Name': 'Last Name',
       'Phone': 'Phone',
       'Roles': 'Roles',
-      'Send Welcome Email': 'Send Welcome Email'
+      'Send Welcome Email': 'Send Welcome Email',
+      'Send Welcome SMS': 'Send Welcome SMS'
     };
 
     // Create data sheet: hints first, then headers

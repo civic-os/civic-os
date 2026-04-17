@@ -16,11 +16,11 @@ import (
 
 // Renderer handles template parsing and rendering
 type Renderer struct {
-	siteURL    string
-	siteName   string          // e.g., "FFSC Staff Portal" — from APP_TITLE env var
-	timezone   *time.Location
-	dbPool     *pgxpool.Pool   // For DB-backed template functions (staticAsset)
-	s3BaseURL  string          // e.g., "https://s3.us-east-1.amazonaws.com/civic-os-files"
+	siteURL   string
+	siteName  string // e.g., "FFSC Staff Portal" — from APP_TITLE env var
+	timezone  *time.Location
+	dbPool    *pgxpool.Pool // For DB-backed template functions (staticAsset)
+	s3BaseURL string        // e.g., "https://s3.us-east-1.amazonaws.com/civic-os-files"
 }
 
 // NewRenderer creates a new Renderer instance
