@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -53,6 +54,7 @@ func main() {
 
 	// Notification Worker Configuration
 	siteURL := getEnv("SITE_URL", "http://localhost:4200")
+	siteName := getEnv("APP_TITLE", "Civic OS") // Same env var as frontend container
 	notificationTimezone := getEnv("NOTIFICATION_TIMEZONE", "America/New_York")
 
 	// SMTP Configuration
@@ -75,8 +77,6 @@ func main() {
 	keycloakRealm := getEnv("KEYCLOAK_REALM", "civic-os-dev")
 	keycloakServiceClientID := getEnv("KEYCLOAK_SERVICE_CLIENT_ID", "civic-os-service-account")
 	keycloakServiceClientSecret := getEnv("KEYCLOAK_SERVICE_CLIENT_SECRET", "")
-	keycloakClientID := getEnv("KEYCLOAK_CLIENT_ID", "civic-os-dev-client") // For redirect URIs
-
 	// Recurring Series Configuration
 	recurringSeriesHorizonDays := getEnvInt("RECURRING_SERIES_HORIZON_DAYS", 90)
 
@@ -205,8 +205,20 @@ func main() {
 	}
 	log.Println("[Init] ✓ SMTP configuration loaded")
 
+	// Construct S3 base URL for staticAsset template function
+	// Must use public endpoint so email image URLs are reachable from the recipient's browser
+	s3PublicEndpoint := getEnv("S3_PUBLIC_ENDPOINT", "")
+	if s3PublicEndpoint == "" {
+		s3PublicEndpoint = getEnv("S3_ENDPOINT", "")
+	}
+	var s3BaseURL string
+	if s3PublicEndpoint != "" && s3Bucket != "" {
+		s3BaseURL = strings.TrimRight(s3PublicEndpoint, "/") + "/" + s3Bucket
+		log.Printf("[Init]   S3 Base URL (for templates): %s", s3BaseURL)
+	}
+
 	// Template Renderer
-	renderer := NewRenderer(siteURL, timezone)
+	renderer := NewRenderer(siteURL, siteName, timezone, dbPool, s3BaseURL)
 	log.Println("[Init] ✓ Template renderer initialized")
 
 	// Telnyx SMS Client (optional)
@@ -299,10 +311,9 @@ func main() {
 	// User Provisioning Workers (only if Keycloak is configured)
 	if keycloakClient != nil {
 		river.AddWorker(workers, &UserProvisionWorker{
-			dbPool:           dbPool,
-			keycloakClient:   keycloakClient,
-			siteURL:          siteURL,
-			keycloakClientID: keycloakClientID,
+			dbPool:         dbPool,
+			keycloakClient: keycloakClient,
+			siteURL:        siteURL,
 		})
 		log.Println("[Init] ✓ UserProvisionWorker registered (queue: user_provisioning)")
 

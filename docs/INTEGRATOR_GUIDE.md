@@ -1324,6 +1324,7 @@ This is an automated notification.'
 ```handlebars
 {{.Entity.field_name}}                  # Access entity data
 {{.Metadata.site_url}}                  # Site URL for links
+{{.Metadata.site_name}}                 # Application display name
 
 {{if .Entity.field}}                    # Conditional rendering
   Field value: {{.Entity.field}}
@@ -1343,6 +1344,7 @@ This is an automated notification.'
 **Template Context**:
 - `Entity` - Entity data passed to `create_notification()` as JSONB
 - `Metadata.site_url` - Application URL from `SITE_URL` environment variable
+- `Metadata.site_name` - Application display name from `APP_TITLE` environment variable (default: `"Civic OS"`)
 
 See [Go template documentation](https://pkg.go.dev/text/template) for full syntax reference.
 

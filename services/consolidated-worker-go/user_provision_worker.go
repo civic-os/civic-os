@@ -30,10 +30,9 @@ func (ProvisionUserArgs) InsertOpts() river.InsertOpts {
 // UserProvisionWorker provisions users in Keycloak
 type UserProvisionWorker struct {
 	river.WorkerDefaults[ProvisionUserArgs]
-	dbPool           *pgxpool.Pool
-	keycloakClient   *KeycloakClient
-	siteURL          string
-	keycloakClientID string // Keycloak client ID for redirect URI
+	dbPool         *pgxpool.Pool
+	keycloakClient *KeycloakClient
+	siteURL        string
 }
 
 // provisionRequest holds data from metadata.user_provisioning
@@ -47,6 +46,7 @@ type provisionRequest struct {
 	SendWelcomeEmail bool
 	Status           string
 	KeycloakUserID   *string
+	RequestedBy      *string // UUID of admin who created the invite
 }
 
 func (w *UserProvisionWorker) Work(ctx context.Context, job *river.Job[ProvisionUserArgs]) error {
@@ -114,14 +114,13 @@ func (w *UserProvisionWorker) Work(ctx context.Context, job *river.Job[Provision
 		return w.handleError(ctx, provisionID, job.ID, "insert user roles", err)
 	}
 
-	// 8. Send welcome email if requested
+	// 8. Send welcome notification if requested (via Civic OS notification system)
 	if req.SendWelcomeEmail {
-		redirectURI := w.siteURL
-		if err := w.keycloakClient.SendWelcomeEmail(ctx, keycloakUserID, w.keycloakClientID, redirectURI); err != nil {
-			// Don't fail the whole job for welcome email - log and continue
-			log.Printf("[Job %d] Warning: failed to send welcome email: %v", job.ID, err)
+		if err := w.sendWelcomeNotification(ctx, keycloakUserID, req); err != nil {
+			// Don't fail the whole job for welcome notification - log and continue
+			log.Printf("[Job %d] Warning: failed to send welcome notification: %v", job.ID, err)
 		} else {
-			log.Printf("[Job %d] Sent welcome email to %s", job.ID, req.Email)
+			log.Printf("[Job %d] Queued welcome notification for %s", job.ID, req.Email)
 		}
 	}
 
@@ -144,12 +143,14 @@ func (w *UserProvisionWorker) fetchProvisionRequest(ctx context.Context, id int6
 	err := w.dbPool.QueryRow(ctx, `
 		SELECT id, email::TEXT, first_name, last_name, phone::TEXT,
 		       to_json(initial_roles) AS initial_roles,
-		       send_welcome_email, status, keycloak_user_id::TEXT
+		       send_welcome_email, status, keycloak_user_id::TEXT,
+		       requested_by::TEXT
 		FROM metadata.user_provisioning
 		WHERE id = $1
 	`, id).Scan(
 		&req.ID, &req.Email, &req.FirstName, &req.LastName, &req.Phone,
 		&rolesJSON, &req.SendWelcomeEmail, &req.Status, &req.KeycloakUserID,
+		&req.RequestedBy,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("provision request %d not found: %w", id, err)
@@ -256,6 +257,55 @@ func (w *UserProvisionWorker) markCompleted(ctx context.Context, id int64, keycl
 		WHERE id = $1
 	`, id, keycloakUserID)
 	return err
+}
+
+// sendWelcomeNotification inserts a notification using the user_welcome template.
+// This replaces the Keycloak "set password" email with a Civic OS notification
+// that links to the login page (where social login buttons are visible).
+func (w *UserProvisionWorker) sendWelcomeNotification(ctx context.Context, keycloakUserID string, req *provisionRequest) error {
+	// Look up invited_by display name
+	var invitedBy string
+	if req.RequestedBy != nil {
+		err := w.dbPool.QueryRow(ctx, `
+			SELECT display_name FROM metadata.civic_os_users WHERE id = $1
+		`, *req.RequestedBy).Scan(&invitedBy)
+		if err != nil {
+			// Non-fatal: template will render without invited_by
+			log.Printf("[UserProvision] Warning: could not look up invited_by display name for %s: %v", *req.RequestedBy, err)
+		}
+	}
+
+	// Build entity_data JSONB
+	entityData := map[string]interface{}{
+		"first_name":   req.FirstName,
+		"last_name":    req.LastName,
+		"display_name": formatPublicDisplayName(req.FirstName, req.LastName),
+		"email":        req.Email,
+		"roles":        strings.Join(req.InitialRoles, ", "),
+	}
+	if invitedBy != "" {
+		entityData["invited_by"] = invitedBy
+	}
+
+	entityDataJSON, err := json.Marshal(entityData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal entity data: %w", err)
+	}
+
+	// INSERT directly into metadata.notifications
+	// The enqueue_notification_job_trigger auto-enqueues the River job
+	_, err = w.dbPool.Exec(ctx, `
+		INSERT INTO metadata.notifications (
+			user_id, template_name, entity_data, channels
+		) VALUES (
+			$1, 'user_welcome', $2::JSONB, '{email}'
+		)
+	`, keycloakUserID, string(entityDataJSON))
+	if err != nil {
+		return fmt.Errorf("failed to insert welcome notification: %w", err)
+	}
+
+	return nil
 }
 
 func (w *UserProvisionWorker) handleError(ctx context.Context, provisionID int64, jobID int64, step string, err error) error {

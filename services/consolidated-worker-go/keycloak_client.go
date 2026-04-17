@@ -322,31 +322,6 @@ func (kc *KeycloakClient) RemoveRealmRoles(ctx context.Context, userID string, r
 	return nil
 }
 
-// SendWelcomeEmail triggers the "set password" email action in Keycloak
-func (kc *KeycloakClient) SendWelcomeEmail(ctx context.Context, userID, clientID, redirectURI string) error {
-	path := fmt.Sprintf("/users/%s/execute-actions-email?client_id=%s&redirect_uri=%s",
-		userID, url.QueryEscape(clientID), url.QueryEscape(redirectURI))
-
-	actions := []string{"UPDATE_PASSWORD"}
-	payloadBytes, err := json.Marshal(actions)
-	if err != nil {
-		return fmt.Errorf("failed to marshal actions: %w", err)
-	}
-
-	resp, err := kc.doRequest(ctx, "PUT", path, strings.NewReader(string(payloadBytes)))
-	if err != nil {
-		return fmt.Errorf("execute-actions-email request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("execute-actions-email returned %d: %s", resp.StatusCode, string(body))
-	}
-
-	return nil
-}
-
 // UpdateUser updates a user's profile in Keycloak (firstName, lastName, phone)
 func (kc *KeycloakClient) UpdateUser(ctx context.Context, userID, firstName, lastName, phone string) error {
 	payload := map[string]interface{}{

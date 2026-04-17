@@ -125,6 +125,7 @@ services:
 
       # Notification Worker
       SITE_URL: ${SITE_URL:-https://${APP_DOMAIN}}
+      APP_TITLE: ${APP_TITLE:-Civic OS}
       NOTIFICATION_TIMEZONE: ${NOTIFICATION_TIMEZONE:-UTC}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT:-587}
@@ -148,7 +149,6 @@ services:
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-}
       KEYCLOAK_SERVICE_CLIENT_ID: ${KEYCLOAK_SERVICE_CLIENT_ID:-civic-os-service-account}
       KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:-}
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-}
     networks:
       - civic-os-network
     healthcheck:

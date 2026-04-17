@@ -165,7 +165,6 @@ services:
       - KEYCLOAK_REALM=civic-os-dev
       - KEYCLOAK_SERVICE_CLIENT_ID=civic-os-service-account
       - KEYCLOAK_SERVICE_CLIENT_SECRET=civic-os-service-secret
-      - KEYCLOAK_CLIENT_ID=civic-os-dev-client
       # Recurring Series Configuration
       - RECURRING_SERIES_HORIZON_DAYS=${RECURRING_SERIES_HORIZON_DAYS:-90}
     networks:

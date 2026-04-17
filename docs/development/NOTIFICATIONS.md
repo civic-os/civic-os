@@ -147,6 +147,10 @@ Go templates use `{{` and `}}` delimiters with dot notation for data access.
 {{$url := .Metadata.site_url}}
 <a href="{{$url}}/view/issues/{{.Entity.id}}">View Issue</a>
 
+// Metadata context
+{{.Metadata.site_url}}    // Application URL (from SITE_URL env var)
+{{.Metadata.site_name}}   // Application name (from APP_TITLE env var, default: "Civic OS")
+
 // Built-in functions
 {{len .Entity.tags}} tags
 {{printf "%.2f" .Entity.price}}
@@ -188,6 +192,14 @@ Civic OS provides custom formatters for domain-specific data types. These functi
 // Input: "5551234567"
 // Output: "(555) 123-4567"
 {{formatPhone .Entity.contact_phone}}
+
+// staticAsset - Resolve a static asset slug to a public S3 URL (v0.43.0+)
+// Queries metadata.static_assets by slug, returns full S3 URL for the requested crop.
+// Returns empty string if S3 is not configured, slug is not found, or any DB error.
+{{staticAsset "company-logo"}}              // desktop crop (default)
+{{staticAsset "company-logo" "mobile"}}     // mobile crop
+{{staticAsset "company-logo" "tablet"}}     // tablet crop
+{{staticAsset "company-logo" "original"}}   // uncropped original
 ```
 
 **Timezone Configuration:**
@@ -1407,7 +1419,8 @@ func (r *Renderer) RenderTemplate(tmpl *NotificationTemplate, entityData json.Ra
     context := map[string]interface{}{
         "Entity": entity,
         "Metadata": map[string]string{
-            "site_url": r.siteURL,
+            "site_url":  r.siteURL,
+            "site_name": r.siteName,
         },
     }
 
@@ -1766,6 +1779,7 @@ services:
       SMTP_FROM: ${SMTP_FROM:-noreply@civic-os.org}
       SKIP_TEST_EMAILS: ${SKIP_TEST_EMAILS:-false}
       SITE_URL: http://localhost:4200
+      APP_TITLE: ${APP_TITLE:-Civic OS}
     depends_on:
       - postgres
       - minio
@@ -1809,6 +1823,7 @@ SMTP_REPLY_TO=support@civic-os.org             # Optional: replies go here inste
 
 # Application Configuration
 SITE_URL=https://app.civic-os.org
+APP_TITLE=FFSC Staff Portal                 # Shown in email subject/headers (default: "Civic OS")
 DATABASE_URL=postgres://authenticator:password@postgres:5432/civic_os
 
 # Test Email Filtering (recommended for production)
@@ -3586,6 +3601,7 @@ func (w *NotificationWorker) getTemplate(name string) (*ParsedTemplate, error) {
          SMTP_PASSWORD: ${SMTP_PASSWORD}
          SMTP_FROM: ${SMTP_FROM}
          SITE_URL: ${SITE_URL}
+         APP_TITLE: ${APP_TITLE:-Civic OS}
        depends_on:
          - postgres
    ```

@@ -2,25 +2,38 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"regexp"
 	textTemplate "text/template"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Renderer handles template parsing and rendering
 type Renderer struct {
-	siteURL  string
-	timezone *time.Location
+	siteURL    string
+	siteName   string          // e.g., "FFSC Staff Portal" — from APP_TITLE env var
+	timezone   *time.Location
+	dbPool     *pgxpool.Pool   // For DB-backed template functions (staticAsset)
+	s3BaseURL  string          // e.g., "https://s3.us-east-1.amazonaws.com/civic-os-files"
 }
 
 // NewRenderer creates a new Renderer instance
-func NewRenderer(siteURL string, timezone *time.Location) *Renderer {
+func NewRenderer(siteURL, siteName string, timezone *time.Location, dbPool *pgxpool.Pool, s3BaseURL string) *Renderer {
+	if s3BaseURL == "" {
+		log.Println("[Renderer] S3 base URL not configured — staticAsset template function will return empty strings")
+	}
 	return &Renderer{
-		siteURL:  siteURL,
-		timezone: timezone,
+		siteURL:   siteURL,
+		siteName:  siteName,
+		timezone:  timezone,
+		dbPool:    dbPool,
+		s3BaseURL: s3BaseURL,
 	}
 }
 
@@ -128,7 +141,87 @@ func (r *Renderer) getTemplateFuncs() template.FuncMap {
 		"formatDate":     r.formatDate,
 		"formatMoney":    r.formatMoney,
 		"formatPhone":    r.formatPhone,
+		"staticAsset":    r.staticAsset,
 	}
+}
+
+// staticAsset resolves a static asset slug to a public S3 URL.
+// Usage in templates:
+//
+//	{{staticAsset "company-logo"}}              → desktop crop (default)
+//	{{staticAsset "company-logo" "mobile"}}     → mobile crop
+//	{{staticAsset "company-logo" "tablet"}}     → tablet crop
+//	{{staticAsset "company-logo" "original"}}   → uncropped original
+//
+// Returns empty string (no error) if S3 is not configured, slug is not found,
+// or any DB error occurs — templates degrade to no image rather than crashing.
+func (r *Renderer) staticAsset(slug string, breakpoint ...string) string {
+	// If S3 is not configured, return empty string immediately
+	if r.s3BaseURL == "" {
+		return ""
+	}
+
+	// Determine which breakpoint to use
+	bp := "desktop"
+	if len(breakpoint) > 0 && breakpoint[0] != "" {
+		bp = breakpoint[0]
+	}
+
+	// Use a background context with 5-second timeout
+	// (Go template functions don't receive context)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Query the static asset for all file IDs
+	var originalFileID, desktopFileID, tabletFileID, mobileFileID *string
+	err := r.dbPool.QueryRow(ctx, `
+		SELECT
+			sa.original_file_id::TEXT,
+			sa.desktop_file_id::TEXT,
+			sa.tablet_file_id::TEXT,
+			sa.mobile_file_id::TEXT
+		FROM metadata.static_assets sa
+		WHERE sa.slug = $1
+	`, slug).Scan(&originalFileID, &desktopFileID, &tabletFileID, &mobileFileID)
+	if err != nil {
+		log.Printf("[Renderer] staticAsset: slug %q not found or DB error: %v", slug, err)
+		return ""
+	}
+
+	// Pick the requested breakpoint's file_id, falling back to original
+	var fileID *string
+	switch bp {
+	case "desktop":
+		fileID = desktopFileID
+	case "tablet":
+		fileID = tabletFileID
+	case "mobile":
+		fileID = mobileFileID
+	case "original":
+		fileID = originalFileID
+	default:
+		fileID = desktopFileID
+	}
+	// Fall back to original if the requested crop is NULL
+	if fileID == nil {
+		fileID = originalFileID
+	}
+	if fileID == nil {
+		log.Printf("[Renderer] staticAsset: slug %q has no file for breakpoint %q and no original", slug, bp)
+		return ""
+	}
+
+	// Query the S3 key for this file
+	var s3Key string
+	err = r.dbPool.QueryRow(ctx, `
+		SELECT s3_original_key FROM metadata.files WHERE id = $1
+	`, *fileID).Scan(&s3Key)
+	if err != nil {
+		log.Printf("[Renderer] staticAsset: failed to get S3 key for file %s: %v", *fileID, err)
+		return ""
+	}
+
+	return r.s3BaseURL + "/" + s3Key
 }
 
 // formatTimeSlot formats tstzrange to human-readable date range
@@ -228,7 +321,8 @@ func (r *Renderer) buildContext(entity map[string]interface{}) map[string]interf
 	return map[string]interface{}{
 		"Entity": entity,
 		"Metadata": map[string]string{
-			"site_url": r.siteURL,
+			"site_url":  r.siteURL,
+			"site_name": r.siteName,
 		},
 	}
 }

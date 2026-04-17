@@ -104,6 +104,7 @@ services:
 
       # Notification Worker Configuration
       SITE_URL: ${SITE_URL}
+      APP_TITLE: ${APP_TITLE:-Civic OS}
       NOTIFICATION_TIMEZONE: ${NOTIFICATION_TIMEZONE:-UTC}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT:-587}
