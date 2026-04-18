@@ -658,6 +658,48 @@ describe('ImportExportService', () => {
       expect(result[0]['Location']).toBeNull();
     });
 
+    it('should convert DateTimeLocal UTC to local timezone string', () => {
+      const data = [{ id: 1, entry_time: '2026-03-18T13:17:09.478Z' }];
+      const properties = [
+        createMockProperty({
+          column_name: 'entry_time',
+          display_name: 'Time',
+          type: EntityPropertyType.DateTimeLocal
+        })
+      ];
+      const result = (service as any).transformForExport(data, properties);
+      // Value should be a formatted local-time string, NOT the raw UTC ISO string
+      expect(result[0]['Time']).not.toContain('Z');
+      expect(result[0]['Time']).not.toContain('T');
+      expect(result[0]['Time']).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    });
+
+    it('should handle null DateTimeLocal values', () => {
+      const data = [{ id: 1, entry_time: null }];
+      const properties = [
+        createMockProperty({
+          column_name: 'entry_time',
+          display_name: 'Time',
+          type: EntityPropertyType.DateTimeLocal
+        })
+      ];
+      const result = (service as any).transformForExport(data, properties);
+      expect(result[0]['Time']).toBeNull();
+    });
+
+    it('should pass through unparseable DateTimeLocal values', () => {
+      const data = [{ id: 1, entry_time: 'not-a-date' }];
+      const properties = [
+        createMockProperty({
+          column_name: 'entry_time',
+          display_name: 'Time',
+          type: EntityPropertyType.DateTimeLocal
+        })
+      ];
+      const result = (service as any).transformForExport(data, properties);
+      expect(result[0]['Time']).toBe('not-a-date');
+    });
+
     it('should handle empty data array', () => {
       const result = (service as any).transformForExport([], []);
 

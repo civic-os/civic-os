@@ -285,6 +285,7 @@ BEGIN
       jsonb_build_object(
         'buttons', jsonb_build_array(
           jsonb_build_object('text', 'Add Staff Member', 'url', '/create/staff_members', 'icon', 'person_add', 'variant', 'primary'),
+          jsonb_build_object('text', 'New Task',         'url', '/create/staff_tasks',   'icon', 'add_task',   'variant', 'primary'),
           jsonb_build_object('text', 'Staff Roster',     'url', '/view/staff_members',   'icon', 'group',      'variant', 'outline'),
           jsonb_build_object('text', 'All Documents',    'url', '/view/staff_documents',  'icon', 'folder_open', 'variant', 'outline'),
           jsonb_build_object('text', 'Time Entries',     'url', '/view/time_entries',     'icon', 'schedule',   'variant', 'outline'),

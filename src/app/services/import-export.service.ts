@@ -269,6 +269,22 @@ export class ImportExportService {
           exportRow[prop.display_name + ' (Start)'] = start;
           exportRow[prop.display_name + ' (End)'] = end;
         }
+        // DateTimeLocal - export in local timezone as human-readable datetime
+        else if (prop.type === EntityPropertyType.DateTimeLocal) {
+          if (value) {
+            const date = new Date(value);
+            if (!isNaN(date.getTime())) {
+              exportRow[prop.display_name] = date.toLocaleString('sv-SE', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+              });
+            } else {
+              exportRow[prop.display_name] = value;
+            }
+          } else {
+            exportRow[prop.display_name] = value;
+          }
+        }
         // All other types - copy as-is
         else {
           exportRow[prop.display_name] = value;

@@ -204,13 +204,30 @@ The save transform may also simplify — if PostgREST's session timezone is set,
 
 ### Phase 4: Import/Export (Low-Medium effort)
 
-**4a. Export timezone labeling**
+**4a. Unify timestamp export formatting**
+
+`DateTimeLocal` export (line 277) and `TimeSlot` export (`parseTimeSlotRange`, line 338) both use the same `sv-SE` locale with identical format options — but they're implemented separately. Extract a shared helper:
+
+```typescript
+private formatTimestampForExport(date: Date): string {
+  return date.toLocaleString('sv-SE', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    timeZone: getSystemTimezone()
+  });
+}
+```
+
+Both `DateTimeLocal` and `TimeSlot` export paths call this, ensuring consistent formatting and system timezone usage in one place.
+
+**4b. Export timezone labeling**
 
 Add a timezone indicator to exported spreadsheets:
-- TimeSlot columns: append system timezone abbreviation to header (e.g., "Time Slot (EST)")
+- TimeSlot columns: append system timezone abbreviation to header (e.g., "Time Slot (Start) (EST)")
+- DateTimeLocal columns: same pattern (e.g., "Created At (EST)")
 - Or add a metadata row/sheet with the export timezone
 
-**4b. Import worker timezone**
+**4c. Import worker timezone**
 
 Pass system timezone to the web worker via `postMessage`:
 
