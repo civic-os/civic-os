@@ -66,13 +66,15 @@ The codebase uses some DaisyUI 4 class names that don't exist in DaisyUI 5:
 
 ## API Response Consistency
 
-### Timestamp Formats
+### Timestamp Formats & Timezone Handling
 
 - Some columns return ISO 8601 strings
 - Some return PostgreSQL timestamp format
 - `tstzrange` columns return PostgreSQL range format `["2025-01-01 00:00:00+00","2025-01-02 00:00:00+00")`
+- Frontend uses browser timezone for `DateTimeLocal`/`TimeSlot` display and editing — inconsistent with Go worker's `NOTIFICATION_TIMEZONE`
+- No system-wide timezone concept — each layer makes its own assumptions
 
-**Recommendation:** Document expected formats clearly. Consider adding PostgREST computed fields for pre-formatted display values where needed.
+**Recommendation:** Unify around a single `SYSTEM_TIMEZONE` env var using PostgREST's `Prefer: timezone` header, Angular `DATE_PIPE_DEFAULT_OPTIONS`, and Go worker env var rename. See `docs/notes/SYSTEM_TIMEZONE_DESIGN.md` for complete design.
 
 ### Money Type
 
@@ -104,6 +106,7 @@ PostgreSQL `money` type returns locale-formatted strings like `"$150.00"`. This 
 ## Pre-Release Checklist
 
 - [ ] Resolve metadata column naming inconsistencies
+- [ ] Unify timezone handling (`SYSTEM_TIMEZONE`) — see `docs/notes/SYSTEM_TIMEZONE_DESIGN.md`
 - [ ] Audit and fix DaisyUI class usage
 - [ ] Update all example schemas to use consistent patterns
 - [ ] Review and update INTEGRATOR_GUIDE.md
