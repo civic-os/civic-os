@@ -113,13 +113,132 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 | `PaginationComponent` | Page navigation with size selector |
 | `DisplayPropertyComponent` | Cell rendering for each property type |
 
-## Future: M:M Extension (Phase 5)
+## Future: M:M Search Modal (Phase 5)
 
-The modal is designed to support M:M editors in a future release:
-- Add `multiSelect` input for checkbox selection instead of radio
-- `ManyToManyEditorComponent` opens modal when related entity has `fk_search_modal = true`
-- "Apply" button confirms bulk selection
-- The database constraint already allows `column_name LIKE '%_m2m'`
+### Design Matrix
+
+M:M relationships have two independent axes of configuration:
+
+| | Default position (Detail bottom card) | Inline (in property grid by `sort_order`) |
+|---|---|---|
+| **Chip editor** (default) | Status quo — immediate save on add/remove | Buffered save — pending UI until form Save |
+| **Search modal** (`fk_search_modal`) | Split modal on Detail page — immediate save | Split modal on Edit page — buffered save |
+
+Configuration via `metadata.properties`:
+- `fk_search_modal = true` — controls **picker UI** (search modal vs chip dropdown)
+- `show_inline = true` (new flag) — controls **position** (property grid vs bottom card)
+- The combination of inline + Edit page automatically triggers **buffered save** behavior
+
+### Split Modal Design
+
+Multi-select modal with a left search panel and right selection panel:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Select Tags                                                │
+├────────────────────────────────┬────────────────────────────┤
+│  [🔍 Search...]               │  Selected (3)              │
+│                                │                            │
+│  ┌──┬───────────────────────┐  │  [Urgent        ×]        │
+│  │☑ │ Urgent          🔴   │  │  [Road Surface  ×]        │
+│  │☐ │ Sidewalk        🔵   │  │  [Lighting      ×]        │
+│  │☑ │ Road Surface    🟢   │  │                            │
+│  │☑ │ Lighting        🟡   │  │                            │
+│  │☐ │ Drainage        🟣   │  │                            │
+│  └──┴───────────────────────┘  │                            │
+│                                │                            │
+│  Showing 1-5 of 12            │                            │
+├────────────────────────────────┴────────────────────────────┤
+│                     [Cancel]  [Apply (1 added, 0 removed)]  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Left panel**: Searchable, sortable, paginated list with checkboxes. Reuses the same
+server-side query pipeline as FK search modal (table mode). Pre-checked items = currently
+linked records.
+
+**Right panel**: Scrolling chip list of the *pending* selection state. Chips show the
+display name and optionally the entity's color. X button on a chip unchecks the
+corresponding row in the left panel.
+
+**Key behaviors**:
+- **Checkbox ↔ chip sync**: Checking a row adds a chip. Unchecking removes it. X on
+  chip unchecks the row. State is bidirectionally synchronized.
+- **Cross-page persistence**: Selections persist across search and pagination. User can
+  search "Urgent" on page 1, check it, search "Drainage" on page 3, check it — both
+  appear in the right panel simultaneously.
+- **Apply button**: Shows diff summary ("2 added, 1 removed"). In default position mode,
+  executes junction mutations immediately. In inline mode, buffers the diff for form Save.
+- **Cancel**: Discards all pending changes, restores original selection state.
+
+### Inline M:M Behavior
+
+**Detail page (read-only)**: Inline M:M renders as display-only chips in the property grid
+at its `sort_order` position. No edit affordance — user must click the page-level Edit
+button to modify relationships.
+
+**Edit page (buffered save)**:
+- Inline M:M shows current chips with an edit trigger (search button or "edit" icon)
+- All M:M changes are buffered as a local diff — NOT committed until form Save
+- Pending changes show visual state:
+  - Added chips: green outline / dashed border
+  - Removed chips: strikethrough / dimmed
+- Form Save executes: (1) entity PATCH, then (2) M:M junction mutations sequentially
+- If entity PATCH fails → M:M mutations don't fire, pending changes preserved in buffer
+- If M:M mutations partially fail → show specific errors with retry option
+- On Create pages: entity save returns the new ID, which is then used for M:M junction inserts
+
+### Data Flow: Buffered Save
+
+```
+User edits form fields + M:M selections
+         │
+         ▼
+    [Save button]
+         │
+    ┌────▼────┐
+    │ PATCH   │ ← Regular form fields
+    │ entity  │
+    └────┬────┘
+         │ success?
+    ┌────▼─────────┐
+    │ Diff M:M     │ ← Compare pending vs original
+    │ selections   │
+    └────┬─────────┘
+         │
+    ┌────▼────┐    ┌────▼────┐
+    │ INSERT  │    │ DELETE  │ ← Individual junction row mutations
+    │ added   │    │ removed │
+    └─────────┘    └─────────┘
+         │              │
+         ▼              ▼
+    Show result: "Saved. 2 tags added, 1 removed."
+    (or partial error with retry for failed mutations)
+```
+
+The existing `ManyToManyEditorComponent` diff model (comparing current vs original to
+determine adds/removes) is preserved. The only change is *when* the diff is applied:
+immediately (default position) vs on form Save (inline).
+
+### Implementation Components
+
+| Component | New/Modified | Role |
+|-----------|-------------|------|
+| `FkSearchModalComponent` | Modified | Add `multiSelect` input, checkbox UI, right panel |
+| `ManyToManyEditorComponent` | Modified | Detect `fk_search_modal`, trigger search modal |
+| `EditPage` | Modified | Collect buffered M:M diffs, apply after entity PATCH |
+| `DetailPage` | Modified | Inline M:M rendering in property grid |
+| `metadata.properties` | Migration | Add `show_inline` column |
+
+### Database Migration (future)
+
+```sql
+ALTER TABLE metadata.properties ADD COLUMN show_inline BOOLEAN DEFAULT FALSE;
+
+-- Constraint: show_inline only for M:M columns
+ALTER TABLE metadata.properties ADD CONSTRAINT show_inline_requires_m2m
+  CHECK (show_inline = false OR column_name LIKE '%\_m2m');
+```
 
 ## Migration
 
