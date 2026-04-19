@@ -68,3 +68,4 @@ v0-41-2-fix-impersonation-refresh [v0-41-1-add-category-action-param-type] 2026-
 v0-43-0-user-welcome-notification [v0-41-2-fix-impersonation-refresh] 2026-04-17T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Replace Keycloak welcome email with Civic OS notification template
 v0-43-1-resolve-role-key [v0-43-0-user-welcome-notification] 2026-04-17T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Accept both role_key and display_name in user provisioning and role RPCs
 v0-44-0-options-source-rpc [v0-43-1-resolve-role-key] 2026-04-18T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add options_source_rpc and depends_on_columns to metadata.properties for custom FK/M:M option loading
+v0-45-0-fk-search-modal [v0-44-0-options-source-rpc] 2026-04-19T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add fk_search_modal flag for searchable FK modal rendering

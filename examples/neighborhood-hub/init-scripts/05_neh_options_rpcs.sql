@@ -21,12 +21,14 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_eligible_borrowers TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_eligible_borrowers TO web_anon;
 
--- Register: tool_reservations.borrower_id uses filtered borrower list
-INSERT INTO metadata.properties (table_name, column_name, display_name, options_source_rpc)
-VALUES ('tool_reservations', 'borrower_id', 'Borrower', 'get_eligible_borrowers')
+-- Register: tool_reservations.borrower_id uses filtered borrower list with search modal (v0.45.0)
+INSERT INTO metadata.properties (table_name, column_name, display_name, options_source_rpc, join_table, fk_search_modal)
+VALUES ('tool_reservations', 'borrower_id', 'Borrower', 'get_eligible_borrowers', 'borrowers', true)
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
-      options_source_rpc = EXCLUDED.options_source_rpc;
+      options_source_rpc = EXCLUDED.options_source_rpc,
+      join_table = EXCLUDED.join_table,
+      fk_search_modal = EXCLUDED.fk_search_modal;
 
 
 -- ============================================================================

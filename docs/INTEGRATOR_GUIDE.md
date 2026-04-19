@@ -95,6 +95,7 @@ Key fields:
 - `show_on_detail` - BOOLEAN - Display in Detail page (default: true)
 - `options_source_rpc` - NAME - Custom RPC function name for FK/M:M option loading (v0.44.0). When set, the framework calls this RPC instead of querying the related table. See [Options Source RPC](#options-source-rpc-v0440) section below.
 - `depends_on_columns` - NAME[] - Array of form field column names that trigger a re-fetch of `options_source_rpc` when their values change (v0.44.0). Enables cascading dropdowns.
+- `fk_search_modal` - BOOLEAN - When true, renders FK fields as a searchable modal instead of a `<select>` dropdown (v0.45.0). Requires `join_table` to be set. See [FK Search Modal](#fk-search-modal-v0450) section below.
 
 **Configuration Methods**:
 1. Property Management page UI (`/property-management`) - Admin-only visual editor
@@ -4559,6 +4560,63 @@ GRANT EXECUTE ON FUNCTION get_eligible_parcels TO authenticated;
 - Grant `EXECUTE` to `authenticated` (and `web_anon` if needed for anonymous access)
 - The RPC is called via PostgREST's `/rpc/function_name` endpoint
 - See `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` for full architecture details
+
+---
+
+### FK Search Modal (v0.45.0)
+
+Replace native `<select>` dropdowns with a searchable modal for FK fields with many options. The modal provides search, sort, filter, and pagination — a mini List page inside a dialog.
+
+**When to use**: Native `<select>` elements become unusable at scale (50+ options). The FK search modal provides a rich browsing experience with the same capabilities as the List page.
+
+**Configuration** — Set `fk_search_modal = true` on `metadata.properties`:
+
+```sql
+-- Basic FK search modal: render borrower_id as searchable modal
+INSERT INTO metadata.properties (table_name, column_name, join_table, fk_search_modal)
+VALUES ('tool_reservations', 'borrower_id', 'borrowers', true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET join_table = EXCLUDED.join_table,
+      fk_search_modal = EXCLUDED.fk_search_modal;
+```
+
+**Requirements**:
+- `join_table` must be set (tells the modal which entity to query)
+- A CHECK constraint (`fk_search_modal_requires_fk`) enforces this — you cannot set `fk_search_modal = true` without `join_table` (or a `_m2m` column name)
+- For auto-detected FKs that don't have a `metadata.properties` row, you must create one with `join_table` to use the search modal
+
+**Compatibility with Options Source RPC**: Both features can be used together. When `options_source_rpc` and `fk_search_modal` are both set, the RPC filters the available options and the modal provides rich UI with client-side search within the filtered set:
+
+```sql
+-- Combined: RPC filters to approved borrowers, modal provides search UI
+INSERT INTO metadata.properties
+  (table_name, column_name, join_table, options_source_rpc, fk_search_modal)
+VALUES
+  ('tool_reservations', 'borrower_id', 'borrowers', 'get_eligible_borrowers', true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET join_table = EXCLUDED.join_table,
+      options_source_rpc = EXCLUDED.options_source_rpc,
+      fk_search_modal = EXCLUDED.fk_search_modal;
+```
+
+**Two data modes** — The modal adapts its behavior based on configuration:
+
+| Mode | When | Search | Sort | Filter | Pagination |
+|------|------|--------|------|--------|------------|
+| **Table mode** | `fk_search_modal` only | Server-side (PostgREST full-text) | Server-side | FilterBar with entity properties | Server-side |
+| **RPC mode** | `fk_search_modal` + `options_source_rpc` | Client-side (text match) | Client-side (alphabetical) | Hidden (no property metadata) | Client-side |
+
+**Frontend behavior**:
+- **Create pages**: Borrower field shows a button with "Select..." and a search icon instead of a `<select>` dropdown. Clicking opens the modal.
+- **Edit pages**: Button shows the current value's display name (resolved via a lookup query). Opening the modal pre-highlights the current selection.
+- **Selection model**: Click a row to highlight it (radio-button style), then click Confirm to apply. This enables an "inspect before choosing" workflow.
+- **Nullable fields**: A Clear button (warning style) appears in the footer to set the FK to null.
+- **Query param pre-fill**: When Create pages pre-fill FK fields via URL query parameters (e.g., `/create/tool_reservations?borrower_id=5`), the display name is automatically resolved.
+
+**Important Notes**:
+- Table mode requires `search_fields` on the target entity for the search input to appear. Without it, users can still sort, filter, and paginate.
+- The modal reuses existing infrastructure: `SchemaService`, `DataService.getDataPaginated()`, `FilterBarComponent`, `PaginationComponent`, and `DisplayPropertyComponent`.
+- See `docs/notes/FK_SEARCH_MODAL_DESIGN.md` for architecture details.
 
 ---
 

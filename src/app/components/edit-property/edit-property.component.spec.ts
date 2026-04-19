@@ -23,6 +23,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { of, Subject } from 'rxjs';
 import { EditPropertyComponent } from './edit-property.component';
 import { DataService } from '../../services/data.service';
+import { SchemaService } from '../../services/schema.service';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
@@ -31,16 +32,32 @@ describe('EditPropertyComponent', () => {
   let component: EditPropertyComponent;
   let fixture: ComponentFixture<EditPropertyComponent>;
   let mockDataService: jasmine.SpyObj<DataService>;
+  let mockSchemaService: jasmine.SpyObj<SchemaService>;
 
   beforeEach(async () => {
-    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'callRpc']);
+    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getDataPaginated', 'callRpc']);
+    mockSchemaService = jasmine.createSpyObj('SchemaService', [
+      'getEntity', 'getPropsForList', 'getPropsForFilter',
+      'getStatusesForEntity', 'getCategoriesForEntity',
+      'getStatusOptionsSync', 'ensureStatusOptionsLoaded',
+      'getCategoryOptionsSync', 'ensureCategoryOptionsLoaded'
+    ]);
+
+    // Default return values to prevent unhandled calls
+    mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+    mockSchemaService.getStatusesForEntity.and.returnValue(of([]));
+    mockSchemaService.getCategoriesForEntity.and.returnValue(of([]));
+    mockSchemaService.getEntity.and.returnValue(of(undefined));
+    mockSchemaService.getPropsForList.and.returnValue(of([]));
+    mockSchemaService.getPropsForFilter.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [EditPropertyComponent, ReactiveFormsModule],
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
-        { provide: DataService, useValue: mockDataService }
+        { provide: DataService, useValue: mockDataService },
+        { provide: SchemaService, useValue: mockSchemaService }
       ]
     })
     .compileComponents();
@@ -1889,6 +1906,210 @@ describe('EditPropertyComponent', () => {
         expect(options.length).toBe(2);
         done();
       });
+    });
+  });
+
+  describe('FK Search Modal (v0.45.0)', () => {
+    const fkSearchProp = createMockProperty({
+      ...MOCK_PROPERTIES.foreignKey,
+      fk_search_modal: true,
+      is_nullable: true
+    });
+
+    it('should render button (not select) when fk_search_modal is true', async () => {
+      mockDataService.getData.and.returnValue(of([{ id: 1, display_name: 'Test', created_at: '', updated_at: '' }] as any));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      const button = fixture.debugElement.query(By.css('button.btn-outline'));
+      expect(button).toBeTruthy();
+      expect(button.nativeElement.textContent).toContain('Select...');
+
+      // Should NOT render <select>
+      const select = fixture.debugElement.query(By.css('select'));
+      expect(select).toBeFalsy();
+    });
+
+    it('should show display name on button when value is set', async () => {
+      mockDataService.getData.and.returnValue(of([{ id: 1, display_name: 'Open Status', created_at: '', updated_at: '' }] as any));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(1)
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+      fixture.detectChanges();
+
+      const button = fixture.debugElement.query(By.css('button.btn-outline'));
+      expect(button.nativeElement.textContent).toContain('Open Status');
+    });
+
+    it('should show search icon in button', () => {
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const icon = fixture.debugElement.query(By.css('button.btn-outline .material-symbols-outlined'));
+      expect(icon).toBeTruthy();
+      expect(icon.nativeElement.textContent.trim()).toBe('search');
+    });
+
+    it('should open modal on button click', () => {
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.showFkSearchModal()).toBe(false);
+
+      const button = fixture.debugElement.query(By.css('button.btn-outline'));
+      button.nativeElement.click();
+      fixture.detectChanges();
+
+      expect(component.showFkSearchModal()).toBe(true);
+    });
+
+    it('should update form on confirmed event', () => {
+      const formControl = new FormControl<number | null>(null);
+      const formGroup = new FormGroup({
+        status_id: formControl
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      component.showFkSearchModal.set(true);
+
+      component.onFkSearchConfirm({ id: 5, displayName: 'Selected Item' });
+
+      expect(formControl.value).toBe(5);
+      expect(formControl.dirty).toBe(true);
+      expect(component.selectedDisplayName()).toBe('Selected Item');
+      expect(component.showFkSearchModal()).toBe(false);
+    });
+
+    it('should not update form on closed event (cancel)', () => {
+      mockDataService.getData.and.returnValue(of([{ id: 3, display_name: 'Existing', created_at: '', updated_at: '' }] as any));
+
+      const formControl = new FormControl(3);
+      const formGroup = new FormGroup({
+        status_id: formControl
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      component.showFkSearchModal.set(true);
+      fixture.detectChanges();
+
+      // Cancel (close without confirm)
+      component.showFkSearchModal.set(false);
+
+      expect(formControl.value).toBe(3);
+      expect(formControl.dirty).toBe(false);
+    });
+
+    it('should clear form value on null confirmed event', () => {
+      mockDataService.getData.and.returnValue(of([{ id: 3, display_name: 'Existing', created_at: '', updated_at: '' }] as any));
+
+      const formControl = new FormControl(3);
+      const formGroup = new FormGroup({
+        status_id: formControl
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      component.onFkSearchConfirm(null);
+
+      expect(formControl.value).toBeNull();
+      expect(formControl.dirty).toBe(true);
+      expect(component.selectedDisplayName()).toBe('');
+    });
+
+    it('should pass rpcSelectOptions to modal when RPC configured', () => {
+      const fkSearchRpcProp = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: true,
+        options_source_rpc: 'get_eligible_options'
+      });
+
+      mockDataService.callRpc.and.returnValue(of([
+        { id: 10, display_name: 'RPC Option A' },
+        { id: 20, display_name: 'RPC Option B' }
+      ]));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkSearchRpcProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.useFkSearchModal()).toBe(true);
+      expect(component.useRpcOptions()).toBe(true);
+      expect(component.rpcSelectOptions().length).toBe(2);
+    });
+
+    it('should pass null rpcOptions when no RPC configured', () => {
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkSearchProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.useFkSearchModal()).toBe(true);
+      expect(component.useRpcOptions()).toBe(false);
+    });
+
+    it('should not use search modal when fk_search_modal is false', () => {
+      const regularFkProp = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: false
+      });
+      mockDataService.getData.and.returnValue(of([]));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', regularFkProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.useFkSearchModal()).toBe(false);
+    });
+
+    it('should not use search modal when fk_search_modal is undefined', () => {
+      mockDataService.getData.and.returnValue(of([]));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.foreignKey);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.useFkSearchModal()).toBe(false);
     });
   });
 });

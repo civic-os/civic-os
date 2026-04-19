@@ -12,7 +12,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | [Mott Park](#mott-park) | Clubhouse reservations | Payments, virtual entities, schema decisions, iCal feeds |
 | [Staff Portal](#staff-portal) | Staff management | Action parameters, multi-entity workflows, three-tier RLS |
 | [StoryMap](#storymap) | Geographic narratives | Map widgets, dashboard storytelling |
-| [Neighborhood Hub](#neighborhood-hub) | Tool lending library | Options Source RPC: cascading dropdowns, filtered FKs, filtered M:M |
+| [Neighborhood Hub](#neighborhood-hub) | Tool lending library | Options Source RPC: cascading dropdowns, filtered FKs, filtered M:M; FK Search Modal |
 
 ## Feature Matrix
 

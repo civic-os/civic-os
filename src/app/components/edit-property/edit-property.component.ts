@@ -32,6 +32,7 @@ import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { EditTimeSlotComponent } from '../edit-time-slot/edit-time-slot.component';
 import { EditRecurringTimeSlotComponent } from '../edit-recurring-time-slot/edit-recurring-time-slot.component';
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
+import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.component';
 import { getS3Config } from '../../config/runtime';
 
 @Component({
@@ -47,7 +48,8 @@ import { getS3Config } from '../../config/runtime';
     GeoPointMapComponent,
     EditTimeSlotComponent,
     EditRecurringTimeSlotComponent,
-    PaymentBadgeComponent
+    PaymentBadgeComponent,
+    FkSearchModalComponent
 ],
     providers: [
         provideNgxMask(),
@@ -71,6 +73,14 @@ export class EditPropertyComponent {
   public categoryOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
 
   propType = computed(() => this.prop().type);
+
+  // FK search modal state (v0.45.0)
+  showFkSearchModal = signal(false);
+  selectedDisplayName = signal('');
+  useFkSearchModal = computed(() =>
+    this.prop().fk_search_modal === true && this.propType() === EntityPropertyType.ForeignKeyName
+  );
+  private suppressDisplayNameResolve = false;
 
   /**
    * Computed signal to check if field is required.
@@ -97,9 +107,36 @@ export class EditPropertyComponent {
   ngOnInit() {
     const prop = this.prop();
 
-    // Load FK options — branch on options_source_rpc (v0.44.0)
+    // Load FK options — branch on fk_search_modal (v0.45.0) > options_source_rpc (v0.44.0) > default
     if(this.propType() == EntityPropertyType.ForeignKeyName) {
-      if (prop.options_source_rpc) {
+      if (this.useFkSearchModal()) {
+        // FK search modal mode: resolve display name for current value
+        const currentId = this.form().get(prop.column_name)?.value;
+        if (currentId != null) {
+          this.resolveDisplayName(prop, currentId);
+        }
+        // Watch for programmatic changes (e.g., query param pre-fill on Create page).
+        // Skip when the change came from onFkSearchConfirm (which already sets the display name).
+        this.form().get(prop.column_name)?.valueChanges.pipe(
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe(value => {
+          if (this.suppressDisplayNameResolve) {
+            this.suppressDisplayNameResolve = false;
+            return;
+          }
+          if (value != null && value !== 'null') {
+            this.resolveDisplayName(this.prop(), value);
+          } else {
+            this.selectedDisplayName.set('');
+          }
+        });
+        // Also load RPC options if configured (for modal's RPC mode)
+        if (prop.options_source_rpc) {
+          this.useRpcOptions.set(true);
+          this.loadOptionsFromRpc(prop);
+          this.setupDependencyWatchers(prop);
+        }
+      } else if (prop.options_source_rpc) {
         this.useRpcOptions.set(true);
         this.loadOptionsFromRpc(prop);
         this.setupDependencyWatchers(prop);
@@ -262,6 +299,38 @@ export class EditPropertyComponent {
     ).subscribe(() => {
       this.loadOptionsFromRpc(prop);
     });
+  }
+
+  /**
+   * Resolve display name for a FK value by querying the related table.
+   * Used when fk_search_modal is true and the form loads with a pre-set FK ID.
+   */
+  private resolveDisplayName(prop: SchemaEntityProperty, id: number | string): void {
+    this.data.getData({
+      key: prop.join_table,
+      fields: ['id:' + (prop.join_column || 'id'), 'display_name'],
+      filters: [{ column: prop.join_column || 'id', operator: 'eq', value: String(id) }]
+    }).pipe(
+      catchError(() => of([])),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(results => {
+      if (results.length > 0) {
+        this.selectedDisplayName.set(results[0].display_name);
+      }
+    });
+  }
+
+  /**
+   * Handle FK search modal confirmation.
+   * Updates the form control and display name.
+   */
+  onFkSearchConfirm(selection: {id: number | string, displayName: string} | null): void {
+    const control = this.form().get(this.prop().column_name);
+    this.suppressDisplayNameResolve = true; // Prevent valueChanges from re-resolving
+    control?.setValue(selection?.id ?? null);
+    control?.markAsDirty();
+    this.selectedDisplayName.set(selection?.displayName ?? '');
+    this.showFkSearchModal.set(false);
   }
 
   public onMapValueChange(ewkt: string) {

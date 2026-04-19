@@ -43,7 +43,28 @@
     </label>
   }
   @if (propType() == EntityPropertyType.ForeignKeyName) {
-    @if (useRpcOptions()) {
+    @if (useFkSearchModal()) {
+      <!-- FK search modal (v0.45.0) — highest priority rendering path -->
+      <button type="button" class="btn btn-outline w-full justify-between"
+              [id]="prop().column_name"
+              (click)="showFkSearchModal.set(true)">
+        <span [class.text-base-content/50]="!selectedDisplayName()">
+          {{ selectedDisplayName() || 'Select...' }}
+        </span>
+        <span class="material-symbols-outlined">search</span>
+      </button>
+      <app-fk-search-modal
+        [isOpen]="showFkSearchModal()"
+        [joinTable]="prop().join_table"
+        [joinColumn]="prop().join_column || 'id'"
+        [currentValue]="form().get(prop().column_name)?.value"
+        [isNullable]="prop().is_nullable"
+        [title]="'Select ' + prop().display_name"
+        [rpcOptions]="useRpcOptions() ? rpcSelectOptions() : null"
+        (confirmed)="onFkSearchConfirm($event)"
+        (closed)="showFkSearchModal.set(false)"
+      />
+    } @else if (useRpcOptions()) {
       <!-- RPC-driven options via signal (v0.44.0) -->
       <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
         @if (prop().is_nullable || rpcSelectOptions().length === 0) {

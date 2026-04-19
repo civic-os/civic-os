@@ -42,7 +42,7 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 ### Property Type System
 
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
-- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` for custom RPC-driven option lists and `depends_on_columns` for cascading dropdowns (v0.44.0). See `docs/INTEGRATOR_GUIDE.md` (Options Source RPC section).
+- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` for custom RPC-driven option lists and `depends_on_columns` for cascading dropdowns (v0.44.0). Optionally renders as searchable modal via `fk_search_modal` (v0.45.0) for large option sets with search, sort, filter, and pagination. See `docs/INTEGRATOR_GUIDE.md` (Options Source RPC and FK Search Modal sections).
 - `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
 - `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
@@ -448,8 +448,23 @@ When creating new documentation files, follow this structure:
 - User guides → `docs/`
 - Developer guides → `docs/development/`
 - Bug postmortems, research notes → `docs/notes/`
-- **Prefer formal docs over MEMORY files**: Research, decisions, and knowledge should be captured in `docs/` files (checked into the repo) rather than in Claude auto-memory. Auto-memory is for quick operational reminders only.
 - **Never** create markdown files in the root directory (except README.md and CLAUDE.md)
+
+**Docs over auto-memory — always.** Auto-memory only lives on one machine and is invisible to contributors. `docs/` files are checked into Git, portable, and permanent. Heavily favor `docs/` for anything of lasting value. Auto-memory is only for quick operational reminders (commands, env quirks).
+
+**Documentation is a feature.** Every feature ships with documentation updates targeting three audiences:
+1. **`CLAUDE.md`** — AI-readable index so Claude Code understands the feature in future sessions
+2. **`docs/INTEGRATOR_GUIDE.md`** — Human integrators: SQL configuration, examples, behavior
+3. **`docs/notes/<FEATURE>_DESIGN.md`** — Future contributors: architecture, decisions, tradeoffs
+
+Keep all three fresh with every feature. Stale docs are worse than no docs.
+
+**Features require E2E validation.** A feature is never finished until validated end-to-end across the full stack:
+1. Unit tests (`npm run test:headless`) — all passing
+2. Docker (`docker compose down -v && up`) — migrations apply cleanly
+3. SQL (`psql`) — verify columns, constraints, VIEW output
+4. curl — verify PostgREST serves new fields correctly
+5. Chrome — browser automation to test the actual UI flow
 
 ## Git Commit Guidelines
 

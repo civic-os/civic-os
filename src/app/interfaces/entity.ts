@@ -126,6 +126,10 @@ export interface SchemaEntityProperty {
     options_source_rpc?: string;
     // Form field names whose values are passed as p_depends_on keys; changes trigger re-fetch
     depends_on_columns?: string[];
+
+    // FK search modal flag (v0.45.0)
+    // When true, FK fields render as a searchable modal instead of a <select> dropdown
+    fk_search_modal?: boolean;
 }
 
 export enum EntityPropertyType {
