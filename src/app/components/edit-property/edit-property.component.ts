@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,16 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, input, computed, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, inject, input, computed, ChangeDetectionStrategy, signal, DestroyRef } from '@angular/core';
 import { SchemaEntityProperty, EntityPropertyType, FileReference } from '../../interfaces/entity';
 
-import { Observable, map } from 'rxjs';
+import { Observable, map, merge, of, catchError } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs/operators';
 import { DataService } from '../../services/data.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { SchemaService } from '../../services/schema.service';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { NgxCurrencyDirective } from 'ngx-currency';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { EditTimeSlotComponent } from '../edit-time-slot/edit-time-slot.component';
@@ -55,6 +57,7 @@ export class EditPropertyComponent {
   private data = inject(DataService);
   private fileUpload = inject(FileUploadService);
   private schema = inject(SchemaService);
+  private destroyRef = inject(DestroyRef);
 
   prop = input.required<SchemaEntityProperty>({ alias: 'property' });
   form = input.required<FormGroup>({ alias: 'formGroup' });
@@ -62,6 +65,8 @@ export class EditPropertyComponent {
   entityId = input<string>('');
 
   public selectOptions$?: Observable<{id: number, text: string}[]>;
+  public rpcSelectOptions = signal<{id: number, text: string}[]>([]);  // Signal-driven FK options for RPC mode (v0.44.0)
+  public useRpcOptions = signal(false);  // Whether this FK uses RPC-driven options
   public statusOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
   public categoryOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
 
@@ -92,21 +97,27 @@ export class EditPropertyComponent {
   ngOnInit() {
     const prop = this.prop();
 
-    // Load FK options
+    // Load FK options — branch on options_source_rpc (v0.44.0)
     if(this.propType() == EntityPropertyType.ForeignKeyName) {
-      this.selectOptions$ = this.data.getData({
-        key: prop.join_table,
-        fields: ['id:' + prop.join_column, 'display_name'],
-        orderField: 'id',
-      })
-      .pipe(map(data => {
-        return data.map(d => {
-          return {
-            id: d.id!,
-            text: d.display_name,
-          }
-        });
-      }));
+      if (prop.options_source_rpc) {
+        this.useRpcOptions.set(true);
+        this.loadOptionsFromRpc(prop);
+        this.setupDependencyWatchers(prop);
+      } else {
+        this.selectOptions$ = this.data.getData({
+          key: prop.join_table,
+          fields: ['id:' + prop.join_column, 'display_name'],
+          orderField: 'id',
+        })
+        .pipe(map(data => {
+          return data.map(d => {
+            return {
+              id: d.id!,
+              text: d.display_name,
+            }
+          });
+        }));
+      }
     }
 
     // Load User options
@@ -183,6 +194,74 @@ export class EditPropertyComponent {
     // Note: Value transformation for datetime-local and money inputs
     // is now handled in edit.page.ts when creating FormControls.
     // This ensures transformation happens when data arrives, not when component initializes.
+  }
+
+  /**
+   * Load FK options from a custom RPC instead of the default table query.
+   * Uses signal (rpcSelectOptions) instead of Observable reassignment to ensure
+   * OnPush change detection picks up updates from dependency watchers.
+   * Invalidates the current selection if it's no longer in the returned options.
+   */
+  private loadOptionsFromRpc(prop: SchemaEntityProperty) {
+    const dependsOn = this.buildDependsOn(prop);
+    this.data.callRpc(prop.options_source_rpc!, {
+      p_id: this.entityId() || null,
+      p_depends_on: dependsOn
+    }).pipe(
+      map((data: any[]) => data.map(d => ({ id: d.id, text: d.display_name }))),
+      catchError(err => {
+        console.error(`options_source_rpc '${prop.options_source_rpc}' failed:`, err);
+        return of([]);
+      })
+    ).subscribe(options => {
+      this.rpcSelectOptions.set(options);
+      // Invalidate current selection if no longer in options
+      const currentValue = this.form().get(prop.column_name)?.value;
+      if (currentValue != null) {
+        const validIds = new Set(options.map(o => o.id));
+        if (!validIds.has(currentValue) && !validIds.has(Number(currentValue))) {
+          this.form().get(prop.column_name)?.setValue(null);
+          this.form().get(prop.column_name)?.markAsTouched();
+        }
+      }
+    });
+  }
+
+  /**
+   * Build the p_depends_on JSONB payload from current form field values.
+   */
+  private buildDependsOn(prop: SchemaEntityProperty): Record<string, any> {
+    if (!prop.depends_on_columns?.length) return {};
+    const result: Record<string, any> = {};
+    for (const col of prop.depends_on_columns) {
+      const control = this.form().get(col);
+      if (!control) {
+        console.warn(`options_source_rpc: depends_on_columns references '${col}' but no form control found for ${prop.table_name}.${prop.column_name}`);
+      }
+      result[col] = control?.value ?? null;
+    }
+    return result;
+  }
+
+  /**
+   * Watch dependency form controls for changes and re-fetch RPC options.
+   * Debounces rapid changes (300ms) to avoid excessive API calls.
+   */
+  private setupDependencyWatchers(prop: SchemaEntityProperty) {
+    if (!prop.depends_on_columns?.length) return;
+
+    const controls = prop.depends_on_columns
+      .map(col => this.form().get(col))
+      .filter((c): c is FormControl => c !== null);
+
+    if (controls.length === 0) return;
+
+    merge(...controls.map(c => c.valueChanges)).pipe(
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
+      this.loadOptionsFromRpc(prop);
+    });
   }
 
   public onMapValueChange(ewkt: string) {

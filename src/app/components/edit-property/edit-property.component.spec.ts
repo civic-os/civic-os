@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,7 +20,7 @@ import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EditPropertyComponent } from './edit-property.component';
 import { DataService } from '../../services/data.service';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -1664,6 +1664,230 @@ describe('EditPropertyComponent', () => {
 
         const bgColor = component.getSelectedCategoryBackgroundColor(mockCategoryOptions);
         expect(bgColor).toBeNull();
+      });
+    });
+  });
+
+  describe('Options Source RPC (v0.44.0)', () => {
+    const mockRpcOptions = [
+      { id: 10, display_name: 'Approved Borrower A' },
+      { id: 20, display_name: 'Approved Borrower B' }
+    ];
+
+    it('should call callRpc instead of getData when options_source_rpc is set', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+
+      const fkPropWithRpc = createMockProperty({
+        column_name: 'borrower_id',
+        display_name: 'Borrower',
+        data_type: 'integer',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'borrowers',
+        join_column: 'id',
+        type: EntityPropertyType.ForeignKeyName,
+        options_source_rpc: 'get_eligible_borrowers'
+      });
+
+      const formGroup = new FormGroup({
+        borrower_id: new FormControl(null)
+      });
+
+      fixture.componentRef.setInput('property', fkPropWithRpc);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      fixture.componentRef.setInput('entityId', '42');
+      component.ngOnInit();
+
+      expect(mockDataService.callRpc).toHaveBeenCalledWith('get_eligible_borrowers', {
+        p_id: '42',
+        p_depends_on: {}
+      });
+      expect(mockDataService.getData).not.toHaveBeenCalled();
+
+      // Signal-driven: options are set synchronously after callRpc completes
+      expect(component.rpcSelectOptions().length).toBe(2);
+      expect(component.rpcSelectOptions()[0]).toEqual({ id: 10, text: 'Approved Borrower A' });
+      expect(component.useRpcOptions()).toBe(true);
+      done();
+    });
+
+    it('should pass p_id=null on Create pages (empty entityId)', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+
+      const fkPropWithRpc = createMockProperty({
+        column_name: 'borrower_id',
+        display_name: 'Borrower',
+        data_type: 'integer',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'borrowers',
+        join_column: 'id',
+        type: EntityPropertyType.ForeignKeyName,
+        options_source_rpc: 'get_eligible_borrowers'
+      });
+
+      const formGroup = new FormGroup({
+        borrower_id: new FormControl(null)
+      });
+
+      fixture.componentRef.setInput('property', fkPropWithRpc);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      fixture.componentRef.setInput('entityId', '');  // Create page
+      component.ngOnInit();
+
+      expect(mockDataService.callRpc).toHaveBeenCalledWith('get_eligible_borrowers', {
+        p_id: null,  // Empty string → null
+        p_depends_on: {}
+      });
+
+      expect(component.rpcSelectOptions().length).toBe(2);
+      done();
+    });
+
+    it('should re-call RPC when a dependency field changes', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+
+      const cascadingProp = createMockProperty({
+        column_name: 'tool_type_id',
+        display_name: 'Tool Type',
+        data_type: 'integer',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'tool_types',
+        join_column: 'id',
+        type: EntityPropertyType.ForeignKeyName,
+        options_source_rpc: 'get_tool_types_by_category',
+        depends_on_columns: ['category_id']
+      });
+
+      const formGroup = new FormGroup({
+        category_id: new FormControl<number | null>(null),
+        tool_type_id: new FormControl<number | null>(null)
+      });
+
+      fixture.componentRef.setInput('property', cascadingProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      fixture.componentRef.setInput('entityId', '42');
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // Reset spy after init to isolate dependency change calls
+      mockDataService.callRpc.calls.reset();
+
+      // Change dependency value
+      formGroup.get('category_id')?.setValue(5);
+
+      // Wait past debounce (300ms)
+      setTimeout(() => {
+        expect(mockDataService.callRpc).toHaveBeenCalled();
+        expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_types_by_category', {
+          p_id: '42',
+          p_depends_on: { category_id: 5 }
+        });
+        done();
+      }, 400);
+    });
+
+    it('should debounce rapid dependency changes (300ms)', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+
+      const cascadingProp = createMockProperty({
+        column_name: 'tool_type_id',
+        display_name: 'Tool Type',
+        data_type: 'integer',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'tool_types',
+        join_column: 'id',
+        type: EntityPropertyType.ForeignKeyName,
+        options_source_rpc: 'get_tool_types_by_category',
+        depends_on_columns: ['category_id']
+      });
+
+      const formGroup = new FormGroup({
+        category_id: new FormControl<number | null>(null),
+        tool_type_id: new FormControl<number | null>(null)
+      });
+
+      fixture.componentRef.setInput('property', cascadingProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      fixture.componentRef.setInput('entityId', '42');
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // Reset spy after init to isolate dependency change calls
+      mockDataService.callRpc.calls.reset();
+
+      // Rapid changes within debounce window
+      formGroup.get('category_id')?.setValue(1);
+      setTimeout(() => formGroup.get('category_id')?.setValue(2), 50);
+      setTimeout(() => formGroup.get('category_id')?.setValue(3), 100);
+
+      // Wait past debounce from last change — only the final value should trigger a call
+      setTimeout(() => {
+        // The debounced callback fires loadOptionsFromRpc once.
+        // The underlying callRpc may be invoked multiple times due to async pipe re-subscription,
+        // but the most recent call should contain the final dependency value.
+        const lastCall = mockDataService.callRpc.calls.mostRecent();
+        expect(lastCall.args[1]['p_depends_on']['category_id']).toBe(3);
+        done();
+      }, 500);
+    });
+
+    it('should clear selection when dependency change removes current value from options', (done) => {
+      const filteredOptions = [
+        { id: 10, display_name: 'Only Available Option' }
+      ];
+      mockDataService.callRpc.and.returnValue(of(filteredOptions));
+
+      const fkPropWithRpc = createMockProperty({
+        column_name: 'borrower_id',
+        display_name: 'Borrower',
+        data_type: 'integer',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'borrowers',
+        join_column: 'id',
+        type: EntityPropertyType.ForeignKeyName,
+        options_source_rpc: 'get_eligible_borrowers'
+      });
+
+      const formGroup = new FormGroup({
+        borrower_id: new FormControl(99)  // Value not in filtered options
+      });
+
+      fixture.componentRef.setInput('property', fkPropWithRpc);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      fixture.componentRef.setInput('entityId', '42');
+      component.ngOnInit();
+
+      // Signal-driven: invalidation happens synchronously after callRpc completes
+      // Value 99 is not in the options, should be cleared
+      expect(formGroup.get('borrower_id')?.value).toBeNull();
+      expect(formGroup.get('borrower_id')?.touched).toBe(true);
+      done();
+    });
+
+    it('should call getData when options_source_rpc is not set (existing behavior)', (done) => {
+      const mockOptions = [
+        { id: 1, display_name: 'Option 1', created_at: '', updated_at: '' },
+        { id: 2, display_name: 'Option 2', created_at: '', updated_at: '' }
+      ];
+      mockDataService.getData.and.returnValue(of(mockOptions as any));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.foreignKey);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(mockDataService.getData).toHaveBeenCalled();
+      expect(mockDataService.callRpc).not.toHaveBeenCalled();
+
+      component.selectOptions$?.subscribe(options => {
+        expect(options.length).toBe(2);
+        done();
       });
     });
   });

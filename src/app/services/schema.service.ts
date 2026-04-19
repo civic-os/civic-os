@@ -238,6 +238,29 @@ export class SchemaService {
   }
 
   /**
+   * Look up options_source_rpc for a synthetic M:M column from metadata.properties.
+   * M:M columns are virtual (built by SchemaService, not in information_schema.columns),
+   * so their metadata.properties entries don't appear in schema_properties VIEW.
+   * This method calls an RPC to bridge that gap.
+   *
+   * @param tableName The parent entity table (e.g., 'projects')
+   * @param columnName The synthetic M:M column (e.g., 'project_parcels_m2m')
+   * @returns Observable of the RPC function name, or null if not configured
+   * @since v0.44.0
+   */
+  public getM2mOptionsSourceRpc(tableName: string, columnName: string): Observable<string | null> {
+    return this.http.post<{table_name: string, column_name: string, options_source_rpc: string}[]>(
+      getPostgrestUrl() + 'rpc/get_m2m_options_source_rpcs', {}
+    ).pipe(
+      map(results => {
+        const match = results.find(r => r.table_name === tableName && r.column_name === columnName);
+        return match?.options_source_rpc ?? null;
+      }),
+      catchError(() => of(null))
+    );
+  }
+
+  /**
    * Fetches constraint error messages from the database.
    * Used by ErrorService to display user-friendly error messages
    * instead of PostgreSQL constraint violation codes.

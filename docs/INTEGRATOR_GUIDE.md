@@ -93,6 +93,8 @@ Key fields:
 - `show_on_create` - BOOLEAN - Display in Create form (default: true)
 - `show_on_edit` - BOOLEAN - Display in Edit form (default: true)
 - `show_on_detail` - BOOLEAN - Display in Detail page (default: true)
+- `options_source_rpc` - NAME - Custom RPC function name for FK/M:M option loading (v0.44.0). When set, the framework calls this RPC instead of querying the related table. See [Options Source RPC](#options-source-rpc-v0440) section below.
+- `depends_on_columns` - NAME[] - Array of form field column names that trigger a re-fetch of `options_source_rpc` when their values change (v0.44.0). Enables cascading dropdowns.
 
 **Configuration Methods**:
 1. Property Management page UI (`/property-management`) - Admin-only visual editor
@@ -4463,6 +4465,100 @@ CREATE INDEX idx_issue_tags_tag_id ON issue_tags(tag_id);
 - Users need CREATE and DELETE permissions on junction table
 
 See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details.
+
+---
+
+### Options Source RPC (v0.44.0)
+
+Override how FK dropdowns and M:M editors load their option lists using a custom PostgreSQL RPC. Enables filtered options, cascading dropdowns, and context-dependent selections.
+
+**RPC Signature** — All options source RPCs must accept these parameters:
+
+```sql
+CREATE FUNCTION my_options_rpc(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE (id INT, display_name TEXT)
+LANGUAGE SQL STABLE AS $$ ... $$;
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `p_id` | TEXT | Entity ID being edited (NULL on Create pages) |
+| `p_depends_on` | JSONB | Current values of dependency form fields (from `depends_on_columns`) |
+
+**Return shape**: Must return `id` (INT or TEXT) and `display_name` (TEXT). Optionally include `color` (TEXT) for M:M editors with colored badges.
+
+**Configuration** — Set on `metadata.properties`:
+
+```sql
+-- Simple filtered FK: show only approved borrowers
+INSERT INTO metadata.properties (table_name, column_name, options_source_rpc)
+VALUES ('reservations', 'borrower_id', 'get_eligible_borrowers')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET options_source_rpc = EXCLUDED.options_source_rpc;
+
+-- Cascading FK: category → tool type (tool_type_id depends on category_id)
+INSERT INTO metadata.properties (table_name, column_name, options_source_rpc, depends_on_columns)
+VALUES ('reservations', 'tool_type_id', 'get_tool_types_by_category', '{category_id}')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET options_source_rpc = EXCLUDED.options_source_rpc,
+      depends_on_columns = EXCLUDED.depends_on_columns;
+
+-- Filtered M:M: show only eligible parcels on projects
+-- table_name = parent entity, column_name = {junction_table}_m2m (synthetic column)
+INSERT INTO metadata.properties (table_name, column_name, options_source_rpc)
+VALUES ('projects', 'project_parcels_m2m', 'get_eligible_parcels')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET options_source_rpc = EXCLUDED.options_source_rpc;
+```
+
+**Example RPCs**:
+
+```sql
+-- Filtered FK: only approved borrowers
+CREATE FUNCTION get_eligible_borrowers(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE (id INT, display_name TEXT)
+LANGUAGE SQL STABLE AS $$
+  SELECT b.id, b.display_name FROM borrowers b
+  JOIN metadata.statuses s ON b.status_id = s.id
+  WHERE s.status_key = 'approved'
+  ORDER BY b.display_name;
+$$;
+GRANT EXECUTE ON FUNCTION get_eligible_borrowers TO authenticated;
+
+-- Cascading FK: filter tool types by selected category
+CREATE FUNCTION get_tool_types_by_category(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE (id INT, display_name TEXT)
+LANGUAGE SQL STABLE AS $$
+  SELECT tt.id, tt.display_name FROM tool_types tt
+  WHERE (p_depends_on->>'category_id') IS NULL
+     OR tt.category_id = (p_depends_on->>'category_id')::INT
+  ORDER BY tt.display_name;
+$$;
+GRANT EXECUTE ON FUNCTION get_tool_types_by_category TO authenticated;
+
+-- M:M with colored badges: eligible parcels
+CREATE FUNCTION get_eligible_parcels(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE (id INT, display_name TEXT, color TEXT)
+LANGUAGE SQL STABLE AS $$
+  SELECT p.id, p.display_name,
+         CASE p.eligibility WHEN 'good' THEN '#22c55e' ELSE '#f59e0b' END
+  FROM parcels p
+  WHERE p.eligibility IN ('good', 'few_issues')
+  ORDER BY p.display_name;
+$$;
+GRANT EXECUTE ON FUNCTION get_eligible_parcels TO authenticated;
+```
+
+**Frontend Behavior**:
+- **FK dropdowns**: When `options_source_rpc` is set, `EditPropertyComponent` calls the RPC instead of querying the related table. If `depends_on_columns` is configured, changing a dependency field re-fetches options (debounced 300ms). Stale selections are cleared automatically.
+- **M:M editors**: When `options_source_rpc` is set, `ManyToManyEditorComponent` calls the RPC for available options. After add/remove mutations, options are re-fetched to reflect updated availability.
+- **Create pages**: `p_id` is NULL since the entity doesn't exist yet. Cascading dropdowns still work via `p_depends_on`.
+
+**Important Notes**:
+- RPCs must be `STABLE` (not `VOLATILE`) for PostgREST to allow GET-style caching
+- Grant `EXECUTE` to `authenticated` (and `web_anon` if needed for anonymous access)
+- The RPC is called via PostgREST's `/rpc/function_name` endpoint
+- See `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` for full architecture details
 
 ---
 

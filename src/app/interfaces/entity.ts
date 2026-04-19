@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -120,6 +120,12 @@ export interface SchemaEntityProperty {
     // Recurring time slot configuration (v0.19.0)
     // When true and udt_name is 'time_slot', enables recurring series UI
     is_recurring?: boolean;
+
+    // Options source RPC configuration (v0.44.0)
+    // When set, FK dropdowns and M:M editors call this RPC instead of the default table query
+    options_source_rpc?: string;
+    // Form field names whose values are passed as p_depends_on keys; changes trigger re-fetch
+    depends_on_columns?: string[];
 }
 
 export enum EntityPropertyType {

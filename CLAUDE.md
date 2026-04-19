@@ -42,7 +42,7 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 ### Property Type System
 
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
-- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name
+- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` for custom RPC-driven option lists and `depends_on_columns` for cascading dropdowns (v0.44.0). See `docs/INTEGRATOR_GUIDE.md` (Options Source RPC section).
 - `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
 - `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
@@ -91,7 +91,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **DateTime vs DateTimeLocal - Timezone Handling**: `DateTime` (`timestamp`) stores wall-clock time with no conversion; `DateTimeLocal` (`timestamptz`) converts between user's local timezone and UTC. **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions — modifying this code can cause data integrity issues. See `docs/development/DATETIME_HANDLING.md` for details.
 
-**Many-to-Many Relationships**: Auto-detected from junction tables. **CRITICAL**: Junction tables MUST use composite primary keys (NOT surrogate IDs). Renders on Detail pages with `ManyToManyEditorComponent`. Requires CREATE/DELETE permissions on junction table. See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details and SQL examples.
+**Many-to-Many Relationships**: Auto-detected from junction tables. **CRITICAL**: Junction tables MUST use composite primary keys (NOT surrogate IDs). Renders on Detail pages with `ManyToManyEditorComponent`. Requires CREATE/DELETE permissions on junction table. Supports `options_source_rpc` for filtered M:M option lists (v0.44.0). See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details and `docs/INTEGRATOR_GUIDE.md` (Options Source RPC section) for filtered M:M configuration.
 
 **Full-Text Search**: Add `civic_os_text_search` tsvector column (generated, indexed) and configure `metadata.entities.search_fields` array. Frontend automatically displays search input on List pages. See example tables for implementation pattern.
 

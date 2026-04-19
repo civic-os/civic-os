@@ -43,7 +43,17 @@
     </label>
   }
   @if (propType() == EntityPropertyType.ForeignKeyName) {
-    @if (selectOptions$ | async; as selectOptions) {
+    @if (useRpcOptions()) {
+      <!-- RPC-driven options via signal (v0.44.0) -->
+      <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
+        @if (prop().is_nullable || rpcSelectOptions().length === 0) {
+          <option [value]="null">Select an Option</option>
+        }
+        @for (option of rpcSelectOptions(); track option.id) {
+          <option [value]="option.id">{{option.text}}</option>
+        }
+      </select>
+    } @else if (selectOptions$ | async; as selectOptions) {
       <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
         @if (prop().is_nullable) {
           <option [value]="null">Select an Option</option>

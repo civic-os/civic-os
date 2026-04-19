@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ManyToManyEditorComponent } from './many-to-many-editor.component';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { SchemaService } from '../../services/schema.service';
 import { of, throwError, Subject } from 'rxjs';
 import { MOCK_M2M_PROPERTY, MOCK_RELATED_DATA, createMockManyToManyMeta } from '../../testing/mock-schema';
 import { provideRouter } from '@angular/router';
@@ -29,21 +30,25 @@ describe('ManyToManyEditorComponent', () => {
   let fixture: ComponentFixture<ManyToManyEditorComponent>;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockSchemaService: jasmine.SpyObj<SchemaService>;
 
   beforeEach(async () => {
     mockDataService = jasmine.createSpyObj('DataService', [
       'getData',
+      'callRpc',
       'addManyToManyRelation',
       'removeManyToManyRelation'
     ]);
 
     mockAuthService = jasmine.createSpyObj('AuthService', ['hasPermission']);
+    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getM2mOptionsSourceRpc']);
 
     // Default mock return values
     mockDataService.getData.and.returnValue(of(MOCK_RELATED_DATA));
     mockAuthService.hasPermission.and.returnValue(true);
     mockDataService.addManyToManyRelation.and.returnValue(of({ success: true }));
     mockDataService.removeManyToManyRelation.and.returnValue(of({ success: true }));
+    mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of(null));  // Default: no RPC
 
     await TestBed.configureTestingModule({
       imports: [ManyToManyEditorComponent],
@@ -51,6 +56,7 @@ describe('ManyToManyEditorComponent', () => {
         provideZonelessChangeDetection(),
         { provide: DataService, useValue: mockDataService },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: SchemaService, useValue: mockSchemaService },
         provideRouter([])
       ]
     }).compileComponents();
@@ -567,6 +573,143 @@ describe('ManyToManyEditorComponent', () => {
       // Check that link exists and has the expected href
       expect(link).toBeTruthy();
       expect(link?.getAttribute('href')).toBe('/view/tags/5');
+    });
+  });
+
+  describe('Options Source RPC (v0.44.0)', () => {
+    const mockRpcOptions = [
+      { id: 10, display_name: 'Eligible Parcel A' },
+      { id: 20, display_name: 'Eligible Parcel B' }
+    ];
+
+    it('should call callRpc instead of getData when options_source_rpc is set', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+      mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of('get_eligible_parcels'));
+
+      const m2mPropWithRpc = {
+        ...MOCK_M2M_PROPERTY
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithRpc);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(mockDataService.callRpc).toHaveBeenCalledWith('get_eligible_parcels', {
+          p_id: '1',
+          p_depends_on: {}
+        });
+        expect(mockDataService.getData).not.toHaveBeenCalled();
+        expect(component.availableOptions()).toEqual(mockRpcOptions);
+        done();
+      }, 10);
+    });
+
+    it('should re-fetch options after successful add mutation when RPC configured', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+      mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of('get_eligible_parcels'));
+
+      const m2mPropWithRpc = {
+        ...MOCK_M2M_PROPERTY
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithRpc);
+      fixture.componentRef.setInput('currentValues', [
+        { id: 10, display_name: 'Eligible Parcel A' }
+      ]);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        // Initial load via RPC
+        const initialCallCount = mockDataService.callRpc.calls.count();
+
+        component.enterEditMode();
+        component.toggleSelection(20);  // Add new
+        component.save();
+
+        setTimeout(() => {
+          // After save, should re-fetch options via RPC
+          expect(mockDataService.callRpc.calls.count()).toBeGreaterThan(initialCallCount);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should re-fetch options after successful remove mutation when RPC configured', (done) => {
+      mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
+      mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of('get_eligible_parcels'));
+
+      const m2mPropWithRpc = {
+        ...MOCK_M2M_PROPERTY
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithRpc);
+      fixture.componentRef.setInput('currentValues', [
+        { id: 10, display_name: 'Eligible Parcel A' }
+      ]);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        const initialCallCount = mockDataService.callRpc.calls.count();
+
+        component.enterEditMode();
+        component.toggleSelection(10);  // Remove existing
+        component.save();
+
+        setTimeout(() => {
+          expect(mockDataService.callRpc.calls.count()).toBeGreaterThan(initialCallCount);
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should NOT re-fetch after mutation when no RPC configured', (done) => {
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+      fixture.componentRef.setInput('currentValues', [
+        { id: 1, display_name: 'Urgent', color: '#FF0000' }
+      ]);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        const initialGetDataCount = mockDataService.getData.calls.count();
+
+        component.enterEditMode();
+        component.toggleSelection(2);  // Add
+        component.save();
+
+        setTimeout(() => {
+          // getData should NOT be called again after save (no RPC, no re-fetch)
+          expect(mockDataService.getData.calls.count()).toBe(initialGetDataCount);
+          expect(mockDataService.callRpc).not.toHaveBeenCalled();
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should emit dependencyChanged with column name after mutation', (done) => {
+      spyOn(component.dependencyChanged, 'emit');
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+      fixture.componentRef.setInput('currentValues', [
+        { id: 1, display_name: 'Urgent', color: '#FF0000' }
+      ]);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.enterEditMode();
+        component.toggleSelection(2);
+        component.save();
+
+        setTimeout(() => {
+          expect(component.dependencyChanged.emit).toHaveBeenCalledWith('tags');
+          done();
+        }, 10);
+      }, 10);
     });
   });
 });

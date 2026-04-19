@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { SchemaEntityProperty } from '../../interfaces/entity';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { SchemaService } from '../../services/schema.service';
 import { ApiResponse } from '../../interfaces/api';
 
 @Component({
@@ -52,9 +53,14 @@ export class ManyToManyEditorComponent {
   // Services
   private data = inject(DataService);
   private authService = inject(AuthService);
+  private schema = inject(SchemaService);
+
+  // v0.44.0: Resolved options_source_rpc for this M:M property (from metadata.properties)
+  private resolvedOptionsSourceRpc = signal<string | null>(null);
 
   // Output
   relationChanged = output<void>();
+  dependencyChanged = output<string>();  // Emits M:M column name after mutation (v0.44.0)
 
   // Computed
   filteredOptions = computed(() => {
@@ -87,7 +93,18 @@ export class ManyToManyEditorComponent {
     effect(() => {
       const prop = this.property();
       if (prop?.many_to_many_meta) {
-        this.loadAvailableOptions();
+        // v0.44.0: Look up options_source_rpc for this synthetic M:M column.
+        // If already set on the property (e.g., from a future SchemaService enrichment), use it.
+        // Otherwise, query metadata.properties via RPC for the synthetic column name.
+        if (prop.options_source_rpc) {
+          this.resolvedOptionsSourceRpc.set(prop.options_source_rpc);
+          this.loadAvailableOptions();
+        } else {
+          this.schema.getM2mOptionsSourceRpc(prop.table_name, prop.column_name).subscribe(rpc => {
+            this.resolvedOptionsSourceRpc.set(rpc);
+            this.loadAvailableOptions();
+          });
+        }
         this.checkPermissions();
       }
     });
@@ -118,23 +135,41 @@ export class ManyToManyEditorComponent {
     const meta = this.property().many_to_many_meta;
     if (!meta) return;
 
-    const fields = meta.relatedTableHasColor
-      ? ['id', 'display_name', 'color']
-      : ['id', 'display_name'];
+    const rpc = this.resolvedOptionsSourceRpc();
 
-    this.data.getData({
-      key: meta.relatedTable,
-      fields: fields,
-      orderField: 'display_name'
-    }).subscribe({
-      next: (options) => {
-        this.availableOptions.set(options);
-      },
-      error: (err) => {
-        console.error('Error loading options:', err);
-        this.availableOptions.set([]);
-      }
-    });
+    if (rpc) {
+      // v0.44.0: Use custom RPC for option loading
+      this.data.callRpc(rpc, {
+        p_id: String(this.entityId()),
+        p_depends_on: {}
+      }).subscribe({
+        next: (options: any[]) => {
+          this.availableOptions.set(options);
+        },
+        error: () => {
+          this.availableOptions.set([]);
+        }
+      });
+    } else {
+      // Default: query the related table directly
+      const fields = meta.relatedTableHasColor
+        ? ['id', 'display_name', 'color']
+        : ['id', 'display_name'];
+
+      this.data.getData({
+        key: meta.relatedTable,
+        fields: fields,
+        orderField: 'display_name'
+      }).subscribe({
+        next: (options) => {
+          this.availableOptions.set(options);
+        },
+        error: (err) => {
+          console.error('Error loading options:', err);
+          this.availableOptions.set([]);
+        }
+      });
+    }
   }
 
   enterEditMode() {
@@ -216,6 +251,10 @@ export class ManyToManyEditorComponent {
         if (failures.length === 0) {
           // All succeeded
           this.relationChanged.emit();
+          if (this.resolvedOptionsSourceRpc()) {
+            this.loadAvailableOptions();  // Re-fetch to reflect limits/availability
+          }
+          this.dependencyChanged.emit(this.property().column_name);
           this.isEditing.set(false);
           this.workingSelection.set([]);
         } else if (successes.length === 0) {
@@ -225,6 +264,10 @@ export class ManyToManyEditorComponent {
           // Partial failure
           this.error.set(`${successes.length} changes succeeded, ${failures.length} failed. Refresh to see current state.`);
           this.relationChanged.emit();  // Refresh to show actual state
+          if (this.resolvedOptionsSourceRpc()) {
+            this.loadAvailableOptions();
+          }
+          this.dependencyChanged.emit(this.property().column_name);
           this.isEditing.set(false);
           this.workingSelection.set([]);
         }

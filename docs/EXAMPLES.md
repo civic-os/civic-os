@@ -12,50 +12,54 @@ This guide helps you choose the right example for learning or as a starting poin
 | [Mott Park](#mott-park) | Clubhouse reservations | Payments, virtual entities, schema decisions, iCal feeds |
 | [Staff Portal](#staff-portal) | Staff management | Action parameters, multi-entity workflows, three-tier RLS |
 | [StoryMap](#storymap) | Geographic narratives | Map widgets, dashboard storytelling |
+| [Neighborhood Hub](#neighborhood-hub) | Tool lending library | Options Source RPC: cascading dropdowns, filtered FKs, filtered M:M |
 
 ## Feature Matrix
 
-| Feature | Pot Hole | Community Center | Broader Impacts | Mott Park | Staff Portal | StoryMap |
-|---------|:--------:|:----------------:|:---------------:|:---------:|:------------:|:--------:|
-| **TimeSlot / Calendar** | | ✅ | | ✅ | | |
-| **Recurring Schedules** | | ✅ | | | | |
-| **Status Workflows** | | ✅ | | ✅ | ✅ | |
-| **Stripe Payments** | | ✅ | | ✅ | | |
-| **Notifications (Email)** | ✅ | ✅ | | ✅ | ✅ | |
-| **Entity Notes** | | ✅ | | ✅ | | |
-| **Static Text Blocks** | | ✅ | | ✅ | | |
-| **Entity Action Buttons** | | ✅ | | ✅ | ✅ | |
-| **Action Parameters** | | | | | ✅ | |
-| **File Uploads** | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| **Full-Text Search** | ✅ | ✅ | ✅ | | ✅ | |
-| **Many-to-Many** | | | ✅ | | | |
-| **Virtual Entities** | | | | ✅ | | |
-| **Geography/GeoPoint** | | | | | | ✅ |
-| **iCal Feeds** | | ✅ | | ✅ | | |
-| **System Introspection** | | ✅ | | ✅ | | |
-| **Causal Bindings** | ✅ | ✅ | | ✅ | ✅ | |
-| **Schema Decisions (ADR)** | | | | ✅ | ✅ | |
-| **Scheduled Jobs (River)** | | | | ✅ | | |
-| **Map Widgets** | | | | | | ✅ |
-| **Calendar Widgets** | | ✅ | | ✅ | | |
-| **Filtered List Widgets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Markdown Widgets** | | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Dashboard Navigation** | | | | | | ✅ |
-| **Local Keycloak** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Mock Data Generator** | ✅ | ✅ | ✅ | | ✅ | ✅ |
+| Feature | Pot Hole | Community Center | Broader Impacts | Mott Park | Staff Portal | StoryMap | Neighborhood Hub |
+|---------|:--------:|:----------------:|:---------------:|:---------:|:------------:|:--------:|:----------------:|
+| **TimeSlot / Calendar** | | ✅ | | ✅ | | | |
+| **Recurring Schedules** | | ✅ | | | | | |
+| **Status Workflows** | | ✅ | | ✅ | ✅ | | ✅ |
+| **Stripe Payments** | | ✅ | | ✅ | | | |
+| **Notifications (Email)** | ✅ | ✅ | | ✅ | ✅ | | |
+| **Entity Notes** | | ✅ | | ✅ | | | |
+| **Static Text Blocks** | | ✅ | | ✅ | | | |
+| **Entity Action Buttons** | | ✅ | | ✅ | ✅ | | |
+| **Action Parameters** | | | | | ✅ | | |
+| **File Uploads** | ✅ | ✅ | ✅ | ✅ | ✅ | | |
+| **Full-Text Search** | ✅ | ✅ | ✅ | | ✅ | | |
+| **Many-to-Many** | | | ✅ | | | | ✅ |
+| **Virtual Entities** | | | | ✅ | | | |
+| **Geography/GeoPoint** | | | | | | ✅ | |
+| **iCal Feeds** | | ✅ | | ✅ | | | |
+| **System Introspection** | | ✅ | | ✅ | | | |
+| **Causal Bindings** | ✅ | ✅ | | ✅ | ✅ | | |
+| **Schema Decisions (ADR)** | | | | ✅ | ✅ | | |
+| **Scheduled Jobs (River)** | | | | ✅ | | | |
+| **Map Widgets** | | | | | | ✅ | |
+| **Calendar Widgets** | | ✅ | | ✅ | | | |
+| **Filtered List Widgets** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| **Markdown Widgets** | | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| **Dashboard Navigation** | | | | | | ✅ | |
+| **Options Source RPC** | | | | | | | ✅ |
+| **Cascading Dropdowns** | | | | | | | ✅ |
+| **Filtered M:M** | | | | | | | ✅ |
+| **Local Keycloak** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Mock Data Generator** | ✅ | ✅ | ✅ | | ✅ | ✅ | |
 
 ## Services by Example
 
-| Service | Port | Pot Hole | Community Center | Broader Impacts | Mott Park | Staff Portal | StoryMap |
-|---------|------|:--------:|:----------------:|:---------------:|:---------:|:------------:|:--------:|
-| PostgreSQL | 15432 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| PostgREST | 3000 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Swagger UI | 8080 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MinIO S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| Inbucket SMTP | 9100 | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| Consolidated Worker | — | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| Payment Worker | 8081 | | ✅ | | ✅ | | |
-| Local Keycloak | 8082 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Service | Port | Pot Hole | Community Center | Broader Impacts | Mott Park | Staff Portal | StoryMap | Neighborhood Hub |
+|---------|------|:--------:|:----------------:|:---------------:|:---------:|:------------:|:--------:|:----------------:|
+| PostgreSQL | 15432 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| PostgREST | 3000 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Swagger UI | 8080 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MinIO S3 | 9000/9001 | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
+| Inbucket SMTP | 9100 | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
+| Consolidated Worker | — | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
+| Payment Worker | 8081 | | ✅ | | ✅ | | | |
+| Local Keycloak | 8082 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -259,6 +263,38 @@ docker-compose up -d
 ```bash
 cd examples/storymap
 docker-compose up -d
+```
+
+---
+
+## Neighborhood Hub
+
+**Path:** `examples/neighborhood-hub/`
+
+**Domain:** Community tool lending library
+
+**What it demonstrates:**
+- **Options Source RPC** (v0.44.0) — custom RPC-driven option lists for FK dropdowns and M:M editors
+- **Cascading dropdowns** — selecting a Tool Category filters the Tool Type dropdown
+- **Filtered FK** — only approved Borrowers appear in reservation dropdowns
+- **Filtered M:M** — only eligible Parcels appear in project editors (with color-coded eligibility)
+- **Status workflows** — borrower approval (pending/approved/rejected) and tool condition (in-service/maintenance/retired)
+
+**Key tables:** `tool_categories`, `tool_types`, `tool_instances`, `borrowers`, `tool_reservations`, `projects`, `parcels`
+
+**Options Source RPCs:**
+- `get_eligible_borrowers` — FK filter: approved borrowers only
+- `get_tool_types_by_category` — Cascading FK: tool types filtered by `depends_on_columns: ['category_id']`
+- `get_eligible_parcels` — M:M filter: eligible parcels with color coding
+
+**Good starting point for:** Dynamic dropdowns, context-aware option filtering, cascading form fields
+
+```bash
+cd examples/neighborhood-hub
+docker-compose up -d
+# Wait for Keycloak, then:
+./fetch-keycloak-jwk.sh
+docker-compose restart postgrest
 ```
 
 ---

@@ -1,7 +1,7 @@
 # Options Source RPC Design
 
-**Status**: Design — pre-implementation
-**Version target**: TBD
+**Status**: Implemented
+**Version target**: v0.44.0
 
 ## Overview
 

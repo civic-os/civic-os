@@ -31,7 +31,7 @@
                   </div>
                 } @else if (isProperty(item)) {
                   <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
-                    <app-edit-property [property]="item" [formGroup]="createForm"></app-edit-property>
+                    <app-edit-property [property]="item" [formGroup]="createForm" [entityType]="entityKey!" [entityId]="''"></app-edit-property>
                   </div>
                 }
               }
