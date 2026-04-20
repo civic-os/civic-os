@@ -1,0 +1,33 @@
+<div class="bg-base-200 rounded-lg p-4 my-2">
+  <ul class="space-y-3">
+    @for (step of stepStates(); track step.label; let i = $index) {
+      <li>
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined text-xl mt-0.5" [class]="getIconClass(step.status)">
+            {{ getIcon(step.status) }}
+          </span>
+          <div class="flex-1">
+            <span [class.font-semibold]="step.status === 'running'"
+                  [class.line-through]="step.status === 'skipped'"
+                  [class.opacity-50]="step.status === 'pending'">
+              {{ step.label }}
+            </span>
+            @if (step.status === 'error' && step.errorMessage) {
+              <div class="text-error text-sm mt-1">{{ step.errorMessage }}</div>
+              <div class="flex gap-2 mt-2">
+                @if (step.retryFailed) {
+                  <button type="button" class="btn btn-xs btn-outline btn-error" (click)="onRetry(i)">
+                    Retry Failed
+                  </button>
+                }
+                <button type="button" class="btn btn-xs btn-outline btn-warning" (click)="onSkip(i)">
+                  Skip &amp; Continue
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </li>
+    }
+  </ul>
+</div>

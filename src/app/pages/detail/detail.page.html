@@ -60,8 +60,26 @@
                 <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
                   <app-static-text [staticText]="item"></app-static-text>
                 </div>
+              } @else if (isProperty(item) && item.type === 17 && item.show_inline) {
+                <!-- v0.46.0: Inline M:M — read-only chip display in property grid -->
+                <div class="col-span-full">
+                  <label class="label"><span class="font-semibold">{{ item.display_name }}</span></label>
+                  <div class="flex flex-wrap gap-1">
+                    @for (val of data[item.column_name] || []; track val.id) {
+                      <a [routerLink]="['/view', item.many_to_many_meta!.relatedTable, val.id]"
+                         class="badge badge-lg badge-primary gap-1 py-3 px-3 cursor-pointer hover:opacity-80 transition-opacity">
+                        @if (val.color) {
+                          <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="val.color"></span>
+                        }
+                        {{ val.display_name }}
+                      </a>
+                    } @empty {
+                      <span class="text-base-content/50 italic text-sm">None</span>
+                    }
+                  </div>
+                </div>
               } @else if (isProperty(item) && item.type !== 17) {
-                <!-- Render properties (excluding ManyToMany type=17) -->
+                <!-- Render properties (excluding ManyToMany type=17, unless inline) -->
                 <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
                   <app-display-property [datum]="data[item.column_name]" [property]="item"></app-display-property>
                 </div>

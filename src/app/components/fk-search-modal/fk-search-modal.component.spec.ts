@@ -368,6 +368,220 @@ describe('FkSearchModalComponent', () => {
     });
   });
 
+  describe('Multi-Select Mode (v0.46.0)', () => {
+    const currentItems = [
+      { id: 1, display_name: 'Urgent', color: '#FF0000' },
+      { id: 2, display_name: 'Road Surface', color: '#00FF00' }
+    ];
+
+    function setupMultiSelect() {
+      fixture.componentRef.setInput('joinTable', 'tags');
+      fixture.componentRef.setInput('multiSelect', true);
+      fixture.componentRef.setInput('currentValueIds', [1, 2]);
+      fixture.componentRef.setInput('currentValueItems', currentItems);
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+    }
+
+    it('should initialize workingSelection from currentValueIds on open', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      expect(component.workingSelection().has(1)).toBeTrue();
+      expect(component.workingSelection().has(2)).toBeTrue();
+      expect(component.workingSelection().size).toBe(2);
+    });
+
+    it('should populate chipCache from currentValueItems on open', async () => {
+      // Use IDs that don't overlap with mock page rows (1,2,3) so they
+      // aren't overwritten by loadTableData's cache update
+      const nonOverlappingItems = [
+        { id: 100, display_name: 'Tag Alpha', color: '#FF0000' },
+        { id: 200, display_name: 'Tag Beta', color: '#00FF00' }
+      ];
+      fixture.componentRef.setInput('joinTable', 'tags');
+      fixture.componentRef.setInput('multiSelect', true);
+      fixture.componentRef.setInput('currentValueIds', [100, 200]);
+      fixture.componentRef.setInput('currentValueItems', nonOverlappingItems);
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const cache = component.chipCache();
+      expect(cache.get(100)?.display_name).toBe('Tag Alpha');
+      expect(cache.get(100)?.color).toBe('#FF0000');
+      expect(cache.get(200)?.display_name).toBe('Tag Beta');
+    });
+
+    it('should render checkboxes instead of radios in multi-select mode', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const checkboxes = fixture.debugElement.queryAll(By.css('input[type="checkbox"]'));
+      const radios = fixture.debugElement.queryAll(By.css('input[type="radio"]'));
+      expect(checkboxes.length).toBeGreaterThan(0);
+      expect(radios.length).toBe(0);
+    });
+
+    it('should toggle selection on checkbox click', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Add item 3 to selection
+      component.toggleSelection(3, 'Carol White');
+      expect(component.workingSelection().has(3)).toBeTrue();
+      expect(component.workingSelection().size).toBe(3);
+
+      // Remove item 1 from selection
+      component.toggleSelection(1, 'Urgent', '#FF0000');
+      expect(component.workingSelection().has(1)).toBeFalse();
+      expect(component.workingSelection().size).toBe(2);
+    });
+
+    it('should show selected chips in right panel', async () => {
+      // Use non-overlapping IDs so page data doesn't overwrite chip cache
+      const items = [
+        { id: 100, display_name: 'Urgent', color: '#FF0000' },
+        { id: 200, display_name: 'Road Surface', color: '#00FF00' }
+      ];
+      fixture.componentRef.setInput('joinTable', 'tags');
+      fixture.componentRef.setInput('multiSelect', true);
+      fixture.componentRef.setInput('currentValueIds', [100, 200]);
+      fixture.componentRef.setInput('currentValueItems', items);
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const chips = component.selectedChips();
+      expect(chips.length).toBe(2);
+      // Sorted alphabetically
+      expect(chips[0].display_name).toBe('Road Surface');
+      expect(chips[1].display_name).toBe('Urgent');
+    });
+
+    it('should remove chip from right panel via removeChip', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.removeChip(1);
+      expect(component.workingSelection().has(1)).toBeFalse();
+      expect(component.selectedChips().length).toBe(1);
+    });
+
+    it('should persist selection across pagination', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Add item 3 from current page
+      component.toggleSelection(3, 'Carol White');
+
+      // Simulate page change (data reload with different rows)
+      mockDataService.getDataPaginated.and.returnValue(of({
+        data: [
+          { id: 4, display_name: 'Dave Green', email: 'd@test.com' },
+          { id: 5, display_name: 'Eve Black', email: 'e@test.com' }
+        ] as any,
+        totalCount: 5
+      }));
+      component.onPageChange(2);
+      await waitForData();
+
+      // Selection should persist
+      expect(component.workingSelection().has(1)).toBeTrue();
+      expect(component.workingSelection().has(2)).toBeTrue();
+      expect(component.workingSelection().has(3)).toBeTrue();
+      expect(component.selectedChips().length).toBe(3);
+    });
+
+    it('should compute pendingDiff correctly', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Add item 3, remove item 1
+      component.toggleSelection(3, 'Carol White');
+      component.toggleSelection(1, 'Urgent');
+
+      const diff = component.pendingDiff();
+      expect(diff.toAdd).toEqual([3]);
+      expect(diff.toRemove).toEqual([1]);
+    });
+
+    it('should disable Apply when diff is empty', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // No changes made
+      expect(component.applyEnabled()).toBeFalse();
+    });
+
+    it('should enable Apply when diff is non-empty', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.toggleSelection(3, 'Carol White');
+      expect(component.applyEnabled()).toBeTrue();
+    });
+
+    it('should emit applied with diff on Apply', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      spyOn(component.applied, 'emit');
+
+      component.toggleSelection(3, 'Carol White');
+      component.toggleSelection(1, 'Urgent');
+      component.onApply();
+
+      expect(component.applied.emit).toHaveBeenCalledWith(
+        jasmine.objectContaining({ toAdd: [3], toRemove: [1] })
+      );
+    });
+
+    it('should populate chipCache from page data', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Row data should be cached
+      const cache = component.chipCache();
+      expect(cache.get(3)?.display_name).toBe('Carol White');
+    });
+
+    it('should show Apply button instead of Confirm in multi-select mode', async () => {
+      setupMultiSelect();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const buttons = fixture.debugElement.queryAll(By.css('.cos-modal-action button'));
+      const buttonTexts = buttons.map(b => b.nativeElement.textContent.trim());
+      expect(buttonTexts.some(t => t.includes('Apply'))).toBeTrue();
+      expect(buttonTexts.some(t => t.includes('Confirm'))).toBeFalse();
+    });
+  });
+
   describe('Fallback for unregistered entities', () => {
     it('should fall back gracefully when entity not in SchemaService', async () => {
       mockSchemaService.getEntity.and.returnValue(of(undefined));

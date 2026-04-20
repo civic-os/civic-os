@@ -4,7 +4,7 @@
     "tool_types": { "count": 15 },
     "tool_instances": { "count": 30 },
     "borrowers": { "count": 20 },
-    "parcels": { "count": 25 },
+    "parcels": { "count": 100 },
     "tool_reservations": { "count": 40 },
     "projects": { "count": 5 }
   }

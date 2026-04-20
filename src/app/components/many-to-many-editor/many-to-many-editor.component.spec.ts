@@ -17,6 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { ManyToManyEditorComponent } from './many-to-many-editor.component';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
@@ -30,7 +31,6 @@ describe('ManyToManyEditorComponent', () => {
   let fixture: ComponentFixture<ManyToManyEditorComponent>;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
 
   beforeEach(async () => {
     mockDataService = jasmine.createSpyObj('DataService', [
@@ -41,19 +41,28 @@ describe('ManyToManyEditorComponent', () => {
     ]);
 
     mockAuthService = jasmine.createSpyObj('AuthService', ['hasPermission']);
-    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getM2mOptionsSourceRpc']);
 
     // Default mock return values
     mockDataService.getData.and.returnValue(of(MOCK_RELATED_DATA));
     mockAuthService.hasPermission.and.returnValue(true);
     mockDataService.addManyToManyRelation.and.returnValue(of({ success: true }));
     mockDataService.removeManyToManyRelation.and.returnValue(of({ success: true }));
-    mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of(null));  // Default: no RPC
+
+    // FkSearchModalComponent (imported by M:M editor) needs SchemaService + HttpClient
+    const mockSchemaService = jasmine.createSpyObj('SchemaService', [
+      'getEntity', 'getPropsForList', 'getPropsForFilter',
+      'getStatusOptionsSync', 'ensureStatusOptionsLoaded',
+      'getCategoryOptionsSync', 'ensureCategoryOptionsLoaded'
+    ]);
+    mockSchemaService.getEntity.and.returnValue(of(undefined));
+    mockSchemaService.getPropsForList.and.returnValue(of([]));
+    mockSchemaService.getPropsForFilter.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [ManyToManyEditorComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideHttpClient(),
         { provide: DataService, useValue: mockDataService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: SchemaService, useValue: mockSchemaService },
@@ -584,10 +593,10 @@ describe('ManyToManyEditorComponent', () => {
 
     it('should call callRpc instead of getData when options_source_rpc is set', (done) => {
       mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
-      mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of('get_eligible_parcels'));
 
       const m2mPropWithRpc = {
-        ...MOCK_M2M_PROPERTY
+        ...MOCK_M2M_PROPERTY,
+        options_source_rpc: 'get_eligible_parcels'
       };
 
       fixture.componentRef.setInput('entityId', 1);
@@ -608,10 +617,10 @@ describe('ManyToManyEditorComponent', () => {
 
     it('should re-fetch options after successful add mutation when RPC configured', (done) => {
       mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
-      mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of('get_eligible_parcels'));
 
       const m2mPropWithRpc = {
-        ...MOCK_M2M_PROPERTY
+        ...MOCK_M2M_PROPERTY,
+        options_source_rpc: 'get_eligible_parcels'
       };
 
       fixture.componentRef.setInput('entityId', 1);
@@ -639,10 +648,10 @@ describe('ManyToManyEditorComponent', () => {
 
     it('should re-fetch options after successful remove mutation when RPC configured', (done) => {
       mockDataService.callRpc.and.returnValue(of(mockRpcOptions));
-      mockSchemaService.getM2mOptionsSourceRpc.and.returnValue(of('get_eligible_parcels'));
 
       const m2mPropWithRpc = {
-        ...MOCK_M2M_PROPERTY
+        ...MOCK_M2M_PROPERTY,
+        options_source_rpc: 'get_eligible_parcels'
       };
 
       fixture.componentRef.setInput('entityId', 1);
@@ -690,7 +699,7 @@ describe('ManyToManyEditorComponent', () => {
       }, 10);
     });
 
-    it('should emit dependencyChanged with column name after mutation', (done) => {
+    it('should emit dependencyChanged with column name after mutation (v0.44.0)', (done) => {
       spyOn(component.dependencyChanged, 'emit');
 
       fixture.componentRef.setInput('entityId', 1);
@@ -712,4 +721,146 @@ describe('ManyToManyEditorComponent', () => {
       }, 10);
     });
   });
+
+  describe('FK Search Modal Integration (v0.46.0)', () => {
+    it('should detect fk_search_modal flag', (done) => {
+      const m2mPropWithModal = {
+        ...MOCK_M2M_PROPERTY,
+        fk_search_modal: true
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithModal);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(component.useFkSearchModal()).toBeTrue();
+        done();
+      }, 10);
+    });
+
+    it('should not use search modal when fk_search_modal is false', (done) => {
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(component.useFkSearchModal()).toBeFalse();
+        done();
+      }, 10);
+    });
+
+    it('should show Browse & Select button when fk_search_modal is true', (done) => {
+      const m2mPropWithModal = {
+        ...MOCK_M2M_PROPERTY,
+        fk_search_modal: true
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithModal);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement;
+        expect(compiled.textContent).toContain('Browse');
+        done();
+      }, 10);
+    });
+
+    it('should call executeManyToManyChanges on modal Apply', (done) => {
+      const m2mPropWithModal = {
+        ...MOCK_M2M_PROPERTY,
+        fk_search_modal: true
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithModal);
+      fixture.componentRef.setInput('currentValues', [
+        { id: 1, display_name: 'Urgent', color: '#FF0000' }
+      ]);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        spyOn(component.relationChanged, 'emit');
+
+        component.onSearchModalApply({ toAdd: [2], toRemove: [] });
+
+        setTimeout(() => {
+          expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(
+            1,
+            m2mPropWithModal.many_to_many_meta!,
+            2
+          );
+          expect(component.showSearchModal()).toBeFalse();
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should do nothing on Apply with empty diff', (done) => {
+      const m2mPropWithModal = {
+        ...MOCK_M2M_PROPERTY,
+        fk_search_modal: true
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithModal);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.onSearchModalApply({ toAdd: [], toRemove: [] });
+
+        setTimeout(() => {
+          expect(mockDataService.addManyToManyRelation).not.toHaveBeenCalled();
+          expect(mockDataService.removeManyToManyRelation).not.toHaveBeenCalled();
+          expect(component.showSearchModal()).toBeFalse();
+          done();
+        }, 10);
+      }, 10);
+    });
+
+    it('should convert RPC options for modal format', (done) => {
+      mockDataService.callRpc.and.returnValue(of([
+        { id: 10, display_name: 'Parcel A' },
+        { id: 20, display_name: 'Parcel B' }
+      ]));
+
+      const m2mPropWithModal = {
+        ...MOCK_M2M_PROPERTY,
+        fk_search_modal: true,
+        options_source_rpc: 'get_eligible_parcels'
+      };
+
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', m2mPropWithModal);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        const rpcOpts = component.resolvedRpcOptions();
+        expect(rpcOpts).toBeTruthy();
+        expect(rpcOpts!.length).toBe(2);
+        expect(rpcOpts![0]).toEqual({ id: 10, text: 'Parcel A' });
+        done();
+      }, 10);
+    });
+
+    it('should return null for resolvedRpcOptions when no RPC configured', (done) => {
+      fixture.componentRef.setInput('entityId', 1);
+      fixture.componentRef.setInput('property', MOCK_M2M_PROPERTY);
+      fixture.componentRef.setInput('currentValues', []);
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        expect(component.resolvedRpcOptions()).toBeNull();
+        done();
+      }, 10);
+    });
+  });
 });
+

@@ -57,16 +57,20 @@ CREATE TABLE borrowers (
 CREATE UNIQUE INDEX ON borrowers(user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX ON borrowers(status_id);
 
--- Parcels (properties with eligibility status)
+-- Parcels (properties with eligibility category)
 CREATE TABLE parcels (
     id SERIAL PRIMARY KEY,
     display_name VARCHAR(100) NOT NULL,
     parcel_number VARCHAR(50),
-    eligibility VARCHAR(20) NOT NULL DEFAULT 'good'
-        CHECK (eligibility IN ('good', 'few_issues', 'ineligible')),
+    eligibility INTEGER REFERENCES metadata.categories(id),
+    civic_os_text_search tsvector GENERATED ALWAYS AS (
+        to_tsvector('english', coalesce(display_name, '') || ' ' || coalesce(parcel_number, ''))
+    ) STORED,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_parcels_eligibility ON parcels(eligibility);
+CREATE INDEX idx_parcels_text_search ON parcels USING GIN(civic_os_text_search);
 
 -- Tool reservations (borrower reserves a tool type, exercises cascading FK + filtered FK)
 CREATE TABLE tool_reservations (

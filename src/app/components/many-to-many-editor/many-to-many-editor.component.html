@@ -30,12 +30,34 @@
 
     <!-- Edit button (only if has permission) -->
     @if (canEdit()) {
-      <button
-        type="button"
-        class="btn btn-sm btn-outline"
-        (click)="enterEditMode()">
-        Edit {{ property().display_name }}
-      </button>
+      @if (useFkSearchModal()) {
+        <!-- v0.46.0: Search modal mode -->
+        <button
+          type="button"
+          class="btn btn-sm btn-outline"
+          (click)="showSearchModal.set(true)">
+          <span class="material-symbols-outlined text-base">search</span>
+          Browse &amp; Select
+        </button>
+        <app-fk-search-modal
+          [isOpen]="showSearchModal()"
+          [joinTable]="property().many_to_many_meta!.relatedTable"
+          [multiSelect]="true"
+          [currentValueIds]="getCurrentValueIds()"
+          [currentValueItems]="currentValues()"
+          [rpcOptions]="resolvedRpcOptions()"
+          [title]="'Select ' + property().display_name"
+          (applied)="onSearchModalApply($event)"
+          (closed)="showSearchModal.set(false)"
+        />
+      } @else {
+        <button
+          type="button"
+          class="btn btn-sm btn-outline"
+          (click)="enterEditMode()">
+          Edit {{ property().display_name }}
+        </button>
+      }
     } @else {
       <div class="text-sm text-base-content/60 italic">
         You don't have permission to edit {{ property().display_name }}

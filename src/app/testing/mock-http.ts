@@ -63,6 +63,19 @@ export function expectPostgrestRequestWithParams(
 }
 
 /**
+ * Helper to flush the schema_m2m_properties request with empty data.
+ * Required because getProperties() uses combineLatest with this VIEW,
+ * so it won't emit until the M:M metadata request completes.
+ * Most tests don't need M:M metadata — call this after flushing schema_properties.
+ *
+ * @since v0.46.0
+ */
+export function flushM2mMetadata(httpMock: HttpTestingController, data: any[] = []) {
+  const reqs = httpMock.match(req => req.url.includes('schema_m2m_properties'));
+  reqs.forEach(req => req.flush(data));
+}
+
+/**
  * Verifies no outstanding HTTP requests remain.
  * Call this in afterEach() to ensure clean test state.
  */

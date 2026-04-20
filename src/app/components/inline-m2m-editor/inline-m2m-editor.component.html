@@ -1,0 +1,56 @@
+<div>
+  <label class="label"><span class="font-semibold">{{ property().display_name }}</span></label>
+
+  <!-- Chip display with pending visual state -->
+  <div class="flex flex-wrap gap-1.5 mb-2">
+    @for (chip of effectiveChips(); track chip.id) {
+      @if (chip.state === 'added') {
+        <!-- Added: dashed green border -->
+        <span class="badge badge-lg badge-outline border-success border-dashed gap-1 py-3 px-3 text-success">
+          @if (chip.color) {
+            <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
+          }
+          {{ chip.display_name }}
+          <span class="material-symbols-outlined text-xs">add</span>
+        </span>
+      } @else if (chip.state === 'removed') {
+        <!-- Removed: strikethrough with reduced opacity -->
+        <span class="badge badge-lg badge-ghost gap-1 py-3 px-3 opacity-40 line-through">
+          @if (chip.color) {
+            <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
+          }
+          {{ chip.display_name }}
+        </span>
+      } @else {
+        <!-- Current: normal -->
+        <span class="badge badge-lg badge-primary gap-1 py-3 px-3">
+          @if (chip.color) {
+            <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
+          }
+          {{ chip.display_name }}
+        </span>
+      }
+    } @empty {
+      <span class="text-base-content/50 italic text-sm">None</span>
+    }
+  </div>
+
+  <!-- Edit trigger -->
+  <button type="button" class="btn btn-xs btn-outline" (click)="openModal()">
+    <span class="material-symbols-outlined text-sm">edit</span>
+    Change {{ property().display_name }}
+  </button>
+
+  <!-- Search modal (always rendered, visibility controlled by isOpen) -->
+  <app-fk-search-modal
+    [isOpen]="showModal()"
+    [joinTable]="property().many_to_many_meta!.relatedTable"
+    [multiSelect]="true"
+    [currentValueIds]="currentValueIdsForModal()"
+    [currentValueItems]="currentValueItemsForModal()"
+    [rpcOptions]="resolvedRpcOptions()"
+    [title]="'Select ' + property().display_name"
+    (applied)="onModalApply($event)"
+    (closed)="onModalClosed()"
+  />
+</div>

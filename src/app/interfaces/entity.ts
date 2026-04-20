@@ -130,6 +130,10 @@ export interface SchemaEntityProperty {
     // FK search modal flag (v0.45.0)
     // When true, FK fields render as a searchable modal instead of a <select> dropdown
     fk_search_modal?: boolean;
+
+    // Inline M:M positioning flag (v0.46.0)
+    // When true, M:M relationships render inline in the property grid instead of bottom card
+    show_inline?: boolean;
 }
 
 export enum EntityPropertyType {

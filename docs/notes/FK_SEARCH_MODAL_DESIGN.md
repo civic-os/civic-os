@@ -113,35 +113,47 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 | `PaginationComponent` | Page navigation with size selector |
 | `DisplayPropertyComponent` | Cell rendering for each property type |
 
-## Future: M:M Search Modal (Phase 5)
+## M:M Search Modal Design
 
-### Design Matrix
+### Problem
 
-M:M relationships have two independent axes of configuration:
+The existing `ManyToManyEditorComponent` uses a flat checkbox list with client-side text
+filtering. At 50+ related options, scrolling through the list is slow and the search
+only matches `display_name` text. For large M:M option sets, the same search/sort/
+filter/pagination capabilities that the FK search modal provides are needed.
+
+### Two Independent Axes
+
+M:M relationships have two independent configuration axes:
 
 | | Default position (Detail bottom card) | Inline (in property grid by `sort_order`) |
 |---|---|---|
-| **Chip editor** (default) | Status quo — immediate save on add/remove | Buffered save — pending UI until form Save |
-| **Search modal** (`fk_search_modal`) | Split modal on Detail page — immediate save | Split modal on Edit page — buffered save |
+| **Chip editor** (default) | Status quo — immediate save | Buffered save — pending UI until form Save |
+| **Search modal** (`fk_search_modal`) | Split modal — immediate save | Split modal — buffered save |
 
-Configuration via `metadata.properties`:
-- `fk_search_modal = true` — controls **picker UI** (search modal vs chip dropdown)
-- `show_inline = true` (new flag) — controls **position** (property grid vs bottom card)
-- The combination of inline + Edit page automatically triggers **buffered save** behavior
+Configuration via `metadata.properties` on the synthetic `{junction}_m2m` column:
 
-### Split Modal Design
+- **`fk_search_modal`** — controls the **picker UI** (split search modal vs flat checkbox list)
+- **`show_inline`** (new flag, future migration) — controls **position** (property grid vs bottom card)
 
-Multi-select modal with a left search panel and right selection panel:
+These are independent. A search modal is valuable even in the default (bottom card)
+position. Inline positioning requires the buffered save model regardless of which picker
+is used.
+
+### Split Modal UI
+
+Multi-select modal with a left search/browse panel and right selection panel:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Select Tags                                                │
 ├────────────────────────────────┬────────────────────────────┤
 │  [🔍 Search...]               │  Selected (3)              │
-│                                │                            │
-│  ┌──┬───────────────────────┐  │  [Urgent        ×]        │
-│  │☑ │ Urgent          🔴   │  │  [Road Surface  ×]        │
-│  │☐ │ Sidewalk        🔵   │  │  [Lighting      ×]        │
+│  [▼ Filters]                  │                            │
+│                                │  [Urgent        ×]  🔴   │
+│  ┌──┬───────────────────────┐  │  [Road Surface  ×]  🟢   │
+│  │☑ │ Urgent          🔴   │  │  [Lighting      ×]  🟡   │
+│  │☐ │ Sidewalk        🔵   │  │                            │
 │  │☑ │ Road Surface    🟢   │  │                            │
 │  │☑ │ Lighting        🟡   │  │                            │
 │  │☐ │ Drainage        🟣   │  │                            │
@@ -149,95 +161,254 @@ Multi-select modal with a left search panel and right selection panel:
 │                                │                            │
 │  Showing 1-5 of 12            │                            │
 ├────────────────────────────────┴────────────────────────────┤
-│                     [Cancel]  [Apply (1 added, 0 removed)]  │
+│           [Cancel]  [Apply (1 added, 0 removed)]            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Left panel**: Searchable, sortable, paginated list with checkboxes. Reuses the same
-server-side query pipeline as FK search modal (table mode). Pre-checked items = currently
-linked records.
+### Left Panel: Search & Browse
 
-**Right panel**: Scrolling chip list of the *pending* selection state. Chips show the
-display name and optionally the entity's color. X button on a chip unchecks the
-corresponding row in the left panel.
+Reuses the same server-side query pipeline as the FK search modal (table mode):
 
-**Key behaviors**:
-- **Checkbox ↔ chip sync**: Checking a row adds a chip. Unchecking removes it. X on
-  chip unchecks the row. State is bidirectionally synchronized.
-- **Cross-page persistence**: Selections persist across search and pagination. User can
-  search "Urgent" on page 1, check it, search "Drainage" on page 3, check it — both
-  appear in the right panel simultaneously.
-- **Apply button**: Shows diff summary ("2 added, 1 removed"). In default position mode,
-  executes junction mutations immediately. In inline mode, buffers the diff for form Save.
-- **Cancel**: Discards all pending changes, restores original selection state.
+- **Data source**: `DataService.getDataPaginated()` querying the related entity (e.g., `tags`)
+- **Columns**: Full list properties from `SchemaService.getPropsForList()`, rendered with
+  `DisplayPropertyComponent` — not just `display_name`
+- **Search**: Server-side full-text search (when entity has `search_fields` configured)
+- **Sort**: Clickable column headers, server-side ordering
+- **Filter**: `FilterBarComponent` for filterable properties
+- **Pagination**: `PaginationComponent` with server-side pagination
+- **RPC filtering**: When `options_source_rpc` is set, eligible IDs are injected as an
+  `id.in.(...)` filter (same mechanism as FK search modal)
+- **Checkboxes**: Replace radio buttons from FK modal. Checked state is derived from the
+  `workingSelection` signal (a Set of selected IDs)
 
-### Inline M:M Behavior
+### Right Panel: Selected Chips
 
-**Detail page (read-only)**: Inline M:M renders as display-only chips in the property grid
-at its `sort_order` position. No edit affordance — user must click the page-level Edit
-button to modify relationships.
+A scrolling list of all currently selected items, displayed as chips:
 
-**Edit page (buffered save)**:
-- Inline M:M shows current chips with an edit trigger (search button or "edit" icon)
-- All M:M changes are buffered as a local diff — NOT committed until form Save
-- Pending changes show visual state:
-  - Added chips: green outline / dashed border
-  - Removed chips: strikethrough / dimmed
-- Form Save executes: (1) entity PATCH, then (2) M:M junction mutations sequentially
-- If entity PATCH fails → M:M mutations don't fire, pending changes preserved in buffer
-- If M:M mutations partially fail → show specific errors with retry option
-- On Create pages: entity save returns the new ID, which is then used for M:M junction inserts
+- Shows `display_name` and optional `color` dot (from related entity data)
+- Each chip has an X button to remove from selection (unchecks the row in left panel)
+- Ordered alphabetically by display name for consistent scanning
+- Shows count in header: "Selected (N)"
+- When empty: "No items selected" placeholder
 
-### Data Flow: Buffered Save
+### Checkbox ↔ Chip Synchronization
+
+Both panels read from the same `workingSelection: signal<Set<number | string>>()`:
 
 ```
-User edits form fields + M:M selections
+Left panel checkbox click         Right panel chip X click
+         │                                    │
+         ▼                                    ▼
+    toggleSelection(id)                 removeSelection(id)
+         │                                    │
+         └──────────┬─────────────────────────┘
+                    ▼
+         workingSelection.update()
+                    │
+         ┌──────────┴──────────┐
+         ▼                     ▼
+    Left panel re-renders     Right panel re-renders
+    (checkbox checked/        (chip added/removed)
+     unchecked)
+```
+
+**Cross-page persistence**: The `workingSelection` Set persists across search queries and
+pagination. Checking an item on page 1, searching for a different item on page 3, and
+checking that too — both remain in the right panel. The left panel checkboxes reflect the
+Set state for whatever page is currently visible.
+
+### Chip Data Resolution
+
+The right panel needs `{id, display_name, color?}` for each selected item, but the left
+panel only shows one page at a time. Two approaches:
+
+**Approach A — Cache from page visits**: Maintain a `Map<id, {display_name, color}>` that
+grows as the user browses pages. Items checked before being seen (e.g., pre-existing
+relations) are populated from `currentValues` input.
+
+**Approach B — Separate lookup for unknowns**: When an item is in `workingSelection` but
+not in the cache (edge case: programmatic pre-selection), do a single batch query:
+`GET /tags?id=in.(4,7,12)&select=id,display_name,color`.
+
+Recommend **Approach A** with Approach B as a fallback. The `currentValues` input from
+`ManyToManyEditorComponent` already provides the initial set, and normal usage (browse
+pages, check items) naturally populates the cache.
+
+### Apply Button Behavior
+
+The Apply button shows a diff summary derived from comparing `workingSelection` against
+the original `currentValues` IDs:
+
+```typescript
+pendingDiff = computed(() => {
+  const original = new Set(this.currentValueIds());
+  const working = this.workingSelection();
+  const toAdd = [...working].filter(id => !original.has(id));
+  const toRemove = [...original].filter(id => !working.has(id));
+  return { toAdd, toRemove };
+});
+```
+
+Button label: `Apply (2 added, 1 removed)` — disabled when diff is empty.
+
+**Immediate save mode** (default position on Detail page):
+- Apply executes `forkJoin` of `addManyToManyRelation` / `removeManyToManyRelation` calls
+- Reuses the existing `ManyToManyEditorComponent.executeManyToManyChanges()` logic
+- Handles partial failures with error count and retry
+
+**Buffered save mode** (inline on Edit page):
+- Apply stores the diff locally and closes the modal
+- The pending diff is surfaced to the parent `EditPage` for execution on form Save
+
+### Existing ManyToManyEditorComponent Changes
+
+The current component needs minimal changes to delegate to the search modal:
+
+```typescript
+// New computed: should this M:M use the search modal?
+useFkSearchModal = computed(() => this.property().fk_search_modal === true);
+
+// In template: when useFkSearchModal(), show a search button instead of the
+// checkbox list. Clicking opens the M:M search modal.
+// The modal receives:
+//   - joinTable: property.many_to_many_meta.relatedTable
+//   - currentValues: currentValues() array
+//   - rpcOptions: resolved from options_source_rpc (if set)
+//   - multiSelect: true
+```
+
+The edit mode toggle, permission check, and diff/commit logic remain in
+`ManyToManyEditorComponent`. The search modal is just a richer picker that returns
+the updated selection set.
+
+### Inline M:M Positioning
+
+**New metadata column**: `show_inline BOOLEAN DEFAULT FALSE` on `metadata.properties`.
+Constraint: only allowed on `_m2m` columns.
+
+**Detail page**: When `show_inline = true`, the M:M property is NOT filtered out of
+`regularProps$`. It renders in the property grid at its `sort_order` position as
+**read-only chips** (same as the current display mode, but positioned inline instead
+of in the bottom card). The user must click the page-level "Edit" button to modify.
+
+**Edit page**: Inline M:M renders as a form field at its `sort_order` position:
+- Shows current selection as read-only chips with an edit button (search icon or pencil)
+- Clicking opens the search modal (or flat checkbox editor if `fk_search_modal` is false)
+- Changes are **buffered** — NOT committed until the form Save button is clicked
+- Pending state shown with visual indicators:
+  - Added chips: dashed green border
+  - Removed chips: strikethrough with reduced opacity
+- The inline editor emits the pending diff to the parent `EditPage` via an output
+
+**Create page**: Same as Edit page, but the entity doesn't exist yet. The entity is
+created first (POST), and the returned ID is used for junction row mutations.
+
+### Buffered Save: Edit Page Integration
+
+`EditPage` needs to coordinate regular form PATCH with inline M:M mutations:
+
+```
+User edits form fields + inline M:M selections
          │
          ▼
     [Save button]
          │
-    ┌────▼────┐
-    │ PATCH   │ ← Regular form fields
-    │ entity  │
-    └────┬────┘
+    ┌────▼────────┐
+    │ PATCH entity │ ← Regular form fields only
+    └────┬────────┘
          │ success?
-    ┌────▼─────────┐
-    │ Diff M:M     │ ← Compare pending vs original
-    │ selections   │
-    └────┬─────────┘
+         │ no → show error, keep M:M buffer intact
+         │ yes ↓
+    ┌────▼───────────────────┐
+    │ For each inline M:M:   │
+    │   forkJoin(             │
+    │     ...adds.map(INSERT),│
+    │     ...removes.map(DEL) │
+    │   )                     │
+    └────┬───────────────────┘
          │
-    ┌────▼────┐    ┌────▼────┐
-    │ INSERT  │    │ DELETE  │ ← Individual junction row mutations
-    │ added   │    │ removed │
-    └─────────┘    └─────────┘
-         │              │
-         ▼              ▼
-    Show result: "Saved. 2 tags added, 1 removed."
-    (or partial error with retry for failed mutations)
+    ┌────▼─────────────────────────────────────────┐
+    │ All succeeded → navigate to detail            │
+    │ Partial failure → show error, stay on page    │
+    │   "Saved. Tags: 2 added, 1 failed to remove" │
+    └───────────────────────────────────────────────┘
 ```
 
-The existing `ManyToManyEditorComponent` diff model (comparing current vs original to
-determine adds/removes) is preserved. The only change is *when* the diff is applied:
-immediately (default position) vs on form Save (inline).
+Key design decisions:
+- Entity PATCH always fires first. If it fails, no M:M mutations execute.
+- Multiple inline M:M fields are processed sequentially (M:M A completes, then M:M B).
+- Partial M:M failure does NOT revert the entity PATCH (the entity save is permanent).
+- The user sees a clear message about what succeeded and what failed.
 
-### Implementation Components
+### FkSearchModalComponent Changes
 
-| Component | New/Modified | Role |
-|-----------|-------------|------|
-| `FkSearchModalComponent` | Modified | Add `multiSelect` input, checkbox UI, right panel |
-| `ManyToManyEditorComponent` | Modified | Detect `fk_search_modal`, trigger search modal |
-| `EditPage` | Modified | Collect buffered M:M diffs, apply after entity PATCH |
-| `DetailPage` | Modified | Inline M:M rendering in property grid |
-| `metadata.properties` | Migration | Add `show_inline` column |
+The FK search modal gains a `multiSelect` input that switches its behavior:
 
-### Database Migration (future)
+| Feature | `multiSelect: false` (FK) | `multiSelect: true` (M:M) |
+|---|---|---|
+| Selection control | Radio buttons | Checkboxes |
+| Selection state | `pendingSelection` signal (single) | `workingSelection` signal (Set) |
+| Right panel | Hidden | Scrolling chip list |
+| Button label | Confirm | Apply (N added, M removed) |
+| On Apply | Emits single `{id, displayName}` | Emits `{toAdd: id[], toRemove: id[]}` |
+| Clear button | For nullable FKs | Not applicable |
+| Pre-selection | Single row highlighted | All current values checked |
+
+The modal size increases from `xl` to `full` when `multiSelect` is true, to accommodate
+the split panel layout.
+
+### New Inputs/Outputs for Multi-Select Mode
+
+```typescript
+// Additional inputs for M:M mode
+multiSelect = input(false);
+currentValueIds = input<(number | string)[]>([]);  // Pre-checked IDs
+currentValueItems = input<{id: number | string, display_name: string, color?: string}[]>([]);
+
+// Additional output for M:M mode
+applied = output<{ toAdd: (number | string)[], toRemove: (number | string)[] }>();
+```
+
+### Database Migration
 
 ```sql
 ALTER TABLE metadata.properties ADD COLUMN show_inline BOOLEAN DEFAULT FALSE;
 
--- Constraint: show_inline only for M:M columns
 ALTER TABLE metadata.properties ADD CONSTRAINT show_inline_requires_m2m
   CHECK (show_inline = false OR column_name LIKE '%\_m2m');
+```
+
+### Implementation Phases
+
+| Phase | Scope | Depends on |
+|---|---|---|
+| **M:M-1** | `multiSelect` mode in `FkSearchModalComponent` (split panel, checkbox/chip sync) | v0.45.0 (this PR) |
+| **M:M-2** | `ManyToManyEditorComponent` detects `fk_search_modal`, opens search modal | M:M-1 |
+| **M:M-3** | `show_inline` migration + Detail page inline rendering (read-only chips in grid) | M:M-2 |
+| **M:M-4** | Edit page inline M:M with buffered save + `EditPage` save coordination | M:M-3 |
+
+M:M-1 and M:M-2 can ship together as one release. M:M-3 and M:M-4 can ship together
+as a follow-up. The search modal on the default (bottom card) position is immediately
+useful without the inline positioning work.
+
+### Configuration Examples
+
+```sql
+-- M:M search modal on default position (Detail bottom card)
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal)
+VALUES ('issues', 'issue_tags_m2m', true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = EXCLUDED.fk_search_modal;
+
+-- M:M search modal with RPC filtering + inline positioning
+INSERT INTO metadata.properties
+  (table_name, column_name, fk_search_modal, options_source_rpc, show_inline)
+VALUES
+  ('projects', 'project_parcels_m2m', true, 'get_eligible_parcels', true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = EXCLUDED.fk_search_modal,
+      options_source_rpc = EXCLUDED.options_source_rpc,
+      show_inline = EXCLUDED.show_inline;
 ```
 
 ## Migration

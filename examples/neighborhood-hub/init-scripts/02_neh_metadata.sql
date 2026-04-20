@@ -48,3 +48,50 @@ VALUES
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
       status_entity_type = EXCLUDED.status_entity_type;
+
+-- ============================================================================
+-- CATEGORIES (v0.34.0+)
+-- ============================================================================
+
+-- Parcel eligibility category group + values
+INSERT INTO metadata.category_groups (entity_type, display_name)
+VALUES ('parcel_eligibility', 'Parcel Eligibility');
+
+INSERT INTO metadata.categories (entity_type, display_name, color, sort_order)
+VALUES
+  ('parcel_eligibility', 'Good',       '#22c55e', 1),
+  ('parcel_eligibility', 'Few Issues', '#f59e0b', 2),
+  ('parcel_eligibility', 'Ineligible', '#ef4444', 3);
+
+-- Configure eligibility column as Category type
+INSERT INTO metadata.properties (table_name, column_name, display_name, category_entity_type)
+VALUES ('parcels', 'eligibility', 'Eligibility', 'parcel_eligibility')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET display_name = EXCLUDED.display_name,
+      category_entity_type = EXCLUDED.category_entity_type;
+
+-- Configure parcels for full-text search
+UPDATE metadata.entities SET search_fields = '{display_name,parcel_number}'
+WHERE table_name = 'parcels';
+
+-- Hide civic_os_text_search generated column
+INSERT INTO metadata.properties (table_name, column_name, show_on_list, show_on_create, show_on_edit, show_on_detail)
+VALUES ('parcels', 'civic_os_text_search', false, false, false, false)
+ON CONFLICT (table_name, column_name) DO UPDATE SET
+  show_on_list = false, show_on_create = false, show_on_edit = false, show_on_detail = false;
+
+-- ============================================================================
+-- M:M SEARCH MODAL + INLINE POSITIONING (v0.46.0)
+-- ============================================================================
+
+-- Enable search modal and inline positioning on project_parcels M:M
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, show_inline)
+VALUES ('projects', 'project_parcels_m2m', true, true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = true, show_inline = true;
+
+-- Enable FK search modal on borrower_id (single-select modal)
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, join_table)
+VALUES ('tool_reservations', 'borrower_id', true, 'borrowers')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = true, join_table = 'borrowers';

@@ -184,13 +184,20 @@ export class DetailPage {
     }
   }));
 
-  // Separate regular properties from M:M properties, excluding structural-only props
+  // Separate regular properties from M:M properties, excluding structural-only props.
+  // v0.46.0: Inline M:M (show_inline=true) are included in regularProps$ for grid rendering.
   public regularProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
-    map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany && p.show_on_detail !== false))
+    map(props => props.filter(p =>
+      (p.type !== EntityPropertyType.ManyToMany || p.show_inline === true)
+      && p.show_on_detail !== false
+    ))
   );
 
+  // Non-inline M:M stays in the bottom card section
   public manyToManyProps$: Observable<SchemaEntityProperty[]> = this.properties$.pipe(
-    map(props => props.filter(p => p.type === EntityPropertyType.ManyToMany))
+    map(props => props.filter(p =>
+      p.type === EntityPropertyType.ManyToMany && p.show_inline !== true
+    ))
   );
 
   /**

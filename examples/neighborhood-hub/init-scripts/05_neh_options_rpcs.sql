@@ -58,20 +58,20 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 
 -- ============================================================================
--- SCENARIO 3: Filtered M:M — eligible parcels only (with color)
+-- SCENARIO 3: Filtered M:M — eligible parcels only (by category)
+-- Parcels with eligibility category 'Good' or 'Few Issues' are eligible.
+-- Color comes from the Category badge rendering, not the RPC.
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION public.get_eligible_parcels(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
-RETURNS TABLE (id INT, display_name TEXT, color TEXT)
+CREATE OR REPLACE FUNCTION public.get_eligible_parcels(p_id TEXT DEFAULT NULL, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE (id INT, display_name TEXT)
 LANGUAGE SQL STABLE AS $$
-    SELECT p.id, p.display_name::TEXT,
-           CASE p.eligibility
-             WHEN 'good' THEN '#22c55e'
-             WHEN 'few_issues' THEN '#f59e0b'
-             ELSE '#ef4444'
-           END
+    SELECT p.id, p.display_name::TEXT
     FROM parcels p
-    WHERE p.eligibility IN ('good', 'few_issues')
+    WHERE p.eligibility IN (
+        get_category_id('parcel_eligibility', 'good'),
+        get_category_id('parcel_eligibility', 'few_issues')
+    )
     ORDER BY p.display_name;
 $$;
 
@@ -80,6 +80,7 @@ GRANT EXECUTE ON FUNCTION public.get_eligible_parcels TO web_anon;
 
 -- Register: project_parcels M:M uses filtered parcel list
 -- M:M column name convention: {junction_table}_m2m
+-- fk_search_modal and show_inline are set in 02_neh_metadata.sql
 INSERT INTO metadata.properties (table_name, column_name, options_source_rpc)
 VALUES ('projects', 'project_parcels_m2m', 'get_eligible_parcels')
 ON CONFLICT (table_name, column_name) DO UPDATE

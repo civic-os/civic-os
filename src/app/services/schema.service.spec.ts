@@ -21,7 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { SchemaService } from './schema.service';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../interfaces/entity';
-import { createMockEntity, createMockProperty, MOCK_PROPERTIES, MOCK_ENTITIES, expectPostgrestRequest } from '../testing';
+import { createMockEntity, createMockProperty, MOCK_PROPERTIES, MOCK_ENTITIES, expectPostgrestRequest, flushM2mMetadata } from '../testing';
 import { environment } from '../../environments/environment';
 import { Validators } from '@angular/forms';
 
@@ -43,7 +43,10 @@ describe('SchemaService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify(); // Ensure no outstanding HTTP requests
+    // Flush any outstanding M:M metadata requests before verify
+    // (getProperties uses combineLatest with schema_m2m_properties)
+    flushM2mMetadata(httpMock);
+    httpMock.verify();
   });
 
   describe('Basic Service Setup', () => {
@@ -128,6 +131,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', []);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should cache properties on first call', (done) => {
@@ -144,6 +148,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', []);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
   });
 
@@ -351,6 +356,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should only return properties for the specified table', (done) => {
@@ -367,6 +373,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should include map property even if hidden from list when map is enabled', (done) => {
@@ -396,6 +403,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [entityWithMap]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should not duplicate map property if already visible in list', (done) => {
@@ -424,6 +432,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [entityWithMap]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
   });
 
@@ -443,6 +452,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should filter out non-updatable columns', (done) => {
@@ -459,6 +469,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should filter out hidden fields (id, created_at, updated_at)', (done) => {
@@ -476,6 +487,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should filter based on show_on_create flag', (done) => {
@@ -495,6 +507,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
   });
 
@@ -513,6 +526,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should filter based on show_on_edit flag', (done) => {
@@ -532,6 +546,7 @@ describe('SchemaService', () => {
 
       expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
   });
 
@@ -554,6 +569,7 @@ describe('SchemaService', () => {
 
         expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
         expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
       });
     });
 
@@ -572,6 +588,7 @@ describe('SchemaService', () => {
 
         expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
         expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
       });
 
       it('should filter based on show_on_detail flag', (done) => {
@@ -593,6 +610,7 @@ describe('SchemaService', () => {
 
         expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
         expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
       });
     });
 
@@ -613,6 +631,7 @@ describe('SchemaService', () => {
 
         expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
         expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
       });
     });
 
@@ -631,6 +650,7 @@ describe('SchemaService', () => {
 
         expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
         expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
       });
     });
   });
@@ -721,6 +741,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should filter properties by table name', (done) => {
@@ -737,6 +758,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should make HTTP request every time (not use cache)', (done) => {
@@ -756,10 +778,12 @@ describe('SchemaService', () => {
 
         // Expect second HTTP request
         expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
       });
 
       // Expect first HTTP request
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should return empty array for entity with no properties', (done) => {
@@ -773,6 +797,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
 
     it('should calculate property types for all properties', (done) => {
@@ -790,6 +815,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
     });
   });
 
@@ -1777,6 +1803,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', allProps);
+      flushM2mMetadata(httpMock);
       expectPostgrestRequest(httpMock, 'schema_entities', entities);
     });
 
@@ -1825,6 +1852,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', allProps);
+      flushM2mMetadata(httpMock);
       expectPostgrestRequest(httpMock, 'schema_entities', entities);
     });
 
@@ -1864,6 +1892,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', allProps);
+      flushM2mMetadata(httpMock);
       expectPostgrestRequest(httpMock, 'schema_entities', entities);
     });
 
@@ -1902,6 +1931,7 @@ describe('SchemaService', () => {
       });
 
       expectPostgrestRequest(httpMock, 'schema_properties', allProps);
+      flushM2mMetadata(httpMock);
       expectPostgrestRequest(httpMock, 'schema_entities', entities);
     });
 

@@ -17,7 +17,7 @@
 
 
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { Observable, mergeMap, of, tap, map, take } from 'rxjs';
+import { Observable, forkJoin, mergeMap, of, tap, map, take } from 'rxjs';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
@@ -35,12 +35,14 @@ import Keycloak from 'keycloak-js';
 import { EditPropertyComponent } from "../../components/edit-property/edit-property.component";
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
+import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inline-m2m-editor.component';
+import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
-import { ApiError } from '../../interfaces/api';
+import { ApiError, ApiResponse } from '../../interfaces/api';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
 @Component({
@@ -52,6 +54,8 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     EditPropertyComponent,
     EmptyStateComponent,
     StaticTextComponent,
+    InlineM2mEditorComponent,
+    SaveProgressComponent,
     CommonModule,
     ReactiveFormsModule,
     CosModalComponent,
@@ -83,20 +87,24 @@ export class CreatePage {
   }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
     if(e) {
-      // Filter OUT M:M and File properties - they can only be edited on Detail/Edit pages after entity is created
+      // Filter OUT M:M (unless inline) and File properties
+      // Non-inline M:M can only be edited on Detail page after entity is created
+      // v0.46.0: Inline M:M (show_inline=true) are included for buffered save
       let props = this.schema.getPropsForCreate(e)
         .pipe(
           map(props => props.filter(p =>
-            p.type !== EntityPropertyType.ManyToMany &&
+            (p.type !== EntityPropertyType.ManyToMany || p.show_inline === true) &&
             p.type !== EntityPropertyType.File &&
             p.type !== EntityPropertyType.FileImage &&
             p.type !== EntityPropertyType.FilePDF
           )),
           tap(props => {
             this.currentProps = props;
+            this.inlineM2mProps = props.filter(p => p.type === EntityPropertyType.ManyToMany && p.show_inline === true);
+            // Build form controls for non-M:M properties only
             this.createForm = new FormGroup(
               Object.fromEntries(
-                props.map(p => {
+                props.filter(p => p.type !== EntityPropertyType.ManyToMany).map(p => {
                   const validators = SchemaService.getFormValidatorsForProperty(p);
                   const defaultValue = SchemaService.getDefaultValueForProperty(p);
                   return [
@@ -156,6 +164,12 @@ export class CreatePage {
   // Store the created record ID for navigation
   private createdRecordId?: number | string;
 
+  // v0.46.0: Inline M:M support
+  public inlineM2mProps: SchemaEntityProperty[] = [];
+  public pendingM2mDiffs = signal<Map<string, { toAdd: (number|string)[], toRemove: (number|string)[] }>>(new Map());
+  public saveSteps = signal<SaveStep[] | null>(null);
+  public saveComplete = signal(false);
+
   submitForm(event: any) {
     event?.preventDefault?.();
 
@@ -190,7 +204,13 @@ export class CreatePage {
           // Transform values back to database format before submission
           const transformedData = this.transformValuesForApi(formData);
 
-          // M:M and File properties are filtered out, so just create the entity directly
+          // v0.46.0: If there are pending M:M diffs, use coordinated save pipeline
+          if (this.pendingM2mDiffs().size > 0) {
+            this.executeCoordinatedCreate(transformedData);
+            return;
+          }
+
+          // No M:M diffs — standard single-step create
           this.data.createData(this.entityKey, transformedData)
             .subscribe({
               next: (result) => {
@@ -242,6 +262,86 @@ export class CreatePage {
         });
         this.showErrorModal.set(true);
       });
+  }
+
+  // --- v0.46.0: Inline M:M methods ---
+
+  onM2mDiffChanged(columnName: string, diff: { toAdd: (number | string)[], toRemove: (number | string)[] }) {
+    this.pendingM2mDiffs.update(m => {
+      const next = new Map(m);
+      if (diff.toAdd.length === 0 && diff.toRemove.length === 0) {
+        next.delete(columnName);
+      } else {
+        next.set(columnName, diff);
+      }
+      return next;
+    });
+  }
+
+  onSaveComplete() {
+    this.saveComplete.set(true);
+    if (this.entityKey) {
+      this.analytics.trackEvent('Entity', 'Create', this.entityKey);
+    }
+  }
+
+  private executeCoordinatedCreate(transformedData: any): void {
+    const steps: SaveStep[] = [];
+
+    // Step 1: Entity POST — captures createdRecordId for M:M steps
+    steps.push({
+      label: 'Creating record',
+      execute: () => this.data.createData(this.entityKey!, transformedData).pipe(
+        map(result => {
+          if (result.success === true && result.body?.[0]?.id) {
+            this.createdRecordId = result.body[0].id;
+            if (this.entityKey) {
+              this.analytics.trackEvent('Entity', 'Create', this.entityKey);
+            }
+          }
+          return {
+            success: result.success === true,
+            errorMessage: result.error?.humanMessage || result.error?.message
+          };
+        })
+      )
+    });
+
+    // Step 2+: M:M mutations using createdRecordId
+    const diffs = this.pendingM2mDiffs();
+    for (const [columnName, diff] of diffs) {
+      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
+      if (!prop?.many_to_many_meta) continue;
+
+      const meta = prop.many_to_many_meta;
+      // On create, there are only additions (no existing relations to remove)
+      const label = `Adding ${prop.display_name} (${diff.toAdd.length} to add)`;
+
+      steps.push({
+        label,
+        execute: () => {
+          if (!this.createdRecordId) return of({ success: false, errorMessage: 'Record ID not available' });
+          const ops: Observable<ApiResponse>[] = diff.toAdd.map(id =>
+            this.data.addManyToManyRelation(this.createdRecordId!, meta, id)
+          );
+          if (ops.length === 0) return of({ success: true });
+          return forkJoin(ops).pipe(
+            map(results => {
+              const failed = results.filter(r => !r.success).length;
+              return {
+                success: failed === 0,
+                failedCount: failed,
+                totalCount: results.length,
+                errorMessage: failed > 0 ? `${failed} of ${results.length} additions failed` : undefined
+              };
+            })
+          );
+        }
+      });
+    }
+
+    this.saveSteps.set(steps);
+    this.showSuccessModal.set(true);  // SaveProgressComponent auto-starts execution
   }
 
   private scrollToFirstError(): void {

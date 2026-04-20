@@ -34,14 +34,14 @@ INSERT INTO borrowers (display_name, email, phone, status_id) VALUES
   ('Diana Prince',    'diana@example.com',   '5554567890', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'rejected')),
   ('Eve Wilson',      'eve@example.com',     '5555678901', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'approved'));
 
--- Parcels (mix of eligibility)
+-- Parcels (mix of eligibility categories, using get_category_id helper)
 INSERT INTO parcels (display_name, parcel_number, eligibility) VALUES
-  ('123 Main St',     'P-001', 'good'),
-  ('456 Oak Ave',     'P-002', 'good'),
-  ('789 Elm Blvd',    'P-003', 'few_issues'),
-  ('321 Pine Dr',     'P-004', 'ineligible'),
-  ('654 Maple Ln',    'P-005', 'good'),
-  ('987 Cedar Ct',    'P-006', 'few_issues');
+  ('123 Main St',     'P-001', get_category_id('parcel_eligibility', 'good')),
+  ('456 Oak Ave',     'P-002', get_category_id('parcel_eligibility', 'good')),
+  ('789 Elm Blvd',    'P-003', get_category_id('parcel_eligibility', 'few_issues')),
+  ('321 Pine Dr',     'P-004', get_category_id('parcel_eligibility', 'ineligible')),
+  ('654 Maple Ln',    'P-005', get_category_id('parcel_eligibility', 'good')),
+  ('987 Cedar Ct',    'P-006', get_category_id('parcel_eligibility', 'few_issues'));
 
 -- Projects
 INSERT INTO projects (display_name, description) VALUES

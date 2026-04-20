@@ -26,6 +26,29 @@ import { isSystemType } from '../constants/system-types';
 import { ConstraintMessage } from '../interfaces/api';
 
 /**
+ * Metadata for synthetic M:M properties from schema_m2m_properties VIEW.
+ * Bridges metadata.properties flags to virtual M:M columns that don't exist
+ * in information_schema.columns (and thus aren't returned by schema_properties).
+ *
+ * @since v0.46.0
+ */
+export interface M2mPropertyMetadata {
+  table_name: string;
+  column_name: string;
+  options_source_rpc: string | null;
+  depends_on_columns: string[] | null;
+  fk_search_modal: boolean;
+  show_inline: boolean;
+  display_name: string | null;
+  sort_order: number | null;
+  column_width: number | null;
+  show_on_list: boolean | null;
+  show_on_create: boolean | null;
+  show_on_edit: boolean | null;
+  show_on_detail: boolean | null;
+}
+
+/**
  * Status option for dropdowns and filters.
  * Simplified version of StatusValue for UI components.
  */
@@ -59,6 +82,7 @@ export class SchemaService {
   // Cached observables for HTTP requests (with shareReplay)
   private schemaCache$?: Observable<SchemaEntityTable[]>;
   private propertiesCache$?: Observable<SchemaEntityProperty[]>;
+  private m2mMetadataCache$?: Observable<M2mPropertyMetadata[]>;
   private constraintMessagesCache$?: Observable<ConstraintMessage[]>;
 
   // Status cache: keyed by entity_type (e.g., 'reservation_request', 'issue')
@@ -119,6 +143,7 @@ export class SchemaService {
     // Clear cached observables to force fresh HTTP requests
     this.schemaCache$ = undefined;
     this.propertiesCache$ = undefined;
+    this.m2mMetadataCache$ = undefined;
     this.constraintMessagesCache$ = undefined;
     this.staticTextCache$ = undefined;
     // Clear processed cache
@@ -168,6 +193,7 @@ export class SchemaService {
     // Clear both the processed cache and the HTTP cache
     this.properties = undefined;
     this.propertiesCache$ = undefined;
+    this.m2mMetadataCache$ = undefined;
     // Reset loading flag to allow new fetch
     this.loadingProperties = false;
     // Trigger fetch - will re-enrich with M:M data
@@ -214,21 +240,32 @@ export class SchemaService {
       return of([]);
     }
 
+    // Fetch M:M metadata VIEW (cached separately, cleared alongside properties)
+    if (!this.m2mMetadataCache$) {
+      this.m2mMetadataCache$ = this.http.get<M2mPropertyMetadata[]>(
+        getPostgrestUrl() + 'schema_m2m_properties'
+      ).pipe(
+        catchError(() => of([] as M2mPropertyMetadata[])),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+
     // Note: getEntities() returns a signal-derived observable that never completes.
     // We use take(1) to complete after first emission, enabling use with forkJoin/combineLatest.
     return combineLatest([
       this.propertiesCache$,
-      this.getEntities().pipe(take(1))
+      this.getEntities().pipe(take(1)),
+      this.m2mMetadataCache$
     ]).pipe(
-      map(([props, tables]) => {
+      map(([props, tables, m2mMetadata]) => {
         // First, set property types
         const typedProps = props.map(p => {
           p.type = this.getPropertyType(p);
           return p;
         });
 
-        // Then enrich with M:M virtual properties and sort by sort_order
-        const enriched = this.enrichPropertiesWithManyToMany(typedProps, tables);
+        // Then enrich with M:M virtual properties (including metadata flags) and sort
+        const enriched = this.enrichPropertiesWithManyToMany(typedProps, tables, m2mMetadata);
         return enriched.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
       }),
       tap(enrichedProps => {
@@ -237,28 +274,10 @@ export class SchemaService {
     );
   }
 
-  /**
-   * Look up options_source_rpc for a synthetic M:M column from metadata.properties.
-   * M:M columns are virtual (built by SchemaService, not in information_schema.columns),
-   * so their metadata.properties entries don't appear in schema_properties VIEW.
-   * This method calls an RPC to bridge that gap.
-   *
-   * @param tableName The parent entity table (e.g., 'projects')
-   * @param columnName The synthetic M:M column (e.g., 'project_parcels_m2m')
-   * @returns Observable of the RPC function name, or null if not configured
-   * @since v0.44.0
-   */
-  public getM2mOptionsSourceRpc(tableName: string, columnName: string): Observable<string | null> {
-    return this.http.post<{table_name: string, column_name: string, options_source_rpc: string}[]>(
-      getPostgrestUrl() + 'rpc/get_m2m_options_source_rpcs', {}
-    ).pipe(
-      map(results => {
-        const match = results.find(r => r.table_name === tableName && r.column_name === columnName);
-        return match?.options_source_rpc ?? null;
-      }),
-      catchError(() => of(null))
-    );
-  }
+  // v0.44.0 getM2mOptionsSourceRpc() removed in v0.46.0.
+  // M:M metadata (options_source_rpc, fk_search_modal, show_inline) is now
+  // batch-loaded from schema_m2m_properties VIEW during getProperties()
+  // and applied to synthetic properties in enrichPropertiesWithManyToMany().
 
   /**
    * Fetches constraint error messages from the database.
@@ -1066,25 +1085,34 @@ export class SchemaService {
    */
   private enrichPropertiesWithManyToMany(
     properties: SchemaEntityProperty[],
-    tables: SchemaEntityTable[]
+    tables: SchemaEntityTable[],
+    m2mMetadata: M2mPropertyMetadata[] = []
   ): SchemaEntityProperty[] {
     const junctions = this.detectJunctionTables(tables, properties);
     const enriched: SchemaEntityProperty[] = [...properties];
 
+    // Build lookup map for M:M metadata: "tableName:columnName" → metadata
+    const metadataMap = new Map<string, M2mPropertyMetadata>();
+    m2mMetadata.forEach(m => metadataMap.set(`${m.table_name}:${m.column_name}`, m));
+
     // For each junction table, create virtual M:M properties on source/target
     junctions.forEach((metas, tableName) => {
       metas.forEach(meta => {
+        const columnName = `${meta.junctionTable}_m2m`;
+        const metaKey = `${meta.sourceTable}:${columnName}`;
+        const m2mMeta = metadataMap.get(metaKey);
+
         // Create a virtual property for the M:M relationship
         // Use empty string for fields we don't have from database
         const virtualProp: SchemaEntityProperty = {
           table_catalog: '',
           table_schema: 'public',
           table_name: meta.sourceTable,
-          column_name: `${meta.junctionTable}_m2m`,  // Virtual column name
-          display_name: meta.relatedTableDisplayName,
+          column_name: columnName,
+          display_name: m2mMeta?.display_name || meta.relatedTableDisplayName,
           description: `Many-to-many relationship via ${meta.junctionTable}`,
-          sort_order: meta.displayOrder,
-          column_width: 2,  // Full width for multi-select
+          sort_order: m2mMeta?.sort_order ?? meta.displayOrder,
+          column_width: m2mMeta?.column_width ?? 2,
           sortable: false,  // M:M not sortable in list view
           filterable: false, // M:M not filterable (yet)
           column_default: '',
@@ -1101,12 +1129,21 @@ export class SchemaService {
           join_table: '',
           join_column: '',
           geography_type: '',
-          show_on_list: false,  // Don't show M:M in list by default (too wide)
-          show_on_create: true,
-          show_on_edit: true,
-          show_on_detail: true,
+          // show_on_* defaults are M:M-specific; metadata.properties can override
+          // (e.g., show_on_detail: false to hide M:M from detail page entirely)
+          show_on_list: false,  // M:M can't render in list table rows
+          show_on_create: m2mMeta?.show_on_create ?? true,
+          show_on_edit: m2mMeta?.show_on_edit ?? true,
+          show_on_detail: m2mMeta?.show_on_detail ?? true,
           type: EntityPropertyType.ManyToMany,
-          many_to_many_meta: meta
+          many_to_many_meta: meta,
+          // v0.44.0+: M:M metadata flags from schema_m2m_properties VIEW
+          options_source_rpc: m2mMeta?.options_source_rpc || undefined,
+          depends_on_columns: m2mMeta?.depends_on_columns || undefined,
+          // v0.45.0+: FK search modal flag
+          fk_search_modal: m2mMeta?.fk_search_modal ?? false,
+          // v0.46.0: Inline positioning
+          show_inline: m2mMeta?.show_inline ?? false,
         };
 
         enriched.push(virtualProp);

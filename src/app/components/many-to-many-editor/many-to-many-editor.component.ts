@@ -23,14 +23,14 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { SchemaEntityProperty } from '../../interfaces/entity';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
-import { SchemaService } from '../../services/schema.service';
 import { ApiResponse } from '../../interfaces/api';
+import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.component';
 
 @Component({
   selector: 'app-many-to-many-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, FkSearchModalComponent],
   templateUrl: './many-to-many-editor.component.html',
   styleUrl: './many-to-many-editor.component.css'
 })
@@ -53,10 +53,22 @@ export class ManyToManyEditorComponent {
   // Services
   private data = inject(DataService);
   private authService = inject(AuthService);
-  private schema = inject(SchemaService);
 
   // v0.44.0: Resolved options_source_rpc for this M:M property (from metadata.properties)
   private resolvedOptionsSourceRpc = signal<string | null>(null);
+
+  // v0.46.0: Search modal mode
+  useFkSearchModal = computed(() => this.property().fk_search_modal === true);
+  showSearchModal = signal(false);
+
+  // Convert loaded RPC options to the format expected by FkSearchModalComponent
+  resolvedRpcOptions = computed<{id: number | string, text: string}[] | null>(() => {
+    if (!this.resolvedOptionsSourceRpc()) return null;
+    return this.availableOptions().map(o => ({
+      id: o.id,
+      text: o.display_name
+    }));
+  });
 
   // Output
   relationChanged = output<void>();
@@ -93,18 +105,11 @@ export class ManyToManyEditorComponent {
     effect(() => {
       const prop = this.property();
       if (prop?.many_to_many_meta) {
-        // v0.44.0: Look up options_source_rpc for this synthetic M:M column.
-        // If already set on the property (e.g., from a future SchemaService enrichment), use it.
-        // Otherwise, query metadata.properties via RPC for the synthetic column name.
-        if (prop.options_source_rpc) {
-          this.resolvedOptionsSourceRpc.set(prop.options_source_rpc);
-          this.loadAvailableOptions();
-        } else {
-          this.schema.getM2mOptionsSourceRpc(prop.table_name, prop.column_name).subscribe(rpc => {
-            this.resolvedOptionsSourceRpc.set(rpc);
-            this.loadAvailableOptions();
-          });
-        }
+        // v0.46.0: options_source_rpc is now set on the property by SchemaService
+        // (batch-loaded from schema_m2m_properties VIEW during enrichment).
+        // No per-component RPC call needed.
+        this.resolvedOptionsSourceRpc.set(prop.options_source_rpc ?? null);
+        this.loadAvailableOptions();
         this.checkPermissions();
       }
     });
@@ -215,6 +220,18 @@ export class ManyToManyEditorComponent {
     }
 
     this.executeManyToManyChanges(toAdd, toRemove);
+  }
+
+  // v0.46.0: Handle Apply from search modal
+  onSearchModalApply(diff: { toAdd: (number | string)[], toRemove: (number | string)[], addedItems?: any[] }) {
+    this.showSearchModal.set(false);
+    if (diff.toAdd.length === 0 && diff.toRemove.length === 0) return;
+    this.executeManyToManyChanges(diff.toAdd as number[], diff.toRemove as number[]);
+  }
+
+  // v0.46.0: Get current value IDs for the search modal
+  getCurrentValueIds(): (number | string)[] {
+    return this.currentValues().map(v => v.id);
   }
 
   private executeManyToManyChanges(toAdd: number[], toRemove: number[]) {

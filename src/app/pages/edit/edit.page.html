@@ -26,33 +26,43 @@
             <span class="loading loading-spinner loading-lg"></span>
           </div>
         } @else if (entity.update && editForm; as form) {
-          <form [formGroup]="form" (ngSubmit)="submitForm($event)">
-            @if (showValidationError()) {
-              <div role="alert" class="alert alert-error mb-4">
-                <span class="material-symbols-outlined">error</span>
-                <span>Please fix the errors highlighted below before saving.</span>
-              </div>
-            }
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
-              @if (editRenderables$ | async; as renderables) {
-                @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
-                  @if (isStaticText(item)) {
-                    <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
-                      <app-static-text [staticText]="item"></app-static-text>
-                    </div>
-                  } @else if (isProperty(item)) {
-                    <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
-                      <app-edit-property [property]="item" [formGroup]="form" [entityType]="entityKey!" [entityId]="entityId!"></app-edit-property>
-                    </div>
+            <form [formGroup]="form" (ngSubmit)="submitForm($event)">
+              @if (showValidationError()) {
+                <div role="alert" class="alert alert-error mb-4">
+                  <span class="material-symbols-outlined">error</span>
+                  <span>Please fix the errors highlighted below before saving.</span>
+                </div>
+              }
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
+                @if (editRenderables$ | async; as renderables) {
+                  @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
+                    @if (isStaticText(item)) {
+                      <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                        <app-static-text [staticText]="item"></app-static-text>
+                      </div>
+                    } @else if (isProperty(item) && item.type === 17 && item.show_inline) {
+                      <!-- v0.46.0: Inline M:M editor (buffered save) -->
+                      <div class="col-span-full">
+                        <app-inline-m2m-editor
+                          [property]="item"
+                          [currentValues]="currentData?.[item.column_name] || []"
+                          [entityId]="entityId!"
+                          (pendingDiff)="onM2mDiffChanged(item.column_name, $event)"
+                        ></app-inline-m2m-editor>
+                      </div>
+                    } @else if (isProperty(item)) {
+                      <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                        <app-edit-property [property]="item" [formGroup]="form" [entityType]="entityKey!" [entityId]="entityId!"></app-edit-property>
+                      </div>
+                    }
                   }
                 }
-              }
-            </div>
-            <div class="divider"></div>
-            <button type="submit" class="btn btn-accent">
-              <span class="material-symbols-outlined">save</span> Save
-            </button>
-          </form>
+              </div>
+              <div class="divider"></div>
+              <button type="submit" class="btn btn-accent">
+                <span class="material-symbols-outlined">save</span> Save
+              </button>
+            </form>
         } @else if (!entity.update) {
           <!-- Access denied when record exists but user lacks update permission -->
           <div class="p-8">
@@ -111,17 +121,41 @@
         </div>
       }
     }
-    <!-- Success Modal -->
+    <!-- Success Modal (also used for coordinated save progress, v0.46.0) -->
     <cos-modal [isOpen]="showSuccessModal()" (closed)="closeSuccessModal()" size="sm">
-      <h3 class="font-bold text-lg mb-4">
-        <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
-        Success
-      </h3>
-      <p class="mb-4">Record updated successfully.</p>
-      <div class="flex flex-col gap-2 w-full">
-        <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
-      </div>
+      @if (saveSteps(); as steps) {
+        <!-- Coordinated save: show step progress -->
+        <h3 class="font-bold text-lg mb-4">
+          @if (saveComplete()) {
+            <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+            Saved
+          } @else {
+            <span class="material-symbols-outlined text-primary align-middle mr-2 animate-spin">progress_activity</span>
+            Saving...
+          }
+        </h3>
+        <app-save-progress
+          [steps]="steps"
+          (completed)="onSaveComplete()"
+        ></app-save-progress>
+        @if (saveComplete()) {
+          <div class="flex flex-col gap-2 w-full mt-4">
+            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+          </div>
+        }
+      } @else {
+        <!-- Standard success (no M:M steps) -->
+        <h3 class="font-bold text-lg mb-4">
+          <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+          Success
+        </h3>
+        <p class="mb-4">Record updated successfully.</p>
+        <div class="flex flex-col gap-2 w-full">
+          <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
+          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+        </div>
+      }
     </cos-modal>
 
     <!-- Error Modal -->

@@ -18,7 +18,7 @@
 
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { SchemaService } from '../../services/schema.service';
-import { Observable, map, mergeMap, of, tap } from 'rxjs';
+import { Observable, forkJoin, map, mergeMap, of, tap } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
@@ -36,13 +36,15 @@ import {
   SeriesEditScope
 } from '../../interfaces/entity';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
-import { ApiError } from '../../interfaces/api';
+import { ApiError, ApiResponse } from '../../interfaces/api';
 import Keycloak from 'keycloak-js';
 
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
+import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inline-m2m-editor.component';
+import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CommonModule } from '@angular/common';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -55,6 +57,8 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     EmptyStateComponent,
     StaticTextComponent,
     ExceptionEditorComponent,
+    InlineM2mEditorComponent,
+    SaveProgressComponent,
     CommonModule,
     ReactiveFormsModule,
     CosModalComponent,
@@ -91,12 +95,15 @@ export class EditPage {
   }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
     if(e) {
-      // Filter OUT M:M properties - they can only be edited on Detail page
+      // Filter OUT M:M properties UNLESS they are inline (show_inline=true, v0.46.0)
+      // Non-inline M:M can only be edited on Detail page
       return this.schema.getPropsForEdit(e)
         .pipe(
-          map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany)),
+          map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany || p.show_inline === true)),
           tap(props => {
             this.currentProps = props;
+            // Track inline M:M properties separately for save pipeline
+            this.inlineM2mProps = props.filter(p => p.type === EntityPropertyType.ManyToMany && p.show_inline === true);
           })
         );
     } else {
@@ -121,11 +128,23 @@ export class EditPage {
     }),
     tap(data => {
       if (data && this.currentProps.length > 0) {
+        // Cache entity data for inline M:M rendering.
+        // Transform M:M junction data to flat arrays (same as Detail page).
+        this.currentData = { ...data };
+        this.inlineM2mProps.forEach(p => {
+          if (p.many_to_many_meta) {
+            const junctionData = (this.currentData as any)[p.column_name] || [];
+            (this.currentData as any)[p.column_name] = DataService.transformManyToManyData(
+              junctionData, p.many_to_many_meta.relatedTable
+            );
+          }
+        });
+
         // Create form with actual data values, not defaults
-        // M:M properties are filtered out, so just map regular properties
-        // Exclude structural-only props (e.g. display_name fetched for header but not editable)
+        // Inline M:M properties are in currentProps but excluded from form controls
+        // (they use InlineM2mEditorComponent, not form inputs)
         const formConfig = Object.fromEntries(
-          this.currentProps.filter(p => p.show_on_edit !== false).map(p => [
+          this.currentProps.filter(p => p.show_on_edit !== false && p.type !== EntityPropertyType.ManyToMany).map(p => [
             p.column_name,
             new FormControl(
               this.transformValueForControl(p, (data as any)[p.column_name]),
@@ -170,6 +189,15 @@ export class EditPage {
   public dataLoading = signal(true);  // Track data fetch state
   public showValidationError = signal(false);
   private currentProps: SchemaEntityProperty[] = [];
+
+  // v0.46.0: Inline M:M support
+  public inlineM2mProps: SchemaEntityProperty[] = [];
+  public pendingM2mDiffs = signal<Map<string, { toAdd: (number|string)[], toRemove: (number|string)[] }>>(new Map());
+  public saveSteps = signal<SaveStep[] | null>(null);
+  public saveComplete = signal(false);
+  public currentData: any = null;  // Cached entity data for M:M rendering
+
+  private saveStartTime = 0;  // Timestamp for minimum display duration
 
   // Series membership (for recurring time slots)
   public seriesMembership = signal<SeriesMembership | undefined>(undefined);
@@ -271,7 +299,13 @@ export class EditPage {
       .then(() => {
         // Token is fresh, proceed with submission
         if(this.entityKey && this.entityId) {
-          // M:M properties are filtered out, so just edit the entity directly
+          // v0.46.0: If there are pending M:M diffs, use coordinated save pipeline
+          if (this.hasM2mDiffs()) {
+            this.executeCoordinatedSave(transformedData);
+            return;
+          }
+
+          // No M:M diffs — standard single-step edit
           this.data.editData(this.entityKey, this.entityId, transformedData)
             .subscribe({
               next: (result) => {
@@ -455,6 +489,81 @@ export class EditPage {
         }
       }
     }, 100);
+  }
+
+  // --- v0.46.0: Inline M:M methods ---
+
+  onM2mDiffChanged(columnName: string, diff: { toAdd: (number | string)[], toRemove: (number | string)[] }) {
+    this.pendingM2mDiffs.update(m => {
+      const next = new Map(m);
+      if (diff.toAdd.length === 0 && diff.toRemove.length === 0) {
+        next.delete(columnName);
+      } else {
+        next.set(columnName, diff);
+      }
+      return next;
+    });
+  }
+
+  onSaveComplete() {
+    this.saveComplete.set(true);
+    if (this.entityKey) {
+      this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
+    }
+  }
+
+  private hasM2mDiffs(): boolean {
+    return this.pendingM2mDiffs().size > 0;
+  }
+
+  private executeCoordinatedSave(transformedData: any): void {
+    const steps: SaveStep[] = [];
+
+    // Step 1: Entity PATCH
+    steps.push({
+      label: 'Saving record',
+      execute: () => this.data.editData(this.entityKey!, this.entityId!, transformedData).pipe(
+        map(result => ({
+          success: result.success === true,
+          errorMessage: result.error?.humanMessage || result.error?.message
+        }))
+      )
+    });
+
+    // Step 2+: One step per inline M:M with pending changes
+    const diffs = this.pendingM2mDiffs();
+    for (const [columnName, diff] of diffs) {
+      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
+      if (!prop?.many_to_many_meta) continue;
+
+      const meta = prop.many_to_many_meta;
+      const label = `Updating ${prop.display_name} (${diff.toAdd.length} to add, ${diff.toRemove.length} to remove)`;
+
+      steps.push({
+        label,
+        execute: () => {
+          const ops: Observable<ApiResponse>[] = [
+            ...diff.toRemove.map(id => this.data.removeManyToManyRelation(this.entityId!, meta, id)),
+            ...diff.toAdd.map(id => this.data.addManyToManyRelation(this.entityId!, meta, id))
+          ];
+          if (ops.length === 0) return of({ success: true });
+          return forkJoin(ops).pipe(
+            map(results => {
+              const failed = results.filter(r => !r.success).length;
+              return {
+                success: failed === 0,
+                failedCount: failed,
+                totalCount: results.length,
+                errorMessage: failed > 0 ? `${failed} of ${results.length} changes failed` : undefined
+              };
+            })
+          );
+        }
+      });
+    }
+
+    this.saveSteps.set(steps);
+    this.showSuccessModal.set(true);  // SaveProgressComponent auto-starts execution
   }
 
   goBack(): void {

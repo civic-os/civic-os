@@ -60,7 +60,7 @@ export class FkSearchModalComponent implements OnDestroy {
   private destroyRef = inject(DestroyRef);
   private destroyed = false;
 
-  // Inputs
+  // Inputs — single-select (FK)
   isOpen = input.required<boolean>();
   joinTable = input.required<string>();
   joinColumn = input<string>('id');
@@ -69,11 +69,19 @@ export class FkSearchModalComponent implements OnDestroy {
   title = input('Select');
   rpcOptions = input<{id: number | string, text: string}[] | null>(null);
 
-  // Outputs
+  // Inputs — multi-select (M:M, v0.46.0)
+  multiSelect = input(false);
+  currentValueIds = input<(number | string)[]>([]);
+  currentValueItems = input<{id: number | string, display_name: string, color?: string}[]>([]);
+
+  // Outputs — single-select (FK)
   confirmed = output<{id: number | string, displayName: string} | null>();
   closed = output<void>();
 
-  // State
+  // Output — multi-select (M:M)
+  applied = output<{ toAdd: (number | string)[], toRemove: (number | string)[], addedItems?: {id: number | string, display_name: string, color?: string}[] }>();
+
+  // State — shared
   loading = signal(false);
   listProperties = signal<SchemaEntityProperty[]>([]);
   filterProperties = signal<SchemaEntityProperty[]>([]);
@@ -86,14 +94,45 @@ export class FkSearchModalComponent implements OnDestroy {
   orderDirection = signal<'asc' | 'desc'>('asc');
   filters = signal<FilterCriteria[]>([]);
   hasSearchFields = signal(false);
+
+  // State — single-select
   pendingSelection = signal<{id: number | string, displayName: string} | null>(null);
 
-  // Whether the Confirm button should be enabled
+  // State — multi-select (v0.46.0)
+  workingSelection = signal<Set<number | string>>(new Set());
+  chipCache = signal<Map<number | string, {display_name: string, color?: string}>>(new Map());
+
+  // Computed — single-select: whether the Confirm button should be enabled
   confirmEnabled = computed(() => {
     const pending = this.pendingSelection();
     const current = this.currentValue();
     if (pending === null) return current !== null && current !== undefined;
     return String(pending.id) !== String(current);
+  });
+
+  // Computed — multi-select: chips for the right panel (sorted alphabetically)
+  selectedChips = computed(() => {
+    const selection = this.workingSelection();
+    const cache = this.chipCache();
+    return [...selection]
+      .map(id => ({ id, ...(cache.get(id) || { display_name: `#${id}` }) }))
+      .sort((a, b) => a.display_name.localeCompare(b.display_name));
+  });
+
+  // Computed — multi-select: diff from original for Apply button
+  pendingDiff = computed(() => {
+    const original = new Set(this.currentValueIds());
+    const working = this.workingSelection();
+    return {
+      toAdd: [...working].filter(id => !original.has(id)),
+      toRemove: [...original].filter(id => !working.has(id))
+    };
+  });
+
+  // Computed — multi-select: Apply enabled only when diff is non-empty
+  applyEnabled = computed(() => {
+    const diff = this.pendingDiff();
+    return diff.toAdd.length > 0 || diff.toRemove.length > 0;
   });
 
   // RPC options provide an ID filter, not a separate rendering path.
@@ -108,19 +147,42 @@ export class FkSearchModalComponent implements OnDestroy {
 
   // Trigger for reloading data in table mode
   private reload$ = new Subject<void>();
+  private lastOpenTable: string | null = null;  // Guard against effect re-triggering
 
   constructor() {
-    // When modal opens, load properties and data
+    // When modal opens, load properties and data.
+    // Guard: only initialize once per open (isOpen transitions false→true).
+    // Without this guard, signal writes (chipCache.set, workingSelection.set)
+    // would re-trigger this effect, causing an infinite load loop.
     effect(() => {
       const open = this.isOpen();
       const table = this.joinTable();
-      if (!open || !table || this.destroyed) return;
+
+      if (!open || !table || this.destroyed) {
+        // Modal closed — reset guard so next open re-initializes
+        if (!open) this.lastOpenTable = null;
+        return;
+      }
+
+      // Skip if already initialized for this table (effect re-triggered by signal writes)
+      if (this.lastOpenTable === table) return;
+      this.lastOpenTable = table;
 
       // Reset state on open
       this.searchQuery.set('');
       this.currentPage.set(1);
       this.filters.set([]);
       this.pendingSelection.set(null);
+
+      // Multi-select: initialize workingSelection and chipCache from inputs
+      if (this.multiSelect()) {
+        this.workingSelection.set(new Set(this.currentValueIds()));
+        const cache = new Map<number | string, {display_name: string, color?: string}>();
+        this.currentValueItems().forEach(item => {
+          cache.set(item.id, { display_name: item.display_name, color: item.color });
+        });
+        this.chipCache.set(cache);
+      }
 
       // Always load entity metadata and query the table.
       // RPC options (if any) are injected as an ID filter, not a separate path.
@@ -207,7 +269,23 @@ export class FkSearchModalComponent implements OnDestroy {
       this.totalCount.set(result.totalCount);
       this.loading.set(false);
 
-      // Auto-highlight current value if found in results
+      // Multi-select: cache display data from page rows for right panel chips
+      if (this.multiSelect()) {
+        this.chipCache.update(m => {
+          const next = new Map(m);
+          result.data.forEach(row => {
+            if (row.id != null) {
+              next.set(row.id, {
+                display_name: row.display_name,
+                color: (row as any).color
+              });
+            }
+          });
+          return next;
+        });
+      }
+
+      // Single-select: auto-highlight current value if found in results
       this.preHighlightCurrent();
     });
   }
@@ -284,6 +362,43 @@ export class FkSearchModalComponent implements OnDestroy {
     if (id === undefined) return false;
     const pending = this.pendingSelection();
     return pending !== null && String(pending.id) === String(id);
+  }
+
+  // --- Multi-select interaction handlers (v0.46.0) ---
+
+  isInWorkingSelection(id: number | string | undefined): boolean {
+    if (id === undefined) return false;
+    // Use string comparison to handle mixed number/string IDs from PostgREST
+    const selection = this.workingSelection();
+    return selection.has(id) || selection.has(String(id)) || selection.has(Number(id));
+  }
+
+  toggleSelection(id: number | string, displayName: string, color?: string) {
+    this.workingSelection.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+    this.chipCache.update(m => new Map(m).set(id, { display_name: displayName, color }));
+  }
+
+  removeChip(id: number | string) {
+    this.workingSelection.update(set => {
+      const next = new Set(set);
+      next.delete(id);
+      return next;
+    });
+  }
+
+  onApply() {
+    const diff = this.pendingDiff();
+    const cache = this.chipCache();
+    // Include display data for added items so the caller can show names (not just IDs)
+    const addedItems = diff.toAdd.map(id => ({
+      id,
+      ...(cache.get(id) || { display_name: `#${id}` })
+    }));
+    this.applied.emit({ ...diff, addedItems });
   }
 
   getSortIcon(columnName: string): string {

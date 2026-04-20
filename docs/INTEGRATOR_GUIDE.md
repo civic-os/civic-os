@@ -95,7 +95,8 @@ Key fields:
 - `show_on_detail` - BOOLEAN - Display in Detail page (default: true)
 - `options_source_rpc` - NAME - Custom RPC function name for FK/M:M option loading (v0.44.0). When set, the framework calls this RPC instead of querying the related table. See [Options Source RPC](#options-source-rpc-v0440) section below.
 - `depends_on_columns` - NAME[] - Array of form field column names that trigger a re-fetch of `options_source_rpc` when their values change (v0.44.0). Enables cascading dropdowns.
-- `fk_search_modal` - BOOLEAN - When true, renders FK fields as a searchable modal instead of a `<select>` dropdown (v0.45.0). Requires `join_table` to be set. See [FK Search Modal](#fk-search-modal-v0450) section below.
+- `fk_search_modal` - BOOLEAN - When true, renders FK fields as a searchable modal instead of a `<select>` dropdown (v0.45.0). For FK fields, requires `join_table` to be set. Also works on M:M synthetic columns (`_m2m`) to enable split-panel multi-select modal. See [FK Search Modal](#fk-search-modal-v0450) and [M:M Search Modal](#mm-search-modal-v0460) sections.
+- `show_inline` - BOOLEAN - When true, M:M relationships render inline in the property grid instead of the bottom card (v0.46.0). Only valid on synthetic M:M columns (`_m2m`). Enables buffered save on Edit/Create pages. See [Inline M:M Positioning](#inline-mm-positioning-v0460) section.
 
 **Configuration Methods**:
 1. Property Management page UI (`/property-management`) - Admin-only visual editor
@@ -4617,6 +4618,64 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 - Table mode requires `search_fields` on the target entity for the search input to appear. Without it, users can still sort, filter, and paginate.
 - The modal reuses existing infrastructure: `SchemaService`, `DataService.getDataPaginated()`, `FilterBarComponent`, `PaginationComponent`, and `DisplayPropertyComponent`.
 - See `docs/notes/FK_SEARCH_MODAL_DESIGN.md` for architecture details.
+
+---
+
+### M:M Search Modal (v0.46.0)
+
+The FK search modal's multi-select mode provides a split-panel interface for M:M relationships with large option sets. Left panel for browsing/searching, right panel showing selected items as chips.
+
+**Configuration** — Set `fk_search_modal = true` on the synthetic M:M column:
+
+```sql
+-- Enable search modal on M:M (uses split panel with checkboxes + chip list)
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal)
+VALUES ('projects', 'project_parcels_m2m', true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = EXCLUDED.fk_search_modal;
+```
+
+**Behavior**:
+- **Detail page (default position)**: "Browse & Select" button replaces the checkbox list. Apply executes mutations immediately.
+- **Checkboxes**: Multi-select via checkboxes (not radio buttons). Checked state persists across search queries and pagination.
+- **Right panel**: Shows all selected items as chips with X buttons. Removing a chip unchecks the corresponding row.
+- **Apply button**: Shows diff summary — e.g., "Apply (2 added, 1 removed)". Disabled when no changes.
+- **RPC filtering**: When `options_source_rpc` is also set, the modal filters to eligible options only.
+
+**Compatibility**: Works alongside `options_source_rpc` (v0.44.0). The RPC filters the available options; the modal provides the rich multi-select UI within that filtered set.
+
+---
+
+### Inline M:M Positioning (v0.46.0)
+
+By default, M:M relationships render in a bottom card on Detail pages. Setting `show_inline = true` moves them into the property grid at their `sort_order` position.
+
+**Configuration**:
+
+```sql
+-- Inline M:M with search modal (recommended combination)
+INSERT INTO metadata.properties
+  (table_name, column_name, fk_search_modal, show_inline)
+VALUES
+  ('projects', 'project_parcels_m2m', true, true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = EXCLUDED.fk_search_modal,
+      show_inline = EXCLUDED.show_inline;
+```
+
+**Behavior by page type**:
+
+| Page | Rendering | Save model |
+|------|-----------|------------|
+| **Detail** | Read-only chips in property grid (clickable links to related entity) | N/A |
+| **Edit** | Chips with "Change {name}" button, pending state (green dashed = added, strikethrough = removed) | Buffered — entity PATCH fires first, then M:M mutations. Progress shown in success modal. |
+| **Create** | Empty state with "Change {name}" button | Buffered — entity POST captures new ID, then M:M mutations execute. |
+
+**Constraint**: A database constraint (`show_inline_requires_m2m`) prevents setting `show_inline = true` on non-M:M columns.
+
+**Metadata bridge**: M:M columns are synthetic (not in `information_schema.columns`), so their metadata flags are loaded from the `schema_m2m_properties` VIEW. This VIEW is automatically created by the v0.46.0 migration and queried once by `SchemaService` during property enrichment.
+
+- See `docs/notes/FK_SEARCH_MODAL_DESIGN.md` (M:M Search Modal Design section) for architecture details.
 
 ---
 

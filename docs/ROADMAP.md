@@ -22,8 +22,8 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] Configurable Entity Menu (Nesting, Hiding, Singular/Plural names)
 - [ ] **Time PropertyType** - Add `Time` to `EntityPropertyType` for PostgreSQL `time` columns. Render native `<input type="time">` on Create/Edit, formatted display on Detail/List. Currently `time` falls through to `Unknown` and is not editable. *(Identified via FFSC incident_reports.incident_time)*
 - [ ] **Cascading Dropdowns** - Filter FK dropdown options based on another field's selection (e.g., category → subcategory)
-- [ ] **M:M on Create/Edit Pages** - Multi-select checkbox component for many-to-many relationships on Create and Edit forms, not just Detail pages. Currently M:M associations require a two-step workflow (create record, then edit associations on Detail page). Affects every Civic OS app with M:M relationships. *(Identified via IC pilot)*
-- [ ] **Dependent/Filtered M:M Options** - Filter M:M checkbox options based on another field's value (e.g., when creating a referral, only show service categories the selected partner provides). Metadata config like `filter_by_field` + `filter_through_table`. *(Identified via IC pilot)*
+- [x] **M:M on Create/Edit Pages** - Inline M:M editor with `show_inline` flag (v0.46.0). Split-panel search modal with buffered save on Edit/Create pages. Coordinated save pipeline (entity PATCH/POST → sequential M:M mutations) with progress display in success modal.
+- [x] **Dependent/Filtered M:M Options** - `options_source_rpc` on M:M columns (v0.44.0) + search modal integration (v0.46.0). RPC filters eligible options; modal provides rich multi-select UI within the filtered set.
 
 #### List Pages
 - [X] Add pagination

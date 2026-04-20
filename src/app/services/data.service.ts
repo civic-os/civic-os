@@ -773,7 +773,7 @@ export class DataService {
   public addManyToManyRelation(
     entityId: number | string,
     meta: ManyToManyMeta,
-    targetId: number
+    targetId: number | string
   ): Observable<ApiResponse> {
     return this.http.post(
       getPostgrestUrl() + meta.junctionTable,
@@ -800,7 +800,7 @@ export class DataService {
   public removeManyToManyRelation(
     entityId: number | string,
     meta: ManyToManyMeta,
-    targetId: number
+    targetId: number | string
   ): Observable<ApiResponse> {
     // Delete by composite key (issue_id, tag_id)
     const filter = `${meta.sourceColumn}=eq.${entityId}&${meta.targetColumn}=eq.${targetId}`;
