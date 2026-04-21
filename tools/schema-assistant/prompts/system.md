@@ -321,6 +321,31 @@ CREATE TABLE public.work_order_tags (
 ```
 Junction tables need only 3 policies: read, create, delete (no update).
 
+## PhotoGallery Type Pattern (v0.47.0)
+
+Multi-image gallery as a column-level property. Entity table gets a UUID FK to `metadata.photo_galleries`.
+
+1. Add column to entity table:
+```sql
+ALTER TABLE public.work_orders ADD COLUMN photos UUID REFERENCES metadata.photo_galleries(id);
+CREATE INDEX idx_work_orders_photos ON public.work_orders(photos);
+```
+
+2. Configure constraints:
+```sql
+INSERT INTO metadata.photo_gallery_config (table_name, column_name, max_images, allowed_types)
+VALUES ('work_orders', 'photos', 10, 'image/jpeg,image/png,image/webp')
+ON CONFLICT (table_name, column_name) DO NOTHING;
+```
+
+3. Multiple galleries per entity — use separate columns:
+```sql
+ALTER TABLE public.inspections ADD COLUMN before_photos UUID REFERENCES metadata.photo_galleries(id);
+ALTER TABLE public.inspections ADD COLUMN after_photos UUID REFERENCES metadata.photo_galleries(id);
+```
+
+Gallery lifecycle (lazy creation, draft workflow, orphan cleanup) is handled automatically by the framework.
+
 ## Custom Domains Available
 
 - `hex_color` — RGB color values with `#RRGGBB` validation

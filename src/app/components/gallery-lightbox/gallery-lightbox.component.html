@@ -1,0 +1,67 @@
+@if (isOpen()) {
+  <!-- Full-screen overlay -->
+  <div
+    class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+    (click)="close()"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Image gallery viewer">
+
+    <!-- Close button -->
+    <button
+      class="absolute top-4 right-4 btn btn-circle btn-ghost text-white z-10"
+      (click)="close()"
+      aria-label="Close gallery">
+      <span class="material-symbols-outlined text-2xl">close</span>
+    </button>
+
+    <!-- Image counter -->
+    <div class="absolute top-4 left-4 text-white/80 text-sm font-mono z-10">
+      {{ currentIndex() + 1 }} / {{ imageCount() }}
+    </div>
+
+    <!-- Previous button -->
+    @if (imageCount() > 1) {
+      <button
+        class="absolute left-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
+        (click)="prev(); $event.stopPropagation()"
+        aria-label="Previous image">
+        <span class="material-symbols-outlined text-3xl">chevron_left</span>
+      </button>
+    }
+
+    <!-- Next button -->
+    @if (imageCount() > 1) {
+      <button
+        class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
+        (click)="next(); $event.stopPropagation()"
+        aria-label="Next image">
+        <span class="material-symbols-outlined text-3xl">chevron_right</span>
+      </button>
+    }
+
+    <!-- Main image + caption container -->
+    @if (currentImage(); as image) {
+      <div class="flex flex-col items-center max-h-[90vh] max-w-[90vw]" (click)="onContentClick($event)">
+        <!-- Image -->
+        <img
+          [src]="getImageUrl(image)"
+          [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
+          class="not-prose max-h-[80vh] max-w-[90vw] object-contain rounded"
+        />
+
+        <!-- Caption -->
+        @if (image.caption) {
+          <div class="mt-3 text-white/80 text-center text-sm max-w-lg">
+            {{ image.caption }}
+          </div>
+        }
+
+        <!-- File name -->
+        <div class="mt-1 text-white/50 text-xs">
+          {{ image.file?.file_name }}
+        </div>
+      </div>
+    }
+  </div>
+}

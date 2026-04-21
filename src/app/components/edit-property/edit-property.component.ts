@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, input, computed, ChangeDetectionStrategy, signal, DestroyRef } from '@angular/core';
-import { SchemaEntityProperty, EntityPropertyType, FileReference } from '../../interfaces/entity';
+import { Component, inject, input, output, computed, ChangeDetectionStrategy, signal, DestroyRef, ViewChild } from '@angular/core';
+import { SchemaEntityProperty, EntityPropertyType, FileReference, GalleryImage, PhotoGalleryConfig } from '../../interfaces/entity';
 
 import { Observable, map, merge, of, catchError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -24,6 +24,7 @@ import { debounceTime } from 'rxjs/operators';
 import { DataService } from '../../services/data.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { SchemaService } from '../../services/schema.service';
+import { GalleryService } from '../../services/gallery.service';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -33,6 +34,8 @@ import { EditTimeSlotComponent } from '../edit-time-slot/edit-time-slot.componen
 import { EditRecurringTimeSlotComponent } from '../edit-recurring-time-slot/edit-recurring-time-slot.component';
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
 import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.component';
+import { PhotoGalleryEditorComponent } from '../photo-gallery-editor/photo-gallery-editor.component';
+import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
 
 @Component({
@@ -49,7 +52,9 @@ import { getS3Config } from '../../config/runtime';
     EditTimeSlotComponent,
     EditRecurringTimeSlotComponent,
     PaymentBadgeComponent,
-    FkSearchModalComponent
+    FkSearchModalComponent,
+    PhotoGalleryEditorComponent,
+    FileThumbnailComponent
 ],
     providers: [
         provideNgxMask(),
@@ -59,12 +64,20 @@ export class EditPropertyComponent {
   private data = inject(DataService);
   private fileUpload = inject(FileUploadService);
   private schema = inject(SchemaService);
+  private galleryService = inject(GalleryService);
   private destroyRef = inject(DestroyRef);
+
+  /** Reference to gallery editor for deferred reorder save (v0.47.0) */
+  @ViewChild(PhotoGalleryEditorComponent) galleryEditor?: PhotoGalleryEditorComponent;
 
   prop = input.required<SchemaEntityProperty>({ alias: 'property' });
   form = input.required<FormGroup>({ alias: 'formGroup' });
   entityType = input<string>('');
   entityId = input<string>('');
+
+  // Gallery outputs (v0.47.0)
+  galleryChanged = output<void>();
+  draftGalleryCreated = output<{ columnName: string; galleryId: string }>();
 
   public selectOptions$?: Observable<{id: number, text: string}[]>;
   public rpcSelectOptions = signal<{id: number, text: string}[]>([]);  // Signal-driven FK options for RPC mode (v0.44.0)
@@ -227,6 +240,9 @@ export class EditPropertyComponent {
         }
       }
     }
+
+    // Load gallery config for PhotoGallery type properties (v0.47.0)
+    this.loadGalleryConfig();
 
     // Note: Value transformation for datetime-local and money inputs
     // is now handled in edit.page.ts when creating FormControls.
@@ -565,5 +581,56 @@ export class EditPropertyComponent {
     this.form().get(controlName)?.markAsDirty();
     this.currentFile.set(null);
     this.uploadError.set(null);
+  }
+
+  // --- Gallery (v0.47.0) ---
+
+  galleryConfig = signal<PhotoGalleryConfig>({
+    table_name: '', column_name: '', max_images: 20, allowed_types: 'image/*'
+  });
+
+  /**
+   * Get gallery images from current form control value.
+   * The form control holds the embedded gallery object from PostgREST.
+   */
+  getGalleryImages(): GalleryImage[] {
+    const gallery = this.form().get(this.prop().column_name)?.value;
+    if (!gallery?.photo_gallery_files) return [];
+    return [...gallery.photo_gallery_files].sort((a: GalleryImage, b: GalleryImage) => a.sort_order - b.sort_order);
+  }
+
+  /**
+   * Get gallery ID from current form control value.
+   */
+  getGalleryId(): string | null {
+    const gallery = this.form().get(this.prop().column_name)?.value;
+    return gallery?.id || null;
+  }
+
+  onGalleryChanged(): void {
+    this.galleryChanged.emit();
+  }
+
+  onDraftGalleryCreated(galleryId: string): void {
+    this.draftGalleryCreated.emit({ columnName: this.prop().column_name, galleryId });
+  }
+
+  /** Delegate gallery save (adds, removes, reorder) to the editor (called by parent on form save) */
+  async saveGalleryChanges(): Promise<boolean> {
+    if (this.galleryEditor) {
+      return this.galleryEditor.saveChanges();
+    }
+    return true;
+  }
+
+  /**
+   * Load gallery config for this property.
+   * Called from ngOnInit for PhotoGallery type properties.
+   */
+  loadGalleryConfig(): void {
+    if (this.propType() !== EntityPropertyType.PhotoGallery) return;
+    this.galleryService.getConfig(this.prop().table_name, this.prop().column_name)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(config => this.galleryConfig.set(config));
   }
 }

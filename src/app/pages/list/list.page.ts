@@ -233,7 +233,7 @@ export class ListPage implements OnInit, OnDestroy {
         switchMap(([entity, props, search, sortState, filters, pagination, calendarState, filterProps]) => {
           if (props && props.length > 0 && p['entityKey']) {
             let columns = props
-              .map(x => SchemaService.propertyToSelectString(x));
+              .map(x => SchemaService.propertyToSelectStringForList(x));
 
             // Add calendar color property to select fields if configured
             if (entity?.calendar_color_property && !columns.includes(entity.calendar_color_property)) {

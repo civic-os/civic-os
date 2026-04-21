@@ -16,8 +16,8 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { Observable, forkJoin, mergeMap, of, tap, map, take } from 'rxjs';
+import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList } from '@angular/core';
+import { Observable, forkJoin, from, mergeMap, of, tap, map, take, catchError } from 'rxjs';
 import {
   SchemaEntityProperty,
   SchemaEntityTable,
@@ -40,6 +40,7 @@ import { SaveProgressComponent, SaveStep } from '../../components/save-progress/
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
+import { GalleryService } from '../../services/gallery.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { ApiError, ApiResponse } from '../../interfaces/api';
@@ -66,6 +67,7 @@ export class CreatePage {
   private route = inject(ActivatedRoute);
   private schema = inject(SchemaService);
   private data = inject(DataService);
+  private gallery = inject(GalleryService);
   private router = inject(Router);
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
@@ -170,6 +172,10 @@ export class CreatePage {
   public saveSteps = signal<SaveStep[] | null>(null);
   public saveComplete = signal(false);
 
+  // v0.47.0: PhotoGallery draft tracking (column_name → gallery_id)
+  public pendingGalleryDrafts = signal<Map<string, string>>(new Map());
+  @ViewChildren(EditPropertyComponent) editProperties!: QueryList<EditPropertyComponent>;
+
   submitForm(event: any) {
     event?.preventDefault?.();
 
@@ -204,8 +210,8 @@ export class CreatePage {
           // Transform values back to database format before submission
           const transformedData = this.transformValuesForApi(formData);
 
-          // v0.46.0: If there are pending M:M diffs, use coordinated save pipeline
-          if (this.pendingM2mDiffs().size > 0) {
+          // v0.46.0+: If there are pending M:M diffs or gallery drafts, use coordinated save pipeline
+          if (this.pendingM2mDiffs().size > 0 || this.pendingGalleryDrafts().size > 0) {
             this.executeCoordinatedCreate(transformedData);
             return;
           }
@@ -285,6 +291,15 @@ export class CreatePage {
     }
   }
 
+  // v0.47.0: Track draft galleries created during form interaction
+  onDraftGalleryCreated(event: { columnName: string; galleryId: string }) {
+    this.pendingGalleryDrafts.update(m => {
+      const next = new Map(m);
+      next.set(event.columnName, event.galleryId);
+      return next;
+    });
+  }
+
   private executeCoordinatedCreate(transformedData: any): void {
     const steps: SaveStep[] = [];
 
@@ -340,8 +355,55 @@ export class CreatePage {
       });
     }
 
+    // v0.47.0: Gallery link steps — link draft galleries to newly created entity
+    const galleryDrafts = this.pendingGalleryDrafts();
+    for (const [columnName, galleryId] of galleryDrafts) {
+      steps.push({
+        label: `Linking photo gallery`,
+        execute: () => {
+          if (!this.createdRecordId) return of({ success: false, errorMessage: 'Record ID not available' });
+          return this.gallery.linkGalleryToEntity(
+            galleryId,
+            this.entityKey!,
+            String(this.createdRecordId),
+            columnName
+          ).pipe(
+            map(() => ({ success: true })),
+            catchError(err => of({
+              success: false,
+              errorMessage: err?.error?.message || 'Failed to link gallery'
+            }))
+          );
+        }
+      });
+    }
+
+    // v0.47.0: Persist buffered gallery junction rows (adds/removes/reorder)
+    if (galleryDrafts.size > 0) {
+      steps.push({
+        label: 'Saving gallery images',
+        execute: () => from(this.saveGalleryChanges()).pipe(
+          map(allOk => ({
+            success: allOk,
+            errorMessage: allOk ? undefined : 'Failed to save gallery images'
+          }))
+        )
+      });
+    }
+
     this.saveSteps.set(steps);
     this.showSuccessModal.set(true);  // SaveProgressComponent auto-starts execution
+  }
+
+  /** v0.47.0: Persist all buffered gallery changes across all edit-property instances */
+  private async saveGalleryChanges(): Promise<boolean> {
+    if (!this.editProperties) return true;
+    const results = await Promise.all(
+      this.editProperties
+        .filter(ep => ep.galleryEditor)
+        .map(ep => ep.saveGalleryChanges())
+    );
+    return results.every(r => r);
   }
 
   private scrollToFirstError(): void {
@@ -503,6 +565,12 @@ export class CreatePage {
       }
 
       // Money: Keep as number, PostgREST accepts numeric values for money type
+
+      // PhotoGallery: gallery FK is managed by link_gallery_to_entity RPC in coordinated save.
+      // Remove from POST data — entity is created with FK=null, then gallery is linked via RPC.
+      if (prop.type === EntityPropertyType.PhotoGallery) {
+        delete transformed[prop.column_name];
+      }
     });
 
     // Remove audit fields AFTER transformation (managed by database triggers)

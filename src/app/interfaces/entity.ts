@@ -162,6 +162,7 @@ export enum EntityPropertyType {
     Status,
     Category,           // v0.34.0 - Rich enum for categorization (not workflow)
     RecurringTimeSlot,  // v0.19.0 - TimeSlot with recurring series support
+    PhotoGallery,       // v0.47.0 - Multi-image gallery with drag-drop reorder
 }
 
 /**
@@ -184,6 +185,44 @@ export interface CategoryValue {
     id: number;
     display_name: string;
     color: string | null;  // hex_color, nullable
+}
+
+/**
+ * Image within a photo gallery, from metadata.photo_gallery_files junction table.
+ * Includes embedded file metadata from metadata.files via PostgREST.
+ * Added in v0.47.0.
+ */
+export interface GalleryImage {
+    file_id: string;
+    sort_order: number;
+    caption?: string | null;
+    alt_text?: string | null;
+    created_at: string;
+    file?: FileReference;  // Embedded via PostgREST
+}
+
+/**
+ * Per-column configuration for photo gallery constraints.
+ * From metadata.photo_gallery_config table.
+ * Added in v0.47.0.
+ */
+export interface PhotoGalleryConfig {
+    table_name: string;
+    column_name: string;
+    max_images: number;
+    allowed_types: string;
+    max_file_size?: number | null;
+}
+
+/**
+ * Gallery container returned when a PhotoGallery property type is embedded in entity data.
+ * From metadata.photo_galleries via PostgREST embedding.
+ * Added in v0.47.0.
+ */
+export interface PhotoGalleryValue {
+    id: string;
+    created_at: string;
+    photo_gallery_files?: GalleryImage[];
 }
 
 /**

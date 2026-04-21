@@ -53,6 +53,61 @@ Maps automatically switch between light and dark tile layers based on the curren
 - Light themes: OpenStreetMap tiles; Dark themes: ESRI World Dark Gray tiles
 - `GeoPointMapComponent` subscribes to theme changes via MutationObserver on `data-theme` attribute and swaps tile layers without page reload
 
+## PhotoGallery Type
+
+**Detection**: UUID with `join_table = 'photo_galleries'` (via `isSystemType()` in `SchemaService`)
+
+The PhotoGallery type manages an ordered collection of images for an entity column, unlike `FileImage` which stores a single file per column. Detection uses the same `isSystemType()` path as Status and Category — when the FK's `join_table` is `photo_galleries`, the property is typed as `EntityPropertyType.PhotoGallery`.
+
+### Display Mode
+
+`DisplayPropertyComponent` renders a responsive thumbnail grid of gallery images. Clicking any thumbnail opens the `GalleryLightboxComponent` for full-screen browsing with previous/next navigation.
+
+- Thumbnails use the 150x150 size from the standard thumbnail pipeline
+- Empty galleries show a placeholder with "No photos" text
+- Image count badge shown on the gallery container
+
+### Edit Mode
+
+`PhotoGalleryEditorComponent` provides the full editing experience:
+
+- **Drag-drop upload**: Drop zone and file input, validates against `photo_gallery_config` (allowed types, max size, max images)
+- **CDK DragDrop reorder**: Angular CDK `DragDropModule` for visual drag-and-drop reordering of thumbnails
+- **Per-image metadata**: Inline editing of caption and alt text
+- **Remove images**: Delete button with confirmation per image
+- **Upload progress**: Progress bar during S3 upload
+
+On Create pages, the component uses the **draft gallery pattern**: a draft gallery is created before the entity record exists, then linked via `link_gallery_to_entity` RPC on form submission. Draft galleries abandoned for more than 12 hours are cleaned up by `metadata.cleanup_draft_galleries` (server-side function, hidden from PostgREST).
+
+### Companion Tables
+
+| Table | Purpose |
+|-------|---------|
+| `metadata.photo_galleries` | Gallery registry with `entity_table`/`entity_id` polymorphic back-reference |
+| `metadata.photo_gallery_files` | Junction table linking galleries to `metadata.files` with `sort_order`, `caption`, `alt_text` |
+| `metadata.photo_gallery_config` | Per-column configuration: `max_images`, `allowed_types`, `max_file_size` |
+
+### Setup
+
+```sql
+-- 1. Add UUID column with FK to photo_galleries
+ALTER TABLE issues ADD COLUMN photos UUID REFERENCES metadata.photo_galleries(id);
+CREATE INDEX idx_issues_photos ON issues(photos);
+
+-- 2. Insert gallery configuration
+INSERT INTO metadata.photo_gallery_config (entity_table, property_name, max_images, allowed_types, max_file_size)
+VALUES ('issues', 'photos', 20, '{image/jpeg,image/png,image/webp}', 10485760);
+
+-- 3. (Optional) Configure display properties
+INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order)
+VALUES ('issues', 'photos', 'Photos', 'Photo gallery for this issue', 60);
+
+-- 4. Notify PostgREST to reload schema cache
+NOTIFY pgrst, 'reload schema';
+```
+
+See `docs/notes/PHOTO_GALLERY_DESIGN.md` for full architecture and lifecycle details.
+
 ---
 
-**Last Updated**: 2026-03-11
+**Last Updated**: 2026-04-20

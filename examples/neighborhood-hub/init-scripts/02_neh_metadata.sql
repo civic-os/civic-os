@@ -81,6 +81,23 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
   show_on_list = false, show_on_create = false, show_on_edit = false, show_on_detail = false;
 
 -- ============================================================================
+-- PHOTO GALLERY (v0.47.0)
+-- ============================================================================
+
+-- Configure gallery constraints for projects.photos
+INSERT INTO metadata.photo_gallery_config (table_name, column_name, max_images, allowed_types)
+VALUES ('projects', 'photos', 10, 'image/jpeg,image/png,image/webp')
+ON CONFLICT (table_name, column_name) DO NOTHING;
+
+-- Configure photos property display
+INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width)
+VALUES ('projects', 'photos', 'Photos', 50, 2)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET display_name = EXCLUDED.display_name,
+      sort_order = EXCLUDED.sort_order,
+      column_width = EXCLUDED.column_width;
+
+-- ============================================================================
 -- M:M SEARCH MODAL + INLINE POSITIONING (v0.46.0)
 -- ============================================================================
 

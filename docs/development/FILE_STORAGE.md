@@ -388,9 +388,36 @@ Requires `files:read` permission (admin role by default). Uses `property_name` c
 
 See `docs/notes/ADMIN_PAGE_PITFALLS.md` for architecture patterns and lessons learned.
 
+## Photo Gallery Integration (v0.47.0)
+
+The PhotoGallery property type builds on the file storage system to manage ordered collections of images per entity column. Gallery files are standard `metadata.files` records — they use the same presigned URL upload workflow, the same thumbnail generation pipeline (consolidated worker), and appear in the File Admin page alongside all other files.
+
+### How Gallery Files Relate to File Storage
+
+- **Storage**: Gallery images are stored in `metadata.files` like all other uploaded files. There is no separate file storage mechanism.
+- **S3 key pattern**: Gallery files use the prefix `photo_gallery/{gallery_id}/{file_id}/original.{ext}` (and `/thumb-{size}.jpg` for thumbnails), grouping all images for a gallery under one S3 prefix.
+- **Thumbnail generation**: The same consolidated worker thumbnail pipeline generates 150x150, 400x400, and 800x800 thumbnails for gallery images.
+- **Junction table**: `metadata.photo_gallery_files` links galleries to files with additional columns for `sort_order`, `caption`, and `alt_text`. This is a separate junction table from the direct FK pattern used by `FileImage`/`FilePDF`/`File` property types.
+- **File Admin visibility**: Gallery files appear in the File Admin page (`/admin/files`) automatically, since they are rows in `metadata.files`. The `property_name` column tracks which gallery property uploaded each file.
+- **Orphan cleanup**: Draft galleries (from abandoned Create pages) are cleaned up after 12 hours by `metadata.cleanup_draft_galleries` (server-side function, hidden from PostgREST), which cascades deletion to `photo_gallery_files` and then to `metadata.files`, triggering S3 cleanup via the consolidated worker.
+
+### Key Differences from Single-File Properties
+
+| Aspect | FileImage / FilePDF / File | PhotoGallery |
+|--------|---------------------------|--------------|
+| Files per column | 1 | Many (configurable via `max_images`) |
+| Entity FK target | `metadata.files` directly | `metadata.photo_galleries` (junction to files) |
+| Ordering | N/A | `sort_order` on `photo_gallery_files` |
+| Per-file metadata | None (just the file record) | `caption`, `alt_text` per image |
+| S3 key prefix | `{entity_type}/{entity_id}/{file_id}/` | `photo_gallery/{gallery_id}/{file_id}/` |
+| Create page behavior | Filtered out (requires entity ID) | Draft gallery pattern (create gallery first, link after) |
+
+See `docs/notes/PHOTO_GALLERY_DESIGN.md` for the full architecture, lifecycle, and RPC reference.
+
 ## Related Documentation
 
 - Main documentation: `CLAUDE.md` - Property Type System section
 - Research notes: `docs/notes/FILE_STORAGE_OPTIONS.md` - Historical design decisions (v0.5.0 planning)
 - Admin page lessons: `docs/notes/ADMIN_PAGE_PITFALLS.md` - Reactive architecture and testing patterns (v0.39.0)
+- Photo gallery design: `docs/notes/PHOTO_GALLERY_DESIGN.md` - Gallery architecture and lifecycle (v0.47.0)
 - Migrations: `postgres/migrations/deploy/v0-5-0-add-file-storage.sql` (core), `v0-39-0-add-file-admin.sql` (admin features)

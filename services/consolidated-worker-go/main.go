@@ -37,6 +37,7 @@ func main() {
 	log.Println("    - Scheduled Jobs Worker")
 	log.Println("    - Source Code Parser")
 	log.Println("    - User Provisioning Worker (Keycloak)")
+	log.Println("    - Gallery Cleanup Cron")
 	log.Println("========================================")
 
 	ctx := context.Background()
@@ -349,6 +350,12 @@ func main() {
 	}
 	log.Println("[Init] ✓ ScheduledJobScheduler initialized (Go ticker, every minute)")
 
+	// Gallery Cleanup Cron - deletes orphaned draft galleries daily at ~3 AM
+	galleryCleanupCron := &GalleryCleanupCron{
+		dbPool: dbPool,
+	}
+	log.Println("[Init] ✓ GalleryCleanupCron initialized (daily at ~3:00 AM)")
+
 	// ===========================================================================
 	// 7. Create River Client (SINGLE CLIENT WITH MULTIPLE QUEUES)
 	// ===========================================================================
@@ -395,6 +402,9 @@ func main() {
 	// Start the scheduled job scheduler (Go ticker, not River periodic)
 	scheduledJobScheduler.Start(ctx)
 
+	// Start the gallery cleanup cron (daily at ~3 AM)
+	galleryCleanupCron.Start(ctx)
+
 	log.Println("")
 	log.Println("========================================")
 	log.Println("🚀 Consolidated Worker is running!")
@@ -409,6 +419,7 @@ func main() {
 	log.Println("  - expand_recurring_series (queue: recurring, 5 workers)")
 	log.Println("  - scheduled_job_scheduler (Go ticker, every minute)")
 	log.Println("  - scheduled_job_execute (queue: scheduled_jobs, 5 workers)")
+	log.Println("  - gallery_cleanup_cron (Go ticker, daily ~3:00 AM)")
 	log.Println("  - parse_all_source_code (queue: source_parsing, 1 worker)")
 	if keycloakClient != nil {
 		log.Println("  - provision_keycloak_user (queue: user_provisioning, 5 workers)")
@@ -433,7 +444,8 @@ func main() {
 	log.Println("")
 	log.Println("[Shutdown] Signal received, stopping gracefully...")
 
-	// Stop the scheduled job scheduler first
+	// Stop cron jobs first
+	galleryCleanupCron.Stop()
 	scheduledJobScheduler.Stop()
 
 	// Use 30 second timeout (thumbnail jobs can be slow)

@@ -97,9 +97,11 @@ CREATE TABLE projects (
     id SERIAL PRIMARY KEY,
     display_name VARCHAR(100) NOT NULL,
     description TEXT,
+    photos UUID REFERENCES metadata.photo_galleries(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_projects_photos ON projects(photos);
 
 -- Junction: projects <-> parcels (M:M)
 CREATE TABLE project_parcels (

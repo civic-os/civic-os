@@ -240,25 +240,13 @@
 
             <!-- Thumbnail Preview for Images -->
             @if (file.file_type.startsWith('image/')) {
-              @if (file.thumbnail_status === 'completed' && file.s3_thumbnail_medium_key) {
-                <div class="border rounded-lg px-2 py-1 bg-base-200">
-                  <img
-                    [src]="getS3Url(file.s3_thumbnail_medium_key)"
-                    [alt]="file.file_name"
-                    class="not-prose max-w-full h-auto rounded"
-                    style="max-height: 200px;"
-                  />
-                </div>
-              } @else if (file.thumbnail_status === 'pending' || file.thumbnail_status === 'processing') {
-                <div class="flex items-center gap-2 text-sm text-base-content/60" role="status" aria-live="polite">
-                  <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-                  <span>Generating thumbnail...</span>
-                </div>
-              } @else if (file.thumbnail_status === 'failed') {
-                <div class="text-sm text-warning" role="alert">
-                  <span>⚠ Thumbnail generation failed (image uploaded successfully)</span>
-                </div>
-              }
+              <div class="w-48 h-48 border rounded-lg p-1 bg-base-200">
+                <app-file-thumbnail
+                  [file]="file"
+                  [alt]="file.file_name"
+                  objectFit="contain"
+                />
+              </div>
             }
           </div>
         }
@@ -278,6 +266,19 @@
         }
       </div>
     </div>
+  }
+
+  @if (propType() == EntityPropertyType.PhotoGallery) {
+    <app-photo-gallery-editor
+      [galleryId]="getGalleryId()"
+      [entityType]="entityType()"
+      [entityId]="entityId()"
+      [columnName]="prop().column_name"
+      [currentFiles]="getGalleryImages()"
+      [config]="galleryConfig()"
+      (galleryChanged)="onGalleryChanged()"
+      (draftGalleryCreated)="onDraftGalleryCreated($event)"
+    />
   }
 
   @if (propType() == EntityPropertyType.Payment) {

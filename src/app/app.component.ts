@@ -112,6 +112,8 @@ export class AppComponent {
 
   public hasFilePermission = computed(() => this.auth.hasPermission('files', 'read'));
 
+  public hasGalleryAdminPermission = computed(() => this.auth.isAdmin());
+
   public hasStatusAdminPermission = computed(() => this.auth.hasPermission('metadata.statuses', 'update'));
 
   public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
@@ -130,6 +132,8 @@ export class AppComponent {
     if (this.hasPaymentEntities() && this.hasPaymentPermission()) return true;
     // Non-admins see it if they have file admin access
     if (this.hasFilePermission()) return true;
+    // Non-admins see it if they have gallery admin access
+    if (this.hasGalleryAdminPermission()) return true;
     // Non-admins see it if they have status/category admin access
     if (this.hasStatusAdminPermission()) return true;
     if (this.hasCategoryAdminPermission()) return true;
@@ -238,6 +242,11 @@ export class AppComponent {
 
   public navigateToFilesAdmin() {
     this.router.navigate(['admin', 'files']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToGalleryAdmin() {
+    this.router.navigate(['admin', 'galleries']);
     this.drawerOpen = false;
   }
 

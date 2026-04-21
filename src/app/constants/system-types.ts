@@ -32,7 +32,7 @@
  * is a public view (backed by payments.transactions). The 'transactions' table name is also
  * included to handle the payments.transactions schema-qualified reference.
  */
-export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses'] as const;
+export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'] as const;
 
 /**
  * Type representing valid system table names.

@@ -93,9 +93,9 @@ describe('SchemaEditorPage - System Type Filtering', () => {
       expect(result.has('transactions')).toBe(true);
     });
 
-    it('should return exactly 5 system types', () => {
+    it('should return exactly 6 system types', () => {
       const result = detectSystemTypes();
-      expect(result.size).toBe(5);
+      expect(result.size).toBe(6);
     });
 
     it('should return statuses as system type', () => {

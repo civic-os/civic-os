@@ -1867,6 +1867,121 @@ SELECT * FROM get_categories_for_entity('time_entry');
 
 See `examples/staff-portal/` for a working example where `time_entry` uses the Category system for Clock In/Clock Out categorization.
 
+### Photo Gallery System
+
+**Version**: v0.47.0+
+
+Ordered image gallery system for any entity column. Unlike single-file properties (`FileImage`, `FilePDF`, `File`), PhotoGallery manages a collection of images with drag-drop upload, reordering, per-image metadata (captions, alt text), and lightbox viewing. Uses the same `metadata.files` storage and thumbnail pipeline as all other file types.
+
+**Features**:
+- Multiple images per column with configurable `max_images` limit
+- Drag-drop upload and CDK DragDrop reordering
+- Per-image caption and alt text
+- Full-screen lightbox viewer with keyboard navigation
+- Draft gallery pattern for Create pages (upload images before entity exists)
+- Multiple gallery columns per entity (e.g., `before_photos`, `after_photos`)
+- Gallery Admin page at `/admin/galleries`
+- Orphan cleanup for abandoned drafts (12-hour TTL)
+
+**Requirements**:
+- Civic OS v0.47.0+ (gallery schema + migrations)
+- File storage infrastructure (S3-compatible storage, consolidated worker)
+
+#### Quick Setup
+
+```sql
+-- 1. Add UUID column with FK to photo_galleries
+ALTER TABLE issues ADD COLUMN photos UUID REFERENCES metadata.photo_galleries(id);
+CREATE INDEX idx_issues_photos ON issues(photos);
+
+-- 2. Configure gallery limits
+INSERT INTO metadata.photo_gallery_config (entity_table, property_name, max_images, allowed_types, max_file_size)
+VALUES ('issues', 'photos', 20, '{image/jpeg,image/png,image/webp}', 10485760);
+
+-- 3. (Optional) Customize display properties
+INSERT INTO metadata.properties (table_name, column_name, display_name, description, sort_order)
+VALUES ('issues', 'photos', 'Photos', 'Photo gallery for this issue', 60);
+
+-- 4. Grant permissions (same as the parent entity's grants)
+-- No separate grants needed — gallery access inherits from entity table RBAC
+
+-- 5. Notify PostgREST to reload schema cache
+NOTIFY pgrst, 'reload schema';
+```
+
+#### Configuration Options
+
+**`metadata.photo_gallery_config`** controls gallery behavior per column:
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `entity_table` | `TEXT NOT NULL` | required | Target entity table name |
+| `property_name` | `TEXT NOT NULL` | required | Column name on the entity |
+| `max_images` | `INT` | `20` | Maximum images per gallery |
+| `allowed_types` | `TEXT[]` | `'{image/jpeg,image/png,image/webp}'` | Allowed MIME types |
+| `max_file_size` | `BIGINT` | `10485760` | Max file size in bytes (default 10 MB) |
+
+**Unique constraint**: `(entity_table, property_name)` — one config per gallery column.
+
+#### Multiple Galleries Per Entity
+
+An entity can have multiple gallery columns. Each column is independently configured:
+
+```sql
+-- Add two gallery columns for before/after photos
+ALTER TABLE work_orders ADD COLUMN before_photos UUID REFERENCES metadata.photo_galleries(id);
+ALTER TABLE work_orders ADD COLUMN after_photos UUID REFERENCES metadata.photo_galleries(id);
+CREATE INDEX idx_work_orders_before_photos ON work_orders(before_photos);
+CREATE INDEX idx_work_orders_after_photos ON work_orders(after_photos);
+
+-- Configure each gallery independently
+INSERT INTO metadata.photo_gallery_config (entity_table, property_name, max_images, allowed_types, max_file_size)
+VALUES
+  ('work_orders', 'before_photos', 10, '{image/jpeg,image/png}', 5242880),
+  ('work_orders', 'after_photos', 10, '{image/jpeg,image/png}', 5242880);
+
+-- Customize display names
+INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order)
+VALUES
+  ('work_orders', 'before_photos', 'Before Photos', 70),
+  ('work_orders', 'after_photos', 'After Photos', 80);
+
+NOTIFY pgrst, 'reload schema';
+```
+
+#### Permissions
+
+Gallery access **inherits from the parent entity's permissions** via tiered RLS:
+
+1. `is_admin()` — full access to all galleries
+2. Gallery `created_by = current_user_id()` — owner can manage their own galleries
+3. `has_permission(entity_table, 'read')` — table-level RBAC on the parent entity
+4. `can_view_entity_record(entity_table, entity_id)` — record-level RLS on the parent entity
+
+No separate permission grants are needed for galleries. If a user can view an entity record, they can view its galleries. If they can edit the record, they can manage its gallery images.
+
+#### RPCs
+
+| Function | Description |
+|----------|-------------|
+| `create_draft_gallery(entity_table, property_name, entity_id?)` | Creates a gallery; links to entity if `entity_id` provided, otherwise creates draft |
+| `link_gallery_to_entity(gallery_id, entity_table, entity_id)` | Links a draft gallery to its entity after record creation (Create page flow) |
+| `add_gallery_image(gallery_id, file_data)` | Uploads a new image (creates file record + junction row) |
+| `add_gallery_image_by_id(gallery_id, file_id)` | Links an existing `metadata.files` record to the gallery |
+| `remove_gallery_image(gallery_id, file_id)` | Removes an image from the gallery |
+| `reorder_gallery_images(gallery_id, file_ids[])` | Reorders images based on the provided UUID array |
+| `update_gallery_image_meta(gallery_id, file_id, caption?, alt_text?)` | Updates caption and/or alt text for an image |
+| `get_gallery_storage_stats()` | Returns aggregate storage statistics (admin use) |
+| `metadata.cleanup_draft_galleries()` | Deletes draft galleries older than 12 hours (server-side only, not exposed via PostgREST) |
+
+#### Gallery Lifecycle
+
+- **Existing entities**: Gallery is lazily created on first interaction — the FK column starts as NULL and is populated when the user first opens the gallery editor
+- **Create pages**: Uses draft gallery pattern — a temporary gallery is created for uploads, then linked to the entity after form submission
+- **Orphan cleanup**: Draft galleries not linked within 12 hours are deleted by `metadata.cleanup_draft_galleries` (server-side only), cascading to files and S3 objects
+
+See `docs/notes/PHOTO_GALLERY_DESIGN.md` for complete architecture, edge cases, and RLS policy details. See `docs/development/FILE_STORAGE.md` (Photo Gallery Integration section) for how gallery files relate to the file storage system.
+
 ### Event-to-Function Bindings
 
 **Version**: v0.33.0+

@@ -570,6 +570,9 @@ export class SchemaService {
                  (val.join_table === 'transactions' && val.join_schema === 'payments')) {
         // Payment type: UUID FK to payment_transactions view OR payments.transactions table
         return EntityPropertyType.Payment;
+      } else if (val.join_table === 'photo_galleries') {
+        // PhotoGallery type: UUID FK to photo_galleries (v0.47.0)
+        return EntityPropertyType.PhotoGallery;
       }
     }
 
@@ -623,6 +626,11 @@ export class SchemaService {
     // Category: Embed category data from metadata.categories table (v0.34.0)
     if (prop.type === EntityPropertyType.Category) {
       return `${prop.column_name}:categories!${prop.column_name}(id,display_name,color)`;
+    }
+
+    // PhotoGallery: Embed gallery with nested files and file metadata (v0.47.0)
+    if (prop.type === EntityPropertyType.PhotoGallery) {
+      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
     }
 
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
@@ -684,9 +692,28 @@ export class SchemaService {
       return `${prop.column_name}:payment_transactions!${prop.column_name}(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`;
     }
 
+    // PhotoGallery: Need full gallery data with files for edit form (same as detail view)
+    // Editor component shows current images and allows add/remove/reorder
+    if (prop.type === EntityPropertyType.PhotoGallery) {
+      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status)))`;
+    }
+
     // Everything else uses the column name directly
     return prop.column_name;
   }
+
+  /**
+   * Returns a lightweight PostgREST select string optimized for list pages.
+   * PhotoGallery fetches only file IDs (for client-side count) instead of full file metadata.
+   * All other types delegate to propertyToSelectString().
+   */
+  public static propertyToSelectStringForList(prop: SchemaEntityProperty): string {
+    if (prop.type === EntityPropertyType.PhotoGallery) {
+      return `${prop.column_name}:photo_galleries!${prop.column_name}(id,photo_gallery_files(file_id))`;
+    }
+    return SchemaService.propertyToSelectString(prop);
+  }
+
   /**
    * Ensure display_name is always fetched — used structurally for page headers,
    * map markers, calendar titles, and delete confirmation modals.

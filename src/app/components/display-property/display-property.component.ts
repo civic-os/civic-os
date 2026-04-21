@@ -17,7 +17,7 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, input, signal, computed, ChangeDetectionStrategy, ViewChild } from '@angular/core';
-import { SchemaEntityProperty, EntityPropertyType, FileReference } from '../../interfaces/entity';
+import { SchemaEntityProperty, EntityPropertyType, FileReference, GalleryImage } from '../../interfaces/entity';
 import { RouterModule } from '@angular/router';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { HighlightPipe } from '../../pipes/highlight.pipe';
@@ -25,6 +25,8 @@ import { ImageViewerComponent } from '../image-viewer/image-viewer.component';
 import { PdfViewerComponent } from '../pdf-viewer/pdf-viewer.component';
 import { DisplayTimeSlotComponent } from '../display-time-slot/display-time-slot.component';
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
+import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.component';
+import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
 import { getContrastTextColor } from '../../utils/color.utils';
 
@@ -40,6 +42,8 @@ import { getContrastTextColor } from '../../utils/color.utils';
         PdfViewerComponent,
         DisplayTimeSlotComponent,
         PaymentBadgeComponent,
+        GalleryLightboxComponent,
+        FileThumbnailComponent,
     ],
     templateUrl: './display-property.component.html',
     styleUrl: './display-property.component.css'
@@ -56,6 +60,10 @@ export class DisplayPropertyComponent {
 
   propType = computed(() => this.prop().type);
   displayCoordinates = signal<[number, number] | null>(null);
+
+  // Gallery lightbox state (v0.47.0)
+  galleryLightboxOpen = signal(false);
+  galleryLightboxIndex = signal(0);
 
   public EntityPropertyType = EntityPropertyType;
 
@@ -116,5 +124,32 @@ export class DisplayPropertyComponent {
   getCategoryTextColor(): string {
     const color = this.datum()?.color || '#3B82F6';
     return getContrastTextColor(color);
+  }
+
+  /**
+   * Get sorted gallery images from embedded gallery data.
+   * Returns empty array if no gallery or no files.
+   */
+  getGalleryImages(): GalleryImage[] {
+    const gallery = this.datum();
+    if (!gallery?.photo_gallery_files) return [];
+    return [...gallery.photo_gallery_files].sort((a: GalleryImage, b: GalleryImage) => a.sort_order - b.sort_order);
+  }
+
+  /**
+   * Get thumbnail URL for a gallery image.
+   */
+  getGalleryThumbUrl(image: GalleryImage): string {
+    if (!image.file) return '';
+    const key = image.file.s3_thumbnail_medium_key || image.file.s3_original_key;
+    return this.getS3Url(key);
+  }
+
+  /**
+   * Open gallery lightbox at specified index.
+   */
+  onGalleryImageClick(index: number): void {
+    this.galleryLightboxIndex.set(index);
+    this.galleryLightboxOpen.set(true);
   }
 }

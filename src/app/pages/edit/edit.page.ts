@@ -16,9 +16,9 @@
  */
 
 
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, ViewChildren, QueryList } from '@angular/core';
 import { SchemaService } from '../../services/schema.service';
-import { Observable, forkJoin, map, mergeMap, of, tap } from 'rxjs';
+import { Observable, forkJoin, from, map, mergeMap, of, tap } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
@@ -190,6 +190,9 @@ export class EditPage {
   public showValidationError = signal(false);
   private currentProps: SchemaEntityProperty[] = [];
 
+  // v0.47.0: Gallery editors for deferred reorder save
+  @ViewChildren(EditPropertyComponent) editProperties!: QueryList<EditPropertyComponent>;
+
   // v0.46.0: Inline M:M support
   public inlineM2mProps: SchemaEntityProperty[] = [];
   public pendingM2mDiffs = signal<Map<string, { toAdd: (number|string)[], toRemove: (number|string)[] }>>(new Map());
@@ -299,16 +302,16 @@ export class EditPage {
       .then(() => {
         // Token is fresh, proceed with submission
         if(this.entityKey && this.entityId) {
-          // v0.46.0: If there are pending M:M diffs, use coordinated save pipeline
-          if (this.hasM2mDiffs()) {
+          // v0.46.0+: If there are pending M:M diffs or gallery changes, use coordinated save
+          if (this.hasM2mDiffs() || this.hasGalleryChanges()) {
             this.executeCoordinatedSave(transformedData);
             return;
           }
 
-          // No M:M diffs — standard single-step edit
+          // No multi-step changes — standard single-step edit
           this.data.editData(this.entityKey, this.entityId, transformedData)
             .subscribe({
-              next: (result) => {
+              next: async (result) => {
                 if(result.success === true) {
                   // Track successful record edit
                   if (this.entityKey) {
@@ -516,6 +519,11 @@ export class EditPage {
     return this.pendingM2mDiffs().size > 0;
   }
 
+  private hasGalleryChanges(): boolean {
+    if (!this.editProperties) return false;
+    return this.editProperties.some(ep => ep.galleryEditor?.hasPendingChanges() === true);
+  }
+
   private executeCoordinatedSave(transformedData: any): void {
     const steps: SaveStep[] = [];
 
@@ -562,8 +570,33 @@ export class EditPage {
       });
     }
 
+    // v0.47.0: Add gallery save step if any editors have pending changes
+    const galleryEditors = this.editProperties?.filter(ep => ep.galleryEditor) || [];
+    if (galleryEditors.length > 0) {
+      steps.push({
+        label: 'Saving gallery changes',
+        execute: () => from(this.saveGalleryChanges()).pipe(
+          map(allOk => ({
+            success: allOk,
+            errorMessage: allOk ? undefined : 'Failed to save gallery changes'
+          }))
+        )
+      });
+    }
+
     this.saveSteps.set(steps);
     this.showSuccessModal.set(true);  // SaveProgressComponent auto-starts execution
+  }
+
+  /** v0.47.0: Persist all buffered gallery changes across all edit-property instances */
+  private async saveGalleryChanges(): Promise<boolean> {
+    if (!this.editProperties) return true;
+    const results = await Promise.all(
+      this.editProperties
+        .filter(ep => ep.galleryEditor)
+        .map(ep => ep.saveGalleryChanges())
+    );
+    return results.every(r => r);
   }
 
   goBack(): void {
@@ -704,6 +737,13 @@ export class EditPage {
           transformed[prop.column_name] = value.id;
         }
         // If it's already a UUID string, leave it as-is
+      }
+
+      // PhotoGallery: Extract UUID from embedded gallery object (v0.47.0)
+      if (prop.type === EntityPropertyType.PhotoGallery) {
+        if (typeof value === 'object' && value.id) {
+          transformed[prop.column_name] = value.id;
+        }
       }
 
       // DateTime (timestamp without time zone): Add seconds, no timezone conversion

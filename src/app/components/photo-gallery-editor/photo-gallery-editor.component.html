@@ -1,0 +1,96 @@
+<div class="space-y-3">
+  <!-- Header with count -->
+  <div class="flex items-center justify-between">
+    <span class="text-sm text-base-content/60">
+      {{ currentCount() }} / {{ maxImages() }} images
+    </span>
+    @if (uploading()) {
+      <span class="loading loading-spinner loading-sm"></span>
+    }
+  </div>
+
+  <!-- Upload zone -->
+  @if (!atMax()) {
+    <div
+      class="border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors"
+      (click)="fileInput.click()"
+      (drop)="onDrop($event)"
+      (dragover)="onDragOver($event)"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="'Upload images. ' + (maxImages() - currentCount()) + ' slots remaining'">
+      <span class="material-symbols-outlined text-3xl text-base-content/40 mb-1">add_photo_alternate</span>
+      <div class="text-sm text-base-content/60">
+        Drop images here or click to browse
+      </div>
+      <div class="text-xs text-base-content/40 mt-1">
+        {{ acceptTypes() }}
+      </div>
+    </div>
+    <input
+      #fileInput
+      type="file"
+      class="hidden"
+      [accept]="acceptTypes()"
+      multiple
+      (change)="onFilesSelected($event)"
+    />
+  }
+
+  <!-- Error -->
+  @if (uploadError()) {
+    <div class="alert alert-error text-sm" role="alert">
+      <span>{{ uploadError() }}</span>
+    </div>
+  }
+
+  <!-- Image grid with CDK DragDrop -->
+  @if (images().length > 0) {
+    <div
+      cdkDropList
+      cdkDropListOrientation="mixed"
+      [cdkDropListData]="images()"
+      (cdkDropListDropped)="onReorder($event)"
+      class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+      @for (image of images(); track image.file_id; let i = $index) {
+        <div
+          cdkDrag
+          class="relative group rounded-lg overflow-hidden border border-base-300 bg-base-200 aspect-square cursor-move">
+          <!-- Thumbnail with automatic polling for completion -->
+          <app-file-thumbnail
+            [file]="image.file ?? null"
+            [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
+            [poll]="true"
+            (clicked)="openLightbox(i)"
+            (fileUpdated)="onThumbnailReady(image.file_id, $event)"
+          />
+
+          <!-- Remove button overlay -->
+          <button
+            type="button"
+            class="absolute top-1 right-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 transition-opacity"
+            (click)="removeImage(image); $event.stopPropagation()"
+            aria-label="Remove image">
+            <span class="material-symbols-outlined text-xs">close</span>
+          </button>
+
+          <!-- Sort order badge -->
+          <div class="absolute bottom-1 left-1 badge badge-sm badge-ghost opacity-0 group-hover:opacity-80 transition-opacity">
+            {{ i + 1 }}
+          </div>
+
+          <!-- CDK drag placeholder -->
+          <div *cdkDragPlaceholder class="w-full h-full bg-primary/20 border-2 border-dashed border-primary rounded-lg"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Lightbox -->
+  <app-gallery-lightbox
+    [images]="images()"
+    [isOpen]="lightboxOpen()"
+    [startIndex]="lightboxIndex()"
+    (closed)="lightboxOpen.set(false)"
+  />
+</div>

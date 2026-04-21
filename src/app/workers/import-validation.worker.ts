@@ -71,7 +71,8 @@ const EntityPropertyType = {
   Payment: 21,
   Status: 22,
   Category: 23,
-  RecurringTimeSlot: 24
+  RecurringTimeSlot: 24,
+  PhotoGallery: 25
 };
 
 interface ImportError {
@@ -177,11 +178,12 @@ function validateData(params: any): void {
         continue;
       }
 
-      // Skip File/Payment properties (system-managed, require upload/payment workflows)
+      // Skip File/Payment/PhotoGallery properties (system-managed, require upload/payment workflows)
       if (prop.type === EntityPropertyType.File ||
           prop.type === EntityPropertyType.FileImage ||
           prop.type === EntityPropertyType.FilePDF ||
-          prop.type === EntityPropertyType.Payment) {
+          prop.type === EntityPropertyType.Payment ||
+          prop.type === EntityPropertyType.PhotoGallery) {
         continue;
       }
 

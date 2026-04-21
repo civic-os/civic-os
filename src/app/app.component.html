@@ -237,6 +237,17 @@
                 </a>
               </li>
             }
+            <!-- Galleries (admin only) -->
+            @if (hasGalleryAdminPermission()) {
+              <li (click)="navigateToGalleryAdmin()">
+                <a [class.menu-active]="isRouteActive('/admin/galleries')"
+                   [class.font-bold]="isRouteActive('/admin/galleries')"
+                   [class.opacity-85]="!isRouteActive('/admin/galleries')">
+                  <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                  Galleries
+                </a>
+              </li>
+            }
             <!-- Feature-specific items (shown based on entity config + user permissions) -->
             @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
               <li (click)="navigateToRecurringSchedules()">

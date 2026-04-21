@@ -1,0 +1,229 @@
+<div class="container mx-auto p-6">
+  <!-- Title + Stats Badges -->
+  <div class="flex items-center gap-3 mb-4">
+    <h1 class="text-3xl font-bold">Gallery Administration</h1>
+    @if (canView()) {
+      <div class="badge badge-ghost gap-1">
+        <span class="material-symbols-outlined text-sm">photo_library</span>
+        {{ totalGalleries() | number }} {{ totalGalleries() === 1 ? 'gallery' : 'galleries' }}
+      </div>
+      <div class="badge badge-ghost gap-1">
+        <span class="material-symbols-outlined text-sm">image</span>
+        {{ totalImages() | number }} {{ totalImages() === 1 ? 'image' : 'images' }}
+      </div>
+      <div class="badge badge-ghost gap-1">
+        <span class="material-symbols-outlined text-sm">hard_drive</span>
+        {{ formatFileSize(totalStorageBytes()) }}
+      </div>
+    }
+  </div>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="alert alert-error mb-4">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Permission Check -->
+  @if (!canView()) {
+    <div class="alert alert-warning">
+      <span class="material-symbols-outlined">lock</span>
+      <span>You do not have permission to view galleries. Administrator access required.</span>
+    </div>
+  } @else {
+
+    <!-- Filters Row -->
+    <div class="flex flex-wrap items-end gap-4 mb-6">
+      <!-- Entity Type Filter (dropdown populated from schema) -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">View</span>
+        </label>
+        <select
+          class="select select-bordered select-sm"
+          [ngModel]="filterEntityType()"
+          (ngModelChange)="onEntityTypeFilterChange($event)">
+          <option value="">All Galleries</option>
+          @for (opt of entityOptions(); track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">Status</span>
+        </label>
+        <select
+          class="select select-bordered select-sm"
+          [ngModel]="filterStatus()"
+          (ngModelChange)="onStatusFilterChange($event)">
+          <option value="all">All</option>
+          <option value="linked">Linked</option>
+          <option value="draft">Draft (orphan)</option>
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">Date Range</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            type="date"
+            class="input input-bordered input-sm w-36"
+            [ngModel]="filterDateFrom()"
+            (ngModelChange)="onDateFromChange($event)"
+            title="From date" />
+          <span class="text-base-content/50">—</span>
+          <input
+            type="date"
+            class="input input-bordered input-sm w-36"
+            [ngModel]="filterDateTo()"
+            (ngModelChange)="onDateToChange($event)"
+            title="To date" />
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="form-control w-64">
+        <label class="label py-1">
+          <span class="label-text font-semibold">&nbsp;</span>
+        </label>
+        <label class="input input-bordered input-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+          <input
+            type="text"
+            placeholder="Search entity ID..."
+            class="grow bg-transparent border-none outline-none"
+            [ngModel]="filterSearch()"
+            (ngModelChange)="onSearchChange($event)" />
+        </label>
+      </div>
+
+      <!-- Spacer -->
+      <div class="flex-grow"></div>
+
+      <!-- Refresh -->
+      <div class="form-control">
+        <label class="label py-1">
+          <span class="label-text font-semibold">&nbsp;</span>
+        </label>
+        <button
+          class="btn btn-sm btn-square btn-ghost"
+          (click)="refresh()"
+          [disabled]="loading()"
+          title="Refresh">
+          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="flex justify-center items-center min-h-[400px]">
+        <div class="flex items-center gap-2">
+          <span class="loading loading-spinner loading-lg"></span>
+          <span class="text-base-content/60">Loading galleries...</span>
+        </div>
+      </div>
+    } @else if (galleries().length === 0) {
+      <div class="text-center py-8 text-base-content/60">
+        <span class="material-symbols-outlined text-4xl mb-2">photo_library</span>
+        <p>No galleries found matching your filters.</p>
+      </div>
+    } @else {
+      <!-- Gallery Table -->
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('entity_type')">
+                <div class="flex items-center gap-1">
+                  Entity Type
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('entity_type') }}</span>
+                </div>
+              </th>
+              <th>Entity ID</th>
+              <th>Property</th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('image_count')">
+                <div class="flex items-center gap-1">
+                  Images
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('image_count') }}</span>
+                </div>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('total_size')">
+                <div class="flex items-center gap-1">
+                  Size
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('total_size') }}</span>
+                </div>
+              </th>
+              <th>Status</th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
+                <div class="flex items-center gap-1">
+                  Created
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
+                </div>
+              </th>
+              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('updated_at')">
+                <div class="flex items-center gap-1">
+                  Updated
+                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('updated_at') }}</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (gallery of galleries(); track gallery.id) {
+              <tr>
+                <td class="font-mono text-sm">{{ gallery.entity_type }}</td>
+                <td>
+                  @if (getEntityRoute(gallery); as route) {
+                    <a [routerLink]="route" class="link link-primary font-mono text-sm">
+                      {{ gallery.entity_id }}
+                    </a>
+                  } @else {
+                    <span class="text-base-content/40 text-sm">—</span>
+                  }
+                </td>
+                <td class="font-mono text-sm">{{ gallery.property_name }}</td>
+                <td>
+                  <div class="badge badge-ghost gap-1">
+                    <span class="material-symbols-outlined text-sm">image</span>
+                    {{ gallery.image_count }}
+                  </div>
+                </td>
+                <td class="text-sm">{{ formatFileSize(gallery.total_size) }}</td>
+                <td>
+                  @if (gallery.is_linked) {
+                    <span class="badge badge-success badge-sm">Linked</span>
+                  } @else {
+                    <span class="badge badge-warning badge-sm">Draft</span>
+                  }
+                </td>
+                <td class="text-sm whitespace-nowrap">{{ gallery.created_at | date:'short' }}</td>
+                <td class="text-sm whitespace-nowrap">{{ gallery.updated_at | date:'short' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-4">
+        <app-pagination
+          [currentPage]="currentPage()"
+          [pageSize]="pageSize()"
+          [totalCount]="totalCount()"
+          [loading]="loading()"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        ></app-pagination>
+      </div>
+    }
+  }
+</div>
