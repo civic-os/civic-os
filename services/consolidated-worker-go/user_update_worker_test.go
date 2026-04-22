@@ -24,8 +24,8 @@ func mockKeycloakUser() map[string]interface{} {
 		"enabled":       true,
 		"emailVerified": true,
 		"attributes": map[string][]string{
-			"phoneNumber":    {"1112223333"},
-			"customAttr":     {"preserve-me"},
+			"phoneNumber": {"1112223333"},
+			"customAttr":  {"preserve-me"},
 		},
 	}
 }
