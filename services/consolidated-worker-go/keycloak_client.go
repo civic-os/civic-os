@@ -35,12 +35,14 @@ type tokenResponse struct {
 
 // KeycloakUser represents a user in Keycloak
 type KeycloakUser struct {
-	ID        string `json:"id"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Enabled   bool   `json:"enabled"`
+	ID            string              `json:"id"`
+	Username      string              `json:"username"`
+	Email         string              `json:"email"`
+	FirstName     string              `json:"firstName"`
+	LastName      string              `json:"lastName"`
+	Enabled       bool                `json:"enabled"`
+	EmailVerified bool                `json:"emailVerified"`
+	Attributes    map[string][]string `json:"attributes,omitempty"`
 }
 
 type keycloakRole struct {
@@ -207,6 +209,32 @@ func (kc *KeycloakClient) GetUserByEmail(ctx context.Context, email string) (*Ke
 	return &users[0], nil
 }
 
+// GetUserByID fetches a user by their Keycloak UUID
+func (kc *KeycloakClient) GetUserByID(ctx context.Context, userID string) (*KeycloakUser, error) {
+	path := fmt.Sprintf("/users/%s", userID)
+	resp, err := kc.doRequest(ctx, "GET", path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("get user request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("user %s not found in Keycloak", userID)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("get user returned %d: %s", resp.StatusCode, string(body))
+	}
+
+	var user KeycloakUser
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+		return nil, fmt.Errorf("failed to decode user response: %w", err)
+	}
+
+	return &user, nil
+}
+
 // loadRoles fetches all realm roles and caches name->ID mapping
 func (kc *KeycloakClient) loadRoles(ctx context.Context) error {
 	resp, err := kc.doRequest(ctx, "GET", "/roles", nil)
@@ -322,21 +350,36 @@ func (kc *KeycloakClient) RemoveRealmRoles(ctx context.Context, userID string, r
 	return nil
 }
 
-// UpdateUser updates a user's profile in Keycloak (firstName, lastName, phone)
-func (kc *KeycloakClient) UpdateUser(ctx context.Context, userID, firstName, lastName, phone string) error {
-	payload := map[string]interface{}{
-		"firstName": firstName,
-		"lastName":  lastName,
+// UpdateUser updates a user's profile in Keycloak (email, firstName, lastName, phone).
+// Uses fetch-then-merge to preserve fields not being updated (enabled, emailVerified, etc.)
+// since Keycloak's PUT semantics treat missing fields as null.
+func (kc *KeycloakClient) UpdateUser(ctx context.Context, userID, email, firstName, lastName, phone string) error {
+	// Fetch current user to preserve fields we don't intend to change
+	current, err := kc.GetUserByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("fetch current user failed: %w", err)
 	}
 
+	// Start with existing attributes, merge phone change
+	attrs := current.Attributes
+	if attrs == nil {
+		attrs = make(map[string][]string)
+	}
 	if phone != "" {
-		payload["attributes"] = map[string][]string{
-			"phoneNumber": {phone},
-		}
+		attrs["phoneNumber"] = []string{phone}
 	} else {
-		payload["attributes"] = map[string][]string{
-			"phoneNumber": {},
-		}
+		attrs["phoneNumber"] = []string{}
+	}
+
+	// Build full payload preserving all existing fields
+	payload := map[string]interface{}{
+		"username":      current.Username,
+		"email":         email,
+		"firstName":     firstName,
+		"lastName":      lastName,
+		"enabled":       current.Enabled,
+		"emailVerified": current.EmailVerified,
+		"attributes":    attrs,
 	}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -356,9 +399,29 @@ func (kc *KeycloakClient) UpdateUser(ctx context.Context, userID, firstName, las
 	return nil
 }
 
-// DisableUser sets enabled=false on a Keycloak user
+// DisableUser sets enabled=false on a Keycloak user.
+// Uses fetch-then-merge to preserve all other fields (name, email, attributes, etc.)
+// since Keycloak's PUT semantics treat missing fields as null.
 func (kc *KeycloakClient) DisableUser(ctx context.Context, userID string) error {
-	payload := map[string]interface{}{"enabled": false}
+	// Fetch current user to preserve all fields
+	current, err := kc.GetUserByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("fetch current user for disable failed: %w", err)
+	}
+
+	// Build full payload, only changing enabled to false
+	payload := map[string]interface{}{
+		"username":      current.Username,
+		"email":         current.Email,
+		"firstName":     current.FirstName,
+		"lastName":      current.LastName,
+		"enabled":       false,
+		"emailVerified": current.EmailVerified,
+	}
+	if current.Attributes != nil {
+		payload["attributes"] = current.Attributes
+	}
+
 	payloadBytes, _ := json.Marshal(payload)
 
 	path := fmt.Sprintf("/users/%s", userID)

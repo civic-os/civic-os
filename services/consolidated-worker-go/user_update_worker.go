@@ -17,6 +17,7 @@ import (
 // UpdateKeycloakUserArgs defines the job arguments for updating user info in Keycloak
 type UpdateKeycloakUserArgs struct {
 	UserID    string `json:"user_id"`
+	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Phone     string `json:"phone"`
@@ -44,7 +45,7 @@ func (w *UpdateKeycloakUserWorker) Work(ctx context.Context, job *river.Job[Upda
 	log.Printf("[Job %d] Starting user update (attempt %d/%d): user=%s name=%s %s",
 		job.ID, job.Attempt, job.MaxAttempts, job.Args.UserID, job.Args.FirstName, job.Args.LastName)
 
-	err := w.keycloakClient.UpdateUser(ctx, job.Args.UserID, job.Args.FirstName, job.Args.LastName, job.Args.Phone)
+	err := w.keycloakClient.UpdateUser(ctx, job.Args.UserID, job.Args.Email, job.Args.FirstName, job.Args.LastName, job.Args.Phone)
 	if err != nil {
 		return fmt.Errorf("update user failed: %w", err)
 	}
