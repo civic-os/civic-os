@@ -497,7 +497,7 @@ export class SeriesGroupManagementPage implements OnInit {
   }
 
   formatDate(dateStr: string | undefined): string {
-    if (!dateStr) return '—';
+    if (!dateStr) return '-';
     try {
       // Handle date-only strings by appending time to avoid UTC interpretation
       const localDate = dateStr.includes('T') ? dateStr : `${dateStr}T00:00:00`;

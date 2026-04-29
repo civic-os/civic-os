@@ -51,7 +51,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- =============================================================================
--- 3B. BOOKKEEPER RLS — SEE ALL REIMBURSEMENTS AND TIME ENTRIES
+-- 3B. BOOKKEEPER RLS - SEE ALL REIMBURSEMENTS AND TIME ENTRIES
 -- =============================================================================
 -- Add bookkeeper to the SELECT policies so they can view all records.
 -- Uses role_key (immutable) in get_user_roles() checks.
@@ -79,7 +79,7 @@ CREATE POLICY select_time_entries ON time_entries
   );
 
 -- =============================================================================
--- 3C. REIMBURSEMENT NOTIFICATIONS — ROUTE TO BOOKKEEPER
+-- 3C. REIMBURSEMENT NOTIFICATIONS - ROUTE TO BOOKKEEPER
 -- =============================================================================
 -- Override notify_reimbursement_submitted() to send to bookkeepers instead of managers.
 -- Override notify_reimbursement_status_change() to also notify bookkeepers.
@@ -271,7 +271,7 @@ VALUES
    'Close', 'Close the incident report after resolution')
 ON CONFLICT DO NOTHING;
 
--- 3D.4: Dashboard widget — recent incidents on Admin Overview
+-- 3D.4: Dashboard widget - recent incidents on Admin Overview
 DO $$
 DECLARE
   v_admin_dashboard_id INT;
@@ -604,7 +604,7 @@ LEFT JOIN sites s ON s.id = sm.site_id;
 
 GRANT SELECT ON staff_directory TO authenticated;
 
--- Register as entity (read-only — no create/edit/delete)
+-- Register as entity (read-only - no create/edit/delete)
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order)
 VALUES ('staff_directory', 'Staff Directory', 'Contact information for all staff members', 15)
 ON CONFLICT (table_name) DO UPDATE SET
@@ -646,7 +646,7 @@ ON CONFLICT DO NOTHING;
 
 UPDATE metadata.dashboard_widgets
 SET config = jsonb_build_object(
-  'content', E'# Welcome to the FFSC Staff Portal\n\nThe Flint Freedom Schools Collaborative (FFSC) connects young people with culturally relevant education through a network of Freedom Schools sites across Flint, Michigan.\n\nThis portal helps our team manage day-to-day operations during the summer program. It is a pilot project built in partnership with **Civic OS, L3C**, a Flint-based social enterprise that builds open-source tools for community organizations.\n\n## What You Can Do Here\n\n- **Track Onboarding** — complete required documents and clearances\n- **Log Time** — clock in/out and submit time-off requests\n- **Submit Reimbursements** — file expense requests with receipt uploads\n- **View Tasks** — see assignments by role, site, or individual\n- **Report Incidents** — document and track incident reports\n- **Staff Directory** — find contact info for any team member\n\n## Getting Started\n\nSign in to access the **Staff Portal** dashboard, where you can view your tasks, track your onboarding progress, and manage your time entries.\n\n---\n\n*Powered by [Civic OS](https://civic-os.org) — open-source software for community organizations*',
+  'content', E'# Welcome to the FFSC Staff Portal\n\nThe Flint Freedom Schools Collaborative (FFSC) connects young people with culturally relevant education through a network of Freedom Schools sites across Flint, Michigan.\n\nThis portal helps our team manage day-to-day operations during the summer program. It is a pilot project built in partnership with **Civic OS, L3C**, a Flint-based social enterprise that builds open-source tools for community organizations.\n\n## What You Can Do Here\n\n- **Track Onboarding** - complete required documents and clearances\n- **Log Time** - clock in/out and submit time-off requests\n- **Submit Reimbursements** - file expense requests with receipt uploads\n- **View Tasks** - see assignments by role, site, or individual\n- **Report Incidents** - document and track incident reports\n- **Staff Directory** - find contact info for any team member\n\n## Getting Started\n\nSign in to access the **Staff Portal** dashboard, where you can view your tasks, track your onboarding progress, and manage your time entries.\n\n---\n\n*Powered by [Civic OS](https://civic-os.org) - open-source software for community organizations*',
   'enableHtml', false
 )
 WHERE dashboard_id = (SELECT id FROM metadata.dashboards WHERE display_name = 'Welcome' LIMIT 1)

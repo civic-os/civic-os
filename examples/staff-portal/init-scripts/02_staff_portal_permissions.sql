@@ -31,7 +31,7 @@ WHERE NOT EXISTS (SELECT 1 FROM metadata.roles WHERE role_key = 'manager');
 
 -- Register CRUD permissions for all staff portal tables
 INSERT INTO metadata.permissions (table_name, permission) VALUES
-  -- staff_roles migrated to Category system (metadata.categories) — no standalone permissions needed
+  -- staff_roles migrated to Category system (metadata.categories) - no standalone permissions needed
   ('sites', 'read'),
   ('sites', 'create'),
   ('sites', 'update'),
@@ -77,7 +77,7 @@ ON CONFLICT (table_name, permission) DO NOTHING;
 -- MAP PERMISSIONS TO ROLES
 -- =====================================================
 
--- staff_roles: Migrated to Category system (metadata.categories) — no standalone permissions needed
+-- staff_roles: Migrated to Category system (metadata.categories) - no standalone permissions needed
 
 -- -----------------------------------------------
 -- sites: user=read, editor=read, manager=read/create/update, admin=all

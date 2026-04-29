@@ -419,6 +419,6 @@ INSERT INTO metadata.schema_decisions (
   ARRAY['reservation_requests']::name[],
   'Recurring/bulk-created reservations by managers triggered one notification per row. Deny and Cancel RPCs existed but lacked UI buttons because reason fields required modal form input (not available until entity_action_params in v0.32.0).',
   'Status guard prevents notification spam for non-Pending inserts while preserving notifications for manager-created Pending requests that need peer review. Parameterized actions collect denial_reason/cancellation_reason in a modal before calling the RPC, so notification emails include the reason text.',
-  'Requests inserted with a non-Pending status (e.g., pre-approved bulk imports) will not trigger manager notification emails. Deny and Cancel RPCs now require a reason text parameter — direct API callers must provide it.',
+  'Requests inserted with a non-Pending status (e.g., pre-approved bulk imports) will not trigger manager notification emails. Deny and Cancel RPCs now require a reason text parameter - direct API callers must provide it.',
   'accepted'
 );

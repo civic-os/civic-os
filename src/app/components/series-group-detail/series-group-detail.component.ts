@@ -945,7 +945,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
   }
 
   formatDateTime(isoStr: string): string {
-    if (!isoStr) return '—';
+    if (!isoStr) return '-';
     try {
       return new Date(isoStr).toLocaleString(undefined, {
         weekday: 'short',
@@ -961,7 +961,7 @@ export class SeriesGroupDetailComponent implements OnChanges {
   }
 
   formatDuration(duration: string): string {
-    if (!duration) return '—';
+    if (!duration) return '-';
     // Parse ISO 8601 duration (e.g., PT1H30M)
     const match = duration.match(/PT(\d+H)?(\d+M)?/);
     if (!match) return duration;

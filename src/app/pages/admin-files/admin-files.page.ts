@@ -692,7 +692,7 @@ export class AdminFilesPage implements OnInit, OnDestroy {
   }
 
   getPropertyDisplayName(file: FileReference): string {
-    if (!file.property_name) return '—';
+    if (!file.property_name) return '-';
     const entityProps = this.entityProperties();
     const match = entityProps.find(p => p.column_name === file.property_name && p.table_name === file.entity_type);
     if (match) return match.display_name;

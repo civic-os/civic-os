@@ -4,7 +4,7 @@
 --
 -- With role_key in place, display_name is now a freely-editable human label.
 -- Renaming display_name does NOT affect JWT matching, RBAC lookups, or
--- notification routing — those all use role_key.
+-- notification routing - those all use role_key.
 --
 -- Changes:
 --   1. Rename display_name: 'editor' -> 'Site Coordinator'  (role_key stays 'editor')

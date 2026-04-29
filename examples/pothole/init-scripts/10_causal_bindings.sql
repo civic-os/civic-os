@@ -3,7 +3,7 @@
 -- ============================================================================
 -- The pothole example now uses the framework Status Type System (v0.15.0+).
 -- Status transitions could be declared via metadata.status_transitions, but
--- this example has no workflow enforcement — any user with update permission
+-- this example has no workflow enforcement - any user with update permission
 -- can set Issue.status to any valid status. The only automation is a
 -- notification trigger on status change.
 --

@@ -146,7 +146,7 @@ BEGIN
         p_entity_type := 'reservation_requests'::NAME,
         p_entity_id := v_competing.id::TEXT,
         p_content := format(
-          '**Security deposit cancelled** — the time slot has been confirmed by another reservation (%s). '
+          '**Security deposit cancelled** - the time slot has been confirmed by another reservation (%s). '
           'This request remains Approved but cannot be secured for this time slot. '
           'Please contact the requestor to reschedule or cancel.',
           v_secured_display_name
@@ -1219,14 +1219,14 @@ VALUES (
     'accepted',
     'The Approved status was doing double duty: (1) managerial approval and (2) calendar locking via the sync trigger. This meant once a request was approved, the time slot was immediately locked on the public calendar even if the requestor never paid the security deposit. Unpaid approved reservations would hold slots indefinitely, blocking other events.',
     'Insert a Secured status between Approved and Completed in the reservation workflow. The public calendar slot is now locked only when a reservation reaches Secured (security deposit paid or fees waived), not at Approved. Two approved-but-not-secured reservations can have overlapping time slots; the first to pay the deposit wins the slot via the GIST exclusion constraint on public_calendar_events.',
-    'The Secured status approach preserves the existing approval workflow while adding a clear payment gate. Alternatives considered: (a) adding a payment deadline with auto-cancel for unpaid approved requests — adds complexity with timers and still blocks the slot temporarily; (b) requiring deposit payment before approval — changes the manager workflow and makes approval dependent on payment.',
+    'The Secured status approach preserves the existing approval workflow while adding a clear payment gate. Alternatives considered: (a) adding a payment deadline with auto-cancel for unpaid approved requests - adds complexity with timers and still blocks the slot temporarily; (b) requiring deposit payment before approval - changes the manager workflow and makes approval dependent on payment.',
     'Calendar sync trigger now checks for Secured/Completed instead of Approved/Completed. Auto-complete daily job transitions from Secured. Cancel RPC accepts Pending/Approved/Secured. Pre-event reminders sent only for Secured events.',
     NOW()::DATE
 ) ON CONFLICT DO NOTHING;
 
 
 -- =============================================================================
--- PART 21: STATUS TRANSITIONS (Causal Bindings) — REQUIRES v0.33.0+
+-- PART 21: STATUS TRANSITIONS (Causal Bindings) - REQUIRES v0.33.0+
 -- =============================================================================
 -- Update transitions to include the new Secured status.
 -- Uncomment when deploying on Civic OS v0.33.0+ which adds metadata.status_transitions.
@@ -1266,7 +1266,7 @@ VALUES (
 -- =============================================================================
 -- Instead of relying solely on RPCs to call check_and_secure_reservation(),
 -- this trigger fires whenever a reservation_payment.status_id changes to
--- Paid or Waived — regardless of how the change happened (RPC, direct edit,
+-- Paid or Waived - regardless of how the change happened (RPC, direct edit,
 -- webhook, etc.). This is the single reactive effect that covers all paths.
 
 CREATE OR REPLACE FUNCTION trg_check_secure_on_payment_status_change()
@@ -1295,7 +1295,7 @@ CREATE TRIGGER trg_payment_status_check_secure
     WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
     EXECUTE FUNCTION trg_check_secure_on_payment_status_change();
 
--- Register as causal binding for introspection — REQUIRES v0.33.0+
+-- Register as causal binding for introspection - REQUIRES v0.33.0+
 -- Uncomment when deploying on Civic OS v0.33.0+ which adds metadata.property_change_triggers.
 --
 -- INSERT INTO metadata.property_change_triggers
@@ -1316,7 +1316,7 @@ CREATE TRIGGER trg_payment_status_check_secure
 -- PART 23: FIX MANAGER DASHBOARD WIDGETS
 -- =============================================================================
 -- Fix two issues:
--- 1. "display_name_full" column doesn't exist — should be "display_name"
+-- 1. "display_name_full" column doesn't exist - should be "display_name"
 -- 2. Status ID filters need to include Secured for upcoming/calendar widgets
 
 -- Fix "Pending Requests" widget: display_name_full → display_name

@@ -174,14 +174,14 @@ SET join_table = 'staff_roles',
     join_column = 'display_name'
 WHERE table_name = 'staff_tasks' AND column_name = 'assigned_to_role_id';
 
--- staff_directory.role_id — was category, now FK
+-- staff_directory.role_id - was category, now FK
 UPDATE metadata.properties
 SET category_entity_type = NULL,
     join_table = 'staff_roles',
     join_column = 'display_name'
 WHERE table_name = 'staff_directory' AND column_name = 'role_id';
 
--- staff_directory.phone_number — added to VIEW from civic_os_users_private
+-- staff_directory.phone_number - added to VIEW from civic_os_users_private
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, show_on_list, show_on_detail, show_on_create, show_on_edit)
 VALUES ('staff_directory', 'phone_number', 'Phone', 3, TRUE, TRUE, FALSE, FALSE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
@@ -294,7 +294,7 @@ VALUES (
     'accepted',
     'Staff roles lived in metadata.categories (Category type) with colored badges. document_requirements.applies_to_roles used TEXT[] which is unsupported in the UI. Need M:M between document requirements and staff roles.',
     'Moved staff roles to a dedicated public.staff_roles table (ForeignKeyName type). Created document_requirement_roles junction table with composite PK. Empty junction rows = applies to all roles.',
-    'Categories provide colored badge display but lack M:M support. Promoting to a public table enables the existing junction table auto-detection. Colored badges are lost — acceptable for this pilot. Framework-level M:M for categories is on the roadmap.',
+    'Categories provide colored badge display but lack M:M support. Promoting to a public table enables the existing junction table auto-detection. Colored badges are lost - acceptable for this pilot. Framework-level M:M for categories is on the roadmap.',
     'Staff role dropdowns show plain text instead of colored badges. Document requirements detail page gains an M:M editor for role assignment. auto_create_staff_documents trigger updated to use junction table.',
     CURRENT_DATE
 );

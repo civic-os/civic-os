@@ -163,7 +163,7 @@ CREATE TRIGGER trg_cascade_site_name_to_staff
 -- All 4 triggers that previously read sm.display_name now JOIN through
 -- civic_os_users_private so child record labels use the person's real name.
 
--- 1. set_staff_document_display_name() — "StaffName - DocumentName"
+-- 1. set_staff_document_display_name() - "StaffName - DocumentName"
 CREATE OR REPLACE FUNCTION set_staff_document_display_name()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -182,7 +182,7 @@ BEGIN
 END;
 $$;
 
--- 2. denormalize_time_entry() — copies staff_name and site_name
+-- 2. denormalize_time_entry() - copies staff_name and site_name
 CREATE OR REPLACE FUNCTION denormalize_time_entry()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -204,7 +204,7 @@ BEGIN
 END;
 $$;
 
--- 3. set_reimbursement_display_name() — "StaffName - Description"
+-- 3. set_reimbursement_display_name() - "StaffName - Description"
 CREATE OR REPLACE FUNCTION set_reimbursement_display_name()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -221,7 +221,7 @@ BEGIN
 END;
 $$;
 
--- 4. set_offboarding_display_name() — "StaffName - Feedback"
+-- 4. set_offboarding_display_name() - "StaffName - Feedback"
 CREATE OR REPLACE FUNCTION set_offboarding_display_name()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -535,7 +535,7 @@ $$;
 
 -- From script 14 (bookkeeper overrides):
 
--- 5. notify_reimbursement_submitted() — sends to bookkeepers
+-- 5. notify_reimbursement_submitted() - sends to bookkeepers
 CREATE OR REPLACE FUNCTION notify_reimbursement_submitted()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -578,7 +578,7 @@ BEGIN
 END;
 $$;
 
--- 6. notify_reimbursement_status_change() — notifies staff member + bookkeepers
+-- 6. notify_reimbursement_status_change() - notifies staff member + bookkeepers
 CREATE OR REPLACE FUNCTION notify_reimbursement_status_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -657,7 +657,7 @@ BEGIN
 END;
 $$;
 
--- 7. notify_task_assigned() — simplified for expansion (only direct assignment)
+-- 7. notify_task_assigned() - simplified for expansion (only direct assignment)
 -- After expansion, all persisted rows have assigned_to_id. The site/role branches
 -- from script 14 are no longer needed since the expansion trigger handles them.
 CREATE OR REPLACE FUNCTION notify_task_assigned()
@@ -874,7 +874,7 @@ WHERE table_name = 'staff_tasks'
   AND column_name IN ('assigned_to_id', 'assigned_to_site_id', 'assigned_to_role_id');
 
 -- =============================================================================
--- B12. UPDATE "MY TASKS" DASHBOARD WIDGET — priority instead of status
+-- B12. UPDATE "MY TASKS" DASHBOARD WIDGET - priority instead of status
 -- =============================================================================
 
 UPDATE metadata.dashboard_widgets
@@ -915,7 +915,7 @@ CREATE POLICY update_staff_tasks ON staff_tasks
 -- =============================================================================
 -- B14. DROP CHECK CONSTRAINT
 -- =============================================================================
--- No longer correct after expansion — expanded rows have assigned_to_id only.
+-- No longer correct after expansion - expanded rows have assigned_to_id only.
 
 ALTER TABLE staff_tasks DROP CONSTRAINT IF EXISTS chk_exactly_one_assignment;
 DELETE FROM metadata.constraint_messages WHERE constraint_name = 'chk_exactly_one_assignment';

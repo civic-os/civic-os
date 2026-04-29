@@ -63,7 +63,7 @@ INSERT INTO metadata.category_groups (entity_type, display_name, description) VA
   ('staff_role', 'Staff Role', 'Position categories for program staff')
 ON CONFLICT (entity_type) DO NOTHING;
 
--- time_entry categories (categorization, not workflow — no is_initial/is_terminal)
+-- time_entry categories (categorization, not workflow - no is_initial/is_terminal)
 INSERT INTO metadata.categories (entity_type, display_name, description, color, sort_order, category_key) VALUES
   ('time_entry', 'Clock In', 'Staff member clocked in', '#22C55E', 1, 'clock_in'),
   ('time_entry', 'Clock Out', 'Staff member clocked out', '#6B7280', 2, 'clock_out')
@@ -623,7 +623,7 @@ CREATE TRIGGER trg_auto_create_staff_documents
 -- 7. trg_staff_document_status_guard
 --    Combined trigger that:
 --    (a) Prevents staff from changing status_id via direct API PATCH.
---        Direct PostgREST calls run as 'authenticated' — status_id is silently
+--        Direct PostgREST calls run as 'authenticated' - status_id is silently
 --        reset to its old value so the rest of the UPDATE (file upload) proceeds.
 --        SECURITY DEFINER RPCs run as 'postgres' and are allowed to change status.
 --    (b) When a file is uploaded and current status is 'Pending' or
