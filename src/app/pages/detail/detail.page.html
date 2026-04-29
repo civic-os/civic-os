@@ -9,7 +9,7 @@
           <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
             <span class="material-symbols-outlined">arrow_back</span>
           </button>
-          <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name }}</h1>
+          <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name || '#' + data.id }}</h1>
           @if (auth.isAdmin()) {
             <a class="btn btn-ghost btn-xs gap-1" [routerLink]="'/system/entity-code/' + entity.table_name">
               <span class="material-symbols-outlined text-sm">code</span>
@@ -23,6 +23,27 @@
             </a>
           }
         </div>
+
+        <!-- GuidedForm Navigation (v0-48-0) -->
+        @if (guidedFormContext(); as ctx) {
+          <app-guided-form-nav
+            [context]="ctx"
+            [parentRecord]="data"
+            [entityDisplayName]="entity.display_name"
+            [mode]="'view'"
+            (stepClick)="onGuidedFormStepClick($event)">
+          </app-guided-form-nav>
+
+          <!-- Continue button for in-progress draft guided forms -->
+          @if (guidedFormStatusKey() === 'draft' && !showReviewSection()) {
+            <div class="flex justify-center my-4">
+              <button class="btn btn-primary btn-lg gap-2" (click)="continueGuidedForm()">
+                <span class="material-symbols-outlined">arrow_forward</span>
+                Continue
+              </button>
+            </div>
+          }
+        }
 
         <!-- Action Bar (separate row, left-aligned) -->
         @if (actionButtons$ | async; as buttons) {
@@ -52,6 +73,46 @@
           </div>
         }
 
+        <!-- GuidedForm Review Section (v0-48-0) -->
+        @if (showReviewSection()) {
+          @if (guidedFormError()) {
+            <div class="alert alert-error mb-4">
+              <span class="material-symbols-outlined">error</span>
+              <span>{{ guidedFormError() }}</span>
+            </div>
+          }
+          <app-guided-form-review-section
+            [context]="guidedFormContext()!"
+            [parentRecord]="data"
+            [entityDisplayName]="entity.display_name"
+            [submitting]="guidedFormSubmitting()"
+            [readOnly]="isGuidedFormSubmitted() && guidedFormContext()?.definition?.lock_on_submit === true"
+            [submitted]="isGuidedFormSubmitted()"
+            (submit)="onSubmitGuidedForm()"
+            (editStep)="onEditGuidedFormStep($event)">
+          </app-guided-form-review-section>
+        }
+
+        <!-- GuidedForm Success Modal -->
+        <cos-modal
+          [isOpen]="showGuidedFormSuccessModal()"
+          (closed)="onGuidedFormSuccessViewRecord()"
+          size="sm"
+          [closeOnBackdrop]="true">
+          <h3 class="font-bold text-lg mb-4">
+            <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+            Submitted
+          </h3>
+          <p class="mb-4">Your {{ currentEntity()?.display_name || 'form' }} has been submitted.</p>
+          <div class="flex flex-col gap-2 w-full">
+            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">View Record</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">Submit Another</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">Back to {{ currentEntity()?.display_name || 'form' }} list</button>
+          </div>
+        </cos-modal>
+
+        <!-- Hide Details grid when review section is showing (review already displays all data) -->
+        @if (!showReviewSection()) {
         <h2 class="text-2xl font-bold mt-6 mb-4">Details</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
           @if (detailRenderables$ | async; as renderables) {
@@ -87,7 +148,10 @@
             }
           }
         </div>
+        } <!-- end !showReviewSection() -->
 
+        <!-- Hide supplementary sections when review section is active -->
+        @if (!showReviewSection()) {
         <!-- Many-to-Many Relationships Section -->
         @if (manyToManyProps$ | async; as manyToManyProps) {
           @if (manyToManyProps.length > 0) {
@@ -159,7 +223,7 @@
                               <a
                                 [routerLink]="'/view/' + relationship.meta.sourceTable + '/' + record.id"
                                 class="link link-primary"
-                              >{{ record.display_name }}</a>@if (!isLast) {<span class="mx-1">•</span>}
+                              >{{ record.display_name || '#' + record.id }}</a>@if (!isLast) {<span class="mx-1">•</span>}
                             }
                           </div>
                         }
@@ -230,6 +294,7 @@
           }
         }
         -->
+        } <!-- end !showReviewSection() for supplementary sections -->
 
         <!-- Delete Confirmation Modal -->
         <cos-modal
@@ -247,7 +312,7 @@
           }
 
           <p class="mb-6">
-            Are you sure you want to delete <strong>{{ data.display_name }}</strong>? This action cannot be undone.
+            Are you sure you want to delete <strong>{{ data.display_name || '#' + data.id }}</strong>? This action cannot be undone.
           </p>
 
           <!-- Actions -->
@@ -527,8 +592,8 @@
               <span class="loading loading-spinner loading-lg"></span>
               <p class="text-base-content/60">Loading record...</p>
             </div>
-          } @else if (!entity.select && !auth.authenticated()) {
-            <!-- User doesn't have select permission and is not logged in -->
+          } @else if (!auth.authenticated()) {
+            <!-- User is not logged in - RLS returned nothing -->
             <app-empty-state
               icon="lock"
               title="Sign in to view this record"
@@ -536,20 +601,12 @@
               alertType="info"
               [showLoginButton]="true">
             </app-empty-state>
-          } @else if (!entity.select) {
-            <!-- User is authenticated but doesn't have permission (and RLS didn't allow access) -->
-            <app-empty-state
-              icon="block"
-              title="Access denied"
-              message="You don't have permission to view this record."
-              alertType="error">
-            </app-empty-state>
           } @else {
-            <!-- Has permission but record doesn't exist -->
+            <!-- Record not found or RLS filtered it out -->
             <app-empty-state
               icon="error"
               title="Record not found"
-              message="The record you're looking for doesn't exist."
+              message="The record you're looking for doesn't exist or you don't have access."
               alertType="error">
             </app-empty-state>
           }

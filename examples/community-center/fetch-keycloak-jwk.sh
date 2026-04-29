@@ -89,7 +89,8 @@ echo "{\"keys\": [$JWK]}" | jq '{keys: [.keys[] | {kid, kty, alg, use, n, e}]}' 
 
 echo ""
 echo "✓ Successfully saved JWKS to jwt-secret.jwks"
-echo ""
-echo "Next steps:"
-echo "  1. Restart PostgREST: docker-compose restart postgrest"
-echo "  2. Test your application with Keycloak authentication"
+
+# Auto-restart PostgREST to pick up new JWKS
+echo "Restarting PostgREST..."
+docker compose restart postgrest 2>/dev/null || docker-compose restart postgrest 2>/dev/null
+echo "✓ PostgREST restarted with new JWKS"

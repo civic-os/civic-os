@@ -1,0 +1,120 @@
+<div class="guided-form-review-section bg-base-100 rounded-lg shadow-sm border border-base-300 p-6 mt-6">
+  <h2 class="text-xl font-bold mb-4">
+    @if (submitted()) {
+      Submission Details
+    } @else {
+      Review & Submit
+    }
+  </h2>
+
+  @if (!submitted() && definition().review_intro_text) {
+    <div class="mb-4 text-base-content/80">
+      {{ definition().review_intro_text }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="flex justify-center py-8">
+      <span class="loading loading-spinner loading-md"></span>
+    </div>
+  }
+
+  @if (!loading()) {
+    <div class="space-y-4">
+      <!-- Parent step card -->
+      @if (definition()) {
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="checkbox" checked />
+          <div class="collapse-title font-medium">
+            {{ entityDisplayName() }}
+            <span class="badge badge-success badge-sm ml-2">Complete</span>
+          </div>
+          <div class="collapse-content">
+            @if (parentRecord() && parentProperties().length > 0) {
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                @for (prop of parentProperties(); track prop.column_name) {
+                  <div [class]="getColSpan(prop)">
+                    <app-display-property
+                      [property]="prop"
+                      [datum]="parentRecord()[prop.column_name]">
+                    </app-display-property>
+                  </div>
+                }
+              </div>
+            }
+            @if (!readOnly()) {
+              <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep('__parent__')">
+                <span class="material-symbols-outlined text-sm">edit</span>
+                Edit
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Step cards -->
+      @for (step of dataSteps(); track step.step_key) {
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="checkbox" [checked]="step.isCompleted" />
+          <div class="collapse-title font-medium">
+            {{ step.display_name }}
+            @if (step.isCompleted) {
+              <span class="badge badge-success badge-sm ml-2">Complete</span>
+            } @else {
+              <span class="badge badge-ghost badge-sm ml-2">Skipped</span>
+            }
+          </div>
+          <div class="collapse-content">
+            @if (step.isCompleted) {
+              @if (getStepRecord(step.step_key); as record) {
+                @if (getStepProperties(step).length > 0) {
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                    @for (prop of getStepProperties(step); track prop.column_name) {
+                      <div [class]="getColSpan(prop)">
+                        <app-display-property
+                          [property]="prop"
+                          [datum]="record[prop.column_name]">
+                        </app-display-property>
+                      </div>
+                    }
+                  </div>
+                }
+              } @else {
+                <div class="text-sm opacity-60">
+                  No data recorded for this step.
+                </div>
+              }
+              @if (!readOnly()) {
+                <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                  Edit
+                </button>
+              }
+            } @else {
+              <p class="text-sm opacity-60">This optional step was skipped.</p>
+              @if (!readOnly()) {
+                <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                  Fill In
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!submitted()) {
+    <div class="mt-6 flex justify-end">
+      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting()">
+        @if (submitting()) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Submitting...
+        } @else {
+          Submit {{ entityDisplayName() || '' }}
+        }
+      </button>
+    </div>
+  }
+</div>

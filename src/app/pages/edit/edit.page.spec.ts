@@ -30,6 +30,8 @@ import { NavigationService } from '../../services/navigation.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
+import { GuidedFormService } from '../../services/guided-form.service';
+import { GuidedFormContext, GuidedFormStep } from '../../interfaces/guided-form';
 import Keycloak from 'keycloak-js';
 
 describe('EditPage', () => {
@@ -42,6 +44,7 @@ describe('EditPage', () => {
   let mockRouter: jasmine.SpyObj<Router>;
   let mockKeycloak: jasmine.SpyObj<Keycloak>;
   let mockNavigationService: jasmine.SpyObj<NavigationService>;
+  let mockGuidedFormService: jasmine.SpyObj<GuidedFormService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -60,6 +63,12 @@ describe('EditPage', () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockKeycloak = jasmine.createSpyObj('Keycloak', ['updateToken']);
     mockNavigationService = jasmine.createSpyObj('NavigationService', ['goBack']);
+    mockGuidedFormService = jasmine.createSpyObj('GuidedFormService', [
+      'loadContext', 'getEffectiveSteps', 'getLockedFields', 'ensureStepRecord',
+      'completeStep', 'submitGuidedForm', 'cancelGuidedForm', 'refreshContext'
+    ]);
+    mockGuidedFormService.getEffectiveSteps.and.returnValue([]);
+    mockGuidedFormService.getLockedFields.and.returnValue(new Set());
 
     // Setup updateToken to return resolved promise by default (for form submission)
     mockKeycloak.updateToken.and.returnValue(Promise.resolve(true));
@@ -80,7 +89,8 @@ describe('EditPage', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: Router, useValue: mockRouter },
         { provide: Keycloak, useValue: mockKeycloak },
-        { provide: NavigationService, useValue: mockNavigationService }
+        { provide: NavigationService, useValue: mockNavigationService },
+        { provide: GuidedFormService, useValue: mockGuidedFormService }
       ]
     })
     .compileComponents();
@@ -907,6 +917,194 @@ describe('EditPage', () => {
           done();
         }, 10);
       });
+    });
+  });
+
+  describe('isCurrentStepSkippable', () => {
+    const mockSteps: GuidedFormStep[] = [
+      {
+        id: 1, guided_form_key: 'test_form', step_key: '__parent__',
+        display_name: 'Parent', description: null, step_table: 'parent_table',
+        parent_fk_column: null, step_order: 0, can_skip: false,
+        track_key: null, conditions: []
+      },
+      {
+        id: 2, guided_form_key: 'test_form', step_key: 'optional_step',
+        display_name: 'Optional Step', description: null, step_table: 'optional_table',
+        parent_fk_column: 'parent_id', step_order: 1, can_skip: true,
+        track_key: null, conditions: []
+      },
+      {
+        id: 3, guided_form_key: 'test_form', step_key: 'required_step',
+        display_name: 'Required Step', description: null, step_table: 'required_table',
+        parent_fk_column: 'parent_id', step_order: 2, can_skip: false,
+        track_key: null, conditions: []
+      }
+    ];
+
+    const makeContext = (overrides?: Partial<GuidedFormContext>): GuidedFormContext => ({
+      definition: {
+        guided_form_key: 'test_form', description: null, parent_table: 'parent_table',
+        ownership_column: null, lock_on_submit: false, on_submit_rpc: null,
+        review_intro_text: null, precondition_rpc: null, auto_submit_on_all_skipped: false,
+        is_enabled: true, status_options: []
+      },
+      steps: mockSteps,
+      progress: [],
+      status_options: [],
+      parent_status_id: 1,
+      parent_status_key: 'draft',
+      parent_id: 100,
+      record_id: 200,
+      is_child_step: true,
+      step_key: 'optional_step',
+      step_record_ids: {},
+      ...overrides
+    });
+
+    it('should return false when no guided form context', () => {
+      expect(component.isCurrentStepSkippable()).toBe(false);
+    });
+
+    it('should return false for parent step (__parent__)', () => {
+      component.entityKey = 'parent_table';
+      component.guidedFormContext.set(makeContext());
+      // getEffectiveSteps would be called but __parent__ is excluded before it
+      expect(component.isCurrentStepSkippable()).toBe(false);
+    });
+
+    it('should return true for optional step (can_skip=true) in draft mode', () => {
+      component.entityKey = 'optional_table';
+      component.guidedFormContext.set(makeContext());
+
+      mockGuidedFormService.getEffectiveSteps.and.returnValue([
+        { ...mockSteps[0], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[1], isSkipped: false, isCompleted: false, isRequired: false },
+        { ...mockSteps[2], isSkipped: false, isCompleted: false, isRequired: true }
+      ]);
+
+      expect(component.isCurrentStepSkippable()).toBe(true);
+    });
+
+    it('should return false for required step (can_skip=false)', () => {
+      component.entityKey = 'required_table';
+      component.guidedFormContext.set(makeContext());
+
+      mockGuidedFormService.getEffectiveSteps.and.returnValue([
+        { ...mockSteps[0], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[1], isSkipped: false, isCompleted: false, isRequired: false },
+        { ...mockSteps[2], isSkipped: false, isCompleted: false, isRequired: true }
+      ]);
+
+      expect(component.isCurrentStepSkippable()).toBe(false);
+    });
+
+    it('should return false when require_if makes optional step required', () => {
+      component.entityKey = 'optional_table';
+      component.guidedFormContext.set(makeContext());
+
+      // require_if condition matched — step is now required
+      mockGuidedFormService.getEffectiveSteps.and.returnValue([
+        { ...mockSteps[0], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[1], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[2], isSkipped: false, isCompleted: false, isRequired: true }
+      ]);
+
+      expect(component.isCurrentStepSkippable()).toBe(false);
+    });
+
+    it('should return false when step is condition-skipped', () => {
+      component.entityKey = 'optional_table';
+      component.guidedFormContext.set(makeContext());
+
+      mockGuidedFormService.getEffectiveSteps.and.returnValue([
+        { ...mockSteps[0], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[1], isSkipped: true, isCompleted: false, isRequired: false },
+        { ...mockSteps[2], isSkipped: false, isCompleted: false, isRequired: true }
+      ]);
+
+      expect(component.isCurrentStepSkippable()).toBe(false);
+    });
+  });
+
+  describe('skipStep()', () => {
+    const mockSteps: GuidedFormStep[] = [
+      {
+        id: 1, guided_form_key: 'test_form', step_key: '__parent__',
+        display_name: 'Parent', description: null, step_table: 'parent_table',
+        parent_fk_column: null, step_order: 0, can_skip: false,
+        track_key: null, conditions: []
+      },
+      {
+        id: 2, guided_form_key: 'test_form', step_key: 'step_a',
+        display_name: 'Step A', description: null, step_table: 'step_a_table',
+        parent_fk_column: 'parent_id', step_order: 1, can_skip: true,
+        track_key: null, conditions: []
+      },
+      {
+        id: 3, guided_form_key: 'test_form', step_key: 'step_b',
+        display_name: 'Step B', description: null, step_table: 'step_b_table',
+        parent_fk_column: 'parent_id', step_order: 2, can_skip: false,
+        track_key: null, conditions: []
+      }
+    ];
+
+    const makeContext = (): GuidedFormContext => ({
+      definition: {
+        guided_form_key: 'test_form', description: null, parent_table: 'parent_table',
+        ownership_column: null, lock_on_submit: false, on_submit_rpc: null,
+        review_intro_text: null, precondition_rpc: null, auto_submit_on_all_skipped: false,
+        is_enabled: true, status_options: []
+      },
+      steps: mockSteps,
+      progress: [],
+      status_options: [],
+      parent_status_id: 1,
+      parent_status_key: 'draft',
+      parent_id: 100,
+      record_id: 200,
+      is_child_step: true,
+      step_key: 'step_a',
+      step_record_ids: {}
+    });
+
+    it('should navigate to next step when skipping a non-last step', () => {
+      component.entityKey = 'step_a_table';
+      component.entityId = '200';
+      component.guidedFormKey.set('test_form');
+      component.guidedFormParentId.set('100');
+      component.guidedFormContext.set(makeContext());
+
+      mockGuidedFormService.getEffectiveSteps.and.returnValue([
+        { ...mockSteps[0], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[1], isSkipped: false, isCompleted: false, isRequired: false },
+        { ...mockSteps[2], isSkipped: false, isCompleted: false, isRequired: true }
+      ]);
+
+      mockGuidedFormService.ensureStepRecord.and.returnValue(of({ record_id: 301, created: false }));
+
+      component.skipStep();
+
+      expect(mockGuidedFormService.ensureStepRecord).toHaveBeenCalledWith('test_form', 100, 'step_b');
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', 'step_b_table', 301]);
+    });
+
+    it('should navigate to detail page when skipping the last step', () => {
+      component.entityKey = 'step_b_table';
+      component.entityId = '301';
+      component.guidedFormKey.set('test_form');
+      component.guidedFormParentId.set('100');
+      component.guidedFormContext.set(makeContext());
+
+      mockGuidedFormService.getEffectiveSteps.and.returnValue([
+        { ...mockSteps[0], isSkipped: false, isCompleted: false, isRequired: true },
+        { ...mockSteps[1], isSkipped: false, isCompleted: false, isRequired: false },
+        { ...mockSteps[2], isSkipped: false, isCompleted: false, isRequired: true }
+      ]);
+
+      component.skipStep();
+
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'parent_table', 100]);
     });
   });
 });

@@ -62,10 +62,17 @@
 
         <!-- Add Button -->
         @if (entity.insert) {
-          <button class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="'Add new ' + entity.display_name">
-            <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
-            <span class="hidden sm:inline">Add {{ entity.display_name }}</span>
-          </button>
+          @if (entity.guided_form_key) {
+            <button class="btn btn-primary btn-sm" (click)="startGuidedForm(entity)" [attr.aria-label]="'Start new ' + entity.display_name">
+              <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+              <span class="hidden sm:inline">Start New {{ entity.display_name }}</span>
+            </button>
+          } @else {
+            <button class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="'Add new ' + entity.display_name">
+              <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+              <span class="hidden sm:inline">Add {{ entity.display_name }}</span>
+            </button>
+          }
         }
       </div>
 
@@ -185,20 +192,13 @@
                         <span class="loading loading-spinner loading-lg"></span>
                         <p class="text-base-content/60">Loading records...</p>
                       </div>
-                    } @else if (!entity.select && !auth.authenticated()) {
+                    } @else if (!auth.authenticated() && dataSignal().length === 0) {
                       <app-empty-state
                         icon="lock"
                         title="Sign in to view data"
                         message="Log in to access this information."
                         alertType="info"
                         [showLoginButton]="true">
-                      </app-empty-state>
-                    } @else if (!entity.select) {
-                      <app-empty-state
-                        icon="block"
-                        title="Access denied"
-                        message="You don't have permission to view this data."
-                        alertType="error">
                       </app-empty-state>
                     } @else if (isFiltered()) {
                       <app-empty-state
@@ -252,5 +252,39 @@
       (pageSizeChange)="onPageSizeChange($event)">
     </app-pagination>
   </div>
+
+  <!-- Guided Form Start Error Modal -->
+  <cos-modal
+    [isOpen]="showGuidedFormError()"
+    (closed)="closeGuidedFormError()"
+    size="sm">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-error">error</span>
+      Unable to Start {{ entity.display_name }}
+    </h3>
+    <p class="mb-6">{{ guidedFormErrorMessage() }}</p>
+    <div class="cos-modal-action">
+      <button class="btn" (click)="closeGuidedFormError()">Close</button>
+    </div>
+  </cos-modal>
+  </div>
+} @else {
+  <div class="container mx-auto p-6">
+    @if (!auth.authenticated()) {
+      <app-empty-state
+        icon="lock"
+        title="Sign in to view this page"
+        message="You need to sign in to access this content."
+        alertType="info"
+        [showLoginButton]="true">
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        icon="block"
+        title="Access denied"
+        message="You don't have permission to view this data."
+        alertType="error">
+      </app-empty-state>
+    }
   </div>
 }

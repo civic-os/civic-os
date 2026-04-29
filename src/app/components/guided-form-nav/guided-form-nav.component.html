@@ -1,0 +1,23 @@
+@if (effectiveSteps().length > 0) {
+  <nav class="guided-form-nav bg-base-200 rounded-lg p-4 mb-4">
+    <h3 class="text-sm font-semibold opacity-70 mb-2">
+      {{ entityDisplayName() || 'Form' }}
+    </h3>
+
+    <ul class="steps steps-horizontal w-full text-xs">
+      @for (step of effectiveSteps(); track step.step_key) {
+        <li
+          class="step"
+          [class.step-primary]="step.isCompleted"
+          [class.step-neutral]="!step.isCompleted && !step.isSkipped"
+          [class.opacity-50]="step.isSkipped"
+          [class.cursor-pointer]="isStepClickable(step)"
+          [class.cursor-not-allowed]="!isStepClickable(step)"
+          [attr.data-content]="stepContent(step)"
+          (click)="isStepClickable(step) && onStepClick(step)">
+          {{ step.display_name }}
+        </li>
+      }
+    </ul>
+  </nav>
+}

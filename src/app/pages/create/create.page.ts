@@ -42,6 +42,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { GalleryService } from '../../services/gallery.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { GuidedFormService } from '../../services/guided-form.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { ApiError, ApiResponse } from '../../interfaces/api';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -72,6 +73,7 @@ export class CreatePage {
   private keycloak = inject(Keycloak);
   private analytics = inject(AnalyticsService);
   private navigation = inject(NavigationService);
+  private guidedForm = inject(GuidedFormService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -131,6 +133,7 @@ export class CreatePage {
             // NEW: Apply query param defaults after form is ready
             this.route.queryParams.pipe(take(1)).subscribe(params => {
               this.applyQueryParamDefaults(params);
+              this.detectGuidedFormMode(e, params);
             });
           })
         );
@@ -175,6 +178,11 @@ export class CreatePage {
   // v0.47.0: PhotoGallery draft tracking (column_name → gallery_id)
   public pendingGalleryDrafts = signal<Map<string, string>>(new Map());
   @ViewChildren(EditPropertyComponent) editProperties!: QueryList<EditPropertyComponent>;
+
+  // v0-48-0: Guided form mode
+  public guidedFormKey = signal<string | null>(null);
+  public isGuidedFormMode = signal(false);
+  public savingAndContinuing = signal(false);
 
   submitForm(event: any) {
     event?.preventDefault?.();
@@ -584,5 +592,148 @@ export class CreatePage {
     }
 
     return transformed;
+  }
+
+  // ==========================================================================
+  // GuidedForm support (v0-48-0)
+  // ==========================================================================
+
+  /**
+   * Detect guided form mode from entity metadata.
+   * Parent ID and step resolution are deferred to loadContext() after record creation.
+   */
+  private detectGuidedFormMode(entity: SchemaEntityTable, _params: Params): void {
+    const key = entity.guided_form_key;
+    if (!key) {
+      this.guidedFormKey.set(null);
+      this.isGuidedFormMode.set(false);
+      return;
+    }
+
+    this.guidedFormKey.set(key);
+    this.isGuidedFormMode.set(true);
+  }
+
+  /**
+   * Save & Continue for guided form mode.
+   * Creates record, loads context to resolve step/parent, then completes the step.
+   */
+  public saveAndContinue(event?: Event): void {
+    event?.preventDefault?.();
+
+    if (!this.createForm || !this.entityKey) return;
+
+    if (this.createForm.invalid) {
+      Object.keys(this.createForm.controls).forEach(key => {
+        this.createForm!.controls[key].markAsTouched();
+      });
+      this.showValidationError = true;
+      this.scrollToFirstError();
+      return;
+    }
+
+    this.showValidationError = false;
+    this.savingAndContinuing.set(true);
+
+    const formData = this.createForm.value;
+    const transformedData = this.transformValuesForApi(formData);
+
+    this.keycloak.updateToken(60)
+      .then(() => {
+        this.data.createData(this.entityKey!, transformedData).subscribe({
+          next: (result) => {
+            if (!result.success) {
+              this.savingAndContinuing.set(false);
+              this.currentError.set(result.error);
+              this.showErrorModal.set(true);
+              return;
+            }
+
+            const recordId = result.body?.[0]?.id;
+            if (this.entityKey) {
+              this.analytics.trackEvent('Entity', 'Create', this.entityKey);
+            }
+
+            const wk = this.guidedFormKey();
+            if (!wk || !recordId) {
+              // Non-guided-form fallback: show success modal
+              this.savingAndContinuing.set(false);
+              this.createdRecordId = recordId;
+              this.showSuccessModal.set(true);
+              return;
+            }
+
+            // Load context to resolve step_key and parent_id server-side
+            this.guidedForm.loadContext(wk, this.entityKey!, recordId).subscribe({
+              next: (ctx) => {
+                const stepKey = ctx.step_key || '__parent__';
+                const parentId = String(ctx.parent_id);
+
+                this.guidedForm.completeStep(wk, parentId, stepKey).subscribe({
+                  next: (completeResult) => {
+                    this.analytics.trackEvent('GuidedForm', 'StepComplete', `${wk}:${stepKey}`);
+
+                    // Backend auto-submitted (all non-parent steps were condition-skipped)
+                    if (completeResult.auto_submitted) {
+                      this.savingAndContinuing.set(false);
+                      if (completeResult.navigate_to) {
+                        this.router.navigateByUrl(completeResult.navigate_to);
+                      } else {
+                        this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+                      }
+                      return;
+                    }
+
+                    // RPC returns next step info directly
+                    this.savingAndContinuing.set(false);
+                    if (completeResult.next_record_id && completeResult.next_step_table) {
+                      this.router.navigate(['/edit', completeResult.next_step_table, completeResult.next_record_id]);
+                    } else if (completeResult.all_data_steps_complete) {
+                      this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+                    }
+                  },
+                  error: (err) => {
+                    this.savingAndContinuing.set(false);
+                    const apiError = err?.error || {};
+                    this.currentError.set({
+                      humanMessage: apiError.message || 'Failed to complete step.',
+                      message: apiError.message || err.message,
+                      code: apiError.code,
+                      hint: apiError.hint
+                    });
+                    this.showErrorModal.set(true);
+                  }
+                });
+              },
+              error: () => {
+                // Context load failed — fall back to success modal
+                this.savingAndContinuing.set(false);
+                this.createdRecordId = recordId;
+                this.showSuccessModal.set(true);
+              }
+            });
+          },
+          error: (err) => {
+            this.savingAndContinuing.set(false);
+            console.error('Unexpected error during create:', err);
+            this.currentError.set({
+              httpCode: 500,
+              message: 'An unexpected error occurred',
+              humanMessage: 'System Error'
+            });
+            this.showErrorModal.set(true);
+          }
+        });
+      })
+      .catch(() => {
+        this.savingAndContinuing.set(false);
+        this.currentError.set({
+          httpCode: 401,
+          message: 'Session expired',
+          humanMessage: 'Session Expired',
+          hint: 'Your login session has expired. Please refresh the page to log in again.'
+        });
+        this.showErrorModal.set(true);
+      });
   }
 }

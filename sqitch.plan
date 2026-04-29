@@ -72,3 +72,4 @@ v0-45-0-fk-search-modal [v0-44-0-options-source-rpc] 2026-04-19T12:00:00Z Daniel
 v0-46-0-m2m-search-modal [v0-45-0-fk-search-modal] 2026-04-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add show_inline flag for inline M:M positioning in property grid
 v0-47-0-add-photo-gallery [v0-46-0-m2m-search-modal] 2026-04-20T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add PhotoGallery property type: multi-image galleries with drag-drop reorder and lightbox
 v0-47-1-fix-keycloak-update-email [v0-47-0-add-photo-gallery] 2026-04-22T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix Keycloak user update clearing email by adding fetch-then-merge pattern
+v0-48-0-workflow-system [v0-47-1-fix-keycloak-update-email] 2026-04-21T23:11:02Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add multi-step workflow framework

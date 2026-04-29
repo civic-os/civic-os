@@ -50,7 +50,8 @@ export class EntityManagementService {
     calendarColorProperty: string | null = null,
     enableNotes: boolean = false,
     supportsRecurring: boolean = false,
-    recurringPropertyName: string | null = null
+    recurringPropertyName: string | null = null,
+    showInSidebar: boolean = true
   ): Observable<ApiResponse> {
     return this.http.post(
       getPostgrestUrl() + 'rpc/upsert_entity_metadata',
@@ -66,7 +67,8 @@ export class EntityManagementService {
         p_calendar_color_property: calendarColorProperty,
         p_enable_notes: enableNotes,
         p_supports_recurring: supportsRecurring,
-        p_recurring_property_name: recurringPropertyName
+        p_recurring_property_name: recurringPropertyName,
+        p_show_in_sidebar: showInSidebar
       }
     ).pipe(
       map((response: any) => <ApiResponse>{ success: true, body: response }),

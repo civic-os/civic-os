@@ -73,8 +73,8 @@ export class EntityManagementPage {
           } as EntityData);
         }
 
-        // Use getEntitiesForMenu() to exclude junction tables
-        return this.schemaService.getEntitiesForMenu().pipe(
+        // Use getEntitiesForManagement() to include sidebar-hidden entities
+        return this.schemaService.getEntitiesForManagement().pipe(
           switchMap(entities => {
             // Load properties for each entity to find GeoPoint fields
             const entityRows: EntityRow[] = (entities || []).map(e => ({
@@ -215,6 +215,10 @@ export class EntityManagementPage {
     this.saveEntityMetadata(entity);
   }
 
+  onShowInSidebarChange(entity: EntityRow) {
+    this.saveEntityMetadata(entity);
+  }
+
   hasGeoPointProperties(entity: EntityRow): boolean {
     return (entity.geoPointProperties?.length ?? 0) > 0;
   }
@@ -270,7 +274,8 @@ export class EntityManagementPage {
       entity.calendar_color_property,
       entity.enable_notes,
       entity.supports_recurring,
-      entity.recurring_property_name
+      entity.recurring_property_name,
+      entity.show_in_sidebar !== false
     ).subscribe({
       next: (response) => {
         // Clear saving state

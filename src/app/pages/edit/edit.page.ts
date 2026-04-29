@@ -16,9 +16,9 @@
  */
 
 
-import { Component, inject, signal, ChangeDetectionStrategy, ViewChildren, QueryList } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy } from '@angular/core';
 import { SchemaService } from '../../services/schema.service';
-import { Observable, forkJoin, from, map, mergeMap, of, tap } from 'rxjs';
+import { Observable, forkJoin, from, map, mergeMap, of, tap, take, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
@@ -36,9 +36,13 @@ import {
   SeriesEditScope
 } from '../../interfaces/entity';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-form-nav.component';
 import { ApiError, ApiResponse } from '../../interfaces/api';
 import Keycloak from 'keycloak-js';
+import { GuidedFormService } from '../../services/guided-form.service';
+import { GuidedFormContext } from '../../interfaces/guided-form';
 
+import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { EditPropertyComponent } from '../../components/edit-property/edit-property.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
@@ -53,12 +57,14 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     selector: 'app-edit',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
+    DisplayPropertyComponent,
     EditPropertyComponent,
     EmptyStateComponent,
     StaticTextComponent,
     ExceptionEditorComponent,
     InlineM2mEditorComponent,
     SaveProgressComponent,
+    GuidedFormNavComponent,
     CommonModule,
     ReactiveFormsModule,
     CosModalComponent,
@@ -67,7 +73,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     templateUrl: './edit.page.html',
     styleUrl: './edit.page.css'
 })
-export class EditPage {
+export class EditPage implements OnDestroy {
   private route = inject(ActivatedRoute);
   private schema = inject(SchemaService);
   private data = inject(DataService);
@@ -84,6 +90,7 @@ export class EditPage {
 
   public entityKey?: string;
   public entityId?: string;
+  public currentEntity?: SchemaEntityTable;
   public entity$: Observable<SchemaEntityTable | undefined> = this.route.params.pipe(mergeMap(p => {
     this.entityKey = p['entityKey'];
     this.entityId = p['entityId'];
@@ -92,6 +99,8 @@ export class EditPage {
     } else {
       return of(undefined);
     }
+  }), tap(entity => {
+    this.currentEntity = entity;
   }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
     if(e) {
@@ -101,6 +110,7 @@ export class EditPage {
         .pipe(
           map(props => props.filter(p => p.type !== EntityPropertyType.ManyToMany || p.show_inline === true)),
           tap(props => {
+            // Properties loaded for edit form
             this.currentProps = props;
             // Track inline M:M properties separately for save pipeline
             this.inlineM2mProps = props.filter(p => p.type === EntityPropertyType.ManyToMany && p.show_inline === true);
@@ -119,6 +129,9 @@ export class EditPage {
       if(props && props.length > 0 && this.entityKey) {
         let columns = props
           .map(x => SchemaService.propertyToSelectStringForEdit(x));
+        // status_id is silently added by ensureStructuralProps() for draft/complete detection
+        // Note: parent FK column inclusion for child steps is no longer needed here —
+        // get_guided_form_context() RPC resolves parent ID server-side.
         return this.data.getData({key: this.entityKey, entityId: this.entityId, fields: columns})
           .pipe(map(x => x[0]));
       } else {
@@ -127,6 +140,7 @@ export class EditPage {
       }
     }),
     tap(data => {
+      // Data loaded for edit form
       if (data && this.currentProps.length > 0) {
         // Cache entity data for inline M:M rendering.
         // Transform M:M junction data to flat arrays (same as Detail page).
@@ -156,7 +170,9 @@ export class EditPage {
         this.editForm = new FormGroup(formConfig);
 
         // Subscribe to form status changes to reactively hide error banner
-        this.editForm.statusChanges.subscribe(status => {
+        // Clean up previous subscription to prevent leaks when data reloads
+        this.statusChangesSub?.unsubscribe();
+        this.statusChangesSub = this.editForm.statusChanges.subscribe(status => {
           if (status === 'VALID' && this.showValidationError()) {
             this.showValidationError.set(false);
           }
@@ -164,10 +180,14 @@ export class EditPage {
 
         // Check if this entity is part of a recurring series
         this.checkSeriesMembership();
+
+        // Guided form mode: trigger context loading (handled by guidedFormContextEffect)
+        this.initGuidedFormMode(this.currentEntity, data);
       }
       this.loading.set(false);  // Clear loading state after data loads
       this.dataLoading.set(false);  // Clear data loading state
-    })
+    }),
+
   );
 
   /**
@@ -199,8 +219,10 @@ export class EditPage {
   public saveSteps = signal<SaveStep[] | null>(null);
   public saveComplete = signal(false);
   public currentData: any = null;  // Cached entity data for M:M rendering
+  public displayData = signal<any>(null);  // Rich display data for completed step display mode
 
   private saveStartTime = 0;  // Timestamp for minimum display duration
+  private statusChangesSub?: Subscription;  // Track statusChanges subscription for cleanup
 
   // Series membership (for recurring time slots)
   public seriesMembership = signal<SeriesMembership | undefined>(undefined);
@@ -212,11 +234,27 @@ export class EditPage {
   showErrorModal = signal(false);
   currentError = signal<ApiError | undefined>(undefined);
 
+  ngOnDestroy(): void {
+    this.cancelAutoSave();
+    this.statusChangesSub?.unsubscribe();
+  }
+
   submitForm(event: any) {
     event?.preventDefault?.();
 
     const form = this.editForm;
     if (!form) return;
+
+    // Guided form drafts: save without required validation.
+    // Database CHECK constraints enforce rules only when status transitions out of draft.
+    if (this.isGuidedFormDraft()) {
+      this.cancelAutoSave();
+      this.showValidationError.set(false);
+      const formData = form.value;
+      const transformedData = this.transformValuesForApi(formData);
+      this.performEdit(transformedData);
+      return;
+    }
 
     // Check if form is valid
     if (form.invalid) {
@@ -235,6 +273,7 @@ export class EditPage {
     }
 
     // Form is valid, hide error banner and proceed
+    this.cancelAutoSave();
     this.showValidationError.set(false);
 
     // Transform values for API
@@ -316,6 +355,31 @@ export class EditPage {
                   // Track successful record edit
                   if (this.entityKey) {
                     this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
+                  }
+
+                  // Guided form draft: navigate to detail page instead of success modal
+                  if (this.isGuidedFormDraft()) {
+                    const ctx = this.guidedFormContext();
+                    const pid = this.guidedFormParentId();
+                    if (ctx && pid) {
+                      this.router.navigate(['/view', ctx.definition.parent_table, pid]);
+                      return;
+                    }
+                  }
+
+                  // Completed step edit: switch back to display mode on successful save
+                  if (this.isEditingCompletedStep()) {
+                    this.isEditingCompletedStep.set(false);
+                    // Re-fetch display data with embedded objects to show updated values
+                    if (this.entityKey && this.currentProps.length > 0) {
+                      const displayColumns = this.currentProps.map(p => SchemaService.propertyToSelectString(p));
+                      this.data.getData({ key: this.entityKey, entityId: this.entityId, fields: displayColumns })
+                        .pipe(take(1))
+                        .subscribe(rows => {
+                          if (rows?.[0]) this.displayData.set(rows[0]);
+                        });
+                    }
+                    return;
                   }
 
                   this.showSuccessModal.set(true);
@@ -788,5 +852,441 @@ export class EditPage {
     }
 
     return transformed;
+  }
+
+  // ==========================================================================
+  // GUIDED FORM MODE (v0.48.0)
+  // ==========================================================================
+
+  private guidedFormService = inject(GuidedFormService);
+
+  // v0.48.0: Guided form mode signals
+  public guidedFormKey = signal<string | null>(null);
+  public isGuidedFormMode = computed(() => !!this.guidedFormKey());
+  // Guided form status comes directly from context (no separate status_id signal)
+  public guidedFormStatus = computed(() => this.guidedFormContext()?.parent_status_key ?? null);
+  public isGuidedFormDraft = computed(() => this.guidedFormStatus() === 'draft');
+  public savingAndContinuing = signal(false);
+
+  // v0.48.0: Auto-save for draft guided form steps
+  public autoSaveStatus = signal<'idle' | 'saving' | 'saved'>('idle');
+  private autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private autoSaveSub?: Subscription;
+  private autoSaveInFlight = signal(false);
+  private lastSavedValues: Record<string, any> = {};
+  private autoSaveEnabled = false;
+  private saveAndContinueRetries = 0;
+
+  // v0.48.0: Lock condition fields when parent step is beyond draft
+  private lockFieldsEffect = effect(() => {
+    const ctx = this.guidedFormContext();
+    if (!ctx || ctx.parent_status_key === 'draft' || !this.editForm) return;
+
+    if (ctx.steps.length === 0) return;
+
+    const lockedFields = this.guidedFormService.getLockedFields(ctx.steps);
+    for (const field of lockedFields) {
+      const control = this.editForm.controls[field];
+      if (control && control.enabled) {
+        control.disable();
+      }
+    }
+  });
+
+  // v0.48.0: View/edit mode for completed guided form steps
+  public isEditingCompletedStep = signal(false);
+
+  // True when the guided form is submitted AND lock_on_submit is enabled
+  public isGuidedFormLocked = computed(() => {
+    const ctx = this.guidedFormContext();
+    if (!ctx) return false;
+    return ctx.definition.lock_on_submit === true && ctx.parent_status_key === 'submitted';
+  });
+
+  // True when showing completed step in read-only display mode (not actively editing).
+  // Context-driven — no flash because status is available from first render.
+  public showCompletedStepDisplayMode = computed(() =>
+    this.isGuidedFormMode() && this.guidedFormStatus() !== null && !this.isGuidedFormDraft() && !this.isEditingCompletedStep()
+  );
+
+  // v0.48.0: Resolved parent ID for guided form (differs from entityId on child steps)
+  public guidedFormParentId = signal<string | null>(null);
+
+  // v0.48.0: Full guided form context from single RPC call
+  public guidedFormContext = signal<GuidedFormContext | null>(null);
+
+  // v0.48.0: Whether the current step can be skipped (can_skip=true AND not require_if-overridden)
+  public isCurrentStepSkippable = computed(() => {
+    const ctx = this.guidedFormContext();
+    if (!ctx || !this.isGuidedFormDraft()) return false;
+    const eKey = this.entityKey;
+    const step = ctx.steps.find(s => s.step_table === eKey);
+    if (!step || step.step_key === '__parent__') return false;
+    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, undefined, ctx.progress);
+    const eff = effective.find(s => s.step_key === step.step_key);
+    return eff ? !eff.isRequired && !eff.isSkipped : false;
+  });
+
+  /**
+   * Initialize guided form mode by triggering a context load.
+   * All signals are set atomically when the context arrives — no race conditions.
+   */
+  private initGuidedFormMode(entity: SchemaEntityTable | undefined, data: any): void {
+    const key = entity?.guided_form_key;
+    if (!key || !data?.id) {
+      this.guidedFormKey.set(null);
+      this.guidedFormParentId.set(null);
+      this.guidedFormContext.set(null);
+      return;
+    }
+
+    this.guidedFormKey.set(key);
+    this.isEditingCompletedStep.set(false);
+
+    // Single RPC call resolves everything: parent/child detection, parent ID, status, progress
+    this.guidedFormService.loadContext(key, entity.table_name, data.id)
+      .subscribe({
+        next: ctx => {
+          if (!ctx) return;
+          this.guidedFormContext.set(ctx);
+          this.guidedFormParentId.set(String(ctx.parent_id));
+
+          // Now that all state is resolved, set up display data and auto-save
+          this.fetchDisplayDataIfNeeded();
+          this.setupAutoSave();
+        },
+        error: err => console.error(`Failed to load guided form context:`, err)
+      });
+  }
+
+  /** Fetch display data (with embedded FK/Status/Category objects) for display mode. */
+  private fetchDisplayDataIfNeeded(): void {
+    if (this.isGuidedFormMode() && !this.isGuidedFormDraft() && this.entityKey && this.currentProps.length > 0) {
+      const displayColumns = this.currentProps.map(p => SchemaService.propertyToSelectString(p));
+      this.data.getData({ key: this.entityKey, entityId: this.entityId, fields: displayColumns })
+        .pipe(take(1))
+        .subscribe(rows => {
+          if (rows?.[0]) this.displayData.set(rows[0]);
+        });
+    }
+  }
+
+  /**
+   * Set up auto-save for draft guided form steps.
+   * Watches form value changes and debounces PATCH calls by 1500ms.
+   */
+  private setupAutoSave(): void {
+    // Only auto-save for draft guided form steps
+    if (!this.isGuidedFormDraft() || !this.editForm) {
+      this.autoSaveEnabled = false;
+      return;
+    }
+
+    this.autoSaveEnabled = true;
+    this.lastSavedValues = { ...this.editForm.value };
+
+    // Clean up previous subscription to prevent leaks in multi-step sessions
+    this.autoSaveSub?.unsubscribe();
+
+    this.autoSaveSub = this.editForm.valueChanges
+      .pipe(debounceTime(1500), distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)))
+      .subscribe(values => {
+        if (!this.autoSaveEnabled || !this.isGuidedFormDraft()) return;
+        this.performAutoSave(values);
+      });
+  }
+
+  /**
+   * Cancel any pending auto-save and disable auto-save.
+   */
+  private cancelAutoSave(): void {
+    this.autoSaveEnabled = false;
+    this.autoSaveSub?.unsubscribe();
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+  }
+
+  /**
+   * Perform auto-save PATCH with only changed fields.
+   */
+  private performAutoSave(values: Record<string, any>): void {
+    if (!this.entityKey || !this.entityId || !this.editForm) return;
+
+    // Find only changed fields
+    const changedFields: Record<string, any> = {};
+    for (const key of Object.keys(values)) {
+      if (JSON.stringify(values[key]) !== JSON.stringify(this.lastSavedValues[key])) {
+        changedFields[key] = values[key];
+      }
+    }
+
+    // Nothing changed — skip
+    if (Object.keys(changedFields).length === 0) return;
+
+    // Never touch status_id during auto-save (managed by framework RPCs)
+    delete changedFields['status_id'];
+
+    const transformedData = this.transformValuesForApi(changedFields);
+    if (Object.keys(transformedData).length === 0) return;
+
+    this.autoSaveStatus.set('saving');
+    this.autoSaveInFlight.set(true);
+
+    this.data.editData(this.entityKey, this.entityId, transformedData).subscribe({
+      next: (result) => {
+        this.autoSaveInFlight.set(false);
+        if (result.success) {
+          this.lastSavedValues = { ...values };
+          this.autoSaveStatus.set('saved');
+          this.autoSaveTimer = setTimeout(() => {
+            if (this.autoSaveStatus() === 'saved') {
+              this.autoSaveStatus.set('idle');
+            }
+          }, 2000);
+        } else {
+          this.autoSaveStatus.set('idle');
+        }
+      },
+      error: () => {
+        this.autoSaveInFlight.set(false);
+        this.autoSaveStatus.set('idle');
+      }
+    });
+  }
+
+  /**
+   * Enter edit mode for a completed guided form step.
+   */
+  public enterEditMode(): void {
+    this.isEditingCompletedStep.set(true);
+  }
+
+  /**
+   * Cancel editing a completed guided form step and revert form values.
+   */
+  public cancelEditMode(): void {
+    this.isEditingCompletedStep.set(false);
+    // Revert form to original data values
+    if (this.editForm && this.currentData) {
+      for (const key of Object.keys(this.editForm.controls)) {
+        const prop = this.currentProps.find(p => p.column_name === key);
+        if (prop) {
+          const value = this.currentData[key];
+          this.editForm.controls[key].setValue(
+            this.transformValueForControl(prop, value),
+            { emitEvent: false }
+          );
+        }
+      }
+      this.editForm.markAsPristine();
+    }
+  }
+
+  /**
+   * Navigate to a different guided form step from the nav overlay.
+   */
+  public onGuidedFormStepClick(stepKey: string): void {
+    const ctx = this.guidedFormContext();
+    const wk = this.guidedFormKey();
+    const pid = this.guidedFormParentId() || this.entityId;
+    if (!wk || !pid || !ctx) return;
+
+    if (stepKey === '__parent__') {
+      this.cancelAutoSave();
+      this.router.navigate(['/edit', ctx.definition.parent_table, pid]);
+      return;
+    }
+
+    if (stepKey === '__review__') {
+      this.cancelAutoSave();
+      this.router.navigate(['/view', ctx.definition.parent_table, pid]);
+      return;
+    }
+
+    const clickedStep = ctx.steps.find(s => s.step_key === stepKey);
+    if (!clickedStep) return;
+
+    // If clicking the current step, do nothing
+    if (clickedStep.step_table === this.entityKey) return;
+
+    this.cancelAutoSave();
+
+    if (clickedStep.parent_fk_column) {
+      // Ensure draft record exists, then navigate to edit
+      this.guidedFormService.ensureStepRecord(wk, pid, clickedStep.step_key).subscribe({
+        next: (result) => {
+          if (result.record_id) {
+            this.router.navigate(['/edit', clickedStep.step_table, result.record_id]);
+          }
+        },
+        error: (err) => {
+          const apiError = err?.error || {};
+          this.currentError.set({
+            humanMessage: apiError.message || 'Failed to load step record.',
+            message: apiError.message || err.message
+          });
+          this.showErrorModal.set(true);
+        }
+      });
+    }
+  }
+
+  /**
+   * Save current step and advance to next step in guided form.
+   */
+  public saveAndContinue(event?: Event): void {
+    event?.preventDefault?.();
+
+    const form = this.editForm;
+    if (!form) return;
+
+    if (form.invalid) {
+      Object.keys(form.controls).forEach(key => {
+        form.controls[key].markAsTouched();
+      });
+      this.showValidationError.set(true);
+      this.scrollToFirstError();
+      return;
+    }
+
+    this.cancelAutoSave();
+
+    // If an auto-save PATCH is in flight, wait for it to complete before proceeding
+    // Cap retries to prevent infinite loop (15 retries × 200ms = 3 seconds max wait)
+    if (this.autoSaveInFlight()) {
+      if (this.saveAndContinueRetries++ >= 15) {
+        this.saveAndContinueRetries = 0;
+        console.warn('[EditPage] Auto-save in-flight timeout exceeded, proceeding with save');
+        // Fall through to save anyway
+      } else {
+        setTimeout(() => this.saveAndContinue(event), 200);
+        return;
+      }
+    }
+    this.saveAndContinueRetries = 0;
+
+    this.showValidationError.set(false);
+    this.savingAndContinuing.set(true);
+
+    const formData = form.value;
+    const transformedData = this.transformValuesForApi(formData);
+
+    const ctx = this.guidedFormContext();
+    const wk = this.guidedFormKey();
+    const eKey = this.entityKey;
+    const eId = this.entityId;
+    const parentId = this.guidedFormParentId() || eId;
+    if (!wk || !eKey || !eId || !parentId || !ctx) {
+      this.savingAndContinuing.set(false);
+      return;
+    }
+
+    const step = ctx.steps.find(s => s.step_table === eKey);
+    const stepKey = step?.step_key || '__parent__';
+
+    // Save data then complete step (RPC auto-creates next step draft in same transaction)
+    this.data.editData(eKey, eId, transformedData).subscribe({
+      next: (result) => {
+        if (!result.success) {
+          this.savingAndContinuing.set(false);
+          this.currentError.set(result.error);
+          this.showErrorModal.set(true);
+          return;
+        }
+
+        this.guidedFormService.completeStep(wk, parseInt(parentId), stepKey).subscribe({
+          next: (completeResult) => {
+            this.savingAndContinuing.set(false);
+            this.analytics.trackEvent('GuidedForm', 'StepComplete', `${wk}:${stepKey}`);
+
+            // Backend auto-submitted (all non-parent steps were condition-skipped)
+            if (completeResult.auto_submitted) {
+              const navigateTo = completeResult.navigate_to;
+              if (navigateTo) {
+                this.router.navigateByUrl(navigateTo);
+              } else {
+                this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+              }
+              return;
+            }
+
+            // RPC returns next step info directly (no separate ensureStepRecord call needed)
+            if (completeResult.next_record_id && completeResult.next_step_table) {
+              this.router.navigate(['/edit', completeResult.next_step_table, completeResult.next_record_id]);
+            } else if (completeResult.all_data_steps_complete) {
+              // All steps done — go to detail page for review
+              this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+            }
+          },
+          error: (err) => {
+            this.savingAndContinuing.set(false);
+            const apiError = err?.error || {};
+            this.currentError.set({
+              humanMessage: apiError.message || 'Failed to complete step.',
+              message: apiError.message || err.message,
+              code: apiError.code,
+              hint: apiError.hint
+            });
+            this.showErrorModal.set(true);
+          }
+        });
+      },
+      error: (err) => {
+        this.savingAndContinuing.set(false);
+        const apiError = err?.error || {};
+        this.currentError.set({
+          humanMessage: apiError.message || 'An unexpected error occurred.',
+          message: apiError.message || err.message
+        });
+        this.showErrorModal.set(true);
+      }
+    });
+  }
+
+  /**
+   * Skip the current optional step without saving or validating.
+   * Navigates to the next data step, or to the detail/review page if this is the last step.
+   */
+  public skipStep(): void {
+    const ctx = this.guidedFormContext();
+    const wk = this.guidedFormKey();
+    if (!ctx || !wk) return;
+    const parentId = ctx.parent_id;
+    if (!parentId) return;
+
+    // Cancel any pending auto-save
+    this.cancelAutoSave();
+
+    // Find current step and compute effective steps
+    const eKey = this.entityKey;
+    const currentStep = ctx.steps.find(s => s.step_table === eKey);
+    if (!currentStep) return;
+
+    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, undefined, ctx.progress);
+    const sortedDataSteps = effective
+      .filter(s => s.step_key !== '__parent__' && !s.isSkipped)
+      .sort((a, b) => a.step_order - b.step_order);
+
+    const currentIndex = sortedDataSteps.findIndex(s => s.step_key === currentStep.step_key);
+    const nextStep = sortedDataSteps[currentIndex + 1];
+
+    if (nextStep) {
+      // Navigate to next data step — ensure its record exists
+      this.guidedFormService.ensureStepRecord(wk, Number(parentId), nextStep.step_key)
+        .subscribe({
+          next: (result) => {
+            this.router.navigate(['/edit', nextStep.step_table, result.record_id]);
+          },
+          error: () => {
+            // Fallback: navigate to detail page
+            this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+          }
+        });
+    } else {
+      // No more data steps — go to detail/review page
+      this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+    }
   }
 }

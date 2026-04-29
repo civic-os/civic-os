@@ -180,6 +180,19 @@
                     <span class="label-text text-xs">Enable notes on detail pages</span>
                   </label>
                 </div>
+
+                <!-- Sidebar Settings (always available) -->
+                <div class="border-t border-base-300 pt-4">
+                  <h3 class="text-xs font-semibold text-base-content/70 mb-2">Sidebar</h3>
+                  <label class="label cursor-pointer justify-start gap-2 py-0">
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm"
+                      [(ngModel)]="entity.show_in_sidebar"
+                      (ngModelChange)="onShowInSidebarChange(entity)" />
+                    <span class="label-text text-xs">Show in sidebar navigation</span>
+                  </label>
+                </div>
               </div>
 
               <!-- Status Indicator (aligned with input fields) -->

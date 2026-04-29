@@ -529,7 +529,7 @@ describe('SchemaService', () => {
       flushM2mMetadata(httpMock);
     });
 
-    it('should filter based on show_on_edit flag', (done) => {
+    it('should filter out fields with show_on_edit=false', (done) => {
       const mockProps: SchemaEntityProperty[] = [
         createMockProperty({ table_name: 'Issue', column_name: 'title', udt_name: 'varchar', is_updatable: true, show_on_edit: true }),
         createMockProperty({ table_name: 'Issue', column_name: 'calculated_field', udt_name: 'varchar', is_updatable: true, show_on_edit: false }),
@@ -538,9 +538,9 @@ describe('SchemaService', () => {
 
       service.getPropsForEdit(MOCK_ENTITIES.issue).subscribe(props => {
         expect(props.length).toBe(2);
-        expect(props[0].column_name).toBe('title');
-        expect(props[1].column_name).toBe('description');
+        expect(props.find(p => p.column_name === 'title')).toBeDefined();
         expect(props.find(p => p.column_name === 'calculated_field')).toBeUndefined();
+        expect(props.find(p => p.column_name === 'description')).toBeDefined();
         done();
       });
 
@@ -591,7 +591,7 @@ describe('SchemaService', () => {
       flushM2mMetadata(httpMock);
       });
 
-      it('should filter based on show_on_detail flag', (done) => {
+      it('should filter out fields with show_on_detail=false', (done) => {
         const mockProps: SchemaEntityProperty[] = [
           createMockProperty({ table_name: 'Issue', column_name: 'title', udt_name: 'varchar', show_on_detail: true }),
           createMockProperty({ table_name: 'Issue', column_name: 'internal_id', udt_name: 'int4', show_on_detail: false }),
@@ -602,9 +602,9 @@ describe('SchemaService', () => {
         service.getPropsForDetail(MOCK_ENTITIES.issue).subscribe(props => {
           expect(props.length).toBe(3);
           expect(props.find(p => p.column_name === 'title')).toBeDefined();
+          expect(props.find(p => p.column_name === 'internal_id')).toBeUndefined();
           expect(props.find(p => p.column_name === 'created_at')).toBeDefined();
           expect(props.find(p => p.column_name === 'updated_at')).toBeDefined();
-          expect(props.find(p => p.column_name === 'internal_id')).toBeUndefined();
           done();
         });
 

@@ -271,6 +271,8 @@ Civic OS provides helper functions for JWT data extraction (`current_user_id()`,
 
 All example docker-compose files include a pre-configured Keycloak service. The shared instance at `auth.civic-os.org` is available as an alternative (see `docs/AUTHENTICATION.md`).
 
+**Permissions Model** (v0.48.0+): Three-layer access control: (1) Database GRANTs for table access, (2) RBAC for blanket role-based access, (3) RLS for row-level ownership. Each RBAC permission maps to blanket access for that operation: `read` = see ALL rows, `update` = edit ALL rows, `delete` = delete ALL rows. Users without RBAC grants still see/edit their own records via ownership RLS. Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for the complete architecture and anti-patterns.
+
 **RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). Each role has an immutable `role_key` (programmatic identifier for JWT matching and SQL lookups) and a freely-editable `display_name` (human label). Use `get_role_id(role_key)` helper for lookups. PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
 
 **Default Roles** (by `role_key`): `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)

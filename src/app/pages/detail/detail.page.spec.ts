@@ -20,6 +20,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DetailPage } from './detail.page';
 import { Router } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
@@ -93,6 +95,8 @@ describe('DetailPage', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },

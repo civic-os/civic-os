@@ -54,3 +54,6 @@ backstop_data/
 baseline-lighthouse.html
 .lighthouseci/
 pa11y-results/
+
+
+.playwright-mcp/

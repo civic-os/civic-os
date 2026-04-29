@@ -40,6 +40,10 @@ export interface SchemaEntityTable {
     // Virtual Entity flag (v0.28.0)
     // True when entity is backed by a VIEW with INSTEAD OF triggers
     is_view?: boolean,
+    // Guided form membership (v0.48.0)
+    guided_form_key?: string | null,
+    // Sidebar visibility (v0.48.0)
+    show_in_sidebar?: boolean,
 }
 
 export interface ValidationRule {

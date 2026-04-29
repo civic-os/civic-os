@@ -5,7 +5,7 @@
 --   3. Filtered M:M: only eligible parcels appear in project_parcels editor
 
 -- ============================================================================
--- SCENARIO 1: Filtered FK — only approved borrowers
+-- SCENARIO 1: Filtered FK - only approved borrowers
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.get_eligible_borrowers(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
@@ -32,7 +32,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 
 -- ============================================================================
--- SCENARIO 2: Cascading FK — category → tool type
+-- SCENARIO 2: Cascading FK - category → tool type
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.get_tool_types_by_category(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
@@ -58,7 +58,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 
 -- ============================================================================
--- SCENARIO 3: Filtered M:M — eligible parcels only (by category)
+-- SCENARIO 3: Filtered M:M - eligible parcels only (by category)
 -- Parcels with eligibility category 'Good' or 'Few Issues' are eligible.
 -- Color comes from the Category badge rendering, not the RPC.
 -- ============================================================================

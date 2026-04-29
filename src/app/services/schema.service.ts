@@ -20,6 +20,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
+import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
@@ -56,6 +57,7 @@ export interface StatusOption {
   id: number;
   display_name: string;
   color: string | null;
+  status_key?: string;
 }
 
 /**
@@ -349,7 +351,8 @@ export class SchemaService {
       map(statuses => statuses.map(s => ({
         id: s.id,
         display_name: s.display_name,
-        color: s.color
+        color: s.color,
+        status_key: s.status_key
       }))),
       tap(statuses => {
         // Also update signal cache for synchronous access (v0.24.0)
@@ -517,9 +520,75 @@ export class SchemaService {
     }
   }
 
+  // ===========================================================================
+  // GUIDED FORM SUPPORT (v0.48.0)
+  // ===========================================================================
+
+  private guidedFormDefinitionsCache$?: Observable<GuidedFormDefinition[]>;
+  private guidedFormStepsCache$?: Observable<GuidedFormStep[]>;
+
+  public getGuidedFormDefinitions(): Observable<GuidedFormDefinition[]> {
+    if (!this.guidedFormDefinitionsCache$) {
+      this.guidedFormDefinitionsCache$ = this.http.get<GuidedFormDefinition[]>(
+        getPostgrestUrl() + 'schema_guided_forms'
+      ).pipe(
+        catchError(err => {
+          console.error('Failed to load guided form definitions:', err);
+          return of([]);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+    return this.guidedFormDefinitionsCache$;
+  }
+
+  public getGuidedFormSteps(): Observable<GuidedFormStep[]> {
+    if (!this.guidedFormStepsCache$) {
+      this.guidedFormStepsCache$ = this.http.get<GuidedFormStep[]>(
+        getPostgrestUrl() + 'schema_guided_form_steps'
+      ).pipe(
+        catchError(err => {
+          console.error('Failed to load guided form steps:', err);
+          return of([]);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+    return this.guidedFormStepsCache$;
+  }
+
+  public getEntityGuidedFormKey(tableName: string): string | undefined {
+    const entities = this.tables();
+    if (!entities) return undefined;
+    const entity = entities.find(e => e.table_name === tableName);
+    return entity?.guided_form_key || undefined;
+  }
+
+  public getGuidedFormForEntity(table: SchemaEntityTable): Observable<{ definition: GuidedFormDefinition | null, steps: GuidedFormStep[] }> {
+    if (!table.guided_form_key) {
+      return of({ definition: null, steps: [] });
+    }
+    return combineLatest([
+      this.getGuidedFormDefinitions(),
+      this.getGuidedFormSteps()
+    ]).pipe(
+      map(([definitions, steps]) => ({
+        definition: definitions.find(d => d.guided_form_key === table.guided_form_key) || null,
+        steps: steps.filter(s => s.guided_form_key === table.guided_form_key)
+      }))
+    );
+  }
+
+  public invalidateGuidedFormCache(): void {
+    this.guidedFormDefinitionsCache$ = undefined;
+    this.guidedFormStepsCache$ = undefined;
+  }
+
   public getPropertiesForEntity(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
     return this.getProperties().pipe(map(props => {
-      return props.filter(p => p.table_name == table.table_name);
+      return props.filter(p =>
+        p.table_name == table.table_name
+      );
     }));
   }
   public getPropertiesForEntityFresh(table: SchemaEntityTable): Observable<SchemaEntityProperty[]> {
@@ -544,7 +613,7 @@ export class SchemaService {
     }
 
     // Category detection: Integer FK with category_entity_type configured in metadata.properties (v0.34.0)
-    // Like Status but for non-workflow categorization (rich enums). Must come before ForeignKeyName.
+    // Like Status but for non-guidedForm categorization (rich enums). Must come before ForeignKeyName.
     if (val.category_entity_type && ['int4', 'int8'].includes(val.udt_name) && val.join_column != null) {
       return EntityPropertyType.Category;
     }
@@ -719,9 +788,12 @@ export class SchemaService {
    * map markers, calendar titles, and delete confirmation modals.
    */
   private static ensureStructuralProps(allProps: SchemaEntityProperty[], visibleProps: SchemaEntityProperty[]): void {
-    const dnProp = allProps.find(p => p.column_name === 'display_name');
-    if (dnProp && !visibleProps.includes(dnProp)) {
-      visibleProps.push(dnProp);
+    const structuralColumns = ['display_name', 'status_id', 'submitted_at'];
+    for (const col of structuralColumns) {
+      const prop = allProps.find(p => p.column_name === col);
+      if (prop && !visibleProps.includes(prop)) {
+        visibleProps.push(prop);
+      }
     }
   }
 
@@ -729,7 +801,9 @@ export class SchemaService {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
         // Include properties visible on list
-        const visibleProps = props.filter(p => p.show_on_list !== false);
+        const visibleProps = props.filter(p =>
+          p.show_on_list !== false
+        );
 
         // If map is enabled, ensure the map property is included even if hidden from list
         if (table.show_map && table.map_property_name) {
@@ -779,6 +853,8 @@ export class SchemaService {
     return this.getPropertiesForEntity(table)
       .pipe(map(props => {
         // Properties are pre-sorted by sort_order in getProperties()
+        // NOTE: We include show_on_edit=false props here so they are fetched in data$
+        // The edit form and renderables filter them out separately for display.
         const visibleProps = props.filter(p =>{
           // Exclude auto-managed timestamp fields (created_at, updated_at)
           // These are managed by database triggers and should never be in edit forms
@@ -790,7 +866,7 @@ export class SchemaService {
             p.show_on_edit !== false;
         });
 
-        // Ensure display_name is always fetched for page header
+        // Ensure structural props (display_name, status_id, submitted_at) are always fetched
         SchemaService.ensureStructuralProps(props, visibleProps);
 
         return visibleProps;
@@ -908,18 +984,20 @@ export class SchemaService {
    * Example: For entity 'issue_statuses', finds all tables with FK to issue_statuses
    * (e.g., issues.status -> issue_statuses.id)
    */
-  public getInverseRelationships(targetTable: string): Observable<InverseRelationshipMeta[]> {
+  public getInverseRelationships(targetTable: string, excludeTables?: Set<string>): Observable<InverseRelationshipMeta[]> {
     return this.getProperties().pipe(
       map(props => {
         // Derive junction tables on-demand from properties (no caching needed)
         const junctionTables = this.getJunctionTableNamesFromProperties(props);
 
         // Find all properties where join_table matches target
-        // But exclude properties from junction tables (they're handled by M:M)
+        // But exclude junction tables (handled by M:M) and caller-specified tables
+        // (e.g., guided form child step tables shown in review section)
         const inverseProps = props.filter(p =>
           p.join_table === targetTable &&
           p.join_schema === 'public' &&
-          !junctionTables.has(p.table_name)  // Filter out junction tables
+          !junctionTables.has(p.table_name) &&
+          (!excludeTables || !excludeTables.has(p.table_name))
         );
 
         // Group by source table to avoid duplicates
@@ -1223,8 +1301,23 @@ export class SchemaService {
         const allTables = this.tables();
         if (!allTables) return [];
         return allTables.filter(t =>
-          !junctions.has(t.table_name)
+          !junctions.has(t.table_name) && t.show_in_sidebar !== false
         );
+      })
+    );
+  }
+
+  /**
+   * Get entities for the Entity Management admin page.
+   * Excludes junction tables but includes sidebar-hidden entities
+   * so admins can toggle visibility.
+   */
+  public getEntitiesForManagement(): Observable<SchemaEntityTable[]> {
+    return this.getDetectedJunctionTables().pipe(
+      map(junctions => {
+        const allTables = this.tables();
+        if (!allTables) return [];
+        return allTables.filter(t => !junctions.has(t.table_name));
       })
     );
   }

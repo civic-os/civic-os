@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -42,6 +42,10 @@ import { ActionBarComponent, ActionButton } from '../../components/action-bar/ac
 import { RecurringService } from '../../services/recurring.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
+import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-form-nav.component';
+import { GuidedFormReviewSectionComponent } from '../../components/guided-form-review-section/guided-form-review-section.component';
+import { GuidedFormService } from '../../services/guided-form.service';
+import { GuidedFormContext } from '../../interfaces/guided-form';
 
 /**
  * Type guard to check if a value is a PaymentValue object.
@@ -95,7 +99,9 @@ export interface CalendarSection {
     StaticTextComponent,
     ActionBarComponent,
     ExceptionEditorComponent,
-    CosModalComponent
+    CosModalComponent,
+    GuidedFormNavComponent,
+    GuidedFormReviewSectionComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -106,6 +112,7 @@ export class DetailPage {
   private data = inject(DataService);
   private recurringService = inject(RecurringService);
   private fileUpload = inject(FileUploadService);
+  private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
   public auth = inject(AuthService);
 
@@ -154,6 +161,20 @@ export class DetailPage {
   // Increment this signal to trigger refresh in components that watch it
   refreshCounter = signal(0);
 
+  // Guided form state (v0-48-0)
+  currentEntity = signal<SchemaEntityTable | undefined>(undefined);
+  isGuidedFormMode = signal(false);
+  showGuidedFormNav = signal(false);
+  showReviewSection = signal(false);
+  guidedFormError = signal<string | undefined>(undefined);
+  showGuidedFormSuccessModal = signal(false);
+  guidedFormSubmitting = signal(false);
+  isGuidedFormSubmitted = signal(false);
+  guidedFormContext = signal<GuidedFormContext | null>(null);
+
+  // Status key derived directly from context — no extra HTTP call needed
+  guidedFormStatusKey = computed(() => this.guidedFormContext()?.parent_status_key ?? null);
+
   // Observable form of refreshCounter for use in RxJS pipelines
   private refreshCounter$ = toObservable(this.refreshCounter);
 
@@ -165,6 +186,7 @@ export class DetailPage {
     if(p['entityKey']) {
       return this.schema.getEntity(p['entityKey']).pipe(
         tap(entity => {
+          this.currentEntity.set(entity);
           // Summary VIEWs (read-only, no id) don't have detail pages — redirect to list
           if (entity?.is_view && !entity?.insert) {
             this.router.navigate(['/view', this.entityKey], { replaceUrl: true });
@@ -285,6 +307,38 @@ export class DetailPage {
 
           return data;
         }),
+          tap(data => {
+            // Detect guided form mode after data loads
+            const entity = this.currentEntity();
+            if (entity?.guided_form_key && data?.id) {
+              this.isGuidedFormMode.set(true);
+              this.showGuidedFormNav.set(true);
+              // Single context call — resolves definition, progress, status all at once
+              this.guidedFormService.loadContext(entity.guided_form_key, entity.table_name, data.id)
+                .subscribe({
+                  next: ctx => {
+                    if (ctx) {
+                      this.guidedFormContext.set(ctx);
+                      const isSubmitted = ctx.parent_status_key === 'submitted';
+                      this.isGuidedFormSubmitted.set(isSubmitted);
+                      // Show review when backend says 'complete', when all required
+                      // steps are done (user-skipped optional steps), or after submission
+                      const allRequiredDone = this.areAllRequiredStepsComplete(ctx);
+                      this.showReviewSection.set(
+                        ctx.parent_status_key === 'complete'
+                        || (ctx.parent_status_key === 'draft' && allRequiredDone)
+                        || isSubmitted
+                      );
+                    }
+                  },
+                  error: err => console.error('[DetailPage] loadContext failed', err)
+                });
+            } else {
+              this.isGuidedFormMode.set(false);
+              this.showGuidedFormNav.set(false);
+              this.showReviewSection.set(false);
+            }
+          }),
           catchError(err => {
             console.error('[DetailPage] getData failed', err);
             return of(undefined);
@@ -412,8 +466,8 @@ export class DetailPage {
 
       if (!entity || !data) return buttons;
 
-      // Edit button
-      if (entity.update) {
+      // Edit button (hidden for guided forms — review section has per-step Edit buttons)
+      if (entity.update && !entity.guided_form_key) {
         buttons.push({
           id: 'edit',
           label: 'Edit',
@@ -481,8 +535,12 @@ export class DetailPage {
       mergeMap(([entity, data, _refreshCount]) => {
         if (!entity || !data) return of([]);
 
-        // Get inverse relationship metadata
-        return this.schema.getInverseRelationships(entity.table_name).pipe(
+        // Get inverse relationship metadata, excluding guided form step tables
+        const ctx = this.guidedFormContext();
+        const guidedFormExclusions = ctx
+          ? new Set(ctx.steps.map(s => s.step_table))
+          : undefined;
+        return this.schema.getInverseRelationships(entity.table_name, guidedFormExclusions).pipe(
           mergeMap(relationships => {
             // Fetch data for each relationship in parallel
             const dataObservables = relationships.map(meta =>
@@ -529,7 +587,7 @@ export class DetailPage {
       mergeMap(([entity, data, allEntities, _refreshCount]) => {
         if (!entity || !data) return of([]);
 
-        // Get inverse relationship metadata
+        // Get inverse relationship metadata (calendar)
         return this.schema.getInverseRelationships(entity.table_name).pipe(
           mergeMap(relationships => {
             // Filter to only relationships where source entity has calendar enabled
@@ -995,6 +1053,149 @@ export class DetailPage {
         }
       });
     }
+  }
+
+  /**
+   * Submit a completed guided form from the review section.
+   */
+  /**
+   * Check whether all required (non-skippable, non-condition-skipped) steps have progress entries.
+   * Used to show the review section when the user has skipped optional steps.
+   */
+  private areAllRequiredStepsComplete(ctx: GuidedFormContext): boolean {
+    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, null, ctx.progress);
+    return effective
+      .filter(s => s.isRequired && !s.isSkipped)
+      .every(s => s.isCompleted);
+  }
+
+  /**
+   * Resume the guided form by navigating to the first incomplete, non-skipped step.
+   */
+  continueGuidedForm(): void {
+    const ctx = this.guidedFormContext();
+    const pid = this.entityId;
+    if (!ctx || !pid) return;
+
+    const effective = this.guidedFormService.getEffectiveSteps(ctx.steps, null, ctx.progress);
+    // Find first incomplete step that is required (skip over user-skippable optional steps)
+    const nextStep = effective.find(s => !s.isCompleted && !s.isSkipped && s.isRequired);
+
+    if (!nextStep) return;
+
+    if (nextStep.step_key === '__parent__') {
+      this.router.navigate(['/edit', nextStep.step_table, pid]);
+    } else {
+      this.onEditGuidedFormStep(nextStep.step_key);
+    }
+  }
+
+  onSubmitGuidedForm(): void {
+    const key = this.currentEntity()?.guided_form_key;
+    const pid = this.entityId;
+    if (!key || !pid) return;
+
+    this.guidedFormError.set(undefined);
+    this.guidedFormSubmitting.set(true);
+
+    this.guidedFormService.submitGuidedForm(key, pid).subscribe({
+      next: (result) => {
+        this.guidedFormSubmitting.set(false);
+        this.showReviewSection.set(false);
+
+        // on_submit_rpc can return navigate_to to override the default success modal
+        if (result?.navigate_to) {
+          this.router.navigateByUrl(result.navigate_to);
+        } else {
+          this.refreshData();
+          this.showGuidedFormSuccessModal.set(true);
+        }
+      },
+      error: (err) => {
+        this.guidedFormSubmitting.set(false);
+        const message = err?.error?.message || err?.message || 'An unexpected error occurred.';
+        this.guidedFormError.set(message);
+      }
+    });
+  }
+
+  onGuidedFormSuccessViewRecord(): void {
+    this.showGuidedFormSuccessModal.set(false);
+  }
+
+  onGuidedFormSuccessCreateAnother(): void {
+    this.showGuidedFormSuccessModal.set(false);
+    const entity = this.currentEntity();
+    if (!entity?.guided_form_key) return;
+
+    this.guidedFormService.startGuidedForm(entity.guided_form_key).subscribe({
+      next: (result) => {
+        this.router.navigate(['/edit', entity.table_name, result.parent_id]);
+      },
+      error: (err) => {
+        const message = err?.error?.message || err?.message || 'Could not start a new form.';
+        this.guidedFormError.set(message);
+      }
+    });
+  }
+
+  onGuidedFormSuccessGoToList(): void {
+    this.showGuidedFormSuccessModal.set(false);
+    const entity = this.currentEntity();
+    if (entity) {
+      this.router.navigate(['/view', entity.table_name]);
+    }
+  }
+
+  /**
+   * Navigate to edit a specific guided form step from the review section.
+   * Looks up the actual step record ID (not the parent ID).
+   */
+  onEditGuidedFormStep(stepKey: string): void {
+    const ctx = this.guidedFormContext();
+    const key = this.currentEntity()?.guided_form_key;
+    const pid = this.entityId;
+    if (!key || !pid || !ctx) return;
+
+    const step = ctx.steps.find(s => s.step_key === stepKey);
+    if (!step) return;
+
+    if (stepKey === '__parent__') {
+      this.router.navigate(['/edit', step.step_table, pid]);
+      return;
+    }
+
+    if (step.parent_fk_column) {
+      // Ensure draft record exists (idempotent), then navigate to edit
+      this.guidedFormService.ensureStepRecord(key, pid, stepKey).subscribe({
+        next: (result) => {
+          if (result.record_id) {
+            this.router.navigate(['/edit', step.step_table, result.record_id]);
+          }
+        },
+        error: (err) => {
+          const message = err?.error?.message || err?.message || 'Failed to load step record.';
+          this.guidedFormError.set(message);
+        }
+      });
+    }
+  }
+
+  /**
+   * Handle guided form nav step click on detail page.
+   */
+  onGuidedFormStepClick(stepKey: string): void {
+    if (stepKey === '__review__') {
+      // Already on detail page — scroll to review section
+      const reviewEl = document.querySelector('app-guided-form-review-section');
+      if (reviewEl) {
+        reviewEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+
+    // For other steps, delegate to edit handler
+    this.onEditGuidedFormStep(stepKey);
   }
 
   /**

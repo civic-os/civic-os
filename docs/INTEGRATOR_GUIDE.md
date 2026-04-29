@@ -126,27 +126,27 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 ### Common Metadata Pitfalls
 
-**`metadata.properties` is override-only — always INSERT, never UPDATE**
+**`metadata.properties` is override-only - always INSERT, never UPDATE**
 
-The `schema_properties` VIEW joins `information_schema.columns` with `metadata.properties` via LEFT JOIN. Rows in `metadata.properties` don't exist until you create them — they're overrides, not a complete registry. A plain `UPDATE` will silently affect zero rows.
+The `schema_properties` VIEW joins `information_schema.columns` with `metadata.properties` via LEFT JOIN. Rows in `metadata.properties` don't exist until you create them - they're overrides, not a complete registry. A plain `UPDATE` will silently affect zero rows.
 
 ```sql
--- WRONG — will match 0 rows if no override exists yet
+-- WRONG - will match 0 rows if no override exists yet
 UPDATE metadata.properties SET filterable = TRUE
 WHERE table_name = 'issues' AND column_name = 'status_id';
 
--- CORRECT — creates the override row, or updates it if it exists
+-- CORRECT - creates the override row, or updates it if it exists
 INSERT INTO metadata.properties (table_name, column_name, filterable)
 VALUES ('issues', 'status_id', TRUE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET filterable = EXCLUDED.filterable;
 ```
 
-**`public.civic_os_users` is a VIEW — use `metadata.civic_os_users` for foreign keys**
+**`public.civic_os_users` is a VIEW - use `metadata.civic_os_users` for foreign keys**
 
 The user table lives in the `metadata` schema. The `public.civic_os_users` object is a VIEW (for PostgREST access) and cannot be referenced in foreign key constraints:
 
 ```sql
--- WRONG — "is not a table"
+-- WRONG - "is not a table"
 user_id UUID REFERENCES civic_os_users(id)
 
 -- CORRECT
@@ -165,8 +165,8 @@ REVOKE ALL ON spatial_ref_sys FROM PUBLIC, web_anon, authenticated;
 
 Both layers must be configured for access to work:
 
-1. **PostgreSQL role grants** (`GRANT ... TO authenticated`) — the floor that PostgREST enforces
-2. **RBAC metadata** (`metadata.permissions` + `metadata.permission_roles`) — the fine-grained ceiling that RLS policies enforce per-role
+1. **PostgreSQL role grants** (`GRANT ... TO authenticated`) - the floor that PostgREST enforces
+2. **RBAC metadata** (`metadata.permissions` + `metadata.permission_roles`) - the fine-grained ceiling that RLS policies enforce per-role
 
 If a user gets "permission denied", check the PG grants first. If they can query via SQL but the UI blocks them, check the RBAC metadata.
 
@@ -550,7 +550,7 @@ Key fields:
 - Excel template download with Available Roles reference sheet
 - Client-side validation for email format, phone (10-digit), and boolean fields
 - Comma-separated role names (e.g., `user, editor`) parsed into arrays
-- Partial success handling — shows which users were created and which failed with per-row errors
+- Partial success handling - shows which users were created and which failed with per-row errors
 - Defaults: roles → `['user']`, send_welcome_email → `true` when not specified
 
 Uses the `CustomImportConfig` abstraction from the Import/Export system (see `docs/development/IMPORT_EXPORT.md` for developer details).
@@ -580,8 +580,8 @@ Fields:
 - `create_role(display_name, description)` - Creates a role, auto-generates `role_key` (snake_case from display_name), and enqueues a `sync_keycloak_role` job to create it in Keycloak. Returns `{ success, role_id, role_key }`.
 - `delete_role(role_id)` - Deletes a custom role (built-in roles with `role_key` in `admin`, `user`, `anonymous` are protected via both RPC check and database trigger) and enqueues a Keycloak sync job to remove it. User assignments CASCADE automatically. Returns `{ success, message, affected_users }` where `affected_users` is the count of users who had this role.
 - `get_role_id(role_key)` - Returns role's SMALLINT id by its stable key
-- `metadata.get_users_by_role(role_keys[])` - Returns user IDs for all users holding any of the given roles. Internal helper (not exposed via PostgREST API) — call from SECURITY DEFINER functions.
-- `metadata.send_notification_to_role(role_keys[], template, entity_type, entity_id, entity_data, channels)` - Sends a notification to every user holding any of the given roles. Returns count. Internal helper — call from SECURITY DEFINER functions.
+- `metadata.get_users_by_role(role_keys[])` - Returns user IDs for all users holding any of the given roles. Internal helper (not exposed via PostgREST API) - call from SECURITY DEFINER functions.
+- `metadata.send_notification_to_role(role_keys[], template, entity_type, entity_id, entity_data, channels)` - Sends a notification to every user holding any of the given roles. Returns count. Internal helper - call from SECURITY DEFINER functions.
 
 **UI**: "Role Delegation" tab on the Permissions page (`/permissions`). Shows a checkbox matrix where admins configure which roles can manage which. The "Delete Selected Role" button allows removing custom roles.
 
@@ -940,7 +940,7 @@ Check permissions and roles from application code (via PostgREST) or RLS policie
 - Checks if current user has 'admin' role
 - Returns FALSE for anonymous requests
 - **Use case**: Framework-level guards only (e.g., protecting `metadata.*` management RPCs)
-- **WARNING**: `is_admin()` creates a hardcoded authorization check that bypasses the Permissions UI. Use `has_permission()` instead for application tables — this allows admins to delegate access to non-admin roles without modifying SQL.
+- **WARNING**: `is_admin()` creates a hardcoded authorization check that bypasses the Permissions UI. Use `has_permission()` instead for application tables - this allows admins to delegate access to non-admin roles without modifying SQL.
 
 **Examples**:
 
@@ -1098,7 +1098,7 @@ Enable full-text search on List pages by adding a generated tsvector column and 
 
 ### Import/Export System
 
-List pages automatically include Import/Export buttons for bulk data operations. No configuration required—feature is enabled globally.
+List pages automatically include Import/Export buttons for bulk data operations. No configuration required-feature is enabled globally.
 
 **Export Features**:
 - Preserves active filters, search, and sort order
@@ -1793,7 +1793,7 @@ See `docs/development/STATUS_TYPE_SYSTEM.md` for complete design documentation a
 
 **Version**: v0.34.0+
 
-Rich enum categorization system for non-workflow properties. While the Status system tracks workflow states (with `is_initial`/`is_terminal` and transitions), Categories are simple colored badge enums for categorization — building types, staff roles, entry categories, etc.
+Rich enum categorization system for non-workflow properties. While the Status system tracks workflow states (with `is_initial`/`is_terminal` and transitions), Categories are simple colored badge enums for categorization - building types, staff roles, entry categories, etc.
 
 **Features**:
 - Colored badges with `hex_color` for visual identification
@@ -1805,7 +1805,7 @@ Rich enum categorization system for non-workflow properties. While the Status sy
 **When to Use Category vs Status vs Custom Table**:
 - **Category**: Simple categorization with colored badges and admin-managed values. Use when the categories are display-oriented and don't carry extra data beyond a name, color, and sort order. Examples: entry types (Clock In/Clock Out), building types, staff roles.
 - **Status**: Workflow state tracking. Use when records progress through a lifecycle. Has `is_initial`/`is_terminal`, allowed transitions, causal bindings. Examples: Pending → Approved → Completed.
-- **Custom lookup table**: Use when categories need extended properties that influence behavior — e.g., a `resource_types` table with `hourly_rate`, `capacity`, or `requires_approval` columns. Categories only store `display_name`, `color`, `sort_order`, and `description`. If you need additional columns that drive business logic, a dedicated table with its own schema is the right choice. Also use a custom table when you need **multi-select categorization** (M:M) — the Category system is single-value only (one category per record via FK). M:M auto-detection requires both tables to be in the `public` schema, and `metadata.categories` is in the `metadata` schema.
+- **Custom lookup table**: Use when categories need extended properties that influence behavior - e.g., a `resource_types` table with `hourly_rate`, `capacity`, or `requires_approval` columns. Categories only store `display_name`, `color`, `sort_order`, and `description`. If you need additional columns that drive business logic, a dedicated table with its own schema is the right choice. Also use a custom table when you need **multi-select categorization** (M:M) - the Category system is single-value only (one category per record via FK). M:M auto-detection requires both tables to be in the `public` schema, and `metadata.categories` is in the `metadata` schema.
 
 #### Quick Setup
 
@@ -1837,14 +1837,14 @@ WHERE table_name = 'time_entries' AND column_name = 'entry_type_id';
 
 **Admin UI**: Category groups and values can be managed via the Category Administration page at `/admin/categories` (v0.40.0+). Requires `metadata.categories` CRUD permissions.
 
-**`metadata.category_groups`** — Registry of entity types that use the Category system:
+**`metadata.category_groups`** - Registry of entity types that use the Category system:
 | Column | Type | Description |
 |--------|------|-------------|
 | `entity_type` | `TEXT PRIMARY KEY` | Identifier matching your entity concept |
 | `display_name` | `TEXT` | Human-readable label for admin UI (v0.40.0+). Falls back to `entity_type` if NULL |
 | `description` | `TEXT` | Human-readable description |
 
-**`metadata.categories`** — Category values with display properties:
+**`metadata.categories`** - Category values with display properties:
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | `SERIAL PRIMARY KEY` | Auto-generated ID |
@@ -1866,6 +1866,112 @@ SELECT * FROM get_categories_for_entity('time_entry');
 ```
 
 See `examples/staff-portal/` for a working example where `time_entry` uses the Category system for Clock In/Clock Out categorization.
+
+### Guided Forms (v0.48.0+)
+
+**Version**: v0.48.0+
+
+Multi-step data collection system for complex intake flows - permit applications, grant submissions, building use requests. Unlike the Status Type System (which tracks work happening on an entity over time), Guided Forms help users capture a lot of structured information ahead of time through a sequence of related forms.
+
+**Key distinction from Status Workflows:**
+- **Status Workflows** (v0.15.0+): Track an entity's lifecycle - `Pending → Approved → Completed`. Work happens *on* the entity, and the status reflects progress.
+- **Guided Forms** (v0.48.0+): Collect data *across* related tables through a guided sequence - parent info → event details → room preferences → submit. The form captures information; status is merely `draft` or `complete` per step.
+
+**Features:**
+- **Parent-as-step-zero**: The parent table is the first step. Users enter the guided form immediately; no separate "create parent" UX.
+- **Conditional branching**: `skip_if` and `require_if` conditions based on parent field values (e.g., "skip event details for private events").
+- **Draft auto-save**: Incomplete steps auto-save while typing; completed steps require explicit manual save.
+- **Server-side validation**: `metadata.validations` drives both frontend validators and auto-generated PostgreSQL CHECK constraints.
+- **Explicit submission**: Users review all steps in a collapsible summary, then click Submit. Only then does `on_submit_rpc` fire and `submitted_at` get set.
+- **Submission locking**: Optional `lock_on_submit = TRUE` prevents further edits after submission.
+- **Auto-submit on all skipped**: Optional `auto_submit_on_all_skipped = TRUE` auto-submits when all non-parent data steps are condition-skipped (e.g., Private Event skips all steps → ineligibility decision fires immediately without requiring manual review/submit).
+- **Step navigation overlay**: Standard Detail/Edit pages show a progress bar when the entity is part of a guided form.
+
+**Table conventions:**
+```sql
+-- Parent table (step 0)
+CREATE TABLE public.permit_applications (
+    id                  BIGSERIAL PRIMARY KEY,
+    guided_form_status  public.guided_form_step_status DEFAULT 'draft',
+    submitted_at        TIMESTAMPTZ,
+    applicant_name      VARCHAR(200),    -- nullable! enforcement via validations
+    project_type        INT,             -- category FK driving skip conditions
+    -- ... other fields (all nullable)
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Step 1 table
+CREATE TABLE public.permit_site_info (
+    id                  BIGSERIAL PRIMARY KEY,
+    guided_form_status  public.guided_form_step_status DEFAULT 'draft',
+    permit_application_id BIGINT NOT NULL REFERENCES permit_applications(id) ON DELETE CASCADE,
+    street_address      VARCHAR(255),    -- nullable!
+    parcel_number       VARCHAR(50),
+    -- ... other fields (all nullable)
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX ON permit_site_info(permit_application_id);
+```
+
+**Critical convention**: All content columns must be **nullable**. The framework enforces required fields via `metadata.validations` → auto-generated CHECK constraints, not `NOT NULL`.
+
+**Registration:**
+```sql
+-- 1. Register the guided form
+SELECT register_guided_form(
+    'permit_application'::name,
+    'Permit Application'::varchar,
+    'permit_applications'::name,
+    'Multi-step building permit application'::text,
+    'notify_permit_submitted'::name,           -- on_submit_rpc (optional)
+    'Application Details'::varchar,              -- parent step display name
+    'Please review your information before submitting.'::text,
+    TRUE                                         -- lock_on_submit
+);
+
+-- 2. Add steps
+SELECT add_guided_form_step('permit_application', 'site_info',
+    'Site Information', 1, 'permit_site_info', 'permit_application_id');
+
+-- 3. Add conditions (optional)
+SELECT add_guided_form_step_condition('permit_application', 'site_info',
+    'skip_if', 'project_type', 'eq', '7');  -- skip site info for project type 7
+
+-- 4. Register validations (framework auto-generates CHECK constraints)
+INSERT INTO metadata.validations (table_name, column_name, validation_type, validation_value, error_message, sort_order)
+VALUES
+  ('permit_applications', 'applicant_name', 'required', NULL, 'Applicant name is required', 1),
+  ('permit_site_info', 'street_address', 'required', NULL, 'Street address is required', 1);
+
+-- 5. Rebuild constraints
+SELECT metadata.rebuild_guided_form_constraints('permit_applications');
+SELECT metadata.rebuild_guided_form_constraints('permit_site_info');
+```
+
+**Auto-submit on all skipped:**
+```sql
+-- Enable after registration (not a register_guided_form parameter)
+UPDATE metadata.guided_forms
+   SET auto_submit_on_all_skipped = TRUE
+ WHERE guided_form_key = 'permit_application';
+```
+
+When enabled and all non-parent data steps are condition-skipped (via `skip_if`), `complete_guided_form_step()` automatically calls `submit_guided_form()` internally. The response includes `"auto_submitted": true` and the frontend navigates using `navigate_to` from the `on_submit_rpc`. This avoids forcing users through a review step when there's nothing to review. Business logic (eligibility decisions, notifications) stays in the `on_submit_rpc` - the framework just enables the shortcut.
+
+**Hooks:**
+- `precondition_rpc`: Called by `start_guided_form()` before creating the parent record. Use to block starting (e.g., "maximum 5 open requests"). Must return `{"success": true}` or `{"success": false, "message": "..."}`.
+- `on_submit_rpc`: Called by `submit_guided_form()` after validation but before locking. Use for side effects (send email, update display_name, create related records). Can return `{"success": true, "navigate_to": "/view/permits/42"}` to control post-submit navigation.
+
+**Frontend behavior:**
+- List page shows a "Start New" button for entities with `guided_form_key` set
+- Edit page detects guided form mode, shows the step nav overlay, enables auto-save for draft steps
+- "Save & Continue" completes the current step and advances to the next
+- Detail page shows the review section when all steps are complete but not yet submitted
+- Submitted records show a "Submitted" badge and are read-only when `lock_on_submit = TRUE`
+
+**Complete example:** See `examples/neighborhood-hub/init-scripts/07_neh_building_use_workflow.sql` for a comprehensive dogfood that exercises every feature: `skip_if`, `require_if`, `lock_on_submit`, `auto_submit_on_all_skipped`, `precondition_rpc`, `on_submit_rpc`, `metadata.validations`, and RPC-driven category dropdowns with `depends_on_columns`.
 
 ### Photo Gallery System
 
@@ -1903,7 +2009,7 @@ INSERT INTO metadata.properties (table_name, column_name, display_name, descript
 VALUES ('issues', 'photos', 'Photos', 'Photo gallery for this issue', 60);
 
 -- 4. Grant permissions (same as the parent entity's grants)
--- No separate grants needed — gallery access inherits from entity table RBAC
+-- No separate grants needed - gallery access inherits from entity table RBAC
 
 -- 5. Notify PostgREST to reload schema cache
 NOTIFY pgrst, 'reload schema';
@@ -1921,7 +2027,7 @@ NOTIFY pgrst, 'reload schema';
 | `allowed_types` | `TEXT[]` | `'{image/jpeg,image/png,image/webp}'` | Allowed MIME types |
 | `max_file_size` | `BIGINT` | `10485760` | Max file size in bytes (default 10 MB) |
 
-**Unique constraint**: `(entity_table, property_name)` — one config per gallery column.
+**Unique constraint**: `(entity_table, property_name)` - one config per gallery column.
 
 #### Multiple Galleries Per Entity
 
@@ -1953,10 +2059,10 @@ NOTIFY pgrst, 'reload schema';
 
 Gallery access **inherits from the parent entity's permissions** via tiered RLS:
 
-1. `is_admin()` — full access to all galleries
-2. Gallery `created_by = current_user_id()` — owner can manage their own galleries
-3. `has_permission(entity_table, 'read')` — table-level RBAC on the parent entity
-4. `can_view_entity_record(entity_table, entity_id)` — record-level RLS on the parent entity
+1. `is_admin()` - full access to all galleries
+2. Gallery `created_by = current_user_id()` - owner can manage their own galleries
+3. `has_permission(entity_table, 'read')` - table-level RBAC on the parent entity
+4. `can_view_entity_record(entity_table, entity_id)` - record-level RLS on the parent entity
 
 No separate permission grants are needed for galleries. If a user can view an entity record, they can view its galleries. If they can edit the record, they can manage its gallery images.
 
@@ -1976,8 +2082,8 @@ No separate permission grants are needed for galleries. If a user can view an en
 
 #### Gallery Lifecycle
 
-- **Existing entities**: Gallery is lazily created on first interaction — the FK column starts as NULL and is populated when the user first opens the gallery editor
-- **Create pages**: Uses draft gallery pattern — a temporary gallery is created for uploads, then linked to the entity after form submission
+- **Existing entities**: Gallery is lazily created on first interaction - the FK column starts as NULL and is populated when the user first opens the gallery editor
+- **Create pages**: Uses draft gallery pattern - a temporary gallery is created for uploads, then linked to the entity after form submission
 - **Orphan cleanup**: Draft galleries not linked within 12 hours are deleted by `metadata.cleanup_draft_galleries` (server-side only), cascading to files and S3 objects
 
 See `docs/notes/PHOTO_GALLERY_DESIGN.md` for complete architecture, edge cases, and RLS policy details. See `docs/development/FILE_STORAGE.md` (Photo Gallery Integration section) for how gallery files relate to the file storage system.
@@ -2004,29 +2110,29 @@ SELECT add_status_transition('reservation_request', 'denied', 'pending',
     NULL, 'Resubmit');
 ```
 
-The `on_transition_rpc` parameter is optional — transitions without an RPC are purely declarative (useful for documenting the state machine even when the transition logic lives in an entity action).
+The `on_transition_rpc` parameter is optional - transitions without an RPC are purely declarative (useful for documenting the state machine even when the transition logic lives in an entity action).
 
 #### Property Change Triggers
 
 Declare property-level event-to-function bindings. Four `change_type` options:
 
 ```sql
--- 'any' — fires on any modification to the property
+-- 'any' - fires on any modification to the property
 SELECT add_property_change_trigger(
     'permits', 'assigned_reviewer_id', 'any',
     'notify_reviewer_assignment'::NAME, 'Notify on reviewer change');
 
--- 'set' — fires when value changes from NULL to non-NULL
+-- 'set' - fires when value changes from NULL to non-NULL
 SELECT add_property_change_trigger(
     'applications', 'submitted_at', 'set',
     'process_application_submission'::NAME, 'Process submission');
 
--- 'cleared' — fires when value changes from non-NULL to NULL
+-- 'cleared' - fires when value changes from non-NULL to NULL
 SELECT add_property_change_trigger(
     'tasks', 'assigned_to', 'cleared',
     'return_to_unassigned_queue'::NAME, 'Return to queue');
 
--- 'changed_to' — fires when value changes to a specific value
+-- 'changed_to' - fires when value changes to a specific value
 SELECT add_property_change_trigger(
     'inspections', 'result', 'changed_to',
     'schedule_reinspection'::NAME, 'Auto-schedule reinspection',
@@ -2040,10 +2146,10 @@ These declarations make automation queryable and visualizable through `schema_en
 See `docs/design/INTROSPECTION_UX_DESIGN.md` for the full conceptual model of structural vs. causal relationships.
 
 **Working examples:**
-- `examples/community-center/init-scripts/15_causal_bindings.sql` — 4 status transitions, 7 property change triggers
-- `examples/mottpark/init-scripts/25_mpra_causal_bindings.sql` — 10 status transitions (2 entity types), 15+ property change triggers including Stripe integration
-- `examples/staff-portal/init-scripts/09_staff_portal_causal_bindings.sql` — 8 status transitions (4 entity types), computed status pattern, file-upload trigger binding
-- `examples/pothole/init-scripts/10_causal_bindings.sql` — Property change triggers only (legacy status tables)
+- `examples/community-center/init-scripts/15_causal_bindings.sql` - 4 status transitions, 7 property change triggers
+- `examples/mottpark/init-scripts/25_mpra_causal_bindings.sql` - 10 status transitions (2 entity types), 15+ property change triggers including Stripe integration
+- `examples/staff-portal/init-scripts/09_staff_portal_causal_bindings.sql` - 8 status transitions (4 entity types), computed status pattern, file-upload trigger binding
+- `examples/pothole/init-scripts/10_causal_bindings.sql` - Property change triggers only (legacy status tables)
 
 ### Entity Action Buttons
 
@@ -4369,7 +4475,7 @@ The `schema_entities` view includes an `is_view` column (boolean) that the front
 
 ### Schema Decisions (ADR) System (v0.30.0+)
 
-Track the reasoning behind schema design choices using database-native architectural decision records (ADRs). Unlike traditional markdown ADRs in a repo, these records travel with the database — if you `pg_dump` and restore elsewhere, the reasoning comes along.
+Track the reasoning behind schema design choices using database-native architectural decision records (ADRs). Unlike traditional markdown ADRs in a repo, these records travel with the database - if you `pg_dump` and restore elsewhere, the reasoning comes along.
 
 **Why Schema Decisions matter**:
 - **Prevent flip-flop changes**: Making prior reasoning visible prevents re-litigating settled tradeoffs
@@ -4378,10 +4484,10 @@ Track the reasoning behind schema design choices using database-native architect
 
 **Key Concepts**:
 - Decisions attach to **schema objects** (tables/columns), not data records
-- **Array-based linking** — a single decision can reference multiple entity types and/or property names for cross-entity architectural choices
-- **Append-only** with supersession model — decisions are never edited, only superseded by newer decisions
+- **Array-based linking** - a single decision can reference multiple entity types and/or property names for cross-entity architectural choices
+- **Append-only** with supersession model - decisions are never edited, only superseded by newer decisions
 - **Admin-only write**, authenticated read access via RLS
-- No Angular UI needed — usable via SQL immediately
+- No Angular UI needed - usable via SQL immediately
 
 #### Quick Setup
 
@@ -4406,7 +4512,7 @@ SELECT create_schema_decision(
     p_title := 'Separate request and calendar tables with one-way sync',
     p_decision := 'Reservation requests and public calendar events are stored in separate tables with trigger-based sync',
     p_entity_types := ARRAY['reservation_requests', 'public_calendar_events']::NAME[],
-    p_rationale := 'Clean privacy isolation — public table is always a safe subset of the full request data.'
+    p_rationale := 'Clean privacy isolation - public table is always a safe subset of the full request data.'
 );
 ```
 
@@ -4425,7 +4531,7 @@ SELECT create_schema_decision(
 | `p_migration_id` | TEXT | No | Sqitch migration reference for traceability |
 | `p_supersedes_id` | INT | No | ID of the decision being superseded |
 
-**Returns**: `INT` — the new decision's ID.
+**Returns**: `INT` - the new decision's ID.
 
 **Validation**:
 - Each element of `p_entity_types` is validated against `information_schema.tables` and `information_schema.views`
@@ -4488,7 +4594,7 @@ WHERE old.status = 'superseded';
 3. **Use arrays for cross-entity decisions**: If a design choice spans multiple tables (e.g., separating request and calendar tables), list all affected entities in `p_entity_types`
 4. **Focus on "why"**: The `decision` field says what you chose; the `rationale` field explains why that approach was better than alternatives
 5. **Link to migrations**: Use `p_migration_id` to trace decisions back to specific Sqitch migrations
-6. **Don't over-document**: Not every column needs a decision — focus on choices where alternatives existed and tradeoffs were weighed
+6. **Don't over-document**: Not every column needs a decision - focus on choices where alternatives existed and tradeoffs were weighed
 7. **Use supersession**: When changing a prior approach, create a new decision with `p_supersedes_id` rather than editing the old one
 
 #### Schema Reference
@@ -4589,7 +4695,7 @@ See `docs/notes/MANY_TO_MANY_DESIGN.md` for implementation details.
 
 Override how FK dropdowns and M:M editors load their option lists using a custom PostgreSQL RPC. Enables filtered options, cascading dropdowns, and context-dependent selections.
 
-**RPC Signature** — All options source RPCs must accept these parameters:
+**RPC Signature** - All options source RPCs must accept these parameters:
 
 ```sql
 CREATE FUNCTION my_options_rpc(p_id TEXT, p_depends_on JSONB DEFAULT '{}')
@@ -4604,7 +4710,7 @@ LANGUAGE SQL STABLE AS $$ ... $$;
 
 **Return shape**: Must return `id` (INT or TEXT) and `display_name` (TEXT). Optionally include `color` (TEXT) for M:M editors with colored badges.
 
-**Configuration** — Set on `metadata.properties`:
+**Configuration** - Set on `metadata.properties`:
 
 ```sql
 -- Simple filtered FK: show only approved borrowers
@@ -4681,11 +4787,11 @@ GRANT EXECUTE ON FUNCTION get_eligible_parcels TO authenticated;
 
 ### FK Search Modal (v0.45.0)
 
-Replace native `<select>` dropdowns with a searchable modal for FK fields with many options. The modal provides search, sort, filter, and pagination — a mini List page inside a dialog.
+Replace native `<select>` dropdowns with a searchable modal for FK fields with many options. The modal provides search, sort, filter, and pagination - a mini List page inside a dialog.
 
 **When to use**: Native `<select>` elements become unusable at scale (50+ options). The FK search modal provides a rich browsing experience with the same capabilities as the List page.
 
-**Configuration** — Set `fk_search_modal = true` on `metadata.properties`:
+**Configuration** - Set `fk_search_modal = true` on `metadata.properties`:
 
 ```sql
 -- Basic FK search modal: render borrower_id as searchable modal
@@ -4698,7 +4804,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 **Requirements**:
 - `join_table` must be set (tells the modal which entity to query)
-- A CHECK constraint (`fk_search_modal_requires_fk`) enforces this — you cannot set `fk_search_modal = true` without `join_table` (or a `_m2m` column name)
+- A CHECK constraint (`fk_search_modal_requires_fk`) enforces this - you cannot set `fk_search_modal = true` without `join_table` (or a `_m2m` column name)
 - For auto-detected FKs that don't have a `metadata.properties` row, you must create one with `join_table` to use the search modal
 
 **Compatibility with Options Source RPC**: Both features can be used together. When `options_source_rpc` and `fk_search_modal` are both set, the RPC filters the available options and the modal provides rich UI with client-side search within the filtered set:
@@ -4715,7 +4821,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
       fk_search_modal = EXCLUDED.fk_search_modal;
 ```
 
-**Two data modes** — The modal adapts its behavior based on configuration:
+**Two data modes** - The modal adapts its behavior based on configuration:
 
 | Mode | When | Search | Sort | Filter | Pagination |
 |------|------|--------|------|--------|------------|
@@ -4740,7 +4846,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 The FK search modal's multi-select mode provides a split-panel interface for M:M relationships with large option sets. Left panel for browsing/searching, right panel showing selected items as chips.
 
-**Configuration** — Set `fk_search_modal = true` on the synthetic M:M column:
+**Configuration** - Set `fk_search_modal = true` on the synthetic M:M column:
 
 ```sql
 -- Enable search modal on M:M (uses split panel with checkboxes + chip list)
@@ -4754,7 +4860,7 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 - **Detail page (default position)**: "Browse & Select" button replaces the checkbox list. Apply executes mutations immediately.
 - **Checkboxes**: Multi-select via checkboxes (not radio buttons). Checked state persists across search queries and pagination.
 - **Right panel**: Shows all selected items as chips with X buttons. Removing a chip unchecks the corresponding row.
-- **Apply button**: Shows diff summary — e.g., "Apply (2 added, 1 removed)". Disabled when no changes.
+- **Apply button**: Shows diff summary - e.g., "Apply (2 added, 1 removed)". Disabled when no changes.
 - **RPC filtering**: When `options_source_rpc` is also set, the modal filters to eligible options only.
 
 **Compatibility**: Works alongside `options_source_rpc` (v0.44.0). The RPC filters the available options; the modal provides the rich multi-select UI within that filtered set.
@@ -4783,8 +4889,8 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 | Page | Rendering | Save model |
 |------|-----------|------------|
 | **Detail** | Read-only chips in property grid (clickable links to related entity) | N/A |
-| **Edit** | Chips with "Change {name}" button, pending state (green dashed = added, strikethrough = removed) | Buffered — entity PATCH fires first, then M:M mutations. Progress shown in success modal. |
-| **Create** | Empty state with "Change {name}" button | Buffered — entity POST captures new ID, then M:M mutations execute. |
+| **Edit** | Chips with "Change {name}" button, pending state (green dashed = added, strikethrough = removed) | Buffered - entity PATCH fires first, then M:M mutations. Progress shown in success modal. |
+| **Create** | Empty state with "Change {name}" button | Buffered - entity POST captures new ID, then M:M mutations execute. |
 
 **Constraint**: A database constraint (`show_inline_requires_m2m`) prevents setting `show_inline = true` on non-M:M columns.
 

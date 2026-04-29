@@ -119,7 +119,23 @@
   }
 
   @if (propType() == EntityPropertyType.Category) {
-    @if (categoryOptions$ | async; as categoryOptions) {
+    @if (useRpcOptions()) {
+      <!-- RPC-driven category options: colors come from full category set, options filtered by RPC -->
+      <select
+        class="select w-full"
+        [id]="prop().column_name"
+        [formControlName]="prop().column_name"
+        [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryColor(filteredCategoryOptions())"
+        [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedCategoryColor(filteredCategoryOptions()) ? '2px' : null)"
+        [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryBackgroundColor(filteredCategoryOptions())">
+        @if (prop().is_nullable || filteredCategoryOptions().length === 0) {
+          <option [value]="null">Select a Category</option>
+        }
+        @for (option of filteredCategoryOptions(); track option.id) {
+          <option [value]="option.id">{{ option.text }}</option>
+        }
+      </select>
+    } @else if (categoryOptions$ | async; as categoryOptions) {
       <select
         class="select w-full"
         [id]="prop().column_name"

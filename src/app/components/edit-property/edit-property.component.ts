@@ -85,6 +85,16 @@ export class EditPropertyComponent {
   public statusOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
   public categoryOptions$?: Observable<{id: number, text: string, color: string | null}[]>;
 
+  // Full category options (with colors) loaded from SchemaService — used for both
+  // standard and RPC-driven category dropdowns. RPC mode filters by available IDs
+  // but preserves colors from the full set.
+  public allCategoryOptions = signal<{id: number, text: string, color: string | null}[]>([]);
+  public filteredCategoryOptions = computed(() => {
+    if (!this.useRpcOptions()) return this.allCategoryOptions();
+    const availableIds = new Set(this.rpcSelectOptions().map(o => o.id));
+    return this.allCategoryOptions().filter(c => availableIds.has(c.id));
+  });
+
   propType = computed(() => this.prop().type);
 
   // FK search modal state (v0.45.0)
@@ -205,15 +215,32 @@ export class EditPropertyComponent {
     }
 
     // Load Category options from cached SchemaService (v0.34.0)
+    // Supports RPC-driven options with depends_on_columns (v0.48.0+ workflow dogfood)
     if(this.propType() == EntityPropertyType.Category && prop.category_entity_type) {
-      this.categoryOptions$ = this.schema.getCategoriesForEntity(prop.category_entity_type)
-        .pipe(map(categories => {
-          return categories.map(c => ({
-            id: c.id,
-            text: c.display_name,
-            color: c.color
+      // Always load full category set (for colors/display names)
+      this.schema.getCategoriesForEntity(prop.category_entity_type)
+        .pipe(
+          map(categories => categories.map(c => ({ id: c.id, text: c.display_name, color: c.color }))),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe(options => this.allCategoryOptions.set(options));
+
+      if (prop.options_source_rpc) {
+        // RPC mode: filter full category set by available IDs returned from RPC
+        this.useRpcOptions.set(true);
+        this.loadOptionsFromRpc(prop);
+        this.setupDependencyWatchers(prop);
+      } else {
+        // Standard mode: use all categories directly
+        this.categoryOptions$ = this.schema.getCategoriesForEntity(prop.category_entity_type)
+          .pipe(map(categories => {
+            return categories.map(c => ({
+              id: c.id,
+              text: c.display_name,
+              color: c.color
+            }));
           }));
-        }));
+      }
     }
 
     // Load existing file reference if this is a file field

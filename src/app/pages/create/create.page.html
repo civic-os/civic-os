@@ -14,7 +14,7 @@
           }
         </h1>
       </div>
-      @if (createForm && entity.insert) {
+      @if (createForm && (entity.insert || isGuidedFormMode())) {
         @if (saveSteps(); as steps) {
           <!-- v0.46.0: Save progress overlay for coordinated create -->
           <app-save-progress
@@ -54,9 +54,21 @@
               }
             </div>
             <div class="divider"></div>
-            <button type="submit" class="btn btn-accent">
-              <span class="material-symbols-outlined">save</span> Save
-            </button>
+            <div class="flex gap-3">
+              <button type="submit" class="btn btn-accent">
+                <span class="material-symbols-outlined">save</span> Save
+              </button>
+              @if (isGuidedFormMode()) {
+                <button type="button" class="btn btn-primary" (click)="saveAndContinue($event)" [disabled]="savingAndContinuing()">
+                  @if (savingAndContinuing()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                  } @else {
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  }
+                  Save & Continue
+                </button>
+              }
+            </div>
           </form>
         }
       } @else {

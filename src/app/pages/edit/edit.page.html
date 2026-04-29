@@ -2,30 +2,48 @@
   @if (entity$ | async; as entity) {
     @if (properties$ | async; as props) {
       @if (data$ | async; as data) {
-        <div class="flex items-center gap-4 mb-4">
-          <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
-            <span class="material-symbols-outlined">arrow_back</span>
-          </button>
-          <h1 class="mb-0">
-            {{ entity.display_name }}: {{ data.display_name }} <sub>(Id: {{entityId}})</sub>
-            @if (entity.description) {
-              <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
-                <span class="material-symbols-outlined text-info cursor-help ml-2 text-xl align-middle">help_outline</span>
-              </div>
-            }
-          </h1>
-          @if (seriesMembership()?.is_member) {
-            <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
-              <span class="material-symbols-outlined text-sm">repeat</span>
-              {{ seriesMembership()?.group_name || 'Recurring' }}
-            </a>
+        @if (guidedFormContext(); as ctx) {
+          <app-guided-form-nav
+            [context]="ctx"
+            [parentRecord]="data"
+            [entityDisplayName]="entity.display_name"
+            mode="edit"
+            (stepClick)="onGuidedFormStepClick($event)"
+          />
+        }
+        @if (guidedFormContext()) {
+          @if (entity.description) {
+            <div class="alert alert-info mb-4">
+              <span class="material-symbols-outlined">info</span>
+              <span>{{ entity.description }}</span>
+            </div>
           }
-        </div>
+        } @else {
+          <div class="flex items-center gap-4 mb-4">
+            <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="mb-0">
+              {{ entity.display_name }}: {{ data.display_name || '#' + data.id }} <sub>(Id: {{entityId}})</sub>
+              @if (entity.description) {
+                <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
+                  <span class="material-symbols-outlined text-info cursor-help ml-2 text-xl align-middle">help_outline</span>
+                </div>
+              }
+            </h1>
+            @if (seriesMembership()?.is_member) {
+              <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
+                <span class="material-symbols-outlined text-sm">repeat</span>
+                {{ seriesMembership()?.group_name || 'Recurring' }}
+              </a>
+            }
+          </div>
+        }
         @if (loading()) {
           <div class="flex justify-center my-8">
             <span class="loading loading-spinner loading-lg"></span>
           </div>
-        } @else if (entity.update && editForm; as form) {
+        } @else if ((entity.update || entity.guided_form_key) && editForm; as form) {
             <form [formGroup]="form" (ngSubmit)="submitForm($event)">
               @if (showValidationError()) {
                 <div role="alert" class="alert alert-error mb-4">
@@ -39,6 +57,11 @@
                     @if (isStaticText(item)) {
                       <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
                         <app-static-text [staticText]="item"></app-static-text>
+                      </div>
+                    } @else if (showCompletedStepDisplayMode() && isProperty(item) && item.type !== 17) {
+                      <!-- Completed step display mode: read-only property display -->
+                      <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
+                        <app-display-property [datum]="displayData()?.[item.column_name]" [property]="item"></app-display-property>
                       </div>
                     } @else if (isProperty(item) && item.type === 17 && item.show_inline) {
                       <!-- v0.46.0: Inline M:M editor (buffered save) -->
@@ -59,12 +82,58 @@
                 }
               </div>
               <div class="divider"></div>
-              <button type="submit" class="btn btn-accent">
-                <span class="material-symbols-outlined">save</span> Save
-              </button>
+              <div class="flex gap-3 items-center">
+                @if (showCompletedStepDisplayMode()) {
+                  <!-- Completed step display mode: show Edit button (unless locked) -->
+                  @if (!isGuidedFormLocked()) {
+                    <button type="button" class="btn btn-accent" (click)="enterEditMode()">
+                      <span class="material-symbols-outlined">edit</span> Edit
+                    </button>
+                  } @else {
+                    <button type="button" class="btn btn-accent" disabled>
+                      <span class="material-symbols-outlined">edit_off</span> Edit Locked
+                    </button>
+                  }
+                } @else {
+                  <!-- Draft step or editing completed step: show Save buttons -->
+                  <button type="submit" class="btn btn-accent">
+                    <span class="material-symbols-outlined">save</span> Save
+                  </button>
+                  @if (isGuidedFormMode() && isGuidedFormDraft()) {
+                    <button type="button" class="btn btn-primary" (click)="saveAndContinue($event)" [disabled]="savingAndContinuing()">
+                      @if (savingAndContinuing()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                      } @else {
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                      }
+                      Save & Continue
+                    </button>
+                  }
+                  @if (isGuidedFormMode() && isGuidedFormDraft() && isCurrentStepSkippable()) {
+                    <button type="button" class="btn btn-outline" (click)="skipStep()">
+                      <span class="material-symbols-outlined">skip_next</span>
+                      Skip
+                    </button>
+                  }
+                  @if (isGuidedFormMode() && !isGuidedFormDraft() && isEditingCompletedStep()) {
+                    <button type="button" class="btn btn-ghost" (click)="cancelEditMode()">
+                      <span class="material-symbols-outlined">close</span> Cancel
+                    </button>
+                  }
+                }
+                @if (isGuidedFormMode() && isGuidedFormDraft() && autoSaveStatus() !== 'idle') {
+                  <span class="text-sm opacity-60 flex items-center gap-1">
+                    @if (autoSaveStatus() === 'saving') {
+                      <span class="loading loading-spinner loading-xs"></span> Saving…
+                    } @else if (autoSaveStatus() === 'saved') {
+                      <span class="material-symbols-outlined text-sm">check</span> Saved
+                    }
+                  </span>
+                }
+              </div>
             </form>
-        } @else if (!entity.update) {
-          <!-- Access denied when record exists but user lacks update permission -->
+        } @else if (!entity.update && !entity.guided_form_key) {
+          <!-- Access denied when record exists but user lacks update permission (non-guided-form) -->
           <div class="p-8">
             @if (!auth.authenticated()) {
               <app-empty-state
@@ -93,7 +162,7 @@
               <span class="loading loading-spinner loading-lg"></span>
               <p class="text-base-content/60">Loading record...</p>
             </div>
-          } @else if (!entity.update) {
+          } @else if (!entity.update && !entity.guided_form_key) {
             @if (!auth.authenticated()) {
               <app-empty-state
                 icon="lock"

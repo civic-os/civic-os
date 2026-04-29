@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -26,6 +26,7 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
+import { GuidedFormService } from '../../services/guided-form.service';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
@@ -34,6 +35,7 @@ import { GeoPointMapComponent, MapMarker } from '../../components/geo-point-map/
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { ImportExportButtonsComponent } from '../../components/import-export-buttons/import-export-buttons.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { FilterCriteria } from '../../interfaces/query';
 
 interface FilterChip {
@@ -59,7 +61,8 @@ interface FilterChip {
     GeoPointMapComponent,
     TimeSlotCalendarComponent,
     ImportExportButtonsComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    CosModalComponent
 ]
 })
 export class ListPage implements OnInit, OnDestroy {
@@ -69,6 +72,7 @@ export class ListPage implements OnInit, OnDestroy {
   private data = inject(DataService);
   private analytics = inject(AnalyticsService);
   private destroyRef = inject(DestroyRef);
+  private guidedForm = inject(GuidedFormService);
   public auth = inject(AuthService);
 
   // Pagination constants
@@ -351,6 +355,10 @@ export class ListPage implements OnInit, OnDestroy {
 
   // Count of search results (use totalCount for paginated results)
   public resultCount = computed(() => this.totalCount());
+
+  // Guided form error state
+  public showGuidedFormError = signal(false);
+  public guidedFormErrorMessage = signal<string | undefined>(undefined);
 
   // Map-related signals
   public highlightedRecordId = signal<number | null>(null);
@@ -1042,5 +1050,36 @@ export class ListPage implements OnInit, OnDestroy {
 
     // Fallback
     return { start: date, end: date };
+  }
+
+  /**
+   * Start a new guidedForm instance.
+   * Calls the start_guidedForm RPC and redirects to the edit page for the new parent record.
+   * @since v0-48-0
+   */
+  public startGuidedForm(entity: SchemaEntityTable): void {
+    const key = entity.guided_form_key;
+    if (!key) {
+      // Fallback to standard create
+      this.router.navigate(['/create', entity.table_name]);
+      return;
+    }
+
+    this.guidedForm.startGuidedForm(key).subscribe({
+      next: (result) => {
+        const parentId = result.parent_id;
+        this.router.navigate(['/edit', entity.table_name, parentId]);
+      },
+      error: (err) => {
+        const message = err?.error?.message || err?.message || 'An unexpected error occurred.';
+        this.guidedFormErrorMessage.set(message);
+        this.showGuidedFormError.set(true);
+      }
+    });
+  }
+
+  public closeGuidedFormError(): void {
+    this.showGuidedFormError.set(false);
+    this.guidedFormErrorMessage.set(undefined);
   }
 }

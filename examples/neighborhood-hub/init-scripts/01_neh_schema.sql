@@ -15,7 +15,7 @@ CREATE TABLE tool_categories (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Tool types (e.g., Chainsaw, Push Mower — belongs to a category)
+-- Tool types (e.g., Chainsaw, Push Mower - belongs to a category)
 CREATE TABLE tool_types (
     id SERIAL PRIMARY KEY,
     display_name VARCHAR(100) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE tool_types (
 );
 CREATE INDEX ON tool_types(category_id);
 
--- Tool instances (e.g., Chainsaw #1, #2 — belongs to a type, has status)
+-- Tool instances (e.g., Chainsaw #1, #2 - belongs to a type, has status)
 CREATE TABLE tool_instances (
     id SERIAL PRIMARY KEY,
     display_name VARCHAR(100) NOT NULL,
@@ -89,7 +89,7 @@ CREATE INDEX ON tool_reservations(category_id);
 CREATE INDEX ON tool_reservations(tool_type_id);
 
 -- ============================================================================
--- M:M JUNCTION TABLE — project_parcels (exercises options_source_rpc on M:M)
+-- M:M JUNCTION TABLE - project_parcels (exercises options_source_rpc on M:M)
 -- ============================================================================
 
 -- Projects (neighborhood improvement projects)

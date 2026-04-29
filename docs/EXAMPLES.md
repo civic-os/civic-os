@@ -10,9 +10,9 @@ This guide helps you choose the right example for learning or as a starting poin
 | [Community Center](#community-center) | Facility reservations | Calendar, recurring schedules, action buttons, iCal feeds |
 | [Broader Impacts](#broader-impacts) | Research tracking | Many-to-many relationships, dashboards |
 | [Mott Park](#mott-park) | Clubhouse reservations | Payments, virtual entities, schema decisions, iCal feeds |
-| [Staff Portal](#staff-portal) | Staff management | Action parameters, multi-entity workflows, three-tier RLS |
+| [Staff Portal](#staff-portal) | Staff management | Action parameters, multi-entity status workflows, three-tier RLS |
 | [StoryMap](#storymap) | Geographic narratives | Map widgets, dashboard storytelling |
-| [Neighborhood Hub](#neighborhood-hub) | Tool lending library | Options Source RPC: cascading dropdowns, filtered FKs, filtered M:M; FK Search Modal |
+| [Neighborhood Hub](#neighborhood-hub) | Tool lending library | Guided Forms: multi-step data collection with conditional branching; Options Source RPC; FK Search Modal |
 
 ## Feature Matrix
 
@@ -21,6 +21,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | **TimeSlot / Calendar** | | ✅ | | ✅ | | | |
 | **Recurring Schedules** | | ✅ | | | | | |
 | **Status Workflows** | | ✅ | | ✅ | ✅ | | ✅ |
+| **Guided Forms** | | | | | | | ✅ |
 | **Stripe Payments** | | ✅ | | ✅ | | | |
 | **Notifications (Email)** | ✅ | ✅ | | ✅ | ✅ | | |
 | **Entity Notes** | | ✅ | | ✅ | | | |
@@ -274,20 +275,22 @@ docker-compose up -d
 **Domain:** Community tool lending library
 
 **What it demonstrates:**
+- **Guided Forms** (v0.48.0+) — multi-step data collection with conditional branching (`skip_if`/`require_if`), draft auto-save, server-side validation, and explicit submission
 - **Options Source RPC** (v0.44.0) — custom RPC-driven option lists for FK dropdowns and M:M editors
 - **Cascading dropdowns** — selecting a Tool Category filters the Tool Type dropdown
 - **Filtered FK** — only approved Borrowers appear in reservation dropdowns
 - **Filtered M:M** — only eligible Parcels appear in project editors (with color-coded eligibility)
 - **Status workflows** — borrower approval (pending/approved/rejected) and tool condition (in-service/maintenance/retired)
 
-**Key tables:** `tool_categories`, `tool_types`, `tool_instances`, `borrowers`, `tool_reservations`, `projects`, `parcels`
+**Key tables:** `tool_categories`, `tool_types`, `tool_instances`, `borrowers`, `tool_reservations`, `projects`, `parcels`, `building_use_requests`, `building_use_event_details`, `building_use_room_preferences`
 
 **Options Source RPCs:**
 - `get_eligible_borrowers` — FK filter: approved borrowers only
 - `get_tool_types_by_category` — Cascading FK: tool types filtered by `depends_on_columns: ['category_id']`
 - `get_eligible_parcels` — M:M filter: eligible parcels with color coding
+- `get_room_options_for_building_use` — Guided form step: room options filtered by group size
 
-**Good starting point for:** Dynamic dropdowns, context-aware option filtering, cascading form fields
+**Good starting point for:** Multi-step data collection, conditional form branching, dynamic dropdowns, context-aware option filtering
 
 ```bash
 cd examples/neighborhood-hub
@@ -348,8 +351,9 @@ docker-compose up -d    # Fresh start
 4. **Community Center** - Learn calendar/scheduling, recurring events, iCal feeds
 
 ### Advanced
-5. **Staff Portal** - Multi-entity workflows with action parameters, three-tier RLS
+5. **Staff Portal** - Multi-entity status workflows with action parameters, three-tier RLS
 6. **Mott Park** - Full payment integration, virtual entities, schema decisions, scheduled jobs
+7. **Neighborhood Hub** - Guided forms with conditional branching, cascading dropdowns, filtered FKs
 
 ---
 
