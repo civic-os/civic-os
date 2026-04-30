@@ -67,7 +67,7 @@ services:
   # Admin console: http://localhost:8082 (admin/admin)
   # Realm auto-imports from mottpark config on startup
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0
+    image: quay.io/keycloak/keycloak:latest
     container_name: storymap_keycloak
     environment:
       KEYCLOAK_ADMIN: admin

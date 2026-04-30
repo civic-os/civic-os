@@ -149,6 +149,59 @@ docker-compose logs worker | grep -i "keycloak\|token\|error"
 
 ### Step 4: Verify (see Post-Upgrade Verification below)
 
+## Bare-Metal Installation
+
+For non-containerized Keycloak installations (e.g., direct install on a Linux server), use this procedure instead.
+
+### Pre-Upgrade
+
+```bash
+# Back up the database
+pg_dump -h localhost -U postgres keycloak > keycloak-db-backup-$(date +%Y%m%d).sql
+```
+
+### Upgrade the Server
+
+```bash
+# Stop Keycloak service
+sudo systemctl stop keycloak
+
+# Run the upgrade (downloads new binaries and migrates database)
+/opt/keycloak/bin/kc.sh build
+
+# Start Keycloak
+sudo systemctl start keycloak
+
+# Watch logs for migration output
+journalctl -u keycloak -f
+```
+
+**What to watch for in logs:**
+- `Updating the configuration and target database` — normal migration
+- `Migrating database from X to Y` — schema migration steps
+- Any `ERROR` or `FATAL` lines during startup
+- `Keycloak ... started in Xs` — successful boot
+
+### Restart Dependent Services
+
+```bash
+# Restart PostgREST to re-fetch JWKS
+docker-compose restart postgrest
+
+# Or for bare-metal PostgREST:
+sudo systemctl restart postgrest
+
+# Restart the Go worker
+docker-compose restart worker
+
+# Or for bare-metal worker:
+sudo systemctl restart civic-os-worker
+```
+
+### Total Downtime
+
+**~5-10 minutes** for bare-metal upgrades (longer than containerized due to binary download/extraction).
+
 ## Post-Upgrade Verification
 
 Run through these checks after every Keycloak upgrade:
@@ -272,6 +325,8 @@ The frontend uses PKCE with S256. If a future Keycloak version changes PKCE defa
 
 ## Rollback
 
+### Containerized (Docker Compose)
+
 If the upgrade fails and Civic OS is broken:
 
 1. **Stop Keycloak**: `docker-compose stop keycloak`
@@ -279,5 +334,15 @@ If the upgrade fails and Civic OS is broken:
 3. **Revert image**: Change docker-compose back to the previous version
 4. **Restart**: `docker-compose up -d keycloak`
 5. **Restart PostgREST**: `docker-compose restart postgrest` (re-fetch JWKS)
+
+### Bare-Metal
+
+If the upgrade fails:
+
+1. **Stop Keycloak**: `sudo systemctl stop keycloak`
+2. **Restore database**: `psql -U postgres keycloak < keycloak-db-backup-YYYYMMDD.sql`
+3. **Revert Keycloak**: Re-install the previous version or restore from `/opt/keycloak` backup
+4. **Start Keycloak**: `sudo systemctl start keycloak`
+5. **Restart PostgREST**: `sudo systemctl restart postgrest`
 
 **Important:** Keycloak's database migrations are forward-only. You cannot run an older Keycloak binary against a migrated database. Always restore from backup if rolling back.
