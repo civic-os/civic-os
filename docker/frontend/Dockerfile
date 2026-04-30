@@ -15,8 +15,8 @@ COPY package*.json ./
 # Install only production dependencies first (skip test tooling like pa11y-ci, Puppeteer)
 # Then explicitly install Angular CLI which is needed for build but listed as devDependency
 RUN --mount=type=cache,target=/root/.npm \
-    PUPPETEER_SKIP_DOWNLOAD='true' npm ci --omit=dev --legacy-peer-deps && \
-    PUPPETEER_SKIP_DOWNLOAD='true' npm install --no-save --legacy-peer-deps @angular/cli @angular-devkit/build-angular
+    PUPPETEER_SKIP_DOWNLOAD='true' npm ci --omit=dev && \
+    PUPPETEER_SKIP_DOWNLOAD='true' npm install --no-save @angular/cli @angular-devkit/build-angular
 
 # Copy source code
 COPY . .

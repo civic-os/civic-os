@@ -22,7 +22,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { of, switchMap, map, catchError, BehaviorSubject } from 'rxjs';
-import { NgxCurrencyDirective } from 'ngx-currency';
+import { NgxCurrencyDirective } from '@dintecom/ngx-currency';
 import { AuthService } from '../../services/auth.service';
 import { getPostgrestUrl } from '../../config/runtime';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
