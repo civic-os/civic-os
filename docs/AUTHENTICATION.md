@@ -2,6 +2,9 @@
 
 This guide explains how to configure Keycloak authentication for Civic OS, with emphasis on setting up roles for testing RBAC (Role-Based Access Control) features.
 
+**Related Guides:**
+- [Keycloak Upgrade Guide](deployment/KEYCLOAK_UPGRADES.md) — procedure for upgrading hosted Keycloak servers
+
 ## Overview
 
 Civic OS uses Keycloak for authentication and role-based authorization. You have two options:
