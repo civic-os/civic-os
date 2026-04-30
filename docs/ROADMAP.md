@@ -106,7 +106,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] **Phase 2 - Dynamic Widgets**: Filtered list widget, map widget with clustering, calendar widget, auto-refresh infrastructure
 - [x] **Static Assets & Image Widget** (v0.38.0): Upload images with responsive breakpoint crops (desktop 16:9, tablet 4:3, mobile 1:1), art-directed `<picture>` display widget, crop presets (Hero Banner, Card Image, Square Only), freeform aspect ratio with lock/unlock toggle, crop position memory across breakpoint navigation. Admin page at `/admin/static-assets`.
 - [ ] **Phase 3 - Management**: Dashboard management UI, widget editor, user preferences, global filter bar
-  - [ ] **Role-based default dashboards** - `default_for_roles TEXT[]` column on `metadata.dashboards` so different roles land on different dashboards (e.g., staff → Staff Portal, managers → Admin Overview)
+  - [x] **Role-based default dashboards** (v0.37.0) - `metadata.dashboard_role_defaults` table so different roles land on different dashboards (e.g., staff → Staff Portal, managers → Admin Overview)
 - [ ] **Phase 4 - Polish**: Drag-and-drop reordering, dashboard templates, embedded links, mobile optimizations
 - [ ] **Phase 5 - Advanced Widgets**: Stat cards (backend aggregation required), charts (Chart.js), query results from views
 - [ ] **Phase 6 - Permissions**: Role-based visibility, widget-level permissions, private dashboards
@@ -129,7 +129,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Allow user profile editing (via Keycloak account console with JWT sync)
 - [x] App and Database update deployments
 - [x] Automatically assign new users the "user" role
-- [ ] Title updates (configure base from Angular Runtime)
+- [x] Title updates (v0.42.0 - APP_TITLE/FAVICON_URL env vars via Angular runtime config)
 - [ ] Application Logging from frontend and pattern for SQL logging
 - [x] Application Analytics (external Matomo integration; see Phase 3 for built-in analytics engine)
 - [ ] Move api functionality (views, functions, rpcs) into `api` schema that is also accessible via postgrest
@@ -177,7 +177,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Theme integration (DaisyUI light/dark with `civic-os-theme.ts`)
   - [x] Entity Code page (`/entity-code/:entity`) showing functions with Source/Blocks toggle
   - [x] System Functions page (`/system-functions`) and System Policies page (`/system-policies`)
-  - [ ] **Documentation**: Write `docs/development/CODE_BLOCK_SYSTEM.md` user-facing guide. Design doc at `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md`
+  - [x] **Documentation** at `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md` (architecture and AST node mapping reference)
   - [ ] Regex fallback (`SqlBlockTransformerService`) for functions without pre-parsed ASTs
   - [ ] Interactive editing (Phase 3: remove `readOnly: true`, enable visual SQL editing)
 - [x] **Schema Decisions (ADR)** (v0.30.0) - Database-native decision records for schema evolution

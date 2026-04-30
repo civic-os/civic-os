@@ -27,12 +27,64 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Do NOT use `ngClass`, use `class` bindings instead
 - Do NOT use `ngStyle`, use `style` bindings instead
 
+### OnPush + Async Pipe Pattern
+
+**CRITICAL**: All components should use `OnPush` change detection with the `async` pipe. Do NOT manually subscribe to observables in components with `OnPush` - this causes change detection issues.
+
+```typescript
+@Component({
+  selector: 'app-my-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,  // Required
+  // ...
+})
+export class MyPageComponent {
+  // Expose Observable with $ suffix
+  data$: Observable<MyData> = this.dataService.getData();
+}
+```
+
+**Template**: Use async pipe: `@if (data$ | async; as data) { <div>{{ data.name }}</div> }`
+
+**Why**: OnPush change detection only runs when: (1) Input properties change, (2) Events fire from template, (3) The `async` pipe receives new values. Manual subscriptions don't trigger OnPush.
+
+**Reference implementations**:
+- `PermissionsPage`, `EntityManagementPage` - Signal-based state
+- `SchemaErdPage`, `ListPage`, `DetailPage` - OnPush + async pipe
+
 ## State Management
 
 - Use signals for local component state
 - Use `computed()` for derived state
 - Keep state transformations pure and predictable
 - Do NOT use `mutate` on signals, use `update` or `set` instead
+
+### Signals for Reactive State
+
+Use Signals for reactive component state to ensure proper change detection with zoneless architecture and `@if`/`@for` control flow.
+
+```typescript
+import { Component, signal } from '@angular/core';
+
+export class MyComponent {
+  data = signal<MyData | undefined>(undefined);
+  loading = signal(true);
+  error = signal<string | undefined>(undefined);
+
+  loadData() {
+    this.dataService.fetch().subscribe({
+      next: (result) => {
+        this.data.set(result);
+        this.loading.set(false);
+      },
+      error: (err) => this.error.set(err.message)
+    });
+  }
+}
+```
+
+**Template**: Access signal values with `()` syntax: `@if (loading()) { <span class="loading"></span> }`
+
+**Multi-phase data loading**: For pages that load data in stages (e.g., load schema → query entities → query files), use multiple `effect()` instances where each reads signals written by the prior effect. Do NOT chain imperative method calls — async timing will break. See `docs/notes/ADMIN_PAGE_PITFALLS.md` for the pattern and common mistakes.
 
 ## Templates
 

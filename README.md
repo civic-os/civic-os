@@ -219,27 +219,44 @@ Civic OS stands on the shoulders of giants. We're grateful to the following open
 - **[DaisyUI](https://daisyui.com/)** - Component library for Tailwind CSS with theming support
 - **[@tailwindcss/typography](https://github.com/tailwindlabs/tailwindcss-typography)** - Beautiful typographic defaults for Tailwind
 
+### Calendar & Scheduling
+
+- **[FullCalendar](https://fullcalendar.io/)** - Full-featured calendar component for Angular
+- **[rrule](https://github.com/jkbrzt/rrule)** - RFC 5545 recurrence rule parser and generator
+
 ### Maps & Geospatial
 
 - **[Leaflet](https://leafletjs.com/)** - Open source JavaScript library for mobile-friendly interactive maps
+- **[Leaflet-Geoman](https://geoman.io/)** - Geometry editing and drawing tools for Leaflet maps
+- **[Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster)** - Marker clustering plugin for Leaflet
 
 ### Forms & Input Components
 
 - **[Angular CDK](https://material.angular.io/cdk/categories)** - Component Dev Kit for advanced UI patterns
 - **[ngx-currency](https://github.com/nbfontana/ngx-currency)** - Currency input masking for Angular
 - **[ngx-mask](https://github.com/JsDaddy/ngx-mask)** - Input masking library for Angular
+- **[ngx-image-cropper](https://github.com/Marioandres717/ngx-image-cropper)** - Image cropping component for file uploads
 - **[@texel/color](https://github.com/texel-org/color)** - Color manipulation library
 
 ### Documentation & Visualization
 
 - **[JointJS](https://www.jointjs.com/)** - Interactive diagramming library for ERD visualization
+- **[Blockly](https://developers.google.com/blockly)** - Visual programming editor for code block visualization
+- **[dagre](https://github.com/dagrejs/dagre)** - Directed graph layout engine for auto-layout
 - **[Mermaid](https://mermaid.js.org/)** - Diagramming and charting tool using markdown-like syntax
 - **[ngx-markdown](https://github.com/jfcere/ngx-markdown)** - Angular markdown component with Mermaid support
 
 ### Data Processing
 
 - **[SheetJS (xlsx)](https://sheetjs.com/)** - Spreadsheet data parser and writer
+- **[DOMPurify](https://github.com/cure53/DOMPurify)** - HTML sanitization library for XSS prevention
+- **[chrono-node](https://github.com/wanasit/chrono)** - Natural language date and time parser
+- **[@pgsql/parser](https://github.com/nicedoc/pgsql-parser)** - PostgreSQL SQL parser for code visualization
 - **[pg](https://node-postgres.com/)** - PostgreSQL client for Node.js
+
+### Analytics
+
+- **[ngx-matomo-client](https://github.com/EmmanuelRoux/ngx-matomo-client)** - Privacy-focused Matomo analytics integration for Angular
 
 ### Development & Testing
 
@@ -261,7 +278,7 @@ Civic OS stands on the shoulders of giants. We're grateful to the following open
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-Copyright (C) 2023-2025 Civic OS, L3C
+Copyright (C) 2023-2026 Civic OS, L3C
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

@@ -43,7 +43,7 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` for custom RPC-driven option lists and `depends_on_columns` for cascading dropdowns (v0.44.0). Optionally renders as searchable modal via `fk_search_modal` (v0.45.0) for large option sets with search, sort, filter, and pagination. See `docs/INTEGRATOR_GUIDE.md` (Options Source RPC and FK Search Modal sections).
-- `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
+- `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. Renders as FK search modal (v0.49.1) for scaling beyond small teams, with ILIKE substring search for partial phone/email matching. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
 - `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
 - `Boolean`: `bool` → Checkbox
@@ -84,13 +84,15 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **File Storage Types** (`FileImage`, `FilePDF`, `File`): S3-based file storage with automatic thumbnail generation via consolidated worker. **File Administration** (v0.39.0+): Admin page at `/admin/files` for browsing all files. See `docs/development/FILE_STORAGE.md` for implementation guide and `docs/notes/ADMIN_PAGE_PITFALLS.md` for architecture patterns.
 
-**PhotoGallery** (`PhotoGallery`, v0.47.0+): Multi-image gallery as a column-level property type. Entity tables get a UUID FK column pointing to `metadata.photo_galleries`. Supports multiple galleries per entity (e.g., `before_photos` + `after_photos`), standard `sort_order` positioning, drag-drop reorder (CDK DragDrop), and full-screen lightbox viewing. Gallery-first creation on Create pages (draft galleries with `entity_id = NULL`, linked after entity creation). Orphan cleanup runs daily via consolidated worker. Configure per-column constraints via `metadata.photo_gallery_config` (max_images, allowed_types, max_file_size). **Gallery Administration** (v0.47.0+): Admin page at `/admin/galleries` for browsing all galleries. See `docs/notes/PHOTO_GALLERY_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (PhotoGallery section) for setup.
+**PhotoGallery** (`PhotoGallery`, v0.47.0+): Multi-image gallery as a column-level property type with drag-drop reorder, lightbox viewing, and per-column constraints via `metadata.photo_gallery_config`. **Gallery Administration** (v0.47.0+): Admin page at `/admin/galleries`. See `docs/notes/PHOTO_GALLERY_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (PhotoGallery section) for setup.
+
+**Guided Forms** (v0.48.0+): Multi-step form workflows with conditional skip/require, auto-save, review-and-submit, and lock-on-submit. Configure via `guided_form_key` on `metadata.entities` with steps defined in `metadata.guided_form_steps`. Each step targets specific properties, supports `can_skip` and conditional `skip_if`/`require_if` rules evaluated against form values. Frontend components: `GuidedFormNavComponent` (step navigation), `GuidedFormReviewSectionComponent` (summary before submit). See `docs/notes/GUIDED_FORM_SYSTEM_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (Guided Forms section) for setup.
 
 **Payment Type** (`Payment`, v0.13.0+): Stripe-based payment processing via UUID FK to `payments.transactions`. Enable on any entity via `payment_initiation_rpc` in `metadata.entities`. Frontend auto-displays payment badges on List pages and "Pay Now" button on Detail pages. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete workflow and `examples/community-center/` for working example.
 
 **Consolidated Worker Architecture**: File storage, thumbnail generation, payment processing, and notification features run in a single Go + River microservice with a shared PostgreSQL connection pool (4 connections vs 12 with separate services). Provides at-least-once delivery, automatic retries with exponential backoff, row-level locking, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
 
-**Geography (GeoPoint / GeoPolygon) Types**: Require a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. GeoPolygon (v0.49.0+) uses `leaflet-geoman-free` for interactive polygon drawing with vertex snapping; supports single-polygon edit mode and multi-polygon display (list/dashboard with per-record color via `resolveColor()`). See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and `docs/notes/GEO_POLYGON_DESIGN.md` for polygon architecture.
+**Geography (GeoPoint / GeoPolygon) Types**: Require a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. GeoPolygon (v0.49.0+) adds interactive polygon drawing and multi-polygon display. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and `docs/notes/GEO_POLYGON_DESIGN.md` for polygon architecture.
 
 **DateTime vs DateTimeLocal - Timezone Handling**: `DateTime` (`timestamp`) stores wall-clock time with no conversion; `DateTimeLocal` (`timestamptz`) converts between user's local timezone and UTC. **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions — modifying this code can cause data integrity issues. See `docs/development/DATETIME_HANDLING.md` for details.
 
@@ -197,13 +199,7 @@ Docker Compose runs PostgreSQL 17 with PostGIS 3.5 and PostgREST locally with Ke
 
 ## Database Migrations
 
-Civic OS uses **Sqitch** for versioned database schema migrations in **both development and production**. This ensures dev/prod parity and allows upgrading databases safely as new versions are released.
-
-**Key Concepts:**
-- **Core Objects Only**: Migrations manage `metadata.*` schema and core public objects (RPCs, views, domains). User application tables (`public.issues`, `public.tags`, etc.) are not managed by core migrations.
-- **Version-Based Naming**: Migrations use `vX-Y-Z-note` format (e.g., `v0-4-0-add_tags_table`) to tie schema changes to releases.
-- **Rollback Support**: Every migration has deploy/revert/verify scripts for safe upgrades and rollbacks.
-- **Containerized**: Migration container (`ghcr.io/civic-os/migrations`) is versioned alongside frontend/postgrest for guaranteed compatibility.
+Civic OS uses **Sqitch** for versioned database schema migrations in both development and production, ensuring dev/prod parity. Migrations use `vX-Y-Z-note` naming and include deploy/revert/verify scripts.
 
 **Quick Commands:**
 
@@ -220,17 +216,7 @@ sqitch deploy dev --verify      # Re-deploy
 ./scripts/migrate-production.sh latest $DATABASE_URL
 ```
 
-**Important Notes:**
-- Migrations are **automatically tested** in CI/CD on every push
-- Migration container **version must match** frontend/postgrest versions
-- Generated migrations require **manual enhancement** (add metadata insertions, grants, RLS policies)
-- See `postgres/migrations/README.md` for comprehensive documentation
-
-**When to Create Migrations:**
-- Adding/modifying `metadata.*` tables
-- Adding/updating public RPCs or views
-- Adding custom domains
-- Schema changes that affect UI generation
+Generated migrations require **manual enhancement** (metadata inserts, grants, RLS policies). See `postgres/migrations/README.md` for comprehensive documentation.
 
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 
@@ -272,7 +258,7 @@ Civic OS provides helper functions for JWT data extraction (`current_user_id()`,
 
 All example docker-compose files include a pre-configured Keycloak service. The shared instance at `auth.civic-os.org` is available as an alternative (see `docs/AUTHENTICATION.md`).
 
-**Permissions Model** (v0.48.0+): Three-layer access control: (1) Database GRANTs for table access, (2) RBAC for blanket role-based access, (3) RLS for row-level ownership. Each RBAC permission maps to blanket access for that operation: `read` = see ALL rows, `update` = edit ALL rows, `delete` = delete ALL rows. Users without RBAC grants still see/edit their own records via ownership RLS. Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for the complete architecture and anti-patterns.
+**Permissions Model** (v0.48.0+): Three-layer access control (database GRANTs → RBAC → RLS ownership). Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for complete architecture and anti-patterns.
 
 **RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). Each role has an immutable `role_key` (programmatic identifier for JWT matching and SQL lookups) and a freely-editable `display_name` (human label). Use `get_role_id(role_key)` helper for lookups. PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
 
@@ -346,9 +332,7 @@ CreatePage supports pre-filling form fields via query parameters (e.g., `/create
 
 ### Form Validation
 
-Civic OS provides **dual enforcement** validation: frontend validation via `metadata.validations` for UX and backend CHECK constraints for security. Supported types: `required`, `min`, `max`, `minLength`, `maxLength`, `pattern`. The `SchemaService.getFormValidatorsForProperty()` maps rules to Angular validators, and `ErrorService.parseToHuman()` translates CHECK constraint errors to friendly messages.
-
-See `docs/INTEGRATOR_GUIDE.md` (Validation System section) for SQL examples and patterns, and `examples/pothole/init-scripts/02_validation_examples.sql` for complete examples. Future async/RPC validators: `docs/development/ADVANCED_VALIDATION.md`.
+Civic OS provides **dual enforcement** validation: frontend via `metadata.validations` for UX and backend CHECK constraints for security. `SchemaService.getFormValidatorsForProperty()` maps rules to Angular validators; `ErrorService.parseToHuman()` translates constraint errors to friendly messages. See `docs/INTEGRATOR_GUIDE.md` (Validation System section) for supported types and SQL patterns. Future: `docs/development/ADVANCED_VALIDATION.md`.
 
 ### Notification System
 
@@ -360,57 +344,11 @@ See `docs/INTEGRATOR_GUIDE.md` (Validation System section) for SQL examples and 
 
 ## Angular 20 Critical Patterns
 
-### Signals for Reactive State
+**IMPORTANT**: Use Signals for reactive component state and `OnPush` change detection on all components. These ensure proper change detection with zoneless architecture and `@if`/`@for` control flow.
 
-**IMPORTANT**: Use Signals for reactive component state to ensure proper change detection with zoneless architecture and new control flow syntax (`@if`, `@for`).
+See `docs/development/ANGULAR.md` for code examples, the OnPush + async pipe pattern, and reference implementations.
 
-```typescript
-import { Component, signal } from '@angular/core';
-
-export class MyComponent {
-  data = signal<MyData | undefined>(undefined);
-  loading = signal(true);
-  error = signal<string | undefined>(undefined);
-
-  loadData() {
-    this.dataService.fetch().subscribe({
-      next: (result) => {
-        this.data.set(result);
-        this.loading.set(false);
-      },
-      error: (err) => this.error.set(err.message)
-    });
-  }
-}
-```
-
-**Template**: Access signal values with `()` syntax: `@if (loading()) { <span class="loading"></span> }`
-
-**Multi-phase data loading**: For pages that load data in stages (e.g., load schema → query entities → query files), use multiple `effect()` instances where each reads signals written by the prior effect. Do NOT chain imperative method calls — async timing will break. See `docs/notes/ADMIN_PAGE_PITFALLS.md` for the pattern and common mistakes.
-
-### OnPush + Async Pipe Pattern
-
-**CRITICAL**: All components should use `OnPush` change detection with the `async` pipe. Do NOT manually subscribe to observables in components with `OnPush` - this causes change detection issues.
-
-```typescript
-@Component({
-  selector: 'app-my-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,  // Required
-  // ...
-})
-export class MyPageComponent {
-  // Expose Observable with $ suffix
-  data$: Observable<MyData> = this.dataService.getData();
-}
-```
-
-**Template**: Use async pipe: `@if (data$ | async; as data) { <div>{{ data.name }}</div> }`
-
-**Why**: OnPush change detection only runs when: (1) Input properties change, (2) Events fire from template, (3) The `async` pipe receives new values. Manual subscriptions don't trigger OnPush.
-
-**Reference implementations**:
-- `PermissionsPage`, `EntityManagementPage` - Signal-based state
-- `SchemaErdPage`, `ListPage`, `DetailPage` - OnPush + async pipe
+**Multi-phase data loading**: For pages that load data in stages, use multiple `effect()` instances where each reads signals written by the prior effect. Do NOT chain imperative method calls. See `docs/notes/ADMIN_PAGE_PITFALLS.md` for the pattern.
 
 ## Styling
 
