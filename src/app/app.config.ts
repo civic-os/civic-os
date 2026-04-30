@@ -31,7 +31,9 @@ import { DashboardNavigationWidgetComponent } from './components/widgets/dashboa
 import { CalendarWidgetComponent } from './components/widgets/calendar-widget/calendar-widget.component';
 import { NavButtonsWidgetComponent } from './components/widgets/nav-buttons-widget/nav-buttons-widget.component';
 import { ImageWidgetComponent } from './components/widgets/image-widget/image-widget.component';
-import { provideMarkdown } from 'ngx-markdown';
+import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
+import { videoEmbedExtension } from './markdown/video-embed.extension';
+import { markdownSanitize } from './markdown/markdown-sanitize';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
 
@@ -93,7 +95,12 @@ export const appConfig: ApplicationConfig = {
       return [];
     })(),
 
-    provideMarkdown(),
+    provideMarkdown({
+      markedExtensions: [
+        { provide: MARKED_EXTENSIONS, useValue: videoEmbedExtension, multi: true },
+      ],
+      sanitize: { provide: SANITIZE, useValue: markdownSanitize },
+    }),
 
     // Register widget components at startup (Phase 1 + Phase 2)
     provideAppInitializer(() => {

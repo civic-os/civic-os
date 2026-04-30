@@ -61,3 +61,17 @@ select.ng-invalid.ng-touched:focus {
     outline-offset: 2px !important;
     border-color: #ef4444 !important;
 }
+
+/* Video embed responsive container (v0.50.0) */
+.video-embed {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.video-embed iframe {
+    width: 100%;
+    max-height: 80vh;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 0.5rem;
+}
