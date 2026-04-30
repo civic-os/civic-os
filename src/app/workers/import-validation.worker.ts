@@ -72,7 +72,8 @@ const EntityPropertyType = {
   Status: 22,
   Category: 23,
   RecurringTimeSlot: 24,
-  PhotoGallery: 25
+  PhotoGallery: 25,
+  GeoPolygon: 26
 };
 
 interface ImportError {
@@ -383,6 +384,9 @@ function validateProperty(
 
     case EntityPropertyType.GeoPoint:
       return validateGeoPoint(value, rowNumber, displayName, rowErrors);
+
+    case EntityPropertyType.GeoPolygon:
+      return validateGeoPolygon(value, rowNumber, displayName, rowErrors);
 
     case EntityPropertyType.Color:
       return validateColor(value, rowNumber, displayName, rowErrors);
@@ -868,6 +872,86 @@ function validateGeoPoint(value: any, rowNumber: number, displayName: string, ro
 
   // Convert to WKT (note: WKT is lng,lat not lat,lng)
   return `SRID=4326;POINT(${lng} ${lat})`;
+}
+
+function validateGeoPolygon(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {
+  const str = String(value).trim();
+
+  // Check if already in WKT format (with or without SRID prefix)
+  const wktMatch = str.match(/(?:SRID=\d+;)?POLYGON\s*\(\s*\(([^)]+)\)\s*\)/i);
+  if (wktMatch) {
+    const coords = wktMatch[1].split(',').map(pair => {
+      const parts = pair.trim().split(/\s+/);
+      return { lng: parseFloat(parts[0]), lat: parseFloat(parts[1]) };
+    });
+
+    // Validate minimum points (triangle + closing = 4)
+    if (coords.length < 4) {
+      rowErrors.push({ row: rowNumber, column: displayName, value, error: 'Polygon must have at least 4 points (3 vertices + closing point)', errorType: 'Invalid geopolygon' });
+      return str;
+    }
+
+    // Validate all coordinates in WGS84 bounds
+    for (const c of coords) {
+      if (isNaN(c.lat) || isNaN(c.lng) || c.lat < -90 || c.lat > 90 || c.lng < -180 || c.lng > 180) {
+        rowErrors.push({ row: rowNumber, column: displayName, value, error: 'All coordinates must be valid (lat -90..90, lng -180..180)', errorType: 'Invalid geopolygon' });
+        return str;
+      }
+    }
+
+    // Ensure ring closure
+    const first = coords[0];
+    const last = coords[coords.length - 1];
+    let ring = wktMatch[1];
+    if (first.lng !== last.lng || first.lat !== last.lat) {
+      ring += `, ${first.lng} ${first.lat}`;
+    }
+
+    return `SRID=4326;POLYGON((${ring}))`;
+  }
+
+  // Check if GeoJSON format
+  if (str.startsWith('{')) {
+    try {
+      const geojson = JSON.parse(str);
+      if (geojson.type !== 'Polygon' || !Array.isArray(geojson.coordinates) || !Array.isArray(geojson.coordinates[0])) {
+        rowErrors.push({ row: rowNumber, column: displayName, value, error: 'GeoJSON must be a Polygon type with coordinates array', errorType: 'Invalid geopolygon' });
+        return str;
+      }
+
+      const ring = geojson.coordinates[0];
+      if (ring.length < 4) {
+        rowErrors.push({ row: rowNumber, column: displayName, value, error: 'Polygon must have at least 4 coordinate pairs', errorType: 'Invalid geopolygon' });
+        return str;
+      }
+
+      // Validate bounds and convert to EWKT
+      const wktPairs: string[] = [];
+      for (const coord of ring) {
+        const lng = coord[0];
+        const lat = coord[1];
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          rowErrors.push({ row: rowNumber, column: displayName, value, error: 'All coordinates must be valid (lat -90..90, lng -180..180)', errorType: 'Invalid geopolygon' });
+          return str;
+        }
+        wktPairs.push(`${lng} ${lat}`);
+      }
+
+      return `SRID=4326;POLYGON((${wktPairs.join(', ')}))`;
+    } catch {
+      rowErrors.push({ row: rowNumber, column: displayName, value, error: 'Invalid GeoJSON format', errorType: 'Invalid geopolygon' });
+      return str;
+    }
+  }
+
+  rowErrors.push({
+    row: rowNumber,
+    column: displayName,
+    value,
+    error: 'Must be WKT POLYGON((...)) or GeoJSON {"type":"Polygon","coordinates":[...]}',
+    errorType: 'Invalid geopolygon'
+  });
+  return str;
 }
 
 function validateColor(value: any, rowNumber: number, displayName: string, rowErrors: ImportError[]): string {

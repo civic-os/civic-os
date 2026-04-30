@@ -37,6 +37,8 @@ declare global {
         attribution: string;
         defaultCenter: [number, number];
         defaultZoom: number;
+        darkTileUrl?: string;
+        darkAttribution?: string;
       };
       keycloak: {
         url: string;

@@ -24,7 +24,9 @@ export const environment: Environment = {
         tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         defaultCenter: [43.0125, -83.6875],  // Flint, MI
-        defaultZoom: 13
+        defaultZoom: 13,
+        darkTileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        darkAttribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
     },
     keycloak: {
         url: 'https://auth.civic-os.org',

@@ -22,6 +22,7 @@ export interface SchemaEntityTable {
     search_fields: string[] | null,
     show_map: boolean,
     map_property_name: string | null,
+    map_color_property?: string | null,
     show_calendar: boolean,
     calendar_property_name: string | null,
     calendar_color_property: string | null,
@@ -167,6 +168,7 @@ export enum EntityPropertyType {
     Category,           // v0.34.0 - Rich enum for categorization (not workflow)
     RecurringTimeSlot,  // v0.19.0 - TimeSlot with recurring series support
     PhotoGallery,       // v0.47.0 - Multi-image gallery with drag-drop reorder
+    GeoPolygon,         // v0.49.0 - Interactive polygon map (geography(Polygon, 4326))
 }
 
 /**
@@ -227,6 +229,18 @@ export interface PhotoGalleryValue {
     id: string;
     created_at: string;
     photo_gallery_files?: GalleryImage[];
+}
+
+/**
+ * Polygon data for multi-polygon map rendering (list pages, dashboards).
+ * WKT format: POLYGON((lng1 lat1, lng2 lat2, ..., lng1 lat1))
+ * Added in v0.49.0.
+ */
+export interface MapPolygon {
+    id: number;
+    name: string;
+    wkt: string;
+    color?: string;
 }
 
 /**

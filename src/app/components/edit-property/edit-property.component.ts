@@ -30,6 +30,7 @@ import { NgxCurrencyDirective } from 'ngx-currency';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
+import { GeoPolygonMapComponent } from '../geo-polygon-map/geo-polygon-map.component';
 import { EditTimeSlotComponent } from '../edit-time-slot/edit-time-slot.component';
 import { EditRecurringTimeSlotComponent } from '../edit-recurring-time-slot/edit-recurring-time-slot.component';
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
@@ -49,6 +50,7 @@ import { getS3Config } from '../../config/runtime';
     NgxCurrencyDirective,
     ReactiveFormsModule,
     GeoPointMapComponent,
+    GeoPolygonMapComponent,
     EditTimeSlotComponent,
     EditRecurringTimeSlotComponent,
     PaymentBadgeComponent,

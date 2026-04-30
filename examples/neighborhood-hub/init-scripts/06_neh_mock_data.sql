@@ -34,14 +34,32 @@ INSERT INTO borrowers (display_name, email, phone, status_id) VALUES
   ('Diana Prince',    'diana@example.com',   '5554567890', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'rejected')),
   ('Eve Wilson',      'eve@example.com',     '5555678901', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'approved'));
 
--- Parcels (mix of eligibility categories, using get_category_id helper)
-INSERT INTO parcels (display_name, parcel_number, eligibility) VALUES
-  ('123 Main St',     'P-001', get_category_id('parcel_eligibility', 'good')),
-  ('456 Oak Ave',     'P-002', get_category_id('parcel_eligibility', 'good')),
-  ('789 Elm Blvd',    'P-003', get_category_id('parcel_eligibility', 'few_issues')),
-  ('321 Pine Dr',     'P-004', get_category_id('parcel_eligibility', 'ineligible')),
-  ('654 Maple Ln',    'P-005', get_category_id('parcel_eligibility', 'good')),
-  ('987 Cedar Ct',    'P-006', get_category_id('parcel_eligibility', 'few_issues'));
+-- Parcels (mix of eligibility and property classes, with polygon boundaries around Flint MI)
+INSERT INTO parcels (display_name, parcel_number, prop_num, prop_street, prop_city, prop_zip, acreage, property_class, eligibility, boundary) VALUES
+  ('123 Main St',     'P-001', '123',  'Main St',    'FLINT', '48503', 0.2500,
+    get_category_id('parcel_property_class', 'residential'),
+    get_category_id('parcel_eligibility', 'good'),
+    postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6880 43.0125, -83.6870 43.0125, -83.6870 43.0135, -83.6880 43.0135, -83.6880 43.0125))')),
+  ('456 Oak Ave',     'P-002', '456',  'Oak Ave',    'FLINT', '48503', 0.3200,
+    get_category_id('parcel_property_class', 'residential'),
+    get_category_id('parcel_eligibility', 'good'),
+    postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6870 43.0125, -83.6860 43.0125, -83.6860 43.0135, -83.6870 43.0135, -83.6870 43.0125))')),
+  ('789 Elm Blvd',    'P-003', '789',  'Elm Blvd',   'FLINT', '48504', 0.1800,
+    get_category_id('parcel_property_class', 'commercial'),
+    get_category_id('parcel_eligibility', 'few_issues'),
+    postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6900 43.0140, -83.6890 43.0140, -83.6890 43.0150, -83.6900 43.0150, -83.6900 43.0140))')),
+  ('321 Pine Dr',     'P-004', '321',  'Pine Dr',    'FLINT', '48505', 1.5000,
+    get_category_id('parcel_property_class', 'industrial'),
+    get_category_id('parcel_eligibility', 'ineligible'),
+    postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6920 43.0100, -83.6900 43.0100, -83.6900 43.0120, -83.6920 43.0120, -83.6920 43.0100))')),
+  ('654 Maple Ln',    'P-005', '654',  'Maple Ln',   'FLINT', '48503', 0.2100,
+    get_category_id('parcel_property_class', 'residential'),
+    get_category_id('parcel_eligibility', 'good'),
+    postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6860 43.0135, -83.6850 43.0135, -83.6850 43.0145, -83.6860 43.0145, -83.6860 43.0135))')),
+  ('987 Cedar Ct',    'P-006', '987',  'Cedar Ct',   'FLINT', '48504', 5.0000,
+    get_category_id('parcel_property_class', 'agricultural'),
+    get_category_id('parcel_eligibility', 'few_issues'),
+    postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6950 43.0080, -83.6920 43.0080, -83.6920 43.0100, -83.6950 43.0100, -83.6950 43.0080))'));
 
 -- Projects
 INSERT INTO projects (display_name, description) VALUES

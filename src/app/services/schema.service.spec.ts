@@ -230,6 +230,14 @@ describe('SchemaService', () => {
       expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.GeoPoint);
     });
 
+    it('should detect GeoPolygon for geography Polygon', () => {
+      const prop = createMockProperty({
+        udt_name: 'geography',
+        geography_type: 'Polygon'
+      });
+      expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.GeoPolygon);
+    });
+
     it('should detect Color for hex_color', () => {
       const prop = createMockProperty({ udt_name: 'hex_color' });
       expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.Color);
@@ -296,6 +304,11 @@ describe('SchemaService', () => {
       expect(result).toBe('location:location_text');
     });
 
+    it('should build computed field select for GeoPolygon', () => {
+      const result = SchemaService.propertyToSelectString(MOCK_PROPERTIES.geoPolygon);
+      expect(result).toBe('boundary:boundary_text');
+    });
+
     it('should handle properties without join_schema gracefully', () => {
       const prop = createMockProperty({
         type: EntityPropertyType.ForeignKeyName,
@@ -324,6 +337,11 @@ describe('SchemaService', () => {
     it('should return computed field select for GeoPoint', () => {
       const result = SchemaService.propertyToSelectStringForEdit(MOCK_PROPERTIES.geoPoint);
       expect(result).toBe('location:location_text');
+    });
+
+    it('should return computed field select for GeoPolygon', () => {
+      const result = SchemaService.propertyToSelectStringForEdit(MOCK_PROPERTIES.geoPolygon);
+      expect(result).toBe('boundary:boundary_text');
     });
 
     it('should return column_name for simple types', () => {
@@ -703,6 +721,14 @@ describe('SchemaService', () => {
     it('should return 2 for GeoPoint type', () => {
       const property = createMockProperty({
         type: EntityPropertyType.GeoPoint,
+        column_width: undefined
+      });
+      expect(SchemaService.getColumnSpan(property)).toBe(2);
+    });
+
+    it('should return 2 for GeoPolygon type', () => {
+      const property = createMockProperty({
+        type: EntityPropertyType.GeoPolygon,
         column_width: undefined
       });
       expect(SchemaService.getColumnSpan(property)).toBe(2);

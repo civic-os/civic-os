@@ -20,9 +20,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DashboardWidget, MapWidgetConfig } from '../../../interfaces/dashboard';
 import { GeoPointMapComponent, MapMarker } from '../../geo-point-map/geo-point-map.component';
+import { GeoPolygonMapComponent, resolveColor } from '../../geo-polygon-map/geo-polygon-map.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
-import { EntityData, SchemaEntityProperty } from '../../../interfaces/entity';
+import { EntityData, EntityPropertyType, MapPolygon, SchemaEntityProperty } from '../../../interfaces/entity';
 import { DataQuery } from '../../../interfaces/query';
 
 /**
@@ -35,7 +36,7 @@ import { DataQuery } from '../../../interfaces/query';
  */
 @Component({
   selector: 'app-map-widget',
-  imports: [CommonModule, GeoPointMapComponent],
+  imports: [CommonModule, GeoPointMapComponent, GeoPolygonMapComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './map-widget.component.html',
   styleUrl: './map-widget.component.css'
@@ -83,6 +84,8 @@ export class MapWidgetComponent {
 
   // Signals for component state
   markers = signal<MapMarker[]>([]);
+  mapPolygons = signal<MapPolygon[]>([]);
+  isPolygonMode = signal(false);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
@@ -106,13 +109,21 @@ export class MapWidgetComponent {
         next: (allProps: SchemaEntityProperty[]) => {
           const entityProps = allProps.filter(p => p.table_name === params.key);
 
-          // Build columns to fetch: map property + display name + show columns
+          // Detect if map property is GeoPolygon
+          const mapProp = entityProps.find(p => p.column_name === cfg.mapPropertyName);
+          const polygonMode = mapProp?.type === EntityPropertyType.GeoPolygon;
+          this.isPolygonMode.set(polygonMode);
+
+          // Build columns to fetch: map property + display name + show columns + colorProperty
           const columnNames = [
             'id',
             'display_name',
             cfg.mapPropertyName,
             ...(cfg.showColumns || [])
           ];
+          if (cfg.colorProperty) {
+            columnNames.push(cfg.colorProperty);
+          }
           const uniqueColumns = [...new Set(columnNames)];
 
           // Filter properties and build select strings
@@ -131,13 +142,20 @@ export class MapWidgetComponent {
           // Fetch filtered data
           this.dataService.getData(query).subscribe({
             next: (response: EntityData[]) => {
-              this.markers.set(this.transformToMarkers(response, cfg.mapPropertyName));
+              if (polygonMode) {
+                this.mapPolygons.set(this.transformToPolygons(response, cfg.mapPropertyName, cfg.colorProperty));
+                this.markers.set([]);
+              } else {
+                this.markers.set(this.transformToMarkers(response, cfg.mapPropertyName));
+                this.mapPolygons.set([]);
+              }
               this.isLoading.set(false);
             },
             error: (err: any) => {
               console.error('Map widget error:', err);
               this.error.set(err.message || 'Failed to load map data');
               this.markers.set([]);
+              this.mapPolygons.set([]);
               this.isLoading.set(false);
             }
           });
@@ -167,6 +185,24 @@ export class MapWidgetComponent {
         id: record.id,
         name: record.display_name || `Record ${record.id}`,
         wkt: record[wktField]
+      }));
+  }
+
+  /**
+   * Transform entity records to MapPolygon format for polygon mode
+   */
+  private transformToPolygons(records: any[], mapPropertyName: string, colorProperty?: string): MapPolygon[] {
+    if (!records || records.length === 0) return [];
+
+    const wktField = `${mapPropertyName}_text`;
+
+    return records
+      .filter(record => record[wktField])
+      .map(record => ({
+        id: record.id,
+        name: record.display_name || `Record ${record.id}`,
+        wkt: record[wktField],
+        color: colorProperty ? resolveColor(record[colorProperty]) : undefined
       }));
   }
 

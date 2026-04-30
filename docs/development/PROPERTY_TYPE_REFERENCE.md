@@ -53,6 +53,44 @@ Maps automatically switch between light and dark tile layers based on the curren
 - Light themes: OpenStreetMap tiles; Dark themes: ESRI World Dark Gray tiles
 - `GeoPointMapComponent` subscribes to theme changes via MutationObserver on `data-theme` attribute and swaps tile layers without page reload
 
+## Geography (GeoPolygon) Type
+
+**Detection**: `geography(Polygon, 4326)`
+
+### Computed Field Requirement
+
+Same pattern as GeoPoint - create a paired computed field:
+
+```sql
+-- For a column named 'boundary':
+CREATE OR REPLACE FUNCTION boundary_text(rec my_table)
+RETURNS TEXT AS $$
+  SELECT postgis.ST_AsText(rec.boundary);
+$$ LANGUAGE SQL STABLE;
+```
+
+**Data formats**:
+- Insert/Update: EWKT `"SRID=4326;POLYGON((lng1 lat1, lng2 lat2, ..., lng1 lat1))"`
+- Read: WKT `"POLYGON((lng1 lat1, lng2 lat2, ...))"` (from the `_text` computed field)
+
+### Drawing Library
+
+Uses `@geoman-io/leaflet-geoman-free` (lazy loaded) for interactive polygon drawing in edit mode:
+- Single polygon constraint (draw one, then delete to draw another)
+- Vertex snapping for parcel-precision boundaries
+- Edit mode enables vertex dragging on existing polygons
+
+### Multi-Polygon Display (List/Dashboard)
+
+`GeoPolygonMapComponent` accepts a `MapPolygon[]` input for rendering multiple polygons:
+- Each polygon can have its own color (resolved via `resolveColor()` utility)
+- `resolveColor()` handles both flat hex strings (`"#22c55e"`) and Category embed objects (`{id, display_name, color}`)
+- Dashboard map widget uses `colorProperty` config to color polygons by a Category column
+
+### Map Dark Mode
+
+Same tile-switching behavior as GeoPoint - see above.
+
 ## PhotoGallery Type
 
 **Detection**: UUID with `join_table = 'photo_galleries'` (via `isSystemType()` in `SchemaService`)

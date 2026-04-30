@@ -70,9 +70,36 @@ ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
       category_entity_type = EXCLUDED.category_entity_type;
 
--- Configure parcels for full-text search
-UPDATE metadata.entities SET search_fields = '{display_name,parcel_number}'
+-- Parcel property class category group + values (polygon color source)
+INSERT INTO metadata.category_groups (entity_type, display_name)
+VALUES ('parcel_property_class', 'Property Class');
+
+INSERT INTO metadata.categories (entity_type, display_name, category_key, color, sort_order)
+VALUES
+  ('parcel_property_class', 'Residential',  'residential',  '#22c55e', 1),
+  ('parcel_property_class', 'Commercial',   'commercial',   '#3b82f6', 2),
+  ('parcel_property_class', 'Industrial',   'industrial',   '#f59e0b', 3),
+  ('parcel_property_class', 'Agricultural', 'agricultural', '#8b5cf6', 4);
+
+-- Configure property_class column as Category type
+INSERT INTO metadata.properties (table_name, column_name, display_name, category_entity_type)
+VALUES ('parcels', 'property_class', 'Property Class', 'parcel_property_class')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET display_name = EXCLUDED.display_name,
+      category_entity_type = EXCLUDED.category_entity_type;
+
+-- Configure parcels for full-text search (expanded fields) and polygon map
+UPDATE metadata.entities SET
+  search_fields = '{display_name,parcel_number,prop_street,prop_zip}',
+  show_map = true,
+  map_property_name = 'boundary',
+  map_color_property = 'property_class'
 WHERE table_name = 'parcels';
+
+-- Hide boundary from list view (the list page map already shows all polygons)
+INSERT INTO metadata.properties (table_name, column_name, show_on_list)
+VALUES ('parcels', 'boundary', false)
+ON CONFLICT (table_name, column_name) DO UPDATE SET show_on_list = false;
 
 -- Hide civic_os_text_search generated column
 INSERT INTO metadata.properties (table_name, column_name, show_on_list, show_on_create, show_on_edit, show_on_detail)

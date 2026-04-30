@@ -17,7 +17,7 @@
 
 import { Injectable, signal, computed, effect, WritableSignal, Signal } from '@angular/core';
 import { parse, sRGB } from '@texel/color';
-import { getThemeConfig } from '../config/runtime';
+import { getThemeConfig, getMapConfig } from '../config/runtime';
 
 export interface MapTileConfig {
   tileUrl: string;
@@ -28,18 +28,13 @@ export interface MapTileConfig {
   providedIn: 'root'
 })
 export class ThemeService {
-  // Light theme tile layers (OpenStreetMap default)
-  private readonly LIGHT_TILE_CONFIG: MapTileConfig = {
-    tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  };
+  // Tile configs read from environment (runtime-configurable per deployment)
+  private readonly LIGHT_TILE_CONFIG: MapTileConfig;
+  private readonly DARK_TILE_CONFIG: MapTileConfig;
 
-  // Dark theme tile layers (ESRI World Dark Gray)
-  // Professional cartography with balanced detail for enterprise applications
-  private readonly DARK_TILE_CONFIG: MapTileConfig = {
-    tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
-  };
+  // Fallback dark tiles when not configured in environment
+  private static readonly DEFAULT_DARK_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+  private static readonly DEFAULT_DARK_ATTRIBUTION = 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ';
 
   // Luminance threshold for determining light vs dark themes
   private readonly LUMINANCE_THRESHOLD = 128;
@@ -60,6 +55,17 @@ export class ThemeService {
   public readonly isDark: Signal<boolean>;
 
   constructor() {
+    // Initialize tile configs from environment (runtime-configurable per deployment)
+    const mapConfig = getMapConfig();
+    this.LIGHT_TILE_CONFIG = {
+      tileUrl: mapConfig.tileUrl,
+      attribution: mapConfig.attribution
+    };
+    this.DARK_TILE_CONFIG = {
+      tileUrl: mapConfig.darkTileUrl || ThemeService.DEFAULT_DARK_TILE_URL,
+      attribution: mapConfig.darkAttribution || ThemeService.DEFAULT_DARK_ATTRIBUTION
+    };
+
     // Load saved theme from localStorage, fallback to default
     const savedTheme = this.loadThemeFromStorage();
 

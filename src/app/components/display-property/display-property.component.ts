@@ -20,6 +20,7 @@ import { Component, input, signal, computed, ChangeDetectionStrategy, ViewChild 
 import { SchemaEntityProperty, EntityPropertyType, FileReference, GalleryImage } from '../../interfaces/entity';
 import { RouterModule } from '@angular/router';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
+import { GeoPolygonMapComponent } from '../geo-polygon-map/geo-polygon-map.component';
 import { HighlightPipe } from '../../pipes/highlight.pipe';
 import { ImageViewerComponent } from '../image-viewer/image-viewer.component';
 import { PdfViewerComponent } from '../pdf-viewer/pdf-viewer.component';
@@ -37,6 +38,7 @@ import { getContrastTextColor } from '../../utils/color.utils';
         CommonModule,
         RouterModule,
         GeoPointMapComponent,
+        GeoPolygonMapComponent,
         HighlightPipe,
         ImageViewerComponent,
         PdfViewerComponent,

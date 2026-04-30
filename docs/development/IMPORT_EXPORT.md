@@ -1297,6 +1297,7 @@ async function validateImportData(request: ValidationRequest): Promise<Validatio
 | DateTime | "2025-01-15 14:30" | Parse to ISO 8601 (no TZ) | "2025-01-15T14:30:00" |
 | DateTimeLocal | "2025-01-15 14:30" | Parse to ISO 8601 in UTC | "2025-01-15T14:30:00Z" |
 | **GeoPoint** | **"42.36,-71.06" or WKT** | **Parse both formats** | **"SRID=4326;POINT(-71.06 42.36)"** |
+| **GeoPolygon** | **WKT or GeoJSON** | **Parse, validate ring** | **"SRID=4326;POLYGON((...))** |
 | Color | "#3B82F6" or "3B82F6" | Normalize, validate hex | "#3B82F6" |
 | ForeignKeyName | ID or display name | Hybrid lookup | Number (ID) |
 | User | UUID or display name | Hybrid lookup + UUID validation | String (UUID) |
@@ -1357,6 +1358,7 @@ function parseGeoPoint(value: string): string {
 | Money | "$123.45" | Keep as-is | "$123.45" |
 | Boolean | true/false | Keep as-is | TRUE/FALSE |
 | **GeoPoint** | **"POINT(-71.06 42.36)"** | **Convert to lat,lng** | **"42.36,-71.06"** |
+| **GeoPolygon** | **"POLYGON((-83.7 43.0, ...))"** | **Convert to GeoJSON** | **'{"type":"Polygon","coordinates":[[...]]}'** |
 | Color | "#3B82F6" | Hex string | "#3B82F6" |
 
 ## Many-to-Many Relationships

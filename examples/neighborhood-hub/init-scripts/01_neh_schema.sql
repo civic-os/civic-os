@@ -57,20 +57,40 @@ CREATE TABLE borrowers (
 CREATE UNIQUE INDEX ON borrowers(user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX ON borrowers(status_id);
 
--- Parcels (properties with eligibility category)
+-- Parcels (properties with eligibility category and polygon boundary)
 CREATE TABLE parcels (
     id SERIAL PRIMARY KEY,
     display_name VARCHAR(100) NOT NULL,
     parcel_number VARCHAR(50),
+    prop_num VARCHAR(20),
+    prop_dir VARCHAR(10),
+    prop_street VARCHAR(100),
+    prop_city VARCHAR(50) DEFAULT 'FLINT',
+    prop_zip VARCHAR(10),
+    acreage DECIMAL(10,4),
+    property_class INTEGER REFERENCES metadata.categories(id),
     eligibility INTEGER REFERENCES metadata.categories(id),
+    boundary postgis.geography(Polygon, 4326),
     civic_os_text_search tsvector GENERATED ALWAYS AS (
-        to_tsvector('english', coalesce(display_name, '') || ' ' || coalesce(parcel_number, ''))
+        to_tsvector('english',
+            coalesce(display_name, '') || ' ' ||
+            coalesce(parcel_number, '') || ' ' ||
+            coalesce(prop_street, '') || ' ' ||
+            coalesce(prop_zip, ''))
     ) STORED,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_parcels_eligibility ON parcels(eligibility);
+CREATE INDEX idx_parcels_property_class ON parcels(property_class);
 CREATE INDEX idx_parcels_text_search ON parcels USING GIN(civic_os_text_search);
+CREATE INDEX idx_parcels_boundary ON parcels USING GIST(boundary);
+
+-- Computed text field for PostgREST (same pattern as GeoPoint)
+CREATE OR REPLACE FUNCTION public.boundary_text(rec public.parcels)
+RETURNS text AS $$
+  SELECT postgis.ST_AsText(rec.boundary);
+$$ LANGUAGE SQL STABLE;
 
 -- Tool reservations (borrower reserves a tool type, exercises cascading FK + filtered FK)
 CREATE TABLE tool_reservations (

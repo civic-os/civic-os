@@ -166,7 +166,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       iconRetinaUrl: 'assets/marker-icon-2x.png',
       shadowUrl: 'assets/marker-shadow.png',
       iconSize: [25, 41],
-      iconAnchor: [12, 21],
+      iconAnchor: [12, 41],
       popupAnchor: [1, -34],
       shadowSize: [41, 41]
     });
@@ -243,12 +243,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     // Add click handler for edit mode
     if (mode === 'edit') {
       this.map.on('click', (e: L.LeafletMouseEvent) => {
-        // Adjust click coordinates to account for center anchor vs tip anchor
-        const point = this.map!.latLngToContainerPoint(e.latlng);
-        point.y -= 20; // Offset by anchor difference (41 - 21 = 20)
-        const adjustedLatLng = this.map!.containerPointToLatLng(point);
-
-        this.setLocation(adjustedLatLng.lat, adjustedLatLng.lng);
+        this.setLocation(e.latlng.lat, e.latlng.lng);
       });
     }
 
@@ -567,14 +562,12 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
 
   private getHighlightedIcon(): L.Icon {
     // Use a larger version of the default icon for highlighted state
-    // Anchor must be proportional to size: default [12, 21] for [25, 41]
-    // For [32, 52]: [12 * 32/25, 21 * 52/41] ≈ [15, 27]
     return L.icon({
       iconUrl: 'assets/marker-icon.png',
       iconRetinaUrl: 'assets/marker-icon-2x.png',
       shadowUrl: 'assets/marker-shadow.png',
-      iconSize: [32, 52], // Slightly larger (default is 25x41)
-      iconAnchor: [15, 27], // Proportionally scaled from default [12, 21]
+      iconSize: [32, 52],
+      iconAnchor: [16, 52],
       popupAnchor: [1, -34],
       shadowSize: [50, 50]
     });

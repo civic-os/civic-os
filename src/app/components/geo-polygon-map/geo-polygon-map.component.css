@@ -1,0 +1,40 @@
+/* Map wrapper - position relative for floating button */
+.map-wrapper {
+  position: relative;
+}
+
+.leaflet-map {
+  border-radius: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.leaflet-map.edit-mode {
+  cursor: crosshair;
+}
+
+/* Floating reset button - Leaflet control style */
+.map-reset-button {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  z-index: 1000;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background-color: white;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.map-reset-button:hover {
+  background-color: #f4f4f4;
+  border-color: rgba(0, 0, 0, 0.3);
+}

@@ -229,14 +229,25 @@
     <!-- Map View (only shown when enabled) -->
     @if (showMap()) {
       <div class="map-container">
-        <app-geo-point-map
-          [markers]="mapMarkers()"
-          [highlightedMarkerId]="highlightedRecordId()"
-          [width]="'100%'"
-          [height]="'600px'"
-          (markerClick)="onMarkerClick($event)"
-          (resetView)="onResetView()">
-        </app-geo-point-map>
+        @if (mapPropertyType() === EntityPropertyType.GeoPolygon) {
+          <app-geo-polygon-map
+            [polygons]="mapPolygons()"
+            [highlightedPolygonId]="highlightedRecordId()"
+            [width]="'100%'"
+            [height]="'600px'"
+            (polygonClick)="onMarkerClick($event)"
+            (resetView)="onResetView()">
+          </app-geo-polygon-map>
+        } @else {
+          <app-geo-point-map
+            [markers]="mapMarkers()"
+            [highlightedMarkerId]="highlightedRecordId()"
+            [width]="'100%'"
+            [height]="'600px'"
+            (markerClick)="onMarkerClick($event)"
+            (resetView)="onResetView()">
+          </app-geo-point-map>
+        }
       </div>
     }
   </div>

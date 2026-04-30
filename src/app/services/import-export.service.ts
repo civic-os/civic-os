@@ -250,6 +250,14 @@ export class ImportExportService {
             exportRow[prop.display_name] = value;
           }
         }
+        // GeoPolygon - export as GeoJSON
+        else if (prop.type === EntityPropertyType.GeoPolygon) {
+          if (value && typeof value === 'string') {
+            exportRow[prop.display_name] = this.formatAsGeoJSON(value);
+          } else {
+            exportRow[prop.display_name] = value;
+          }
+        }
         // M:M - export as comma-separated names (read-only)
         else if (prop.type === EntityPropertyType.ManyToMany) {
           const junctionData = value;
@@ -308,6 +316,25 @@ export class ImportExportService {
     const lat = parseFloat(match[2]);
 
     return `${lat},${lng}`;
+  }
+
+  /**
+   * Convert WKT POLYGON to GeoJSON string for spreadsheet editing.
+   * Input: "POLYGON((-83.7 43.0, -83.6 43.0, -83.6 43.1, -83.7 43.0))"
+   * Output: '{"type":"Polygon","coordinates":[[[-83.7,43.0],[-83.6,43.0],[-83.6,43.1],[-83.7,43.0]]]}'
+   */
+  private formatAsGeoJSON(wkt: string): string {
+    const match = wkt.match(/POLYGON\s*\(\s*\(([^)]+)\)\s*\)/i);
+    if (!match) return wkt;
+
+    const coords = match[1].split(',').map(pair => {
+      const parts = pair.trim().split(/\s+/);
+      return [parseFloat(parts[0]), parseFloat(parts[1])];
+    }).filter(c => !isNaN(c[0]) && !isNaN(c[1]));
+
+    if (coords.length < 3) return wkt;
+
+    return JSON.stringify({ type: 'Polygon', coordinates: [coords] });
   }
 
   /**
@@ -468,6 +495,9 @@ export class ImportExportService {
 
       case EntityPropertyType.GeoPoint:
         return 'Format: latitude,longitude (e.g., 42.3601,-71.0589)';
+
+      case EntityPropertyType.GeoPolygon:
+        return 'Format: GeoJSON or WKT (e.g., POLYGON((-83.7 43.0, -83.6 43.0, -83.6 43.1, -83.7 43.0)))';
 
       case EntityPropertyType.Color:
         return 'Format: #RRGGBB (e.g., #3B82F6)';

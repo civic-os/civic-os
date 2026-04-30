@@ -1,0 +1,19 @@
+<div class="map-wrapper not-prose">
+  <div [id]="mapId"
+       class="leaflet-map"
+       [class.display-mode]="mode() === 'display'"
+       [class.edit-mode]="mode() === 'edit'"
+       [style.width]="width()"
+       [style.height]="height()">
+  </div>
+
+  <!-- Floating reset button (only in multi-polygon mode when a polygon is highlighted) -->
+  @if (highlightedPolygonId() !== null && polygons().length > 0) {
+    <button type="button"
+            class="map-reset-button"
+            (click)="onResetView()"
+            title="Reset view to show all polygons">
+      <span class="material-symbols-outlined" style="font-size: 18px; line-height: 1;">home</span>
+    </button>
+  }
+</div>

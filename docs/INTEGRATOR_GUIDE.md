@@ -1166,13 +1166,17 @@ See `docs/development/CALENDAR_INTEGRATION.md` for complete implementation guide
 
 ### Map Visualization
 
-Enable map visualization on List pages for entities with `geography(Point, 4326)` properties.
+Enable map visualization on List pages for entities with geography properties.
+
+**Supported types**:
+- `geography(Point, 4326)` - displays markers (GeoPoint)
+- `geography(Polygon, 4326)` - displays colored polygons (GeoPolygon, v0.49.0+)
 
 **Requirements**:
-- Table must have `geography(Point, 4326)` column (PostGIS)
+- Table must have a geography column (PostGIS)
 - Computed field function returning WKT: `<column_name>_text()`
 
-**Setup**:
+**Setup (GeoPoint)**:
 ```sql
 -- 1. Add geography column
 ALTER TABLE issues
@@ -1191,15 +1195,41 @@ UPDATE metadata.entities SET
 WHERE table_name = 'issues';
 ```
 
+**Setup (GeoPolygon)**:
+```sql
+-- 1. Add polygon geography column
+ALTER TABLE parcels
+  ADD COLUMN boundary geography(Polygon, 4326);
+
+-- 2. Create computed field function
+CREATE OR REPLACE FUNCTION boundary_text(rec parcels)
+RETURNS TEXT AS $$
+  SELECT postgis.ST_AsText(rec.boundary);
+$$ LANGUAGE SQL STABLE;
+
+-- 3. Enable map on List page
+UPDATE metadata.entities SET
+  show_on_map = TRUE,
+  map_property_name = 'boundary'
+WHERE table_name = 'parcels';
+```
+
+Polygon colors are resolved from a Category column on the same entity. The `resolveColor()` utility handles both flat hex strings and Category embed objects, so you can point `colorProperty` in a dashboard map widget at a Category FK column directly.
+
 **Behavior**:
-- List page shows toggle button to switch between table/map views
-- Map displays markers for all records with non-NULL location
-- Clicking marker opens popup with entity link
+- List page shows map alongside table (side-by-side layout)
+- GeoPoint: markers for records with non-NULL location
+- GeoPolygon: filled polygons with per-record color from Category column
+- Clicking marker/polygon navigates to record detail
 - Dark mode automatically switches to ESRI World Dark Gray tiles
 
-**Data Format**:
+**Data Format (GeoPoint)**:
 - Insert/Update: EWKT `"SRID=4326;POINT(lng lat)"`
 - Read: WKT `"POINT(lng lat)"` (via computed field)
+
+**Data Format (GeoPolygon)**:
+- Insert/Update: EWKT `"SRID=4326;POLYGON((lng1 lat1, lng2 lat2, ..., lng1 lat1))"`
+- Read: WKT `"POLYGON((lng1 lat1, ...))"` (via computed field)
 
 ---
 

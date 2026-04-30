@@ -32,6 +32,7 @@
             "styles": [
               "src/styles.css",
               "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css",
               "node_modules/prismjs/themes/prism-tomorrow.css",
               "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css"
             ],
@@ -140,6 +141,7 @@
             "styles": [
               "src/styles.css",
               "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css",
               "node_modules/prismjs/themes/prism-tomorrow.css",
               "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css"
             ],

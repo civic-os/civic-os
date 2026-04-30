@@ -52,6 +52,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `TextShort`: `varchar` → Text input
 - `TextLong`: `text` → Textarea
 - `GeoPoint`: `geography(Point, 4326)` → Interactive map (Leaflet) with location picker
+- `GeoPolygon`: `geography(Polygon, 4326)` → Interactive polygon map (Leaflet + leaflet-geoman-free) with draw/edit/delete
 - `Color`: `hex_color` → Color chip display with native HTML5 color picker
 - `Email`: `email_address` → Clickable mailto: link, HTML5 email input
 - `Telephone`: `phone_number` → Clickable tel: link with formatted display, masked input (XXX) XXX-XXXX
@@ -89,7 +90,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Consolidated Worker Architecture**: File storage, thumbnail generation, payment processing, and notification features run in a single Go + River microservice with a shared PostgreSQL connection pool (4 connections vs 12 with separate services). Provides at-least-once delivery, automatic retries with exponential backoff, row-level locking, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
 
-**Geography (GeoPoint) Type**: Requires a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and map dark mode details.
+**Geography (GeoPoint / GeoPolygon) Types**: Require a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. GeoPolygon (v0.49.0+) uses `leaflet-geoman-free` for interactive polygon drawing with vertex snapping; supports single-polygon edit mode and multi-polygon display (list/dashboard with per-record color via `resolveColor()`). See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and `docs/notes/GEO_POLYGON_DESIGN.md` for polygon architecture.
 
 **DateTime vs DateTimeLocal - Timezone Handling**: `DateTime` (`timestamp`) stores wall-clock time with no conversion; `DateTimeLocal` (`timestamptz`) converts between user's local timezone and UTC. **CRITICAL**: The transformation logic in `EditPage.transformValueForControl()`, `EditPage.transformValuesForApi()`, and `CreatePage.transformValuesForApi()` handles these conversions — modifying this code can cause data integrity issues. See `docs/development/DATETIME_HANDLING.md` for details.
 
@@ -420,6 +421,8 @@ export class MyPageComponent {
 - Global styles in `src/styles.css`
 
 **IMPORTANT: This project uses DaisyUI 5, not DaisyUI 4.** Many class names changed between versions. See `docs/development/ANGULAR.md` (DaisyUI 5 Migration section) for the full v4→v5 mapping table. Always verify class names against the [DaisyUI 5 documentation](https://daisyui.com/components/).
+
+**CRITICAL: `not-prose` for sensitive components.** All CRUD pages wrap content in `<div class="prose">`. Tailwind Typography applies styles to bare HTML elements (`img`, `video`, `table`, `hr`, headings, etc.) — any component that dynamically creates these elements (maps, diagrams, rich editors, canvas libraries) **must** add `not-prose` to its outermost wrapper div. Without it, elements like Leaflet tile `<img>` tags get `margin: 2em 0` which causes subtle visual bugs. See `docs/notes/MAP_SHIFT_INVESTIGATION.md` for the full story.
 
 ## TypeScript Configuration
 

@@ -87,6 +87,20 @@
         <em>No location set</em>
       }
     }
+    @if (propType() == EntityPropertyType.GeoPolygon) {
+      @if (datum()) {
+        <div class="geo-polygon-display min-w-[250px]">
+          <app-geo-polygon-map
+            mode="display"
+            [initialValue]="datum()"
+            width="100%"
+            height="150px" />
+        </div>
+      }
+      @if (!datum()) {
+        <em>No boundary set</em>
+      }
+    }
     @if (propType() == EntityPropertyType.Color) {
       <div class="badge gap-2 font-mono">
         <span

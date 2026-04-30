@@ -22,7 +22,9 @@ export interface Environment {
         tileUrl: string,
         attribution: string,
         defaultCenter: [number, number],  // [lat, lng]
-        defaultZoom: number
+        defaultZoom: number,
+        darkTileUrl?: string,
+        darkAttribution?: string
     },
     keycloak: {
         url: string,

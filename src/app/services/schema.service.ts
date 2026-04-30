@@ -646,6 +646,7 @@ export class SchemaService {
     }
 
     return (['int4', 'int8'].includes(val.udt_name) && val.join_column != null) ? EntityPropertyType.ForeignKeyName :
+      (['geography'].includes(val.udt_name) && val.geography_type == 'Polygon') ? EntityPropertyType.GeoPolygon :
       (['geography'].includes(val.udt_name) && val.geography_type == 'Point') ? EntityPropertyType.GeoPoint :
       ['timestamp'].includes(val.udt_name) ? EntityPropertyType.DateTime :
       ['timestamptz'].includes(val.udt_name) ? EntityPropertyType.DateTimeLocal :
@@ -705,7 +706,7 @@ export class SchemaService {
     // User type: Embed user data from civic_os_users table (system type - see METADATA_SYSTEM_TABLES)
     return (prop.type == EntityPropertyType.User) ? prop.column_name + ':civic_os_users!' + prop.column_name + '(id,display_name,full_name,phone,email)' :
       (prop.join_schema == 'public' && prop.join_column) ? prop.column_name + ':' + prop.join_table + '!' + prop.column_name + '(' + prop.join_column + ',display_name)' :
-      (prop.type == EntityPropertyType.GeoPoint) ? prop.column_name + ':' + prop.column_name + '_text' :
+      (prop.type == EntityPropertyType.GeoPoint || prop.type == EntityPropertyType.GeoPolygon) ? prop.column_name + ':' + prop.column_name + '_text' :
       prop.column_name;
   }
 
@@ -744,8 +745,8 @@ export class SchemaService {
       return prop.column_name;
     }
 
-    // GeoPoint still needs the computed _text field
-    if (prop.type === EntityPropertyType.GeoPoint) {
+    // GeoPoint/GeoPolygon still need the computed _text field
+    if (prop.type === EntityPropertyType.GeoPoint || prop.type === EntityPropertyType.GeoPolygon) {
       return prop.column_name + ':' + prop.column_name + '_text';
     }
 
@@ -968,6 +969,7 @@ export class SchemaService {
     switch (property.type) {
       case EntityPropertyType.TextLong:
       case EntityPropertyType.GeoPoint:
+      case EntityPropertyType.GeoPolygon:
       case EntityPropertyType.File:
       case EntityPropertyType.FileImage:
       case EntityPropertyType.FilePDF:

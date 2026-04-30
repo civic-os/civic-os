@@ -608,8 +608,8 @@ describe('GeoPointMapComponent', () => {
     it('should have proportionally scaled anchor point', () => {
       const icon = component['getHighlightedIcon']();
 
-      // Anchor should be [15, 27] (proportional to [12, 21] for size [32, 52])
-      expect(icon.options.iconAnchor).toEqual([15, 27]);
+      // Anchor at bottom-center: [16, 52] for size [32, 52]
+      expect(icon.options.iconAnchor).toEqual([16, 52]);
     });
 
     it('should use same icon URLs as default icon', () => {

@@ -31,6 +31,14 @@
         <p class="mt-4 text-error">{{ error() }}</p>
       </div>
     </div>
+  } @else if (isPolygonMode() && mapPolygons().length > 0) {
+    <!-- Map with polygons -->
+    <app-geo-polygon-map
+      [polygons]="mapPolygons()"
+      [width]="'100%'"
+      [height]="'400px'"
+      (polygonClick)="onMarkerClick($event)"
+    />
   } @else if (markers().length > 0) {
     <!-- Map with markers -->
     <app-geo-point-map

@@ -27,11 +27,12 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { GuidedFormService } from '../../services/guided-form.service';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
+import { EntityPropertyType, MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { GeoPointMapComponent, MapMarker } from '../../components/geo-point-map/geo-point-map.component';
+import { GeoPolygonMapComponent, resolveColor } from '../../components/geo-polygon-map/geo-polygon-map.component';
 import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-slot-calendar/time-slot-calendar.component';
 import { ImportExportButtonsComponent } from '../../components/import-export-buttons/import-export-buttons.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -59,6 +60,7 @@ interface FilterChip {
     FilterBarComponent,
     PaginationComponent,
     GeoPointMapComponent,
+    GeoPolygonMapComponent,
     TimeSlotCalendarComponent,
     ImportExportButtonsComponent,
     EmptyStateComponent,
@@ -244,6 +246,13 @@ export class ListPage implements OnInit, OnDestroy {
               columns.push(entity.calendar_color_property);
             }
 
+            // Add map color property to select fields if configured (for per-polygon coloring)
+            // Must use FK-aware select string so category embeds return {id, display_name, color}
+            if (entity?.map_color_property && !columns.some(c => c === entity.map_color_property || c.startsWith(entity.map_color_property + ':'))) {
+              const colorPropMeta = [...props, ...filterProps].find(p => p.column_name === entity.map_color_property);
+              columns.push(colorPropMeta ? SchemaService.propertyToSelectStringForList(colorPropMeta) : entity.map_color_property);
+            }
+
             // Build order field for PostgREST
             let orderField: string | undefined = undefined;
             if (sortState.column && sortState.direction) {
@@ -366,6 +375,9 @@ export class ListPage implements OnInit, OnDestroy {
   // Convert entity$ to signal for map configuration
   private entitySignal = toSignal(this.entity$);
 
+  // Expose enum to template for polygon type check
+  public EntityPropertyType = EntityPropertyType;
+
   // Summary VIEWs are read-only aggregates without id/created_at/updated_at.
   // Rows are non-clickable (no detail page navigation).
   public isSummaryView = computed(() => {
@@ -379,13 +391,29 @@ export class ListPage implements OnInit, OnDestroy {
     return entity?.show_map && entity?.map_property_name;
   });
 
-  // Build map markers from current page data
+  // Convert properties$ to signal for computed derivations
+  private propertiesSignal = toSignal(this.properties$, { initialValue: [] as SchemaEntityProperty[] });
+
+  // Detect map property type (GeoPoint vs GeoPolygon)
+  public mapPropertyType = computed(() => {
+    const entity = this.entitySignal();
+    const props = this.propertiesSignal();
+    if (!entity?.map_property_name || !props.length) return EntityPropertyType.GeoPoint;
+    const mapProp = props.find(p => p.column_name === entity.map_property_name);
+    return mapProp?.type ?? EntityPropertyType.GeoPoint;
+  });
+
+  // Build map markers from current page data (for GeoPoint)
   public mapMarkers = computed(() => {
     const entity = this.entitySignal();
     const data = this.dataSignal();
 
     if (!entity?.show_map || !entity?.map_property_name || !data || data.length === 0) {
       return [];
+    }
+
+    if (this.mapPropertyType() === EntityPropertyType.GeoPolygon) {
+      return []; // Polygons handled by mapPolygons computed
     }
 
     const mapProperty = entity.map_property_name;
@@ -401,6 +429,32 @@ export class ListPage implements OnInit, OnDestroy {
       } as MapMarker));
 
     return markers;
+  });
+
+  // Build map polygons from current page data (for GeoPolygon)
+  public mapPolygons = computed(() => {
+    const entity = this.entitySignal();
+    const data = this.dataSignal();
+
+    if (!entity?.show_map || !entity?.map_property_name || !data || data.length === 0) {
+      return [];
+    }
+
+    if (this.mapPropertyType() !== EntityPropertyType.GeoPolygon) {
+      return []; // Points handled by mapMarkers computed
+    }
+
+    const mapProperty = entity.map_property_name;
+    const colorProp = entity.map_color_property;
+
+    return data
+      .filter((row: any) => !!row[mapProperty])
+      .map((row: any) => ({
+        id: row.id,
+        name: row.display_name || `${entity.display_name} #${row.id}`,
+        wkt: row[mapProperty],
+        color: colorProp && row[colorProp] ? resolveColor(row[colorProp]) : undefined
+      } as MapPolygon));
   });
 
   // Calendar-related signals
