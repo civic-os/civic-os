@@ -34,6 +34,7 @@ export interface DataQuery {
     orderDirection?: string;
     searchQuery?: string;
     filters?: FilterCriteria[];
+    rawQueryParams?: string[];
     pagination?: PaginationParams;
     limit?: number;
     isSummaryView?: boolean;

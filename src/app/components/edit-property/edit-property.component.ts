@@ -102,9 +102,11 @@ export class EditPropertyComponent {
   // FK search modal state (v0.45.0)
   showFkSearchModal = signal(false);
   selectedDisplayName = signal('');
-  useFkSearchModal = computed(() =>
-    this.prop().fk_search_modal === true && this.propType() === EntityPropertyType.ForeignKeyName
-  );
+  useFkSearchModal = computed(() => {
+    const type = this.propType();
+    if (type === EntityPropertyType.User) return true;
+    return this.prop().fk_search_modal === true && type === EntityPropertyType.ForeignKeyName;
+  });
   private suppressDisplayNameResolve = false;
 
   /**
@@ -133,7 +135,7 @@ export class EditPropertyComponent {
     const prop = this.prop();
 
     // Load FK options — branch on fk_search_modal (v0.45.0) > options_source_rpc (v0.44.0) > default
-    if(this.propType() == EntityPropertyType.ForeignKeyName) {
+    if(this.propType() == EntityPropertyType.ForeignKeyName || this.propType() == EntityPropertyType.User) {
       if (this.useFkSearchModal()) {
         // FK search modal mode: resolve display name for current value
         const currentId = this.form().get(prop.column_name)?.value;
@@ -180,27 +182,6 @@ export class EditPropertyComponent {
           });
         }));
       }
-    }
-
-    // Load User options
-    // Fetch both public and private display names (full_name only visible if user has permission)
-    if(this.propType() == EntityPropertyType.User) {
-      this.selectOptions$ = this.data.getData({
-        key: 'civic_os_users',
-        fields: ['id', 'display_name', 'full_name', 'phone', 'email'],
-        orderField: 'display_name',
-        orderDirection: 'asc'
-      })
-      .pipe(map(data => {
-        return data.map(d => {
-          // Prefer full_name if available (authorized), otherwise use display_name (public)
-          const displayName = (d as any).full_name || d.display_name;
-          return {
-            id: d.id!,
-            text: displayName,
-          }
-        });
-      }));
     }
 
     // Load Status options from cached SchemaService

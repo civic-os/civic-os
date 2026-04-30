@@ -32,7 +32,33 @@
  * is a public view (backed by payments.transactions). The 'transactions' table name is also
  * included to handle the payments.transactions schema-qualified reference.
  */
+import { SchemaEntityProperty, EntityPropertyType } from '../interfaces/entity';
+
 export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'] as const;
+
+/**
+ * Modal configuration for system types that are NOT registered in schema_entities.
+ * The FK search modal checks this map when SchemaService.getEntity() returns undefined
+ * for a join_table, allowing system types like civic_os_users to render rich modals
+ * with search, sort, and typed columns — without polluting metadata.entities.
+ */
+export interface SystemTypeModalConfig {
+  displayName: string;
+  searchFields: string[];
+  listProperties: Partial<SchemaEntityProperty>[];
+}
+
+export const SYSTEM_TYPE_MODAL_CONFIGS: Record<string, SystemTypeModalConfig> = {
+  civic_os_users: {
+    displayName: 'Users',
+    searchFields: ['display_name', 'full_name', 'email', 'phone'],
+    listProperties: [
+      { column_name: 'display_name', display_name: 'Name', data_type: 'character varying', udt_name: 'varchar', type: EntityPropertyType.TextShort, sortable: true, table_name: 'civic_os_users' },
+      { column_name: 'email', display_name: 'Email', data_type: 'USER-DEFINED', udt_name: 'email_address', type: EntityPropertyType.Email, sortable: true, table_name: 'civic_os_users' },
+      { column_name: 'phone', display_name: 'Phone', data_type: 'USER-DEFINED', udt_name: 'phone_number', type: EntityPropertyType.Telephone, sortable: false, table_name: 'civic_os_users' },
+    ]
+  }
+};
 
 /**
  * Type representing valid system table names.

@@ -2112,4 +2112,54 @@ describe('EditPropertyComponent', () => {
       expect(component.useFkSearchModal()).toBe(false);
     });
   });
+
+  describe('User Type Search Modal (v0.49.1)', () => {
+    it('should always return true for useFkSearchModal when type is User', () => {
+      const formGroup = new FormGroup({
+        assigned_to: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.user);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.useFkSearchModal()).toBe(true);
+    });
+
+    it('should render search modal button (not select) for User type', async () => {
+      const formGroup = new FormGroup({
+        assigned_to: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.user);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      fixture.detectChanges();
+
+      const button = fixture.debugElement.query(By.css('button.btn-outline'));
+      expect(button).toBeTruthy();
+      expect(button.nativeElement.textContent).toContain('Select...');
+
+      // Should NOT render <select>
+      const select = fixture.debugElement.query(By.css('select'));
+      expect(select).toBeFalsy();
+    });
+
+    it('should not require fk_search_modal flag for User type', () => {
+      // User type has no fk_search_modal flag set — should still use modal
+      const userProp = createMockProperty({
+        ...MOCK_PROPERTIES.user,
+        fk_search_modal: false
+      });
+      const formGroup = new FormGroup({
+        assigned_to: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', userProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.useFkSearchModal()).toBe(true);
+    });
+  });
 });

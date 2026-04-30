@@ -18,6 +18,7 @@
                 placeholder="Search..."
                 [ngModel]="searchQuery()"
                 (ngModelChange)="onSearchInput($event)"
+                (keydown.enter)="$event.preventDefault()"
               />
             </div>
           </div>
@@ -164,6 +165,7 @@
             placeholder="Search..."
             [ngModel]="searchQuery()"
             (ngModelChange)="onSearchInput($event)"
+            (keydown.enter)="$event.preventDefault()"
           />
         </div>
       </div>

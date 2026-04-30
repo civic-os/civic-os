@@ -40,6 +40,7 @@ import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
 import { SchemaEntityProperty, EntityData } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
+import { SYSTEM_TYPE_MODAL_CONFIGS } from '../../constants/system-types';
 
 @Component({
   selector: 'app-fk-search-modal',
@@ -94,6 +95,7 @@ export class FkSearchModalComponent implements OnDestroy {
   orderDirection = signal<'asc' | 'desc'>('asc');
   filters = signal<FilterCriteria[]>([]);
   hasSearchFields = signal(false);
+  private ilikeSearchColumns = signal<string[]>([]);
 
   // State — single-select
   pendingSelection = signal<{id: number | string, displayName: string} | null>(null);
@@ -210,13 +212,27 @@ export class FkSearchModalComponent implements OnDestroy {
       switchMap(entity => {
         if (entity) {
           this.hasSearchFields.set(!!(entity.search_fields && entity.search_fields.length > 0));
+          this.ilikeSearchColumns.set([]);
           return combineLatest({
             listProps: this.schema.getPropsForList(entity),
             filterProps: this.schema.getPropsForFilter(entity)
           });
         }
+
+        // System type config: rich modal for types not in schema_entities (e.g., civic_os_users)
+        const systemConfig = SYSTEM_TYPE_MODAL_CONFIGS[tableName];
+        if (systemConfig) {
+          this.hasSearchFields.set(systemConfig.searchFields.length > 0);
+          this.ilikeSearchColumns.set(systemConfig.searchFields);
+          return of({
+            listProps: systemConfig.listProperties as SchemaEntityProperty[],
+            filterProps: [] as SchemaEntityProperty[]
+          });
+        }
+
         // Fallback: entity not registered in schema_entities
         this.hasSearchFields.set(false);
+        this.ilikeSearchColumns.set([]);
         return of({ listProps: [] as SchemaEntityProperty[], filterProps: [] as SchemaEntityProperty[] });
       }),
       catchError(() => {
@@ -250,12 +266,29 @@ export class FkSearchModalComponent implements OnDestroy {
       allFilters.push(rpcFilter);
     }
 
+    // Build search: ILIKE substring matching for system types (phone, email),
+    // or standard FTS (wfts) for schema entities with tsvector columns
+    const ilikeColumns = this.ilikeSearchColumns();
+    const searchTerm = this.searchQuery()?.trim();
+    let searchQuery: string | undefined;
+    let rawQueryParams: string[] | undefined;
+
+    if (searchTerm && ilikeColumns.length > 0) {
+      // System type: use PostgREST or() with ILIKE for true substring matching
+      const safeQuery = searchTerm.replace(/[(),]/g, '');
+      const orClauses = ilikeColumns.map(col => `${col}.ilike.*${safeQuery}*`).join(',');
+      rawQueryParams = [`or=(${orClauses})`];
+    } else {
+      searchQuery = searchTerm || undefined;
+    }
+
     this.data.getDataPaginated({
       key: table,
       fields,
       orderField: this.orderField(),
       orderDirection: this.orderDirection(),
-      searchQuery: this.searchQuery() || undefined,
+      searchQuery,
+      rawQueryParams,
       filters: allFilters.length > 0 ? allFilters : undefined,
       pagination: {
         page: this.currentPage(),

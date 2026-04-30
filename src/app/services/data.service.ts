@@ -72,6 +72,10 @@ export class DataService {
     if(query.limit) {
       args.push(`limit=${query.limit}`);
     }
+    // Append raw PostgREST query params (e.g., or=(...) clauses)
+    if (query.rawQueryParams) {
+      args.push(...query.rawQueryParams);
+    }
     let url = query.key + '?' + args.join('&');
     return this.get(url);
   }
@@ -117,6 +121,10 @@ export class DataService {
     // Add limit if specified (though pagination typically handles this via Range header)
     if(query.limit) {
       args.push(`limit=${query.limit}`);
+    }
+    // Append raw PostgREST query params (e.g., or=(...) clauses)
+    if (query.rawQueryParams) {
+      args.push(...query.rawQueryParams);
     }
 
     const url = query.key + '?' + args.join('&');

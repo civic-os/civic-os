@@ -602,4 +602,71 @@ describe('FkSearchModalComponent', () => {
       expect(callArgs.fields).toEqual(['id', 'display_name']);
     });
   });
+
+  describe('System Type Config (v0.49.1)', () => {
+    it('should use system type config for civic_os_users when entity not in schema_entities', async () => {
+      // civic_os_users is not registered in schema_entities, but has a system type config
+      mockSchemaService.getEntity.and.returnValue(of(undefined));
+      mockDataService.getDataPaginated.and.returnValue(of({
+        data: [
+          { id: 'uuid-1', display_name: 'Alice Smith', email: 'alice@example.com', phone: '5551234567' },
+          { id: 'uuid-2', display_name: 'Bob Jones', email: 'bob@example.com', phone: null }
+        ] as any,
+        totalCount: 2
+      }));
+
+      fixture.componentRef.setInput('joinTable', 'civic_os_users');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Should have populated listProperties from system config (3 columns: Name, Email, Phone)
+      expect(component.listProperties().length).toBe(3);
+      expect(component.listProperties()[0].column_name).toBe('display_name');
+      expect(component.listProperties()[1].column_name).toBe('email');
+      expect(component.listProperties()[2].column_name).toBe('phone');
+
+      // Should have search enabled
+      expect(component.hasSearchFields()).toBe(true);
+
+      // Should NOT have called getPropsForList (not a registered entity)
+      expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
+    });
+
+    it('should show search input for civic_os_users system type', async () => {
+      mockSchemaService.getEntity.and.returnValue(of(undefined));
+      mockDataService.getDataPaginated.and.returnValue(of({
+        data: [{ id: 'uuid-1', display_name: 'Alice' }] as any,
+        totalCount: 1
+      }));
+
+      fixture.componentRef.setInput('joinTable', 'civic_os_users');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search..."]'));
+      expect(searchInput).toBeTruthy();
+    });
+
+    it('should still fall back to empty for unknown unregistered tables', async () => {
+      mockSchemaService.getEntity.and.returnValue(of(undefined));
+      mockDataService.getDataPaginated.and.returnValue(of({
+        data: [{ id: 1, display_name: 'Item' }] as any,
+        totalCount: 1
+      }));
+
+      fixture.componentRef.setInput('joinTable', 'some_unknown_table');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Should have no list properties (empty fallback)
+      expect(component.listProperties().length).toBe(0);
+      expect(component.hasSearchFields()).toBe(false);
+    });
+  });
 });

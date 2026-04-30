@@ -74,3 +74,4 @@ v0-47-0-add-photo-gallery [v0-46-0-m2m-search-modal] 2026-04-20T18:00:00Z Daniel
 v0-47-1-fix-keycloak-update-email [v0-47-0-add-photo-gallery] 2026-04-22T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix Keycloak user update clearing email by adding fetch-then-merge pattern
 v0-48-0-workflow-system [v0-47-1-fix-keycloak-update-email] 2026-04-21T23:11:02Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add multi-step workflow framework
 v0-49-0-add-geo-polygon [v0-48-0-workflow-system] 2026-04-29T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add GeoPolygon support with map_color_property for per-polygon coloring
+v0-49-1-user-search-modal [v0-49-0-add-geo-polygon] 2026-04-30T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add civic_os_text_search to civic_os_users VIEW for user search modal
