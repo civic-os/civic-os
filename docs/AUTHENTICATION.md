@@ -617,13 +617,16 @@ Realm settings → Login → **User registration** = OFF
 | Forgot password | ON (optional) | Email-verified reset doesn't create accounts |
 | Edit username | OFF | Prevents users changing their own username |
 
-**2. Remove social login auto-creation:**
+**2. Replace the first broker login flow for admin-only linking:**
 
-The `auto-link first broker login` flow ships with a **"Create User If Unique"** step that auto-creates accounts for new social logins. To prevent this:
+The default `auto-link first broker login` flow ships with a **"Create User If Unique"** step that auto-creates accounts for new social logins. Simply removing this step does **not** work — the `idp-auto-link` authenticator requires a prior step to set the user context in the auth session, and without it, all first-time social logins fail with `invalid_user_credentials` ([Keycloak #8900](https://github.com/keycloak/keycloak/issues/8900)).
+
+Instead, replace the flow to use **"Detect Existing Broker User"** which finds existing users by email without ever creating new accounts:
 
 1. Go to Authentication → Flows → `auto-link first broker login`
-2. **Delete the "Create User If Unique"** execution step
-3. Leave the "Auto-link existing" sub-flow intact
+2. **Delete all existing steps** (both "Create User If Unique" and the "Auto-link existing" sub-flow)
+3. Add **"Detect Existing Broker User"** (`idp-detect-existing-broker-user`) as **Required**
+4. Add **"Automatically Set Existing User"** (`idp-auto-link`) as **Required**
 
 Before (default — allows new signups via social login):
 
@@ -637,13 +640,15 @@ After (admin-only — links pre-existing accounts only):
 
 | Step | Type | Requirement |
 |---|---|---|
-| Auto-link existing (sub-flow) | flow | Alternative |
-| └─ Automatically set existing user | step | Required |
+| Detect Existing Broker User | execution | Required |
+| Automatically Set Existing User | execution | Required |
 
 **How it works after restricting:**
-- Admin pre-creates user in Civic OS with their corporate email → Go worker creates Keycloak account
-- User clicks "Sign in with Microsoft" → Keycloak matches the incoming email to the pre-existing account → links the identity, login succeeds
-- Unknown email via social login → no step can handle it → access denied
+- Admin pre-creates user in Civic OS with their corporate email → Go worker creates Keycloak account with `emailVerified: true`
+- User clicks "Sign in with Google/Microsoft" → "Detect Existing Broker User" finds the pre-existing account by email → "Automatically Set Existing User" links the identity → login succeeds
+- Unknown email via social login → "Detect Existing Broker User" finds no match → Required step fails → access denied (no account created)
+
+> **Important:** The Identity Provider must have **"Trust email" = ON** so Keycloak trusts the email from the social provider for matching. The provisioned Keycloak account must also have `emailVerified: true` (the Go worker sets this automatically).
 
 **3. Ensure the service account client is configured** (see [Step 8](#step-8-create-service-account-client-v0310-required-for-user-provisioning)) — this becomes the sole path for account creation.
 

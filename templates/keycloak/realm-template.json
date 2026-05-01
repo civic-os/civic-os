@@ -193,7 +193,7 @@
   "authenticationFlows": [
     {
       "alias": "auto-link first broker login",
-      "description": "First broker login flow that auto-creates new users and auto-links existing users by email. For admin-only registration, delete the 'Create User If Unique' execution in the Keycloak admin console.",
+      "description": "First broker login flow that auto-creates new users and auto-links existing users by email. For admin-only registration, replace both steps with 'Detect Existing Broker User' (Required) + 'Automatically Set Existing User' (Required). See docs/AUTHENTICATION.md for details.",
       "providerId": "basic-flow",
       "topLevel": true,
       "builtIn": false,
