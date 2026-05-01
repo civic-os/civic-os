@@ -61,11 +61,13 @@ CREATE TABLE IF NOT EXISTS public.building_use_requests (
     submitted_at TIMESTAMPTZ,
     group_name VARCHAR(200),
     group_type INTEGER REFERENCES metadata.categories(id),
+    borrower_id BIGINT REFERENCES public.borrowers(id),
     contact_name VARCHAR(200),
     contact_email email_address,
     contact_phone phone_number,
     mission_description TEXT,
     decision_notes TEXT,
+    status_id INT REFERENCES metadata.statuses(id),
     created_by UUID DEFAULT current_user_id(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -96,6 +98,12 @@ CREATE TABLE IF NOT EXISTS public.building_use_room_preferences (
 -- GRANTS
 -- ============================================================================
 
+-- Grant to web_anon (read-only public access)
+GRANT SELECT ON public.building_use_requests TO web_anon;
+GRANT SELECT ON public.building_use_event_details TO web_anon;
+GRANT SELECT ON public.building_use_room_preferences TO web_anon;
+
+-- Grant to authenticated (full CRUD)
 GRANT ALL ON public.building_use_requests TO authenticated;
 GRANT ALL ON public.building_use_event_details TO authenticated;
 GRANT ALL ON public.building_use_room_preferences TO authenticated;
@@ -118,6 +126,15 @@ BEGIN
     ALTER TABLE public.building_use_requests
       ADD CONSTRAINT building_use_requests_group_type_fkey
       FOREIGN KEY (group_type) REFERENCES metadata.categories(id);
+  END IF;
+  
+  -- Add index on borrower_id if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes 
+    WHERE tablename = 'building_use_requests' 
+    AND indexname = 'building_use_requests_borrower_id_idx'
+  ) THEN
+    CREATE INDEX building_use_requests_borrower_id_idx ON public.building_use_requests(borrower_id);
   END IF;
 END $$;
 
@@ -531,8 +548,8 @@ DELETE FROM public.building_use_requests WHERE id IN (10001, 10002, 10003, 10004
 --   Parent: draft
 --   Event details: draft (incomplete - missing estimated_attendees to test validation)
 --   Room prefs: none
-INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, contact_name, contact_email, contact_phone, mission_description)
-VALUES (10001, 'Oak Park Cleanup - Draft', 'Oak Park Neighbors', 4, 'Sarah Chen', 'sarah@oakpark.org', '5551112222', 'Monthly neighborhood cleanup and greening initiative.');
+INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, borrower_id, contact_name, contact_email, contact_phone, mission_description)
+VALUES (10001, 'Oak Park Cleanup - Draft', 'Oak Park Neighbors', 4, NULL, 'Sarah Chen', 'sarah@oakpark.org', '5551112222', 'Monthly neighborhood cleanup and greening initiative.');
 
 INSERT INTO public.building_use_event_details (id, building_use_request_id, time_slot, estimated_attendees, setup_needs)
 VALUES (10001, 10001, tstzrange('2026-06-15 09:00:00'::timestamptz, '2026-06-15 12:00:00'::timestamptz), NULL, 'Trash bags, gloves, refreshments');
@@ -541,15 +558,15 @@ VALUES (10001, 10001, tstzrange('2026-06-15 09:00:00'::timestamptz, '2026-06-15 
 --   Parent: draft
 --   Event details: SKIPPED (private_event skips this step)
 --   Room prefs: none
-INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, contact_name, contact_email, contact_phone, mission_description)
-VALUES (10002, 'Smith Birthday Party - Draft', 'Smith Family', 7, 'John Smith', 'john@example.com', '5553334444', 'Private birthday celebration.');
+INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, borrower_id, contact_name, contact_email, contact_phone, mission_description)
+VALUES (10002, 'Smith Birthday Party - Draft', 'Smith Family', 7, NULL, 'John Smith', 'john@example.com', '5553334444', 'Private birthday celebration.');
 
 -- Record 10003: Community Group, COMPLETE
 --   Parent: complete
 --   Event details: complete
 --   Room prefs: skipped (optional for community group)
-INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, contact_name, contact_email, contact_phone, mission_description)
-VALUES (10003, 'Youth Coding Workshop - Complete', 'Code for Good', 5, 'Maria Garcia', 'maria@codeforgood.org', '5555556666', 'Free coding classes for underserved youth.');
+INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, borrower_id, contact_name, contact_email, contact_phone, mission_description)
+VALUES (10003, 'Youth Coding Workshop - Complete', 'Code for Good', 5, NULL, 'Maria Garcia', 'maria@codeforgood.org', '5555556666', 'Free coding classes for underserved youth.');
 
 INSERT INTO public.building_use_event_details (id, status_id, building_use_request_id, time_slot, estimated_attendees, setup_needs)
 SELECT 10003, s.id, 10003, tstzrange('2026-05-15 14:00:00'::timestamptz, '2026-05-15 17:00:00'::timestamptz), 25, 'Tables, chairs, projector, Wi-Fi'
@@ -564,8 +581,8 @@ ON CONFLICT (guided_form_key, parent_id, step_key) DO UPDATE SET completed_at = 
 --   Parent: draft
 --   Event details: complete
 --   Room prefs: draft (required for school - must complete to finish guided_form)
-INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, contact_name, contact_email, contact_phone, mission_description)
-VALUES (10004, 'After-School STEM Program - Draft', 'Lincoln High Robotics', 6, 'David Park', 'david@lincolnhs.edu', '5557778888', 'Weekly robotics and coding workshops for students.');
+INSERT INTO public.building_use_requests (id, display_name, group_name, group_type, borrower_id, contact_name, contact_email, contact_phone, mission_description)
+VALUES (10004, 'After-School STEM Program - Draft', 'Lincoln High Robotics', 6, NULL, 'David Park', 'david@lincolnhs.edu', '5557778888', 'Weekly robotics and coding workshops for students.');
 
 INSERT INTO public.building_use_event_details (id, status_id, building_use_request_id, time_slot, estimated_attendees, setup_needs)
 SELECT 10004, s.id, 10004, tstzrange('2026-05-20 15:30:00'::timestamptz, '2026-05-20 17:30:00'::timestamptz), 40, 'Power strips, laptops, projector'
@@ -584,8 +601,8 @@ ON CONFLICT (guided_form_key, parent_id, step_key) DO UPDATE SET completed_at = 
 --   Event details: complete
 --   Room prefs: complete
 --   Tests: lock_on_submit (editing should fail)
-INSERT INTO public.building_use_requests (id, display_name, submitted_at, group_name, group_type, contact_name, contact_email, contact_phone, mission_description)
-VALUES (10005, 'Community Garden Planning - Submitted', NOW(), 'Green Thumb Collective', 4, 'Amara Okafor', 'amara@greenthumb.org', '5559990000', 'Planning meeting for the new community garden layout.');
+INSERT INTO public.building_use_requests (id, display_name, submitted_at, group_name, group_type, borrower_id, contact_name, contact_email, contact_phone, mission_description)
+VALUES (10005, 'Community Garden Planning - Submitted', NOW(), 'Green Thumb Collective', 4, NULL, 'Amara Okafor', 'amara@greenthumb.org', '5559990000', 'Planning meeting for the new community garden layout.');
 
 INSERT INTO public.building_use_event_details (id, status_id, building_use_request_id, time_slot, estimated_attendees, setup_needs)
 SELECT 10005, s.id, 10005, tstzrange('2026-04-30 10:00:00'::timestamptz, '2026-04-30 12:00:00'::timestamptz), 15, 'Whiteboard, markers, coffee'

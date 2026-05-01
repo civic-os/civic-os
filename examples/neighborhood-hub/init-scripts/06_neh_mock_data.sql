@@ -26,15 +26,11 @@ INSERT INTO tool_instances (display_name, tool_type_id, instance_number, status_
   ('Chainsaw #2',       4, 2, (SELECT id FROM metadata.statuses WHERE entity_type = 'tool_instances' AND status_key = 'maintenance')),
   ('Snow Blower #1',    7, 1, (SELECT id FROM metadata.statuses WHERE entity_type = 'tool_instances' AND status_key = 'retired'));
 
--- Borrowers (mix of approved, pending, rejected)
-INSERT INTO borrowers (display_name, email, phone, status_id) VALUES
-  ('Alice Johnson',   'alice@example.com',   '5551234567', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'approved')),
-  ('Bob Smith',       'bob@example.com',     '5552345678', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'approved')),
-  ('Charlie Brown',   'charlie@example.com', '5553456789', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'pending')),
-  ('Diana Prince',    'diana@example.com',   '5554567890', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'rejected')),
-  ('Eve Wilson',      'eve@example.com',     '5555678901', (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'approved'));
+-- Borrowers need a user_id from civic_os_users, but those are created by Keycloak sync
+-- For mock data, we'll skip borrowers since they require valid user_id references
+-- Instead, we'll create tool reservations without borrower references
 
--- Parcels (mix of eligibility and property classes, with polygon boundaries around Flint MI)
+-- Projects
 INSERT INTO parcels (display_name, parcel_number, prop_num, prop_street, prop_city, prop_zip, acreage, property_class, eligibility, boundary) VALUES
   ('123 Main St',     'P-001', '123',  'Main St',    'FLINT', '48503', 0.2500,
     get_category_id('parcel_property_class', 'residential'),
@@ -66,10 +62,8 @@ INSERT INTO projects (display_name, description) VALUES
   ('Spring Cleanup 2026',  'Annual spring neighborhood cleanup'),
   ('Tree Planting Drive',  'Plant 50 new trees along Main St');
 
--- Some tool reservations
-INSERT INTO tool_reservations (display_name, borrower_id, category_id, tool_type_id, reserved_date, notes) VALUES
-  ('Alice - Mower Reservation', 1, 1, 1, '2026-04-20', 'For weekend lawn care'),
-  ('Bob - Chainsaw Reservation', 2, 2, 4, '2026-04-22', 'Trim oak tree in backyard');
+-- Tool reservations require borrower_id (BIGINT) which needs a valid borrower
+-- Skipping tool reservations in mock data for now since borrowers require user_id
 
 -- Some project-parcel associations
 INSERT INTO project_parcels (project_id, parcel_id) VALUES
