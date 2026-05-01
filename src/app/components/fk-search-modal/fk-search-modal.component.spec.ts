@@ -627,11 +627,38 @@ describe('FkSearchModalComponent', () => {
       expect(component.listProperties()[1].column_name).toBe('email');
       expect(component.listProperties()[2].column_name).toBe('phone');
 
-      // Should have search enabled
+      // Should have search enabled (via hasTextSearch flag, not searchFields)
       expect(component.hasSearchFields()).toBe(true);
 
       // Should NOT have called getPropsForList (not a registered entity)
       expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
+    });
+
+    it('should use tsvector search (wfts) for civic_os_users, not ILIKE', async () => {
+      // v0.50.1: civic_os_users has hasTextSearch=true and searchFields=[]
+      // so search should use the standard wfts path, not ILIKE substring matching
+      mockSchemaService.getEntity.and.returnValue(of(undefined));
+      mockDataService.getDataPaginated.and.returnValue(of({
+        data: [
+          { id: 'uuid-1', display_name: 'Alice Smith', email: 'alice@example.com', phone: '5551234567' }
+        ] as any,
+        totalCount: 1
+      }));
+
+      fixture.componentRef.setInput('joinTable', 'civic_os_users');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Perform a search
+      component.onSearchInput('555');
+      await waitForData();
+
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      // Should use searchQuery (wfts path), NOT rawQueryParams (ILIKE path)
+      expect(callArgs.searchQuery).toBe('555');
+      expect(callArgs.rawQueryParams).toBeUndefined();
     });
 
     it('should show search input for civic_os_users system type', async () => {

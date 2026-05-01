@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -45,13 +45,15 @@ export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_trans
 export interface SystemTypeModalConfig {
   displayName: string;
   searchFields: string[];
+  hasTextSearch?: boolean;
   listProperties: Partial<SchemaEntityProperty>[];
 }
 
 export const SYSTEM_TYPE_MODAL_CONFIGS: Record<string, SystemTypeModalConfig> = {
   civic_os_users: {
     displayName: 'Users',
-    searchFields: ['display_name', 'full_name', 'email', 'phone'],
+    searchFields: [],
+    hasTextSearch: true,
     listProperties: [
       { column_name: 'display_name', display_name: 'Name', data_type: 'character varying', udt_name: 'varchar', type: EntityPropertyType.TextShort, sortable: true, table_name: 'civic_os_users' },
       { column_name: 'email', display_name: 'Email', data_type: 'USER-DEFINED', udt_name: 'email_address', type: EntityPropertyType.Email, sortable: true, table_name: 'civic_os_users' },

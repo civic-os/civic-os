@@ -222,8 +222,12 @@ export class FkSearchModalComponent implements OnDestroy {
         // System type config: rich modal for types not in schema_entities (e.g., civic_os_users)
         const systemConfig = SYSTEM_TYPE_MODAL_CONFIGS[tableName];
         if (systemConfig) {
-          this.hasSearchFields.set(systemConfig.searchFields.length > 0);
-          this.ilikeSearchColumns.set(systemConfig.searchFields);
+          this.hasSearchFields.set(
+            systemConfig.searchFields.length > 0 || !!systemConfig.hasTextSearch
+          );
+          this.ilikeSearchColumns.set(
+            systemConfig.hasTextSearch ? [] : systemConfig.searchFields
+          );
           return of({
             listProps: systemConfig.listProperties as SchemaEntityProperty[],
             filterProps: [] as SchemaEntityProperty[]

@@ -58,10 +58,10 @@ CREATE TABLE borrowers (
     drivers_license_front UUID REFERENCES metadata.photo_galleries(id),
     drivers_license_back UUID REFERENCES metadata.photo_galleries(id),
     civic_os_text_search tsvector GENERATED ALWAYS AS (
-        to_tsvector('simple',
+        to_tsvector('english',
             coalesce(display_name, '') || ' ' ||
             coalesce(email::text, '') || ' ' ||
-            coalesce(phone::text, '')
+            phone_search_tokens(phone)
         )
     ) STORED,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -1094,6 +1094,41 @@ Enable full-text search on List pages by adding a generated tsvector column and 
 
 **Performance**: GIN indexes are highly efficient for full-text search. Expect sub-second queries on tables with millions of rows.
 
+#### Phone Number Search (v0.50.1)
+
+**Problem**: `to_tsvector('english', '3135551234')` produces a single token — searching for `555` or `1234` won't match because tsvector uses lexeme-based lookup, not substring matching.
+
+**Solution**: Use `phone_search_tokens(phone_number)` to pre-compute searchable fragments. The function returns the full number plus area code, exchange, last 4, last 7, and area+exchange as separate tokens.
+
+```sql
+-- Example: phone_search_tokens('3135551234')
+-- Returns: '3135551234 313 555 1234 5551234 313555'
+
+-- Use in a generated tsvector column:
+civic_os_text_search tsvector GENERATED ALWAYS AS (
+    to_tsvector('english',
+        coalesce(display_name, '') || ' ' ||
+        coalesce(email::text, '') || ' ' ||
+        phone_search_tokens(phone)
+    )
+) STORED
+```
+
+**Search behavior** — what queries match which fragments:
+
+| User types | Matches token | Example match |
+|------------|---------------|---------------|
+| `313`      | area code     | All 313 numbers |
+| `555`      | exchange      | All x-555-xxxx numbers |
+| `1234`     | last 4        | All xxx-xxx-1234 numbers |
+| `5551234`  | last 7        | Exact local number |
+| `313555`   | area+exchange | All 313-555-xxxx numbers |
+
+**Requirements**:
+- Column must use the `phone_number` domain type (10-digit CHECK enforced)
+- Keep `'english'` text search config (not `'simple'`). English stemming does not modify numeric tokens, so phone fragments are unaffected. Using `'english'` ensures name searches work correctly with PostgREST's default `websearch_to_tsquery` config.
+- The `civic_os_users` VIEW uses `phone_search_tokens()` automatically (v0.50.1+)
+
 ---
 
 ### Import/Export System

@@ -100,6 +100,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Full-Text Search**: Add `civic_os_text_search` tsvector column (generated, indexed) and configure `metadata.entities.search_fields` array. Frontend automatically displays search input on List pages. See example tables for implementation pattern.
 
+**Phone Search Tokens** (v0.50.1): `phone_search_tokens(phone_number)` pre-computes searchable phone fragments (area code, exchange, last 4, last 7, area+exchange) for GIN-indexed tsvector lookup. Keep `'english'` text config (numeric tokens are unaffected by stemming). The `civic_os_users` VIEW uses this automatically. See `docs/INTEGRATOR_GUIDE.md` (Full-Text Search > Phone Number Search section).
+
 **Excel Import/Export**: Bulk data operations on List pages with FK name resolution and validation. **Custom Import Mode** (v0.31.0+) for non-entity imports. See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for specification.
 
 ## Custom Dashboards
