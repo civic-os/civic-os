@@ -66,6 +66,37 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_eligible_parcels_new TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_eligible_parcels_new TO web_anon;
 
+-- Role-aware borrower dropdown: staff see all approved, borrowers see only themselves
+CREATE OR REPLACE FUNCTION public.get_borrowers_for_reservation(p_id TEXT DEFAULT NULL, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE (id BIGINT, display_name TEXT)
+LANGUAGE plpgsql STABLE
+SECURITY DEFINER
+SET search_path = public, metadata, pg_temp
+AS $$
+BEGIN
+    -- Staff and admin see all approved borrowers
+    IF 'neh_staff' = ANY(get_user_roles()) OR 'neh_admin' = ANY(get_user_roles()) OR is_admin() THEN
+        RETURN QUERY
+            SELECT b.id, b.display_name::TEXT
+            FROM borrowers b
+            JOIN metadata.statuses s ON b.status_id = s.id
+            WHERE s.entity_type = 'borrowers' AND s.status_key = 'approved'
+            ORDER BY b.display_name;
+    ELSE
+        -- Borrowers see only their own record
+        RETURN QUERY
+            SELECT b.id, b.display_name::TEXT
+            FROM borrowers b
+            WHERE b.user_id = current_user_id();
+    END IF;
+END;
+$$;
+
+COMMENT ON FUNCTION public.get_borrowers_for_reservation(TEXT, JSONB) IS
+    'Role-aware borrower dropdown: staff see all approved borrowers, borrowers see only themselves.';
+
+GRANT EXECUTE ON FUNCTION public.get_borrowers_for_reservation(TEXT, JSONB) TO authenticated;
+
 -- ============================================================================
 -- GUIDED FORM RPCs (tool_reservation)
 -- ============================================================================
@@ -82,6 +113,11 @@ DECLARE
     v_borrower_id BIGINT;
     v_status_key TEXT;
 BEGIN
+    -- Staff and admin bypass: they create reservations on behalf of borrowers
+    IF 'neh_staff' = ANY(get_user_roles()) OR 'neh_admin' = ANY(get_user_roles()) OR is_admin() THEN
+        RETURN jsonb_build_object('success', true);
+    END IF;
+
     SELECT b.id INTO v_borrower_id
     FROM borrowers b
     WHERE b.user_id = current_user_id();

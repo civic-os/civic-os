@@ -107,6 +107,8 @@ RETURNS text AS $$
 $$ LANGUAGE SQL STABLE;
 
 -- Tool reservations (guided form: borrower submits reservation, staff approves)
+-- NOTE: checkout_photos/return_photos/checkout_notes/return_notes moved to
+-- tool_reservation_checkouts entity (v0.51.0)
 CREATE TABLE tool_reservations (
     id BIGSERIAL PRIMARY KEY,
     display_name VARCHAR(200),
@@ -115,10 +117,6 @@ CREATE TABLE tool_reservations (
     timeslot tstzrange,
     status_id INT REFERENCES metadata.statuses(id),
     delivery_required BOOLEAN DEFAULT false,
-    checkout_photos UUID REFERENCES metadata.photo_galleries(id),
-    return_photos UUID REFERENCES metadata.photo_galleries(id),
-    checkout_notes TEXT,
-    return_notes TEXT,
     notes TEXT,
     created_by UUID DEFAULT current_user_id(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -291,3 +289,110 @@ RETURNS text AS $$
   JOIN tool_types tt ON tt.id = trti.tool_type_id
   WHERE trt.tool_reservation_id = rec.id;
 $$ LANGUAGE SQL STABLE;
+
+-- ============================================================================
+-- CHECKOUT ENTITY (v0.51.0 — one checkout per reservation)
+-- Placed after tools_summary() since requested_tools() delegates to it.
+-- ============================================================================
+
+-- Checkout record: staff assigns instances, takes photos at checkout/return
+CREATE TABLE tool_reservation_checkouts (
+    id BIGSERIAL PRIMARY KEY,
+    tool_reservation_id BIGINT NOT NULL UNIQUE REFERENCES tool_reservations(id),
+    checkout_photos UUID REFERENCES metadata.photo_galleries(id),
+    return_photos UUID REFERENCES metadata.photo_galleries(id),
+    checkout_notes TEXT,
+    return_notes TEXT,
+    damage_reported BOOLEAN DEFAULT false,
+    status_id INT REFERENCES metadata.statuses(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX ON tool_reservation_checkouts(tool_reservation_id);
+CREATE INDEX ON tool_reservation_checkouts(status_id);
+
+-- Junction: checkout <-> tool_instances (M:M, which specific instances are checked out)
+CREATE TABLE checkout_instances (
+    checkout_id BIGINT NOT NULL REFERENCES tool_reservation_checkouts(id) ON DELETE CASCADE,
+    tool_instance_id INT NOT NULL REFERENCES tool_instances(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (checkout_id, tool_instance_id)
+);
+CREATE INDEX ON checkout_instances(checkout_id);
+CREATE INDEX ON checkout_instances(tool_instance_id);
+
+-- Computed field: delegate to tools_summary() on the linked reservation
+CREATE OR REPLACE FUNCTION public.requested_tools(rec public.tool_reservation_checkouts)
+RETURNS text AS $$
+  SELECT public.tools_summary(tr)
+  FROM public.tool_reservations tr
+  WHERE tr.id = rec.tool_reservation_id;
+$$ LANGUAGE SQL STABLE;
+
+-- Auto-create checkout record when reservation status changes to 'checked_out'
+CREATE OR REPLACE FUNCTION public.auto_create_checkout()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata, pg_temp
+AS $$
+DECLARE
+    v_status_key TEXT;
+    v_checkout_status_id INT;
+BEGIN
+    SELECT status_key INTO v_status_key
+    FROM metadata.statuses WHERE id = NEW.status_id;
+
+    IF v_status_key = 'checked_out' THEN
+        SELECT id INTO v_checkout_status_id
+        FROM metadata.statuses
+        WHERE entity_type = 'tool_reservation_checkouts' AND status_key = 'checked_out';
+
+        INSERT INTO public.tool_reservation_checkouts (tool_reservation_id, status_id)
+        VALUES (NEW.id, v_checkout_status_id)
+        ON CONFLICT (tool_reservation_id) DO NOTHING;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_auto_create_checkout
+    AFTER UPDATE OF status_id ON public.tool_reservations
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
+    EXECUTE FUNCTION public.auto_create_checkout();
+
+-- Damage cascade: when checkout is returned_damaged, set linked instances to maintenance
+CREATE OR REPLACE FUNCTION public.cascade_damage_to_instances()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata, pg_temp
+AS $$
+DECLARE
+    v_status_key TEXT;
+    v_maintenance_status_id INT;
+BEGIN
+    SELECT status_key INTO v_status_key
+    FROM metadata.statuses WHERE id = NEW.status_id;
+
+    IF v_status_key = 'returned_damaged' AND NEW.damage_reported = true THEN
+        SELECT id INTO v_maintenance_status_id
+        FROM metadata.statuses
+        WHERE entity_type = 'tool_instances' AND status_key = 'maintenance';
+
+        UPDATE public.tool_instances
+        SET status_id = v_maintenance_status_id
+        WHERE id IN (
+            SELECT tool_instance_id FROM checkout_instances WHERE checkout_id = NEW.id
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_cascade_damage
+    AFTER UPDATE OF status_id ON public.tool_reservation_checkouts
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
+    EXECUTE FUNCTION public.cascade_damage_to_instances();

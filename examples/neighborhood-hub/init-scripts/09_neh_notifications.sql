@@ -95,7 +95,32 @@ INSERT INTO metadata.notification_templates (
    'Building Use Request Denied',
    '<p>Your building use request for <strong>{{.Entity.group_name}}</strong> has been denied.</p>',
    'Your building use request for {{.Entity.group_name}} has been denied.',
-   'Your building use request for {{.Entity.group_name}} has been denied.')
+   'Your building use request for {{.Entity.group_name}} has been denied.'),
+
+  -- Borrower approved
+  ('borrower_approved',
+   'Sent to borrower when their account is approved',
+   'Borrower Account Approved',
+   '<p>Your borrower account has been approved! You can now reserve tools from the Neighborhood Engagement Hub.</p><p><a href="{{.Metadata.site_url}}/guided-form/tool_reservation">Reserve Tools</a></p>',
+   'Your borrower account has been approved! You can now reserve tools from the Neighborhood Engagement Hub.',
+   'Your NEH borrower account has been approved. You can now reserve tools.'),
+
+  -- Borrower rejected
+  ('borrower_rejected',
+   'Sent to borrower when their account is rejected',
+   'Borrower Account Not Approved',
+   '<p>Your borrower account application has not been approved. Please contact NEH staff for more information.</p>',
+   'Your borrower account application has not been approved. Please contact NEH staff for more information.',
+   'Your NEH borrower account was not approved. Contact staff for details.'),
+
+  -- Borrower barred
+  ('borrower_barred',
+   'Sent to borrower when their account is barred',
+   'Borrower Account Suspended',
+   '<p>Your borrower account has been suspended. Please contact NEH staff for more information.</p>',
+   'Your borrower account has been suspended. Please contact NEH staff for more information.',
+   'Your NEH borrower account has been suspended. Contact staff for details.')
+
 ON CONFLICT (name) DO UPDATE
   SET subject_template = EXCLUDED.subject_template,
       html_template = EXCLUDED.html_template,
@@ -167,38 +192,8 @@ BEGIN
 END;
 $$;
 
--- Notify staff when a new building use request is submitted
-CREATE OR REPLACE FUNCTION public.notify_building_use_request_submitted()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, metadata, pg_temp
-AS $$
-DECLARE
-  v_staff RECORD;
-  v_entity_data JSONB;
-BEGIN
-  v_entity_data := jsonb_build_object(
-    'id', NEW.id,
-    'display_name', NEW.display_name,
-    'group_name', NEW.group_name,
-    'contact_name', NEW.contact_name
-  );
-
-  -- Notify all staff and admin users
-  FOR v_staff IN SELECT user_id FROM get_neh_users_with_role('neh_staff')
-                 UNION
-                 SELECT user_id FROM get_neh_users_with_role('neh_admin')
-  LOOP
-    INSERT INTO metadata.notifications (user_id, template_name, entity_type, entity_id, entity_data)
-    VALUES (v_staff.user_id, 'building_use_request_submitted', 'building_use_requests', NEW.id::text, v_entity_data);
-  END LOOP;
-
-  RETURN NEW;
-END;
-$$;
-
--- Notify requester on building use request status change
+-- Notify on building use request status change
+-- Handles both staff notification (pending) and requester notification (approved/denied)
 CREATE OR REPLACE FUNCTION public.notify_building_use_request_status_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -206,26 +201,79 @@ SECURITY DEFINER
 SET search_path = public, metadata, pg_temp
 AS $$
 DECLARE
+  v_status_key TEXT;
   v_template_name TEXT;
   v_entity_data JSONB;
+  v_staff RECORD;
 BEGIN
-  -- Determine which template to use based on status change
-  CASE (SELECT status_key FROM metadata.statuses WHERE id = NEW.status_id)
+  SELECT status_key INTO v_status_key
+  FROM metadata.statuses WHERE id = NEW.status_id;
+
+  v_entity_data := jsonb_build_object(
+    'id', NEW.id,
+    'display_name', NEW.display_name,
+    'group_name', NEW.group_name,
+    'contact_name', NEW.contact_name
+  );
+
+  -- 'pending' = submission → notify staff
+  IF v_status_key = 'pending' THEN
+    FOR v_staff IN SELECT user_id FROM get_neh_users_with_role('neh_staff')
+                   UNION
+                   SELECT user_id FROM get_neh_users_with_role('neh_admin')
+    LOOP
+      INSERT INTO metadata.notifications (user_id, template_name, entity_type, entity_id, entity_data)
+      VALUES (v_staff.user_id, 'building_use_request_submitted', 'building_use_requests', NEW.id::text, v_entity_data);
+    END LOOP;
+    RETURN NEW;
+  END IF;
+
+  -- Other statuses → notify requester
+  CASE v_status_key
     WHEN 'approved' THEN v_template_name := 'building_use_request_approved';
     WHEN 'denied' THEN v_template_name := 'building_use_request_denied';
     ELSE v_template_name := NULL;
   END CASE;
 
-  -- Send notification to requester if they have a user account
   IF v_template_name IS NOT NULL AND NEW.created_by IS NOT NULL THEN
+    INSERT INTO metadata.notifications (user_id, template_name, entity_type, entity_id, entity_data)
+    VALUES (NEW.created_by, v_template_name, 'building_use_requests', NEW.id::text, v_entity_data);
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+-- Notify borrower on borrower status change (approved, rejected, barred)
+CREATE OR REPLACE FUNCTION public.notify_borrower_status_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata, pg_temp
+AS $$
+DECLARE
+  v_status_key TEXT;
+  v_template_name TEXT;
+  v_entity_data JSONB;
+BEGIN
+  SELECT status_key INTO v_status_key
+  FROM metadata.statuses WHERE id = NEW.status_id;
+
+  CASE v_status_key
+    WHEN 'approved' THEN v_template_name := 'borrower_approved';
+    WHEN 'rejected' THEN v_template_name := 'borrower_rejected';
+    WHEN 'barred' THEN v_template_name := 'borrower_barred';
+    ELSE v_template_name := NULL;
+  END CASE;
+
+  IF v_template_name IS NOT NULL AND NEW.user_id IS NOT NULL THEN
     v_entity_data := jsonb_build_object(
       'id', NEW.id,
-      'display_name', NEW.display_name,
-      'group_name', NEW.group_name
+      'display_name', NEW.display_name
     );
 
     INSERT INTO metadata.notifications (user_id, template_name, entity_type, entity_id, entity_data)
-    VALUES (NEW.created_by, v_template_name, 'building_use_requests', NEW.id::text, v_entity_data);
+    VALUES (NEW.user_id, v_template_name, 'borrowers', NEW.id::text, v_entity_data);
   END IF;
 
   RETURN NEW;
@@ -246,13 +294,19 @@ CREATE TRIGGER trg_notify_tool_reservation_update
   FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
   EXECUTE FUNCTION public.notify_tool_reservation_status_change();
 
+-- No INSERT trigger for building_use_requests — drafts should not notify.
+-- Submission fires via on_submit_rpc setting status to 'pending', which fires the status_change trigger.
 DROP TRIGGER IF EXISTS trg_notify_building_use_request_insert ON public.building_use_requests;
-CREATE TRIGGER trg_notify_building_use_request_insert
-  AFTER INSERT ON public.building_use_requests
-  FOR EACH ROW EXECUTE FUNCTION public.notify_building_use_request_submitted();
 
 DROP TRIGGER IF EXISTS trg_notify_building_use_request_update ON public.building_use_requests;
 CREATE TRIGGER trg_notify_building_use_request_update
   AFTER UPDATE OF status_id ON public.building_use_requests
   FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
   EXECUTE FUNCTION public.notify_building_use_request_status_change();
+
+-- Borrower status change notifications
+DROP TRIGGER IF EXISTS trg_notify_borrower_status_change ON public.borrowers;
+CREATE TRIGGER trg_notify_borrower_status_change
+  AFTER UPDATE OF status_id ON public.borrowers
+  FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
+  EXECUTE FUNCTION public.notify_borrower_status_change();

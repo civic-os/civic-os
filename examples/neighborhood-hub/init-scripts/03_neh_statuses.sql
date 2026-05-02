@@ -9,7 +9,8 @@ INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, sta
 VALUES
   ('borrowers', 'Pending',  '#f59e0b', 1, 'pending',  true,  false),
   ('borrowers', 'Approved', '#22c55e', 2, 'approved', false, false),
-  ('borrowers', 'Rejected', '#ef4444', 3, 'rejected', false, true);
+  ('borrowers', 'Rejected', '#ef4444', 3, 'rejected', false, true),
+  ('borrowers', 'Barred',   '#dc2626', 4, 'barred',   false, true);
 
 -- Tool instance condition tracking
 INSERT INTO metadata.status_types (entity_type, display_name, description)
@@ -36,6 +37,17 @@ VALUES
   ('tool_reservations', 'Completed',   '#6b7280', 5, 'completed',   false, true),
   ('tool_reservations', 'Denied',      '#ef4444', 6, 'denied',      false, true),
   ('tool_reservations', 'Cancelled',   '#94a3b8', 7, 'cancelled',   false, true);
+
+-- Tool reservation checkout tracking
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('tool_reservation_checkouts', 'Checkout', 'Tracking status for tool checkouts')
+ON CONFLICT (entity_type) DO NOTHING;
+
+INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, status_key, is_initial, is_terminal)
+VALUES
+  ('tool_reservation_checkouts', 'Checked Out',      '#f59e0b', 1, 'checked_out',      true,  false),
+  ('tool_reservation_checkouts', 'Returned',         '#22c55e', 2, 'returned',         false, true),
+  ('tool_reservation_checkouts', 'Returned Damaged', '#ef4444', 3, 'returned_damaged', false, true);
 
 -- Building use request workflow
 INSERT INTO metadata.status_types (entity_type, display_name, description)

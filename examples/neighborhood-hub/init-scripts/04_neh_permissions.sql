@@ -2,7 +2,7 @@
 
 -- Define NEH roles
 INSERT INTO metadata.roles (role_key, display_name, description)
-VALUES 
+VALUES
   ('neh_borrower', 'NEH Borrower', 'Default role for community members borrowing tools'),
   ('neh_staff', 'NEH Staff', 'Staff member who approves requests and manages inventory'),
   ('neh_admin', 'NEH Admin', 'Administrator with full access to all NEH features')
@@ -17,6 +17,8 @@ GRANT SELECT ON tool_instances TO web_anon;
 GRANT SELECT ON borrowers TO web_anon;
 GRANT SELECT ON parcels TO web_anon;
 GRANT SELECT ON tool_reservations TO web_anon;
+GRANT SELECT ON tool_reservation_checkouts TO web_anon;
+GRANT SELECT ON checkout_instances TO web_anon;
 GRANT SELECT ON projects TO web_anon;
 GRANT SELECT ON project_parcels TO web_anon;
 GRANT SELECT ON tool_reservation_tools TO web_anon;
@@ -32,6 +34,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON tool_instances TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON borrowers TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON parcels TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON tool_reservations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON tool_reservation_checkouts TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON checkout_instances TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON projects TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON project_parcels TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON tool_reservation_tools TO authenticated;
@@ -46,6 +50,7 @@ GRANT USAGE, SELECT ON SEQUENCE tool_types_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE tool_instances_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE parcels_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE tool_reservations_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE tool_reservation_checkouts_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE projects_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE tool_reservation_tools_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE tool_reservation_work_site_id_seq TO authenticated;
@@ -60,11 +65,11 @@ DO $$
 DECLARE
   tables TEXT[] := ARRAY[
     'tool_categories', 'tool_types', 'tool_instances', 'borrowers',
-    'tool_reservations', 'projects', 'parcels', 'project_parcels',
+    'tool_reservations', 'tool_reservation_checkouts', 'checkout_instances',
+    'projects', 'parcels', 'project_parcels',
     'tool_reservation_tools', 'tool_reservation_tool_items',
     'tool_reservation_work_site', 'work_site_parcels',
-    'building_use_requests',
-    'building_use_event_details', 'building_use_room_preferences'
+    'building_use_requests', 'building_use_room_preferences'
   ];
   perms TEXT[] := ARRAY['read', 'create', 'update', 'delete'];
   t TEXT;
@@ -99,17 +104,17 @@ BEGIN
       -- Admin always gets all permissions
       INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_admin_id) ON CONFLICT (permission_id, role_id) DO NOTHING;
       INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_editor_id) ON CONFLICT DO NOTHING;
-      
+
       -- NEH Admin gets all permissions
       INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_neh_admin_id) ON CONFLICT DO NOTHING;
-      
+
       -- NEH Staff gets all permissions except delete on some tables
       IF t IN ('tool_categories', 'tool_types', 'tool_instances', 'parcels', 'projects') AND p = 'delete' THEN
         -- Skip delete permissions for staff on master data tables
       ELSE
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_staff_id) ON CONFLICT DO NOTHING;
       END IF;
-      
+
       -- NEH Borrower gets limited permissions
       IF t = 'borrowers' AND p IN ('read', 'update') THEN
         -- Borrowers can read and update their own record
@@ -121,14 +126,17 @@ BEGIN
                   'tool_reservation_work_site', 'work_site_parcels') AND p IN ('read', 'create', 'update', 'delete') THEN
         -- Borrowers can manage guided form step data (full CRUD for M:M editing)
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
-      ELSIF t IN ('building_use_event_details', 'building_use_room_preferences') AND p IN ('read', 'create', 'update') THEN
+      ELSIF t = 'building_use_room_preferences' AND p IN ('read', 'create', 'update') THEN
         -- Borrowers can create/read/update their own building use details
+        INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
+      ELSIF t IN ('tool_reservation_checkouts', 'checkout_instances') AND p = 'read' THEN
+        -- Borrowers can read checkout records for their reservations
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
       ELSIF p = 'read' THEN
         -- Borrowers can read reference data
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
       END IF;
-      
+
       -- Anonymous users get read access to some tables
       IF p = 'read' AND t IN ('tool_categories', 'tool_types', 'parcels') THEN
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_anon_id) ON CONFLICT DO NOTHING;

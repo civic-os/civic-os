@@ -8,8 +8,10 @@ SECURITY DEFINER
 SET search_path = public, metadata, pg_temp
 AS $$
 BEGIN
-  INSERT INTO public.borrowers (user_id, display_name)
-  VALUES (NEW.id, NEW.display_name)
+  INSERT INTO public.borrowers (user_id, display_name, status_id)
+  VALUES (NEW.id, NEW.display_name,
+    (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'pending')
+  )
   ON CONFLICT (user_id) DO UPDATE
     SET display_name = EXCLUDED.display_name,
         updated_at = now();
@@ -28,8 +30,10 @@ SECURITY DEFINER
 SET search_path = public, metadata, pg_temp
 AS $$
 BEGIN
-  INSERT INTO public.borrowers (user_id, display_name, phone, email)
-  VALUES (NEW.id, NEW.display_name, NEW.phone, NEW.email)
+  INSERT INTO public.borrowers (user_id, display_name, phone, email, status_id)
+  VALUES (NEW.id, NEW.display_name, NEW.phone, NEW.email,
+    (SELECT id FROM metadata.statuses WHERE entity_type = 'borrowers' AND status_key = 'pending')
+  )
   ON CONFLICT (user_id) DO UPDATE
     SET display_name = EXCLUDED.display_name,
         phone = EXCLUDED.phone,

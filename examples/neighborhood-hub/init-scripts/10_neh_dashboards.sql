@@ -50,7 +50,7 @@ BEGIN
 
     -- My Building Use Requests
     (v_borrower_dashboard_id, 'filtered_list',
-     '{"entity": "building_use_requests", "filter": {"created_by": "{{current_user.id}}"}, "title": "My Building Use Requests", "columns": ["display_name", "group_name", "status.display_name"]}', 30),
+     '{"entity": "building_use_requests", "filter": {"created_by": "{{current_user.id}}"}, "title": "My Building Use Requests", "columns": ["display_name", "group_name", "time_slot", "status.display_name"]}', 30),
 
     -- My Borrower Status
     (v_borrower_dashboard_id, 'markdown',
@@ -65,40 +65,62 @@ BEGIN
   -- ========================================
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, config, sort_order)
   VALUES
-    -- Pending Requests
+    -- Pending Tool Reservations
     (v_staff_dashboard_id, 'filtered_list',
      '{"entity": "tool_reservations", "filter": {"status.status_key": "pending"}, "title": "Pending Tool Reservations", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 10),
 
-    -- Today''s Checkouts
+    -- Pending Building Use Requests
     (v_staff_dashboard_id, 'filtered_list',
-     '{"entity": "tool_reservations", "filter": {"status.status_key": "approved"}, "title": "Upcoming Checkouts", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 20),
+     '{"entity": "building_use_requests", "filter": {"status.status_key": "pending"}, "title": "Pending Building Use Requests", "columns": ["display_name", "group_name", "contact_name", "time_slot"]}', 15),
 
-    -- Overdue Items
+    -- Pending Borrower Approvals
+    (v_staff_dashboard_id, 'filtered_list',
+     '{"entity": "borrowers", "filter": {"status.status_key": "pending"}, "title": "Pending Borrower Approvals", "columns": ["display_name", "email", "phone", "status.display_name"]}', 18),
+
+    -- Upcoming Checkouts (approved reservations)
+    (v_staff_dashboard_id, 'filtered_list',
+     '{"entity": "tool_reservations", "filter": {"status.status_key": "approved"}, "title": "Approved - Awaiting Checkout", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 20),
+
+    -- Currently Checked Out
     (v_staff_dashboard_id, 'filtered_list',
      '{"entity": "tool_reservations", "filter": {"status.status_key": "checked_out"}, "title": "Currently Checked Out", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 30),
 
-    -- Calendar
+    -- Tool Reservation Calendar
     (v_staff_dashboard_id, 'calendar',
-     '{"entity": "tool_reservations", "date_field": "timeslot", "title_field": "display_name", "color_field": "status.color", "title": "Reservation Calendar"}', 40),
+     '{"entity": "tool_reservations", "date_field": "timeslot", "title_field": "display_name", "color_field": "status.color", "title": "Tool Reservation Calendar"}', 40),
+
+    -- Building Use Calendar
+    (v_staff_dashboard_id, 'calendar',
+     '{"entity": "building_use_requests", "date_field": "time_slot", "title_field": "display_name", "color_field": "status.color", "title": "Building Use Calendar"}', 45),
 
     -- Quick Actions
     (v_staff_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Approve Requests", "url": "/view/tool_reservations"}, {"label": "Create Reservation", "url": "/guided-form/tool_reservation"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}]}', 50);
+     '{"buttons": [{"label": "Approve Requests", "url": "/view/tool_reservations"}, {"label": "Create Reservation", "url": "/guided-form/tool_reservation"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}]}', 50);
 
   -- ========================================
   -- Admin Dashboard Widgets
   -- ========================================
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, config, sort_order)
   VALUES
-    -- Pending Requests (same as staff)
+    -- Pending Tool Reservations (same as staff)
     (v_admin_dashboard_id, 'filtered_list',
      '{"entity": "tool_reservations", "filter": {"status.status_key": "pending"}, "title": "Pending Tool Reservations", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 10),
 
+    -- Pending Building Use Requests
+    (v_admin_dashboard_id, 'filtered_list',
+     '{"entity": "building_use_requests", "filter": {"status.status_key": "pending"}, "title": "Pending Building Use Requests", "columns": ["display_name", "group_name", "contact_name", "time_slot"]}', 15),
+
+    -- Currently Checked Out
     (v_admin_dashboard_id, 'filtered_list',
      '{"entity": "tool_reservations", "filter": {"status.status_key": "checked_out"}, "title": "Currently Checked Out", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 20),
 
+    -- Tool Reservation Calendar
     (v_admin_dashboard_id, 'calendar',
-     '{"entity": "tool_reservations", "date_field": "timeslot", "title_field": "display_name", "color_field": "status.color", "title": "Reservation Calendar"}', 30),
+     '{"entity": "tool_reservations", "date_field": "timeslot", "title_field": "display_name", "color_field": "status.color", "title": "Tool Reservation Calendar"}', 30),
+
+    -- Building Use Calendar
+    (v_admin_dashboard_id, 'calendar',
+     '{"entity": "building_use_requests", "date_field": "time_slot", "title_field": "display_name", "color_field": "status.color", "title": "Building Use Calendar"}', 35),
 
     -- System Health
     (v_admin_dashboard_id, 'markdown',
@@ -106,7 +128,7 @@ BEGIN
 
     -- Admin Navigation
     (v_admin_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Manage Users", "url": "/admin/users"}, {"label": "Permissions", "url": "/permissions"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}]}', 50);
+     '{"buttons": [{"label": "Manage Users", "url": "/admin/users"}, {"label": "Permissions", "url": "/permissions"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}]}', 50);
 
   -- ========================================
   -- Map roles to dashboards

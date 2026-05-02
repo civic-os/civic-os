@@ -12,6 +12,7 @@ VALUES
   ('tool_reservations', 'Tool Reservations', 'Reservations for borrowing tools', '{display_name}', 5),
   ('tool_reservation_tools', 'Tool Selection', 'Selected tools for reservation', NULL, 5),
   ('tool_reservation_work_site', 'Work Site', 'Parcel selections for reservation', NULL, 5),
+  ('tool_reservation_checkouts', 'Checkouts', 'Checkout records for tool reservations', NULL, 5),
   ('projects',          'Projects',          'Neighborhood improvement projects', '{display_name}', 6),
   ('parcels',           'Parcels',           'Properties in the neighborhood', '{display_name,parcel_number,prop_street,prop_zip}', 7)
 ON CONFLICT (table_name) DO UPDATE
@@ -45,7 +46,11 @@ VALUES
   -- Step table: tool_reservation_work_site (timestamps + FK hidden)
   ('tool_reservation_work_site', 'created_at', false, false, false),
   ('tool_reservation_work_site', 'updated_at', false, false, false),
-  ('tool_reservation_work_site', 'tool_reservation_id', false, false, false)
+  ('tool_reservation_work_site', 'tool_reservation_id', false, false, false),
+  -- Checkout entity (timestamps + FK hidden)
+  ('tool_reservation_checkouts', 'created_at', false, false, false),
+  ('tool_reservation_checkouts', 'updated_at', false, false, false),
+  ('tool_reservation_checkouts', 'tool_reservation_id', false, false, false)
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET show_on_list = EXCLUDED.show_on_list,
       show_on_create = EXCLUDED.show_on_create,
@@ -55,7 +60,8 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 INSERT INTO metadata.properties (table_name, column_name, display_name, status_entity_type)
 VALUES
   ('borrowers', 'status_id', 'Status', 'borrowers'),
-  ('tool_instances', 'status_id', 'Condition', 'tool_instances')
+  ('tool_instances', 'status_id', 'Condition', 'tool_instances'),
+  ('tool_reservation_checkouts', 'status_id', 'Checkout Status', 'tool_reservation_checkouts')
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
       status_entity_type = EXCLUDED.status_entity_type;
@@ -71,10 +77,10 @@ ON CONFLICT (table_name, column_name) DO UPDATE
       show_on_edit = EXCLUDED.show_on_edit,
       show_on_detail = EXCLUDED.show_on_detail;
 
--- Remove stale metadata for deleted columns (category_id, tool_type_id, quantity)
+-- Remove stale metadata for deleted columns (category_id, tool_type_id, quantity, checkout_photos, etc.)
 DELETE FROM metadata.properties
 WHERE table_name = 'tool_reservations'
-  AND column_name IN ('category_id', 'tool_type_id', 'quantity');
+  AND column_name IN ('category_id', 'tool_type_id', 'quantity', 'checkout_photos', 'return_photos', 'checkout_notes', 'return_notes');
 
 -- ============================================================================
 -- CATEGORIES (v0.34.0+)
@@ -87,7 +93,7 @@ ON CONFLICT (entity_type) DO NOTHING;
 
 -- Register categories for Tool Shed and Event Kit
 INSERT INTO metadata.categories (entity_type, display_name, category_key, color, sort_order)
-VALUES 
+VALUES
   ('inventory_module', 'Tool Shed', 'tool_shed', '#22c55e', 1),
   ('inventory_module', 'Event Kit', 'event_kit', '#3b82f6', 2)
 ON CONFLICT (entity_type, display_name) DO NOTHING;
@@ -166,16 +172,32 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 -- Configure photo gallery constraints for borrowers
 INSERT INTO metadata.photo_gallery_config (table_name, column_name, max_images, allowed_types)
-VALUES 
+VALUES
   ('borrowers', 'drivers_license_front', 1, 'image/jpeg,image/png,image/webp'),
   ('borrowers', 'drivers_license_back', 1, 'image/jpeg,image/png,image/webp')
 ON CONFLICT (table_name, column_name) DO NOTHING;
 
 -- Configure photo gallery properties display
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width)
-VALUES 
+VALUES
   ('borrowers', 'drivers_license_front', 'Driver''s License Front', 60, 1),
   ('borrowers', 'drivers_license_back', 'Driver''s License Back', 61, 1)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET display_name = EXCLUDED.display_name,
+      sort_order = EXCLUDED.sort_order,
+      column_width = EXCLUDED.column_width;
+
+-- Configure photo gallery for checkout entity
+INSERT INTO metadata.photo_gallery_config (table_name, column_name, max_images, allowed_types)
+VALUES
+  ('tool_reservation_checkouts', 'checkout_photos', 10, 'image/jpeg,image/png,image/webp'),
+  ('tool_reservation_checkouts', 'return_photos', 10, 'image/jpeg,image/png,image/webp')
+ON CONFLICT (table_name, column_name) DO NOTHING;
+
+INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width)
+VALUES
+  ('tool_reservation_checkouts', 'checkout_photos', 'Checkout Photos', 50, 2),
+  ('tool_reservation_checkouts', 'return_photos', 'Return Photos', 51, 2)
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET display_name = EXCLUDED.display_name,
       sort_order = EXCLUDED.sort_order,
@@ -191,11 +213,11 @@ VALUES ('projects', 'project_parcels_m2m', true, true)
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET fk_search_modal = true, show_inline = true;
 
--- Enable FK search modal on borrower_id (single-select modal)
-INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, join_table)
-VALUES ('tool_reservations', 'borrower_id', true, 'borrowers')
+-- Enable FK search modal on borrower_id with role-aware RPC filter
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, join_table, options_source_rpc)
+VALUES ('tool_reservations', 'borrower_id', true, 'borrowers', 'get_borrowers_for_reservation')
 ON CONFLICT (table_name, column_name) DO UPDATE
-  SET fk_search_modal = true, join_table = 'borrowers';
+  SET fk_search_modal = true, join_table = 'borrowers', options_source_rpc = 'get_borrowers_for_reservation';
 
 -- Step 1: Tools M:M (inline search modal with available-only RPC filter)
 INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, show_inline, options_source_rpc)
@@ -209,9 +231,18 @@ VALUES ('tool_reservation_work_site', 'work_site_parcels_m2m', true, true, 'get_
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET fk_search_modal = true, show_inline = true, options_source_rpc = 'get_eligible_parcels_new';
 
--- Enable search modal on borrower_id FK for other reservation types
-INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, join_table)
-VALUES 
-  ('building_use_requests', 'borrower_id', true, 'borrowers')
+-- Checkout instances M:M (FK search modal for instance selection)
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, show_inline)
+VALUES ('tool_reservation_checkouts', 'checkout_instances_m2m', true, true)
 ON CONFLICT (table_name, column_name) DO UPDATE
-  SET fk_search_modal = true, join_table = 'borrowers';
+  SET fk_search_modal = true, show_inline = true;
+
+-- Enable search modal on borrower_id FK for building use requests
+INSERT INTO metadata.properties (table_name, column_name, fk_search_modal, join_table, options_source_rpc)
+VALUES
+  ('building_use_requests', 'borrower_id', true, 'borrowers', 'get_borrowers_for_reservation')
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET fk_search_modal = true, join_table = 'borrowers', options_source_rpc = 'get_borrowers_for_reservation';
+
+-- Hide checkout entity from sidebar (accessed via tool reservation detail page)
+UPDATE metadata.entities SET show_in_sidebar = false WHERE table_name = 'tool_reservation_checkouts';
