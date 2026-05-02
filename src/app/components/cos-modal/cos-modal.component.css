@@ -45,8 +45,10 @@
   /* CRITICAL: position: relative, NOT fixed */
   /* This allows the box to participate in flexbox centering */
   position: relative;
-  /* DaisyUI theme-aware styles */
-  @apply bg-base-100 text-base-content shadow-xl;
+  /* DaisyUI theme-aware styles (expanded from @apply for Tailwind v4 compat) */
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   border-radius: var(--rounded-box, 0.5rem);
   padding: 1.5rem;
   /* Responsive sizing - dvh handles mobile browser chrome */

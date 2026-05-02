@@ -3,9 +3,36 @@
 @import 'leaflet.markercluster/dist/MarkerCluster.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography" {
+  className: prose;
+}
+
+@plugin "daisyui" {
+  themes: light, dark, corporate --default, nord, emerald,
+    abyss, acid, aqua, autumn, black,
+    bumblebee, business, caramellatte, cmyk, coffee,
+    cupcake, cyberpunk, dim, dracula, fantasy,
+    forest, garden, halloween, lemonade, lofi,
+    luxury, night, pastel, retro, silk,
+    sunset, synthwave, valentine, winter, wireframe;
+}
+
+/* Safelist: classes dynamically constructed at runtime (e.g., `btn-${style}`) */
+/* Tailwind v4 @source inline replaces the v3 safelist in tailwind.config.js */
+@source inline("
+  btn-primary btn-secondary btn-accent btn-neutral
+  btn-info btn-success btn-warning btn-error btn-ghost
+  border-l-primary border-l-secondary border-l-accent border-l-neutral
+  border-l-info border-l-success border-l-warning border-l-error border-l-base-300
+");
+
+/* Override prose max-width (was in tailwind.config.js theme.extend.typography) */
+/* All CRUD pages wrap content in <div class="prose"> */
+.prose {
+    max-width: none;
+}
 
 body {
     margin-bottom: 24px;

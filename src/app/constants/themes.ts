@@ -42,7 +42,7 @@ export function themeNameToLabel(name: string): string {
 /**
  * Fallback list of all DaisyUI 5 built-in themes.
  * Used when CSS rule scanning fails (e.g., Firefox dev mode with blob: stylesheet URLs).
- * Must match the themes array in tailwind.config.js.
+ * Must match the themes in the @plugin "daisyui" block in src/styles.css.
  */
 const ALL_DAISYUI_THEMES: string[] = [
   'abyss', 'acid', 'aqua', 'autumn', 'black', 'bumblebee', 'business',

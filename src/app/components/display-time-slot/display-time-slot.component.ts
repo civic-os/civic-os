@@ -26,7 +26,7 @@ import { Component, input, computed, ChangeDetectionStrategy } from '@angular/co
   `,
   styles: [`
     .time-slot-display {
-      @apply text-base-content;
+      color: var(--color-base-content);
     }
   `]
 })

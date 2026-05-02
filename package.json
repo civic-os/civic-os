@@ -34,6 +34,7 @@
     "@angular/platform-browser": "^20.3.16",
     "@angular/platform-browser-dynamic": "^20.3.16",
     "@angular/router": "^20.3.16",
+    "@dintecom/ngx-currency": "^20.0.0",
     "@fullcalendar/angular": "^6.1.19",
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
@@ -54,7 +55,6 @@
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "mermaid": "^11.12.0",
-    "@dintecom/ngx-currency": "^20.0.0",
     "ngx-image-cropper": "^9.1.6",
     "ngx-markdown": "^20.1.0",
     "ngx-mask": "^20.0.3",
@@ -71,6 +71,7 @@
     "@angular/compiler-cli": "^20.3.16",
     "@faker-js/faker": "^10.0.0",
     "@lhci/cli": "^0.15.1",
+    "@tailwindcss/postcss": "^4.2.4",
     "@tailwindcss/typography": "^0.5.10",
     "@types/jasmine": "~5.1.0",
     "@types/jointjs": "^1.0.5",
@@ -88,7 +89,7 @@
     "pa11y-ci": "^4.0.1",
     "pg": "^8.16.3",
     "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6",
+    "tailwindcss": "^4.2.4",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.0"
   }
