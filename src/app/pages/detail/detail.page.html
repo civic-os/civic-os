@@ -126,16 +126,26 @@
                 <div class="col-span-full">
                   <label class="label"><span class="font-semibold">{{ item.display_name }}</span></label>
                   <div class="flex flex-wrap gap-1">
-                    @for (val of data[item.column_name] || []; track val.id) {
+                    @let allItems = data[item.column_name] || [];
+                    @let isExpanded = isInlineM2mExpanded(item.column_name);
+                    @let visibleItems = isExpanded || allItems.length <= INLINE_M2M_CHIP_LIMIT ? allItems : allItems.slice(0, INLINE_M2M_CHIP_LIMIT);
+                    @for (val of visibleItems; track val.id) {
                       <a [routerLink]="['/view', item.many_to_many_meta!.relatedTable, val.id]"
-                         class="badge badge-lg badge-primary gap-1 py-3 px-3 cursor-pointer hover:opacity-80 transition-opacity">
+                         class="badge badge-lg badge-primary !text-primary-content gap-1 py-3 px-3 cursor-pointer hover:opacity-80 transition-opacity">
                         @if (val.color) {
                           <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="val.color"></span>
                         }
-                        {{ val.display_name }}
+                        {{ item.many_to_many_meta!.extraColumns.length > 0 ? formatRichJunctionLabel(val.display_name, val._junction, item.many_to_many_meta!.extraColumns) : val.display_name }}
                       </a>
                     } @empty {
                       <span class="text-base-content/50 italic text-sm">None</span>
+                    }
+                    @if (!isExpanded && allItems.length > INLINE_M2M_CHIP_LIMIT) {
+                      <button
+                        class="badge badge-lg badge-ghost gap-1 py-3 px-3 cursor-pointer hover:bg-base-200 transition-colors"
+                        (click)="toggleInlineM2mExpand(item.column_name)">
+                        + {{ allItems.length - INLINE_M2M_CHIP_LIMIT }} more
+                      </button>
                     }
                   </div>
                 </div>

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, ManyToManyMeta } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, ManyToManyMeta, ParentHop } from '../interfaces/entity';
 
 /**
  * Creates a mock SchemaEntityTable with sensible defaults.
@@ -245,6 +245,7 @@ export function createMockManyToManyMeta(overrides?: Partial<ManyToManyMeta>): M
     showOnTarget: true,
     displayOrder: 100,
     relatedTableHasColor: true,
+    extraColumns: [],
     ...overrides
   };
 }

@@ -235,6 +235,17 @@ export class DetailPage {
   protected readonly isStaticText = isStaticText;
   protected readonly isProperty = isProperty;
 
+  /** v0.51.0: Format chip label for rich junctions (inline M:M on detail page) */
+  formatRichJunctionLabel(displayName: string, junctionData: Record<string, unknown> | undefined, extraColumns: SchemaEntityProperty[]): string {
+    if (!junctionData || extraColumns.length === 0) return displayName;
+    const parts = extraColumns
+      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+      .map(col => junctionData[col.column_name])
+      .filter(val => val !== null && val !== undefined && val !== '');
+    if (parts.length === 0) return displayName;
+    return `${displayName} / ${parts.join(' / ')}`;
+  }
+
   /**
    * Fetch entity actions for the current entity.
    * Actions are filtered by permission (can_execute) on the server side.
@@ -298,9 +309,14 @@ export class DetailPage {
             if (p.type === EntityPropertyType.ManyToMany && p.many_to_many_meta) {
               const dataAny = data as any;
               const junctionData = dataAny[p.column_name] || [];
+              // v0.51.0: Pass extra column names for rich junction _junction data
+              const extraColNames = p.many_to_many_meta.extraColumns.map(c => c.column_name);
               dataAny[p.column_name] = DataService.transformManyToManyData(
                 junctionData,
-                p.many_to_many_meta.relatedTable
+                p.many_to_many_meta.relatedTable,
+                extraColNames.length > 0 ? extraColNames : undefined,
+                p.many_to_many_meta.parentHops,
+                p.many_to_many_meta.parentHops?.length ? p.many_to_many_meta.targetTable : undefined
               );
             }
           });
@@ -652,6 +668,25 @@ export class DetailPage {
 
   // Threshold for showing preview vs "View all" only
   readonly LARGE_RELATIONSHIP_THRESHOLD = 20;
+
+  // Inline M:M chip cap (show first N, then "+ x more" to expand)
+  readonly INLINE_M2M_CHIP_LIMIT = 10;
+  expandedInlineM2m = signal<Set<string>>(new Set());
+
+  toggleInlineM2mExpand(columnName: string): void {
+    const current = this.expandedInlineM2m();
+    const next = new Set(current);
+    if (next.has(columnName)) {
+      next.delete(columnName);
+    } else {
+      next.add(columnName);
+    }
+    this.expandedInlineM2m.set(next);
+  }
+
+  isInlineM2mExpanded(columnName: string): boolean {
+    return this.expandedInlineM2m().has(columnName);
+  }
 
   // Refresh data after M:M changes
   refreshData() {

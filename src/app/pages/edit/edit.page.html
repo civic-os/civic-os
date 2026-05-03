@@ -71,6 +71,7 @@
                           [currentValues]="currentData?.[item.column_name] || []"
                           [entityId]="entityId!"
                           (pendingDiff)="onM2mDiffChanged(item.column_name, $event)"
+                          (richPendingDiff)="onRichM2mDiffChanged(item.column_name, $event)"
                         ></app-inline-m2m-editor>
                       </div>
                     } @else if (isProperty(item)) {

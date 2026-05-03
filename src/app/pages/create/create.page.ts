@@ -36,6 +36,7 @@ import { EditPropertyComponent } from "../../components/edit-property/edit-prope
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inline-m2m-editor.component';
+import { RichM2mDiff } from '../../components/fk-search-modal/fk-search-modal.component';
 import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -172,6 +173,8 @@ export class CreatePage {
   // v0.46.0: Inline M:M support
   public inlineM2mProps: SchemaEntityProperty[] = [];
   public pendingM2mDiffs = signal<Map<string, { toAdd: (number|string)[], toRemove: (number|string)[] }>>(new Map());
+  // v0.51.0: Rich junction diffs
+  public pendingRichM2mDiffs = signal<Map<string, RichM2mDiff>>(new Map());
   public saveSteps = signal<SaveStep[] | null>(null);
   public saveComplete = signal(false);
 
@@ -219,7 +222,7 @@ export class CreatePage {
           const transformedData = this.transformValuesForApi(formData);
 
           // v0.46.0+: If there are pending M:M diffs or gallery drafts, use coordinated save pipeline
-          if (this.pendingM2mDiffs().size > 0 || this.pendingGalleryDrafts().size > 0) {
+          if (this.pendingM2mDiffs().size > 0 || this.pendingRichM2mDiffs().size > 0 || this.pendingGalleryDrafts().size > 0) {
             this.executeCoordinatedCreate(transformedData);
             return;
           }
@@ -292,6 +295,19 @@ export class CreatePage {
     });
   }
 
+  // v0.51.0: Handle rich junction diff from inline editor
+  onRichM2mDiffChanged(columnName: string, diff: RichM2mDiff) {
+    this.pendingRichM2mDiffs.update(m => {
+      const next = new Map(m);
+      if (diff.toAdd.length === 0 && diff.toRemove.length === 0 && diff.toUpdate.length === 0) {
+        next.delete(columnName);
+      } else {
+        next.set(columnName, diff);
+      }
+      return next;
+    });
+  }
+
   onSaveComplete() {
     this.saveComplete.set(true);
     if (this.entityKey) {
@@ -346,6 +362,38 @@ export class CreatePage {
           if (!this.createdRecordId) return of({ success: false, errorMessage: 'Record ID not available' });
           const ops: Observable<ApiResponse>[] = diff.toAdd.map(id =>
             this.data.addManyToManyRelation(this.createdRecordId!, meta, id)
+          );
+          if (ops.length === 0) return of({ success: true });
+          return forkJoin(ops).pipe(
+            map(results => {
+              const failed = results.filter(r => !r.success).length;
+              return {
+                success: failed === 0,
+                failedCount: failed,
+                totalCount: results.length,
+                errorMessage: failed > 0 ? `${failed} of ${results.length} additions failed` : undefined
+              };
+            })
+          );
+        }
+      });
+    }
+
+    // v0.51.0: Rich junction M:M mutations using createdRecordId
+    const richDiffs = this.pendingRichM2mDiffs();
+    for (const [columnName, diff] of richDiffs) {
+      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
+      if (!prop?.many_to_many_meta) continue;
+
+      const meta = prop.many_to_many_meta;
+      const label = `Adding ${prop.display_name} (${diff.toAdd.length} to add)`;
+
+      steps.push({
+        label,
+        execute: () => {
+          if (!this.createdRecordId) return of({ success: false, errorMessage: 'Record ID not available' });
+          const ops: Observable<ApiResponse>[] = diff.toAdd.map(item =>
+            this.data.addManyToManyRelation(this.createdRecordId!, meta, item.id, item.extraData)
           );
           if (ops.length === 0) return of({ success: true });
           return forkJoin(ops).pipe(

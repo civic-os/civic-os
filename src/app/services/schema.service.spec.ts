@@ -1538,6 +1538,8 @@ describe('SchemaService', () => {
     it('should detect junction table with exactly 2 FKs and only metadata columns', () => {
       const tables = [createMockEntity({ table_name: 'issue_tags' })];
       const junctionProps = [
+        createMockProperty({ table_name: 'Issue', column_name: 'display_name', udt_name: 'varchar' }),
+        createMockProperty({ table_name: 'tags', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({
           table_name: 'issue_tags',
           column_name: 'issue_id',
@@ -1640,6 +1642,9 @@ describe('SchemaService', () => {
       // This caused junction tables to have 3+ FKs (2 public + 1 phantom metadata), breaking detection.
       const tables = [createMockEntity({ table_name: 'project_broader_impact_categories' })];
       const props = [
+        // Related table display_name columns (required for M:M direction creation)
+        createMockProperty({ table_name: 'projects', column_name: 'display_name', udt_name: 'varchar' }),
+        createMockProperty({ table_name: 'broader_impact_categories', column_name: 'display_name', udt_name: 'varchar' }),
         // Valid public schema FK #1
         createMockProperty({
           table_name: 'project_broader_impact_categories',
@@ -1731,6 +1736,8 @@ describe('SchemaService', () => {
     it('should accept id column as metadata (for backwards compatibility)', () => {
       const tables = [createMockEntity({ table_name: 'issue_tags' })];
       const props = [
+        createMockProperty({ table_name: 'Issue', column_name: 'display_name', udt_name: 'varchar' }),
+        createMockProperty({ table_name: 'tags', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({
           table_name: 'issue_tags',
           column_name: 'id',
@@ -1842,7 +1849,9 @@ describe('SchemaService', () => {
 
       const allProps = [
         createMockProperty({ table_name: 'Issue', column_name: 'id', udt_name: 'int8' }),
+        createMockProperty({ table_name: 'Issue', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({ table_name: 'tags', column_name: 'id', udt_name: 'int4' }),
+        createMockProperty({ table_name: 'tags', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({
           table_name: 'issue_tags',
           column_name: 'issue_id',
@@ -1891,7 +1900,9 @@ describe('SchemaService', () => {
 
       const allProps = [
         createMockProperty({ table_name: 'Issue', column_name: 'id', udt_name: 'int8' }),
+        createMockProperty({ table_name: 'Issue', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({ table_name: 'tags', column_name: 'id', udt_name: 'int4' }),
+        createMockProperty({ table_name: 'tags', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({ table_name: 'tags', column_name: 'color', udt_name: 'varchar' }),
         createMockProperty({
           table_name: 'issue_tags',
@@ -1931,7 +1942,9 @@ describe('SchemaService', () => {
 
       const allProps = [
         createMockProperty({ table_name: 'Issue', column_name: 'id', udt_name: 'int8' }),
+        createMockProperty({ table_name: 'Issue', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({ table_name: 'categories', column_name: 'id', udt_name: 'int4' }),
+        createMockProperty({ table_name: 'categories', column_name: 'display_name', udt_name: 'varchar' }),
         createMockProperty({
           table_name: 'issue_categories',
           column_name: 'issue_id',
@@ -1977,7 +1990,8 @@ describe('SchemaService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         }
       });
 
@@ -2002,13 +2016,99 @@ describe('SchemaService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: false
+          relatedTableHasColor: false,
+          extraColumns: []
         }
       });
 
       const result = SchemaService.propertyToSelectString(m2mProp);
       // Format: column_name:junctionTable!sourceColumn(relatedTable!targetColumn(fields))
       expect(result).toBe('categories:issue_categories!issue_id(categories!category_id(id,display_name))');
+    });
+
+    it('should build nested PostgREST select string for M:M with parent hops', () => {
+      const m2mProp = createMockProperty({
+        column_name: 'tool_reservation_tool_items_m2m',
+        display_name: 'Tool Reservations',
+        type: EntityPropertyType.ManyToMany,
+        many_to_many_meta: {
+          junctionTable: 'tool_reservation_tool_items',
+          sourceTable: 'tool_types',
+          targetTable: 'tool_reservation_tools',
+          sourceColumn: 'tool_type_id',
+          targetColumn: 'tool_reservation_tools_id',
+          relatedTable: 'tool_reservations',
+          relatedTableDisplayName: 'Tool Reservations',
+          showOnSource: true,
+          showOnTarget: true,
+          displayOrder: 100,
+          relatedTableHasColor: false,
+          extraColumns: [],
+          parentHops: [{ table: 'tool_reservations', fkColumn: 'tool_reservation_id' }]
+        }
+      });
+
+      const result = SchemaService.propertyToSelectString(m2mProp);
+      // Format: col:junction!sourceCol(intermediate!targetCol(grandparent!fkCol(fields)))
+      expect(result).toBe(
+        'tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservation_tools!tool_reservation_tools_id(tool_reservations!tool_reservation_id(id,display_name)))'
+      );
+    });
+
+    it('should detect parent hops when intermediate table lacks display_name', () => {
+      // Simulates: tool_types ← junction(tool_reservation_tool_items) → tool_reservation_tools → tool_reservations
+      const tables = [
+        createMockEntity({ table_name: 'tool_reservation_tool_items' })
+      ];
+      const props = [
+        // tool_reservation_tools has NO display_name (guided form step table)
+        createMockProperty({ table_name: 'tool_reservation_tools', column_name: 'id', type: EntityPropertyType.IntegerNumber }),
+        createMockProperty({ table_name: 'tool_reservation_tools', column_name: 'tool_reservation_id', udt_name: 'int4', join_schema: 'public', join_table: 'tool_reservations', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+        // tool_reservations HAS display_name (the grandparent we want to reach)
+        createMockProperty({ table_name: 'tool_reservations', column_name: 'id', type: EntityPropertyType.IntegerNumber }),
+        createMockProperty({ table_name: 'tool_reservations', column_name: 'display_name', type: EntityPropertyType.TextShort }),
+        // tool_types HAS display_name
+        createMockProperty({ table_name: 'tool_types', column_name: 'id', type: EntityPropertyType.IntegerNumber }),
+        createMockProperty({ table_name: 'tool_types', column_name: 'display_name', type: EntityPropertyType.TextShort }),
+        // Junction table FKs
+        createMockProperty({ table_name: 'tool_reservation_tool_items', column_name: 'tool_type_id', udt_name: 'int4', join_schema: 'public', join_table: 'tool_types', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+        createMockProperty({ table_name: 'tool_reservation_tool_items', column_name: 'tool_reservation_tools_id', udt_name: 'int4', join_schema: 'public', join_table: 'tool_reservation_tools', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+      ];
+
+      const result = (service as any).detectJunctionTables(tables, props);
+      // Should create M:M on tool_types with parent hops to tool_reservations
+      expect(result.has('tool_types')).toBe(true);
+      const metas = result.get('tool_types');
+      expect(metas.length).toBe(1);
+      expect(metas[0].targetTable).toBe('tool_reservation_tools');
+      expect(metas[0].relatedTable).toBe('tool_reservations');
+      expect(metas[0].parentHops).toEqual([{ table: 'tool_reservations', fkColumn: 'tool_reservation_id' }]);
+    });
+
+    it('should skip parent hop detection when intermediate has multiple FK candidates', () => {
+      // Ambiguous: intermediate has 2 FKs to tables with display_name
+      const tables = [
+        createMockEntity({ table_name: 'ambiguous_junction' })
+      ];
+      const props = [
+        // intermediate has NO display_name
+        createMockProperty({ table_name: 'intermediate', column_name: 'id', type: EntityPropertyType.IntegerNumber }),
+        createMockProperty({ table_name: 'intermediate', column_name: 'parent_a_id', udt_name: 'int4', join_schema: 'public', join_table: 'parent_a', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+        createMockProperty({ table_name: 'intermediate', column_name: 'parent_b_id', udt_name: 'int4', join_schema: 'public', join_table: 'parent_b', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+        // Both parents have display_name → ambiguous
+        createMockProperty({ table_name: 'parent_a', column_name: 'display_name', type: EntityPropertyType.TextShort }),
+        createMockProperty({ table_name: 'parent_b', column_name: 'display_name', type: EntityPropertyType.TextShort }),
+        // source table
+        createMockProperty({ table_name: 'source_table', column_name: 'id', type: EntityPropertyType.IntegerNumber }),
+        createMockProperty({ table_name: 'source_table', column_name: 'display_name', type: EntityPropertyType.TextShort }),
+        // Junction table FKs
+        createMockProperty({ table_name: 'ambiguous_junction', column_name: 'source_id', udt_name: 'int4', join_schema: 'public', join_table: 'source_table', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+        createMockProperty({ table_name: 'ambiguous_junction', column_name: 'intermediate_id', udt_name: 'int4', join_schema: 'public', join_table: 'intermediate', join_column: 'id', type: EntityPropertyType.ForeignKeyName }),
+      ];
+
+      const result = (service as any).detectJunctionTables(tables, props);
+      // Should NOT create M:M for source_table → intermediate because hop is ambiguous
+      expect(result.has('source_table')).toBe(false);
     });
   });
 

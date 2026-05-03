@@ -20,11 +20,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Observable, of } from 'rxjs';
-import { SchemaEntityProperty } from '../../interfaces/entity';
+import { SchemaEntityProperty, ManyToManyMeta } from '../../interfaces/entity';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { ApiResponse } from '../../interfaces/api';
-import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.component';
+import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
 
 @Component({
   selector: 'app-many-to-many-editor',
@@ -68,6 +68,27 @@ export class ManyToManyEditorComponent {
       id: o.id,
       text: o.display_name
     }));
+  });
+
+  // v0.51.0: Rich junction support
+  isRichJunction = computed(() => {
+    const meta = this.property().many_to_many_meta;
+    return meta ? meta.extraColumns.length > 0 : false;
+  });
+
+  extraColumns = computed(() => {
+    return this.property().many_to_many_meta?.extraColumns ?? [];
+  });
+
+  /** Build a Map<targetId, Record<string, unknown>> from currentValues' _junction data */
+  currentJunctionDataMap = computed(() => {
+    const map = new Map<number | string, Record<string, unknown>>();
+    for (const item of this.currentValues()) {
+      if (item._junction) {
+        map.set(item.id, item._junction);
+      }
+    }
+    return map;
   });
 
   // Output
@@ -222,16 +243,38 @@ export class ManyToManyEditorComponent {
     this.executeManyToManyChanges(toAdd, toRemove);
   }
 
-  // v0.46.0: Handle Apply from search modal
+  // v0.46.0: Handle Apply from search modal (pure junctions)
   onSearchModalApply(diff: { toAdd: (number | string)[], toRemove: (number | string)[], addedItems?: any[] }) {
     this.showSearchModal.set(false);
     if (diff.toAdd.length === 0 && diff.toRemove.length === 0) return;
     this.executeManyToManyChanges(diff.toAdd as number[], diff.toRemove as number[]);
   }
 
+  // v0.51.0: Handle Apply from search modal (rich junctions)
+  onRichSearchModalApply(diff: RichM2mDiff) {
+    this.showSearchModal.set(false);
+    if (diff.toAdd.length === 0 && diff.toRemove.length === 0 && diff.toUpdate.length === 0) return;
+    this.executeRichManyToManyChanges(diff);
+  }
+
   // v0.46.0: Get current value IDs for the search modal
   getCurrentValueIds(): (number | string)[] {
     return this.currentValues().map(v => v.id);
+  }
+
+  /**
+   * v0.51.0: Format a chip label for rich junctions.
+   * Appends extra column values separated by " / ".
+   * Example: "Push Mower / 2" or "Push Mower / 2 / urgent"
+   */
+  formatRichJunctionLabel(displayName: string, junctionData: Record<string, unknown> | undefined, extraColumns: SchemaEntityProperty[]): string {
+    if (!junctionData || extraColumns.length === 0) return displayName;
+    const parts = extraColumns
+      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+      .map(col => junctionData[col.column_name])
+      .filter(val => val !== null && val !== undefined && val !== '');
+    if (parts.length === 0) return displayName;
+    return `${displayName} / ${parts.join(' / ')}`;
   }
 
   private executeManyToManyChanges(toAdd: number[], toRemove: number[]) {
@@ -292,6 +335,64 @@ export class ManyToManyEditorComponent {
       },
       error: (err) => {
         console.error('Error saving changes:', err);
+        this.error.set('Failed to save changes');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  /**
+   * v0.51.0: Execute rich junction changes — adds, removes, AND updates (extra column changes).
+   */
+  private executeRichManyToManyChanges(diff: RichM2mDiff) {
+    const meta = this.property().many_to_many_meta!;
+    const operations: Observable<ApiResponse>[] = [];
+
+    // Removals
+    diff.toRemove.forEach(targetId => {
+      operations.push(this.data.removeManyToManyRelation(this.entityId(), meta, targetId));
+    });
+
+    // Additions (with extra data)
+    diff.toAdd.forEach(item => {
+      operations.push(this.data.addManyToManyRelation(this.entityId(), meta, item.id, item.extraData));
+    });
+
+    // Updates (patch extra columns on existing junction rows)
+    diff.toUpdate.forEach(item => {
+      operations.push(this.data.updateManyToManyRelation(this.entityId(), meta, item.id, item.extraData));
+    });
+
+    if (operations.length === 0) return;
+
+    this.loading.set(true);
+    this.error.set(undefined);
+
+    forkJoin(operations).subscribe({
+      next: (results) => {
+        const failures = results.filter(r => !r.success);
+        const successes = results.filter(r => r.success);
+
+        if (failures.length === 0) {
+          this.relationChanged.emit();
+          if (this.resolvedOptionsSourceRpc()) {
+            this.loadAvailableOptions();
+          }
+          this.dependencyChanged.emit(this.property().column_name);
+        } else if (successes.length === 0) {
+          this.error.set('All changes failed. Please try again.');
+        } else {
+          this.error.set(`${successes.length} changes succeeded, ${failures.length} failed. Refresh to see current state.`);
+          this.relationChanged.emit();
+          if (this.resolvedOptionsSourceRpc()) {
+            this.loadAvailableOptions();
+          }
+          this.dependencyChanged.emit(this.property().column_name);
+        }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error saving rich junction changes:', err);
         this.error.set('Failed to save changes');
         this.loading.set(false);
       }

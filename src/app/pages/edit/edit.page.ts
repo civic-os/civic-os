@@ -48,6 +48,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inline-m2m-editor.component';
+import { RichM2mDiff } from '../../components/fk-search-modal/fk-search-modal.component';
 import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CommonModule } from '@angular/common';
@@ -148,8 +149,13 @@ export class EditPage implements OnDestroy {
         this.inlineM2mProps.forEach(p => {
           if (p.many_to_many_meta) {
             const junctionData = (this.currentData as any)[p.column_name] || [];
+            // v0.51.0: Pass extra column names for rich junction _junction data
+            const extraColNames = p.many_to_many_meta.extraColumns.map(c => c.column_name);
             (this.currentData as any)[p.column_name] = DataService.transformManyToManyData(
-              junctionData, p.many_to_many_meta.relatedTable
+              junctionData, p.many_to_many_meta.relatedTable,
+              extraColNames.length > 0 ? extraColNames : undefined,
+              p.many_to_many_meta.parentHops,
+              p.many_to_many_meta.parentHops?.length ? p.many_to_many_meta.targetTable : undefined
             );
           }
         });
@@ -216,6 +222,8 @@ export class EditPage implements OnDestroy {
   // v0.46.0: Inline M:M support
   public inlineM2mProps: SchemaEntityProperty[] = [];
   public pendingM2mDiffs = signal<Map<string, { toAdd: (number|string)[], toRemove: (number|string)[] }>>(new Map());
+  // v0.51.0: Rich junction diffs (with extraData for adds/updates)
+  public pendingRichM2mDiffs = signal<Map<string, RichM2mDiff>>(new Map());
   public saveSteps = signal<SaveStep[] | null>(null);
   public saveComplete = signal(false);
   public currentData: any = null;  // Cached entity data for M:M rendering
@@ -572,6 +580,19 @@ export class EditPage implements OnDestroy {
     });
   }
 
+  // v0.51.0: Handle rich junction diff from inline editor
+  onRichM2mDiffChanged(columnName: string, diff: RichM2mDiff) {
+    this.pendingRichM2mDiffs.update(m => {
+      const next = new Map(m);
+      if (diff.toAdd.length === 0 && diff.toRemove.length === 0 && diff.toUpdate.length === 0) {
+        next.delete(columnName);
+      } else {
+        next.set(columnName, diff);
+      }
+      return next;
+    });
+  }
+
   onSaveComplete() {
     this.saveComplete.set(true);
     if (this.entityKey) {
@@ -580,7 +601,7 @@ export class EditPage implements OnDestroy {
   }
 
   private hasM2mDiffs(): boolean {
-    return this.pendingM2mDiffs().size > 0;
+    return this.pendingM2mDiffs().size > 0 || this.pendingRichM2mDiffs().size > 0;
   }
 
   private hasGalleryChanges(): boolean {
@@ -617,6 +638,40 @@ export class EditPage implements OnDestroy {
           const ops: Observable<ApiResponse>[] = [
             ...diff.toRemove.map(id => this.data.removeManyToManyRelation(this.entityId!, meta, id)),
             ...diff.toAdd.map(id => this.data.addManyToManyRelation(this.entityId!, meta, id))
+          ];
+          if (ops.length === 0) return of({ success: true });
+          return forkJoin(ops).pipe(
+            map(results => {
+              const failed = results.filter(r => !r.success).length;
+              return {
+                success: failed === 0,
+                failedCount: failed,
+                totalCount: results.length,
+                errorMessage: failed > 0 ? `${failed} of ${results.length} changes failed` : undefined
+              };
+            })
+          );
+        }
+      });
+    }
+
+    // v0.51.0: Rich junction M:M diffs (with extraData for adds/updates)
+    const richDiffs = this.pendingRichM2mDiffs();
+    for (const [columnName, diff] of richDiffs) {
+      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
+      if (!prop?.many_to_many_meta) continue;
+
+      const meta = prop.many_to_many_meta;
+      const totalOps = diff.toAdd.length + diff.toRemove.length + diff.toUpdate.length;
+      const label = `Updating ${prop.display_name} (${totalOps} changes)`;
+
+      steps.push({
+        label,
+        execute: () => {
+          const ops: Observable<ApiResponse>[] = [
+            ...diff.toRemove.map(id => this.data.removeManyToManyRelation(this.entityId!, meta, id)),
+            ...diff.toAdd.map(item => this.data.addManyToManyRelation(this.entityId!, meta, item.id, item.extraData)),
+            ...diff.toUpdate.map(item => this.data.updateManyToManyRelation(this.entityId!, meta, item.id, item.extraData))
           ];
           if (ops.length === 0) return of({ success: true });
           return forkJoin(ops).pipe(
@@ -1186,7 +1241,7 @@ export class EditPage implements OnDestroy {
     const step = ctx.steps.find(s => s.step_table === eKey);
     const stepKey = step?.step_key || '__parent__';
 
-    // Save data then complete step (RPC auto-creates next step draft in same transaction)
+    // Save data, then flush pending M:M diffs, then complete step
     this.data.editData(eKey, eId, transformedData).subscribe({
       next: (result) => {
         if (!result.success) {
@@ -1196,39 +1251,56 @@ export class EditPage implements OnDestroy {
           return;
         }
 
-        this.guidedFormService.completeStep(wk, parseInt(parentId), stepKey).subscribe({
-          next: (completeResult) => {
-            this.savingAndContinuing.set(false);
-            this.analytics.trackEvent('GuidedForm', 'StepComplete', `${wk}:${stepKey}`);
-
-            // Backend auto-submitted (all non-parent steps were condition-skipped)
-            if (completeResult.auto_submitted) {
-              const navigateTo = completeResult.navigate_to;
-              if (navigateTo) {
-                this.router.navigateByUrl(navigateTo);
-              } else {
-                this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
-              }
+        // Flush any pending M:M changes before completing the step
+        this.executePendingM2mForGuidedForm(eId).subscribe({
+          next: (m2mResult) => {
+            if (!m2mResult.success) {
+              this.savingAndContinuing.set(false);
+              this.currentError.set({ humanMessage: m2mResult.errorMessage || 'Failed to save related items.', message: m2mResult.errorMessage || '' });
+              this.showErrorModal.set(true);
               return;
             }
 
-            // RPC returns next step info directly (no separate ensureStepRecord call needed)
-            if (completeResult.next_record_id && completeResult.next_step_table) {
-              this.router.navigate(['/edit', completeResult.next_step_table, completeResult.next_record_id]);
-            } else if (completeResult.all_data_steps_complete) {
-              // All steps done — go to detail page for review
-              this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
-            }
+            this.guidedFormService.completeStep(wk, parseInt(parentId), stepKey).subscribe({
+              next: (completeResult) => {
+                this.savingAndContinuing.set(false);
+                this.analytics.trackEvent('GuidedForm', 'StepComplete', `${wk}:${stepKey}`);
+
+                // Backend auto-submitted (all non-parent steps were condition-skipped)
+                if (completeResult.auto_submitted) {
+                  const navigateTo = completeResult.navigate_to;
+                  if (navigateTo) {
+                    this.router.navigateByUrl(navigateTo);
+                  } else {
+                    this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+                  }
+                  return;
+                }
+
+                // RPC returns next step info directly (no separate ensureStepRecord call needed)
+                if (completeResult.next_record_id && completeResult.next_step_table) {
+                  this.router.navigate(['/edit', completeResult.next_step_table, completeResult.next_record_id]);
+                } else if (completeResult.all_data_steps_complete) {
+                  // All steps done — go to detail page for review
+                  this.router.navigate(['/view', ctx.definition.parent_table, parentId]);
+                }
+              },
+              error: (err) => {
+                this.savingAndContinuing.set(false);
+                const apiError = err?.error || {};
+                this.currentError.set({
+                  humanMessage: apiError.message || 'Failed to complete step.',
+                  message: apiError.message || err.message,
+                  code: apiError.code,
+                  hint: apiError.hint
+                });
+                this.showErrorModal.set(true);
+              }
+            });
           },
           error: (err) => {
             this.savingAndContinuing.set(false);
-            const apiError = err?.error || {};
-            this.currentError.set({
-              humanMessage: apiError.message || 'Failed to complete step.',
-              message: apiError.message || err.message,
-              code: apiError.code,
-              hint: apiError.hint
-            });
+            this.currentError.set({ humanMessage: 'Failed to save related items.', message: err.message || '' });
             this.showErrorModal.set(true);
           }
         });
@@ -1243,6 +1315,47 @@ export class EditPage implements OnDestroy {
         this.showErrorModal.set(true);
       }
     });
+  }
+
+  /**
+   * Execute all pending M:M diffs (pure + rich) for a guided form step save.
+   * Returns an observable that completes when all M:M operations finish.
+   */
+  private executePendingM2mForGuidedForm(entityId: string): Observable<{ success: boolean; errorMessage?: string }> {
+    const ops: Observable<ApiResponse>[] = [];
+
+    // Pure junction diffs
+    const diffs = this.pendingM2mDiffs();
+    for (const [columnName, diff] of diffs) {
+      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
+      if (!prop?.many_to_many_meta) continue;
+      const meta = prop.many_to_many_meta;
+      ops.push(...diff.toRemove.map(id => this.data.removeManyToManyRelation(entityId, meta, id)));
+      ops.push(...diff.toAdd.map(id => this.data.addManyToManyRelation(entityId, meta, id)));
+    }
+
+    // Rich junction diffs (with extraData for adds/updates)
+    const richDiffs = this.pendingRichM2mDiffs();
+    for (const [columnName, diff] of richDiffs) {
+      const prop = this.inlineM2mProps.find(p => p.column_name === columnName);
+      if (!prop?.many_to_many_meta) continue;
+      const meta = prop.many_to_many_meta;
+      ops.push(...diff.toRemove.map(id => this.data.removeManyToManyRelation(entityId, meta, id)));
+      ops.push(...diff.toAdd.map(item => this.data.addManyToManyRelation(entityId, meta, item.id, item.extraData)));
+      ops.push(...diff.toUpdate.map(item => this.data.updateManyToManyRelation(entityId, meta, item.id, item.extraData)));
+    }
+
+    if (ops.length === 0) return of({ success: true });
+
+    return forkJoin(ops).pipe(
+      map(results => {
+        const failed = results.filter(r => !r.success).length;
+        return {
+          success: failed === 0,
+          errorMessage: failed > 0 ? `${failed} of ${results.length} related item changes failed` : undefined
+        };
+      })
+    );
   }
 
   /**

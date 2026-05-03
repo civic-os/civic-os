@@ -38,7 +38,8 @@ function createM2MMeta(overrides: Partial<ManyToManyMeta>): ManyToManyMeta {
     showOnSource: overrides.showOnSource ?? true,
     showOnTarget: overrides.showOnTarget ?? true,
     displayOrder: overrides.displayOrder ?? 0,
-    relatedTableHasColor: overrides.relatedTableHasColor ?? false
+    relatedTableHasColor: overrides.relatedTableHasColor ?? false,
+    extraColumns: overrides.extraColumns ?? []
   };
 }
 

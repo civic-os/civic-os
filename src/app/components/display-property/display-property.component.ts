@@ -79,6 +79,22 @@ export class DisplayPropertyComponent {
   }
 
   /**
+   * Format M:M chip label, appending rich junction extra column values if present.
+   * Example: "Push Mower / 2"
+   */
+  formatM2mLabel(item: any): string {
+    const name = item.display_name ?? '';
+    const meta = this.prop().many_to_many_meta;
+    if (!meta || !item._junction || meta.extraColumns.length === 0) return name;
+    const parts = meta.extraColumns
+      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+      .map(col => item._junction[col.column_name])
+      .filter(val => val !== null && val !== undefined && val !== '');
+    if (parts.length === 0) return name;
+    return `${name} / ${parts.join(' / ')}`;
+  }
+
+  /**
    * Open image in full-screen viewer
    */
   onImageClick(file: FileReference) {

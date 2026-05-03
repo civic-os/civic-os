@@ -18,7 +18,7 @@
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, filter, forkJoin, map, of, tap } from 'rxjs';
-import { EntityData, InverseRelationshipMeta, InverseRelationshipData, ManyToManyMeta } from '../interfaces/entity';
+import { EntityData, InverseRelationshipMeta, InverseRelationshipData, ManyToManyMeta, ParentHop } from '../interfaces/entity';
 import { DataQuery, PaginatedResponse } from '../interfaces/query';
 import { ApiError, ApiResponse } from '../interfaces/api';
 import { ErrorService } from './error.service';
@@ -752,21 +752,70 @@ export class DataService {
    * Transform M:M data from PostgREST response.
    * Flattens junction records to just the related entities.
    *
-   * Input:  [{Tag: {id: 1, display_name: 'Urgent'}}, {Tag: {id: 2, display_name: 'Road'}}]
-   * Output: [{id: 1, display_name: 'Urgent'}, {id: 2, display_name: 'Road'}]
+   * Pure junction:
+   *   Input:  [{Tag: {id: 1, display_name: 'Urgent'}}, {Tag: {id: 2, display_name: 'Road'}}]
+   *   Output: [{id: 1, display_name: 'Urgent'}, {id: 2, display_name: 'Road'}]
+   *
+   * Rich junction (v0.51.0):
+   *   Input:  [{tool_types: {id: 1, display_name: 'Push Mower'}, quantity: 3}]
+   *   Output: [{id: 1, display_name: 'Push Mower', _junction: {quantity: 3}}]
    *
    * @param junctionData Array of junction records with embedded related entities
    * @param relatedTable Name of the related table (used as key in PostgREST embedded resource)
-   * @returns Flattened array of related entity objects
+   * @param extraColumnNames Optional extra column names for rich junctions (v0.51.0)
+   * @returns Flattened array of related entity objects (with _junction for rich junctions)
    */
-  public static transformManyToManyData(junctionData: any[], relatedTable: string): any[] {
+  public static transformManyToManyData(
+    junctionData: any[],
+    relatedTable: string,
+    extraColumnNames?: string[],
+    parentHops?: ParentHop[],
+    targetTable?: string
+  ): any[] {
     if (!junctionData || !Array.isArray(junctionData)) {
       return [];
     }
 
+    // v0.51.0: Parent hop traversal — drill through intermediate tables to grandparent
+    // Deduplicates by ID since multiple junction rows may collapse to same grandparent
+    if (parentHops?.length && targetTable) {
+      const seen = new Set<number | string>();
+      return junctionData
+        .map(record => {
+          let entity = record[targetTable];
+          for (const hop of parentHops) {
+            if (!entity) return null;
+            entity = entity[hop.table];
+          }
+          return entity;
+        })
+        .filter(item => item != null)
+        .filter(item => {
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+    }
+
     return junctionData
-      .map(record => record[relatedTable])
-      .filter(item => item !== null && item !== undefined);
+      .map(record => {
+        const related = record[relatedTable];
+        if (related === null || related === undefined) return null;
+
+        // v0.51.0: Attach extra junction column values under _junction namespace
+        if (extraColumnNames && extraColumnNames.length > 0) {
+          const junctionData: Record<string, unknown> = {};
+          extraColumnNames.forEach(col => {
+            if (col in record) {
+              junctionData[col] = record[col];
+            }
+          });
+          return { ...related, _junction: junctionData };
+        }
+
+        return related;
+      })
+      .filter(item => item !== null);
   }
 
   /**
@@ -781,14 +830,43 @@ export class DataService {
   public addManyToManyRelation(
     entityId: number | string,
     meta: ManyToManyMeta,
-    targetId: number | string
+    targetId: number | string,
+    extraData?: Record<string, unknown>
   ): Observable<ApiResponse> {
     return this.http.post(
       getPostgrestUrl() + meta.junctionTable,
       {
         [meta.sourceColumn]: entityId,
-        [meta.targetColumn]: targetId
+        [meta.targetColumn]: targetId,
+        ...extraData
       },
+      { headers: { Prefer: 'return=minimal' } }
+    ).pipe(
+      map(() => ({ success: true, body: null })),
+      catchError(err => this.parseApiError(err))
+    );
+  }
+
+  /**
+   * Update extra column values on an existing many-to-many junction row (v0.51.0).
+   * Used by rich junctions (e.g., quantity on tool_reservation_tool_items).
+   *
+   * @param entityId The source entity ID
+   * @param meta M:M relationship metadata
+   * @param targetId The related entity ID
+   * @param patchData Extra column values to update
+   * @returns Observable of API response
+   */
+  public updateManyToManyRelation(
+    entityId: number | string,
+    meta: ManyToManyMeta,
+    targetId: number | string,
+    patchData: Record<string, unknown>
+  ): Observable<ApiResponse> {
+    const filter = `${meta.sourceColumn}=eq.${entityId}&${meta.targetColumn}=eq.${targetId}`;
+    return this.http.patch(
+      getPostgrestUrl() + meta.junctionTable + '?' + filter,
+      patchData,
       { headers: { Prefer: 'return=minimal' } }
     ).pipe(
       map(() => ({ success: true, body: null })),

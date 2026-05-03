@@ -10,7 +10,7 @@
           @if (chip.color) {
             <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
           }
-          {{ chip.display_name }}
+          {{ formatChipLabel(chip) }}
           <span class="material-symbols-outlined text-xs">add</span>
         </span>
       } @else if (chip.state === 'removed') {
@@ -19,7 +19,7 @@
           @if (chip.color) {
             <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
           }
-          {{ chip.display_name }}
+          {{ formatChipLabel(chip) }}
         </span>
       } @else {
         <!-- Current: normal -->
@@ -27,7 +27,7 @@
           @if (chip.color) {
             <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
           }
-          {{ chip.display_name }}
+          {{ formatChipLabel(chip) }}
         </span>
       }
     } @empty {
@@ -50,7 +50,10 @@
     [currentValueItems]="currentValueItemsForModal()"
     [rpcOptions]="resolvedRpcOptions()"
     [title]="'Select ' + property().display_name"
+    [extraColumns]="extraColumns()"
+    [currentJunctionData]="currentJunctionDataMap()"
     (applied)="onModalApply($event)"
+    (richApplied)="onRichModalApply($event)"
     (closed)="onModalClosed()"
   />
 </div>

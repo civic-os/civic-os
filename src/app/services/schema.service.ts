@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
-import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
+import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
 import { GuidedFormDefinition, GuidedFormStep } from '../interfaces/guided-form';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
@@ -666,13 +666,29 @@ export class SchemaService {
   public static propertyToSelectString(prop: SchemaEntityProperty): string {
     // M:M: Embed junction records with related entity data
     // Format: junction_table_m2m:junction_table!source_column(related_table!target_column(id,display_name[,color]))
+    // Rich: junction_table_m2m:junction_table!source_column(quantity,related_table!target_column(id,display_name[,color]))
     if (prop.type == EntityPropertyType.ManyToMany && prop.many_to_many_meta) {
       const meta = prop.many_to_many_meta;
       // Build the embedded select string with FK hints
       // Example: issue_tags_m2m:issue_tags!issue_id(Tag!tag_id(id,display_name,color))
       // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
       const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
+
+      // v0.51.0: Parent hop M:M — build nested embed inside-out for multi-level traversal
+      // Example: junction!sourceCol(intermediate!targetCol(grandparent!fkCol(id,display_name)))
+      if (meta.parentHops?.length) {
+        let inner = `(${fields})`;
+        for (let i = meta.parentHops.length - 1; i >= 0; i--) {
+          const hop = meta.parentHops[i];
+          inner = `(${hop.table}!${hop.fkColumn}${inner})`;
+        }
+        return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.targetTable}!${meta.targetColumn}${inner})`;
+      }
+
+      // v0.51.0: Include extra columns at junction level for rich junctions
+      const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
+      const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
+      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
     }
 
     // File types: Embed file metadata from files table (system type - see METADATA_SYSTEM_TABLES)
@@ -722,7 +738,10 @@ export class SchemaService {
       const meta = prop.many_to_many_meta;
       // The ! syntax tells PostgREST which FK to follow (required when table has multiple FKs)
       const fields = meta.relatedTableHasColor ? 'id,display_name,color' : 'id,display_name';
-      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
+      // v0.51.0: Include extra columns at junction level for rich junctions
+      const extraFieldNames = meta.extraColumns.map(c => c.column_name).join(',');
+      const extraPrefix = extraFieldNames ? extraFieldNames + ',' : '';
+      return `${prop.column_name}:${meta.junctionTable}!${meta.sourceColumn}(${extraPrefix}${meta.relatedTable}!${meta.targetColumn}(${fields}))`;
     }
 
     // File types: Need full file data to show current file and allow replacement
@@ -1115,71 +1134,194 @@ export class SchemaService {
       // Ignore ALL FK columns (including non-public FKs) to handle edge case where
       // phantom metadata schema FKs exist (e.g., from pre-v0.8.2 bug)
       const metadataColumns = ['id', 'created_at', 'updated_at'];
-      const hasExtraColumns = tableProps.some(p =>
+      const extraColumnProps = tableProps.filter(p =>
         !metadataColumns.includes(p.column_name) &&
         !fkProps.includes(p) &&
         p.type !== EntityPropertyType.ForeignKeyName &&
         p.type !== EntityPropertyType.User
       );
 
-      if (hasExtraColumns) {
+      const hasExtraColumns = extraColumnProps.length > 0;
+
+      // v0.51.0: Rich junctions bypass the extra-column guard
+      const isRichJunction = hasExtraColumns && table.is_rich_junction === true;
+
+      if (hasExtraColumns && !isRichJunction) {
         return;
       }
 
       // This is a junction table! Create M:M metadata for both directions
       const [fk1, fk2] = fkProps;
 
-      // Check if related tables have 'color' column
+      // Collect extra columns for rich junctions (typed SchemaEntityProperty[])
+      const extraColumns = isRichJunction ? extraColumnProps : [];
+
+      // Check if related tables have 'color' and 'display_name' columns.
+      // Tables without display_name (e.g. guided form step tables) can't be rendered
+      // as M:M chips — the PostgREST select requires display_name on the related table.
       const fk2TableHasColor = properties.some(p =>
         p.table_name === fk2.join_table && p.column_name === 'color'
       );
       const fk1TableHasColor = properties.some(p =>
         p.table_name === fk1.join_table && p.column_name === 'color'
       );
+      const fk2TableHasDisplayName = properties.some(p =>
+        p.table_name === fk2.join_table && p.column_name === 'display_name'
+      );
+      const fk1TableHasDisplayName = properties.some(p =>
+        p.table_name === fk1.join_table && p.column_name === 'display_name'
+      );
 
       // Direction 1: fk1.join_table -> fk2.join_table via this junction
-      const meta1: ManyToManyMeta = {
-        junctionTable: table.table_name,
-        sourceTable: fk1.join_table,
-        targetTable: fk2.join_table,
-        sourceColumn: fk1.column_name,
-        targetColumn: fk2.column_name,
-        relatedTable: fk2.join_table,
-        relatedTableDisplayName: this.getDisplayNameForTable(fk2.join_table),
-        showOnSource: true,
-        showOnTarget: true,
-        displayOrder: 100, // Default high sort order (appears after regular props)
-        relatedTableHasColor: fk2TableHasColor
-      };
+      // Create if the related table (fk2) has display_name, or if we can hop through to a parent that does
+      if (fk2TableHasDisplayName) {
+        const meta1: ManyToManyMeta = {
+          junctionTable: table.table_name,
+          sourceTable: fk1.join_table,
+          targetTable: fk2.join_table,
+          sourceColumn: fk1.column_name,
+          targetColumn: fk2.column_name,
+          relatedTable: fk2.join_table,
+          relatedTableDisplayName: this.getDisplayNameForTable(fk2.join_table),
+          showOnSource: true,
+          showOnTarget: true,
+          displayOrder: 100, // Default high sort order (appears after regular props)
+          relatedTableHasColor: fk2TableHasColor,
+          extraColumns
+        };
+
+        if (!junctions.has(fk1.join_table)) {
+          junctions.set(fk1.join_table, []);
+        }
+        junctions.get(fk1.join_table)!.push(meta1);
+      } else {
+        // fk2 target lacks display_name — try parent hop detection
+        const hopResult = this.detectParentHops(fk2.join_table, table.table_name, properties);
+        if (hopResult) {
+          const grandparentHasColor = properties.some(p =>
+            p.table_name === hopResult.finalTable && p.column_name === 'color'
+          );
+          const meta1: ManyToManyMeta = {
+            junctionTable: table.table_name,
+            sourceTable: fk1.join_table,
+            targetTable: fk2.join_table, // intermediate (no display_name)
+            sourceColumn: fk1.column_name,
+            targetColumn: fk2.column_name,
+            relatedTable: hopResult.finalTable, // displayable grandparent
+            relatedTableDisplayName: this.getDisplayNameForTable(hopResult.finalTable),
+            showOnSource: true,
+            showOnTarget: true,
+            displayOrder: 100,
+            relatedTableHasColor: grandparentHasColor,
+            extraColumns: [], // Reverse direction doesn't carry rich junction data
+            parentHops: hopResult.hops
+          };
+
+          if (!junctions.has(fk1.join_table)) {
+            junctions.set(fk1.join_table, []);
+          }
+          junctions.get(fk1.join_table)!.push(meta1);
+        }
+      }
 
       // Direction 2: fk2.join_table -> fk1.join_table via this junction
-      const meta2: ManyToManyMeta = {
-        junctionTable: table.table_name,
-        sourceTable: fk2.join_table,
-        targetTable: fk1.join_table,
-        sourceColumn: fk2.column_name,
-        targetColumn: fk1.column_name,
-        relatedTable: fk1.join_table,
-        relatedTableDisplayName: this.getDisplayNameForTable(fk1.join_table),
-        showOnSource: true,
-        showOnTarget: true,
-        displayOrder: 100,
-        relatedTableHasColor: fk1TableHasColor
-      };
+      // Create if the related table (fk1) has display_name, or if we can hop through to a parent that does
+      if (fk1TableHasDisplayName) {
+        const meta2: ManyToManyMeta = {
+          junctionTable: table.table_name,
+          sourceTable: fk2.join_table,
+          targetTable: fk1.join_table,
+          sourceColumn: fk2.column_name,
+          targetColumn: fk1.column_name,
+          relatedTable: fk1.join_table,
+          relatedTableDisplayName: this.getDisplayNameForTable(fk1.join_table),
+          showOnSource: true,
+          showOnTarget: true,
+          displayOrder: 100,
+          relatedTableHasColor: fk1TableHasColor,
+          extraColumns
+        };
 
-      // Store both directions
-      if (!junctions.has(fk1.join_table)) {
-        junctions.set(fk1.join_table, []);
-      }
-      junctions.get(fk1.join_table)!.push(meta1);
+        if (!junctions.has(fk2.join_table)) {
+          junctions.set(fk2.join_table, []);
+        }
+        junctions.get(fk2.join_table)!.push(meta2);
+      } else {
+        // fk1 target lacks display_name — try parent hop detection
+        const hopResult = this.detectParentHops(fk1.join_table, table.table_name, properties);
+        if (hopResult) {
+          const grandparentHasColor = properties.some(p =>
+            p.table_name === hopResult.finalTable && p.column_name === 'color'
+          );
+          const meta2: ManyToManyMeta = {
+            junctionTable: table.table_name,
+            sourceTable: fk2.join_table,
+            targetTable: fk1.join_table, // intermediate (no display_name)
+            sourceColumn: fk2.column_name,
+            targetColumn: fk1.column_name,
+            relatedTable: hopResult.finalTable, // displayable grandparent
+            relatedTableDisplayName: this.getDisplayNameForTable(hopResult.finalTable),
+            showOnSource: true,
+            showOnTarget: true,
+            displayOrder: 100,
+            relatedTableHasColor: grandparentHasColor,
+            extraColumns: [], // Reverse direction doesn't carry rich junction data
+            parentHops: hopResult.hops
+          };
 
-      if (!junctions.has(fk2.join_table)) {
-        junctions.set(fk2.join_table, []);
+          if (!junctions.has(fk2.join_table)) {
+            junctions.set(fk2.join_table, []);
+          }
+          junctions.get(fk2.join_table)!.push(meta2);
+        }
       }
-      junctions.get(fk2.join_table)!.push(meta2);
     });
 
     return junctions;
+  }
+
+  /**
+   * Detect parent hops from an intermediate table (lacks display_name) to a displayable parent.
+   * Looks at FK columns FROM the intermediate table to find a parent with display_name.
+   * Only succeeds when exactly one unambiguous candidate is found.
+   *
+   * @param intermediateTable The table that lacks display_name (junction's direct FK target)
+   * @param junctionTable The junction table to exclude from candidates
+   * @param properties All properties for FK inspection
+   * @returns ParentHop chain + final table, or null if ambiguous/impossible
+   */
+  private detectParentHops(
+    intermediateTable: string,
+    junctionTable: string,
+    properties: SchemaEntityProperty[]
+  ): { hops: ParentHop[]; finalTable: string } | null {
+    // Find FK columns FROM the intermediate table (public schema only, exclude system tables)
+    const systemTables = ['statuses', 'categories', 'civic_os_users', 'civic_os_users_private'];
+    const intermediateFks = properties.filter(p =>
+      p.table_name === intermediateTable &&
+      p.join_table &&
+      p.join_schema === 'public' &&
+      p.join_table !== junctionTable &&
+      !systemTables.includes(p.join_table) &&
+      (p.type === EntityPropertyType.ForeignKeyName || p.type === EntityPropertyType.User)
+    );
+
+    // Find candidates whose target table has display_name
+    const candidates = intermediateFks.filter(fk =>
+      properties.some(p => p.table_name === fk.join_table && p.column_name === 'display_name')
+    );
+
+    // Exactly one candidate → unambiguous hop
+    if (candidates.length === 1) {
+      const candidate = candidates[0];
+      return {
+        hops: [{ table: candidate.join_table, fkColumn: candidate.column_name }],
+        finalTable: candidate.join_table
+      };
+    }
+
+    // Zero or multiple → ambiguous, skip
+    return null;
   }
 
   /**
@@ -1238,9 +1380,10 @@ export class SchemaService {
           geography_type: '',
           // show_on_* defaults are M:M-specific; metadata.properties can override
           // (e.g., show_on_detail: false to hide M:M from detail page entirely)
+          // v0.51.0: Parent hop M:M is detail-only (can't edit through grandparent chain)
           show_on_list: false,  // M:M can't render in list table rows
-          show_on_create: m2mMeta?.show_on_create ?? true,
-          show_on_edit: m2mMeta?.show_on_edit ?? true,
+          show_on_create: meta.parentHops?.length ? false : (m2mMeta?.show_on_create ?? true),
+          show_on_edit: meta.parentHops?.length ? false : (m2mMeta?.show_on_edit ?? true),
           show_on_detail: m2mMeta?.show_on_detail ?? true,
           type: EntityPropertyType.ManyToMany,
           many_to_many_meta: meta,
@@ -1248,9 +1391,12 @@ export class SchemaService {
           options_source_rpc: m2mMeta?.options_source_rpc || undefined,
           depends_on_columns: m2mMeta?.depends_on_columns || undefined,
           // v0.45.0+: FK search modal flag
-          fk_search_modal: m2mMeta?.fk_search_modal ?? false,
+          // v0.51.0: Rich junctions force search modal (no inline checkbox editor)
+          // Parent hop M:M is never editable so no search modal needed
+          fk_search_modal: meta.parentHops?.length ? false : (meta.extraColumns.length > 0 ? true : (m2mMeta?.fk_search_modal ?? false)),
           // v0.46.0: Inline positioning
-          show_inline: m2mMeta?.show_inline ?? false,
+          // v0.51.0: Parent hop M:M renders inline (read-only chips in property grid)
+          show_inline: meta.parentHops?.length ? true : (m2mMeta?.show_inline ?? false),
         };
 
         enriched.push(virtualProp);

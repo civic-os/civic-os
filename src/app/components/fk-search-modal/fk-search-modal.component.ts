@@ -25,12 +25,13 @@ import {
   computed,
   effect,
   DestroyRef,
-  OnDestroy
+  OnDestroy,
+  Type
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
+import { FormsModule, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, switchMap, of, combineLatest, debounceTime, catchError } from 'rxjs';
+import { Subject, Subscription, merge, switchMap, of, combineLatest, debounceTime, catchError } from 'rxjs';
 
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { PaginationComponent } from '../pagination/pagination.component';
@@ -38,15 +39,28 @@ import { FilterBarComponent } from '../filter-bar/filter-bar.component';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
 import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
-import { SchemaEntityProperty, EntityData } from '../../interfaces/entity';
+import { SchemaEntityProperty, EntityData, EntityPropertyType } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
 import { SYSTEM_TYPE_MODAL_CONFIGS } from '../../constants/system-types';
+
+/**
+ * Extended diff output for rich junction M:M (v0.51.0).
+ * Includes extra column data for added and updated junction rows.
+ */
+export interface RichM2mDiff {
+  toAdd: { id: number | string; extraData: Record<string, unknown> }[];
+  toRemove: (number | string)[];
+  toUpdate: { id: number | string; extraData: Record<string, unknown> }[];
+  addedItems?: { id: number | string; display_name: string; color?: string }[];
+}
 
 @Component({
   selector: 'app-fk-search-modal',
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
+    NgComponentOutlet,
     CosModalComponent,
     PaginationComponent,
     FilterBarComponent,
@@ -75,12 +89,19 @@ export class FkSearchModalComponent implements OnDestroy {
   currentValueIds = input<(number | string)[]>([]);
   currentValueItems = input<{id: number | string, display_name: string, color?: string}[]>([]);
 
+  // Inputs — rich junction (v0.51.0)
+  extraColumns = input<SchemaEntityProperty[]>([]);
+  currentJunctionData = input<Map<number | string, Record<string, unknown>>>(new Map());
+
   // Outputs — single-select (FK)
   confirmed = output<{id: number | string, displayName: string} | null>();
   closed = output<void>();
 
-  // Output — multi-select (M:M)
+  // Output — multi-select (M:M) — pure junctions
   applied = output<{ toAdd: (number | string)[], toRemove: (number | string)[], addedItems?: {id: number | string, display_name: string, color?: string}[] }>();
+
+  // Output — rich junction M:M (v0.51.0)
+  richApplied = output<RichM2mDiff>();
 
   // State — shared
   loading = signal(false);
@@ -137,6 +158,48 @@ export class FkSearchModalComponent implements OnDestroy {
     return diff.toAdd.length > 0 || diff.toRemove.length > 0;
   });
 
+  // --- Rich junction state (v0.51.0) ---
+  isRichJunction = computed(() => this.extraColumns().length > 0);
+  richPage = signal<1 | 2>(1);  // Current page in two-page flow
+  extraColumnValues = signal<Map<number | string, Record<string, unknown>>>(new Map());
+  page2FormGroups = signal<Map<number | string, FormGroup>>(new Map());
+  private page2FormsValid = signal(true);
+  private page2Subscriptions: Subscription[] = [];
+  // Dynamically loaded to break circular dependency (EditProperty ↔ FkSearchModal)
+  editPropertyComponent = signal<Type<any> | null>(null);
+
+  // Page 2: items to configure (selected items that aren't being removed)
+  page2Items = computed(() => {
+    const selection = this.workingSelection();
+    const cache = this.chipCache();
+    const original = new Set(this.currentValueIds());
+
+    return [...selection]
+      .map(id => {
+        const cached = cache.get(id) || { display_name: `#${id}` };
+        return {
+          id,
+          display_name: cached.display_name,
+          color: cached.color,
+          isExisting: original.has(id)
+        };
+      })
+      .sort((a, b) => a.display_name.localeCompare(b.display_name));
+  });
+
+  // Whether page 2 "Apply" can be clicked (all FormGroups valid)
+  page2Valid = computed(() => this.page2FormsValid());
+
+  // Computed — rich junction: whether Apply is enabled on page 2
+  richApplyEnabled = computed(() => {
+    if (!this.page2Valid()) return false;
+    // Must have at least some change (add, remove, or update)
+    const diff = this.pendingDiff();
+    const hasSelectionChanges = diff.toAdd.length > 0 || diff.toRemove.length > 0;
+    const hasExtraDataChanges = this.hasExtraColumnChanges();
+    return hasSelectionChanges || hasExtraDataChanges;
+  });
+
   // RPC options provide an ID filter, not a separate rendering path.
   // When rpcOptions is set, eligible IDs are injected as an `in` filter
   // into the standard table query so the modal always shows full entity columns.
@@ -184,6 +247,12 @@ export class FkSearchModalComponent implements OnDestroy {
           cache.set(item.id, { display_name: item.display_name, color: item.color });
         });
         this.chipCache.set(cache);
+
+        // v0.51.0: Reset rich junction page and initialize extra column values
+        this.richPage.set(1);
+        if (this.isRichJunction()) {
+          this.extraColumnValues.set(new Map(this.currentJunctionData()));
+        }
       }
 
       // Always load entity metadata and query the table.
@@ -203,6 +272,12 @@ export class FkSearchModalComponent implements OnDestroy {
   ngOnDestroy() {
     this.destroyed = true;
     this.reload$.complete();
+    this.cleanupPage2Subscriptions();
+  }
+
+  private cleanupPage2Subscriptions() {
+    this.page2Subscriptions.forEach(s => s.unsubscribe());
+    this.page2Subscriptions = [];
   }
 
   private loadEntityMetadata(tableName: string) {
@@ -441,5 +516,175 @@ export class FkSearchModalComponent implements OnDestroy {
   getSortIcon(columnName: string): string {
     if (this.orderField() !== columnName) return '';
     return this.orderDirection() === 'asc' ? 'arrow_upward' : 'arrow_downward';
+  }
+
+  // --- Rich junction methods (v0.51.0) ---
+
+  goToPage2() {
+    this.buildPage2FormGroups();
+    // Dynamic import breaks the circular dependency with EditPropertyComponent
+    if (!this.editPropertyComponent()) {
+      import('../edit-property/edit-property.component').then(m => {
+        this.editPropertyComponent.set(m.EditPropertyComponent);
+      });
+    }
+    this.richPage.set(2);
+  }
+
+  goToPage1() {
+    this.richPage.set(1);
+  }
+
+  getExtraValue(itemId: number | string, columnName: string): unknown {
+    const values = this.extraColumnValues();
+    const itemValues = values.get(itemId);
+    return itemValues?.[columnName] ?? null;
+  }
+
+  setExtraValue(itemId: number | string, columnName: string, value: unknown) {
+    this.extraColumnValues.update(m => {
+      const next = new Map(m);
+      const itemValues = { ...(next.get(itemId) || {}) };
+      itemValues[columnName] = value;
+      next.set(itemId, itemValues);
+      return next;
+    });
+  }
+
+  /** Build a FormGroup per selected item with validators from SchemaService */
+  private buildPage2FormGroups() {
+    this.cleanupPage2Subscriptions();
+    const items = this.page2Items();
+    const extras = this.extraColumns();
+    const currentValues = this.extraColumnValues();
+    const groups = new Map<number | string, FormGroup>();
+
+    for (const item of items) {
+      const controls: Record<string, FormControl> = {};
+      const itemValues = currentValues.get(item.id) || {};
+
+      for (const col of extras) {
+        const defaultValue = itemValues[col.column_name] ??
+          SchemaService.getDefaultValueForProperty(col);
+        const validators = SchemaService.getFormValidatorsForProperty(col);
+        controls[col.column_name] = new FormControl(defaultValue, validators);
+      }
+
+      const fg = new FormGroup(controls);
+      groups.set(item.id, fg);
+
+      // Sync FormGroup value changes back to extraColumnValues signal
+      const valueSub = fg.valueChanges.subscribe(values => {
+        this.extraColumnValues.update(m => {
+          const next = new Map(m);
+          next.set(item.id, { ...(next.get(item.id) || {}), ...values });
+          return next;
+        });
+      });
+      this.page2Subscriptions.push(valueSub);
+    }
+
+    this.page2FormGroups.set(groups);
+
+    // Monitor validity of all FormGroups
+    const allGroups = [...groups.values()];
+    if (allGroups.length > 0) {
+      const statusSub = merge(...allGroups.map(g => g.statusChanges)).pipe(
+        debounceTime(50)
+      ).subscribe(() => this.checkPage2Validity());
+      this.page2Subscriptions.push(statusSub);
+    }
+
+    // Initial validity check
+    this.checkPage2Validity();
+  }
+
+  private checkPage2Validity() {
+    const groups = this.page2FormGroups();
+    const allValid = [...groups.values()].every(g => g.valid);
+    this.page2FormsValid.set(allValid);
+  }
+
+  /** Get the FormGroup for a given item ID (used by template) */
+  getItemFormGroup(itemId: number | string): FormGroup {
+    return this.page2FormGroups().get(itemId) || new FormGroup({});
+  }
+
+  /** Build inputs object for NgComponentOutlet rendering of EditPropertyComponent */
+  getEditPropertyInputs(col: SchemaEntityProperty, itemId: number | string): Record<string, unknown> {
+    return {
+      property: col,
+      formGroup: this.getItemFormGroup(itemId),
+      compact: true
+    };
+  }
+
+  /** Check if any extra column values changed from their original values */
+  private hasExtraColumnChanges(): boolean {
+    const original = this.currentJunctionData();
+    const current = this.extraColumnValues();
+    const extras = this.extraColumns();
+
+    for (const [id, currentValues] of current) {
+      const originalValues = original.get(id);
+      if (!originalValues) continue; // New item, handled by toAdd
+      for (const col of extras) {
+        if (currentValues[col.column_name] !== originalValues[col.column_name]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  onRichApply() {
+    const diff = this.pendingDiff();
+    const cache = this.chipCache();
+    const originalJunction = this.currentJunctionData();
+    const currentValues = this.extraColumnValues();
+    const extras = this.extraColumns();
+
+    // Build toAdd with extra data
+    const toAdd = diff.toAdd.map(id => ({
+      id,
+      extraData: currentValues.get(id) || {}
+    }));
+
+    // Build toUpdate: existing items whose extra column values changed
+    const toUpdate: { id: number | string; extraData: Record<string, unknown> }[] = [];
+    const originalIds = new Set(this.currentValueIds());
+    const working = this.workingSelection();
+
+    for (const id of working) {
+      if (!originalIds.has(id)) continue; // New item — in toAdd, not toUpdate
+      const origValues = originalJunction.get(id);
+      const currValues = currentValues.get(id);
+      if (!origValues || !currValues) continue;
+
+      const changed: Record<string, unknown> = {};
+      let hasChange = false;
+      for (const col of extras) {
+        if (currValues[col.column_name] !== origValues[col.column_name]) {
+          changed[col.column_name] = currValues[col.column_name];
+          hasChange = true;
+        }
+      }
+      if (hasChange) {
+        toUpdate.push({ id, extraData: changed });
+      }
+    }
+
+    // addedItems for display cache
+    const addedItems = diff.toAdd.map(id => ({
+      id,
+      ...(cache.get(id) || { display_name: `#${id}` })
+    }));
+
+    this.richApplied.emit({
+      toAdd,
+      toRemove: diff.toRemove,
+      toUpdate,
+      addedItems
+    });
   }
 }

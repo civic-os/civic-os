@@ -55,8 +55,8 @@ CREATE TABLE borrowers (
     phone phone_number,
     email email_address,
     status_id INT REFERENCES metadata.statuses(id),
-    drivers_license_front UUID REFERENCES metadata.photo_galleries(id),
-    drivers_license_back UUID REFERENCES metadata.photo_galleries(id),
+    drivers_license_front UUID REFERENCES metadata.files(id),
+    drivers_license_back UUID REFERENCES metadata.files(id),
     civic_os_text_search tsvector GENERATED ALWAYS AS (
         to_tsvector('english',
             coalesce(display_name, '') || ' ' ||
@@ -70,6 +70,15 @@ CREATE TABLE borrowers (
 CREATE INDEX idx_borrowers_user_id ON borrowers(user_id);
 CREATE INDEX idx_borrowers_phone ON borrowers(phone);
 CREATE INDEX idx_borrowers_search ON borrowers USING gin(civic_os_text_search);
+
+-- Helper: resolve the current JWT user's borrower record (used as DEFAULT on tool_reservations)
+CREATE OR REPLACE FUNCTION current_borrower_id()
+RETURNS BIGINT
+LANGUAGE SQL STABLE
+SET search_path = public, pg_catalog
+AS $$
+  SELECT id FROM borrowers WHERE user_id = current_user_id();
+$$;
 
 -- Parcels (properties with eligibility category and polygon boundary)
 CREATE TABLE parcels (
@@ -112,10 +121,10 @@ $$ LANGUAGE SQL STABLE;
 CREATE TABLE tool_reservations (
     id BIGSERIAL PRIMARY KEY,
     display_name VARCHAR(200),
-    borrower_id BIGINT NOT NULL REFERENCES borrowers(id),
+    borrower_id BIGINT NOT NULL DEFAULT current_borrower_id() REFERENCES borrowers(id),
     reserved_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    timeslot tstzrange,
-    status_id INT REFERENCES metadata.statuses(id),
+    timeslot time_slot,
+    status_id INT REFERENCES metadata.statuses(id) DEFAULT get_initial_status('guided_form'),
     delivery_required BOOLEAN DEFAULT false,
     notes TEXT,
     created_by UUID DEFAULT current_user_id(),
@@ -251,6 +260,7 @@ CREATE INDEX ON tool_reservation_tools(tool_reservation_id);
 CREATE TABLE tool_reservation_tool_items (
     tool_reservation_tools_id BIGINT NOT NULL REFERENCES tool_reservation_tools(id) ON DELETE CASCADE,
     tool_type_id INT NOT NULL REFERENCES tool_types(id) ON DELETE CASCADE,
+    quantity INT NOT NULL DEFAULT 1,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (tool_reservation_tools_id, tool_type_id)
 );

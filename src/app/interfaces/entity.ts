@@ -45,6 +45,9 @@ export interface SchemaEntityTable {
     guided_form_key?: string | null,
     // Sidebar visibility (v0.48.0)
     show_in_sidebar?: boolean,
+    // Rich junction flag (v0.51.0)
+    // When true, junction table has extra editable columns beyond FKs
+    is_rich_junction?: boolean,
 }
 
 export interface ValidationRule {
@@ -332,6 +335,18 @@ export interface InverseRelationshipData {
 }
 
 /**
+ * Represents one FK hop in a parent traversal chain.
+ * Used when the junction's direct FK target (e.g., a guided form step table)
+ * lacks display_name, so we traverse through it to a displayable parent.
+ *
+ * Added in v0.51.0.
+ */
+export interface ParentHop {
+    table: string;       // Table to traverse to (e.g., 'tool_reservations')
+    fkColumn: string;    // FK column in the previous table pointing here (e.g., 'tool_reservation_id')
+}
+
+/**
  * Metadata for a many-to-many relationship.
  * Describes one side of a bidirectional M:M relationship via junction table.
  */
@@ -358,6 +373,17 @@ export interface ManyToManyMeta {
 
     // Optional fields on related table
     relatedTableHasColor: boolean;  // Whether related table has 'color' column
+
+    // Rich junction support (v0.51.0)
+    // Non-FK, non-PK columns from the junction table (e.g., quantity, notes)
+    // Empty array for pure junctions — no behavior change.
+    extraColumns: SchemaEntityProperty[];
+
+    // Parent hops: chain from junction's direct FK target to the displayable entity.
+    // When present, targetTable is the junction's direct FK target (may lack display_name),
+    // and relatedTable is the FINAL table in the chain (has display_name).
+    // Undefined/empty = standard M:M (targetTable === relatedTable).
+    parentHops?: ParentHop[];
 }
 
 /**

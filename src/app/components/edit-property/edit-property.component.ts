@@ -76,6 +76,7 @@ export class EditPropertyComponent {
   form = input.required<FormGroup>({ alias: 'formGroup' });
   entityType = input<string>('');
   entityId = input<string>('');
+  compact = input(false);
 
   // Gallery outputs (v0.47.0)
   galleryChanged = output<void>();

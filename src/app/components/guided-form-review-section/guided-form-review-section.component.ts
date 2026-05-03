@@ -10,7 +10,8 @@ import { forkJoin, of, Observable } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { SchemaService } from '../../services/schema.service';
-import { SchemaEntityProperty } from '../../interfaces/entity';
+import { DataService } from '../../services/data.service';
+import { SchemaEntityProperty, EntityPropertyType } from '../../interfaces/entity';
 import { GuidedFormContext, EffectiveGuidedFormStep } from '../../interfaces/guided-form';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
 
@@ -187,7 +188,28 @@ export class GuidedFormReviewSectionComponent {
       next: results => {
         const records = new Map<string, any>();
         for (const [stepKey, data] of Object.entries(results)) {
-          if (data.length > 0) records.set(stepKey, data[0]);
+          if (data.length > 0) {
+            const record = data[0];
+            // Transform M:M junction data so DisplayPropertyComponent gets flat items
+            const step = steps.find(s => s.step_key === stepKey);
+            if (step) {
+              const stepProps = this.tableProperties().get(step.step_table) || [];
+              for (const p of stepProps) {
+                if (p.type === EntityPropertyType.ManyToMany && p.many_to_many_meta) {
+                  const junctionData = record[p.column_name] || [];
+                  const extraColNames = p.many_to_many_meta.extraColumns.map(c => c.column_name);
+                  record[p.column_name] = DataService.transformManyToManyData(
+                    junctionData,
+                    p.many_to_many_meta.relatedTable,
+                    extraColNames.length > 0 ? extraColNames : undefined,
+                    p.many_to_many_meta.parentHops,
+                    p.many_to_many_meta.parentHops?.length ? p.many_to_many_meta.targetTable : undefined
+                  );
+                }
+              }
+            }
+            records.set(stepKey, record);
+          }
         }
         this.stepRecords.set(records);
         this.loading.set(false);

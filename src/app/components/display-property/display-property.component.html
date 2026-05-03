@@ -131,11 +131,11 @@
               @if (linkRelated()) {
                 <a
                   [routerLink]="['/view', prop().many_to_many_meta?.relatedTable, item.id]"
-                  class="link link-hover">
-                  {{ item.display_name }}
+                  class="!text-primary-content hover:underline">
+                  {{ formatM2mLabel(item) }}
                 </a>
               } @else {
-                {{ item.display_name }}
+                {{ formatM2mLabel(item) }}
               }
 
               @if (item.color) {

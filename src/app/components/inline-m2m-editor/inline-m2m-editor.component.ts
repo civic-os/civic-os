@@ -19,7 +19,7 @@ import { Component, ChangeDetectionStrategy, input, output, signal, computed, ef
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SchemaEntityProperty } from '../../interfaces/entity';
 import { DataService } from '../../services/data.service';
-import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.component';
+import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
 
 /**
  * Inline M:M editor for Edit/Create pages with buffered save.
@@ -50,6 +50,8 @@ export class InlineM2mEditorComponent {
   entityId = input<number | string>('');
 
   pendingDiff = output<{ toAdd: (number | string)[], toRemove: (number | string)[] }>();
+  // v0.51.0: Rich junction extended diff output
+  richPendingDiff = output<RichM2mDiff>();
 
   showModal = signal(false);
 
@@ -80,6 +82,39 @@ export class InlineM2mEditorComponent {
       });
     });
   }
+  // v0.51.0: Rich junction support
+  isRichJunction = computed(() => {
+    const meta = this.property().many_to_many_meta;
+    return meta ? meta.extraColumns.length > 0 : false;
+  });
+  extraColumns = computed(() => this.property().many_to_many_meta?.extraColumns ?? []);
+  currentJunctionDataMap = computed(() => {
+    const map = new Map<number | string, Record<string, unknown>>();
+    for (const item of this.currentValues()) {
+      if ((item as any)._junction) {
+        map.set(item.id, (item as any)._junction);
+      }
+    }
+    return map;
+  });
+  localRichDiff = signal<RichM2mDiff | null>(null);
+
+  // Merged junction data for chip display: base from currentValues, overlaid by rich diff
+  chipJunctionData = computed(() => {
+    const base = new Map<number | string, Record<string, unknown>>();
+    for (const item of this.currentValues()) {
+      if ((item as any)._junction) {
+        base.set(item.id, (item as any)._junction);
+      }
+    }
+    const richDiff = this.localRichDiff();
+    if (richDiff) {
+      richDiff.toUpdate.forEach(u => base.set(u.id, u.extraData));
+      richDiff.toAdd.forEach(a => base.set(a.id, a.extraData));
+    }
+    return base;
+  });
+
   localDiff = signal<{ toAdd: (number | string)[], toRemove: (number | string)[] }>({ toAdd: [], toRemove: [] });
 
   // Cache for display data of newly added items (not in currentValues)
@@ -92,16 +127,17 @@ export class InlineM2mEditorComponent {
     const removeSet = new Set(diff.toRemove);
     const addSet = new Set(diff.toAdd);
     const cache = this.addedItemCache();
+    const junctionData = this.chipJunctionData();
 
     // Current items that haven't been removed
     const kept = current
       .filter(v => !removeSet.has(v.id))
-      .map(v => ({ ...v, state: 'current' as const }));
+      .map(v => ({ ...v, _junction: junctionData.get(v.id), state: 'current' as const }));
 
     // Current items that are being removed
     const removed = current
       .filter(v => removeSet.has(v.id))
-      .map(v => ({ ...v, state: 'removed' as const }));
+      .map(v => ({ ...v, _junction: junctionData.get(v.id), state: 'removed' as const }));
 
     // Newly added items
     const added = diff.toAdd
@@ -111,6 +147,7 @@ export class InlineM2mEditorComponent {
           id,
           display_name: cached?.display_name ?? `#${id}`,
           color: cached?.color,
+          _junction: junctionData.get(id),
           state: 'added' as const
         };
       });
@@ -181,12 +218,46 @@ export class InlineM2mEditorComponent {
     this.pendingDiff.emit(newDiff);
   }
 
+  // v0.51.0: Handle rich junction apply from search modal
+  onRichModalApply(diff: RichM2mDiff) {
+    this.showModal.set(false);
+
+    if (diff.addedItems) {
+      this.updateAddedItemCache(diff.addedItems);
+    }
+
+    // Store the rich diff for the parent page's coordinated save
+    this.localRichDiff.set(diff);
+
+    // Also update localDiff for chip display (toAdd/toRemove still drive chip state)
+    const newDiff = {
+      toAdd: diff.toAdd.map(item => item.id),
+      toRemove: diff.toRemove
+    };
+    this.localDiff.set(newDiff);
+
+    // Emit the rich diff to parent
+    this.richPendingDiff.emit(diff);
+  }
+
   onModalClosed() {
     this.showModal.set(false);
   }
 
   openModal() {
     this.showModal.set(true);
+  }
+
+  /** Format chip label with rich junction extra column values (e.g. "Push Mower / 2") */
+  formatChipLabel(chip: { display_name: string; _junction?: Record<string, unknown> }): string {
+    if (!chip._junction || !this.isRichJunction()) return chip.display_name;
+    const extras = this.extraColumns();
+    const parts = extras
+      .sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+      .map(col => chip._junction![col.column_name])
+      .filter(val => val !== null && val !== undefined && val !== '');
+    if (parts.length === 0) return chip.display_name;
+    return `${chip.display_name} / ${parts.join(' / ')}`;
   }
 
   // Called by the search modal's chipCache to populate addedItemCache

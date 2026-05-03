@@ -170,14 +170,16 @@ ON CONFLICT (table_name, column_name) DO UPDATE
       sort_order = EXCLUDED.sort_order,
       column_width = EXCLUDED.column_width;
 
--- Configure photo gallery constraints for borrowers
-INSERT INTO metadata.photo_gallery_config (table_name, column_name, max_images, allowed_types)
+-- Configure file validations for borrower license images (FileImage type)
+INSERT INTO metadata.validations (table_name, column_name, validation_type, validation_value, error_message, sort_order)
 VALUES
-  ('borrowers', 'drivers_license_front', 1, 'image/jpeg,image/png,image/webp'),
-  ('borrowers', 'drivers_license_back', 1, 'image/jpeg,image/png,image/webp')
-ON CONFLICT (table_name, column_name) DO NOTHING;
+  ('borrowers', 'drivers_license_front', 'fileType', 'image/*', 'Only image files are allowed', 1),
+  ('borrowers', 'drivers_license_front', 'maxFileSize', '5242880', 'File size must not exceed 5 MB', 2),
+  ('borrowers', 'drivers_license_back', 'fileType', 'image/*', 'Only image files are allowed', 1),
+  ('borrowers', 'drivers_license_back', 'maxFileSize', '5242880', 'File size must not exceed 5 MB', 2)
+ON CONFLICT (table_name, column_name, validation_type) DO NOTHING;
 
--- Configure photo gallery properties display
+-- Configure file properties display
 INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order, column_width)
 VALUES
   ('borrowers', 'drivers_license_front', 'Driver''s License Front', 60, 1),
@@ -243,6 +245,23 @@ VALUES
   ('building_use_requests', 'borrower_id', true, 'borrowers', 'get_borrowers_for_reservation')
 ON CONFLICT (table_name, column_name) DO UPDATE
   SET fk_search_modal = true, join_table = 'borrowers', options_source_rpc = 'get_borrowers_for_reservation';
+
+-- Mark tool_reservation_tool_items as a rich junction (has `quantity` extra column)
+INSERT INTO metadata.entities (table_name, display_name, is_rich_junction, show_in_sidebar)
+VALUES ('tool_reservation_tool_items', 'Tool Items', true, false)
+ON CONFLICT (table_name) DO UPDATE
+  SET is_rich_junction = true, show_in_sidebar = false;
+
+-- Configure quantity display and hide timestamps on junction table
+INSERT INTO metadata.properties (table_name, column_name, display_name, sort_order)
+VALUES ('tool_reservation_tool_items', 'quantity', 'Quantity', 1)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET display_name = 'Quantity', sort_order = 1;
+
+INSERT INTO metadata.properties (table_name, column_name, show_on_list, show_on_create, show_on_edit, show_on_detail)
+VALUES ('tool_reservation_tool_items', 'created_at', false, false, false, false)
+ON CONFLICT (table_name, column_name) DO UPDATE
+  SET show_on_list = false, show_on_create = false, show_on_edit = false, show_on_detail = false;
 
 -- Hide checkout entity from sidebar (accessed via tool reservation detail page)
 UPDATE metadata.entities SET show_in_sidebar = false WHERE table_name = 'tool_reservation_checkouts';

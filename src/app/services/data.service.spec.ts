@@ -1700,7 +1700,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.addManyToManyRelation(5, meta, 3).subscribe(response => {
@@ -1729,7 +1730,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: false
+          relatedTableHasColor: false,
+          extraColumns: []
         };
 
         service.addManyToManyRelation('abc-123-uuid', meta, 2).subscribe(response => {
@@ -1757,7 +1759,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.addManyToManyRelation(5, meta, 3).subscribe(response => {
@@ -1785,7 +1788,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.addManyToManyRelation(5, meta, 3).subscribe(response => {
@@ -1815,7 +1819,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
@@ -1842,7 +1847,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: false
+          relatedTableHasColor: false,
+          extraColumns: []
         };
 
         service.removeManyToManyRelation('abc-123-uuid', meta, 2).subscribe(response => {
@@ -1869,7 +1875,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.removeManyToManyRelation(5, meta, 999).subscribe(response => {
@@ -1896,7 +1903,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
@@ -1926,7 +1934,8 @@ describe('DataService', () => {
           showOnSource: true,
           showOnTarget: true,
           displayOrder: 100,
-          relatedTableHasColor: true
+          relatedTableHasColor: true,
+          extraColumns: []
         };
 
         service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
@@ -1939,6 +1948,81 @@ describe('DataService', () => {
           req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3')
         );
         req.error(new ProgressEvent('Network error'), { status: 0 });
+      });
+    });
+
+    describe('transformManyToManyData() with parent hops', () => {
+      it('should traverse parent hops to extract grandparent entities', () => {
+        const junctionData = [
+          { tool_reservation_tools: { tool_reservations: { id: 1, display_name: 'Reservation A' } } },
+          { tool_reservation_tools: { tool_reservations: { id: 2, display_name: 'Reservation B' } } },
+        ];
+
+        const result = DataService.transformManyToManyData(
+          junctionData,
+          'tool_reservations', // relatedTable (grandparent)
+          undefined,
+          [{ table: 'tool_reservations', fkColumn: 'tool_reservation_id' }], // parentHops
+          'tool_reservation_tools' // targetTable (intermediate)
+        );
+
+        expect(result).toEqual([
+          { id: 1, display_name: 'Reservation A' },
+          { id: 2, display_name: 'Reservation B' },
+        ]);
+      });
+
+      it('should deduplicate by ID when multiple junction rows collapse to same grandparent', () => {
+        // Two tool items on the same reservation
+        const junctionData = [
+          { tool_reservation_tools: { tool_reservations: { id: 1, display_name: 'Reservation A' } } },
+          { tool_reservation_tools: { tool_reservations: { id: 1, display_name: 'Reservation A' } } },
+          { tool_reservation_tools: { tool_reservations: { id: 2, display_name: 'Reservation B' } } },
+        ];
+
+        const result = DataService.transformManyToManyData(
+          junctionData,
+          'tool_reservations',
+          undefined,
+          [{ table: 'tool_reservations', fkColumn: 'tool_reservation_id' }],
+          'tool_reservation_tools'
+        );
+
+        expect(result.length).toBe(2);
+        expect(result[0].id).toBe(1);
+        expect(result[1].id).toBe(2);
+      });
+
+      it('should handle null intermediate gracefully', () => {
+        const junctionData = [
+          { tool_reservation_tools: null },
+          { tool_reservation_tools: { tool_reservations: { id: 1, display_name: 'Reservation A' } } },
+        ];
+
+        const result = DataService.transformManyToManyData(
+          junctionData,
+          'tool_reservations',
+          undefined,
+          [{ table: 'tool_reservations', fkColumn: 'tool_reservation_id' }],
+          'tool_reservation_tools'
+        );
+
+        expect(result.length).toBe(1);
+        expect(result[0].id).toBe(1);
+      });
+
+      it('should fall back to standard path when no parentHops provided', () => {
+        const junctionData = [
+          { tags: { id: 1, display_name: 'Urgent' } },
+          { tags: { id: 2, display_name: 'Bug' } },
+        ];
+
+        const result = DataService.transformManyToManyData(junctionData, 'tags');
+
+        expect(result).toEqual([
+          { id: 1, display_name: 'Urgent' },
+          { id: 2, display_name: 'Bug' },
+        ]);
       });
     });
   });
