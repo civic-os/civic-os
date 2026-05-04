@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -35,6 +35,8 @@ export interface ManagedUser {
   roles: string[] | null;
   created_at: string;
   provision_id: number | null;
+  // Last login tracking (from managed_users view, v0.52.0+)
+  last_login_at: string | null;
   // Notification status (from managed_users view, v0.35.0+)
   email_notif_enabled: boolean | null;
   sms_notif_enabled: boolean | null;

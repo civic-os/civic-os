@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -17,7 +17,7 @@
 
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, switchMap, of, debounceTime, startWith, combineLatest, Observable, map } from 'rxjs';
 import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest, AdminNotificationPreference } from '../../services/user-management.service';
@@ -29,7 +29,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImportModalComponent],
+  imports: [CommonModule, DatePipe, FormsModule, ImportModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-4 max-w-7xl mx-auto">
@@ -153,7 +153,20 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                     </span>
                   </td>
                   <td>
-                    <div class="flex gap-1">
+                    <div class="flex gap-1 items-center">
+                      @if (user.status === 'active') {
+                        @if (user.last_login_at) {
+                          <span class="material-symbols-outlined text-sm"
+                                [title]="'Last login: ' + (user.last_login_at | date:'short')">
+                            schedule
+                          </span>
+                        } @else {
+                          <span class="material-symbols-outlined text-sm opacity-40"
+                                title="Never logged in">
+                            help
+                          </span>
+                        }
+                      }
                       @if (user.status === 'active' && user.id) {
                         <button class="btn btn-xs btn-ghost" title="Edit user"
                                 (click)="openEditModal(user)">
@@ -302,7 +315,15 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
     @if (showEditModal()) {
       <div class="modal modal-open">
         <div class="modal-box">
-          <h3 class="font-bold text-lg mb-4">Edit User</h3>
+          <h3 class="font-bold text-lg">Edit User</h3>
+          <p class="text-sm text-base-content/60 mb-4">
+            {{ editUser()?.full_name }}
+            @if (editUser()?.last_login_at) {
+              · Last login {{ editUser()?.last_login_at | date:'short' }}
+            } @else {
+              · Never logged in
+            }
+          </p>
 
           <!-- User Info Section -->
           <div class="grid grid-cols-2 gap-4">

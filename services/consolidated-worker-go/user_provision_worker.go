@@ -210,23 +210,27 @@ func (w *UserProvisionWorker) insertUserRecords(ctx context.Context, keycloakUse
 
 	if phone != "" {
 		_, err = w.dbPool.Exec(ctx, `
-			INSERT INTO metadata.civic_os_users_private (id, display_name, email, phone)
-			VALUES ($1, $2, $3::email_address, $4::phone_number)
+			INSERT INTO metadata.civic_os_users_private (id, display_name, email, phone, first_name, last_name)
+			VALUES ($1, $2, $3::email_address, $4::phone_number, $5, $6)
 			ON CONFLICT (id) DO UPDATE SET
 			    display_name = EXCLUDED.display_name,
 			    email = EXCLUDED.email,
 			    phone = EXCLUDED.phone,
+			    first_name = EXCLUDED.first_name,
+			    last_name = EXCLUDED.last_name,
 			    updated_at = NOW()
-		`, keycloakUserID, fullName, req.Email, phone)
+		`, keycloakUserID, fullName, req.Email, phone, req.FirstName, req.LastName)
 	} else {
 		_, err = w.dbPool.Exec(ctx, `
-			INSERT INTO metadata.civic_os_users_private (id, display_name, email)
-			VALUES ($1, $2, $3::email_address)
+			INSERT INTO metadata.civic_os_users_private (id, display_name, email, first_name, last_name)
+			VALUES ($1, $2, $3::email_address, $4, $5)
 			ON CONFLICT (id) DO UPDATE SET
 			    display_name = EXCLUDED.display_name,
 			    email = EXCLUDED.email,
+			    first_name = EXCLUDED.first_name,
+			    last_name = EXCLUDED.last_name,
 			    updated_at = NOW()
-		`, keycloakUserID, fullName, req.Email)
+		`, keycloakUserID, fullName, req.Email, req.FirstName, req.LastName)
 	}
 	if err != nil {
 		return fmt.Errorf("insert civic_os_users_private failed: %w", err)
