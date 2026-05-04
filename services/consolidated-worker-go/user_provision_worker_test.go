@@ -199,9 +199,9 @@ func TestFormatPublicDisplayName(t *testing.T) {
 		{"", "Doe", "D."},
 		{"", "", "User"},
 		{"María", "García", "María G."},
-		{"  Jane  ", "  Doe  ", "Jane D."},  // whitespace trimmed
-		{"Alice", "O'Brien", "Alice O."},    // special chars
-		{"Li", "Wei", "Li W."},              // short names
+		{"  Jane  ", "  Doe  ", "Jane D."}, // whitespace trimmed
+		{"Alice", "O'Brien", "Alice O."},   // special chars
+		{"Li", "Wei", "Li W."},             // short names
 	}
 
 	for _, tc := range tests {
