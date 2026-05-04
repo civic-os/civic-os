@@ -2,8 +2,9 @@
 
 BEGIN;
 
--- Restore schema_entities VIEW without is_rich_junction
-CREATE OR REPLACE VIEW public.schema_entities AS
+-- Must DROP then CREATE (not CREATE OR REPLACE) because PG cannot remove columns from a view
+DROP VIEW IF EXISTS public.schema_entities;
+CREATE VIEW public.schema_entities AS
 SELECT
     COALESCE(entities.display_name, tables.table_name::text) AS display_name,
     COALESCE(entities.sort_order, 0) AS sort_order,
@@ -43,6 +44,9 @@ WHERE tables.table_schema::name = 'public'::name
     )
   )
 ORDER BY (COALESCE(entities.sort_order, 0)), tables.table_name;
+
+-- Restore grants lost by DROP VIEW
+GRANT SELECT ON public.schema_entities TO web_anon, authenticated;
 
 -- Drop the column
 ALTER TABLE metadata.entities DROP COLUMN is_rich_junction;
