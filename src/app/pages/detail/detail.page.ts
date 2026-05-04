@@ -18,7 +18,7 @@
 
 import { Component, inject, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin } from 'rxjs';
+import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
   SchemaEntityProperty,
@@ -196,7 +196,7 @@ export class DetailPage {
     } else {
       return of(undefined);
     }
-  }));
+  }), shareReplay({ bufferSize: 1, refCount: true }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
     if(e) {
       let props = this.schema.getPropsForDetail(e);
@@ -204,7 +204,7 @@ export class DetailPage {
     } else {
       return of([]);
     }
-  }));
+  }), shareReplay({ bufferSize: 1, refCount: true }));
 
   // Separate regular properties from M:M properties, excluding structural-only props.
   // v0.46.0: Inline M:M (show_inline=true) are included in regularProps$ for grid rendering.
@@ -369,7 +369,7 @@ export class DetailPage {
       this.dataLoading.set(false);
       return of(undefined);
     }
-  }));
+  }), shareReplay({ bufferSize: 1, refCount: true }));
 
   // Check if payment can be initiated (metadata-driven via payment_initiation_rpc)
   public canInitiatePayment$: Observable<boolean> = combineLatest([
@@ -746,6 +746,10 @@ export class DetailPage {
    */
   private checkSeriesMembership(): void {
     if (!this.entityKey || !this.entityId) return;
+
+    // Only check for entities that support recurring time slots
+    const entity = this.currentEntity();
+    if (!entity?.supports_recurring) return;
 
     this.recurringService.getSeriesMembership(this.entityKey, this.entityId)
       .subscribe({
