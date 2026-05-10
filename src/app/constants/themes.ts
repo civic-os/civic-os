@@ -67,7 +67,25 @@ export function detectAvailableThemes(): string[] {
   }
 
   const themes = new Set<string>();
-  const regex = /\[data-theme="([^"]+)"\]/;
+  // Match both quoted and unquoted attribute values:
+  //   [data-theme="corporate"]  (browser-normalized selectorText)
+  //   [data-theme=corporate]    (raw DaisyUI 5 output)
+  const regex = /\[data-theme=["']?([^\]"']+)["']?\]/;
+
+  function scanRules(rules: CSSRuleList): void {
+    for (let i = 0; i < rules.length; i++) {
+      const rule = rules[i];
+      if (rule instanceof CSSStyleRule) {
+        const match = regex.exec(rule.selectorText);
+        if (match) {
+          themes.add(match[1]);
+        }
+      } else if ('cssRules' in rule) {
+        // Recurse into @layer, @media, @supports, etc.
+        scanRules((rule as CSSGroupingRule).cssRules);
+      }
+    }
+  }
 
   try {
     for (let i = 0; i < document.styleSheets.length; i++) {
@@ -78,16 +96,7 @@ export function detectAvailableThemes(): string[] {
         // Cross-origin or blob: stylesheet — skip
         continue;
       }
-
-      for (let j = 0; j < rules.length; j++) {
-        const rule = rules[j];
-        if (rule instanceof CSSStyleRule) {
-          const match = regex.exec(rule.selectorText);
-          if (match) {
-            themes.add(match[1]);
-          }
-        }
-      }
+      scanRules(rules);
     }
   } catch {
     // Scanning failed entirely
