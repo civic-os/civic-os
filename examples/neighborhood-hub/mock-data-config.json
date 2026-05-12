@@ -6,6 +6,11 @@
     "borrowers": { "count": 20 },
     "parcels": { "count": 100 },
     "tool_reservations": { "count": 40 },
-    "projects": { "count": 5 }
+    "projects": { "count": 5 },
+    "census_block_groups": { "count": 10 },
+    "training_records": { "count": 15 },
+    "building_use_requests": { "count": 10 },
+    "building_use_rooms": { "count": 4 },
+    "mek_requests": { "count": 10 }
   }
 }

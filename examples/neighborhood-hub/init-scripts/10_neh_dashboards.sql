@@ -52,13 +52,17 @@ BEGIN
     (v_borrower_dashboard_id, 'filtered_list',
      '{"entity": "building_use_requests", "filter": {"created_by": "{{current_user.id}}"}, "title": "My Building Use Requests", "columns": ["display_name", "group_name", "time_slot", "status.display_name"]}', 30),
 
+    -- My Event Kit Requests
+    (v_borrower_dashboard_id, 'filtered_list',
+     '{"entity": "mek_requests", "filter": {"created_by": "{{current_user.id}}"}, "title": "My Event Kit Requests", "columns": ["display_name", "event_type", "pickup_date", "return_date", "status.display_name"]}', 35),
+
     -- My Borrower Status
     (v_borrower_dashboard_id, 'markdown',
      '{"content": "## My Status\n\nTo borrow tools, your account must be approved by staff. Contact NEH if you need approval."}', 40),
 
     -- Quick Actions
     (v_borrower_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Request Tool", "url": "/guided-form/tool_reservation"}, {"label": "Request Building Use", "url": "/guided-form/building_use_request"}]}', 50);
+     '{"buttons": [{"label": "Request Tool", "url": "/create/tool_reservations"}, {"label": "Request Building Use", "url": "/create/building_use_requests"}, {"label": "Request Event Kit", "url": "/create/mek_requests"}]}', 50);
 
   -- ========================================
   -- Staff Dashboard Widgets
@@ -72,6 +76,10 @@ BEGIN
     -- Pending Building Use Requests
     (v_staff_dashboard_id, 'filtered_list',
      '{"entity": "building_use_requests", "filter": {"status.status_key": "pending"}, "title": "Pending Building Use Requests", "columns": ["display_name", "group_name", "contact_name", "time_slot"]}', 15),
+
+    -- Pending Event Kit Requests
+    (v_staff_dashboard_id, 'filtered_list',
+     '{"entity": "mek_requests", "filter": {"status.status_key": "pending"}, "title": "Pending Event Kit Requests", "columns": ["display_name", "borrower.display_name", "event_type", "pickup_date", "return_date"]}', 17),
 
     -- Pending Borrower Approvals
     (v_staff_dashboard_id, 'filtered_list',
@@ -87,15 +95,15 @@ BEGIN
 
     -- Tool Reservation Calendar
     (v_staff_dashboard_id, 'calendar',
-     '{"entity": "tool_reservations", "date_field": "timeslot", "title_field": "display_name", "color_field": "status.color", "title": "Tool Reservation Calendar"}', 40),
+     '{"entityKey": "tool_reservations", "timeSlotPropertyName": "timeslot", "initialView": "timeGridWeek", "showCreateButton": true}', 40),
 
     -- Building Use Calendar
     (v_staff_dashboard_id, 'calendar',
-     '{"entity": "building_use_requests", "date_field": "time_slot", "title_field": "display_name", "color_field": "status.color", "title": "Building Use Calendar"}', 45),
+     '{"entityKey": "building_use_requests", "timeSlotPropertyName": "time_slot", "initialView": "timeGridWeek"}', 45),
 
     -- Quick Actions
     (v_staff_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Approve Requests", "url": "/view/tool_reservations"}, {"label": "Create Reservation", "url": "/guided-form/tool_reservation"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}]}', 50);
+     '{"buttons": [{"label": "Approve Requests", "url": "/view/tool_reservations"}, {"label": "Create Reservation", "url": "/create/tool_reservations"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}, {"label": "Event Kit Requests", "url": "/view/mek_requests"}]}', 50);
 
   -- ========================================
   -- Admin Dashboard Widgets
@@ -110,17 +118,21 @@ BEGIN
     (v_admin_dashboard_id, 'filtered_list',
      '{"entity": "building_use_requests", "filter": {"status.status_key": "pending"}, "title": "Pending Building Use Requests", "columns": ["display_name", "group_name", "contact_name", "time_slot"]}', 15),
 
+    -- Pending Event Kit Requests
+    (v_admin_dashboard_id, 'filtered_list',
+     '{"entity": "mek_requests", "filter": {"status.status_key": "pending"}, "title": "Pending Event Kit Requests", "columns": ["display_name", "borrower.display_name", "event_type", "pickup_date", "return_date"]}', 17),
+
     -- Currently Checked Out
     (v_admin_dashboard_id, 'filtered_list',
      '{"entity": "tool_reservations", "filter": {"status.status_key": "checked_out"}, "title": "Currently Checked Out", "columns": ["display_name", "borrower.display_name", "tools_summary", "timeslot"]}', 20),
 
     -- Tool Reservation Calendar
     (v_admin_dashboard_id, 'calendar',
-     '{"entity": "tool_reservations", "date_field": "timeslot", "title_field": "display_name", "color_field": "status.color", "title": "Tool Reservation Calendar"}', 30),
+     '{"entityKey": "tool_reservations", "timeSlotPropertyName": "timeslot", "initialView": "timeGridWeek", "showCreateButton": true}', 30),
 
     -- Building Use Calendar
     (v_admin_dashboard_id, 'calendar',
-     '{"entity": "building_use_requests", "date_field": "time_slot", "title_field": "display_name", "color_field": "status.color", "title": "Building Use Calendar"}', 35),
+     '{"entityKey": "building_use_requests", "timeSlotPropertyName": "time_slot", "initialView": "timeGridWeek"}', 35),
 
     -- System Health
     (v_admin_dashboard_id, 'markdown',
@@ -128,7 +140,7 @@ BEGIN
 
     -- Admin Navigation
     (v_admin_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Manage Users", "url": "/admin/users"}, {"label": "Permissions", "url": "/permissions"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}]}', 50);
+     '{"buttons": [{"label": "Manage Users", "url": "/admin/users"}, {"label": "Permissions", "url": "/permissions"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}, {"label": "Event Kit", "url": "/view/mek_requests"}]}', 50);
 
   -- ========================================
   -- Map roles to dashboards

@@ -25,7 +25,9 @@ GRANT SELECT ON tool_reservation_tools TO web_anon;
 GRANT SELECT ON tool_reservation_tool_items TO web_anon;
 GRANT SELECT ON tool_reservation_work_site TO web_anon;
 GRANT SELECT ON work_site_parcels TO web_anon;
--- Note: building_use_* table grants are in 07_neh_building_use_workflow.sql
+GRANT SELECT ON training_records TO web_anon;
+GRANT SELECT ON census_block_groups TO web_anon;
+-- Note: building_use_* and mek_* table grants are in 07/11 respectively
 
 -- Grant to authenticated (full CRUD)
 GRANT SELECT, INSERT, UPDATE, DELETE ON tool_categories TO authenticated;
@@ -42,7 +44,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON tool_reservation_tools TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON tool_reservation_tool_items TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON tool_reservation_work_site TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON work_site_parcels TO authenticated;
--- Note: building_use_* table grants are in 07_neh_building_use_workflow.sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON training_records TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON census_block_groups TO authenticated;
+-- Note: building_use_* and mek_* table grants are in 07/11 respectively
 
 -- Sequences
 GRANT USAGE, SELECT ON SEQUENCE tool_categories_id_seq TO authenticated;
@@ -54,11 +58,14 @@ GRANT USAGE, SELECT ON SEQUENCE tool_reservation_checkouts_id_seq TO authenticat
 GRANT USAGE, SELECT ON SEQUENCE projects_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE tool_reservation_tools_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE tool_reservation_work_site_id_seq TO authenticated;
--- Note: building_use_* sequence grants are in 07_neh_building_use_workflow.sql
+GRANT USAGE, SELECT ON SEQUENCE training_records_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE census_block_groups_id_seq TO authenticated;
+-- Note: building_use_* and mek_* sequence grants are in 07/11 respectively
 
 -- RPC Functions
 -- Note: Building-use related functions are granted in 07_neh_building_use_workflow.sql
 -- Core NEH function grants are in 05_neh_options_rpcs.sql
+-- MEK function grants are in 11_neh_mek_workflow.sql
 
 -- RBAC permissions (metadata.permissions + metadata.permission_roles)
 DO $$
@@ -69,7 +76,9 @@ DECLARE
     'projects', 'parcels', 'project_parcels',
     'tool_reservation_tools', 'tool_reservation_tool_items',
     'tool_reservation_work_site', 'work_site_parcels',
-    'building_use_requests', 'building_use_room_preferences'
+    'building_use_requests', 'building_use_request_rooms', 'building_use_rooms',
+    'training_records', 'census_block_groups',
+    'mek_requests', 'mek_request_equipment', 'mek_request_equipment_items'
   ];
   perms TEXT[] := ARRAY['read', 'create', 'update', 'delete'];
   t TEXT;
@@ -119,18 +128,25 @@ BEGIN
       IF t = 'borrowers' AND p IN ('read', 'update') THEN
         -- Borrowers can read and update their own record
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
-      ELSIF t IN ('tool_reservations', 'building_use_requests') AND p IN ('read', 'create', 'update') THEN
-        -- Borrowers can create/read/update their own reservations
+      ELSIF t IN ('tool_reservations', 'building_use_requests', 'mek_requests') AND p IN ('read', 'create', 'update') THEN
+        -- Borrowers can create/read/update their own reservations/requests
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
       ELSIF t IN ('tool_reservation_tools', 'tool_reservation_tool_items',
-                  'tool_reservation_work_site', 'work_site_parcels') AND p IN ('read', 'create', 'update', 'delete') THEN
+                  'tool_reservation_work_site', 'work_site_parcels',
+                  'mek_request_equipment', 'mek_request_equipment_items') AND p IN ('read', 'create', 'update', 'delete') THEN
         -- Borrowers can manage guided form step data (full CRUD for M:M editing)
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
-      ELSIF t = 'building_use_room_preferences' AND p IN ('read', 'create', 'update') THEN
-        -- Borrowers can create/read/update their own building use details
+      ELSIF t = 'building_use_request_rooms' AND p IN ('read', 'create', 'update', 'delete') THEN
+        -- Borrowers can manage room selections on their own requests
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
       ELSIF t IN ('tool_reservation_checkouts', 'checkout_instances') AND p = 'read' THEN
         -- Borrowers can read checkout records for their reservations
+        INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
+      ELSIF t = 'training_records' AND p = 'read' THEN
+        -- Borrowers can read their own training records (own via RLS)
+        INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
+      ELSIF t = 'building_use_rooms' AND p = 'read' THEN
+        -- Borrowers can read the room lookup table
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_borrower_id) ON CONFLICT DO NOTHING;
       ELSIF p = 'read' THEN
         -- Borrowers can read reference data
@@ -138,9 +154,15 @@ BEGIN
       END IF;
 
       -- Anonymous users get read access to some tables
-      IF p = 'read' AND t IN ('tool_categories', 'tool_types', 'parcels') THEN
+      IF p = 'read' AND t IN ('tool_categories', 'tool_types', 'parcels', 'census_block_groups') THEN
         INSERT INTO metadata.permission_roles (permission_id, role_id) VALUES (v_perm_id, v_anon_id) ON CONFLICT DO NOTHING;
       END IF;
     END LOOP;
   END LOOP;
 END $$;
+
+-- Clean up stale permissions for dropped table
+DELETE FROM metadata.permission_roles WHERE permission_id IN (
+  SELECT id FROM metadata.permissions WHERE table_name = 'building_use_room_preferences'
+);
+DELETE FROM metadata.permissions WHERE table_name = 'building_use_room_preferences';

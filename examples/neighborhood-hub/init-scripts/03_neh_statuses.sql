@@ -62,4 +62,28 @@ VALUES
   ('building_use_requests', 'Cancelled', '#94a3b8', 4, 'cancelled', false, true),
   ('building_use_requests', 'Completed', '#6b7280', 5, 'completed', false, true);
 
+-- Training record certification tracking
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('training_records', 'Training Record', 'Certification status for borrower training')
+ON CONFLICT (entity_type) DO NOTHING;
 
+INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, status_key, is_initial, is_terminal)
+VALUES
+  ('training_records', 'Active',  '#22c55e', 1, 'active',  true,  false),
+  ('training_records', 'Expired', '#ef4444', 2, 'expired', false, true),
+  ('training_records', 'Revoked', '#6b7280', 3, 'revoked', false, true);
+
+-- MEK request workflow (mirrors tool_reservations)
+INSERT INTO metadata.status_types (entity_type, display_name, description)
+VALUES ('mek_requests', 'MEK Request', 'Workflow status for Mobile Event Kit requests')
+ON CONFLICT (entity_type) DO NOTHING;
+
+INSERT INTO metadata.statuses (entity_type, display_name, color, sort_order, status_key, is_initial, is_terminal)
+VALUES
+  ('mek_requests', 'Pending',     '#f59e0b', 1, 'pending',     true,  false),
+  ('mek_requests', 'Approved',    '#3b82f6', 2, 'approved',    false, false),
+  ('mek_requests', 'Checked Out', '#22c55e', 3, 'checked_out', false, false),
+  ('mek_requests', 'Returned',    '#8b5cf6', 4, 'returned',    false, false),
+  ('mek_requests', 'Completed',   '#6b7280', 5, 'completed',   false, true),
+  ('mek_requests', 'Denied',      '#ef4444', 6, 'denied',      false, true),
+  ('mek_requests', 'Cancelled',   '#94a3b8', 7, 'cancelled',   false, true);

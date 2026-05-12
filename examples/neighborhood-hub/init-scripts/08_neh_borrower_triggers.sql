@@ -62,3 +62,11 @@ CREATE TRIGGER trg_borrower_sync_private
 -- SELECT cup.id, cup.display_name, cup.phone, cup.email
 -- FROM metadata.civic_os_users_private cup
 -- ON CONFLICT (user_id) DO NOTHING;
+
+-- Human-readable error message for borrower unique constraint
+INSERT INTO metadata.constraint_messages (constraint_name, table_name, column_name, error_message)
+VALUES
+  ('borrowers_user_id_key', 'borrowers', 'user_id',
+   'A borrower record already exists for this user')
+ON CONFLICT (constraint_name) DO UPDATE
+  SET error_message = EXCLUDED.error_message;

@@ -119,7 +119,31 @@ INSERT INTO metadata.notification_templates (
    'Borrower Account Suspended',
    '<p>Your borrower account has been suspended. Please contact NEH staff for more information.</p>',
    'Your borrower account has been suspended. Please contact NEH staff for more information.',
-   'Your NEH borrower account has been suspended. Contact staff for details.')
+   'Your NEH borrower account has been suspended. Contact staff for details.'),
+
+  -- MEK request submitted (staff notification)
+  ('mek_request_submitted',
+   'Sent to staff when a new event kit request is submitted',
+   'New Event Kit Request',
+   '<p>A new event kit request has been submitted by <strong>{{.Entity.borrower_display_name}}</strong> for pickup on {{.Entity.pickup_date}}.</p><p><a href="{{.Metadata.site_url}}/view/mek_requests/{{.Entity.id}}">View Request</a></p>',
+   'A new event kit request has been submitted by {{.Entity.borrower_display_name}} for pickup on {{.Entity.pickup_date}}.',
+   NULL),
+
+  -- MEK request approved (requester notification)
+  ('mek_request_approved',
+   'Sent to requester when their event kit request is approved',
+   'Event Kit Request Approved',
+   '<p>Your event kit request for pickup on <strong>{{.Entity.pickup_date}}</strong> has been approved.</p><p><a href="{{.Metadata.site_url}}/view/mek_requests/{{.Entity.id}}">View Request</a></p>',
+   'Your event kit request for pickup on {{.Entity.pickup_date}} has been approved.',
+   'Your event kit request has been approved. Pickup: {{.Entity.pickup_date}}.'),
+
+  -- MEK request denied (requester notification)
+  ('mek_request_denied',
+   'Sent to requester when their event kit request is denied',
+   'Event Kit Request Denied',
+   '<p>Your event kit request for pickup on <strong>{{.Entity.pickup_date}}</strong> has been denied.</p>',
+   'Your event kit request for pickup on {{.Entity.pickup_date}} has been denied.',
+   'Your event kit request has been denied.')
 
 ON CONFLICT (name) DO UPDATE
   SET subject_template = EXCLUDED.subject_template,
@@ -310,3 +334,63 @@ CREATE TRIGGER trg_notify_borrower_status_change
   AFTER UPDATE OF status_id ON public.borrowers
   FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
   EXECUTE FUNCTION public.notify_borrower_status_change();
+
+-- MEK request status change notifications
+-- Note: mek_requests table is created in 11_neh_mek_workflow.sql which runs after this file.
+-- The trigger function is defined here; the trigger itself is created in file 11.
+CREATE OR REPLACE FUNCTION public.notify_mek_request_status_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata, pg_temp
+AS $$
+DECLARE
+  v_status_key TEXT;
+  v_template_name TEXT;
+  v_borrower_user_id UUID;
+  v_entity_data JSONB;
+  v_staff RECORD;
+BEGIN
+  SELECT status_key INTO v_status_key
+  FROM metadata.statuses WHERE id = NEW.status_id;
+
+  v_entity_data := jsonb_build_object(
+    'id', NEW.id,
+    'display_name', NEW.display_name,
+    'pickup_date', NEW.pickup_date::text,
+    'return_date', NEW.return_date::text,
+    'borrower_display_name', (SELECT display_name FROM borrowers WHERE id = NEW.borrower_id)
+  );
+
+  -- 'pending' = submission -> notify staff
+  IF v_status_key = 'pending' THEN
+    FOR v_staff IN SELECT user_id FROM get_neh_users_with_role('neh_staff')
+                   UNION
+                   SELECT user_id FROM get_neh_users_with_role('neh_admin')
+    LOOP
+      INSERT INTO metadata.notifications (user_id, template_name, entity_type, entity_id, entity_data)
+      VALUES (v_staff.user_id, 'mek_request_submitted', 'mek_requests', NEW.id::text, v_entity_data);
+    END LOOP;
+    RETURN NEW;
+  END IF;
+
+  -- Other statuses -> notify requester (borrower)
+  CASE v_status_key
+    WHEN 'approved' THEN v_template_name := 'mek_request_approved';
+    WHEN 'denied' THEN v_template_name := 'mek_request_denied';
+    ELSE v_template_name := NULL;
+  END CASE;
+
+  IF v_template_name IS NOT NULL THEN
+    SELECT b.user_id INTO v_borrower_user_id
+    FROM borrowers b WHERE b.id = NEW.borrower_id;
+
+    IF v_borrower_user_id IS NOT NULL THEN
+      INSERT INTO metadata.notifications (user_id, template_name, entity_type, entity_id, entity_data)
+      VALUES (v_borrower_user_id, v_template_name, 'mek_requests', NEW.id::text, v_entity_data);
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;

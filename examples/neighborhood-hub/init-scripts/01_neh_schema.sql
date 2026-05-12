@@ -5,7 +5,7 @@
 -- LOOKUP TABLES
 -- ============================================================================
 
--- Tool categories (e.g., Lawn Care, Tree Trimming, Snow Removal)
+-- Tool categories (e.g., Power Tools, Hand Tools, Accessibility Tools)
 CREATE TABLE tool_categories (
     id SERIAL PRIMARY KEY,
     display_name VARCHAR(100) NOT NULL,
@@ -48,6 +48,11 @@ CREATE INDEX ON tool_instances(status_id);
 -- ============================================================================
 
 -- Borrowers (community members who can borrow tools)
+-- T-2: photo_id/address_proof (renamed from drivers_license_front/back)
+-- T-3: liability_waiver (FileImage upload)
+-- BR-2: phone_verified (staff checkbox)
+-- BR-3: street/city/state/zip (structured address)
+-- T-1: borrower_type (category: Resident, Non-Resident, Volunteer Group)
 CREATE TABLE borrowers (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL UNIQUE REFERENCES metadata.civic_os_users(id),
@@ -55,13 +60,23 @@ CREATE TABLE borrowers (
     phone phone_number,
     email email_address,
     status_id INT REFERENCES metadata.statuses(id),
-    drivers_license_front UUID REFERENCES metadata.files(id),
-    drivers_license_back UUID REFERENCES metadata.files(id),
+    borrower_type INT REFERENCES metadata.categories(id),
+    phone_verified BOOLEAN DEFAULT false,
+    street VARCHAR(255),
+    city VARCHAR(100),
+    state VARCHAR(2),
+    zip VARCHAR(10),
+    photo_id UUID REFERENCES metadata.files(id),
+    address_proof UUID REFERENCES metadata.files(id),
+    liability_waiver UUID REFERENCES metadata.files(id),
     civic_os_text_search tsvector GENERATED ALWAYS AS (
         to_tsvector('english',
             coalesce(display_name, '') || ' ' ||
             coalesce(email::text, '') || ' ' ||
-            phone_search_tokens(phone)
+            phone_search_tokens(phone) || ' ' ||
+            coalesce(street, '') || ' ' ||
+            coalesce(city, '') || ' ' ||
+            coalesce(zip, '')
         )
     ) STORED,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -70,6 +85,7 @@ CREATE TABLE borrowers (
 CREATE INDEX idx_borrowers_user_id ON borrowers(user_id);
 CREATE INDEX idx_borrowers_phone ON borrowers(phone);
 CREATE INDEX idx_borrowers_search ON borrowers USING gin(civic_os_text_search);
+CREATE INDEX idx_borrowers_borrower_type ON borrowers(borrower_type);
 
 -- Helper: resolve the current JWT user's borrower record (used as DEFAULT on tool_reservations)
 CREATE OR REPLACE FUNCTION current_borrower_id()
@@ -93,6 +109,7 @@ CREATE TABLE parcels (
     acreage DECIMAL(10,4),
     property_class INTEGER REFERENCES metadata.categories(id),
     eligibility INTEGER REFERENCES metadata.categories(id),
+    lmi_status INTEGER REFERENCES metadata.categories(id),
     boundary postgis.geography(Polygon, 4326),
     civic_os_text_search tsvector GENERATED ALWAYS AS (
         to_tsvector('english',
@@ -105,6 +122,7 @@ CREATE TABLE parcels (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_parcels_eligibility ON parcels(eligibility);
+CREATE INDEX idx_parcels_lmi_status ON parcels(lmi_status);
 CREATE INDEX idx_parcels_property_class ON parcels(property_class);
 CREATE INDEX idx_parcels_text_search ON parcels USING GIN(civic_os_text_search);
 CREATE INDEX idx_parcels_boundary ON parcels USING GIST(boundary);
@@ -115,9 +133,38 @@ RETURNS text AS $$
   SELECT postgis.ST_AsText(rec.boundary);
 $$ LANGUAGE SQL STABLE;
 
+-- Census block groups (HUD CDBG LMI boundaries with polygon map)
+CREATE TABLE census_block_groups (
+    id SERIAL PRIMARY KEY,
+    display_name VARCHAR(255) NOT NULL,
+    geoid VARCHAR(12),                 -- Census GEOID (not UNIQUE — MultiPolygon splits share a GEOID)
+    lowmod_pct DECIMAL(5,2),           -- LMI percentage
+    lowmod INT,                        -- LMI person count
+    lowmod_universe INT,               -- Total population
+    low INT,                           -- Low-income person count
+    lmi_status INTEGER REFERENCES metadata.categories(id),  -- Drives map color
+    boundary postgis.geography(Polygon, 4326),
+    civic_os_text_search tsvector GENERATED ALWAYS AS (
+        to_tsvector('english', coalesce(display_name, '') || ' ' || coalesce(geoid, ''))
+    ) STORED,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_cbg_lmi_status ON census_block_groups(lmi_status);
+CREATE INDEX idx_cbg_geoid ON census_block_groups(geoid);
+CREATE INDEX idx_cbg_text_search ON census_block_groups USING GIN(civic_os_text_search);
+CREATE INDEX idx_cbg_boundary ON census_block_groups USING GIST(boundary);
+
+-- Computed text field for PostgREST (function overload — same name, different arg type as parcels)
+CREATE OR REPLACE FUNCTION public.boundary_text(rec public.census_block_groups)
+RETURNS text AS $$
+  SELECT postgis.ST_AsText(rec.boundary);
+$$ LANGUAGE SQL STABLE;
+
 -- Tool reservations (guided form: borrower submits reservation, staff approves)
 -- NOTE: checkout_photos/return_photos/checkout_notes/return_notes moved to
 -- tool_reservation_checkouts entity (v0.51.0)
+-- T-6: site_review_completed (staff checkbox for site review)
 CREATE TABLE tool_reservations (
     id BIGSERIAL PRIMARY KEY,
     display_name VARCHAR(200),
@@ -127,6 +174,7 @@ CREATE TABLE tool_reservations (
     status_id INT REFERENCES metadata.statuses(id) DEFAULT get_initial_status('guided_form'),
     delivery_required BOOLEAN DEFAULT false,
     notes TEXT,
+    site_review_completed BOOLEAN DEFAULT false,
     created_by UUID DEFAULT current_user_id(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -406,3 +454,25 @@ CREATE TRIGGER trg_cascade_damage
     AFTER UPDATE OF status_id ON public.tool_reservation_checkouts
     FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id)
     EXECUTE FUNCTION public.cascade_damage_to_instances();
+
+-- ============================================================================
+-- TRAINING RECORDS (T-5: certification tracking for borrowers)
+-- ============================================================================
+
+CREATE TABLE training_records (
+    id BIGSERIAL PRIMARY KEY,
+    display_name VARCHAR(255) NOT NULL,
+    borrower_id BIGINT NOT NULL REFERENCES borrowers(id),
+    training_type INT NOT NULL REFERENCES metadata.categories(id),
+    date_earned DATE NOT NULL,
+    expiry_date DATE,
+    trainer VARCHAR(255),
+    notes TEXT,
+    status_id INT REFERENCES metadata.statuses(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_training_records_borrower ON training_records(borrower_id);
+CREATE INDEX idx_training_records_type ON training_records(training_type);
+CREATE INDEX idx_training_records_expiry ON training_records(expiry_date);
+CREATE INDEX idx_training_records_status ON training_records(status_id);

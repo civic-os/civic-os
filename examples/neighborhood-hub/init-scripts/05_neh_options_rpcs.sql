@@ -8,8 +8,8 @@ STABLE
 SECURITY DEFINER
 SET search_path = public, metadata, pg_temp
 AS $$
-  SELECT id 
-  FROM public.borrowers 
+  SELECT id
+  FROM public.borrowers
   WHERE user_id = current_user_id()
   LIMIT 1;
 $$;
@@ -33,16 +33,18 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_approved_borrowers TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_approved_borrowers TO web_anon;
 
--- Function to get available tool types (respects is_qty_managed)
+-- Function to get available tool types (toolshed only — excludes event_kit items)
 CREATE OR REPLACE FUNCTION public.get_available_tool_types(p_id TEXT DEFAULT NULL, p_depends_on JSONB DEFAULT '{}')
 RETURNS TABLE (id INT, display_name TEXT)
 LANGUAGE SQL STABLE AS $$
     SELECT tt.id, tt.display_name::TEXT
     FROM tool_types tt
+    LEFT JOIN metadata.categories c ON tt.inventory_module_id = c.id
     LEFT JOIN tool_instances ti ON tt.id = ti.tool_type_id AND ti.status_id IN (
       SELECT id FROM metadata.statuses WHERE entity_type = 'tool_instances' AND status_key = 'in_service'
     )
-    WHERE tt.is_qty_managed = true OR ti.id IS NOT NULL
+    WHERE (c.category_key IS DISTINCT FROM 'event_kit')
+      AND (tt.is_qty_managed = true OR ti.id IS NOT NULL)
     ORDER BY tt.display_name;
 $$;
 
@@ -56,8 +58,8 @@ LANGUAGE SQL STABLE AS $$
     SELECT p.id, p.display_name::TEXT
     FROM parcels p
     WHERE p.eligibility IN (
-        SELECT id FROM metadata.categories 
-        WHERE entity_type = 'parcel_eligibility' 
+        SELECT id FROM metadata.categories
+        WHERE entity_type = 'parcel_eligibility'
         AND category_key IN ('good', 'few_issues')
     )
     ORDER BY p.display_name;
@@ -251,3 +253,72 @@ SELECT public.grant_guided_form_permissions('tool_reservation', (SELECT id FROM 
 SELECT public.grant_guided_form_permissions('tool_reservation', (SELECT id FROM metadata.roles WHERE role_key = 'neh_staff'), ARRAY['read', 'create', 'update', 'delete']);
 -- NEH Borrower: create (start guided form); sees/edits own records via ownership RLS
 SELECT public.grant_guided_form_permissions('tool_reservation', (SELECT id FROM metadata.roles WHERE role_key = 'neh_borrower'), ARRAY['create']);
+
+-- ============================================================================
+-- BULK ENRICHMENT RPCs
+-- ============================================================================
+
+-- Enrich parcels with LMI status based on spatial intersection with census block groups.
+-- Resolves boundary-straddling parcels via centroid tiebreaker, then largest overlap area.
+-- Clears stale LMI status for parcels no longer matching any block group.
+CREATE OR REPLACE FUNCTION public.enrich_parcels_lmi_status()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata, postgis, pg_temp
+AS $$
+DECLARE
+  v_updated INT;
+  v_cleared INT;
+BEGIN
+  -- Gate on parcels:update permission to prevent expensive spatial joins by unauthorized users
+  IF NOT public.has_permission('parcels', 'update') THEN
+    RAISE EXCEPTION 'Permission denied: parcels update required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  -- Update parcels that intersect a block group.
+  -- DISTINCT ON + centroid tiebreaker handles parcels straddling boundaries:
+  --   1. Prefer block group whose polygon contains the parcel's centroid
+  --   2. Fall back to largest intersection area
+  WITH best_match AS (
+    SELECT DISTINCT ON (p.id) p.id AS parcel_id, cbg.lmi_status
+    FROM parcels p
+    JOIN census_block_groups cbg
+      ON ST_Intersects(p.boundary, cbg.boundary)
+    ORDER BY p.id,
+      ST_Contains(cbg.boundary::geometry, ST_Centroid(p.boundary::geometry)) DESC,
+      ST_Area(ST_Intersection(p.boundary::geometry, cbg.boundary::geometry)) DESC
+  )
+  UPDATE parcels p
+  SET lmi_status = bm.lmi_status
+  FROM best_match bm
+  WHERE p.id = bm.parcel_id
+    AND p.lmi_status IS DISTINCT FROM bm.lmi_status;
+
+  GET DIAGNOSTICS v_updated = ROW_COUNT;
+
+  -- Clear stale LMI status for parcels no longer matching any block group
+  WITH matched_ids AS (
+    SELECT DISTINCT p.id
+    FROM parcels p
+    JOIN census_block_groups cbg
+      ON ST_Intersects(p.boundary, cbg.boundary)
+  )
+  UPDATE parcels
+  SET lmi_status = NULL
+  WHERE lmi_status IS NOT NULL
+    AND id NOT IN (SELECT id FROM matched_ids);
+
+  GET DIAGNOSTICS v_cleared = ROW_COUNT;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'updated', v_updated,
+    'cleared', v_cleared,
+    'message', format('%s parcels enriched, %s cleared', v_updated, v_cleared)
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.enrich_parcels_lmi_status() TO authenticated;
