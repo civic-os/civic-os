@@ -11,12 +11,10 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package*.json ./
 
-# Install dependencies with npm cache mount for faster rebuilds
-# Install only production dependencies first (skip test tooling like pa11y-ci, Puppeteer)
-# Then explicitly install Angular CLI which is needed for build but listed as devDependency
+# Install all dependencies from lockfile (including devDeps needed for Angular build)
+# PUPPETEER_SKIP_DOWNLOAD avoids downloading Chromium (only needed for testing)
 RUN --mount=type=cache,target=/root/.npm \
-    PUPPETEER_SKIP_DOWNLOAD='true' npm ci --omit=dev && \
-    PUPPETEER_SKIP_DOWNLOAD='true' npm install --no-save @angular/cli @angular-devkit/build-angular
+    PUPPETEER_SKIP_DOWNLOAD='true' npm ci
 
 # Copy source code
 COPY . .
