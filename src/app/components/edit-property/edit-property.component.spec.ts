@@ -1885,6 +1885,42 @@ describe('EditPropertyComponent', () => {
       done();
     });
 
+    it('should NOT clear selection when FK search modal is used and value not in RPC options', (done) => {
+      const filteredOptions = [
+        { id: 10, display_name: 'Only Available Option' }
+      ];
+      mockDataService.callRpc.and.returnValue(of(filteredOptions));
+      // resolveDisplayName calls getData to look up the display name for the current value
+      mockDataService.getData.and.returnValue(of([{ id: 99, display_name: 'Saved Borrower' }] as any));
+
+      const fkPropWithModal = createMockProperty({
+        column_name: 'borrower_id',
+        display_name: 'Borrower',
+        data_type: 'integer',
+        udt_name: 'int4',
+        join_schema: 'public',
+        join_table: 'borrowers',
+        join_column: 'id',
+        type: EntityPropertyType.ForeignKeyName,
+        options_source_rpc: 'get_eligible_borrowers',
+        fk_search_modal: true
+      });
+
+      const formGroup = new FormGroup({
+        borrower_id: new FormControl(99)  // Value not in filtered options
+      });
+
+      fixture.componentRef.setInput('property', fkPropWithModal);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      fixture.componentRef.setInput('entityId', '42');
+      component.ngOnInit();
+
+      // Value 99 is NOT in options, but FK search modal means we should NOT invalidate
+      expect(formGroup.get('borrower_id')?.value).toBe(99);
+      expect(formGroup.get('borrower_id')?.touched).toBeFalsy();
+      done();
+    });
+
     it('should call getData when options_source_rpc is not set (existing behavior)', (done) => {
       const mockOptions = [
         { id: 1, display_name: 'Option 1', created_at: '', updated_at: '' },

@@ -279,11 +279,13 @@ export class EditPropertyComponent {
       })
     ).subscribe(options => {
       this.rpcSelectOptions.set(options);
-      // Invalidate current selection if no longer in options
+      // Invalidate current selection if no longer in options.
+      // Skip for FK search modals — user explicitly selected via search; the modal
+      // handles its own filtering and the saved value may not be in this page of results.
       const currentValue = this.form().get(prop.column_name)?.value;
-      if (currentValue != null) {
-        const validIds = new Set(options.map(o => o.id));
-        if (!validIds.has(currentValue) && !validIds.has(Number(currentValue))) {
+      if (currentValue != null && !this.useFkSearchModal()) {
+        const validIds = new Set(options.map(o => String(o.id)));
+        if (!validIds.has(String(currentValue))) {
           this.form().get(prop.column_name)?.setValue(null);
           this.form().get(prop.column_name)?.markAsTouched();
         }
