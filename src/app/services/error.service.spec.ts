@@ -146,6 +146,19 @@ describe('ErrorService', () => {
       const result = ErrorService.parseToHuman(error);
       expect(result).toBe('This conflicts with an existing record.');
     });
+
+    it('should return RPC exception message for P0001 (RAISE EXCEPTION)', () => {
+      const error: ApiError = {
+        code: 'P0001',
+        httpCode: 400,
+        message: 'DR Trimmer is fully reserved for this time window (0 available, 0 conflicting)',
+        details: null as unknown as string,
+        humanMessage: ''
+      };
+
+      const result = ErrorService.parseToHuman(error);
+      expect(result).toBe('DR Trimmer is fully reserved for this time window (0 available, 0 conflicting)');
+    });
   });
 
   describe('parseToHumanWithLookup()', () => {

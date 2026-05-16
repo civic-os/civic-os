@@ -114,6 +114,8 @@ export class ErrorService {
       return "Resource not found";
     } else if(err.httpCode == 401) {
       return "Your session has expired. Please refresh the page to log in again.";
+    } else if(err.code == 'P0001') {
+      return err.message;
     }
     return "System Error";
   }
