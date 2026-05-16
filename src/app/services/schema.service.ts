@@ -47,6 +47,7 @@ export interface M2mPropertyMetadata {
   show_on_create: boolean | null;
   show_on_edit: boolean | null;
   show_on_detail: boolean | null;
+  options_filter_column: string | null;
 }
 
 /**
@@ -1397,6 +1398,8 @@ export class SchemaService {
           // v0.46.0: Inline positioning
           // v0.51.0: Parent hop M:M renders inline (read-only chips in property grid)
           show_inline: meta.parentHops?.length ? true : (m2mMeta?.show_inline ?? false),
+          // v0.53.0: Computed column filter for FK search modal
+          options_filter_column: m2mMeta?.options_filter_column || undefined,
         };
 
         enriched.push(virtualProp);

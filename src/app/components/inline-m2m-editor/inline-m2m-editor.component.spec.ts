@@ -175,4 +175,48 @@ describe('InlineM2mEditorComponent', () => {
     expect(ids).toContain(3);
     expect(ids).not.toContain(1);
   });
+
+  describe('Computed Column Filter (v0.53.0)', () => {
+    it('should build computedFilter when options_filter_column is set', () => {
+      const propWithFilter = {
+        ...MOCK_M2M_PROPERTY,
+        show_inline: true,
+        fk_search_modal: true,
+        options_filter_column: 'is_eligible'
+      };
+
+      fixture.componentRef.setInput('property', propWithFilter);
+      fixture.componentRef.setInput('currentValues', currentValues);
+      fixture.detectChanges();
+
+      const filter = component.computedFilter();
+      expect(filter).toBeTruthy();
+      expect(filter!.column).toBe('is_eligible');
+      expect(filter!.operator).toBe('is');
+      expect(filter!.value).toBe('true');
+    });
+
+    it('should return null computedFilter when options_filter_column is not set', () => {
+      fixture.componentRef.setInput('property', mockProperty);
+      fixture.componentRef.setInput('currentValues', currentValues);
+      fixture.detectChanges();
+
+      expect(component.computedFilter()).toBeNull();
+    });
+
+    it('should return null computedFilter when options_filter_column is undefined', () => {
+      const propNoFilter = {
+        ...MOCK_M2M_PROPERTY,
+        show_inline: true,
+        fk_search_modal: true,
+        options_filter_column: undefined
+      };
+
+      fixture.componentRef.setInput('property', propNoFilter);
+      fixture.componentRef.setInput('currentValues', currentValues);
+      fixture.detectChanges();
+
+      expect(component.computedFilter()).toBeNull();
+    });
+  });
 });

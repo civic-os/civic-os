@@ -634,3 +634,79 @@ if (currentValue && !validIds.has(currentValue)) {
   (it's locked), but another user might have reserved a tool in the meantime. Recommendation:
   re-fetch on step entry (call `loadAvailableOptions()` when the step component re-renders
   with a new step input, not just on first init).
+
+---
+
+## Computed Column Filters (v0.53.0)
+
+### Problem
+
+When `options_source_rpc` returns a large ID set (e.g., 50,000 eligible parcels out of 70,000),
+the FK search modal builds `?id=in.(1,2,3,...,50000)` which exceeds HTTP URL length limits.
+The RPC pre-fetch pattern only works for small/medium result sets.
+
+### Solution: `options_filter_column`
+
+A new column on `metadata.properties` that names **any boolean column PostgREST can filter on**.
+When set, the FK search modal appends `?{column}=is.true` as a server-side filter instead of
+fetching all IDs via RPC.
+
+The column can be:
+- **A stored boolean column** on the table (simplest; natively indexable)
+- **A PostgREST computed column** — a `STABLE` function accepting the row type, evaluated per row
+- **A VIEW column** — if the FK target is a VIEW, any boolean column works
+
+The most common pattern is a PostgREST computed column function:
+
+```sql
+CREATE FUNCTION is_eligible(parcels) RETURNS boolean
+LANGUAGE SQL STABLE AS $$
+  SELECT $1.eligibility IN (
+    SELECT id FROM metadata.categories
+    WHERE entity_type = 'parcel_eligibility'
+    AND category_key IN ('good', 'few_issues')
+  )
+$$;
+```
+
+The modal queries: `GET /parcels?is_eligible=is.true&order=display_name.asc&select=...`
+
+All list-page features preserved: column filtering, ordering, FTS, resource embedding, pagination.
+
+### When to Use Each Mechanism
+
+| Mechanism | Data access | Scales to | Use when |
+|---|---|---|---|
+| `options_filter_column` | Row data + JWT claims | Any size | Filter depends only on the candidate row |
+| `options_source_rpc` | Entity ID + form fields | Small/medium sets | Filter depends on form context |
+| Both (layered) | Both | Any size | Server narrows base set, RPC refines by context |
+
+### Configuration Matrix
+
+| `options_filter_column` | `options_source_rpc` | `fk_search_modal` | Behavior |
+|---|---|---|---|
+| set | — | true | Modal adds `?{col}=is.true`. No ID pre-fetch. |
+| — | set | true | Fetch IDs, `in(...)` filter. Small dynamic sets. |
+| set | set | true | Both applied: server filter + client ID filter (layered). |
+| — | set | false | Populate dropdown options. Unchanged. |
+| set | — | false | Edge case: dropdown with server-pre-filtered table. |
+
+### Frontend Implementation
+
+**`FkSearchModalComponent`**: New `serverFilter` input of type `FilterCriteria | null`.
+In `loadTableData()`, `serverFilter` takes precedence over `rpcIdFilter` — when both are
+present, `serverFilter` replaces the `rpcIdFilter` in the query (the layered case handles
+differently: `serverFilter` for the base set, `rpcIdFilter` for further refinement).
+
+**`EditPropertyComponent`**: New `computedFilter` computed signal builds `FilterCriteria`
+from `prop.options_filter_column`. When set, skips `loadOptionsFromRpc()` and
+`setupDependencyWatchers()` — the filter is row-level, not form-dependent.
+
+**`InlineM2mEditorComponent`**: Same pattern — `computedFilter` signal, skip RPC pre-fetch.
+
+### Performance Characteristics
+
+- Computed column functions are evaluated per-row but can leverage indexes on underlying columns
+- STABLE volatility allows PostgreSQL to cache results within a statement
+- For optimal performance, create indexes on columns used in the function body
+- Combined with FTS (tsvector), provides sub-millisecond pagination over filtered large datasets

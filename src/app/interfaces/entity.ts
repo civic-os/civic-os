@@ -139,6 +139,11 @@ export interface SchemaEntityProperty {
     // When true, FK fields render as a searchable modal instead of a <select> dropdown
     fk_search_modal?: boolean;
 
+    // Computed column filter for FK search modal (v0.53.0)
+    // When set, the FK search modal adds ?{column}=is.true as a server-side filter
+    // instead of fetching all IDs via options_source_rpc
+    options_filter_column?: string;
+
     // Inline M:M positioning flag (v0.46.0)
     // When true, M:M relationships render inline in the property grid instead of bottom card
     show_inline?: boolean;

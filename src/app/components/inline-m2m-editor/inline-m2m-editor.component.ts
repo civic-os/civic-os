@@ -18,6 +18,7 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SchemaEntityProperty } from '../../interfaces/entity';
+import { FilterCriteria } from '../../interfaces/query';
 import { DataService } from '../../services/data.service';
 import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
 
@@ -59,12 +60,25 @@ export class InlineM2mEditorComponent {
   resolvedRpcOptions = signal<{id: number | string, text: string}[] | null>(null);
   private lastRpcKey: string | null = null;  // Track entityId+rpc to avoid redundant calls
 
+  // Server-side computed column filter (v0.53.0)
+  // When options_filter_column is set, builds a FilterCriteria for the modal
+  // instead of pre-fetching all IDs via RPC.
+  computedFilter = computed<FilterCriteria | null>(() => {
+    const prop = this.property();
+    if (prop.options_filter_column) {
+      return { column: prop.options_filter_column, operator: 'is', value: 'true' };
+    }
+    return null;
+  });
+
   constructor() {
     // Load RPC options when property has options_source_rpc configured
+    // Skip when options_filter_column is set — server-side filter replaces ID pre-fetch (v0.53.0)
     effect(() => {
       const prop = this.property();
       const entityId = this.entityId();
       if (!prop?.options_source_rpc) return;
+      if (prop.options_filter_column) return;
 
       // Guard: only reload when entityId or RPC changes
       const rpcKey = `${entityId}:${prop.options_source_rpc}`;

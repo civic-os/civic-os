@@ -2149,6 +2149,103 @@ describe('EditPropertyComponent', () => {
     });
   });
 
+  describe('Computed Column Filter (v0.53.0)', () => {
+    it('should build computedFilter when options_filter_column is set with fk_search_modal', () => {
+      const fkFilterProp = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: true,
+        options_filter_column: 'is_eligible'
+      });
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkFilterProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      const filter = component.computedFilter();
+      expect(filter).toBeTruthy();
+      expect(filter!.column).toBe('is_eligible');
+      expect(filter!.operator).toBe('is');
+      expect(filter!.value).toBe('true');
+    });
+
+    it('should return null computedFilter when options_filter_column is not set', () => {
+      const fkSearchPropNoFilter = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: true
+      });
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkSearchPropNoFilter);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.computedFilter()).toBeNull();
+    });
+
+    it('should return null computedFilter when fk_search_modal is false', () => {
+      const regularFkWithFilter = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: false,
+        options_filter_column: 'is_eligible'
+      });
+      mockDataService.getData.and.returnValue(of([]));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', regularFkWithFilter);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      expect(component.computedFilter()).toBeNull();
+    });
+
+    it('should NOT call RPC when options_filter_column is set', () => {
+      const fkFilterProp = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: true,
+        options_source_rpc: 'get_eligible_items',
+        options_filter_column: 'is_eligible'
+      });
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkFilterProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      // Should NOT call RPC since options_filter_column takes precedence
+      expect(mockDataService.callRpc).not.toHaveBeenCalled();
+      expect(component.useRpcOptions()).toBe(false);
+    });
+
+    it('should still call RPC when options_source_rpc is set without options_filter_column', () => {
+      const fkRpcProp = createMockProperty({
+        ...MOCK_PROPERTIES.foreignKey,
+        fk_search_modal: true,
+        options_source_rpc: 'get_eligible_items'
+      });
+      mockDataService.callRpc.and.returnValue(of([{ id: 1, display_name: 'Item' }]));
+
+      const formGroup = new FormGroup({
+        status_id: new FormControl(null)
+      });
+      fixture.componentRef.setInput('property', fkRpcProp);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+
+      // RPC should be called since no options_filter_column
+      expect(mockDataService.callRpc).toHaveBeenCalled();
+      expect(component.useRpcOptions()).toBe(true);
+    });
+  });
+
   describe('User Type Search Modal (v0.49.1)', () => {
     it('should always return true for useFkSearchModal when type is User', () => {
       const formGroup = new FormGroup({

@@ -17,6 +17,7 @@
 
 import { Component, inject, input, output, computed, ChangeDetectionStrategy, signal, DestroyRef, ViewChild } from '@angular/core';
 import { SchemaEntityProperty, EntityPropertyType, FileReference, GalleryImage, PhotoGalleryConfig } from '../../interfaces/entity';
+import { FilterCriteria } from '../../interfaces/query';
 
 import { Observable, map, merge, of, catchError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -108,6 +109,16 @@ export class EditPropertyComponent {
     if (type === EntityPropertyType.User) return true;
     return this.prop().fk_search_modal === true && type === EntityPropertyType.ForeignKeyName;
   });
+  // Server-side computed column filter for FK search modal (v0.53.0)
+  // When options_filter_column is set, builds a FilterCriteria that the modal
+  // applies as ?{column}=is.true — avoids fetching all IDs via RPC.
+  computedFilter = computed<FilterCriteria | null>(() => {
+    const prop = this.prop();
+    if (prop.options_filter_column && this.useFkSearchModal()) {
+      return { column: prop.options_filter_column, operator: 'is', value: 'true' };
+    }
+    return null;
+  });
   private suppressDisplayNameResolve = false;
 
   /**
@@ -158,8 +169,9 @@ export class EditPropertyComponent {
             this.selectedDisplayName.set('');
           }
         });
-        // Also load RPC options if configured (for modal's RPC mode)
-        if (prop.options_source_rpc) {
+        // Load RPC options if configured (for modal's RPC mode), but skip when
+        // options_filter_column is set — the server-side filter replaces ID pre-fetch (v0.53.0)
+        if (prop.options_source_rpc && !prop.options_filter_column) {
           this.useRpcOptions.set(true);
           this.loadOptionsFromRpc(prop);
           this.setupDependencyWatchers(prop);

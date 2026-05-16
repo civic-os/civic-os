@@ -79,3 +79,4 @@ v0-50-1-phone-search-tokens [v0-49-1-user-search-modal] 2026-05-01T12:00:00Z Dan
 v0-50-2-fix-notification-preferences-rls [v0-50-1-phone-search-tokens] 2026-05-01T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix notification_preferences VIEW missing security_invoker
 v0-51-0-rich-junction-m2m [v0-50-2-fix-notification-preferences-rls] 2026-05-02T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add is_rich_junction flag for M:M junctions with extra editable columns
 v0-52-0-add-last-login-tracking [v0-51-0-rich-junction-m2m] 2026-05-03T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add last_login_at tracking, OIDC name claims, and provisioned user name backfill
+v0-53-0-options-filter-column [v0-52-0-add-last-login-tracking] 2026-05-16T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add options_filter_column for server-side computed column filtering in FK search modals

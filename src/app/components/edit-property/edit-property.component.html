@@ -63,6 +63,7 @@
         [isNullable]="prop().is_nullable"
         [title]="'Select ' + prop().display_name"
         [rpcOptions]="useRpcOptions() ? rpcSelectOptions() : null"
+        [serverFilter]="computedFilter()"
         (confirmed)="onFkSearchConfirm($event)"
         (closed)="showFkSearchModal.set(false)"
       />

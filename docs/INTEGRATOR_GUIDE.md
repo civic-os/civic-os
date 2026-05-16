@@ -97,6 +97,7 @@ Key fields:
 - `depends_on_columns` - NAME[] - Array of form field column names that trigger a re-fetch of `options_source_rpc` when their values change (v0.44.0). Enables cascading dropdowns.
 - `fk_search_modal` - BOOLEAN - When true, renders FK fields as a searchable modal instead of a `<select>` dropdown (v0.45.0). For FK fields, requires `join_table` to be set. Also works on M:M synthetic columns (`_m2m`) to enable split-panel multi-select modal. See [FK Search Modal](#fk-search-modal-v0450) and [M:M Search Modal](#mm-search-modal-v0460) sections.
 - `show_inline` - BOOLEAN - When true, M:M relationships render inline in the property grid instead of the bottom card (v0.46.0). Only valid on synthetic M:M columns (`_m2m`). Enables buffered save on Edit/Create pages. See [Inline M:M Positioning](#inline-mm-positioning-v0460) section.
+- `options_filter_column` - TEXT - Name of a PostgREST computed boolean column function (v0.53.0). When set with `fk_search_modal=true`, the modal appends `?{column}=is.true` as a server-side filter instead of fetching all IDs via `options_source_rpc`. Scales to any dataset size. See [Computed Column Filters](#computed-column-filters-v0530) section.
 
 **Configuration Methods**:
 1. Property Management page UI (`/property-management`) - Admin-only visual editor
@@ -4962,6 +4963,82 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 **Metadata bridge**: M:M columns are synthetic (not in `information_schema.columns`), so their metadata flags are loaded from the `schema_m2m_properties` VIEW. This VIEW is automatically created by the v0.46.0 migration and queried once by `SchemaService` during property enrichment.
 
 - See `docs/notes/FK_SEARCH_MODAL_DESIGN.md` (M:M Search Modal Design section) for architecture details.
+
+---
+
+### Computed Column Filters (v0.53.0)
+
+When `options_source_rpc` returns a large result set (e.g., 50,000 eligible parcels out of 70,000 total), the FK search modal can't embed all IDs in the URL (`?id=in.(1,2,...,50000)` exceeds HTTP limits). `options_filter_column` solves this by pushing the filter to the server.
+
+**How it works**: The modal adds `?{column}=is.true` to its query — a simple WHERE clause that scales to any dataset size. The column can be:
+- **A stored boolean column** on the table (simplest; indexed natively)
+- **A PostgREST computed column** — a `STABLE` function accepting the row type (e.g., `is_eligible(parcels) RETURNS boolean`), evaluated server-side per row
+- **Any column PostgREST can filter on** — including columns exposed by VIEWs or `RETURNS TABLE` RPCs
+
+The most common pattern is a computed column function, which keeps the base table clean while enabling complex filtering logic.
+
+**Configuration**:
+
+```sql
+-- 1. Create a computed boolean function on the target table
+CREATE FUNCTION is_eligible(parcels) RETURNS boolean
+LANGUAGE SQL STABLE AS $$
+  SELECT $1.eligibility IN (
+    SELECT id FROM metadata.categories
+    WHERE entity_type = 'parcel_eligibility'
+    AND category_key IN ('good', 'few_issues')
+  )
+$$;
+
+-- 2. Configure the property to use it
+UPDATE metadata.properties
+SET options_filter_column = 'is_eligible'
+WHERE table_name = 'tool_reservation_work_site'
+  AND column_name = 'work_site_parcels_m2m';
+```
+
+**Result**: The modal queries `GET /parcels?is_eligible=is.true&order=display_name.asc` with full pagination, search, sort, and filter capabilities.
+
+**When to use each filtering mechanism**:
+
+| `options_filter_column` | `options_source_rpc` | `fk_search_modal` | Behavior |
+|---|---|---|---|
+| set | — | true | Modal adds `?{col}=is.true`. No ID pre-fetch. Scales to any size. |
+| — | set | true | Fetch IDs, `in(...)` filter. For small dynamic sets with `depends_on_columns`. |
+| set | set | true | Both applied: server-side filter + client-side ID filter (layered). |
+| — | set | false | Populate dropdown options. Unchanged. |
+
+**Choosing the right mechanism**:
+
+- **`options_filter_column`**: Filter depends only on the candidate row's own data and/or JWT session context. Good for: "Show only eligible parcels" (row-level), "Staff see all; borrowers see only themselves" (JWT). Cannot access form field values.
+- **`options_source_rpc`**: Filter depends on the entity being edited (`p_id`) or other form field values (`p_depends_on`). Good for: "Show tools available during THIS time slot" (form-context). Limited to small/medium result sets (URL length).
+- **Both (layered)**: Server narrows to eligible candidates (70k → 50k), RPC refines by form context (50k → 200 in selected ward). The 200-ID `in(...)` is well within URL limits.
+
+**Column requirements**:
+
+The value of `options_filter_column` must name a column (real or computed) that PostgREST can filter with `=is.true`. Three patterns are supported:
+
+1. **Stored boolean column** — simplest, indexable, fastest:
+   ```sql
+   ALTER TABLE parcels ADD COLUMN is_eligible BOOLEAN
+     GENERATED ALWAYS AS (eligibility IN (SELECT id FROM ...)) STORED;
+   CREATE INDEX idx_parcels_is_eligible ON parcels(is_eligible) WHERE is_eligible;
+   ```
+
+2. **PostgREST computed column function** (most flexible):
+   ```sql
+   -- Function must: accept the row type, return boolean, be STABLE
+   CREATE FUNCTION is_eligible(parcels) RETURNS boolean
+   LANGUAGE SQL STABLE AS $$ ... $$;
+   ```
+   - Can access JWT claims via `current_user_id()`, `get_user_roles()` for role-dependent filtering
+   - For performance, create indexes on columns used in the function body
+
+3. **VIEW column** — if the FK target is a VIEW, any boolean column in the VIEW definition works
+
+All three are treated identically by the frontend — it just appends `?{column}=is.true` to the query.
+
+See `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` (Computed Column Filters section) for architecture details.
 
 ---
 

@@ -582,6 +582,82 @@ describe('FkSearchModalComponent', () => {
     });
   });
 
+  describe('Server Filter (v0.53.0)', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('joinTable', 'borrowers');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+    });
+
+    it('should include serverFilter in query when provided', async () => {
+      fixture.componentRef.setInput('serverFilter', { column: 'is_eligible', operator: 'is', value: 'true' });
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      expect(mockDataService.getDataPaginated).toHaveBeenCalled();
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      const serverFilter = callArgs.filters!.find((f: any) => f.column === 'is_eligible');
+      expect(serverFilter).toBeTruthy();
+      expect(serverFilter!.operator).toBe('is');
+      expect(serverFilter!.value).toBe('true');
+    });
+
+    it('should use serverFilter instead of rpcIdFilter when both are available', async () => {
+      const rpcOptions = [
+        { id: 1, text: 'Option A' },
+        { id: 2, text: 'Option B' }
+      ];
+      fixture.componentRef.setInput('rpcOptions', rpcOptions);
+      fixture.componentRef.setInput('serverFilter', { column: 'is_eligible', operator: 'is', value: 'true' });
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      // serverFilter should be present
+      const serverFilter = callArgs.filters!.find((f: any) => f.column === 'is_eligible');
+      expect(serverFilter).toBeTruthy();
+      // rpcIdFilter (in operator) should NOT be present
+      const inFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
+      expect(inFilter).toBeFalsy();
+    });
+
+    it('should fall back to rpcIdFilter when serverFilter is null', async () => {
+      const rpcOptions = [
+        { id: 1, text: 'Option A' },
+        { id: 2, text: 'Option B' }
+      ];
+      fixture.componentRef.setInput('rpcOptions', rpcOptions);
+      fixture.componentRef.setInput('serverFilter', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      // rpcIdFilter (in operator) should be present since serverFilter is null
+      const inFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
+      expect(inFilter).toBeTruthy();
+      expect(inFilter!.value).toBe('(1,2)');
+    });
+
+    it('should not add any extra filter when both serverFilter and rpcOptions are null', async () => {
+      fixture.componentRef.setInput('serverFilter', null);
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      // No server filter and no in filter
+      const serverFilter = callArgs.filters?.find((f: any) => f.column === 'is_eligible');
+      const inFilter = callArgs.filters?.find((f: any) => f.operator === 'in');
+      expect(serverFilter).toBeFalsy();
+      expect(inFilter).toBeFalsy();
+    });
+  });
+
   describe('Fallback for unregistered entities', () => {
     it('should fall back gracefully when entity not in SchemaService', async () => {
       mockSchemaService.getEntity.and.returnValue(of(undefined));

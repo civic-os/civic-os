@@ -89,6 +89,10 @@ export class FkSearchModalComponent implements OnDestroy {
   currentValueIds = input<(number | string)[]>([]);
   currentValueItems = input<{id: number | string, display_name: string, color?: string}[]>([]);
 
+  // Input — server-side computed column filter (v0.53.0)
+  // When provided, adds this filter to all queries instead of using rpcIdFilter
+  serverFilter = input<FilterCriteria | null>(null);
+
   // Inputs — rich junction (v0.51.0)
   extraColumns = input<SchemaEntityProperty[]>([]);
   currentJunctionData = input<Map<number | string, Record<string, unknown>>>(new Map());
@@ -338,11 +342,18 @@ export class FkSearchModalComponent implements OnDestroy {
       ? props.map(p => SchemaService.propertyToSelectString(p))
       : ['id', 'display_name'];
 
-    // Merge user filters with RPC ID filter (if any)
+    // Merge user filters with server-side filter (v0.53.0) or RPC ID filter
+    // serverFilter takes precedence: it's a lightweight server-side WHERE clause
+    // that scales to any dataset size, vs rpcIdFilter which embeds all IDs in the URL.
     const allFilters: FilterCriteria[] = [...this.filters()];
-    const rpcFilter = this.rpcIdFilter();
-    if (rpcFilter) {
-      allFilters.push(rpcFilter);
+    const sf = this.serverFilter();
+    if (sf) {
+      allFilters.push(sf);
+    } else {
+      const rpcFilter = this.rpcIdFilter();
+      if (rpcFilter) {
+        allFilters.push(rpcFilter);
+      }
     }
 
     // Build search: ILIKE substring matching for system types (phone, email),
