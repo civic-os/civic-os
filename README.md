@@ -44,11 +44,12 @@ npm install
 # 3. Set up authentication (choose one):
 #    A) Use shared Keycloak (basic testing, can't manage roles)
 #    B) Run your own Keycloak (see docs/AUTHENTICATION.md for RBAC testing)
-cd example
+cd examples/pothole
 cp .env.example .env
-./fetch-keycloak-jwk.sh  # Fetch Keycloak public key
 docker-compose up -d
-cd ..
+./fetch-keycloak-jwk.sh  # Fetch Keycloak public key
+docker-compose restart postgrest
+cd ../..
 
 # 4. Start the Angular development server
 npm start
@@ -67,14 +68,17 @@ npm run watch          # Build in watch mode
 
 # Testing
 npm test               # Run unit tests (watch mode)
-npm test -- --no-watch --browsers=ChromeHeadless  # Run once and exit
+npm run test:headless                              # Run once and exit
 
 # Building
 npm run build          # Production build
 
 # Mock Data Generation
-./examples/generate.sh pothole              # Generate for Pot Hole example
-./examples/generate.sh broader-impacts      # Generate for Broader Impacts
+npm run generate pothole              # Generate for Pot Hole example
+npm run generate broader-impacts      # Generate for Broader Impacts
+npm run generate community-center     # Generate for Community Center
+npm run generate staff-portal         # Generate for Staff Portal
+npm run generate storymap             # Generate for StoryMap
 
 # Code Generation
 ng generate component components/component-name
@@ -117,6 +121,7 @@ src/app/
 │   ├── display-property/  # Read-only property display
 │   ├── edit-property/     # Editable form inputs
 │   ├── geo-point-map/     # Leaflet map for geography
+│   ├── cos-modal/         # Reusable modal with focus trap
 │   └── dialog/            # Error/success dialogs
 ├── pages/               # Route-driven pages
 │   ├── list/            # Table view of entities
@@ -125,7 +130,8 @@ src/app/
 │   ├── edit/            # Edit existing record
 │   ├── permissions/     # Admin RBAC management
 │   ├── entity-management/  # Admin entity configuration
-│   └── schema-erd/      # Database diagram viewer
+│   ├── schema-editor/   # Interactive ERD viewer
+│   └── admin/           # Admin pages (users, files, statuses, categories, galleries)
 ├── services/            # Business logic and API
 │   ├── schema.service.ts      # Metadata management
 │   ├── data.service.ts        # CRUD operations
@@ -138,8 +144,13 @@ examples/                # Example deployments
 │   ├── docker-compose.yml   # PostgreSQL + PostgREST + MinIO
 │   ├── init-scripts/        # Database initialization
 │   └── generate-mock-data.ts # Mock data generator
-├── broader-impacts/     # UM-Flint research tracking example
-│   └── ...              # Same structure as pothole
+├── broader-impacts/     # UM-Flint research tracking
+├── community-center/    # Facility reservations (calendar, payments)
+├── mottpark/            # Clubhouse reservations (Stripe payments)
+├── staff-portal/        # Staff management (action params, RLS)
+├── storymap/            # Geographic narratives (map widgets)
+├── neighborhood-hub/    # Tool lending (guided forms, cascading FKs)
+├── keycloak/            # Shared Keycloak realm configuration
 └── generate.sh          # Unified mock data generation script
 
 postgres/                # Database schema management
@@ -233,7 +244,7 @@ Civic OS stands on the shoulders of giants. We're grateful to the following open
 ### Forms & Input Components
 
 - **[Angular CDK](https://material.angular.io/cdk/categories)** - Component Dev Kit for advanced UI patterns
-- **[ngx-currency](https://github.com/nbfontana/ngx-currency)** - Currency input masking for Angular
+- **[@dintecom/ngx-currency](https://github.com/nicedoc/ngx-currency)** - Currency input masking for Angular
 - **[ngx-mask](https://github.com/JsDaddy/ngx-mask)** - Input masking library for Angular
 - **[ngx-image-cropper](https://github.com/Marioandres717/ngx-image-cropper)** - Image cropping component for file uploads
 - **[@texel/color](https://github.com/texel-org/color)** - Color manipulation library

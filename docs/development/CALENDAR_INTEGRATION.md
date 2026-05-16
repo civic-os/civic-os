@@ -1565,7 +1565,7 @@ END $$;
 
 **Documented Constraints** (by design for v1):
 
-1. **No Recurring Events**: Each reservation is a one-time event. For weekly meetings, create separate reservations. Future: Add `recurrence_rule` TEXT column with RRULE support.
+1. **No Recurring Events** (community-center example only): Each reservation in this example is a one-time event. For weekly meetings, create separate reservations. **Note:** The Civic OS framework supports recurring time slots (v0.19.0+). See `docs/notes/RECURRING_TIMESLOT_DESIGN.md`.
 
 2. **No Multi-Resource Bookings**: One reservation = one resource. For events needing multiple resources (clubhouse + projector + tables), use boolean accessory fields on the request:
    ```sql

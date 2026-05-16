@@ -2,7 +2,7 @@
 
 This directory contains example Kubernetes manifests for deploying Civic OS. These examples reflect real-world deployment learnings and best practices.
 
-**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2025 Civic OS, L3C.
+**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2026 Civic OS, L3C.
 
 ---
 
@@ -436,22 +436,17 @@ image: ghcr.io/civic-os/frontend:latest
 image: ghcr.io/civic-os/postgrest:latest
 image: ghcr.io/civic-os/consolidated-worker:latest
 
-# Production (pin to specific version)
-image: ghcr.io/civic-os/frontend:0.19.0
-image: ghcr.io/civic-os/postgrest:0.19.0
-image: ghcr.io/civic-os/consolidated-worker:0.19.0
+# Production (pin to specific version from GitHub Releases)
+image: ghcr.io/civic-os/frontend:0.52.1
+image: ghcr.io/civic-os/postgrest:0.52.1
+image: ghcr.io/civic-os/consolidated-worker:0.52.1
 
 # Payment worker (optional - must be built locally, not published to ghcr.io)
 # docker build -t your-registry/payment-worker:latest ./services/payment-worker
 image: your-registry/payment-worker:latest
 ```
 
-**Recent versions:**
-- **0.15.0** - Status type system for workflow states
-- **0.14.0** - Excel import improvements, timezone handling
-- **0.13.0** - Payment processing with Stripe integration
-- **0.11.0** - Consolidated worker, notification system
-- **0.10.0** - File storage with S3 and thumbnails
+**Version history:** See [GitHub Releases](https://github.com/civic-os/civic-os/releases) for a complete changelog. Pin production deployments to a specific version tag.
 
 ---
 
@@ -464,4 +459,4 @@ image: your-registry/payment-worker:latest
 
 ---
 
-**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2025 Civic OS, L3C.
+**License**: This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copyright (C) 2023-2026 Civic OS, L3C.

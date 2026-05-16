@@ -2036,7 +2036,7 @@ When enabled and all non-parent data steps are condition-skipped (via `skip_if`)
 - Detail page shows the review section when all steps are complete but not yet submitted
 - Submitted records show a "Submitted" badge and are read-only when `lock_on_submit = TRUE`
 
-**Complete example:** See `examples/neighborhood-hub/init-scripts/07_neh_building_use_workflow.sql` for a comprehensive dogfood that exercises every feature: `skip_if`, `require_if`, `lock_on_submit`, `auto_submit_on_all_skipped`, `precondition_rpc`, `on_submit_rpc`, `metadata.validations`, and RPC-driven category dropdowns with `depends_on_columns`.
+**Complete example:** See `examples/neighborhood-hub/init-scripts/07_neh_building_use_workflow_prod.sql` for a comprehensive dogfood that exercises every feature: `skip_if`, `require_if`, `lock_on_submit`, `auto_submit_on_all_skipped`, `precondition_rpc`, `on_submit_rpc`, `metadata.validations`, and RPC-driven category dropdowns with `depends_on_columns`.
 
 ### Photo Gallery System
 
@@ -2835,7 +2835,7 @@ Please have the following ready:
 
 Static text blocks appear in the Property Management page (`/property-management`) alongside entity properties. They are styled with a distinct background and can be reordered via drag-and-drop. Sort order changes are saved to the database in real-time.
 
-See `docs/design/STATIC_TEXT_FEATURE.md` for complete implementation details and `examples/community-center/init-scripts/12_static_text_example.sql` for a working example.
+See `docs/development/STATIC_TEXT_FEATURE.md` for complete implementation details and `examples/community-center/init-scripts/12_static_text_example.sql` for a working example.
 
 ### Payment System
 
@@ -3637,7 +3637,7 @@ ORDER BY timestamp;
 
 3. **Check Stripe Dashboard** for payment details, error messages, and webhook delivery status
 
-See `docs/development/PAYMENT_POC_IMPLEMENTATION.md` for complete architecture, testing guide, and Phase 2 roadmap (polymorphic payments, multiple payments per entity).
+See `docs/development/PAYMENT_PROCESSING.md` for complete architecture, testing guide, and Phase 2 roadmap (polymorphic payments, multiple payments per entity).
 
 #### Example: Complete Payment Setup
 

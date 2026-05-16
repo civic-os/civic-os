@@ -165,7 +165,9 @@ Based on this analysis, the following were added to `docs/ROADMAP.md`:
 
 ## Conclusion
 
-The single most impactful improvement for internal operations is **implementing Entity Actions**, which is fully designed but not yet built. This feature transforms the staff experience from "edit form to change status" to "click Approve button" - a fundamental UX improvement.
+**Update:** Entity Actions were fully implemented in v0.18.0+. See `docs/development/ENTITY_ACTIONS.md`.
+
+The single most impactful improvement for internal operations was **implementing Entity Actions**, which transformed the staff experience from "edit form to change status" to "click Approve button" - a fundamental UX improvement.
 
 The second priority is **First-Class Notes**, enabling internal communication without external tools or custom per-entity tables.
 

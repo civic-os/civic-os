@@ -3567,7 +3567,7 @@ func (w *NotificationWorker) getTemplate(name string) (*ParsedTemplate, error) {
    # Or via migrations container
    docker run --rm \
      -e DATABASE_URL="postgres://user:pass@host:5432/db" \
-     ghcr.io/civic-os/migrations:v0.11.0 deploy
+     ghcr.io/civic-os/migrations:latest deploy
    ```
 
 2. **Configure Environment Variables**

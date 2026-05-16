@@ -156,7 +156,7 @@ The PostgreSQL `get_user_roles()` function cannot extract roles from the JWT cla
 
 ### Problem: Roles not appearing in JWT
 
-See the "Configuring Keycloak Roles" section in [CLAUDE.md](../CLAUDE.md#configuring-keycloak-roles) for step-by-step instructions on:
+See [AUTHENTICATION.md](./AUTHENTICATION.md#step-3-create-roles) for step-by-step instructions on:
 - Creating realm roles
 - Assigning roles to users
 - Configuring client scopes and mappers

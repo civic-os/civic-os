@@ -19,9 +19,9 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Add File Administration page with tiered RLS and storage stats (`/admin/files`)
 - [x] Live update page as Schema is updated
 - [x] Add Color PropertyType
-- [ ] Configurable Entity Menu (Nesting, Hiding, Singular/Plural names)
+- [~] Configurable Entity Menu (hiding via `show_in_sidebar` works; nesting and plural names not yet implemented)
 - [ ] **Time PropertyType** - Add `Time` to `EntityPropertyType` for PostgreSQL `time` columns. Render native `<input type="time">` on Create/Edit, formatted display on Detail/List. Currently `time` falls through to `Unknown` and is not editable. *(Identified via FFSC incident_reports.incident_time)*
-- [ ] **Cascading Dropdowns** - Filter FK dropdown options based on another field's selection (e.g., category → subcategory)
+- [x] **Cascading Dropdowns** (v0.44.0) - Implemented via `depends_on_columns` and `options_source_rpc`. See Neighborhood Hub example.
 - [x] **M:M on Create/Edit Pages** - Inline M:M editor with `show_inline` flag (v0.46.0). Split-panel search modal with buffered save on Edit/Create pages. Coordinated save pipeline (entity PATCH/POST → sequential M:M mutations) with progress display in success modal.
 - [x] **Dependent/Filtered M:M Options** - `options_source_rpc` on M:M columns (v0.44.0) + search modal integration (v0.46.0). RPC filters eligible options; modal provides rich multi-select UI within the filtered set.
 
@@ -37,7 +37,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Roles
 - [x] Build Roles/Permissions schema
-- [ ] Give Roles display name, description
+- [~] Give Roles display name, description (schema fields and create UI exist; no edit UI for existing roles yet)
 - [x] Allow creation of Roles on the Permissions screen (or a role-specific screen)
 - [x] **Role Delegation** (v0.31.0) - Admin-configurable matrix controlling which roles can assign which other roles
   - [x] `metadata.role_can_manage` table with RLS policies
@@ -120,7 +120,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Table semantics (caption, scope, aria-sort)
   - [x] ARIA live regions for loading/errors
   - [x] Keyboard navigation for table rows
-  - [ ] Modal focus management (Angular CDK)
+  - [x] Modal focus management (Angular CDK `cdkTrapFocus`)
   - [ ] Color contrast fixes (3 issues)
   - [ ] Focus indicators and Phase 4 polish items
   - See `docs/development/ACCESSIBILITY_WCAG.md` for details
@@ -175,10 +175,10 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] `BlocklyViewerComponent` lazy-loads Blockly (~150KB gzip) with read-only workspace
   - [x] Custom block definitions (`sql-blocks.ts`) for SQL/PL/pgSQL constructs (SELECT INTO, UPDATE, IF/ELSE, DECLARE, etc.)
   - [x] Theme integration (DaisyUI light/dark with `civic-os-theme.ts`)
-  - [x] Entity Code page (`/entity-code/:entity`) showing functions with Source/Blocks toggle
-  - [x] System Functions page (`/system-functions`) and System Policies page (`/system-policies`)
+  - [x] Entity Code page (`/system/entity-code/:tableName`) showing functions with Source/Blocks toggle
+  - [x] System Functions page (`/system/functions`) and System Policies page (`/system/policies`)
   - [x] **Documentation** at `docs/notes/CODE_BLOCK_SYSTEM_DESIGN.md` (architecture and AST node mapping reference)
-  - [ ] Regex fallback (`SqlBlockTransformerService`) for functions without pre-parsed ASTs
+  - [x] Regex fallback (`SqlBlockTransformerService`) for functions without pre-parsed ASTs
   - [ ] Interactive editing (Phase 3: remove `readOnly: true`, enable visual SQL editing)
 - [x] **Schema Decisions (ADR)** (v0.30.0) - Database-native decision records for schema evolution
   - [x] `metadata.schema_decisions` table with entity/property linking

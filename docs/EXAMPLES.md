@@ -23,7 +23,7 @@ This guide helps you choose the right example for learning or as a starting poin
 | **Status Workflows** | | ✅ | | ✅ | ✅ | | ✅ |
 | **Guided Forms** | | | | | | | ✅ |
 | **Stripe Payments** | | ✅ | | ✅ | | | |
-| **Notifications (Email)** | ✅ | ✅ | | ✅ | ✅ | | |
+| **Notifications (Email)** | ✅ | ✅ | | ✅ | ✅ | | ✅ |
 | **Entity Notes** | | ✅ | | ✅ | | | |
 | **Static Text Blocks** | | ✅ | | ✅ | | | |
 | **Entity Action Buttons** | | ✅ | | ✅ | ✅ | | |
@@ -272,7 +272,7 @@ docker-compose up -d
 
 **Path:** `examples/neighborhood-hub/`
 
-**Domain:** Community tool lending library
+**Domain:** Community tool lending library and neighborhood operations
 
 **What it demonstrates:**
 - **Guided Forms** (v0.48.0+) — multi-step data collection with conditional branching (`skip_if`/`require_if`), draft auto-save, server-side validation, and explicit submission
@@ -281,6 +281,8 @@ docker-compose up -d
 - **Filtered FK** — only approved Borrowers appear in reservation dropdowns
 - **Filtered M:M** — only eligible Parcels appear in project editors (with color-coded eligibility)
 - **Status workflows** — borrower approval (pending/approved/rejected) and tool condition (in-service/maintenance/retired)
+- **Email notifications** — borrower approval and tool reservation notifications
+- **MEK workflow** — multi-entity coordination with training records and census block groups
 
 **Key tables:** `tool_categories`, `tool_types`, `tool_instances`, `borrowers`, `tool_reservations`, `projects`, `parcels`, `building_use_requests`, `building_use_event_details`, `building_use_room_preferences`
 
