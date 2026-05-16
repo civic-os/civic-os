@@ -1,4 +1,8 @@
 -- Neighborhood Engagement Hub - RPC Functions
+BEGIN;
+
+-- Fake admin JWT context for managed PostgreSQL (no true superuser)
+SET LOCAL request.jwt.claims = '{"sub":"init-script","realm_access":{"roles":["admin"]}}';
 
 -- Function to get borrower for current user
 CREATE OR REPLACE FUNCTION public.get_borrower_for_current_user()
@@ -322,3 +326,5 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.enrich_parcels_lmi_status() TO authenticated;
+
+COMMIT;

@@ -1,6 +1,7 @@
 -- Neighborhood Engagement Hub - Dashboards
 -- Creates role-based dashboards for borrowers, staff, and admins.
 -- Uses only registered widget types: markdown, filtered_list, calendar, nav_buttons.
+BEGIN;
 
 -- ============================================================================
 -- DASHBOARDS
@@ -40,6 +41,10 @@ BEGIN
   -- ========================================
   INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, config, sort_order)
   VALUES
+    -- Quick Actions (top of page for easy access)
+    (v_borrower_dashboard_id, 'nav_buttons',
+     '{"buttons": [{"text": "Request Tool", "url": "/create/tool_reservations", "variant": "primary"}, {"text": "Request Building Use", "url": "/create/building_use_requests", "variant": "primary"}, {"text": "Request Event Kit", "url": "/create/mek_requests", "variant": "primary"}]}', 5),
+
     -- Welcome markdown
     (v_borrower_dashboard_id, 'markdown',
      '{"content": "# Welcome to Neighborhood Engagement Hub\n\nManage your tool reservations, event kit bookings, and building use requests."}', 10),
@@ -54,15 +59,7 @@ BEGIN
 
     -- My Event Kit Requests
     (v_borrower_dashboard_id, 'filtered_list',
-     '{"entity": "mek_requests", "filter": {"created_by": "{{current_user.id}}"}, "title": "My Event Kit Requests", "columns": ["display_name", "event_type", "pickup_date", "return_date", "status.display_name"]}', 35),
-
-    -- My Borrower Status
-    (v_borrower_dashboard_id, 'markdown',
-     '{"content": "## My Status\n\nTo borrow tools, your account must be approved by staff. Contact NEH if you need approval."}', 40),
-
-    -- Quick Actions
-    (v_borrower_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Request Tool", "url": "/create/tool_reservations"}, {"label": "Request Building Use", "url": "/create/building_use_requests"}, {"label": "Request Event Kit", "url": "/create/mek_requests"}]}', 50);
+     '{"entity": "mek_requests", "filter": {"created_by": "{{current_user.id}}"}, "title": "My Event Kit Requests", "columns": ["display_name", "event_type", "pickup_date", "return_date", "status.display_name"]}', 35);
 
   -- ========================================
   -- Staff Dashboard Widgets
@@ -101,9 +98,9 @@ BEGIN
     (v_staff_dashboard_id, 'calendar',
      '{"entityKey": "building_use_requests", "timeSlotPropertyName": "time_slot", "initialView": "timeGridWeek"}', 45),
 
-    -- Quick Actions
+    -- Quick Actions (top of page for easy access)
     (v_staff_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Approve Requests", "url": "/view/tool_reservations"}, {"label": "Create Reservation", "url": "/create/tool_reservations"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}, {"label": "Event Kit Requests", "url": "/view/mek_requests"}]}', 50);
+     '{"buttons": [{"text": "Approve Requests", "url": "/view/tool_reservations", "variant": "primary"}, {"text": "Create Reservation", "url": "/create/tool_reservations"}, {"text": "Manage Inventory", "url": "/view/tool_instances"}, {"text": "Building Use", "url": "/view/building_use_requests"}, {"text": "Event Kit Requests", "url": "/view/mek_requests"}]}', 5);
 
   -- ========================================
   -- Admin Dashboard Widgets
@@ -138,9 +135,9 @@ BEGIN
     (v_admin_dashboard_id, 'markdown',
      '{"content": "## System Health\n\nUse the admin pages to manage users, roles, and data imports."}', 40),
 
-    -- Admin Navigation
+    -- Admin Navigation (top of page for easy access)
     (v_admin_dashboard_id, 'nav_buttons',
-     '{"buttons": [{"label": "Manage Users", "url": "/admin/users"}, {"label": "Permissions", "url": "/permissions"}, {"label": "Manage Inventory", "url": "/view/tool_instances"}, {"label": "Building Use", "url": "/view/building_use_requests"}, {"label": "Event Kit", "url": "/view/mek_requests"}]}', 50);
+     '{"buttons": [{"text": "Manage Users", "url": "/admin/users", "variant": "primary"}, {"text": "Permissions", "url": "/permissions"}, {"text": "Manage Inventory", "url": "/view/tool_instances"}, {"text": "Building Use", "url": "/view/building_use_requests"}, {"text": "Event Kit", "url": "/view/mek_requests"}]}', 5);
 
   -- ========================================
   -- Map roles to dashboards
@@ -164,3 +161,5 @@ BEGIN
     SET dashboard_id = EXCLUDED.dashboard_id,
         priority = EXCLUDED.priority;
 END $$;
+
+COMMIT;

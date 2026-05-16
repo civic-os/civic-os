@@ -1,4 +1,5 @@
 -- Neighborhood Engagement Hub - Borrower Sync Triggers
+BEGIN;
 
 -- Trigger function for civic_os_users INSERT → create shell with display_name
 CREATE OR REPLACE FUNCTION public.sync_borrower_on_user_insert()
@@ -70,3 +71,5 @@ VALUES
    'A borrower record already exists for this user')
 ON CONFLICT (constraint_name) DO UPDATE
   SET error_message = EXCLUDED.error_message;
+
+COMMIT;

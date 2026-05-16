@@ -3,6 +3,7 @@
 --   1. Helper function to resolve role → user_ids
 --   2. Templates with correct column names (name, subject_template, html/text/sms_template)
 --   3. Trigger functions that INSERT into metadata.notifications with user_id
+BEGIN;
 
 -- ============================================================================
 -- HELPER: get_users_with_role (same pattern as community-center)
@@ -394,3 +395,5 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+COMMIT;

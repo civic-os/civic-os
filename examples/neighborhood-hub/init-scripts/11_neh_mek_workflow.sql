@@ -3,6 +3,10 @@
 -- PA systems, games) via a guided form. Follows the same pattern as
 -- tool_reservations: precondition checks borrower approval, on_submit sets
 -- status to pending, deny action button for staff.
+BEGIN;
+
+-- Fake admin JWT context for managed PostgreSQL (no true superuser)
+SET LOCAL request.jwt.claims = '{"sub":"init-script","realm_access":{"roles":["admin"]}}';
 --
 -- GuidedForm: MEK Request
 --   Step 0 (Parent): Event info, dates, responsibility acknowledgment
@@ -638,4 +642,5 @@ END $$;
 -- FINAL
 -- ============================================================================
 
+COMMIT;
 NOTIFY pgrst, 'reload schema';

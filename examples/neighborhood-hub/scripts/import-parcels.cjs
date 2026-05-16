@@ -43,11 +43,6 @@ function geojsonToEWKT(geometry) {
   return `SRID=4326;POLYGON((${coords}))`;
 }
 
-function buildDisplayName(props) {
-  const parts = [props.PropNum, props.PropDir, props.PropStreet].filter(Boolean);
-  return parts.join(' ') || props.PARCELID || 'Unknown';
-}
-
 async function main() {
   const geojsonPath = process.argv[2] || path.join(
     process.env.HOME || process.env.USERPROFILE,
@@ -110,8 +105,7 @@ async function main() {
         continue;
       }
 
-      const displayName = buildDisplayName(props).substring(0, 100);
-      const parcelNumber = (props.PARCELID || '').substring(0, 50);
+      const parcelNumber = (props.PARCELID || '').replace(/-/g, '').substring(0, 12);
       const propNum = (props.PropNum || '').substring(0, 20);
       const propDir = (props.PropDir || '').substring(0, 10);
       const propStreet = (props.PropStreet || '').substring(0, 100);
@@ -126,19 +120,19 @@ async function main() {
       values.push(
         `($${paramIdx}, $${paramIdx+1}, $${paramIdx+2}, $${paramIdx+3}, ` +
         `$${paramIdx+4}, $${paramIdx+5}, $${paramIdx+6}, $${paramIdx+7}, ` +
-        `$${paramIdx+8}, postgis.ST_GeogFromText($${paramIdx+9}))`
+        `postgis.ST_GeogFromText($${paramIdx+8}))`
       );
       params.push(
-        displayName, parcelNumber, propNum, propDir,
+        parcelNumber, propNum, propDir,
         propStreet, propCity, propZip, acreage,
         propertyClassId, ewkt
       );
-      paramIdx += 10;
+      paramIdx += 9;
     }
 
     if (values.length === 0) continue;
 
-    const sql = `INSERT INTO parcels (display_name, parcel_number, prop_num, prop_dir, prop_street, prop_city, prop_zip, acreage, property_class, boundary) VALUES ${values.join(', ')}`;
+    const sql = `INSERT INTO parcels (parcel_number, prop_num, prop_dir, prop_street, prop_city, prop_zip, acreage, property_class, boundary) VALUES ${values.join(', ')}`;
     await client.query(sql, params);
     inserted += values.length;
 

@@ -1,4 +1,5 @@
 -- Neighborhood Engagement Hub - Permissions
+BEGIN;
 
 -- Define NEH roles
 INSERT INTO metadata.roles (role_key, display_name, description)
@@ -166,3 +167,5 @@ DELETE FROM metadata.permission_roles WHERE permission_id IN (
   SELECT id FROM metadata.permissions WHERE table_name = 'building_use_room_preferences'
 );
 DELETE FROM metadata.permissions WHERE table_name = 'building_use_room_preferences';
+
+COMMIT;

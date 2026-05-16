@@ -1,6 +1,7 @@
 -- Neighborhood Engagement Hub - Entity & Property Metadata
 -- NOTE: Uses direct INSERT instead of upsert_entity_metadata() because init scripts
 -- run as postgres superuser, not through JWT auth (which is_admin() requires).
+BEGIN;
 
 -- Entity display configuration
 INSERT INTO metadata.entities (table_name, display_name, description, search_fields, sort_order)
@@ -488,3 +489,5 @@ ON CONFLICT (table_name, column_name) DO UPDATE
 
 -- Hide checkout entity from sidebar (accessed via tool reservation detail page)
 UPDATE metadata.entities SET show_in_sidebar = false WHERE table_name = 'tool_reservation_checkouts';
+
+COMMIT;

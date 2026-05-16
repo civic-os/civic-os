@@ -1,4 +1,8 @@
 -- Neighborhood Engagement Hub - Building Use Workflow (v0.52.0 restructured)
+BEGIN;
+
+-- Fake admin JWT context for managed PostgreSQL (no true superuser)
+SET LOCAL request.jwt.claims = '{"sub":"init-script","realm_access":{"roles":["admin"]}}';
 -- Major changes from v0.51.0:
 --   - Rooms are now a lookup table (building_use_rooms) instead of categories
 --   - Room selection is M:M junction (building_use_request_rooms) replacing child table
@@ -1158,4 +1162,5 @@ VALUES
 ON CONFLICT (constraint_name) DO UPDATE
   SET error_message = EXCLUDED.error_message;
 
+COMMIT;
 NOTIFY pgrst, 'reload schema';

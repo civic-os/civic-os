@@ -1,5 +1,6 @@
 -- Neighborhood Engagement Hub - Base Schema
 -- Exercises options_source_rpc with cascading FKs, filtered dropdowns, and M:M editors
+BEGIN;
 
 -- ============================================================================
 -- LOOKUP TABLES
@@ -476,3 +477,5 @@ CREATE INDEX idx_training_records_borrower ON training_records(borrower_id);
 CREATE INDEX idx_training_records_type ON training_records(training_type);
 CREATE INDEX idx_training_records_expiry ON training_records(expiry_date);
 CREATE INDEX idx_training_records_status ON training_records(status_id);
+
+COMMIT;

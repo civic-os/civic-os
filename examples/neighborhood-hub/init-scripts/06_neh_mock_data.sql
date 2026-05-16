@@ -1,4 +1,5 @@
 -- Neighborhood Engagement Hub - Seed Data
+BEGIN;
 
 -- ============================================================================
 -- CLEAN UP EXISTING DATA
@@ -191,27 +192,27 @@ INSERT INTO tool_instances (display_name, tool_type_id, instance_number, status_
 -- PARCELS (6 existing records)
 -- ============================================================================
 INSERT INTO parcels (display_name, parcel_number, prop_num, prop_street, prop_city, prop_zip, acreage, property_class, eligibility, boundary) VALUES
-  ('123 Main St',     'P-001', '123',  'Main St',    'FLINT', '48503', 0.2500,
+  ('123 Main St',     '254014377001', '123',  'Main St',    'FLINT', '48503', 0.2500,
     get_category_id('parcel_property_class', 'residential'),
     get_category_id('parcel_eligibility', 'good'),
     postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6880 43.0125, -83.6870 43.0125, -83.6870 43.0135, -83.6880 43.0135, -83.6880 43.0125))')),
-  ('456 Oak Ave',     'P-002', '456',  'Oak Ave',    'FLINT', '48503', 0.3200,
+  ('456 Oak Ave',     '254014377002', '456',  'Oak Ave',    'FLINT', '48503', 0.3200,
     get_category_id('parcel_property_class', 'residential'),
     get_category_id('parcel_eligibility', 'good'),
     postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6870 43.0125, -83.6860 43.0125, -83.6860 43.0135, -83.6870 43.0135, -83.6870 43.0125))')),
-  ('789 Elm Blvd',    'P-003', '789',  'Elm Blvd',   'FLINT', '48504', 0.1800,
+  ('789 Elm Blvd',    '254014377003', '789',  'Elm Blvd',   'FLINT', '48504', 0.1800,
     get_category_id('parcel_property_class', 'commercial'),
     get_category_id('parcel_eligibility', 'few_issues'),
     postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6900 43.0140, -83.6890 43.0140, -83.6890 43.0150, -83.6900 43.0150, -83.6900 43.0140))')),
-  ('321 Pine Dr',     'P-004', '321',  'Pine Dr',    'FLINT', '48505', 1.5000,
+  ('321 Pine Dr',     '254014377004', '321',  'Pine Dr',    'FLINT', '48505', 1.5000,
     get_category_id('parcel_property_class', 'industrial'),
     get_category_id('parcel_eligibility', 'ineligible'),
     postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6920 43.0100, -83.6900 43.0100, -83.6900 43.0120, -83.6920 43.0120, -83.6920 43.0100))')),
-  ('654 Maple Ln',    'P-005', '654',  'Maple Ln',   'FLINT', '48503', 0.2100,
+  ('654 Maple Ln',    '254014377005', '654',  'Maple Ln',   'FLINT', '48503', 0.2100,
     get_category_id('parcel_property_class', 'residential'),
     get_category_id('parcel_eligibility', 'good'),
     postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6860 43.0135, -83.6850 43.0135, -83.6850 43.0145, -83.6860 43.0145, -83.6860 43.0135))')),
-  ('987 Cedar Ct',    'P-006', '987',  'Cedar Ct',   'FLINT', '48504', 5.0000,
+  ('987 Cedar Ct',    '254014377006', '987',  'Cedar Ct',   'FLINT', '48504', 5.0000,
     get_category_id('parcel_property_class', 'agricultural'),
     get_category_id('parcel_eligibility', 'few_issues'),
     postgis.ST_GeogFromText('SRID=4326;POLYGON((-83.6950 43.0080, -83.6920 43.0080, -83.6920 43.0100, -83.6950 43.0100, -83.6950 43.0080))'));
@@ -226,11 +227,11 @@ INSERT INTO projects (display_name, description) VALUES
 -- Project-parcel associations (use subqueries since IDs are auto-generated)
 INSERT INTO project_parcels (project_id, parcel_id) VALUES
   ((SELECT id FROM projects WHERE display_name = 'Spring Cleanup 2026'),
-   (SELECT id FROM parcels WHERE parcel_number = 'P-001')),
+   (SELECT id FROM parcels WHERE parcel_number = '254014377001')),
   ((SELECT id FROM projects WHERE display_name = 'Spring Cleanup 2026'),
-   (SELECT id FROM parcels WHERE parcel_number = 'P-002')),
+   (SELECT id FROM parcels WHERE parcel_number = '254014377002')),
   ((SELECT id FROM projects WHERE display_name = 'Tree Planting Drive'),
-   (SELECT id FROM parcels WHERE parcel_number = 'P-005'));
+   (SELECT id FROM parcels WHERE parcel_number = '254014377005'));
 
 -- ============================================================================
 -- TRAINING & BORROWER DATA
@@ -247,3 +248,5 @@ INSERT INTO project_parcels (project_id, parcel_id) VALUES
 -- ============================================================================
 
 -- MEK request mock data is handled in 11_neh_mek_workflow.sql
+
+COMMIT;

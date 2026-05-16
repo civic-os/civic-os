@@ -1,4 +1,5 @@
 -- Neighborhood Engagement Hub - Statuses
+BEGIN;
 
 -- Borrower approval workflow
 INSERT INTO metadata.status_types (entity_type, display_name, description)
@@ -87,3 +88,5 @@ VALUES
   ('mek_requests', 'Completed',   '#6b7280', 5, 'completed',   false, true),
   ('mek_requests', 'Denied',      '#ef4444', 6, 'denied',      false, true),
   ('mek_requests', 'Cancelled',   '#94a3b8', 7, 'cancelled',   false, true);
+
+COMMIT;
