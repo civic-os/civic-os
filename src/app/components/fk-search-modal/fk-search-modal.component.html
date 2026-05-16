@@ -1,169 +1,61 @@
 <cos-modal [isOpen]="isOpen()" (closed)="onCancel()" [size]="multiSelect() ? 'full' : 'xl'">
-  <!-- Header -->
-  <h3 class="font-bold text-lg mb-4">{{ title() }}</h3>
+  <div class="flex flex-col max-h-[calc(100dvh-5rem)]">
+    <!-- Header -->
+    <h3 class="font-bold text-lg mb-4 shrink-0">{{ title() }}</h3>
 
-  @if (multiSelect()) {
-    <!-- ====== MULTI-SELECT MODE (M:M, v0.46.0) ====== -->
+    @if (multiSelect()) {
+      <!-- ====== MULTI-SELECT MODE (M:M, v0.46.0) ====== -->
 
-    @if (isRichJunction() && richPage() === 2) {
-      <!-- ====== PAGE 2: Configure Extra Columns (v0.51.0) ====== -->
-      <div class="mb-2">
-        <p class="text-sm text-base-content/70">
-          Configure {{ extraColumns().length === 1 ? extraColumns()[0].display_name : 'details' }} for each selected item.
-        </p>
-      </div>
+      @if (isRichJunction() && richPage() === 2) {
+        <!-- ====== PAGE 2: Configure Extra Columns (v0.51.0) ====== -->
+        <div class="flex flex-col flex-1 min-h-0">
+          <div class="mb-2 shrink-0">
+            <p class="text-sm text-base-content/70">
+              Configure {{ extraColumns().length === 1 ? extraColumns()[0].display_name : 'details' }} for each selected item.
+            </p>
+          </div>
 
-      <div class="overflow-x-auto max-h-[60vh] overflow-y-auto">
-        <table class="table table-sm w-full">
-          <thead class="sticky top-0 bg-base-200 z-10">
-            <tr>
-              <th>Item</th>
-              @for (col of extraColumns(); track col.column_name) {
-                <th>
-                  {{ col.display_name }}
-                  @if (!col.is_nullable) {
-                    <span class="text-error">*</span>
-                  }
-                </th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of page2Items(); track item.id) {
-              <tr [class.bg-success/5]="!item.isExisting">
-                <td>
-                  <div class="flex items-center gap-2">
-                    @if (item.color) {
-                      <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background-color]="item.color"></span>
-                    }
-                    <span class="font-medium">{{ item.display_name }}</span>
-                    @if (!item.isExisting) {
-                      <span class="badge badge-success badge-xs">new</span>
-                    }
-                  </div>
-                </td>
-                @for (col of extraColumns(); track col.column_name) {
-                  <td>
-                    <ng-container
-                      *ngComponentOutlet="editPropertyComponent(); inputs: getEditPropertyInputs(col, item.id)"
-                    />
-                  </td>
-                }
-              </tr>
-            } @empty {
-              <tr>
-                <td [attr.colspan]="extraColumns().length + 1" class="text-center text-base-content/50 py-8">
-                  No items selected
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Footer: Back / Apply -->
-      <div class="cos-modal-action">
-        <button type="button" class="btn btn-ghost" (click)="goToPage1()">
-          <span class="material-symbols-outlined text-base">arrow_back</span>
-          Back
-        </button>
-        <div class="flex-1"></div>
-        <button type="button" class="btn" (click)="onCancel()">Cancel</button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          [disabled]="!richApplyEnabled()"
-          (click)="onRichApply()"
-        >
-          Apply
-        </button>
-      </div>
-    } @else {
-      <!-- ====== PAGE 1: Select Items (original multi-select) ====== -->
-      <div class="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4">
-        <!-- Left panel: search + browse -->
-        <div>
-          <!-- Search -->
-          @if (hasSearchFields()) {
-            <div class="mb-3">
-              <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
-                <input
-                  type="text"
-                  class="input input-bordered w-full pl-10"
-                  placeholder="Search..."
-                  [ngModel]="searchQuery()"
-                  (ngModelChange)="onSearchInput($event)"
-                  (keydown.enter)="$event.preventDefault()"
-                />
-              </div>
-            </div>
-          }
-
-          <!-- Filters -->
-          @if (filterProperties().length > 0) {
-            <app-filter-bar
-              [properties]="filterProperties()"
-              [entityKey]="joinTable()"
-              [currentFilters]="filters()"
-              (filtersChange)="onFiltersChange($event)"
-            ></app-filter-bar>
-          }
-
-          <!-- Table with checkboxes -->
-          <div class="overflow-x-auto max-h-[50vh] overflow-y-auto">
-            <table class="table table-zebra table-sm w-full">
+          <div class="overflow-x-auto flex-1 min-h-0 overflow-y-auto">
+            <table class="table table-sm w-full">
               <thead class="sticky top-0 bg-base-200 z-10">
                 <tr>
-                  <th class="w-8"></th>
-                  @for (prop of listProperties(); track prop.column_name) {
-                    <th
-                      class="cursor-pointer select-none"
-                      [class.font-bold]="orderField() === prop.column_name"
-                      (click)="onSort(prop.column_name)"
-                    >
-                      <span class="flex items-center gap-1">
-                        {{ prop.display_name }}
-                        @if (getSortIcon(prop.column_name)) {
-                          <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
-                        }
-                      </span>
+                  <th>Item</th>
+                  @for (col of extraColumns(); track col.column_name) {
+                    <th>
+                      {{ col.display_name }}
+                      @if (!col.is_nullable) {
+                        <span class="text-error">*</span>
+                      }
                     </th>
                   }
                 </tr>
               </thead>
               <tbody>
-                @for (row of rows(); track row.id) {
-                  <tr
-                    class="cursor-pointer hover:bg-base-200"
-                    [class.bg-primary/10]="isInWorkingSelection(row.id)"
-                    (click)="toggleSelection(row.id!, row.display_name, $any(row).color)"
-                  >
+                @for (item of page2Items(); track item.id) {
+                  <tr [class.bg-success/5]="!item.isExisting">
                     <td>
-                      <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
-                             [checked]="isInWorkingSelection(row.id)"
-                             tabindex="-1"
-                             (click)="$event.stopPropagation(); toggleSelection(row.id!, row.display_name, $any(row).color)" />
+                      <div class="flex items-center gap-2">
+                        @if (item.color) {
+                          <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background-color]="item.color"></span>
+                        }
+                        <span class="font-medium">{{ item.display_name }}</span>
+                        @if (!item.isExisting) {
+                          <span class="badge badge-success badge-xs">new</span>
+                        }
+                      </div>
                     </td>
-                    @for (prop of listProperties(); track prop.column_name) {
+                    @for (col of extraColumns(); track col.column_name) {
                       <td>
-                        <app-display-property
-                          [property]="prop"
-                          [datum]="row[prop.column_name]"
-                          [showLabel]="false"
-                          [linkRelated]="false"
-                        ></app-display-property>
+                        <ng-container
+                          *ngComponentOutlet="editPropertyComponent(); inputs: getEditPropertyInputs(col, item.id)"
+                        />
                       </td>
                     }
                   </tr>
                 } @empty {
                   <tr>
-                    <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
-                      @if (loading()) {
-                        <span class="loading loading-spinner loading-sm"></span>
-                      } @else {
-                        No results found
-                      }
+                    <td [attr.colspan]="extraColumns().length + 1" class="text-center text-base-content/50 py-8">
+                      No items selected
                     </td>
                   </tr>
                 }
@@ -171,193 +63,309 @@
             </table>
           </div>
 
-          <!-- Pagination -->
-          <div class="mt-3">
-            <app-pagination
-              [currentPage]="currentPage()"
-              [pageSize]="pageSize()"
-              [totalCount]="totalCount()"
-              [loading]="loading()"
-              (pageChange)="onPageChange($event)"
-              (pageSizeChange)="onPageSizeChange($event)"
-            ></app-pagination>
-          </div>
-        </div>
-
-        <!-- Right panel: selected chips -->
-        <div class="border-l border-base-300 pl-4 pr-2 self-start sticky top-0">
-          <h4 class="font-semibold text-sm mb-3">Selected ({{ workingSelection().size }})</h4>
-          <div class="max-h-[60vh] overflow-y-auto space-y-1">
-            @for (chip of selectedChips(); track chip.id) {
-              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-base-200 group">
-                @if (chip.color) {
-                  <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background-color]="chip.color"></span>
-                }
-                <span class="text-sm flex-1 truncate">{{ chip.display_name }}</span>
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-xs opacity-50 group-hover:opacity-100"
-                  (click)="removeChip(chip.id)"
-                >
-                  <span class="material-symbols-outlined text-sm">close</span>
-                </button>
-              </div>
-            } @empty {
-              <p class="text-sm text-base-content/50 italic">No items selected</p>
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer: Next / Apply / Cancel -->
-      <div class="cos-modal-action">
-        <div class="flex-1"></div>
-        <button type="button" class="btn" (click)="onCancel()">Cancel</button>
-        @if (isRichJunction()) {
-          <!-- Rich junction: "Next" goes to page 2 for extra column configuration -->
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="workingSelection().size === 0"
-            (click)="goToPage2()"
-          >
-            Next
-            <span class="material-symbols-outlined text-base">arrow_forward</span>
-          </button>
-        } @else {
-          <!-- Pure junction: direct "Apply" -->
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="!applyEnabled()"
-            (click)="onApply()"
-          >
-            Apply
-            @if (applyEnabled()) {
-              <span class="text-xs opacity-80">
-                ({{ pendingDiff().toAdd.length }} added, {{ pendingDiff().toRemove.length }} removed)
-              </span>
-            }
-          </button>
-        }
-      </div>
-    }
-  } @else {
-    <!-- ====== SINGLE-SELECT MODE (FK) ====== -->
-
-    <!-- Search -->
-    @if (hasSearchFields()) {
-      <div class="mb-3">
-        <div class="relative">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
-          <input
-            type="text"
-            class="input input-bordered w-full pl-10"
-            placeholder="Search..."
-            [ngModel]="searchQuery()"
-            (ngModelChange)="onSearchInput($event)"
-            (keydown.enter)="$event.preventDefault()"
-          />
-        </div>
-      </div>
-    }
-
-    <!-- Filters -->
-    @if (filterProperties().length > 0) {
-      <app-filter-bar
-        [properties]="filterProperties()"
-        [entityKey]="joinTable()"
-        [currentFilters]="filters()"
-        (filtersChange)="onFiltersChange($event)"
-      ></app-filter-bar>
-    }
-
-    <!-- Table -->
-    <div class="overflow-x-auto max-h-[50vh] overflow-y-auto">
-      <table class="table table-zebra table-sm w-full">
-        <thead class="sticky top-0 bg-base-200 z-10">
-          <tr>
-            <th class="w-8"></th>
-            @for (prop of listProperties(); track prop.column_name) {
-              <th
-                class="cursor-pointer select-none"
-                [class.font-bold]="orderField() === prop.column_name"
-                (click)="onSort(prop.column_name)"
-              >
-                <span class="flex items-center gap-1">
-                  {{ prop.display_name }}
-                  @if (getSortIcon(prop.column_name)) {
-                    <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
-                  }
-                </span>
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.id) {
-            <tr
-              class="cursor-pointer hover:bg-base-200"
-              [class.bg-primary/10]="isSelected(row.id)"
-              (click)="onRowClick(row)"
+          <!-- Footer: Back / Apply -->
+          <div class="cos-modal-action shrink-0">
+            <button type="button" class="btn btn-ghost" (click)="goToPage1()">
+              <span class="material-symbols-outlined text-base">arrow_back</span>
+              Back
+            </button>
+            <div class="flex-1"></div>
+            <button type="button" class="btn" (click)="onCancel()">Cancel</button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="!richApplyEnabled()"
+              (click)="onRichApply()"
             >
-              <td>
-                <input type="radio" class="radio radio-primary radio-sm" [checked]="isSelected(row.id)" tabindex="-1" />
-              </td>
+              Apply
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- ====== PAGE 1: Select Items (original multi-select) ====== -->
+        <div class="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 flex-1 min-h-0 overflow-hidden">
+          <!-- Left panel: search + browse -->
+          <div class="min-w-0 flex flex-col">
+            <!-- Search -->
+            @if (hasSearchFields()) {
+              <div class="mb-3 shrink-0">
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+                  <input
+                    type="text"
+                    class="input input-bordered w-full pl-10"
+                    placeholder="Search..."
+                    [ngModel]="searchQuery()"
+                    (ngModelChange)="onSearchInput($event)"
+                    (keydown.enter)="$event.preventDefault()"
+                  />
+                </div>
+              </div>
+            }
+
+            <!-- Filters -->
+            @if (filterProperties().length > 0) {
+              <div class="shrink-0">
+                <app-filter-bar
+                  [properties]="filterProperties()"
+                  [entityKey]="joinTable()"
+                  [currentFilters]="filters()"
+                  (filtersChange)="onFiltersChange($event)"
+                ></app-filter-bar>
+              </div>
+            }
+
+            <!-- Table with checkboxes -->
+            <div class="overflow-x-auto flex-1 min-h-0 overflow-y-auto">
+              <table class="table table-zebra table-sm w-full">
+                <thead class="sticky top-0 bg-base-200 z-10">
+                  <tr>
+                    <th class="w-8"></th>
+                    @for (prop of listProperties(); track prop.column_name) {
+                      <th
+                        class="cursor-pointer select-none"
+                        [class.font-bold]="orderField() === prop.column_name"
+                        (click)="onSort(prop.column_name)"
+                      >
+                        <span class="flex items-center gap-1">
+                          {{ prop.display_name }}
+                          @if (getSortIcon(prop.column_name)) {
+                            <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
+                          }
+                        </span>
+                      </th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of rows(); track row.id) {
+                    <tr
+                      class="cursor-pointer hover:bg-base-200"
+                      [class.bg-primary/10]="isInWorkingSelection(row.id)"
+                      (click)="toggleSelection(row.id!, row.display_name, $any(row).color)"
+                    >
+                      <td>
+                        <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
+                               [checked]="isInWorkingSelection(row.id)"
+                               tabindex="-1"
+                               (click)="$event.stopPropagation(); toggleSelection(row.id!, row.display_name, $any(row).color)" />
+                      </td>
+                      @for (prop of listProperties(); track prop.column_name) {
+                        <td>
+                          <app-display-property
+                            [property]="prop"
+                            [datum]="row[prop.column_name]"
+                            [showLabel]="false"
+                            [linkRelated]="false"
+                          ></app-display-property>
+                        </td>
+                      }
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
+                        @if (loading()) {
+                          <span class="loading loading-spinner loading-sm"></span>
+                        } @else {
+                          No results found
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-3 shrink-0">
+              <app-pagination
+                [currentPage]="currentPage()"
+                [pageSize]="pageSize()"
+                [totalCount]="totalCount()"
+                [loading]="loading()"
+                (pageChange)="onPageChange($event)"
+                (pageSizeChange)="onPageSizeChange($event)"
+              ></app-pagination>
+            </div>
+          </div>
+
+          <!-- Right panel: selected chips -->
+          <div class="border-l border-base-300 pl-4 pr-2 flex flex-col min-h-0">
+            <h4 class="font-semibold text-sm mb-3 shrink-0">Selected ({{ workingSelection().size }})</h4>
+            <div class="flex-1 min-h-0 overflow-y-auto space-y-1">
+              @for (chip of selectedChips(); track chip.id) {
+                <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-base-200 group">
+                  @if (chip.color) {
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background-color]="chip.color"></span>
+                  }
+                  <span class="text-sm flex-1 truncate">{{ chip.display_name }}</span>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs opacity-50 group-hover:opacity-100"
+                    (click)="removeChip(chip.id)"
+                  >
+                    <span class="material-symbols-outlined text-sm">close</span>
+                  </button>
+                </div>
+              } @empty {
+                <p class="text-sm text-base-content/50 italic">No items selected</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer: Next / Apply / Cancel -->
+        <div class="cos-modal-action shrink-0">
+          <div class="flex-1"></div>
+          <button type="button" class="btn" (click)="onCancel()">Cancel</button>
+          @if (isRichJunction()) {
+            <!-- Rich junction: "Next" goes to page 2 for extra column configuration -->
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="workingSelection().size === 0"
+              (click)="goToPage2()"
+            >
+              Next
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+          } @else {
+            <!-- Pure junction: direct "Apply" -->
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="!applyEnabled()"
+              (click)="onApply()"
+            >
+              Apply
+              @if (applyEnabled()) {
+                <span class="text-xs opacity-80">
+                  ({{ pendingDiff().toAdd.length }} added, {{ pendingDiff().toRemove.length }} removed)
+                </span>
+              }
+            </button>
+          }
+        </div>
+      }
+    } @else {
+      <!-- ====== SINGLE-SELECT MODE (FK) ====== -->
+
+      <!-- Search -->
+      @if (hasSearchFields()) {
+        <div class="mb-3 shrink-0">
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+            <input
+              type="text"
+              class="input input-bordered w-full pl-10"
+              placeholder="Search..."
+              [ngModel]="searchQuery()"
+              (ngModelChange)="onSearchInput($event)"
+              (keydown.enter)="$event.preventDefault()"
+            />
+          </div>
+        </div>
+      }
+
+      <!-- Filters -->
+      @if (filterProperties().length > 0) {
+        <div class="shrink-0">
+          <app-filter-bar
+            [properties]="filterProperties()"
+            [entityKey]="joinTable()"
+            [currentFilters]="filters()"
+            (filtersChange)="onFiltersChange($event)"
+          ></app-filter-bar>
+        </div>
+      }
+
+      <!-- Table -->
+      <div class="overflow-x-auto flex-1 min-h-0 min-w-0 overflow-y-auto">
+        <table class="table table-zebra table-sm w-full">
+          <thead class="sticky top-0 bg-base-200 z-10">
+            <tr>
+              <th class="w-8"></th>
               @for (prop of listProperties(); track prop.column_name) {
-                <td>
-                  <app-display-property
-                    [property]="prop"
-                    [datum]="row[prop.column_name]"
-                    [showLabel]="false"
-                    [linkRelated]="false"
-                  ></app-display-property>
-                </td>
+                <th
+                  class="cursor-pointer select-none"
+                  [class.font-bold]="orderField() === prop.column_name"
+                  (click)="onSort(prop.column_name)"
+                >
+                  <span class="flex items-center gap-1">
+                    {{ prop.display_name }}
+                    @if (getSortIcon(prop.column_name)) {
+                      <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
+                    }
+                  </span>
+                </th>
               }
             </tr>
-          } @empty {
-            <tr>
-              <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
-                @if (loading()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
-                  No results found
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.id) {
+              <tr
+                class="cursor-pointer hover:bg-base-200"
+                [class.bg-primary/10]="isSelected(row.id)"
+                (click)="onRowClick(row)"
+              >
+                <td>
+                  <input type="radio" class="radio radio-primary radio-sm" [checked]="isSelected(row.id)" tabindex="-1" />
+                </td>
+                @for (prop of listProperties(); track prop.column_name) {
+                  <td>
+                    <app-display-property
+                      [property]="prop"
+                      [datum]="row[prop.column_name]"
+                      [showLabel]="false"
+                      [linkRelated]="false"
+                    ></app-display-property>
+                  </td>
                 }
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
+                  @if (loading()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                  } @else {
+                    No results found
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-    <!-- Pagination -->
-    <div class="mt-3">
-      <app-pagination
-        [currentPage]="currentPage()"
-        [pageSize]="pageSize()"
-        [totalCount]="totalCount()"
-        [loading]="loading()"
-        (pageChange)="onPageChange($event)"
-        (pageSizeChange)="onPageSizeChange($event)"
-      ></app-pagination>
-    </div>
+      <!-- Pagination -->
+      <div class="mt-3 shrink-0">
+        <app-pagination
+          [currentPage]="currentPage()"
+          [pageSize]="pageSize()"
+          [totalCount]="totalCount()"
+          [loading]="loading()"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        ></app-pagination>
+      </div>
 
-    <!-- Footer actions -->
-    <div class="cos-modal-action">
-      <div class="flex-1"></div>
-      <button type="button" class="btn" (click)="onCancel()">Cancel</button>
-      @if (isNullable()) {
-        <button type="button" class="btn btn-warning btn-outline" (click)="onClear()">
-          <span class="material-symbols-outlined text-base">close</span>
-          Clear
-        </button>
-      }
-      <button
-        type="button"
-        class="btn btn-primary"
-        [disabled]="!confirmEnabled()"
-        (click)="onConfirm()"
-      >Confirm</button>
-    </div>
-  }
+      <!-- Footer actions -->
+      <div class="cos-modal-action shrink-0">
+        <div class="flex-1"></div>
+        <button type="button" class="btn" (click)="onCancel()">Cancel</button>
+        @if (isNullable()) {
+          <button type="button" class="btn btn-warning btn-outline" (click)="onClear()">
+            <span class="material-symbols-outlined text-base">close</span>
+            Clear
+          </button>
+        }
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!confirmEnabled()"
+          (click)="onConfirm()"
+        >Confirm</button>
+      </div>
+    }
+  </div>
 </cos-modal>
