@@ -58,6 +58,7 @@ export class DisplayPropertyComponent {
   datum = input<any>();
   linkRelated = input<boolean>(true);
   showLabel = input<boolean>(true);
+  compact = input<boolean>(false);
   highlightTerms = input<string[]>([]);
 
   propType = computed(() => this.prop().type);

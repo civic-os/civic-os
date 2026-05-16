@@ -17,7 +17,7 @@
 
     <!-- Filter Controls Drawer (Collapsible) -->
     @if (isExpanded()) {
-      <div class="card bg-base-200 p-4 mt-2 absolute right-6 z-10 shadow-lg" [style.max-width]="dropdownMaxWidth()">
+      <div class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg" [class.left-0]="alignLeft()" [class.right-6]="!alignLeft()" [style.max-width]="dropdownMaxWidth()">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold">Filter Options</h3>
           @if (activeFilterCount() > 0) {

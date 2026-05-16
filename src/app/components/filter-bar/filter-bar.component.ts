@@ -57,6 +57,7 @@ export class FilterBarComponent {
   properties = input<SchemaEntityProperty[]>([]);
   entityKey = input<string | undefined>(undefined);
   currentFilters = input<FilterCriteria[]>([]);
+  alignLeft = input<boolean>(false);
   @Output() filtersChange = new EventEmitter<FilterCriteria[]>();
 
   public isExpanded = signal(false);

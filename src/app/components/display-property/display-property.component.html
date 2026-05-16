@@ -216,7 +216,7 @@
     }
     @if (propType() == EntityPropertyType.Status) {
       <span
-        class="badge badge-lg h-auto min-h-[2rem]"
+        [class]="compact() ? 'badge badge-sm h-auto' : 'badge badge-lg h-auto min-h-[2rem]'"
         [style.background-color]="datum()?.color || '#3B82F6'"
         [style.border-color]="datum()?.color || '#3B82F6'"
         [style.color]="getStatusTextColor()">
@@ -225,7 +225,7 @@
     }
     @if (propType() == EntityPropertyType.Category) {
       <span
-        class="badge badge-lg h-auto min-h-[2rem]"
+        [class]="compact() ? 'badge badge-sm h-auto' : 'badge badge-lg h-auto min-h-[2rem]'"
         [style.background-color]="datum()?.color || '#3B82F6'"
         [style.border-color]="datum()?.color || '#3B82F6'"
         [style.color]="getCategoryTextColor()">
