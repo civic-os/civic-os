@@ -1140,11 +1140,15 @@ export class DetailPage {
     this.guidedFormService.submitGuidedForm(key, pid).subscribe({
       next: (result) => {
         this.guidedFormSubmitting.set(false);
-        this.showReviewSection.set(false);
 
-        // on_submit_rpc can return navigate_to to override the default success modal
-        if (result?.navigate_to) {
-          this.router.navigateByUrl(result.navigate_to);
+        // on_submit_rpc can return navigate_to to override the default success modal.
+        // Guard against same-URL navigation (e.g., submit_tool_reservation returns
+        // the current detail page URL) — Angular ignores navigateByUrl to the same
+        // route, which would leave the page in a stale state with no refresh.
+        const navigateTo = result?.navigate_to;
+        if (navigateTo && navigateTo !== this.router.url) {
+          this.showReviewSection.set(false);
+          this.router.navigateByUrl(navigateTo);
         } else {
           this.refreshData();
           this.showGuidedFormSuccessModal.set(true);
