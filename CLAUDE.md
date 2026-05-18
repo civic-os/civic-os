@@ -72,7 +72,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Video Embeds** (v0.50.0+): `@[video](url)` markdown syntax for embedding YouTube videos within Static Text Blocks and notes. Uses DOMPurify sanitization with `privacy-enhanced` nocookie domain for GDPR compliance. Supported in all markdown rendering contexts (Static Text, Entity Notes, Dashboard Markdown widgets).
 
-**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. **Action Parameters** (v0.32.0+) allow user-provided form fields in modals. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
+**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. **Action Parameters** (v0.32.0+) allow user-provided form fields in modals. **Dot-notation conditions** (v0.53.2+): `visibility_condition` and `enabled_condition` support dot-notation for embedded FK properties (e.g., `"field": "status_id.status_key"`) — prefer `status_key` over numeric IDs for portability across environments. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
 **Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedules. Enable via `supports_recurring=true` in `metadata.entities`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for architecture.
 

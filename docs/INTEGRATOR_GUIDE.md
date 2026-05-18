@@ -2371,6 +2371,22 @@ Control when buttons appear and when they're clickable using JSONB condition exp
 | `is_null` | Is null | `{"field": "cancelled_at", "operator": "is_null"}` |
 | `is_not_null` | Is not null | `{"field": "approved_at", "operator": "is_not_null"}` |
 
+**Dot-notation for embedded FK properties (v0.53.2+):**
+
+The `field` value supports dot-notation to access properties of embedded FK objects. This is especially useful with `status_key`, which is a stable string identifier that doesn't change across environments (unlike numeric status IDs):
+
+```json
+{"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+```
+
+This traverses into the PostgREST embedded object (`status_id: {id: 5, status_key: "preparing", ...}`) and compares the nested property. Works with any operator including `in`:
+
+```json
+{"field": "status_id.status_key", "operator": "in", "value": ["pending", "approved"]}
+```
+
+**Recommended:** Prefer `status_id.status_key` over numeric `status_id` values — status keys are portable across dev/staging/production where auto-increment IDs may differ.
+
 **Example with conditions:**
 
 ```sql
