@@ -32,6 +32,35 @@ function isAndCondition(c: ActionCondition): c is { and: ActionCondition[] } {
 }
 
 /**
+ * Resolves a field value from record data, supporting dot-notation for nested properties.
+ *
+ * PostgREST embeds FK data as objects: `status_id: {id: 1, status_key: "preparing", ...}`.
+ * For dot-notation fields like "status_id.status_key", traverses the path.
+ * For plain fields with embedded FK objects, extracts the .id for backward compatibility.
+ */
+function resolveFieldValue(data: Record<string, any>, field: string): any {
+    if (field.includes('.')) {
+        // Dot-notation: traverse nested object path
+        const parts = field.split('.');
+        let value: any = data;
+        for (const part of parts) {
+            if (value === null || value === undefined || typeof value !== 'object') {
+                return undefined;
+            }
+            value = value[part];
+        }
+        return value;
+    }
+
+    // Plain field: extract .id from embedded FK objects for backward compatibility
+    let value = data[field];
+    if (value !== null && typeof value === 'object' && 'id' in value) {
+        value = value.id;
+    }
+    return value;
+}
+
+/**
  * Evaluates a condition against record data.
  *
  * Used for entity action visibility and enablement conditions.
@@ -73,13 +102,11 @@ export function evaluateCondition(
     // Simple condition - cast to SimpleCondition for field access
     const simple = condition as SimpleCondition;
 
-    // Get field value, handling embedded FK objects (Status, ForeignKey types)
-    // PostgREST embeds related data as objects like {id: 1, display_name: "..."}
-    // For conditions, we want to compare against the ID
-    let fieldValue = data[simple.field];
-    if (fieldValue !== null && typeof fieldValue === 'object' && 'id' in fieldValue) {
-        fieldValue = fieldValue.id;
-    }
+    // Get field value, handling dot-notation for nested properties and
+    // embedded FK objects (Status, ForeignKey types).
+    // Dot-notation like "status_id.status_key" traverses into PostgREST embedded
+    // objects: data.status_id = {id: 1, status_key: "preparing", ...}
+    let fieldValue = resolveFieldValue(data, simple.field);
 
     switch (simple.operator) {
         case 'eq':
@@ -128,6 +155,9 @@ export function evaluateCondition(
 /**
  * Extracts all field names referenced in a condition (including nested or/and).
  * Used to ensure condition fields are included in API select queries.
+ *
+ * For dot-notation fields like "status_id.status_key", returns only the base
+ * column name ("status_id") since PostgREST already embeds the full FK object.
  */
 export function extractConditionFieldNames(condition: ActionCondition | null | undefined): string[] {
     if (!condition) return [];
@@ -139,5 +169,8 @@ export function extractConditionFieldNames(condition: ActionCondition | null | u
         return condition.and.flatMap(sub => extractConditionFieldNames(sub));
     }
 
-    return [(condition as SimpleCondition).field];
+    const field = (condition as SimpleCondition).field;
+    // Dot-notation: only the base column (before first dot) needs to be in the select.
+    // The nested property (e.g. status_key) comes from the FK embed automatically.
+    return [field.includes('.') ? field.split('.')[0] : field];
 }

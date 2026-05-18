@@ -342,6 +342,50 @@ describe('evaluateCondition', () => {
         });
     });
 
+    describe('dot-notation field traversal', () => {
+        // Visibility conditions like {"field": "status_id.status_key", "value": "preparing"}
+        // need to traverse into PostgREST embedded objects
+
+        it('should resolve dot-notation field from embedded object', () => {
+            const condition: ActionCondition = { field: 'status_id.status_key', operator: 'eq', value: 'preparing' };
+            const data = {
+                id: 1,
+                status_id: { id: 5, display_name: 'Preparing', color: '#f59e0b', status_key: 'preparing' }
+            };
+            expect(evaluateCondition(condition, data)).toBe(true);
+        });
+
+        it('should return false when dot-notation field does not match', () => {
+            const condition: ActionCondition = { field: 'status_id.status_key', operator: 'eq', value: 'preparing' };
+            const data = {
+                id: 1,
+                status_id: { id: 6, display_name: 'Checked Out', color: '#22c55e', status_key: 'checked_out' }
+            };
+            expect(evaluateCondition(condition, data)).toBe(false);
+        });
+
+        it('should handle null parent object in dot-notation', () => {
+            const condition: ActionCondition = { field: 'status_id.status_key', operator: 'eq', value: 'preparing' };
+            const data = { id: 1, status_id: null };
+            expect(evaluateCondition(condition, data)).toBe(false);
+        });
+
+        it('should handle missing parent key in dot-notation', () => {
+            const condition: ActionCondition = { field: 'status_id.status_key', operator: 'eq', value: 'preparing' };
+            const data = { id: 1 };
+            expect(evaluateCondition(condition, data)).toBe(false);
+        });
+
+        it('should work with in operator and dot-notation', () => {
+            const condition: ActionCondition = { field: 'status_id.status_key', operator: 'in', value: ['preparing', 'checked_out'] };
+            const data = {
+                id: 1,
+                status_id: { id: 5, status_key: 'preparing' }
+            };
+            expect(evaluateCondition(condition, data)).toBe(true);
+        });
+    });
+
     describe('real-world scenarios', () => {
         it('should evaluate pending status condition', () => {
             const pendingCondition: ActionCondition = { field: 'status_id', operator: 'eq', value: 1 };
@@ -418,5 +462,22 @@ describe('extractConditionFieldNames', () => {
             ]
         });
         expect(result).toEqual(['status_id', 'type', 'amount']);
+    });
+
+    it('should return base column name for dot-notation fields', () => {
+        const result = extractConditionFieldNames({
+            field: 'status_id.status_key', operator: 'eq', value: 'preparing'
+        });
+        expect(result).toEqual(['status_id']);
+    });
+
+    it('should return base column names from compound conditions with dot-notation', () => {
+        const result = extractConditionFieldNames({
+            or: [
+                { field: 'status_id.status_key', operator: 'eq', value: 'preparing' },
+                { field: 'status_id.status_key', operator: 'eq', value: 'checked_out' }
+            ]
+        });
+        expect(result).toEqual(['status_id', 'status_id']);
     });
 });

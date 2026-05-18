@@ -706,8 +706,9 @@ export class SchemaService {
 
     // Status type: Embed status data from metadata.statuses table
     // Uses FK hint to metadata schema since statuses live in metadata, not public
+    // Includes status_key for condition evaluation (e.g. visibility_condition: {"field": "status_id.status_key", ...})
     if (prop.type === EntityPropertyType.Status) {
-      return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color)`;
+      return `${prop.column_name}:statuses!${prop.column_name}(id,display_name,color,status_key)`;
     }
 
     // Category: Embed category data from metadata.categories table (v0.34.0)
