@@ -1419,10 +1419,12 @@ export class DetailPage {
           orderDirection: 'asc'
         });
       } else if (param.param_type === 'foreign_key' && param.join_table && param.join_column) {
+        // Always fetch display_name for dropdown labels; join_column for the submitted value
+        const fields = [...new Set(['id', 'display_name', param.join_column])];
         optionsToLoad[param.param_name] = this.data.getData({
           key: param.join_table,
-          fields: ['id', param.join_column],
-          orderField: param.join_column,
+          fields,
+          orderField: 'display_name',
           orderDirection: 'asc'
         });
       } else if (param.param_type === 'user') {
@@ -1547,11 +1549,9 @@ export class DetailPage {
 
   /**
    * Get display column name for a foreign_key param's options.
+   * Always uses display_name — join_column is the value column, not the label.
    */
-  getParamDisplayColumn(param: EntityActionParam): string {
-    if (param.param_type === 'foreign_key' && param.join_column) {
-      return param.join_column;
-    }
+  getParamDisplayColumn(_param: EntityActionParam): string {
     return 'display_name';
   }
 }

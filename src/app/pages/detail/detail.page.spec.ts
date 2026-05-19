@@ -700,6 +700,65 @@ describe('DetailPage', () => {
         p_document_file: 'file-uuid-456'
       });
     });
+
+    it('should load FK param options with id and display_name', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id'
+        })
+      ];
+
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Hammer' },
+        { id: 2, display_name: 'Drill' }
+      ]));
+
+      component.loadParamOptions(params);
+
+      expect(mockDataService.getData).toHaveBeenCalledWith(jasmine.objectContaining({
+        key: 'tool_types',
+        fields: ['id', 'display_name'],
+        orderField: 'display_name',
+        orderDirection: 'asc'
+      }));
+    });
+
+    it('should include join_column in fields when it differs from id', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_code',
+          param_type: 'foreign_key',
+          join_table: 'categories',
+          join_column: 'code'
+        })
+      ];
+
+      mockDataService.getData.and.returnValue(of([]));
+
+      component.loadParamOptions(params);
+
+      expect(mockDataService.getData).toHaveBeenCalledWith(jasmine.objectContaining({
+        key: 'categories',
+        fields: ['id', 'display_name', 'code']
+      }));
+    });
+
+    it('should always return display_name from getParamDisplayColumn', () => {
+      expect(component.getParamDisplayColumn(
+        createMockParam({ param_type: 'foreign_key', join_column: 'id' })
+      )).toBe('display_name');
+
+      expect(component.getParamDisplayColumn(
+        createMockParam({ param_type: 'foreign_key', join_column: 'code' })
+      )).toBe('display_name');
+
+      expect(component.getParamDisplayColumn(
+        createMockParam({ param_type: 'text' })
+      )).toBe('display_name');
+    });
   });
 
   describe('Data Flow with Complex Property Types', () => {
