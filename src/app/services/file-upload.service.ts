@@ -178,13 +178,16 @@ export class FileUploadService {
   }
 
   /**
-   * Upload file directly to S3 using presigned URL
+   * Upload file directly to S3 using presigned URL.
+   * The x-amz-acl header must match what the worker signed into the presigned URL —
+   * without it, S3 rejects the PUT with a signature mismatch.
    */
   private async uploadToS3(presignedUrl: string, file: File): Promise<void> {
     await firstValueFrom(
       this.http.put(presignedUrl, file, {
         headers: {
-          'Content-Type': file.type
+          'Content-Type': file.type,
+          'x-amz-acl': 'public-read'
         }
       })
     );

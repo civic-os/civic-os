@@ -158,7 +158,34 @@ In DigitalOcean console → Spaces → your bucket → Settings → CORS Configu
 
 If using a vanity domain, add that origin too. If multiple instances share a bucket, include all origins in one CORS config (S3 replaces, not appends).
 
-### 7. Configure Keycloak Realm Email (required for welcome emails and password resets)
+### 7. Verify S3 Object ACLs (required for file display)
+
+The consolidated worker sets `public-read` ACL on all uploaded objects (originals and thumbnails) so the frontend can display them via unsigned GET URLs. The bucket itself remains private (no directory listing).
+
+**Requirements:**
+- The S3 credentials (`S3_ACCESS_KEY_ID`) must have `s3:PutObjectAcl` permission
+- For DigitalOcean Spaces: the Spaces key must not be a read-only key
+
+**Verify** by uploading a file through the app, then checking the object is publicly accessible:
+
+```bash
+# Should return 200 (not 403)
+curl -s -o /dev/null -w "%{http_code}" \
+  "https://{S3_PUBLIC_ENDPOINT}/{BUCKET}/{path-to-uploaded-file}"
+```
+
+If objects return 403, check that the worker is running with `s3:PutObjectAcl` permission. For existing objects uploaded before this fix, set ACLs retroactively:
+
+```bash
+aws --endpoint-url https://nyc3.digitaloceanspaces.com \
+  s3api list-objects-v2 --bucket YOUR_BUCKET --query 'Contents[].Key' --output text \
+  | tr '\t' '\n' | while read key; do
+    aws --endpoint-url https://nyc3.digitaloceanspaces.com \
+      s3api put-object-acl --bucket YOUR_BUCKET --key "$key" --acl public-read
+  done
+```
+
+### 8. Configure Keycloak Realm Email (required for welcome emails and password resets)
 
 Keycloak uses its own SMTP config for all user-facing emails (welcome, password reset, verify email) — this is **separate** from the worker's `SMTP_*` env vars.
 
@@ -168,7 +195,7 @@ In Keycloak admin → your realm → **Realm Settings → Email** tab:
 
 Without this, users are created in Keycloak successfully but never receive these emails.
 
-### 8. Configure Database Firewall
+### 9. Configure Database Firewall
 
 DigitalOcean Managed PostgreSQL blocks all connections by default. You must add the VPS IP to the trusted sources:
 
@@ -188,7 +215,7 @@ doctl databases firewalls list {DB_ID}
 doctl databases firewalls append 00888968-a952-430c-9895-1d263de733c2 --rule ip_addr:165.227.80.192
 ```
 
-### 9. Create MCP Read-Only Role (optional, for Claude Code / AI tooling)
+### 10. Create MCP Read-Only Role (optional, for Claude Code / AI tooling)
 
 To allow MCP database servers (e.g., `@anthropic/postgres-mcp`) to query the database safely, create a read-only role:
 

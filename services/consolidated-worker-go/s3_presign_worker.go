@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 )
@@ -116,10 +117,13 @@ func (w *S3PresignWorker) generateFileID(ctx context.Context) (string, error) {
 
 // generateUploadURL creates a presigned URL for uploading files to S3
 func (w *S3PresignWorker) generateUploadURL(ctx context.Context, bucket, key string) (string, error) {
-	// Create presigned PUT request for upload (15 minutes expiry)
+	// Create presigned PUT request for upload (15 minutes expiry).
+	// ACL public-read ensures uploaded objects are publicly readable via unsigned GET,
+	// while the bucket itself remains private (no directory listing).
 	presignResult, err := w.s3PresignClient.PresignPutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
+		ACL:    types.ObjectCannedACLPublicRead,
 	}, s3.WithPresignExpires(15*time.Minute))
 
 	if err != nil {

@@ -14,6 +14,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/h2non/bimg"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
@@ -272,6 +273,7 @@ func (w *ThumbnailWorker) uploadToS3(ctx context.Context, bucket, key string, da
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(data),
 		ContentType: aws.String(contentType),
+		ACL:         types.ObjectCannedACLPublicRead,
 	})
 	return err
 }
