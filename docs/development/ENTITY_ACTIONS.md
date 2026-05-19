@@ -1102,6 +1102,7 @@ Each param row defines:
 - `status_entity_type` — For `status` type (statuses discriminator)
 - `category_entity_type` — For `category` type (categories discriminator, v0.41.1)
 - `file_type` — For `file` type (`image`, `pdf`, `any`)
+- `target_column` — For `photo_gallery` type: entity column name used to look up `photo_gallery_config` constraints (v0.55.0)
 
 ### Supported Parameter Types
 
@@ -1125,8 +1126,11 @@ Each param row defines:
 | `file` | File input (presigned URL) | File/FileImage/FilePDF |
 | `geo_point` | Map picker (fallback: text) | GeoPoint |
 | `time_slot` | Range picker (fallback: text) | TimeSlot |
+| `photo_gallery` | PhotoGalleryEditor | PhotoGallery |
 
 **Not supported** (different interaction model): ManyToMany, Payment, RecurringTimeSlot
+
+**Note**: `photo_gallery` action param is a blank uploader — it does NOT pre-load the entity's existing gallery. The RPC decides how to handle the uploaded gallery (link, merge, replace).
 
 **MAINTENANCE NOTE**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type.
 
@@ -1140,7 +1144,8 @@ Each param row defines:
 - When all dependencies are null, the param's initial options load is skipped (watcher triggers first load)
 - When a dependency is cleared, the dependent param's options are emptied and its selection is reset
 - When a dependency changes and the current selection is no longer valid, it's automatically cleared
-- The Confirm button is disabled when: loading, form invalid, or file uploading
+- Gallery params (`photo_gallery`) embed `PhotoGalleryEditorComponent` — always starts blank, draft created on first upload, `saveChanges()` called before RPC execution, gallery UUID passed as param value
+- The Confirm button is disabled when: loading, form invalid, file uploading, **or gallery uploading**
 - Form values are merged with `{ p_entity_id }` when calling the RPC
 - Modal size is `md` when params exist, `sm` when no params
 
@@ -1176,6 +1181,78 @@ The `schema_entity_actions` view embeds params as a `parameters` JSON array:
     {"param_name": "p_response_notes", "display_name": "Reason", "param_type": "text", "required": false, ...}
   ]
 }
+```
+
+## Photo Gallery Action Params (v0.55.0)
+
+Entity actions can include photo upload fields via the `photo_gallery` param type. This embeds the
+`PhotoGalleryEditorComponent` (same component used on Edit pages) inside the action modal.
+
+### Key Design Principle
+
+Gallery params **always start blank**. Unlike Edit-page galleries that show existing images,
+action param galleries create a fresh draft. The RPC receives the gallery UUID and decides
+what to do — link it as-is, merge into an existing gallery, or replace.
+
+### Architecture
+
+New column on `metadata.entity_action_params`:
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `target_column` | `NAME` | Entity column name — used to look up `photo_gallery_config` constraints |
+
+**Constraints:**
+- `photo_gallery` type requires `target_column`
+- `target_column` is only allowed on `photo_gallery` type
+- Multiple `photo_gallery` params on the same action are supported
+
+### Frontend Flow
+
+1. Modal opens → load `photo_gallery_config` for `target_column` (constraints only)
+2. Gallery editor renders empty (no pre-loaded images)
+3. User uploads photos → `GalleryService.createDraftGallery()` creates draft → thumbnails appear
+4. User clicks Confirm → `PhotoGalleryEditorComponent.saveChanges()` persists uploads
+5. Gallery UUID passed to RPC as the param value (or NULL if no photos uploaded)
+6. RPC links/merges gallery as needed
+
+### SQL Example
+
+```sql
+-- 1. RPC accepts gallery UUID param
+CREATE OR REPLACE FUNCTION confirm_checkout(
+    p_entity_id BIGINT,
+    p_checkout_photos UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    -- ... business logic ...
+
+    -- Link gallery to entity if photos were uploaded
+    IF p_checkout_photos IS NOT NULL THEN
+        PERFORM link_gallery_to_entity(
+            p_checkout_photos,
+            'tool_reservation_checkouts',
+            p_entity_id::TEXT,
+            'checkout_photos'
+        );
+    END IF;
+
+    RETURN jsonb_build_object('success', true, 'message', 'Checkout confirmed.', 'refresh', true);
+END;
+$$;
+
+-- 2. Register the gallery param
+INSERT INTO metadata.entity_action_params (
+    entity_action_id, param_name, display_name, param_type,
+    target_column, required, sort_order
+)
+SELECT ea.id, 'p_checkout_photos', 'Checkout Photos', 'photo_gallery',
+       'checkout_photos', FALSE, 20
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'tool_reservation_checkouts'
+  AND ea.action_name = 'confirm_checkout';
 ```
 
 ## Future Enhancements

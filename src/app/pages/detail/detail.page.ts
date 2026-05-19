@@ -16,9 +16,9 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, QueryList, ViewChildren } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay } from 'rxjs';
+import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay, firstValueFrom } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
   SchemaEntityProperty,
@@ -34,6 +34,7 @@ import {
   EntityActionResult,
   EntityActionParam,
   FileReference,
+  PhotoGalleryConfig,
   SeriesMembership,
   SeriesEditScope
 } from '../../interfaces/entity';
@@ -41,6 +42,8 @@ import { evaluateCondition, extractConditionFieldNames } from '../../utils/condi
 import { ActionBarComponent, ActionButton } from '../../components/action-bar/action-bar.component';
 import { RecurringService } from '../../services/recurring.service';
 import { FileUploadService } from '../../services/file-upload.service';
+import { GalleryService } from '../../services/gallery.service';
+import { PhotoGalleryEditorComponent } from '../../components/photo-gallery-editor/photo-gallery-editor.component';
 import { ExceptionEditorComponent, ExceptionEditorResult } from '../../components/exception-editor/exception-editor.component';
 import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-form-nav.component';
 import { GuidedFormReviewSectionComponent } from '../../components/guided-form-review-section/guided-form-review-section.component';
@@ -101,7 +104,8 @@ export interface CalendarSection {
     ExceptionEditorComponent,
     CosModalComponent,
     GuidedFormNavComponent,
-    GuidedFormReviewSectionComponent
+    GuidedFormReviewSectionComponent,
+    PhotoGalleryEditorComponent
     // TimeSlotCalendarComponent
   ]
 })
@@ -112,6 +116,7 @@ export class DetailPage {
   private data = inject(DataService);
   private recurringService = inject(RecurringService);
   private fileUpload = inject(FileUploadService);
+  private galleryService = inject(GalleryService);
   private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
   public auth = inject(AuthService);
@@ -150,6 +155,11 @@ export class DetailPage {
   actionUploadedFile = signal<Record<string, FileReference>>({});
   actionUploadError = signal<string | undefined>(undefined);
   private paramDependencySubs: Subscription[] = [];
+
+  // Photo gallery action param state (v0.55.0)
+  @ViewChildren('actionGalleryEditor') actionGalleryEditors!: QueryList<PhotoGalleryEditorComponent>;
+  actionGalleryConfig = signal<Record<string, PhotoGalleryConfig>>({});
+  actionGalleryIds = signal<Record<string, string | null>>({});
 
   // Data loading state
   dataLoading = signal(true);
@@ -1273,9 +1283,9 @@ export class DetailPage {
 
   /**
    * Confirm action from modal.
-   * Validates param form if present, then collects values and executes.
+   * Validates param form if present, saves any gallery uploads, then collects values and executes.
    */
-  confirmEntityAction(): void {
+  async confirmEntityAction(): Promise<void> {
     const action = this.currentAction();
     if (!action) return;
 
@@ -1289,6 +1299,14 @@ export class DetailPage {
     }
 
     this.actionLoading.set(true);
+
+    // Save gallery uploads before executing RPC (v0.55.0)
+    const gallerySaved = await this.saveActionGalleries();
+    if (!gallerySaved) {
+      this.actionLoading.set(false);
+      this.actionError.set('Failed to save gallery photos. Please try again.');
+      return;
+    }
 
     // Collect param values from form
     const additionalParams = form ? this.collectParamValues(action.parameters, form) : {};
@@ -1310,6 +1328,9 @@ export class DetailPage {
     this.actionFileUploading.set(false);
     this.actionUploadedFile.set({});
     this.actionUploadError.set(undefined);
+    // Gallery cleanup (v0.55.0)
+    this.actionGalleryConfig.set({});
+    this.actionGalleryIds.set({});
   }
 
   /**
@@ -1450,6 +1471,19 @@ export class DetailPage {
           fields: ['id', 'display_name'],
           orderField: 'display_name',
           orderDirection: 'asc'
+        });
+      } else if (param.param_type === 'photo_gallery' && param.target_column) {
+        // Load gallery config for constraints (max_images, allowed_types)
+        this.galleryService.getConfig(this.entityKey!, param.target_column).subscribe({
+          next: (config) => {
+            this.actionGalleryConfig.set({
+              ...this.actionGalleryConfig(),
+              [param.param_name]: config
+            });
+          },
+          error: (err) => {
+            console.error(`[DetailPage] Failed to load gallery config for ${param.target_column}`, err);
+          }
         });
       }
     }
@@ -1637,6 +1671,49 @@ export class DetailPage {
         this.actionFileUploading.set(false);
         input.value = '';
       });
+  }
+
+  // =========================================================================
+  // PHOTO GALLERY ACTION PARAM HELPERS (v0.55.0)
+  // =========================================================================
+
+  /**
+   * Handle draft gallery creation from a photo_gallery action param editor.
+   * Stores the gallery ID and sets the form control value (enables required validation).
+   */
+  onActionGalleryDraftCreated(paramName: string, galleryId: string): void {
+    this.actionGalleryIds.set({
+      ...this.actionGalleryIds(),
+      [paramName]: galleryId
+    });
+    // Set form control value so the gallery UUID is passed to the RPC
+    this.actionParamForm()?.get(paramName)?.setValue(galleryId);
+  }
+
+  /**
+   * Save all photo gallery editors in the action modal before executing the RPC.
+   * Calls saveChanges() on each gallery editor to persist uploads.
+   * @returns true if all saves succeeded (or no galleries to save)
+   */
+  async saveActionGalleries(): Promise<boolean> {
+    if (!this.actionGalleryEditors?.length) return true;
+
+    for (const editor of this.actionGalleryEditors) {
+      if (editor.hasPendingChanges()) {
+        const success = await editor.saveChanges();
+        if (!success) return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if any gallery editor in the action modal is currently uploading.
+   * Used to disable the Confirm button during uploads.
+   */
+  isAnyGalleryUploading(): boolean {
+    if (!this.actionGalleryEditors?.length) return false;
+    return this.actionGalleryEditors.some(editor => editor.uploading());
   }
 
   /**

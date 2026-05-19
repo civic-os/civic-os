@@ -30,6 +30,7 @@ import { AuthService } from '../../services/auth.service';
 import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FileUploadService } from '../../services/file-upload.service';
+import { GalleryService } from '../../services/gallery.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
@@ -43,6 +44,7 @@ describe('DetailPage', () => {
   let mockRecurringService: jasmine.SpyObj<RecurringService>;
   let mockNavigationService: jasmine.SpyObj<NavigationService>;
   let mockFileUploadService: jasmine.SpyObj<FileUploadService>;
+  let mockGalleryService: jasmine.SpyObj<GalleryService>;
   let routeParams: BehaviorSubject<any>;
 
   beforeEach(async () => {
@@ -70,6 +72,7 @@ describe('DetailPage', () => {
     mockNavigationService = jasmine.createSpyObj('NavigationService', ['goBack']);
     mockFileUploadService = jasmine.createSpyObj('FileUploadService', ['validateFile', 'uploadFile']);
     mockFileUploadService.validateFile.and.returnValue(null);
+    mockGalleryService = jasmine.createSpyObj('GalleryService', ['getConfig', 'createDraftGallery', 'linkGalleryToEntity']);
 
     // Default mock for series membership - not a member
     mockRecurringService.getSeriesMembership.and.returnValue(of({ is_member: false }));
@@ -103,7 +106,8 @@ describe('DetailPage', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: RecurringService, useValue: mockRecurringService },
         { provide: NavigationService, useValue: mockNavigationService },
-        { provide: FileUploadService, useValue: mockFileUploadService }
+        { provide: FileUploadService, useValue: mockFileUploadService },
+        { provide: GalleryService, useValue: mockGalleryService }
       ]
     })
     .compileComponents();
@@ -462,7 +466,7 @@ describe('DetailPage', () => {
       expect(form.invalid).toBeTrue(); // Required field empty
     });
 
-    it('should pass param values to executeRpc', () => {
+    it('should pass param values to executeRpc', async () => {
       const params: EntityActionParam[] = [
         createMockParam({ param_name: 'p_response_notes', param_type: 'text' })
       ];
@@ -482,7 +486,7 @@ describe('DetailPage', () => {
       component.actionParamForm()!.get('p_response_notes')!.setValue('Schedule conflict');
       component.currentAction.set(action);
 
-      component.confirmEntityAction();
+      await component.confirmEntityAction();
 
       expect(mockDataService.executeRpc).toHaveBeenCalledWith('deny_time_off', {
         p_entity_id: '42',
@@ -673,7 +677,7 @@ describe('DetailPage', () => {
       expect(component.actionFileUploading()).toBeFalse();
     });
 
-    it('should pass uploaded file UUID to executeRpc via confirmEntityAction', () => {
+    it('should pass uploaded file UUID to executeRpc via confirmEntityAction', async () => {
       const params: EntityActionParam[] = [
         createMockParam({ param_name: 'p_document_file', param_type: 'file', required: true })
       ];
@@ -693,7 +697,7 @@ describe('DetailPage', () => {
       component.actionParamForm()!.get('p_document_file')!.setValue('file-uuid-456');
       component.currentAction.set(action);
 
-      component.confirmEntityAction();
+      await component.confirmEntityAction();
 
       expect(mockDataService.executeRpc).toHaveBeenCalledWith('submit_staff_document', {
         p_entity_id: '42',
@@ -1079,6 +1083,115 @@ describe('DetailPage', () => {
         expect(mockDataService.callRpc).not.toHaveBeenCalled();
         done();
       }, 400);
+    });
+
+    // =========================================================================
+    // PHOTO GALLERY ACTION PARAM TESTS (v0.55.0)
+    // =========================================================================
+
+    it('should create form control with null default for photo_gallery param', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })
+      ];
+
+      component.buildActionParamForm(params);
+
+      const form = component.actionParamForm()!;
+      expect(form.get('p_checkout_photos')).toBeTruthy();
+      expect(form.get('p_checkout_photos')!.value).toBeNull();
+    });
+
+    it('should load gallery config via GalleryService.getConfig on modal open', () => {
+      const mockConfig = { table_name: 'tool_reservation_checkouts', column_name: 'checkout_photos', max_images: 10, allowed_types: 'image/*' };
+      mockGalleryService.getConfig.and.returnValue(of(mockConfig));
+
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })
+      ];
+
+      component.entityKey = 'tool_reservation_checkouts';
+      component.loadParamOptions(params);
+
+      expect(mockGalleryService.getConfig).toHaveBeenCalledWith('tool_reservation_checkouts', 'checkout_photos');
+      expect(component.actionGalleryConfig()['p_checkout_photos']).toEqual(mockConfig);
+    });
+
+    it('should store gallery ID and set form control on draft creation', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos' })
+      ];
+
+      component.buildActionParamForm(params);
+      component.onActionGalleryDraftCreated('p_checkout_photos', 'gallery-uuid-123');
+
+      expect(component.actionGalleryIds()['p_checkout_photos']).toBe('gallery-uuid-123');
+      expect(component.actionParamForm()!.get('p_checkout_photos')!.value).toBe('gallery-uuid-123');
+    });
+
+    it('should pass gallery UUID to executeRpc via confirmEntityAction', async () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos', required: false })
+      ];
+      const action = createMockAction({
+        rpc_function: 'confirm_checkout',
+        parameters: params
+      });
+
+      component.entityId = '42';
+      mockDataService.executeRpc.and.returnValue(of({
+        success: true,
+        body: { success: true, message: 'Confirmed.', refresh: true }
+      }));
+
+      component.buildActionParamForm(params);
+      // Simulate draft gallery was created and UUID stored
+      component.onActionGalleryDraftCreated('p_checkout_photos', 'gallery-uuid-789');
+      component.currentAction.set(action);
+
+      await component.confirmEntityAction();
+
+      expect(mockDataService.executeRpc).toHaveBeenCalledWith('confirm_checkout', {
+        p_entity_id: '42',
+        p_checkout_photos: 'gallery-uuid-789'
+      });
+    });
+
+    it('should clear gallery state when modal is closed', () => {
+      // Set up some gallery state
+      component.actionGalleryConfig.set({ 'p_photos': { table_name: 't', column_name: 'c', max_images: 20, allowed_types: 'image/*' } });
+      component.actionGalleryIds.set({ 'p_photos': 'some-uuid' });
+
+      component.closeActionModal();
+
+      expect(component.actionGalleryConfig()).toEqual({});
+      expect(component.actionGalleryIds()).toEqual({});
+    });
+
+    it('should skip gallery param value when no photos uploaded (optional)', async () => {
+      const params: EntityActionParam[] = [
+        createMockParam({ param_name: 'p_checkout_photos', param_type: 'photo_gallery', target_column: 'checkout_photos', required: false })
+      ];
+      const action = createMockAction({
+        rpc_function: 'confirm_checkout',
+        parameters: params
+      });
+
+      component.entityId = '42';
+      mockDataService.executeRpc.and.returnValue(of({
+        success: true,
+        body: { success: true, message: 'Confirmed.', refresh: true }
+      }));
+
+      component.buildActionParamForm(params);
+      // No draft created — form control stays null
+      component.currentAction.set(action);
+
+      await component.confirmEntityAction();
+
+      // Optional null value should be skipped in collectParamValues
+      expect(mockDataService.executeRpc).toHaveBeenCalledWith('confirm_checkout', {
+        p_entity_id: '42'
+      });
     });
   });
 

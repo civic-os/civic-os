@@ -672,7 +672,7 @@ export type ActionParamType =
     | 'money' | 'date' | 'datetime' | 'datetime_local'
     | 'color' | 'email' | 'telephone'
     | 'status' | 'category' | 'foreign_key' | 'user' | 'file'
-    | 'geo_point' | 'time_slot';
+    | 'geo_point' | 'time_slot' | 'photo_gallery';
 
 /**
  * Parameter definition for an entity action.
@@ -725,6 +725,9 @@ export interface EntityActionParam {
 
     /** Sibling param names whose values trigger RPC re-fetch (v0.54.0) */
     depends_on_params?: string[];
+
+    /** Entity column name used to look up photo_gallery_config constraints (v0.55.0) */
+    target_column?: string;
 }
 
 /**

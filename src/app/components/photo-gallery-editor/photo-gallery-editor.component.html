@@ -9,32 +9,31 @@
     }
   </div>
 
-  <!-- Upload zone -->
+  <!-- Upload zone — uses a transparent file input overlay so the user directly
+       clicks the native input (no programmatic .click()). Chrome blocks .click()
+       on file inputs inside CDK focus traps even when called from a user gesture. -->
   @if (!atMax()) {
     <div
-      class="border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors"
-      (click)="fileInput.click()"
-      (drop)="onDrop($event)"
+      class="relative border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors"
       (dragover)="onDragOver($event)"
-      role="button"
-      tabindex="0"
       [attr.aria-label]="'Upload images. ' + (maxImages() - currentCount()) + ' slots remaining'">
-      <span class="material-symbols-outlined text-3xl text-base-content/40 mb-1">add_photo_alternate</span>
-      <div class="text-sm text-base-content/60">
+      <span class="material-symbols-outlined text-3xl text-base-content/40 mb-1 pointer-events-none">add_photo_alternate</span>
+      <div class="text-sm text-base-content/60 pointer-events-none">
         Drop images here or click to browse
       </div>
-      <div class="text-xs text-base-content/40 mt-1">
+      <div class="text-xs text-base-content/40 mt-1 pointer-events-none">
         {{ acceptTypes() }}
       </div>
+      <input
+        type="file"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        tabindex="-1"
+        [accept]="acceptTypes()"
+        multiple
+        (change)="onFilesSelected($event)"
+        (drop)="onDrop($event)"
+      />
     </div>
-    <input
-      #fileInput
-      type="file"
-      class="hidden"
-      [accept]="acceptTypes()"
-      multiple
-      (change)="onFilesSelected($event)"
-    />
   }
 
   <!-- Error -->

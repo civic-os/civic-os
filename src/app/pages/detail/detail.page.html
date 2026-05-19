@@ -543,6 +543,20 @@
                             <p class="text-success text-sm mt-1">Uploaded: {{ fileRef.file_name }}</p>
                           }
                         }
+                        @case ('photo_gallery') {
+                          <div class="not-prose">
+                            <app-photo-gallery-editor
+                              #actionGalleryEditor
+                              [galleryId]="actionGalleryIds()[param.param_name] ?? null"
+                              [entityType]="entityKey!"
+                              [entityId]="entityId || ''"
+                              [columnName]="param.target_column!"
+                              [currentFiles]="[]"
+                              [config]="actionGalleryConfig()[param.param_name] || {table_name:'',column_name:'',max_images:20,allowed_types:'image/*'}"
+                              (draftGalleryCreated)="onActionGalleryDraftCreated(param.param_name, $event)"
+                            />
+                          </div>
+                        }
                         @default {
                           <!-- Fallback for less common types (geo_point, time_slot) -->
                           <input
@@ -573,7 +587,7 @@
                 <button
                   [class]="'btn btn-' + action.button_style"
                   (click)="confirmEntityAction()"
-                  [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading()">
+                  [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">
                   @if (actionLoading()) {
                     <span class="loading loading-spinner loading-sm"></span>
                   }

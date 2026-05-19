@@ -2154,6 +2154,10 @@ No separate permission grants are needed for galleries. If a user can view an en
 
 See `docs/notes/PHOTO_GALLERY_DESIGN.md` for complete architecture, edge cases, and RLS policy details. See `docs/development/FILE_STORAGE.md` (Photo Gallery Integration section) for how gallery files relate to the file storage system.
 
+#### Photo Gallery in Entity Actions
+
+Gallery columns can also be populated via entity action params (`photo_gallery` type, v0.55.0+). This allows capturing photos as part of a workflow action (e.g., "Confirm Checkout" captures checkout photos). The gallery always starts blank in the action modal; the RPC receives the draft gallery UUID and links it to the entity. See the Entity Action Buttons section (Photo Gallery Action Params) for setup.
+
 ### Event-to-Function Bindings
 
 **Version**: v0.33.0+
@@ -2536,6 +2540,65 @@ WHERE entity_action_params.entity_action_id = ea.id
 - `options_source_rpc` is only allowed on `foreign_key` param type
 
 See `examples/neighborhood-hub/init-scripts/24_neh_action_param_filters.sql` for a complete working example with checkout item removal and cascading tool type/instance dropdowns.
+
+#### Photo Gallery Action Params (v0.55.0)
+
+Actions can include photo upload fields that embed the full gallery editor inside the action modal. Useful for capturing evidence, documentation photos, or before/after images as part of a workflow action.
+
+**New column on `metadata.entity_action_params`:**
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `target_column` | `NAME` | Entity column name — used to look up `photo_gallery_config` constraints (max_images, allowed_types) |
+
+**Key principle:** Gallery params always start blank. The RPC receives the gallery UUID and links/merges as needed.
+
+**Setup:**
+
+```sql
+-- 1. Ensure the entity has a gallery column + config (see Photo Gallery System section above)
+
+-- 2. RPC accepts gallery UUID (DEFAULT NULL for optional photos)
+CREATE OR REPLACE FUNCTION mark_returned(
+    p_entity_id BIGINT,
+    p_return_photos UUID DEFAULT NULL
+)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    -- Business logic...
+
+    IF p_return_photos IS NOT NULL THEN
+        PERFORM link_gallery_to_entity(
+            p_return_photos, 'checkouts', p_entity_id::TEXT, 'return_photos'
+        );
+    END IF;
+
+    RETURN jsonb_build_object('success', true, 'message', 'Returned.', 'refresh', true);
+END;
+$$;
+
+-- 3. Register the gallery param
+INSERT INTO metadata.entity_action_params (
+    entity_action_id, param_name, display_name, param_type,
+    target_column, required, sort_order
+)
+SELECT ea.id, 'p_return_photos', 'Return Photos', 'photo_gallery',
+       'return_photos', FALSE, 20
+FROM metadata.entity_actions ea
+WHERE ea.table_name = 'checkouts' AND ea.action_name = 'mark_returned';
+```
+
+**Behavior:**
+- Gallery editor appears in the action modal with drag-drop upload zone
+- Constraints (max_images, allowed_types, max_file_size) loaded from `photo_gallery_config` for `target_column`
+- Draft gallery created automatically on first upload
+- Photos persist immediately (S3 upload + file record) for thumbnail feedback
+- On Confirm: `saveChanges()` finalizes gallery → UUID passed to RPC → RPC links to entity
+- If no photos uploaded, NULL is passed to the RPC (optional by default)
+- Multiple `photo_gallery` params on one action are supported (each independent)
+- Photos are visible and editable on Detail and Edit pages after the action completes
+
+See `examples/neighborhood-hub/init-scripts/25_neh_fix_checkout_instance_status.sql` for a complete working example with checkout and return photo galleries.
 
 ### Recurring Time Slots
 
