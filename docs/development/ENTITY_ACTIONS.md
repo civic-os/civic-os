@@ -1097,6 +1097,8 @@ Each param row defines:
 
 **Type-specific columns**:
 - `join_table` + `join_column` — For `foreign_key` type (dropdown source)
+- `options_source_rpc` — For `foreign_key` type: custom RPC returning `[{id, display_name}]` (v0.54.0)
+- `depends_on_params` — Sibling param names that trigger RPC re-fetch for cascading dropdowns (v0.54.0)
 - `status_entity_type` — For `status` type (statuses discriminator)
 - `category_entity_type` — For `category` type (categories discriminator, v0.41.1)
 - `file_type` — For `file` type (`image`, `pdf`, `any`)
@@ -1133,6 +1135,11 @@ Each param row defines:
 - Actions with `parameters.length > 0` **always** show the modal (even if `requires_confirmation = false`)
 - A `FormGroup` is built dynamically from parameter definitions
 - Dropdown options (`status`, `foreign_key`, `user`) are loaded on modal open
+- FK params with `options_source_rpc` call the RPC instead of querying `join_table` (v0.54.0)
+- Params with `depends_on_params` watch sibling FormControls; dependency changes trigger RPC re-fetch (300ms debounce)
+- When all dependencies are null, the param's initial options load is skipped (watcher triggers first load)
+- When a dependency is cleared, the dependent param's options are emptied and its selection is reset
+- When a dependency changes and the current selection is no longer valid, it's automatically cleared
 - The Confirm button is disabled when: loading, form invalid, or file uploading
 - Form values are merged with `{ p_entity_id }` when calling the RPC
 - Modal size is `md` when params exist, `sm` when no params
@@ -1223,14 +1230,24 @@ A: Phase 3 - add `parameter_schema` for input fields. For now, create separate p
 **Q: Can actions create related records?**
 A: Yes! RPC can INSERT into related tables. Consider returning new record ID in response.data and navigating to it.
 
-## Implementation Checklist
+## Feature Gaps Between Action Params and Property Types
 
-When implementing this feature:
+Entity action parameters (`metadata.entity_action_params`) were introduced in v0.32.0 as a simpler subset of the property system. The gap has been partially closed:
 
-- [ ] Create Sqitch migration (deploy, revert, verify)
-- [ ] Add TypeScript interfaces to `src/app/interfaces/entity.ts`
-- [ ] Create `src/app/utils/condition-evaluator.ts` with tests
-- [ ] Update `DataService.executeRpc()`
+| Feature | Properties | Action Params | Status |
+|---------|-----------|---------------|--------|
+| `options_source_rpc` | v0.44.0 | **v0.54.0** | ✅ Implemented |
+| `depends_on_columns` / `depends_on_params` | v0.44.0 | **v0.54.0** | ✅ Implemented |
+| `options_filter_column` | v0.53.0 | Missing | Medium — server-side computed column filter |
+| `fk_search_modal` | v0.45.0 | Missing | Low — large option sets with search/pagination |
+
+**RPC signature convention** (shared with properties):
+```sql
+CREATE FUNCTION get_filtered_options(p_id BIGINT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE(id BIGINT, display_name TEXT)
+```
+- `p_id` = entity ID (the record being viewed on the Detail page)
+- `p_depends_on` = JSONB with sibling param values (e.g., `{"p_tool_type_id": 5}`)
 - [ ] Update `SchemaService.getEntityActions()`
 - [ ] Update `DetailPage` component (TS + template)
 - [ ] Create example in pothole domain

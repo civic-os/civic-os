@@ -2480,6 +2480,63 @@ See `examples/community-center/init-scripts/13_entity_actions.sql` for a complet
 - Triggers that create/delete reservations on approval/cancellation
 - Role permission grants
 
+#### Filtered Action Param Dropdowns (v0.54.0)
+
+FK action parameters can use a custom RPC for filtered options instead of loading all rows from `join_table`. Supports cascading dropdowns between sibling params via `depends_on_params`.
+
+**New columns on `metadata.entity_action_params`:**
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `options_source_rpc` | NAME | RPC function returning `[{id, display_name}]` |
+| `depends_on_params` | TEXT[] | Sibling param names whose values trigger RPC re-fetch |
+
+**RPC signature convention** (same as property-level `options_source_rpc`):
+```sql
+CREATE FUNCTION get_filtered_options(p_id BIGINT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE(id BIGINT, display_name TEXT)
+```
+- `p_id` = the entity ID (record being viewed on the Detail page)
+- `p_depends_on` = JSONB with sibling param values (e.g., `{"p_tool_type_id": 5}`)
+
+**Example: Cascading Tool Type → Tool Instance dropdown:**
+```sql
+-- 1. RPC that filters instances by selected tool type
+CREATE FUNCTION get_tool_instance_options(p_id BIGINT, p_depends_on JSONB DEFAULT '{}')
+RETURNS TABLE(id INT, display_name TEXT)
+LANGUAGE sql STABLE AS $$
+    SELECT ti.id, ti.display_name
+    FROM tool_instances ti
+    JOIN metadata.statuses s ON ti.status_id = s.id
+    WHERE ti.tool_type_id = (p_depends_on->>'p_tool_type_id')::INT
+      AND s.status_key = 'in_service'
+    ORDER BY ti.display_name;
+$$;
+
+-- 2. Configure the param with RPC + dependency
+UPDATE metadata.entity_action_params
+SET options_source_rpc = 'get_tool_instance_options',
+    depends_on_params = ARRAY['p_tool_type_id']
+FROM metadata.entity_actions ea
+WHERE entity_action_params.entity_action_id = ea.id
+  AND ea.table_name = 'my_checkouts'
+  AND ea.action_name = 'add_item'
+  AND entity_action_params.param_name = 'p_tool_instance_id';
+```
+
+**Behavior:**
+- When `options_source_rpc` is set, the frontend calls the RPC instead of querying `join_table`
+- When `depends_on_params` is set, the frontend watches those params' form controls for value changes
+- Dependency changes trigger RPC re-fetch with 300ms debounce
+- When a dependency is cleared (null), the dependent param's options are emptied and its selection is reset
+- When a dependency changes and the current selection is no longer in the new options, it's automatically cleared
+
+**Constraints:**
+- `depends_on_params` requires `options_source_rpc` (can't have cascading without an RPC)
+- `options_source_rpc` is only allowed on `foreign_key` param type
+
+See `examples/neighborhood-hub/init-scripts/24_neh_action_param_filters.sql` for a complete working example with checkout item removal and cascading tool type/instance dropdowns.
+
 ### Recurring Time Slots
 
 **Version**: v0.19.0+

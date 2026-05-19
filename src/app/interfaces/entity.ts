@@ -719,6 +719,12 @@ export interface EntityActionParam {
 
     /** For file type: accepted file category ('image', 'pdf', 'any') */
     file_type?: string;
+
+    /** RPC function returning [{id, display_name}] for filtered FK options (v0.54.0) */
+    options_source_rpc?: string;
+
+    /** Sibling param names whose values trigger RPC re-fetch (v0.54.0) */
+    depends_on_params?: string[];
 }
 
 /**

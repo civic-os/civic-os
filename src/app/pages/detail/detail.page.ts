@@ -18,7 +18,7 @@
 
 import { Component, inject, ChangeDetectionStrategy, signal, computed, effect } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay } from 'rxjs';
+import { Observable, Subscription, map, merge, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, catchError, finalize, switchMap, forkJoin, shareReplay } from 'rxjs';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import {
   SchemaEntityProperty,
@@ -149,6 +149,7 @@ export class DetailPage {
   actionFileUploading = signal(false);
   actionUploadedFile = signal<Record<string, FileReference>>({});
   actionUploadError = signal<string | undefined>(undefined);
+  private paramDependencySubs: Subscription[] = [];
 
   // Data loading state
   dataLoading = signal(true);
@@ -1260,6 +1261,7 @@ export class DetailPage {
       if (hasParams) {
         this.buildActionParamForm(action.parameters);
         this.loadParamOptions(action.parameters);
+        this.setupParamDependencyWatchers(action.parameters);
       }
       this.showActionModal.set(true);
     } else {
@@ -1303,6 +1305,8 @@ export class DetailPage {
     this.actionSuccess.set(undefined);
     this.actionParamForm.set(undefined);
     this.actionParamOptions.set({});
+    this.paramDependencySubs.forEach(s => s.unsubscribe());
+    this.paramDependencySubs = [];
     this.actionFileUploading.set(false);
     this.actionUploadedFile.set({});
     this.actionUploadError.set(undefined);
@@ -1397,6 +1401,9 @@ export class DetailPage {
 
   /**
    * Load dropdown options for status, foreign_key, and user param types.
+   * FK params with options_source_rpc use a custom RPC instead of querying the join_table.
+   * Params with depends_on_params that have all-null dependencies skip initial load
+   * (the dependency watcher will trigger the first load when a value is set).
    */
   loadParamOptions(params: EntityActionParam[]): void {
     const optionsToLoad: Record<string, Observable<any[]>> = {};
@@ -1418,6 +1425,16 @@ export class DetailPage {
           orderField: 'sort_order',
           orderDirection: 'asc'
         });
+      } else if (param.param_type === 'foreign_key' && param.options_source_rpc) {
+        // RPC-driven options: skip initial load if depends_on_params are all null
+        if (param.depends_on_params?.length) {
+          const form = this.actionParamForm();
+          const allDepsNull = param.depends_on_params.every(
+            dep => form?.get(dep)?.value == null
+          );
+          if (allDepsNull) continue; // Watcher will trigger first load
+        }
+        optionsToLoad[param.param_name] = this.loadParamOptionsFromRpc(param);
       } else if (param.param_type === 'foreign_key' && param.join_table && param.join_column) {
         // Always fetch display_name for dropdown labels; join_column for the submitted value
         const fields = [...new Set(['id', 'display_name', param.join_column])];
@@ -1442,12 +1459,99 @@ export class DetailPage {
     // Load all options in parallel
     forkJoin(optionsToLoad).subscribe({
       next: (results) => {
-        this.actionParamOptions.set(results);
+        this.actionParamOptions.set({ ...this.actionParamOptions(), ...results });
       },
       error: (err) => {
         console.error('[DetailPage] Failed to load param options', err);
       }
     });
+  }
+
+  /**
+   * Call an options_source_rpc for a FK action param.
+   * Returns an Observable of the options array [{id, display_name, ...}].
+   */
+  private loadParamOptionsFromRpc(param: EntityActionParam): Observable<any[]> {
+    const dependsOn = this.buildParamDependsOn(param);
+    return this.data.callRpc(param.options_source_rpc!, {
+      p_id: this.entityId ? Number(this.entityId) || this.entityId : null,
+      p_depends_on: dependsOn
+    }).pipe(
+      catchError(err => {
+        console.error(`[DetailPage] options_source_rpc '${param.options_source_rpc}' failed:`, err);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Build the p_depends_on JSONB payload from sibling param form values.
+   */
+  private buildParamDependsOn(param: EntityActionParam): Record<string, any> {
+    if (!param.depends_on_params?.length) return {};
+    const result: Record<string, any> = {};
+    const form = this.actionParamForm();
+    for (const dep of param.depends_on_params) {
+      result[dep] = form?.get(dep)?.value ?? null;
+    }
+    return result;
+  }
+
+  /**
+   * Set up dependency watchers for action params with depends_on_params.
+   * When a dependency param value changes, re-fetches RPC options and
+   * invalidates the current selection if no longer valid.
+   */
+  setupParamDependencyWatchers(params: EntityActionParam[]): void {
+    const form = this.actionParamForm();
+    if (!form) return;
+
+    for (const param of params) {
+      if (!param.depends_on_params?.length || !param.options_source_rpc) continue;
+
+      const controls = param.depends_on_params
+        .map(dep => form.get(dep))
+        .filter((c): c is FormControl => c !== null);
+
+      if (controls.length === 0) continue;
+
+      const sub = merge(...controls.map(c => c.valueChanges)).pipe(
+        debounceTime(300)
+      ).subscribe(() => {
+        // Check if all dependencies are null → clear options and reset value
+        const allNull = param.depends_on_params!.every(
+          dep => form.get(dep)?.value == null
+        );
+
+        if (allNull) {
+          this.actionParamOptions.set({
+            ...this.actionParamOptions(),
+            [param.param_name]: []
+          });
+          form.get(param.param_name)?.setValue(null);
+          return;
+        }
+
+        // Re-fetch from RPC with updated depends_on
+        this.loadParamOptionsFromRpc(param).subscribe(options => {
+          this.actionParamOptions.set({
+            ...this.actionParamOptions(),
+            [param.param_name]: options
+          });
+
+          // Invalidate current selection if no longer in options
+          const currentValue = form.get(param.param_name)?.value;
+          if (currentValue != null) {
+            const validIds = new Set(options.map((o: any) => String(o.id)));
+            if (!validIds.has(String(currentValue))) {
+              form.get(param.param_name)?.setValue(null);
+            }
+          }
+        });
+      });
+
+      this.paramDependencySubs.push(sub);
+    }
   }
 
   /**

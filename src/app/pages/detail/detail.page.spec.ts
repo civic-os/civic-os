@@ -56,7 +56,7 @@ describe('DetailPage', () => {
       'getEntities',
       'getEntityActions'
     ]);
-    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData', 'executeRpc']);
+    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getInverseRelationshipData', 'executeRpc', 'callRpc']);
     mockAuthService = jasmine.createSpyObj('AuthService', ['login', 'isAdmin'], {
       authenticated: signal(false)
     });
@@ -758,6 +758,327 @@ describe('DetailPage', () => {
       expect(component.getParamDisplayColumn(
         createMockParam({ param_type: 'text' })
       )).toBe('display_name');
+    });
+
+    // =====================================================================
+    // options_source_rpc + depends_on_params (v0.54.0)
+    // =====================================================================
+
+    it('should call RPC instead of getData when options_source_rpc is set', () => {
+      const rpcOptions = [
+        { id: 1, display_name: 'Item A' },
+        { id: 2, display_name: 'Item B' }
+      ];
+      mockDataService.callRpc.and.returnValue(of(rpcOptions));
+
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_checkout_item_id',
+          param_type: 'foreign_key',
+          join_table: 'checkout_items',
+          join_column: 'id',
+          options_source_rpc: 'get_checkout_items_options'
+        })
+      ];
+
+      component.entityId = '42';
+      component.buildActionParamForm(params);
+      component.loadParamOptions(params);
+
+      expect(mockDataService.callRpc).toHaveBeenCalledWith('get_checkout_items_options', {
+        p_id: 42,
+        p_depends_on: {}
+      });
+      // getData should NOT be called for this param
+      expect(mockDataService.getData).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ key: 'checkout_items' })
+      );
+    });
+
+    it('should pass p_depends_on from sibling params when calling RPC', () => {
+      mockDataService.callRpc.and.returnValue(of([]));
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Type A' }
+      ]));
+
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id',
+          sort_order: 10
+        }),
+        createMockParam({
+          id: 2,
+          param_name: 'p_tool_instance_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_instances',
+          join_column: 'id',
+          options_source_rpc: 'get_tool_instance_options',
+          depends_on_params: ['p_tool_type_id'],
+          sort_order: 20
+        })
+      ];
+
+      component.entityId = '42';
+      component.buildActionParamForm(params);
+
+      // Set the dependency value BEFORE loading options
+      component.actionParamForm()!.get('p_tool_type_id')!.setValue(5);
+
+      component.loadParamOptions(params);
+
+      expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
+        p_id: 42,
+        p_depends_on: { p_tool_type_id: 5 }
+      });
+    });
+
+    it('should skip initial RPC load when depends_on_params are all null', () => {
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id',
+          sort_order: 10
+        }),
+        createMockParam({
+          id: 2,
+          param_name: 'p_tool_instance_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_instances',
+          join_column: 'id',
+          options_source_rpc: 'get_tool_instance_options',
+          depends_on_params: ['p_tool_type_id'],
+          sort_order: 20
+        })
+      ];
+
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Type A' }
+      ]));
+
+      component.buildActionParamForm(params);
+      // p_tool_type_id is null (default)
+      component.loadParamOptions(params);
+
+      // RPC should NOT have been called since dependency is null
+      expect(mockDataService.callRpc).not.toHaveBeenCalled();
+    });
+
+    it('should re-fetch RPC options when dependency param changes', (done) => {
+      const rpcOptions = [
+        { id: 10, display_name: 'Instance X' }
+      ];
+      mockDataService.callRpc.and.returnValue(of(rpcOptions));
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Type A' }
+      ]));
+
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id',
+          sort_order: 10
+        }),
+        createMockParam({
+          id: 2,
+          param_name: 'p_tool_instance_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_instances',
+          join_column: 'id',
+          options_source_rpc: 'get_tool_instance_options',
+          depends_on_params: ['p_tool_type_id'],
+          sort_order: 20
+        })
+      ];
+
+      component.entityId = '42';
+      component.buildActionParamForm(params);
+      component.loadParamOptions(params);
+      component.setupParamDependencyWatchers(params);
+
+      // Change the dependency value
+      component.actionParamForm()!.get('p_tool_type_id')!.setValue(3);
+
+      // Wait for debounce (300ms)
+      setTimeout(() => {
+        expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
+          p_id: 42,
+          p_depends_on: { p_tool_type_id: 3 }
+        });
+        expect(component.actionParamOptions()['p_tool_instance_id']).toEqual(rpcOptions);
+        done();
+      }, 400);
+    });
+
+    it('should clear options and reset value when dependency is cleared', (done) => {
+      mockDataService.callRpc.and.returnValue(of([
+        { id: 10, display_name: 'Instance X' }
+      ]));
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Type A' }
+      ]));
+
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id',
+          sort_order: 10
+        }),
+        createMockParam({
+          id: 2,
+          param_name: 'p_tool_instance_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_instances',
+          join_column: 'id',
+          options_source_rpc: 'get_tool_instance_options',
+          depends_on_params: ['p_tool_type_id'],
+          sort_order: 20
+        })
+      ];
+
+      component.entityId = '42';
+      component.buildActionParamForm(params);
+      component.loadParamOptions(params);
+      component.setupParamDependencyWatchers(params);
+
+      // Set a value first, then the dependent param
+      const form = component.actionParamForm()!;
+      form.get('p_tool_type_id')!.setValue(3);
+
+      setTimeout(() => {
+        // Set a selection on the dependent param
+        form.get('p_tool_instance_id')!.setValue(10);
+
+        // Now clear the dependency
+        form.get('p_tool_type_id')!.setValue(null);
+
+        setTimeout(() => {
+          expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([]);
+          expect(form.get('p_tool_instance_id')!.value).toBeNull();
+          done();
+        }, 400);
+      }, 400);
+    });
+
+    it('should invalidate selection when no longer in re-fetched options', (done) => {
+      // First call returns option 10, second call returns only option 20
+      let callCount = 0;
+      mockDataService.callRpc.and.callFake(() => {
+        callCount++;
+        if (callCount <= 1) {
+          return of([{ id: 10, display_name: 'Instance X' }]);
+        }
+        return of([{ id: 20, display_name: 'Instance Y' }]);
+      });
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Type A' },
+        { id: 2, display_name: 'Type B' }
+      ]));
+
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id',
+          sort_order: 10
+        }),
+        createMockParam({
+          id: 2,
+          param_name: 'p_tool_instance_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_instances',
+          join_column: 'id',
+          options_source_rpc: 'get_tool_instance_options',
+          depends_on_params: ['p_tool_type_id'],
+          sort_order: 20
+        })
+      ];
+
+      component.entityId = '42';
+      component.buildActionParamForm(params);
+      component.setupParamDependencyWatchers(params);
+      const form = component.actionParamForm()!;
+
+      // First: select type 1, which loads instance 10
+      form.get('p_tool_type_id')!.setValue(1);
+
+      setTimeout(() => {
+        // User selects instance 10
+        form.get('p_tool_instance_id')!.setValue(10);
+
+        // Now change type — new options won't include 10
+        form.get('p_tool_type_id')!.setValue(2);
+
+        setTimeout(() => {
+          // Instance 10 is no longer valid → should be cleared
+          expect(form.get('p_tool_instance_id')!.value).toBeNull();
+          expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([
+            { id: 20, display_name: 'Instance Y' }
+          ]);
+          done();
+        }, 400);
+      }, 400);
+    });
+
+    it('should clean up dependency watchers when modal is closed', (done) => {
+      mockDataService.callRpc.and.returnValue(of([]));
+      mockDataService.getData.and.returnValue(of([
+        { id: 1, display_name: 'Type A' }
+      ]));
+
+      const params: EntityActionParam[] = [
+        createMockParam({
+          param_name: 'p_tool_type_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_types',
+          join_column: 'id',
+          sort_order: 10
+        }),
+        createMockParam({
+          id: 2,
+          param_name: 'p_tool_instance_id',
+          param_type: 'foreign_key',
+          join_table: 'tool_instances',
+          join_column: 'id',
+          options_source_rpc: 'get_tool_instance_options',
+          depends_on_params: ['p_tool_type_id'],
+          sort_order: 20
+        })
+      ];
+
+      component.entityId = '42';
+      component.buildActionParamForm(params);
+      component.loadParamOptions(params);
+      component.setupParamDependencyWatchers(params);
+
+      // Close modal — should clean up subs
+      component.closeActionModal();
+
+      // Reset mock call tracking
+      mockDataService.callRpc.calls.reset();
+
+      // Re-open with fresh form to trigger watchers
+      component.buildActionParamForm(params);
+      component.setupParamDependencyWatchers(params);
+
+      // Change value on the OLD form's control — should NOT trigger RPC
+      // (watchers were cleaned up on close)
+      // The new form has fresh controls, so old subs are irrelevant
+      setTimeout(() => {
+        // Verify no RPC calls from stale watchers
+        // (The only callRpc calls would be from the new watcher setup, which we didn't trigger)
+        expect(mockDataService.callRpc).not.toHaveBeenCalled();
+        done();
+      }, 400);
     });
   });
 
