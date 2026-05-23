@@ -919,11 +919,9 @@ LEFT JOIN payments.transactions t ON r.transaction_id = t.id;
 GRANT SELECT ON public.payment_refunds TO authenticated;
 
 
--- ============================================================================
--- 17. Revert hybrid search: DROP pg_trgm extension
--- ============================================================================
-
-DROP EXTENSION IF EXISTS pg_trgm;
+-- NOTE: pg_trgm extension is NOT dropped here because v0-39-0-add-file-admin
+-- created it first (with idx_files_file_name_trgm). That migration's revert
+-- owns the extension lifecycle.
 
 
 NOTIFY pgrst, 'reload schema';
