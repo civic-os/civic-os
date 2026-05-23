@@ -1066,34 +1066,61 @@ SELECT set_role_permission(get_role_id('moderator'), 'submissions', 'UPDATE', TR
 
 ### Full-Text Search
 
-Enable full-text search on List pages by adding a generated tsvector column and configuring search fields.
+Civic OS supports **hybrid search** combining PostgreSQL Full-Text Search (FTS) with `pg_trgm` substring matching (v0.55.2+). FTS handles multi-word queries with stemming ("running" → "run"), while ILIKE handles autocomplete-style substring matches ("iel" → "Daniel").
 
-**Steps**:
+**Two metadata columns** control search behavior:
 
-1. Add `civic_os_text_search` column (generated, indexed):
-   ```sql
-   ALTER TABLE issues
-     ADD COLUMN civic_os_text_search tsvector
-       GENERATED ALWAYS AS (
-         to_tsvector('english',
-           coalesce(display_name, '') || ' ' ||
-           coalesce(description, '')
-         )
-       ) STORED;
+| Column | Type | Purpose |
+|--------|------|---------|
+| `fulltext_search_column` | NAME | Column name containing tsvector for FTS (e.g., `'civic_os_text_search'`) |
+| `substring_search_column` | NAME | Column name for ILIKE substring search (e.g., `'display_name'`) |
 
-   CREATE INDEX idx_issues_text_search ON issues USING GIN(civic_os_text_search);
-   ```
+Search input appears on the List page when **either** column is set. The `search_fields` TEXT[] array is preserved for documentation (which source columns feed the tsvector) but does not control search behavior.
 
-2. Configure search fields in `metadata.entities`:
-   ```sql
-   UPDATE metadata.entities
-   SET search_fields = ARRAY['display_name', 'description']
-   WHERE table_name = 'issues';
-   ```
+#### Setup Checklist
 
-3. Frontend automatically displays search input on List page when `search_fields` is populated.
+```sql
+-- Step 1: Add tsvector column (existing pattern, unchanged)
+ALTER TABLE my_table ADD COLUMN civic_os_text_search tsvector
+  GENERATED ALWAYS AS (
+    to_tsvector('english', coalesce(display_name, '') || ' ' || coalesce(notes, ''))
+  ) STORED;
+CREATE INDEX idx_my_table_fts ON my_table USING gin (civic_os_text_search);
 
-**Performance**: GIN indexes are highly efficient for full-text search. Expect sub-second queries on tables with millions of rows.
+-- Step 2: Enable full-text search on the entity
+UPDATE metadata.entities
+SET fulltext_search_column = 'civic_os_text_search',
+    search_fields = ARRAY['display_name', 'notes']  -- informational: which columns feed the tsvector
+WHERE table_name = 'my_table';
+
+-- Step 3 (recommended): Enable substring search for autocomplete-style matching
+CREATE INDEX idx_my_table_name_trgm ON my_table USING gin (display_name gin_trgm_ops);
+UPDATE metadata.entities SET substring_search_column = 'display_name' WHERE table_name = 'my_table';
+-- Small tables (<10K rows) work fine without the trgm index — ILIKE still works, just slower.
+```
+
+**Advanced**: Use a generated column for multi-field substring search:
+```sql
+ALTER TABLE my_table ADD COLUMN search_text TEXT
+  GENERATED ALWAYS AS (
+    coalesce(display_name, '') || ' ' || coalesce(description, '')
+  ) STORED;
+CREATE INDEX idx_my_table_search_trgm ON my_table USING gin (search_text gin_trgm_ops);
+UPDATE metadata.entities SET substring_search_column = 'search_text' WHERE table_name = 'my_table';
+```
+
+#### Query Behavior
+
+When both columns are set, the frontend constructs:
+```
+?or=(civic_os_text_search.wfts.query,display_name.ilike.*query*)
+```
+
+When only one is set:
+- `fulltext_search_column` only → `?civic_os_text_search=wfts.query`
+- `substring_search_column` only → `?display_name=ilike.*query*`
+
+**Backward compatibility**: Entities with `search_fields` populated but the new columns NULL continue to work via the legacy `searchQuery` path.
 
 #### Phone Number Search (v0.50.1)
 
@@ -1956,9 +1983,9 @@ Multi-step data collection system for complex intake flows - permit applications
 **Table conventions:**
 ```sql
 -- Parent table (step 0)
+-- NOTE: Do NOT manually add guided_form_status_id — register_guided_form() creates it automatically.
 CREATE TABLE public.permit_applications (
     id                  BIGSERIAL PRIMARY KEY,
-    guided_form_status  public.guided_form_step_status DEFAULT 'draft',
     submitted_at        TIMESTAMPTZ,
     applicant_name      VARCHAR(200),    -- nullable! enforcement via validations
     project_type        INT,             -- category FK driving skip conditions
@@ -1970,7 +1997,6 @@ CREATE TABLE public.permit_applications (
 -- Step 1 table
 CREATE TABLE public.permit_site_info (
     id                  BIGSERIAL PRIMARY KEY,
-    guided_form_status  public.guided_form_step_status DEFAULT 'draft',
     permit_application_id BIGINT NOT NULL REFERENCES permit_applications(id) ON DELETE CASCADE,
     street_address      VARCHAR(255),    -- nullable!
     parcel_number       VARCHAR(50),
@@ -1981,7 +2007,18 @@ CREATE TABLE public.permit_site_info (
 CREATE UNIQUE INDEX ON permit_site_info(permit_application_id);
 ```
 
-**Critical convention**: All content columns must be **nullable**. The framework enforces required fields via `metadata.validations` → auto-generated CHECK constraints, not `NOT NULL`.
+**Critical conventions:**
+- All content columns must be **nullable**. The framework enforces required fields via `metadata.validations` → auto-generated CHECK constraints, not `NOT NULL`.
+- Do NOT manually create `guided_form_status_id` — `register_guided_form()` adds it automatically.
+
+**Dual-Status Pattern (v0.55.2+):** If your entity also needs a business workflow status (e.g., pending → approved → denied), add a **separate** `status_id` column:
+
+```sql
+-- Business workflow status — added by integrator, NOT managed by the GF framework
+ALTER TABLE permit_applications ADD COLUMN status_id INT REFERENCES metadata.statuses(id);
+```
+
+The framework manages `guided_form_status_id` (draft → complete → submitted). Your `on_submit_rpc` sets the business `status_id`. These columns are independent — the framework never touches `status_id`, and your RPCs should never touch `guided_form_status_id`. See `docs/notes/GUIDED_FORM_SYSTEM_DESIGN.md` (Dual-Status Pattern) for details.
 
 **Registration:**
 ```sql

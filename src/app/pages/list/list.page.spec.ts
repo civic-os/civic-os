@@ -190,6 +190,7 @@ describe('ListPage', () => {
           orderField: undefined,
           orderDirection: undefined,
           filters: undefined,
+          rawQueryParams: undefined,
           pagination: { page: 1, pageSize: 25 },
           isSummaryView: false
         });
@@ -218,6 +219,7 @@ describe('ListPage', () => {
           orderField: undefined,
           orderDirection: undefined,
           filters: undefined,
+          rawQueryParams: undefined,
           pagination: { page: 1, pageSize: 25 },
           isSummaryView: false
         });

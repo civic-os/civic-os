@@ -48,6 +48,10 @@ export interface SchemaEntityTable {
     // Rich junction flag (v0.51.0)
     // When true, junction table has extra editable columns beyond FKs
     is_rich_junction?: boolean,
+    // Hybrid search columns (v0.55.2)
+    // Explicit column names that tell the frontend how to search
+    fulltext_search_column?: string | null,    // tsvector column for FTS (wfts operator)
+    substring_search_column?: string | null,   // column for ILIKE substring search (pg_trgm)
 }
 
 export interface ValidationRule {

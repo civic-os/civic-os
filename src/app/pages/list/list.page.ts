@@ -288,10 +288,13 @@ export class ListPage implements OnInit, OnDestroy {
               ? { page: 1, pageSize: 1000 }
               : pagination;
 
-            // Only apply search if entity has search_fields defined
-            const validSearch = (entity && entity.search_fields && entity.search_fields.length > 0)
-              ? search
-              : undefined;
+            // Hybrid search: check new explicit columns first, fall back to search_fields
+            const hasSearchCapability = !!(entity?.fulltext_search_column || entity?.substring_search_column
+              || (entity?.search_fields && entity.search_fields.length > 0));
+            const searchParams = hasSearchCapability && search && entity
+              ? this.buildSearchParams(search, entity)
+              : [];
+            const useHybridSearch = searchParams.length > 0;
 
             // CRITICAL: Emit empty dataset first (synchronous), then fetch real data (async)
             // This prevents stale data flash when entity changes by immediately resetting toSignal()
@@ -300,10 +303,12 @@ export class ListPage implements OnInit, OnDestroy {
               this.data.getDataPaginated({
                 key: p['entityKey'],
                 fields: columns,
-                searchQuery: validSearch || undefined,
-                orderField: orderField,
-                orderDirection: sortState.direction || undefined,
+                // Backward compat: use searchQuery only when new columns aren't set
+                searchQuery: (hasSearchCapability && search && !useHybridSearch) ? search : undefined,
+                orderField: (hasSearchCapability && search) ? undefined : orderField,
+                orderDirection: (hasSearchCapability && search) ? undefined : (sortState.direction || undefined),
                 filters: validFilters && validFilters.length > 0 ? validFilters : undefined,
+                rawQueryParams: useHybridSearch ? searchParams : undefined,
                 pagination: effectivePagination,
                 isSummaryView: !!(entity?.is_view && !entity?.insert)
               }).pipe(
@@ -810,6 +815,29 @@ export class ListPage implements OnInit, OnDestroy {
 
     // For regular columns, use the column name
     return property.column_name;
+  }
+
+  /**
+   * Builds PostgREST query params for hybrid search.
+   * Combines FTS (wfts) and ILIKE (pg_trgm) via or=() when both columns are set.
+   * Returns empty array when entity uses legacy search_fields-only path.
+   */
+  private buildSearchParams(query: string, entity: SchemaEntityTable): string[] {
+    const safe = query.replace(/[(),]/g, '').trim();
+    if (!safe) return [];
+    const encoded = encodeURIComponent(safe);
+    const fts = entity.fulltext_search_column;
+    const sub = entity.substring_search_column;
+
+    if (fts && sub) {
+      return [`or=(${fts}.wfts.${encoded},${sub}.ilike.*${encoded}*)`];
+    } else if (fts) {
+      return [`${fts}=wfts.${encoded}`];
+    } else if (sub) {
+      return [`${sub}=ilike.*${encoded}*`];
+    }
+    // No new columns set — fall back to legacy searchQuery path
+    return [];
   }
 
   /**

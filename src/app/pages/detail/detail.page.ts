@@ -1158,6 +1158,9 @@ export class DetailPage {
         // route, which would leave the page in a stale state with no refresh.
         const navigateTo = result?.navigate_to;
         if (navigateTo && navigateTo !== this.router.url) {
+          this.guidedFormContext.set(null);
+          this.isGuidedFormMode.set(false);
+          this.showGuidedFormNav.set(false);
           this.showReviewSection.set(false);
           this.router.navigateByUrl(navigateTo);
         } else {
@@ -1362,6 +1365,11 @@ export class DetailPage {
             this.closeActionModal();
 
             if (navigateTo) {
+              // Clear guided form state before navigation to prevent stale header
+              this.guidedFormContext.set(null);
+              this.isGuidedFormMode.set(false);
+              this.showGuidedFormNav.set(false);
+              this.showReviewSection.set(false);
               this.router.navigate([navigateTo]);
             } else if (shouldRefresh) {
               this.refreshData();

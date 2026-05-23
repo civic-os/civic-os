@@ -13,7 +13,7 @@
   <div class="sticky-controls-wrapper">
     <!-- Search bar, Filter button, and Add button -->
     <div class="flex gap-2 items-start mb-2">
-        @if (entity.search_fields && entity.search_fields.length > 0) {
+        @if (entity.fulltext_search_column || entity.substring_search_column || (entity.search_fields && entity.search_fields.length > 0)) {
           <div class="form-control flex-1">
             <label class="input input-bordered flex items-center gap-2">
               <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">search</span>

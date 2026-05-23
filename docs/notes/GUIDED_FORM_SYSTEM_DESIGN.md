@@ -83,33 +83,33 @@ conditions, and what happens when the guided form is finally submitted.
 ### Progress tracking (hybrid)
 
 > **Implementation note**: The `guided_form_step_status` domain described below was replaced
-> during implementation with a unified `status_id INTEGER` FK to `metadata.statuses`. The
-> actual implementation uses `is_guided_form_draft(status_id)` helper in CHECK constraints
-> instead of the domain-based approach. The dual-column design was simplified to a single
-> `status_id` column per table.
+> during implementation with a `guided_form_status_id INTEGER` FK to `metadata.statuses`. The
+> actual implementation uses `is_guided_form_draft(guided_form_status_id)` helper in CHECK
+> constraints instead of the domain-based approach. (Prior to v0.55.2, this column was named
+> `status_id` — see [Dual-Status Pattern](#dual-status-pattern) for why it was renamed.)
 
 Two complementary mechanisms:
 
-1. ~~**`guided_form_step_status` domain column**~~ **`status_id` FK column** on every participating
-   table (parent + step tables). References `metadata.statuses` with `entity_type = 'guided_form'`.
-   CHECK constraints use `is_guided_form_draft(status_id)` helper function.
+1. ~~**`guided_form_step_status` domain column**~~ **`guided_form_status_id` FK column** on every
+   participating table (parent + step tables). References `metadata.statuses` with
+   `entity_type = 'guided_form'`. CHECK constraints use `is_guided_form_draft(guided_form_status_id)`.
 
 2. **`metadata.guided_form_progress` table** — denormalized completion log written atomically
    alongside the step status UPDATE. Enables O(1) resume queries without querying N step tables.
 
 ### Status tracking
 
-The parent table uses a single `status_id` column (FK to `metadata.statuses`) for both
-framework state and user-facing display:
+The parent table uses `guided_form_status_id` (FK to `metadata.statuses`) for framework
+lifecycle tracking. This column is hidden from user-facing views (`show_on_list = false`, etc.)
+since integrators typically expose a separate business `status_id` instead.
 
-- **`status_id`** (FK to `metadata.statuses`) — user-facing Civic OS Status. Renders as
-  colored badges on list/detail pages, supports FilterBar filtering and column sorting.
+- **`guided_form_status_id`** (FK to `metadata.statuses`) — framework-managed lifecycle column.
   Uses the shared `'guided_form'` entity type with three values: Draft (`#f59e0b`),
-  Complete (`#22c55e`), Submitted (`#3b82f6`). Also drives conditional CHECK constraints
-  via `is_guided_form_draft(status_id)` helper function.
+  Complete (`#22c55e`), Submitted (`#3b82f6`). Drives conditional CHECK constraints
+  via `is_guided_form_draft(guided_form_status_id)` helper function.
 
 Sync points:
-- `register_guided_form()` adds `status_id` column with `DEFAULT get_initial_status('guided_form')`
+- `register_guided_form()` adds `guided_form_status_id` column with `DEFAULT get_initial_status('guided_form')`
 - `complete_guided_form_step()` sets status to `'complete'` when all steps are done, or
   back to `'draft'` when they aren't
 - `submit_guided_form()` sets status to `'submitted'` atomically with `submitted_at`
@@ -194,19 +194,19 @@ Three distinct concepts track guided form state at different granularities:
 | Concept | Where tracked | Lifecycle |
 |---------|---------------|-----------|
 | Step completion | `guided_form_progress` row | Row exists = step done |
-| Step data status | `status_id` on step 1-N tables | `draft → complete` |
-| Form lifecycle | `status_id` on parent row | `draft → complete → submitted` (forward-only) |
+| Step data status | `guided_form_status_id` on step 1-N tables | `draft → complete` |
+| Form lifecycle | `guided_form_status_id` on parent row | `draft → complete → submitted` (forward-only) |
 
-### Key principle: parent `status_id` only advances forward
+### Key principle: parent `guided_form_status_id` only advances forward
 
-The parent row's `status_id` is the **form lifecycle status**, not step zero's data status.
+The parent row's `guided_form_status_id` is the **form lifecycle status**, not step zero's data status.
 Step zero's completion is recorded in `guided_form_progress`, the same as every other step.
 
-- `complete_guided_form_step()` does NOT update the parent's `status_id` when completing step
+- `complete_guided_form_step()` does NOT update the parent's `guided_form_status_id` when completing step
   zero. It only writes a `guided_form_progress` entry.
-- Steps 1-N DO get a step-level `status_id = 'complete'` update on their own table (which is
+- Steps 1-N DO get a step-level `guided_form_status_id = 'complete'` update on their own table (which is
   a different table from the parent).
-- The parent's `status_id` advances to `complete` only when `_check_guided_form_complete()`
+- The parent's `guided_form_status_id` advances to `complete` only when `_check_guided_form_complete()`
   returns TRUE (all required steps done). It never reverts from `complete` back to `draft`.
 - The `enforce_guided_form_lock` trigger enforces this: `complete → draft` is blocked;
   `complete → submitted` is allowed (for `submit_guided_form` / auto-submit).
@@ -216,8 +216,8 @@ Step zero's completion is recorded in `guided_form_progress`, the same as every 
 For steps 1-N, the "step data status" and "form lifecycle status" live on different tables, so
 both writes in `complete_guided_form_step` target different rows (no conflict). For step zero,
 the step table IS the parent table — writing both would cause two conflicting updates to the
-same row's `status_id` in one transaction (first to `complete`, then back to `draft`), which
-the lock trigger rightfully blocks.
+same row's `guided_form_status_id` in one transaction (first to `complete`, then back to `draft`),
+which the lock trigger rightfully blocks.
 
 ### Draft-first edit flow (steps 1-N)
 
@@ -234,7 +234,7 @@ editing happens on the Edit page where the full guided form experience is availa
 2. RPC looks up the step table and FK column from `guided_form_steps`
 3. If a record with that FK already exists → returns `{record_id, created: false}`
 4. Otherwise → `INSERT INTO {step_table} ({fk_col}) VALUES (parent_id)` → returns `{record_id, created: true}`
-5. `status_id` auto-populates via DEFAULT (`get_initial_status('guided_form')` = draft)
+5. `guided_form_status_id` auto-populates via DEFAULT (`get_initial_status('guided_form')` = draft)
 6. `display_name` auto-populates via BEFORE INSERT trigger (if configured on the step table)
 7. Frontend navigates to `/edit/{step_table}/{record_id}`
 
@@ -247,13 +247,43 @@ completion, and navigation uses this resolved parent ID.
 
 ## Database Schema
 
-### Status tracking via `status_id` FK
+### Status tracking via `guided_form_status_id` FK
 
-> **Implementation divergence**: The original design proposed a `guided_form_step_status` custom
-> domain. The actual implementation uses `status_id INTEGER REFERENCES metadata.statuses(id)`
-> instead, leveraging the existing Civic OS Status system for colored badges, filtering, and
-> lifecycle tracking. The `is_guided_form_draft(status_id)` helper function is used in CHECK
-> constraints where the domain was originally planned.
+> **Implementation history**: The original design proposed a `guided_form_step_status` custom
+> domain. v0.48.0 implemented it as `status_id INTEGER REFERENCES metadata.statuses(id)`,
+> leveraging the existing Civic OS Status system. v0.55.2 renamed the column to
+> `guided_form_status_id` to eliminate confusion with business workflow `status_id` columns
+> (see [Dual-Status Pattern](#dual-status-pattern) below).
+
+### Dual-Status Pattern
+
+**Problem (v0.48.0–v0.55.2):** The framework auto-created a `status_id` column on parent tables
+for GF lifecycle tracking (draft → complete → submitted). When integrators also needed a
+`status_id` for business workflow (pending → approved → denied), the name collision caused bugs:
+script 28 accidentally wrote to the GF column instead of the business column.
+
+**Solution (v0.55.2):** Rename the framework column to `guided_form_status_id`. This makes its
+purpose self-documenting and frees `status_id` for natural business use.
+
+**After v0.55.2, parent tables may have two status columns:**
+
+| Column | Owner | Lifecycle | Example values |
+|--------|-------|-----------|----------------|
+| `guided_form_status_id` | Framework | draft → complete → submitted | Always present on GF parents |
+| `status_id` (or `workflow_status_id`) | Integrator | pending → approved → denied | Optional, added by integrator |
+
+**The `on_submit_rpc` bridges the two:** `submit_guided_form()` ALWAYS sets
+`guided_form_status_id = 'submitted'`. The integrator's `on_submit_rpc` sets the business
+status (e.g., `status_id = 'pending'`). These are independent — the framework never touches
+the business column, and the integrator never touches the framework column.
+
+**Self-healing `register_guided_form()`:** The function detects the table's current state:
+1. `guided_form_status_id` already exists → no action (correct state)
+2. `status_id` exists (legacy or init script) → renames to `guided_form_status_id`
+3. Neither exists → adds `guided_form_status_id` column fresh
+
+This handles both upgrade (existing tables with old column) and fresh install (init scripts
+that still create `status_id` before the migration rename loop runs).
 
 ### `metadata.guided_forms`
 
