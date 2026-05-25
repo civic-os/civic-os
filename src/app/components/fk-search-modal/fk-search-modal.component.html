@@ -192,7 +192,7 @@
           </div>
 
           <!-- Right panel: selected chips -->
-          <div class="border-l border-base-300 pl-4 pr-2 flex flex-col min-h-0">
+          <div class="max-h-32 md:max-h-none border-t md:border-t-0 md:border-l border-base-300 pt-3 md:pt-0 md:pl-4 pr-2 flex flex-col min-h-0">
             <h4 class="font-semibold text-sm mb-3 shrink-0">Selected ({{ workingSelection().size }})</h4>
             <div class="flex-1 min-h-0 overflow-y-auto space-y-1">
               @for (chip of selectedChips(); track chip.id) {

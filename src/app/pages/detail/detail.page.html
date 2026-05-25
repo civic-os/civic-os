@@ -173,6 +173,7 @@
                     [property]="prop"
                     [currentValues]="data[prop.column_name] || []"
                     [refreshTrigger]="refreshCounter()"
+                    [readOnly]="!!guidedFormContext()"
                     (relationChanged)="refreshData()">
                   </app-many-to-many-editor>
                   @if (!$last) {

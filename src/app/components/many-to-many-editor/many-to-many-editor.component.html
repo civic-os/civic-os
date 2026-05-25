@@ -29,7 +29,7 @@
     </div>
 
     <!-- Edit button (only if has permission) -->
-    @if (canEdit()) {
+    @if (canEdit() && !readOnly()) {
       @if (useFkSearchModal()) {
         <!-- v0.46.0: Search modal mode -->
         <button
@@ -62,7 +62,7 @@
           Edit {{ property().display_name }}
         </button>
       }
-    } @else {
+    } @else if (!readOnly()) {
       <div class="text-sm text-base-content/60 italic">
         You don't have permission to edit {{ property().display_name }}
       </div>

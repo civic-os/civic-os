@@ -40,6 +40,7 @@ export class ManyToManyEditorComponent {
   property = input.required<SchemaEntityProperty>();
   currentValues = input.required<any[]>(); // Array of related entities with {id, display_name, color?}
   refreshTrigger = input<number>(0);  // Increment to force refresh from parent
+  readOnly = input(false);
 
   // State
   isEditing = signal(false);
