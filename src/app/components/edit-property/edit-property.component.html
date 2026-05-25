@@ -64,6 +64,7 @@
         [title]="'Select ' + prop().display_name"
         [rpcOptions]="useRpcOptions() ? rpcSelectOptions() : null"
         [serverFilter]="computedFilter()"
+        [storageKey]="'fk_modal:' + prop().table_name + '.' + prop().column_name"
         (confirmed)="onFkSearchConfirm($event)"
         (closed)="showFkSearchModal.set(false)"
       />

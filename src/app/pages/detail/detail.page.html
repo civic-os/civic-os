@@ -86,7 +86,7 @@
             [parentRecord]="data"
             [entityDisplayName]="entity.display_name"
             [submitting]="guidedFormSubmitting()"
-            [readOnly]="isGuidedFormSubmitted() && guidedFormContext()?.definition?.lock_on_submit === true"
+            [readOnly]="isGuidedFormSubmitted() && guidedFormContext()?.definition?.lock_on_submit === true && !entity.update"
             [submitted]="isGuidedFormSubmitted()"
             (submit)="onSubmitGuidedForm()"
             (editStep)="onEditGuidedFormStep($event)">

@@ -679,6 +679,262 @@ describe('FkSearchModalComponent', () => {
     });
   });
 
+  describe('localStorage Persistence', () => {
+    const storageKey = 'fk_modal:tool_reservations.tool_type_id';
+
+    afterEach(() => {
+      localStorage.removeItem(storageKey);
+    });
+
+    function setupWithStorageKey() {
+      fixture.componentRef.setInput('joinTable', 'borrowers');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('storageKey', storageKey);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+    }
+
+    it('should restore pageSize and sort from localStorage on open', async () => {
+      localStorage.setItem(storageKey, JSON.stringify({
+        pageSize: 50,
+        orderField: 'display_name',
+        orderDirection: 'desc',
+        filters: []
+      }));
+
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      expect(component.pageSize()).toBe(50);
+      expect(component.orderField()).toBe('display_name');
+      expect(component.orderDirection()).toBe('desc');
+    });
+
+    it('should restore filters from localStorage on open', async () => {
+      mockSchemaService.getPropsForFilter.and.returnValue(of(mockFilterProps));
+
+      localStorage.setItem(storageKey, JSON.stringify({
+        pageSize: 10,
+        orderField: 'id',
+        orderDirection: 'asc',
+        filters: [{ column: 'status_id', operator: 'eq', value: '1' }]
+      }));
+
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      expect(component.filters().length).toBe(1);
+      expect(component.filters()[0].column).toBe('status_id');
+    });
+
+    it('should save state on pageSize change', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.onPageSizeChange(25);
+
+      const stored = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(stored.pageSize).toBe(25);
+    });
+
+    it('should save state on sort change', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.onSort('display_name');
+
+      const stored = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(stored.orderField).toBe('display_name');
+      expect(stored.orderDirection).toBe('asc');
+    });
+
+    it('should save state on filter change', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.onFiltersChange([{ column: 'status_id', operator: 'eq', value: '2' }]);
+
+      const stored = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(stored.filters.length).toBe(1);
+      expect(stored.filters[0].column).toBe('status_id');
+    });
+
+    it('should not persist when storageKey is empty (backward compat)', async () => {
+      fixture.componentRef.setInput('joinTable', 'borrowers');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('storageKey', '');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.onPageSizeChange(50);
+
+      // No key should be written to localStorage
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('fk_modal:'));
+      expect(keys.length).toBe(0);
+    });
+
+    it('should use defaults when no stored state exists', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      expect(component.pageSize()).toBe(10);
+      expect(component.orderField()).toBe('id');
+      expect(component.orderDirection()).toBe('asc');
+      expect(component.filters().length).toBe(0);
+    });
+
+    it('should strip stale filters referencing removed columns', async () => {
+      // Store filters referencing a column that won't be in filterProperties
+      localStorage.setItem(storageKey, JSON.stringify({
+        pageSize: 10,
+        orderField: 'id',
+        orderDirection: 'asc',
+        filters: [
+          { column: 'status_id', operator: 'eq', value: '1' },
+          { column: 'nonexistent_col', operator: 'eq', value: 'foo' }
+        ]
+      }));
+
+      // Only status_id is a valid filter column
+      mockSchemaService.getPropsForFilter.and.returnValue(of(mockFilterProps));
+
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Stale filter should be stripped, valid one kept
+      expect(component.filters().length).toBe(1);
+      expect(component.filters()[0].column).toBe('status_id');
+
+      // Cleaned state should be re-persisted
+      const stored = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(stored.filters.length).toBe(1);
+    });
+
+    it('should handle pageSize saved as string (from <select> ngModel)', async () => {
+      // Angular <select> with [value] emits strings, not numbers.
+      // Simulate a stored state where pageSize was saved as a string.
+      localStorage.setItem(storageKey, JSON.stringify({
+        pageSize: '50',  // string, not number
+        orderField: 'display_name',
+        orderDirection: 'asc',
+        filters: []
+      }));
+
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Should coerce string "50" to number 50
+      expect(component.pageSize()).toBe(50);
+      expect(component.orderField()).toBe('display_name');
+    });
+
+    it('should save pageSize as number even when signal holds a string', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Simulate what PaginationComponent does: emit string from <select>
+      component.onPageSizeChange('25' as any);
+
+      const stored = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(typeof stored.pageSize).toBe('number');
+      expect(stored.pageSize).toBe(25);
+    });
+
+    it('should handle corrupted localStorage gracefully (invalid JSON)', async () => {
+      localStorage.setItem(storageKey, 'not valid json!!!');
+
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Should fall back to defaults, no error thrown
+      expect(component.pageSize()).toBe(10);
+      expect(component.orderField()).toBe('id');
+      expect(component.orderDirection()).toBe('asc');
+    });
+
+    it('should handle corrupted localStorage gracefully (wrong shape)', async () => {
+      localStorage.setItem(storageKey, JSON.stringify({ pageSize: 'not a number' }));
+
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Should fall back to defaults
+      expect(component.pageSize()).toBe(10);
+    });
+
+    it('should restore sort state on close and reopen without navigation', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Change sort manually
+      component.onSort('email');
+
+      // Close and re-open
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Should restore from localStorage (which was persisted with email/asc)
+      const stored = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(stored.orderField).toBe('email');
+      expect(component.orderField()).toBe('email');
+    });
+
+    it('should restore pageSize on close and reopen without navigation', async () => {
+      setupWithStorageKey();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Change page size
+      component.onPageSizeChange(50);
+      expect(component.pageSize()).toBe(50);
+
+      // Verify it was saved to localStorage
+      const savedState = JSON.parse(localStorage.getItem(storageKey)!);
+      expect(savedState.pageSize).toBe(50);
+
+      // Close modal
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+
+      // Reopen modal (same component, no navigation)
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      // Page size should be restored from localStorage
+      expect(component.pageSize()).toBe(50);
+    });
+  });
+
   describe('System Type Config (v0.49.1)', () => {
     it('should use system type config for civic_os_users when entity not in schema_entities', async () => {
       // civic_os_users is not registered in schema_entities, but has a system type config

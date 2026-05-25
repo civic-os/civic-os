@@ -42,7 +42,7 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 ### Property Type System
 
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
-- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` for custom RPC-driven option lists and `depends_on_columns` for cascading dropdowns (v0.44.0). Optionally renders as searchable modal via `fk_search_modal` (v0.45.0) for large option sets with search, sort, filter, and pagination. Supports `options_filter_column` (v0.53.0) for server-side computed column filtering that scales to any dataset size — replaces RPC ID pre-fetch for row-level filters. See `docs/INTEGRATOR_GUIDE.md` (Options Source RPC and FK Search Modal sections) and `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` (Computed Column Filters section).
+- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` for custom RPC-driven option lists and `depends_on_columns` for cascading dropdowns (v0.44.0). Optionally renders as searchable modal via `fk_search_modal` (v0.45.0) for large option sets with search, sort, filter, and pagination. **Modal state persistence** (v0.56.0): page size, sort, and filters persist per-entity-per-property in localStorage (`fk_modal:{entity}.{column}` key format). Supports `options_filter_column` (v0.53.0) for server-side computed column filtering that scales to any dataset size — replaces RPC ID pre-fetch for row-level filters. See `docs/INTEGRATOR_GUIDE.md` (Options Source RPC and FK Search Modal sections) and `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md` (Computed Column Filters section).
 - `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. Renders as FK search modal (v0.49.1) for scaling beyond small teams, with ILIKE substring search for partial phone/email matching. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
 - `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
@@ -289,6 +289,13 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 **Troubleshooting RBAC**: See `docs/TROUBLESHOOTING.md` for debugging JWT roles and permissions issues.
 
 ## Common Patterns
+
+### Instance Design Checklists
+
+Two checklists for reviewing new instance designs, derived from NEH post-design corrections. Use `/design-review` skill to scan a design doc against both checklists automatically.
+
+- `docs/INSTANCE_DESIGN_UX_CHECKLIST.md` — Interface/flow concerns (workflows, field visibility, dropdowns, entity groups)
+- `docs/INSTANCE_DESIGN_SCHEMA_CHECKLIST.md` — Schema/SQL concerns (entity architecture, column design, triggers, scaling, permissions)
 
 ### Adding a New Entity to the UI
 1. Create table in PostgreSQL `public` schema

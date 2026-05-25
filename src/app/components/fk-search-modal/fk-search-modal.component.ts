@@ -43,6 +43,14 @@ import { SchemaEntityProperty, EntityData, EntityPropertyType } from '../../inte
 import { FilterCriteria } from '../../interfaces/query';
 import { SYSTEM_TYPE_MODAL_CONFIGS } from '../../constants/system-types';
 
+/** Shape of persisted FK search modal preferences in localStorage. */
+interface FkModalStoredState {
+  pageSize: number;
+  orderField: string;
+  orderDirection: 'asc' | 'desc';
+  filters: FilterCriteria[];
+}
+
 /**
  * Extended diff output for rich junction M:M (v0.51.0).
  * Includes extra column data for added and updated junction rows.
@@ -96,6 +104,10 @@ export class FkSearchModalComponent implements OnDestroy {
   // Inputs — rich junction (v0.51.0)
   extraColumns = input<SchemaEntityProperty[]>([]);
   currentJunctionData = input<Map<number | string, Record<string, unknown>>>(new Map());
+
+  // Input — localStorage persistence key (v0.56.0)
+  // Format: 'fk_modal:{sourceEntity}.{columnName}' — empty string disables persistence
+  storageKey = input<string>('');
 
   // Outputs — single-select (FK)
   confirmed = output<{id: number | string, displayName: string} | null>();
@@ -237,11 +249,23 @@ export class FkSearchModalComponent implements OnDestroy {
       if (this.lastOpenTable === table) return;
       this.lastOpenTable = table;
 
-      // Reset state on open
+      // Reset ALL state to defaults, then overlay stored preferences
       this.searchQuery.set('');
       this.currentPage.set(1);
+      this.pageSize.set(10);
+      this.orderField.set('id');
+      this.orderDirection.set('asc');
       this.filters.set([]);
       this.pendingSelection.set(null);
+
+      // Overlay stored preferences if available
+      const stored = this.loadStoredState();
+      if (stored) {
+        this.pageSize.set(stored.pageSize);
+        this.orderField.set(stored.orderField);
+        this.orderDirection.set(stored.orderDirection);
+        this.filters.set(stored.filters);
+      }
 
       // Multi-select: initialize workingSelection and chipCache from inputs
       if (this.multiSelect()) {
@@ -326,6 +350,10 @@ export class FkSearchModalComponent implements OnDestroy {
     ).subscribe(({ listProps, filterProps }) => {
       this.listProperties.set(listProps);
       this.filterProperties.set(filterProps);
+
+      // Validate stored filters against available filter columns
+      this.validateAndCleanStoredFilters(filterProps);
+
       this.reload$.next();
     });
   }
@@ -461,6 +489,7 @@ export class FkSearchModalComponent implements OnDestroy {
       this.orderDirection.set('asc');
     }
     this.currentPage.set(1);
+    this.saveState();
     this.reload$.next();
   }
 
@@ -472,12 +501,14 @@ export class FkSearchModalComponent implements OnDestroy {
   onPageSizeChange(size: number) {
     this.pageSize.set(size);
     this.currentPage.set(1);
+    this.saveState();
     this.reload$.next();
   }
 
   onFiltersChange(filters: FilterCriteria[]) {
     this.filters.set(filters);
     this.currentPage.set(1);
+    this.saveState();
     this.reload$.next();
   }
 
@@ -697,5 +728,80 @@ export class FkSearchModalComponent implements OnDestroy {
       toUpdate,
       addedItems
     });
+  }
+
+  // --- localStorage persistence (v0.56.0) ---
+
+  /** Read and validate stored state from localStorage. Returns null on any error. */
+  private loadStoredState(): FkModalStoredState | null {
+    const key = this.storageKey();
+    if (!key || typeof window === 'undefined') return null;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+
+      // Coerce pageSize to number — Angular <select> emits strings via [value]
+      const pageSize = Number(parsed.pageSize);
+
+      // Validate shape
+      if (
+        typeof parsed !== 'object' || parsed === null ||
+        isNaN(pageSize) || pageSize <= 0 ||
+        typeof parsed.orderField !== 'string' ||
+        (parsed.orderDirection !== 'asc' && parsed.orderDirection !== 'desc') ||
+        !Array.isArray(parsed.filters)
+      ) {
+        return null;
+      }
+
+      // Validate each filter has required fields
+      const validFilters = parsed.filters.filter(
+        (f: any) => typeof f?.column === 'string' && typeof f?.operator === 'string'
+      );
+
+      return {
+        pageSize,
+        orderField: parsed.orderField,
+        orderDirection: parsed.orderDirection,
+        filters: validFilters
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /** Persist current pageSize, sort, and filters to localStorage. No-op when storageKey is empty. */
+  private saveState(): void {
+    const key = this.storageKey();
+    if (!key || typeof window === 'undefined') return;
+
+    try {
+      const state: FkModalStoredState = {
+        pageSize: Number(this.pageSize()),  // Coerce: <select> may emit strings
+        orderField: this.orderField(),
+        orderDirection: this.orderDirection(),
+        filters: this.filters()
+      };
+      localStorage.setItem(key, JSON.stringify(state));
+    } catch {
+      // localStorage full or unavailable — silent no-op
+    }
+  }
+
+  /** Strip stored filters referencing columns not in available filterProperties, and re-persist. */
+  private validateAndCleanStoredFilters(filterProps: SchemaEntityProperty[]): void {
+    const currentFilters = this.filters();
+    if (currentFilters.length === 0) return;
+
+    const validColumns = new Set(filterProps.map(p => p.column_name));
+    const cleaned = currentFilters.filter(f => validColumns.has(f.column));
+
+    if (cleaned.length !== currentFilters.length) {
+      this.filters.set(cleaned);
+      this.saveState();
+    }
   }
 }

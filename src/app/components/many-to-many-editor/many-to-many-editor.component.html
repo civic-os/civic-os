@@ -49,6 +49,7 @@
           [title]="'Select ' + property().display_name"
           [extraColumns]="extraColumns()"
           [currentJunctionData]="currentJunctionDataMap()"
+          [storageKey]="'fk_modal:' + property().table_name + '.' + property().column_name"
           (applied)="onSearchModalApply($event)"
           (richApplied)="onRichSearchModalApply($event)"
           (closed)="showSearchModal.set(false)"
