@@ -933,9 +933,11 @@ export class EditPage implements OnDestroy {
   private saveAndContinueRetries = 0;
 
   // v0.48.0: Lock condition fields when parent step is beyond draft
+  // Users with RBAC update permission bypass field locks (matches backend trigger)
   private lockFieldsEffect = effect(() => {
     const ctx = this.guidedFormContext();
     if (!ctx || ctx.parent_status_key === 'draft' || !this.editForm) return;
+    if (this.currentEntity?.update) return;
 
     if (ctx.steps.length === 0) return;
 
@@ -952,9 +954,11 @@ export class EditPage implements OnDestroy {
   public isEditingCompletedStep = signal(false);
 
   // True when the guided form is submitted AND lock_on_submit is enabled
+  // BUT users with RBAC update permission bypass the lock (matches backend behavior)
   public isGuidedFormLocked = computed(() => {
     const ctx = this.guidedFormContext();
     if (!ctx) return false;
+    if (this.currentEntity?.update) return false;
     return ctx.definition.lock_on_submit === true && ctx.parent_status_key === 'submitted';
   });
 
