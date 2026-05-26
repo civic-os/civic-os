@@ -55,6 +55,16 @@ Derived from post-design corrections to the Neighborhood Engagement Hub (NEH) in
 - [ ] Does every table have appropriate RLS policies (SELECT/INSERT/UPDATE/DELETE)? — *Why: RLS with no policies = no access for non-superusers. At minimum, need a SELECT policy.*
 - [ ] For multi-tenant or ownership-scoped data: does the policy use `current_user_id()` or `has_permission()`? — *Why: These helpers extract identity from the JWT. Raw `current_user` gives you the PostgREST role name, not the application user.*
 
+### Owner-Based Permissions (User Story → RLS Implementation)
+
+**Preferred pattern:** Attach behavior to PERMISSIONS, not roles. Use `has_permission('entity', 'read')` in policies so access is controlled by the permission matrix. Role checks (`get_user_roles()`) are allowed but not recommended — they couple SQL to specific role names, meaning access can't be reconfigured via the Permissions admin page without schema changes.
+
+- [ ] For entities where normal users own their records: does the RLS SELECT policy filter by ownership column? (e.g., `user_id = current_user_id()` or `borrower_id IN (SELECT id FROM borrowers WHERE user_id = current_user_id())`) — *Why: Without owner filtering, all authenticated users see all records. User stories like "I can view my reservations" require explicit ownership-scoped policies.*
+- [ ] For child entities with indirect ownership: does the RLS policy JOIN through the parent chain? — *Why: checkout_items has no user_id, but ownership flows through checkout → reservation → borrower → user_id. The policy needs a subquery or JOIN to establish the chain.*
+- [ ] Does the staff bypass use `has_permission('entity', 'read')` (not role checks like `is_admin()`)? — *Why: Permission checks are decoupled from roles. If you hardcode `is_admin()`, you can't grant access to a new "coordinator" role without modifying the policy SQL. Permission checks resolve through the metadata.permission_roles matrix.*
+- [ ] For INSERT policies: does the policy enforce that users can only create records owned by themselves? — *Why: Without INSERT restriction, a user could create records attributed to other users. Use `WITH CHECK (user_id = current_user_id() OR has_permission('entity', 'create'))`.*
+- [ ] For UPDATE/DELETE policies: does the ownership check include a permission-based bypass for staff? — *Why: Pattern: `(user_id = current_user_id()) OR has_permission('entity', 'update')`. Borrowers edit their own drafts; anyone with the update permission can modify any record.*
+
 ### RBAC Metadata
 - [ ] For each entity: are `metadata.permissions` entries created (read, create, update, delete)? — *Why: Without permission entries, `has_permission()` checks always return false. Sidebar visibility and data rendering rely on these.*
 - [ ] For each permission: are `metadata.permission_roles` mappings created for all relevant roles? — *Why: Permissions exist but aren't granted to any role = invisible entity. Map to at minimum the roles that correspond to your GRANTs.*

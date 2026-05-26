@@ -57,9 +57,19 @@ Derived from post-design corrections to the Neighborhood Engagement Hub (NEH) in
 
 ## Permissions & Role Visibility
 
-- [ ] For each entity: which roles can see it? (Drives GRANT + RLS + `metadata.permission_roles` decisions downstream) — *Why: If you don't specify access per role during UX design, the schema generates with either over-permissive or under-permissive defaults.*
-- [ ] For each Entity Action button: which roles can trigger it? — *Why: "Approve" should only be visible to staff/admin. Without specifying this in UX design, `entity_action_roles` gets omitted from schema generation.*
-- [ ] For custom roles (beyond standard user/editor/manager/admin): what can each role do? — *Why: NEH defined neh_staff and neh_admin but didn't map their permissions until Entity Notes and action buttons were invisible.*
+- [ ] For each entity: what CRUD permissions exist and who gets them? (Think in terms of permissions, not roles — roles are just groups of permissions.) — *Why: If you don't specify the permission matrix during UX design, the schema generates with either over-permissive or under-permissive defaults.*
+- [ ] For each Entity Action button: what permission gates it? — *Why: "Approve" needs a permission entry. The Permissions admin page then maps that to roles. Without the permission defined, `entity_action_roles` gets omitted.*
+- [ ] For custom roles: what permissions does each role bundle? — *Why: NEH defined neh_staff and neh_admin but didn't map their permissions until Entity Notes and action buttons were invisible. Define the permission matrix, then assign permissions to roles.*
+
+### Ownership & Access Scope (User Story → RLS Mapping)
+
+- [ ] For each user story "As a [role], I can [verb] [entity]": what's the access scope? — *Why: "I can view my reservations" vs "I can view all reservations" requires fundamentally different RLS policies. Specify per-role scope explicitly.*
+  - **Own records only**: User can only see/edit records they created or are assigned to (e.g., borrower sees only their reservations)
+  - **Parent-chain ownership**: User can see/edit child records attached to their parent (e.g., borrower sees checkout items on their checkout)
+  - **All records**: Staff/admin sees everything (typically guarded by role check, not ownership)
+- [ ] For each entity: what column establishes ownership? (e.g., `user_id`, `borrower_id`, `created_by`) — *Why: This drives the RLS policy WHERE clause. If ownership isn't decided during UX design, schemas default to "all authenticated users see everything."*
+- [ ] For child entities: does ownership inherit from the parent? — *Why: A borrower should see their checkout items, but checkout_items has no direct user_id — ownership flows through tool_reservation_checkouts → tool_reservations → borrowers → user_id. The RLS policy must JOIN through the parent chain.*
+- [ ] For entities with both self-service and staff workflows: does the owner only have `create` + `read` permission, while the staff permission bundle includes `update`? — *Why: Without this distinction, borrowers could edit their own reservation status directly via the Edit page instead of going through the guided form + staff approval flow. Gate edit access via the permission, not the role.*
 
 ## Notifications & Dashboards
 
