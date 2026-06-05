@@ -118,7 +118,7 @@
                   }
                 } @else {
                   <!-- Draft step or editing completed step: show Save buttons -->
-                  <button type="submit" class="btn btn-accent">
+                  <button type="submit" class="btn btn-accent" [disabled]="isSaving()">
                     <span class="material-symbols-outlined">save</span> {{ 'action.save' | translate }}
                   </button>
                   @if (isGuidedFormMode() && isGuidedFormDraft()) {

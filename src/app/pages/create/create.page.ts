@@ -184,6 +184,9 @@ export class CreatePage {
   public pendingGalleryDrafts = signal<Map<string, string>>(new Map());
   @ViewChildren(EditPropertyComponent) editProperties!: QueryList<EditPropertyComponent>;
 
+  // v0.60.1: Double-submit guard
+  public isSaving = signal(false);
+
   // v0-48-0: Guided form mode
   public guidedFormKey = signal<string | null>(null);
   public isGuidedFormMode = signal(false);
@@ -192,7 +195,7 @@ export class CreatePage {
   submitForm(event: any) {
     event?.preventDefault?.();
 
-    if (!this.createForm) return;
+    if (!this.createForm || this.isSaving()) return;
 
     // Check if form is valid
     if (this.createForm.invalid) {
@@ -214,6 +217,7 @@ export class CreatePage {
     this.showValidationError = false;
 
     // Refresh token before submission (if expires in < 60 seconds)
+    this.isSaving.set(true);
     this.keycloak.updateToken(60)
       .then(() => {
         // Token is fresh, proceed with submission
@@ -257,6 +261,7 @@ export class CreatePage {
                   });
                   this.currentError.set(result.error);
                   this.showErrorModal.set(true);
+                  this.isSaving.set(false);
                 }
               },
               error: (err) => {
@@ -267,6 +272,7 @@ export class CreatePage {
                   humanMessage: 'System Error'
                 });
                 this.showErrorModal.set(true);
+                this.isSaving.set(false);
               }
             });
         }
@@ -280,6 +286,7 @@ export class CreatePage {
           hint: "Your login session has expired. Please refresh the page to log in again."
         });
         this.showErrorModal.set(true);
+        this.isSaving.set(false);
       });
   }
 
@@ -312,6 +319,10 @@ export class CreatePage {
 
   onSaveComplete() {
     this.saveComplete.set(true);
+    this.isSaving.set(false);
+    this.pendingM2mDiffs.set(new Map());
+    this.pendingRichM2mDiffs.set(new Map());
+    this.pendingGalleryDrafts.set(new Map());
     if (this.entityKey) {
       this.analytics.trackEvent('Entity', 'Create', this.entityKey);
     }
@@ -498,6 +509,12 @@ export class CreatePage {
 
   navToCreate(key?: string) {
     this.showSuccessModal.set(false);
+    this.saveSteps.set(null);
+    this.saveComplete.set(false);
+    this.isSaving.set(false);
+    this.pendingM2mDiffs.set(new Map());
+    this.pendingRichM2mDiffs.set(new Map());
+    this.pendingGalleryDrafts.set(new Map());
 
     // Reset form with proper defaults (boolean → false, others → null)
     // FormGroup.reset() without args sets all controls to null, which breaks

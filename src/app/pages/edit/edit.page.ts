@@ -234,6 +234,9 @@ export class EditPage implements OnDestroy {
   private saveStartTime = 0;  // Timestamp for minimum display duration
   private statusChangesSub?: Subscription;  // Track statusChanges subscription for cleanup
 
+  // v0.60.1: Double-submit guard
+  public isSaving = signal(false);
+
   // Series membership (for recurring time slots)
   public seriesMembership = signal<SeriesMembership | undefined>(undefined);
   public showScopeDialog = signal(false);
@@ -253,7 +256,7 @@ export class EditPage implements OnDestroy {
     event?.preventDefault?.();
 
     const form = this.editForm;
-    if (!form) return;
+    if (!form || this.isSaving()) return;
 
     // Guided form drafts: save without required validation.
     // Database CHECK constraints enforce rules only when status transitions out of draft.
@@ -347,6 +350,7 @@ export class EditPage implements OnDestroy {
    */
   private performEdit(transformedData: any): void {
     // Refresh token before submission (if expires in < 60 seconds)
+    this.isSaving.set(true);
     this.keycloak.updateToken(60)
       .then(() => {
         // Token is fresh, proceed with submission
@@ -372,6 +376,7 @@ export class EditPage implements OnDestroy {
                     const ctx = this.guidedFormContext();
                     const pid = this.guidedFormParentId();
                     if (ctx && pid) {
+                      this.isSaving.set(false);
                       this.router.navigate(['/view', ctx.definition.parent_table, pid]);
                       return;
                     }
@@ -380,6 +385,7 @@ export class EditPage implements OnDestroy {
                   // Completed step edit: switch back to display mode on successful save
                   if (this.isEditingCompletedStep()) {
                     this.isEditingCompletedStep.set(false);
+                    this.isSaving.set(false);
                     // Re-fetch display data with embedded objects to show updated values
                     if (this.entityKey && this.currentProps.length > 0) {
                       const displayColumns = this.currentProps.map(p => SchemaService.propertyToSelectString(p));
@@ -392,6 +398,7 @@ export class EditPage implements OnDestroy {
                     return;
                   }
 
+                  this.isSaving.set(false);
                   this.showSuccessModal.set(true);
                 } else {
                   console.error('[EDIT SUBMIT] API returned error:', result.error);
@@ -404,6 +411,7 @@ export class EditPage implements OnDestroy {
                   });
                   this.currentError.set(result.error);
                   this.showErrorModal.set(true);
+                  this.isSaving.set(false);
                 }
               },
               error: (err) => {
@@ -414,6 +422,7 @@ export class EditPage implements OnDestroy {
                   humanMessage: 'System Error'
                 });
                 this.showErrorModal.set(true);
+                this.isSaving.set(false);
               }
             });
         }
@@ -427,6 +436,7 @@ export class EditPage implements OnDestroy {
           hint: "Your login session has expired. Please refresh the page to log in again."
         });
         this.showErrorModal.set(true);
+        this.isSaving.set(false);
       });
   }
 
@@ -597,6 +607,9 @@ export class EditPage implements OnDestroy {
 
   onSaveComplete() {
     this.saveComplete.set(true);
+    this.isSaving.set(false);
+    this.pendingM2mDiffs.set(new Map());
+    this.pendingRichM2mDiffs.set(new Map());
     if (this.entityKey) {
       this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
     }

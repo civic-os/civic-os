@@ -15,13 +15,6 @@
         </h1>
       </div>
       @if (createForm && (entity.insert || isGuidedFormMode())) {
-        @if (saveSteps(); as steps) {
-          <!-- v0.46.0: Save progress overlay for coordinated create -->
-          <app-save-progress
-            [steps]="steps"
-            (completed)="onSaveComplete()"
-          ></app-save-progress>
-        } @else {
           <form [formGroup]="createForm" (ngSubmit)="submitForm($event)">
             @if (showValidationError) {
               <div role="alert" class="alert alert-error mb-4">
@@ -56,7 +49,7 @@
             </div>
             <div class="divider"></div>
             <div class="flex gap-3">
-              <button type="submit" class="btn btn-accent">
+              <button type="submit" class="btn btn-accent" [disabled]="isSaving()">
                 <span class="material-symbols-outlined">save</span> {{ 'action.save' | translate }}
               </button>
               @if (isGuidedFormMode()) {
@@ -71,7 +64,6 @@
               }
             </div>
           </form>
-        }
       } @else {
         <!-- Empty state when form is not available -->
         <div class="p-8">
