@@ -408,7 +408,13 @@ export class ImportExportService {
     // Sort and filter properties (exclude generated columns and system-managed types)
     const templateProperties = properties
       .filter(p => p.column_name !== 'civic_os_text_search') // Exclude generated tsvector column
-      .filter(p => p.type !== EntityPropertyType.ManyToMany) // M:M import not yet supported
+      // Exclude rich junctions and parent-hop M:M — only pure junctions can be imported
+      .filter(p => {
+        if (p.type !== EntityPropertyType.ManyToMany) return true;
+        const meta = p.many_to_many_meta;
+        if (!meta) return false;
+        return meta.extraColumns.length === 0 && !meta.parentHops?.length;
+      })
       .filter(p => p.type !== EntityPropertyType.File) // Files require S3 upload workflow
       .filter(p => p.type !== EntityPropertyType.FileImage)
       .filter(p => p.type !== EntityPropertyType.FilePDF)
@@ -443,11 +449,12 @@ export class ImportExportService {
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, dataSheet, 'Import Data');
 
-    // Add reference sheets for FK, User, and Status fields
+    // Add reference sheets for FK, User, Status, and M:M target fields
     const referenceProps = templateProperties.filter(p =>
       p.type === EntityPropertyType.ForeignKeyName ||
       p.type === EntityPropertyType.User ||
-      p.type === EntityPropertyType.Status
+      p.type === EntityPropertyType.Status ||
+      p.type === EntityPropertyType.ManyToMany
     );
 
     for (const prop of referenceProps) {
@@ -496,6 +503,9 @@ export class ImportExportService {
       case EntityPropertyType.GeoPoint:
         return 'Format: latitude,longitude (e.g., 42.3601,-71.0589)';
 
+      case EntityPropertyType.ManyToMany:
+        return `Comma-separated. See "${prop.display_name} Options" sheet`;
+
       case EntityPropertyType.GeoPolygon:
         return 'Format: GeoJSON or WKT (e.g., POLYGON((-83.7 43.0, -83.6 43.0, -83.6 43.1, -83.7 43.0)))';
 
@@ -516,7 +526,10 @@ export class ImportExportService {
       let columnName: string;
       let filters: FilterCriteria[] | undefined;
 
-      if (prop.type === EntityPropertyType.User) {
+      if (prop.type === EntityPropertyType.ManyToMany) {
+        tableName = prop.many_to_many_meta!.targetTable;
+        columnName = 'id';
+      } else if (prop.type === EntityPropertyType.User) {
         tableName = 'civic_os_users';
         columnName = 'id';
       } else if (prop.type === EntityPropertyType.Status) {
@@ -607,21 +620,52 @@ export class ImportExportService {
       p.type === EntityPropertyType.ForeignKeyName ||
       p.type === EntityPropertyType.User ||
       p.type === EntityPropertyType.Status ||
-      p.type === EntityPropertyType.Category
+      p.type === EntityPropertyType.Category ||
+      // M:M: fetch target table lookups for comma-separated validation
+      (p.type === EntityPropertyType.ManyToMany &&
+        p.many_to_many_meta &&
+        p.many_to_many_meta.extraColumns.length === 0 &&
+        !p.many_to_many_meta.parentHops?.length)
     );
 
     if (referenceProps.length === 0) {
       return of(new Map());
     }
 
-    const requests = referenceProps.map(prop => {
+    // Deduplicate M:M targets — multiple M:M properties might reference the same target table
+    const seenLookupKeys = new Set<string>();
+
+    const requests = referenceProps
+      .filter(prop => {
+        let lookupKey: string;
+        if (prop.type === EntityPropertyType.ManyToMany) {
+          lookupKey = `m2m_${prop.many_to_many_meta!.targetTable}`;
+        } else if (prop.type === EntityPropertyType.User) {
+          lookupKey = 'civic_os_users';
+        } else if (prop.type === EntityPropertyType.Status) {
+          lookupKey = `status_${prop.status_entity_type}`;
+        } else if (prop.type === EntityPropertyType.Category) {
+          lookupKey = `category_${prop.category_entity_type}`;
+        } else {
+          lookupKey = prop.join_table;
+        }
+        if (seenLookupKeys.has(lookupKey)) return false;
+        seenLookupKeys.add(lookupKey);
+        return true;
+      })
+      .map(prop => {
       // Determine table, column, and lookup key based on property type
       let tableName: string;
       let columnName: string;
       let lookupKey: string;
       let filters: FilterCriteria[] | undefined;
 
-      if (prop.type === EntityPropertyType.User) {
+      if (prop.type === EntityPropertyType.ManyToMany) {
+        // M:M: lookup target table by id + display_name
+        tableName = prop.many_to_many_meta!.targetTable;
+        columnName = 'id';
+        lookupKey = `m2m_${tableName}`;
+      } else if (prop.type === EntityPropertyType.User) {
         tableName = 'civic_os_users';
         columnName = 'id';
         lookupKey = 'civic_os_users';

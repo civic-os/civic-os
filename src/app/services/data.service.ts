@@ -948,6 +948,35 @@ export class DataService {
   }
 
   /**
+   * Bulk insert junction table records for M:M relationships.
+   * Uses Prefer: return=minimal since junction rows don't need to be returned.
+   * Simpler than bulkInsert() — no progress tracking needed for junction records.
+   *
+   * @param junctionTable Junction table name (e.g., 'partner_service_categories')
+   * @param records Array of junction records to insert
+   * @returns Observable of API response
+   */
+  public bulkInsertJunctions(junctionTable: string, records: Record<string, any>[]): Observable<ApiResponse> {
+    if (records.length === 0) {
+      return of({ success: true, body: null } as ApiResponse);
+    }
+
+    return this.http.post(
+      getPostgrestUrl() + junctionTable,
+      records,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        }
+      }
+    ).pipe(
+      map(() => ({ success: true, body: null } as ApiResponse)),
+      catchError(err => this.parseApiError(err))
+    );
+  }
+
+  /**
    * Call a PostgREST RPC function
    *
    * @param functionName - Name of the PostgreSQL function to call

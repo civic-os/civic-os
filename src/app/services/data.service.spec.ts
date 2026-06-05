@@ -2107,4 +2107,53 @@ describe('DataService', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  describe('bulkInsertJunctions()', () => {
+    it('should POST junction records with return=minimal', (done) => {
+      const records = [
+        { partner_id: 1, service_category_id: 2 },
+        { partner_id: 1, service_category_id: 5 }
+      ];
+
+      service.bulkInsertJunctions('partner_service_categories', records).subscribe(response => {
+        expect(response.success).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'partner_service_categories');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(records);
+      expect(req.request.headers.get('Prefer')).toBe('return=minimal');
+      expect(req.request.headers.get('Content-Type')).toBe('application/json');
+      req.flush(null, { status: 201, statusText: 'Created' });
+    });
+
+    it('should return success for empty records array', (done) => {
+      service.bulkInsertJunctions('partner_service_categories', []).subscribe(response => {
+        expect(response.success).toBe(true);
+        done();
+      });
+
+      // No HTTP request should be made
+      httpMock.expectNone(testPostgrestUrl + 'partner_service_categories');
+    });
+
+    it('should handle conflict errors (duplicate junction records)', (done) => {
+      const records = [
+        { partner_id: 1, service_category_id: 2 }
+      ];
+
+      service.bulkInsertJunctions('partner_service_categories', records).subscribe(response => {
+        expect(response.success).toBe(false);
+        expect(response.error).toBeDefined();
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'partner_service_categories');
+      req.flush(
+        { code: '23505', message: 'duplicate key value violates unique constraint', details: '', hint: '' },
+        { status: 409, statusText: 'Conflict' }
+      );
+    });
+  });
 });

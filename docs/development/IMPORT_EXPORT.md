@@ -27,7 +27,8 @@ This document specifies the implementation of Excel import/export functionality 
 - ✅ Filter, search, and sort preservation
 - ✅ System field inclusion (id, created_at, updated_at)
 - ✅ GeoPoint export as lat,lng format
-- ✅ M:M export as comma-separated names (read-only)
+- ✅ M:M export as comma-separated names
+- ✅ M:M import via comma-separated values with two-phase insert (v0.60.0)
 - ✅ Property sorting by sort_order
 - ✅ Exclusion of generated columns (civic_os_text_search)
 
@@ -58,7 +59,7 @@ This document specifies the implementation of Excel import/export functionality 
 **Recent Bug Fixes (October 2025):**
 - ✅ **PGRST102 Fix**: Nullable fields now set to null instead of being skipped, ensuring all rows have identical keys for PostgREST bulk insert
 - ✅ **Error Display**: Fixed error handling to show user-friendly messages when import fails after validation
-- ✅ **M:M Template Exclusion**: Many-to-many properties excluded from import templates (not yet supported for direct import)
+- ✅ **M:M Import Support**: Many-to-many properties included in templates with comma-separated format and two-phase insert
 - ✅ **Button Styling**: Import/Export/Filter buttons now have consistent sizing and alignment
 - ✅ **Related Records Navigation**: Fixed "View All" button navigation for large relationships (>1000 records)
 - ✅ **Metadata Preservation**: Fixed `upsert_entity_metadata()` to preserve existing search_fields when NULL is passed
@@ -79,10 +80,6 @@ This document specifies the implementation of Excel import/export functionality 
 
 ### 🚧 Not Yet Implemented
 
-**Many-to-Many Import:**
-- ❌ M:M properties in main entity templates (use junction table import instead)
-- ✅ **Workaround Available**: Power users can import to junction tables directly using dual FK hybrid lookup
-
 **Advanced Features (Planned for Future):**
 See [Future Enhancements](#future-enhancements) section below for:
 - Server-side validation RPC (for datasets > 1,000 rows)
@@ -99,7 +96,7 @@ See [Future Enhancements](#future-enhancements) section below for:
 
 1. **All-or-Nothing Transactions**: PostgREST bulk insert is transactional. If ANY row fails database constraints (even after validation passes), the ENTIRE import is rejected. Users must fix all errors and re-upload.
 
-2. **M:M Import**: Many-to-many relationships cannot be imported via main entity. Power users must import directly to junction tables.
+2. **Rich Junction M:M Import**: Rich junctions (with extra columns like `quantity`) and parent-hop M:M cannot be imported via comma-separated format. Power users can import directly to junction tables.
 
 3. **File Size Limit**: 10MB maximum file size. Larger datasets must be split into batches.
 
@@ -1363,8 +1360,8 @@ function parseGeoPoint(value: string): string {
 
 ## Many-to-Many Relationships
 
-**Export M:M (Read-Only):**
-Export M:M relationships in main entity as comma-separated display names for informational purposes:
+**Export M:M:**
+Export M:M relationships as comma-separated display names:
 
 ```typescript
 // In transformForExport()
@@ -1380,39 +1377,39 @@ if (prop.type === EntityPropertyType.ManyToMany) {
 }
 ```
 
-**Import M:M (Power User Approach):**
-To import M:M relationships, **import directly to the junction table** using the hybrid ID/name lookup for BOTH FK columns.
+**Import M:M (v0.60.0) — Two-Phase Insert:**
+Pure junctions (no extra columns, no parent hops) can be imported via comma-separated values in the main entity template.
 
-Example: Importing `issue_tags` junction table:
+Example: Importing partners with service categories:
 
-| Issue | Issue (Name) | Tag | Tag (Name) |
-|-------|--------------|-----|------------|
-| 42 | Fix bug | 3 | Urgent |
-| 42 | Fix bug | 7 | Backend |
-| 58 | Add feature | 12 | Frontend |
+| Name | Contact | Service Categories |
+|------|---------|-------------------|
+| Community Org | Jane Smith | Legal Aid, Healthcare, Housing |
+| Solo Provider | Bob Jones | |
+| Both IDs Work | Test User | 1, 3, 5 |
 
-The import process works automatically:
-1. Hybrid lookup resolves "Fix bug" → `issue_id = 42`
-2. Hybrid lookup resolves "Urgent" → `tag_id = 3`
-3. Insert: `{issue_id: 42, tag_id: 3, created_at: NOW()}`
+**How it works:**
 
-**Benefits:**
-- No special M:M handling needed
-- Reuses existing FK hybrid lookup logic
-- Power users can manage M:M relationships via spreadsheet
+1. **Template**: M:M columns appear with hint "Comma-separated. See 'X Options' sheet" and a reference sheet listing available values
+2. **Validation**: Web Worker splits on commas, trims, deduplicates, and validates each value against FK lookups (same hybrid ID/name lookup as regular FKs)
+3. **Phase 1**: Main entity rows are bulk-inserted via PostgREST → returns inserted rows with IDs
+4. **Phase 2**: Junction records are built using inserted IDs + resolved target IDs, then bulk-inserted per junction table via `bulkInsertJunctions()`
 
-**Documentation Note:**
-Add to user guide:
-```
-To import many-to-many relationships (e.g., assigning tags to issues):
+**Validation rules:**
+- Empty M:M cell → valid (no junction records created)
+- Values split on comma, trimmed, deduplicated
+- Each value validated via existing `validateForeignKey()` — accepts IDs or names
+- Invalid values generate per-value errors (row rejected if any value invalid)
 
-1. Import directly to the junction table (e.g., issue_tags)
-2. Use either IDs or names for both foreign key columns
-3. Example: "Issue" column can be issue ID (42) or name ("Fix bug")
-4. Example: "Tag" column can be tag ID (3) or name ("Urgent")
+**Error handling:**
+- Phase 1 failure → show error, return to results (existing behavior)
+- Phase 2 failure → partial success: "N records imported. Some relationship associations failed: {error}"
+- Main rows are never rolled back — they are valuable even without M:M associations
 
-This is a power user feature for bulk-managing relationships.
-```
+**Scope:** Pure junctions only. Rich junctions (with extra columns like `quantity`) and parent-hop M:M are excluded from templates.
+
+**Import M:M (Power User Approach — Direct Junction Table):**
+Power users can also import directly to junction tables using the hybrid ID/name lookup for BOTH FK columns. Navigate to the junction table's import modal and provide both FK columns.
 
 ## Performance Optimization
 

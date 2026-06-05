@@ -206,11 +206,18 @@
           <span class="loading loading-spinner loading-lg"></span>
         </div>
       } @else {
-        <p>Importing {{ validRowCount() }} records...</p>
-        <div class="flex items-center gap-4">
-          <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
-          <span class="text-sm">{{ uploadProgress() }}%</span>
-        </div>
+        @if (importPhase() === 'associations') {
+          <p>Associating relationships...</p>
+          <div class="flex justify-center py-4">
+            <span class="loading loading-spinner loading-lg"></span>
+          </div>
+        } @else {
+          <p>Importing {{ validRowCount() }} records...</p>
+          <div class="flex items-center gap-4">
+            <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
+            <span class="text-sm">{{ uploadProgress() }}%</span>
+          </div>
+        }
       }
       <p class="text-xs text-base-content/70">Please do not close this window.</p>
     </div>

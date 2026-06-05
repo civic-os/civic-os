@@ -157,6 +157,15 @@ function validateData(params: any): void {
   const errorsByType = new Map<string, number>();
   const errorsByColumn = new Map<string, number>();
 
+  // Identify M:M properties eligible for import (pure junctions only)
+  const m2mProperties = properties.filter((p: any) =>
+    p.type === EntityPropertyType.ManyToMany &&
+    p.many_to_many_meta &&
+    p.many_to_many_meta.extraColumns.length === 0 &&
+    !p.many_to_many_meta.parentHops?.length
+  );
+  const hasM2m = m2mProperties.length > 0;
+
   const totalRows = rows.length;
   const chunkSize = totalRows > 1000 ? 100 : 10;
 
@@ -171,11 +180,88 @@ function validateData(params: any): void {
     const rowErrors: ImportError[] = [];
 
     const validatedRow: any = {};
+    const rowM2mData: any = {};
 
     // Validate each property
     for (const prop of properties) {
-      // Skip M:M properties (not supported for import)
+      // Handle M:M properties — validate comma-separated values against FK lookups
       if (prop.type === EntityPropertyType.ManyToMany) {
+        // Skip rich junctions and parent-hop M:M
+        if (!prop.many_to_many_meta ||
+            prop.many_to_many_meta.extraColumns.length > 0 ||
+            prop.many_to_many_meta.parentHops?.length) {
+          continue;
+        }
+
+        const displayName = prop.display_name;
+        const value = row[displayName];
+
+        // Empty M:M is always valid (nullable by nature)
+        if (value === null || value === undefined || value === '') {
+          rowM2mData[prop.column_name] = [];
+          continue;
+        }
+
+        // Split comma-separated values, trim, and deduplicate
+        const rawValues = String(value).split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+        const uniqueValues = [...new Set(rawValues)];
+
+        const targetTable = prop.many_to_many_meta.targetTable;
+        const lookupKey = `m2m_${targetTable}`;
+        const lookup = fkLookups[lookupKey];
+
+        if (!lookup) {
+          rowErrors.push({
+            row: rowNumber,
+            column: displayName,
+            value: value,
+            error: 'FK lookup not available for ' + targetTable,
+            errorType: 'System error'
+          });
+          continue;
+        }
+
+        const resolvedIds: any[] = [];
+        let hasInvalidValue = false;
+
+        for (const singleValue of uniqueValues) {
+          // Try as ID first
+          if (lookup.validIds.includes(singleValue) || lookup.validIds.includes(Number(singleValue))) {
+            const id = lookup.validIds.includes(singleValue) ? singleValue : Number(singleValue);
+            resolvedIds.push(id);
+            continue;
+          }
+
+          // Try name lookup (case-insensitive)
+          const nameKey = singleValue.toLowerCase().trim();
+          const ids = lookup.displayNameToIds[nameKey];
+
+          if (!ids || ids.length === 0) {
+            rowErrors.push({
+              row: rowNumber,
+              column: displayName,
+              value: singleValue,
+              error: `"${singleValue}" not found in ${displayName}`,
+              errorType: `${displayName} not found`
+            });
+            hasInvalidValue = true;
+          } else if (ids.length > 1) {
+            rowErrors.push({
+              row: rowNumber,
+              column: displayName,
+              value: singleValue,
+              error: `"${singleValue}" matches multiple ${displayName} entries. Use ID instead.`,
+              errorType: `Duplicate ${displayName}`
+            });
+            hasInvalidValue = true;
+          } else {
+            resolvedIds.push(ids[0]);
+          }
+        }
+
+        if (!hasInvalidValue) {
+          rowM2mData[prop.column_name] = resolvedIds;
+        }
         continue;
       }
 
@@ -288,9 +374,13 @@ function validateData(params: any): void {
       }
     }
 
-    // If no errors, add to valid rows
+    // If no errors, add to valid rows (with M:M data if present)
     if (rowErrors.length === 0) {
-      validRows.push(validatedRow);
+      if (hasM2m) {
+        validRows.push({ rowData: validatedRow, m2mData: rowM2mData });
+      } else {
+        validRows.push(validatedRow);
+      }
     } else {
       allErrors.push(...rowErrors);
 
@@ -330,7 +420,9 @@ function validateData(params: any): void {
     type: 'complete',
     results: {
       validRows: validRows,
-      errorSummary: errorSummary
+      errorSummary: errorSummary,
+      hasM2m: hasM2m,
+      m2mProperties: hasM2m ? m2mProperties : []
     }
   });
 }

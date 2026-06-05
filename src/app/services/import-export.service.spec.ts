@@ -1375,4 +1375,170 @@ describe('ImportExportService', () => {
       expect(getDataCall.args[0].isSummaryView).toBe(false);
     });
   });
+
+  describe('M:M Import Support', () => {
+    const m2mProp = createMockProperty({
+      column_name: 'service_categories',
+      display_name: 'Service Categories',
+      type: EntityPropertyType.ManyToMany,
+      many_to_many_meta: {
+        junctionTable: 'partner_service_categories',
+        sourceTable: 'partners',
+        targetTable: 'service_categories',
+        sourceColumn: 'partner_id',
+        targetColumn: 'service_category_id',
+        relatedTable: 'service_categories',
+        relatedTableDisplayName: 'Service Categories',
+        showOnSource: true,
+        showOnTarget: true,
+        displayOrder: 100,
+        relatedTableHasColor: false,
+        extraColumns: []
+      }
+    });
+
+    const richM2mProp = createMockProperty({
+      column_name: 'tools',
+      display_name: 'Tools',
+      type: EntityPropertyType.ManyToMany,
+      many_to_many_meta: {
+        junctionTable: 'reservation_tools',
+        sourceTable: 'reservations',
+        targetTable: 'tool_types',
+        sourceColumn: 'reservation_id',
+        targetColumn: 'tool_type_id',
+        relatedTable: 'tool_types',
+        relatedTableDisplayName: 'Tools',
+        showOnSource: true,
+        showOnTarget: true,
+        displayOrder: 100,
+        relatedTableHasColor: false,
+        extraColumns: [createMockProperty({ column_name: 'quantity', display_name: 'Quantity' })]
+      }
+    });
+
+    describe('fetchForeignKeyLookups() with M:M', () => {
+      it('should fetch M:M target table lookups for pure junctions', (done) => {
+        const mockCategories = [
+          { id: 1, display_name: 'Legal Aid' },
+          { id: 2, display_name: 'Healthcare' },
+          { id: 3, display_name: 'Housing' }
+        ];
+
+        mockDataService.getData.and.returnValue(of(mockCategories));
+
+        service.fetchForeignKeyLookups([m2mProp]).subscribe(result => {
+          expect(result.size).toBe(1);
+          expect(result.has('m2m_service_categories')).toBe(true);
+
+          const lookup = result.get('m2m_service_categories')!;
+          expect(lookup.validIds.has(1)).toBe(true);
+          expect(lookup.validIds.has(2)).toBe(true);
+          expect(lookup.displayNameToIds.get('legal aid')).toEqual([1]);
+          expect(lookup.displayNameToIds.get('healthcare')).toEqual([2]);
+
+          done();
+        });
+      });
+
+      it('should skip rich junctions (with extra columns)', (done) => {
+        service.fetchForeignKeyLookups([richM2mProp]).subscribe(result => {
+          expect(result.size).toBe(0);
+          done();
+        });
+      });
+
+      it('should skip parent-hop M:M', (done) => {
+        const parentHopProp = createMockProperty({
+          ...m2mProp,
+          many_to_many_meta: {
+            ...m2mProp.many_to_many_meta!,
+            parentHops: [{ table: 'intermediate', fkColumn: 'inter_id' }]
+          }
+        });
+
+        service.fetchForeignKeyLookups([parentHopProp]).subscribe(result => {
+          expect(result.size).toBe(0);
+          done();
+        });
+      });
+
+      it('should deduplicate M:M targets referencing the same table', (done) => {
+        const secondM2mProp = createMockProperty({
+          ...m2mProp,
+          column_name: 'other_categories',
+          display_name: 'Other Categories'
+        });
+
+        const mockCategories = [
+          { id: 1, display_name: 'Legal Aid' },
+          { id: 2, display_name: 'Healthcare' }
+        ];
+
+        mockDataService.getData.and.returnValue(of(mockCategories));
+
+        service.fetchForeignKeyLookups([m2mProp, secondM2mProp]).subscribe(result => {
+          // Should only have one lookup entry, not two
+          expect(result.size).toBe(1);
+          // Should only fetch once
+          expect(mockDataService.getData).toHaveBeenCalledTimes(1);
+          done();
+        });
+      });
+    });
+
+    describe('downloadTemplate() with M:M', () => {
+      it('should include pure M:M in template', async () => {
+        const properties = [
+          createMockProperty({
+            column_name: 'display_name',
+            display_name: 'Name',
+            sort_order: 1,
+            type: EntityPropertyType.TextShort
+          }),
+          m2mProp
+        ];
+
+        mockDataService.getData.and.returnValue(of([
+          { id: 1, display_name: 'Legal Aid' },
+          { id: 2, display_name: 'Healthcare' }
+        ]));
+
+        await service.downloadTemplate(mockEntity, properties);
+
+        expect(saveWorkbookSpy).toHaveBeenCalled();
+        const workbook = saveWorkbookSpy.calls.mostRecent().args[0];
+        const sheetNames = workbook.SheetNames;
+        // Should have data sheet + M:M reference sheet
+        expect(sheetNames).toContain('Service Categories Options');
+      });
+
+      it('should exclude rich M:M from template', async () => {
+        const properties = [
+          createMockProperty({
+            column_name: 'display_name',
+            display_name: 'Name',
+            sort_order: 1,
+            type: EntityPropertyType.TextShort
+          }),
+          richM2mProp
+        ];
+
+        await service.downloadTemplate(mockEntity, properties);
+
+        expect(saveWorkbookSpy).toHaveBeenCalled();
+        const workbook = saveWorkbookSpy.calls.mostRecent().args[0];
+        const sheetNames = workbook.SheetNames;
+        expect(sheetNames).not.toContain('Tools Options');
+      });
+    });
+
+    describe('getHintForProperty() with M:M', () => {
+      it('should return comma-separated hint for M:M', () => {
+        const hint = (service as any).getHintForProperty(m2mProp);
+        expect(hint).toContain('Comma-separated');
+        expect(hint).toContain('Service Categories Options');
+      });
+    });
+  });
 });

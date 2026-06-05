@@ -27,6 +27,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { SchemaEntityTable, SchemaEntityProperty, ValidationErrorSummary, ImportError } from '../../interfaces/entity';
 import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
 import { ImportExportService } from '../../services/import-export.service';
@@ -114,9 +115,14 @@ export class ImportModalComponent implements OnDestroy {
     return this.validRowCount() > 0 && !this.hasErrors();
   });
 
+  // M:M import phase indicator
+  public importPhase = signal<'main' | 'associations'>('main');
+
   // Worker reference
   private worker: Worker | null = null;
   private validatedData: any[] = [];
+  private m2mDataList: any[] = [];
+  private m2mProperties: any[] = [];
   private originalExcelData: any[] = [];
 
   ngOnDestroy(): void {
@@ -460,9 +466,18 @@ export class ImportModalComponent implements OnDestroy {
         break;
 
       case 'complete':
-        this.validatedData = message.results.validRows;
+        // Separate rowData and m2mData when M:M properties are present
+        if (message.results.hasM2m) {
+          this.validatedData = message.results.validRows.map((r: any) => r.rowData);
+          this.m2mDataList = message.results.validRows.map((r: any) => r.m2mData);
+          this.m2mProperties = message.results.m2mProperties || [];
+        } else {
+          this.validatedData = message.results.validRows;
+          this.m2mDataList = [];
+          this.m2mProperties = [];
+        }
         this.errorSummary.set(message.results.errorSummary);
-        this.validRowCount.set(message.results.validRows.length);
+        this.validRowCount.set(this.validatedData.length);
         this.currentStep.set('results');
         this.terminateWorker();
         break;
@@ -623,25 +638,24 @@ export class ImportModalComponent implements OnDestroy {
       return;
     }
 
-    // Entity import path (existing behavior)
+    // Entity import path
     if (this.validatedData.length === 0 || !this.entityKey) return;
 
     this.currentStep.set('importing');
     this.uploadProgress.set(0);
+    this.importPhase.set('main');
 
     try {
-      // Subscribe to bulk insert with progress tracking
+      // Phase 1: Insert main entity rows
       this.dataService.bulkInsert(this.entityKey, this.validatedData).subscribe({
         next: (response) => {
           if (response.progress !== undefined) {
-            // Progress update
             this.uploadProgress.set(response.progress);
           } else if (response.success) {
-            // Import complete
-            this.importedCount.set(this.validatedData.length);
-            this.currentStep.set('success');
+            // Phase 1 complete — check if Phase 2 (M:M junctions) is needed
+            const insertedRows = response.body as any[] | null;
+            this.insertM2mJunctions(insertedRows);
           } else if (response.error) {
-            // Error occurred - display message to user and return to results screen
             this.errorMessage.set(response.error.humanMessage || 'Import failed');
             this.currentStep.set('results');
           }
@@ -657,6 +671,97 @@ export class ImportModalComponent implements OnDestroy {
       this.errorMessage.set(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       this.currentStep.set('results');
     }
+  }
+
+  /**
+   * Phase 2: Insert M:M junction records after main rows are created.
+   *
+   * Maps each inserted row's ID to its M:M data by array index
+   * (PostgREST preserves insertion order), then builds junction records
+   * and bulk-inserts them grouped by junction table.
+   *
+   * If no M:M data exists, skips directly to success.
+   * Phase 2 failure shows partial success — main rows are never rolled back.
+   */
+  private insertM2mJunctions(insertedRows: any[] | null): void {
+    // Check if any M:M data has values
+    const hasAnyM2mData = this.m2mDataList.some(m2m =>
+      Object.values(m2m).some((ids: any) => Array.isArray(ids) && ids.length > 0)
+    );
+
+    if (!hasAnyM2mData || !insertedRows?.length || this.m2mProperties.length === 0) {
+      // No M:M data — complete immediately
+      this.importedCount.set(this.validatedData.length);
+      this.currentStep.set('success');
+      return;
+    }
+
+    this.importPhase.set('associations');
+
+    // Build junction records grouped by junction table
+    const junctionRecordsByTable = new Map<string, Record<string, any>[]>();
+
+    for (let i = 0; i < insertedRows.length; i++) {
+      const entityId = insertedRows[i].id;
+      const m2mData = this.m2mDataList[i];
+      if (!m2mData || !entityId) continue;
+
+      for (const prop of this.m2mProperties) {
+        const targetIds: any[] = m2mData[prop.column_name] || [];
+        if (targetIds.length === 0) continue;
+
+        const meta = prop.many_to_many_meta;
+        if (!meta) continue;
+
+        const junctionTable = meta.junctionTable;
+        if (!junctionRecordsByTable.has(junctionTable)) {
+          junctionRecordsByTable.set(junctionTable, []);
+        }
+
+        for (const targetId of targetIds) {
+          junctionRecordsByTable.get(junctionTable)!.push({
+            [meta.sourceColumn]: entityId,
+            [meta.targetColumn]: targetId
+          });
+        }
+      }
+    }
+
+    if (junctionRecordsByTable.size === 0) {
+      this.importedCount.set(this.validatedData.length);
+      this.currentStep.set('success');
+      return;
+    }
+
+    // Bulk-insert junctions for each table in parallel
+    const junctionInserts = Array.from(junctionRecordsByTable.entries()).map(
+      ([table, records]) => this.dataService.bulkInsertJunctions(table, records)
+    );
+
+    forkJoin(junctionInserts).subscribe({
+      next: (results) => {
+        const failures = results.filter(r => !r.success);
+        if (failures.length > 0) {
+          const errorMsg = failures.map(f => f.error?.humanMessage || 'Unknown error').join('; ');
+          this.errorMessage.set(
+            `${this.validatedData.length} records imported. Some relationship associations failed: ${errorMsg}`
+          );
+          this.importedCount.set(this.validatedData.length);
+          this.currentStep.set('success');
+        } else {
+          this.importedCount.set(this.validatedData.length);
+          this.currentStep.set('success');
+        }
+      },
+      error: (error) => {
+        console.error('M:M junction insert error:', error);
+        this.errorMessage.set(
+          `${this.validatedData.length} records imported. Relationship associations failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+        this.importedCount.set(this.validatedData.length);
+        this.currentStep.set('success');
+      }
+    });
   }
 
   /**
@@ -687,6 +792,8 @@ export class ImportModalComponent implements OnDestroy {
     this.validRowCount.set(0);
     this.partialSuccessCount.set(0);
     this.validatedData = [];
+    this.m2mDataList = [];
+    this.m2mProperties = [];
     this.originalExcelData = [];
   }
 }

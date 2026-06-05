@@ -1175,8 +1175,10 @@ List pages automatically include Import/Export buttons for bulk data operations.
 - Template generation: Includes reference sheets for lookup tables
 - All-or-nothing transactions: Single row failure rejects entire batch
 
+**M:M Import (v0.60.0)**: Pure junction M:M relationships are included in import templates as comma-separated columns. Users enter display names separated by commas (e.g., "Legal Aid, Healthcare, Housing"). The import uses a two-phase insert: main entity rows are created first, then junction records are bulk-inserted. Rich junctions (with extra columns) and parent-hop M:M are excluded.
+
 **Technical Limitations**:
-- Many-to-many relationships not supported (use junction table import)
+- Rich junction M:M import not supported (use junction table import directly)
 - 10MB file size limit (browser constraint)
 - INSERT only (no updates)
 - Requires CREATE permission on entity

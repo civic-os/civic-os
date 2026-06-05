@@ -102,7 +102,7 @@ describe('ImportModalComponent', () => {
       'downloadErrorReport'
     ]);
     mockSchemaService = jasmine.createSpyObj('SchemaService', ['getPropsForCreate']);
-    mockDataService = jasmine.createSpyObj('DataService', ['bulkInsert']);
+    mockDataService = jasmine.createSpyObj('DataService', ['bulkInsert', 'bulkInsertJunctions']);
 
     await TestBed.configureTestingModule({
       imports: [ImportModalComponent],
@@ -918,6 +918,133 @@ describe('ImportModalComponent', () => {
 
         expect(component.partialSuccessCount()).toBe(0);
       });
+
+      it('should reset M:M state on startOver', () => {
+        (component as any).m2mDataList = [{ col: [1, 2] }];
+        (component as any).m2mProperties = [{ column_name: 'col' }];
+
+        component.startOver();
+
+        expect((component as any).m2mDataList).toEqual([]);
+        expect((component as any).m2mProperties).toEqual([]);
+      });
+    });
+  });
+
+  describe('M:M Two-Phase Import', () => {
+    const m2mMeta = {
+      junctionTable: 'partner_service_categories',
+      sourceTable: 'partners',
+      targetTable: 'service_categories',
+      sourceColumn: 'partner_id',
+      targetColumn: 'service_category_id',
+      relatedTable: 'service_categories',
+      relatedTableDisplayName: 'Service Categories',
+      showOnSource: true,
+      showOnTarget: true,
+      displayOrder: 100,
+      relatedTableHasColor: false,
+      extraColumns: []
+    };
+
+    it('should handle worker output with M:M data', () => {
+      const message = {
+        data: {
+          type: 'complete',
+          results: {
+            validRows: [
+              { rowData: { display_name: 'Test' }, m2mData: { service_categories: [1, 2] } },
+              { rowData: { display_name: 'Test2' }, m2mData: { service_categories: [] } }
+            ],
+            errorSummary: { totalErrors: 0, errorsByType: new Map(), errorsByColumn: new Map(), firstNErrors: [], allErrors: [] },
+            hasM2m: true,
+            m2mProperties: [{ column_name: 'service_categories', many_to_many_meta: m2mMeta }]
+          }
+        }
+      };
+
+      (component as any).handleWorkerMessage(message);
+
+      expect((component as any).validatedData).toEqual([
+        { display_name: 'Test' },
+        { display_name: 'Test2' }
+      ]);
+      expect((component as any).m2mDataList).toEqual([
+        { service_categories: [1, 2] },
+        { service_categories: [] }
+      ]);
+      expect((component as any).m2mProperties.length).toBe(1);
+      expect(component.validRowCount()).toBe(2);
+    });
+
+    it('should handle worker output without M:M (backward compat)', () => {
+      const message = {
+        data: {
+          type: 'complete',
+          results: {
+            validRows: [{ display_name: 'Test' }],
+            errorSummary: { totalErrors: 0, errorsByType: new Map(), errorsByColumn: new Map(), firstNErrors: [], allErrors: [] },
+            hasM2m: false,
+            m2mProperties: []
+          }
+        }
+      };
+
+      (component as any).handleWorkerMessage(message);
+
+      expect((component as any).validatedData).toEqual([{ display_name: 'Test' }]);
+      expect((component as any).m2mDataList).toEqual([]);
+    });
+
+    it('should call bulkInsertJunctions after Phase 1 success with M:M data', () => {
+      (component as any).validatedData = [{ display_name: 'Test' }];
+      (component as any).m2mDataList = [{ service_categories: [1, 3] }];
+      (component as any).m2mProperties = [{ column_name: 'service_categories', many_to_many_meta: m2mMeta }];
+
+      mockDataService.bulkInsertJunctions.and.returnValue(of({ success: true, body: null }));
+
+      const insertedRows = [{ id: 42, display_name: 'Test' }];
+      (component as any).insertM2mJunctions(insertedRows);
+
+      expect(mockDataService.bulkInsertJunctions).toHaveBeenCalledWith(
+        'partner_service_categories',
+        [
+          { partner_id: 42, service_category_id: 1 },
+          { partner_id: 42, service_category_id: 3 }
+        ]
+      );
+      expect(component.currentStep()).toBe('success');
+    });
+
+    it('should skip Phase 2 when no M:M data has values', () => {
+      (component as any).validatedData = [{ display_name: 'Test' }];
+      (component as any).m2mDataList = [{ service_categories: [] }];
+      (component as any).m2mProperties = [{ column_name: 'service_categories', many_to_many_meta: m2mMeta }];
+
+      const insertedRows = [{ id: 42, display_name: 'Test' }];
+      (component as any).insertM2mJunctions(insertedRows);
+
+      expect(mockDataService.bulkInsertJunctions).not.toHaveBeenCalled();
+      expect(component.currentStep()).toBe('success');
+    });
+
+    it('should show partial success when Phase 2 fails', () => {
+      (component as any).validatedData = [{ display_name: 'Test' }];
+      (component as any).m2mDataList = [{ service_categories: [1] }];
+      (component as any).m2mProperties = [{ column_name: 'service_categories', many_to_many_meta: m2mMeta }];
+
+      mockDataService.bulkInsertJunctions.and.returnValue(of({
+        success: false,
+        error: { httpCode: 409, message: 'duplicate key', humanMessage: 'Duplicate record' }
+      }));
+
+      const insertedRows = [{ id: 42, display_name: 'Test' }];
+      (component as any).insertM2mJunctions(insertedRows);
+
+      // Should still show success (main rows imported), with error message about M:M
+      expect(component.currentStep()).toBe('success');
+      expect(component.importedCount()).toBe(1);
+      expect(component.errorMessage()).toContain('relationship associations failed');
     });
   });
 });
