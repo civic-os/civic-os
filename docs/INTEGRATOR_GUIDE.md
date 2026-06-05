@@ -5334,6 +5334,161 @@ ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
 
 ---
 
+## Multi-Language (i18n)
+
+> v0.57.0+ — Phase 1: Framework UI strings
+
+Civic OS can display framework UI (buttons, labels, navigation, error messages) in the user's preferred language. Instance-specific text (entity names, property labels) will be translatable in Phase 2.
+
+### Enabling Multi-Language Support
+
+Add supported locales to your instance's runtime configuration:
+
+```js
+// config.js (runtime override) or environment.ts
+locale: {
+  defaultLocale: 'en',
+  supportedLocales: ['en', 'es']
+}
+```
+
+When `supportedLocales` has more than one entry, a **Language** tab appears in the Settings modal. Users can switch languages there.
+
+For Docker deployments, set the locale config in your `config.js` file served alongside the app.
+
+### Supported Locales
+
+Phase 1 ships with English (`en`) and Spanish (`es`) translations for ~190 framework UI strings. To add a new locale:
+
+1. **Seed translations** using the `upsert_translations` RPC:
+
+```sql
+-- Check which keys need translating
+SELECT * FROM get_missing_translations('fr');
+
+-- Bulk upsert translations (admin auth required)
+SELECT upsert_translations('[
+  {"source_type": "ui", "source_key": "nav.home", "locale": "fr", "translated_text": "Accueil"},
+  {"source_type": "ui", "source_key": "nav.data", "locale": "fr", "translated_text": "Données"},
+  {"source_type": "ui", "source_key": "action.save", "locale": "fr", "translated_text": "Enregistrer"}
+]'::jsonb);
+```
+
+2. **Add the locale** to your runtime config's `supportedLocales` array:
+
+```js
+supportedLocales: ['en', 'es', 'fr']
+```
+
+3. **Configure Keycloak** (optional, for persistence across devices):
+   - Add the locale to the realm's supported locales
+   - Ensure the `locale` user attribute mapper exists in the client scope
+
+### Managing Translations
+
+#### Via SQL (Direct Database Access)
+
+```sql
+-- View all Spanish translations
+SELECT source_key, translated_text
+FROM metadata.translations
+WHERE source_type = 'ui' AND locale = 'es'
+ORDER BY source_key;
+
+-- Add or update a single translation
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text)
+VALUES ('ui', 'nav.home', 'fr', 'Accueil')
+ON CONFLICT (source_type, source_key, locale)
+DO UPDATE SET translated_text = EXCLUDED.translated_text,
+             updated_at = NOW();
+
+-- Check translation coverage for a locale
+SELECT count(*) as total_keys,
+       count(*) FILTER (WHERE t.id IS NOT NULL) as translated,
+       count(*) FILTER (WHERE t.id IS NULL) as missing
+FROM metadata.translations en
+LEFT JOIN metadata.translations t
+  ON en.source_key = t.source_key AND t.locale = 'fr' AND t.source_type = en.source_type
+WHERE en.locale = 'en' AND en.source_type = 'ui';
+```
+
+#### Via PostgREST API
+
+```bash
+# Fetch all Spanish UI translations
+curl -s -X POST "$POSTGREST/rpc/get_translations_for_locale" \
+  -H "Content-Type: application/json" \
+  -d '{"p_locale": "es"}'
+
+# Check missing translations for French
+curl -s -X POST "$POSTGREST/rpc/get_missing_translations" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_JWT" \
+  -d '{"p_target_locale": "fr"}'
+
+# Bulk upsert translations (admin only)
+curl -s -X POST "$POSTGREST/rpc/upsert_translations" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_JWT" \
+  -d '{"p_translations": [
+    {"source_type": "ui", "source_key": "nav.home", "locale": "fr", "translated_text": "Accueil"},
+    {"source_type": "ui", "source_key": "action.save", "locale": "fr", "translated_text": "Enregistrer"}
+  ]}'
+```
+
+### Translation Fallback Chain
+
+When a translation key is requested:
+
+1. **Database translations** for the current locale (fetched once on locale change)
+2. **Bundled English text** from `en.translations.ts` (synchronous, always available)
+3. **Raw key name** as last resort (e.g., `nav.home`)
+
+This means untranslated keys gracefully fall back to English rather than showing broken UI.
+
+### How It Works (Technical)
+
+- **Frontend**: `LocaleService` manages the current locale as a signal. `TranslationService` fetches translations from the database and caches them. The `TranslatePipe` (`{{ 'key' | translate }}`) renders translated text in templates.
+- **Backend**: An HTTP interceptor adds `Accept-Language` to all PostgREST requests. The `metadata.t()` function reads this header to return translated text. For English, `t()` short-circuits with zero table lookup overhead.
+- **Persistence**: The user's locale preference is stored in `civic_os_users_private.locale` and synced to the JWT via Keycloak, so the preference persists across devices.
+
+### Keycloak Configuration
+
+For locale persistence across sessions and devices, configure Keycloak:
+
+1. Enable internationalization on the realm (`internationalizationEnabled: true`)
+2. Add `locale` as a user attribute in the Declarative User Profile (must be optional)
+3. Add a Client Scope Mapper: user attribute `locale` → JWT claim `locale`
+4. Add supported locales to match your instance config
+
+The dev realm config at `examples/keycloak/civic-os-dev.json` includes this configuration for `en` and `es`.
+
+### Translation Key Reference
+
+Translation keys follow a `namespace.key_name` convention:
+
+| Namespace | Examples | Count |
+|-----------|----------|-------|
+| `nav.*` | `nav.home`, `nav.admin` | 7 |
+| `sidebar.*` | `sidebar.entities`, `sidebar.users` | 14 |
+| `action.*` | `action.save`, `action.delete` | 23 |
+| `state.*` | `state.loading`, `state.error` | 9 |
+| `form.*` | `form.required`, `form.create_title` | 32 |
+| `detail.*` | `detail.overview`, `detail.confirm_delete` | 25 |
+| `list.*` | `list.search_placeholder`, `list.no_records` | 14 |
+| `error.*` | `error.forbidden`, `error.network` | 14 |
+| `pagination.*` | `pagination.showing`, `pagination.next` | 10 |
+| `settings.*` | `settings.title`, `settings.privacy` | 12 |
+| `guided_form.*` | `guided_form.draft`, `guided_form.submit` | 20 |
+| `gallery.*` | `gallery.upload`, `gallery.counter` | 10 |
+| Other | `map.*`, `file.*`, `calendar.*`, `import_export.*`, etc. | ~40 |
+
+The complete key list is in `src/app/i18n/en.translations.ts`.
+
+See `docs/notes/I18N_DESIGN.md` for full architecture details.
+
+---
+
 ## Production Considerations
 
 ### Sqitch Migrations
@@ -5463,6 +5618,7 @@ archive_command = 'cp %p /backup/wal/%f'
 - **docs/development/CALENDAR_INTEGRATION.md** - Calendar system implementation
 - **docs/development/IMPORT_EXPORT.md** - Import/Export specification
 - **docs/notes/DASHBOARD_DESIGN.md** - Dashboard system architecture
+- **docs/notes/I18N_DESIGN.md** - Multi-language (i18n) system architecture
 - **postgres/migrations/README.md** - Sqitch migrations guide
 
 For questions or support, see the project README or file an issue on GitHub.

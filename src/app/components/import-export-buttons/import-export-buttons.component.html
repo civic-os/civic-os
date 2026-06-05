@@ -6,11 +6,11 @@
     [disabled]="isExporting()"
     (click)="onExport()"
     type="button"
-    title="Export to Excel">
+    [title]="'import_export.export_excel' | translate">
     @if (!isExporting()) {
       <span class="material-symbols-outlined">download</span>
     }
-    <span class="hidden sm:inline">Export</span>
+    <span class="hidden sm:inline">{{ 'action.export' | translate }}</span>
   </button>
 
   <!-- Import Button (only if entity.insert) -->
@@ -19,9 +19,9 @@
       class="btn btn-outline btn-sm"
       (click)="onImport()"
       type="button"
-      title="Import from Excel">
+      [title]="'import_export.import_excel' | translate">
       <span class="material-symbols-outlined">upload</span>
-      <span class="hidden sm:inline">Import</span>
+      <span class="hidden sm:inline">{{ 'action.import' | translate }}</span>
     </button>
   }
 </div>
@@ -38,7 +38,7 @@
 
 <!-- Export Options Modal (shown when entity has notes enabled) -->
 <cos-modal [isOpen]="showExportModal()" (closed)="closeExportModal()" size="sm">
-  <h3 class="font-bold text-lg mb-4">Export {{ entity.display_name }}</h3>
+  <h3 class="font-bold text-lg mb-4">{{ 'action.export' | translate }} {{ entity.display_name }}</h3>
 
   <div class="form-control mb-4">
     <label class="label cursor-pointer justify-start gap-3">
@@ -48,9 +48,9 @@
         [ngModel]="includeNotes()"
         (ngModelChange)="includeNotes.set($event)" />
       <div>
-        <span class="label-text font-medium">Include notes</span>
+        <span class="label-text font-medium">{{ 'import_export.include_notes' | translate }}</span>
         <p class="text-xs text-base-content/60 mt-0.5">
-          Export notes as a separate worksheet
+          {{ 'import_export.include_notes_description' | translate }}
         </p>
       </div>
     </label>
@@ -61,7 +61,7 @@
       class="btn btn-ghost"
       (click)="closeExportModal()"
       [disabled]="isExporting()">
-      Cancel
+      {{ 'action.cancel' | translate }}
     </button>
     <button
       class="btn btn-primary"
@@ -69,10 +69,10 @@
       [disabled]="isExporting()">
       @if (isExporting()) {
         <span class="loading loading-spinner loading-sm"></span>
-        Exporting...
+        {{ 'import_export.exporting' | translate }}
       } @else {
         <span class="material-symbols-outlined">download</span>
-        Export
+        {{ 'action.export' | translate }}
       }
     </button>
   </div>

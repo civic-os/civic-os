@@ -1,5 +1,5 @@
 <cos-modal [isOpen]="showModal()" (closed)="close()" size="lg">
-  <h3 class="font-bold text-lg mb-4">Settings</h3>
+  <h3 class="font-bold text-lg mb-4">{{ 'settings.title' | translate }}</h3>
 
   <!-- Tabs -->
   <div class="tabs tabs-lift mb-4" role="tablist">
@@ -8,13 +8,21 @@
       [class.tab-active]="selectedTab() === 'preferences'"
       (click)="selectedTab.set('preferences')"
       role="tab"
-    >Preferences</button>
+    >{{ 'settings.preferences' | translate }}</button>
     <button
       class="tab"
       [class.tab-active]="selectedTab() === 'colors'"
       (click)="selectedTab.set('colors')"
       role="tab"
-    >Colors</button>
+    >{{ 'settings.colors' | translate }}</button>
+    @if (localeService.supportedLocales.length > 1) {
+      <button
+        class="tab"
+        [class.tab-active]="selectedTab() === 'language'"
+        (click)="selectedTab.set('language')"
+        role="tab"
+      >{{ 'settings.language' | translate }}</button>
+    }
   </div>
 
   <!-- Preferences Tab -->
@@ -22,7 +30,7 @@
     <!-- Privacy Section -->
     @if (analyticsConfigured) {
       <div class="py-4">
-        <h4 class="font-semibold mb-3">Privacy</h4>
+        <h4 class="font-semibold mb-3">{{ 'settings.privacy' | translate }}</h4>
         <label class="flex items-start cursor-pointer gap-3">
           <input
             type="checkbox"
@@ -30,21 +38,20 @@
             [(ngModel)]="analyticsEnabled"
             (change)="onAnalyticsToggle()"
           />
-          <span>Share anonymous usage data to help improve {{ appTitle }}</span>
+          <span>{{ 'settings.analytics_label' | translate:{ appTitle: appTitle } }}</span>
         </label>
         <p class="text-xs opacity-70 mt-1 ml-9">
-          We collect page views and feature usage statistics. No personal information or data content is tracked.
-          You can change this preference at any time.
+          {{ 'settings.analytics_description' | translate }}
         </p>
       </div>
     }
 
     <!-- Notifications Section -->
     <div class="py-4">
-      <h4 class="font-semibold mb-3">Notifications</h4>
+      <h4 class="font-semibold mb-3">{{ 'settings.notifications' | translate }}</h4>
 
       @if (preferencesLoading()) {
-        <div class="text-sm opacity-70">Loading preferences...</div>
+        <div class="text-sm opacity-70">{{ 'settings.loading_preferences' | translate }}</div>
       } @else {
         <!-- Email Notifications -->
         @if (emailPreference(); as email) {
@@ -56,10 +63,10 @@
                 [checked]="email.enabled"
                 (change)="onEmailToggle($any($event.target).checked)"
               />
-              <span>Email notifications</span>
+              <span>{{ 'settings.email_notifications' | translate }}</span>
             </label>
             <p class="text-xs opacity-70 mt-1 ml-9">
-              Send notifications to: <strong>{{ email.email_address }}</strong>
+              {{ 'settings.send_to' | translate }} <strong>{{ email.email_address }}</strong>
             </p>
           </div>
         }
@@ -75,21 +82,20 @@
                   [checked]="sms.enabled"
                   (change)="onSmsToggle($any($event.target).checked)"
                 />
-                <span>SMS notifications</span>
+                <span>{{ 'settings.sms_notifications' | translate }}</span>
               </label>
               <p class="text-xs opacity-70 mt-1 ml-9">
-                Send notifications to: <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
+                {{ 'settings.send_to' | translate }} <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
               </p>
               <p class="text-xs opacity-70 mt-1 ml-9">
-                By enabling SMS notifications, you consent to receive transactional text messages from {{ appTitle }}.
-                Msg &amp; data rates may apply. Reply STOP to unsubscribe, HELP for help.
+                {{ 'settings.sms_consent' | translate:{ appTitle: appTitle } }}
               </p>
             </div>
           }
         }
 
         @if (!emailPreference() && !smsPreference()) {
-          <p class="text-sm opacity-70">No notification preferences found. They will be created on your next login.</p>
+          <p class="text-sm opacity-70">{{ 'settings.no_preferences' | translate }}</p>
         }
       }
     </div>
@@ -97,9 +103,9 @@
     <!-- Admin Section: Role Impersonation (only for real admins) -->
     @if (auth.isRealAdmin()) {
       <div class="py-4 border-t border-base-300">
-        <h4 class="font-semibold mb-3">Admin: Role Impersonation</h4>
+        <h4 class="font-semibold mb-3">{{ 'impersonation.title' | translate }}</h4>
         <p class="text-xs opacity-70 mb-3">
-          Test the app as if you only have specific roles. Your real identity is preserved.
+          {{ 'impersonation.description' | translate }}
         </p>
 
         @if (impersonation.isActive()) {
@@ -109,10 +115,10 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
-              <span class="font-medium">Impersonation Active</span>
+              <span class="font-medium">{{ 'impersonation.active' | translate }}</span>
             </div>
             <p class="text-sm mb-2">
-              Currently viewing as: <strong>{{ impersonation.impersonatedRoles().join(', ') }}</strong>
+              {{ 'impersonation.viewing_as' | translate }} <strong>{{ impersonation.impersonatedRoles().join(', ') }}</strong>
             </p>
             <button
               class="btn btn-warning btn-sm"
@@ -122,13 +128,13 @@
               @if (impersonationLoading()) {
                 <span class="loading loading-spinner loading-xs"></span>
               }
-              Stop Impersonation
+              {{ 'impersonation.stop' | translate }}
             </button>
           </div>
         } @else {
           <!-- Role selection -->
           <div class="mb-3">
-            <p class="text-sm mb-2">Select roles to impersonate:</p>
+            <p class="text-sm mb-2">{{ 'impersonation.select_roles' | translate }}</p>
             <div class="flex flex-wrap gap-2">
               @for (role of availableRoles(); track role.id) {
                 <label class="cursor-pointer">
@@ -158,7 +164,7 @@
             @if (impersonationLoading()) {
               <span class="loading loading-spinner loading-xs"></span>
             }
-            Start Impersonation
+            {{ 'impersonation.start' | translate }}
           </button>
         }
       </div>
@@ -170,7 +176,34 @@
     <app-theme-picker />
   }
 
+  <!-- Language Tab -->
+  @if (selectedTab() === 'language') {
+    <div class="py-4">
+      <h4 class="font-semibold mb-3">{{ 'settings.language' | translate }}</h4>
+      <div class="flex flex-wrap gap-2">
+        @for (loc of localeService.supportedLocales; track loc.code) {
+          <label class="cursor-pointer">
+            <input
+              type="radio"
+              name="locale"
+              class="radio hidden"
+              [checked]="localeService.locale() === loc.code"
+              (change)="localeService.setLocale(loc.code)"
+            />
+            <span
+              class="badge badge-lg cursor-pointer transition-colors"
+              [class.badge-primary]="localeService.locale() === loc.code"
+              [class.badge-outline]="localeService.locale() !== loc.code"
+            >
+              {{ loc.name }}
+            </span>
+          </label>
+        }
+      </div>
+    </div>
+  }
+
   <div class="cos-modal-action">
-    <button class="btn" (click)="close()">Close</button>
+    <button class="btn" (click)="close()">{{ 'action.close' | translate }}</button>
   </div>
 </cos-modal>

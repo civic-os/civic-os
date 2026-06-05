@@ -47,5 +47,9 @@ export const environment: Environment = {
     },
     sms: {
         configured: true
+    },
+    locale: {
+        defaultLocale: 'en',
+        supportedLocales: ['en', 'es']
     }
 };

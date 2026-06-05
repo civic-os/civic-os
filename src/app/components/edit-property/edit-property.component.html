@@ -39,8 +39,8 @@
     <label class="pt-2 flex items-center gap-3 cursor-pointer w-fit" [for]="prop().column_name">
       <input type="checkbox" class="toggle" [id]="prop().column_name" [formControlName]="prop().column_name" />
       <span class="boolean-label-container">
-        <span class="boolean-label boolean-yes" [class.active]="form().get(prop().column_name)?.value">Yes</span>
-        <span class="boolean-label boolean-no" [class.active]="!form().get(prop().column_name)?.value">No</span>
+        <span class="boolean-label boolean-yes" [class.active]="form().get(prop().column_name)?.value">{{ 'form.yes' | translate }}</span>
+        <span class="boolean-label boolean-no" [class.active]="!form().get(prop().column_name)?.value">{{ 'form.no' | translate }}</span>
       </span>
     </label>
   }
@@ -51,7 +51,7 @@
               [id]="prop().column_name"
               (click)="showFkSearchModal.set(true)">
         <span [class.text-base-content/50]="!selectedDisplayName()">
-          {{ selectedDisplayName() || 'Select...' }}
+          {{ selectedDisplayName() || ('form.select_option' | translate) }}
         </span>
         <span class="material-symbols-outlined">search</span>
       </button>
@@ -72,7 +72,7 @@
       <!-- RPC-driven options via signal (v0.44.0) -->
       <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
         @if (prop().is_nullable || rpcSelectOptions().length === 0) {
-          <option [value]="null">Select an Option</option>
+          <option [value]="null">{{ 'form.select_option' | translate }}</option>
         }
         @for (option of rpcSelectOptions(); track option.id) {
           <option [value]="option.id">{{option.text}}</option>
@@ -81,7 +81,7 @@
     } @else if (selectOptions$ | async; as selectOptions) {
       <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
         @if (prop().is_nullable) {
-          <option [value]="null">Select an Option</option>
+          <option [value]="null">{{ 'form.select_option' | translate }}</option>
         }
         @for (option of selectOptions; track option) {
           <option [value]="option.id">{{option.text}}</option>
@@ -100,7 +100,7 @@
         [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedStatusColor(statusOptions) ? '2px' : null)"
         [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedStatusBackgroundColor(statusOptions)">
         @if (prop().is_nullable) {
-          <option [value]="null">Select a Status</option>
+          <option [value]="null">{{ 'form.select_status' | translate }}</option>
         }
         @for (option of statusOptions; track option.id) {
           <option [value]="option.id">{{ option.text }}</option>
@@ -120,7 +120,7 @@
         [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedCategoryColor(filteredCategoryOptions()) ? '2px' : null)"
         [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryBackgroundColor(filteredCategoryOptions())">
         @if (prop().is_nullable || filteredCategoryOptions().length === 0) {
-          <option [value]="null">Select a Category</option>
+          <option [value]="null">{{ 'form.select_category' | translate }}</option>
         }
         @for (option of filteredCategoryOptions(); track option.id) {
           <option [value]="option.id">{{ option.text }}</option>
@@ -135,7 +135,7 @@
         [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedCategoryColor(categoryOptions) ? '2px' : null)"
         [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryBackgroundColor(categoryOptions)">
         @if (prop().is_nullable) {
-          <option [value]="null">Select a Category</option>
+          <option [value]="null">{{ 'form.select_category' | translate }}</option>
         }
         @for (option of categoryOptions; track option.id) {
           <option [value]="option.id">{{ option.text }}</option>
@@ -195,7 +195,7 @@
       (blur)="onPhoneBlur(prop().column_name)"
     />
     <div class="text-xs text-base-content/60 mt-1">
-      Enter 10-digit US phone number
+      {{ 'form.phone_hint' | translate }}
     </div>
   }
 
@@ -225,7 +225,7 @@
       @if (uploadingFile()) {
         <div class="flex items-center gap-2 text-sm" role="status" aria-live="polite">
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
-          <span>Uploading...</span>
+          <span>{{ 'file.uploading' | translate }}</span>
         </div>
       }
 
@@ -242,16 +242,16 @@
           <div class="space-y-2">
             <!-- Success Message with Clear Button -->
             <div class="alert alert-success text-sm flex justify-between items-center">
-              <span>✓ Uploaded: {{ file.file_name }}</span>
+              <span>{{ 'file.uploaded' | translate }}: {{ file.file_name }}</span>
               <button
                 type="button"
                 class="btn btn-ghost btn-sm"
                 (click)="onClearFile(prop().column_name)"
                 [disabled]="uploadingFile()"
-                aria-label="Clear uploaded file"
+                [attr.aria-label]="'action.clear' | translate"
               >
                 <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
-                Clear
+                {{ 'action.clear' | translate }}
               </button>
             </div>
 
@@ -314,7 +314,7 @@
             @if (getValidationMessage('required'); as customMsg) {
               {{ customMsg }}
             } @else {
-              {{ prop().display_name }} is required.
+              {{ 'form.required' | translate }}
             }
           </div>
         }
@@ -323,7 +323,7 @@
             @if (getValidationMessage('min'); as customMsg) {
               {{ customMsg }}
             } @else {
-              Value must be at least {{ ctl.errors?.['min'].min }}.
+              {{ 'form.min_value' | translate:{ min: ctl.errors?.['min'].min } }}
             }
           </div>
         }
@@ -332,7 +332,7 @@
             @if (getValidationMessage('max'); as customMsg) {
               {{ customMsg }}
             } @else {
-              Value must be no more than {{ ctl.errors?.['max'].max }}.
+              {{ 'form.max_value' | translate:{ max: ctl.errors?.['max'].max } }}
             }
           </div>
         }
@@ -341,7 +341,7 @@
             @if (getValidationMessage('minLength'); as customMsg) {
               {{ customMsg }}
             } @else {
-              Must be at least {{ ctl.errors?.['minlength'].requiredLength }} characters.
+              {{ 'form.min_length' | translate:{ min: ctl.errors?.['minlength'].requiredLength } }}
             }
           </div>
         }
@@ -350,7 +350,7 @@
             @if (getValidationMessage('maxLength'); as customMsg) {
               {{ customMsg }}
             } @else {
-              Must be no more than {{ ctl.errors?.['maxlength'].requiredLength }} characters.
+              {{ 'form.max_length' | translate:{ max: ctl.errors?.['maxlength'].requiredLength } }}
             }
           </div>
         }
@@ -359,7 +359,7 @@
             @if (getValidationMessage('pattern'); as customMsg) {
               {{ customMsg }}
             } @else {
-              Invalid format.
+              {{ 'form.pattern_mismatch' | translate }}
             }
           </div>
         }

@@ -30,6 +30,7 @@ import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.c
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
 import { getContrastTextColor } from '../../utils/color.utils';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-display-property',
@@ -46,6 +47,7 @@ import { getContrastTextColor } from '../../utils/color.utils';
         PaymentBadgeComponent,
         GalleryLightboxComponent,
         FileThumbnailComponent,
+        TranslatePipe,
     ],
     templateUrl: './display-property.component.html',
     styleUrl: './display-property.component.css'

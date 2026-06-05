@@ -13,7 +13,7 @@
           @if (auth.isAdmin()) {
             <a class="btn btn-ghost btn-xs gap-1" [routerLink]="'/system/entity-code/' + entity.table_name">
               <span class="material-symbols-outlined text-sm">code</span>
-              View Source
+              {{ 'detail.view_source' | translate }}
             </a>
           }
           @if (seriesMembership()?.is_member) {
@@ -39,7 +39,7 @@
             <div class="flex justify-center my-4">
               <button class="btn btn-primary btn-lg gap-2" (click)="continueGuidedForm()">
                 <span class="material-symbols-outlined">arrow_forward</span>
-                Continue
+                {{ 'guided_form.continue' | translate }}
               </button>
             </div>
           }
@@ -101,19 +101,19 @@
           [closeOnBackdrop]="true">
           <h3 class="font-bold text-lg mb-4">
             <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
-            Submitted
+            {{ 'guided_form.submitted' | translate }}
           </h3>
-          <p class="mb-4">Your {{ currentEntity()?.display_name || 'form' }} has been submitted.</p>
+          <p class="mb-4">{{ 'guided_form.submitted_message' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</p>
           <div class="flex flex-col gap-2 w-full">
-            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">View Record</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">Submit Another</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">Back to {{ currentEntity()?.display_name || 'form' }} list</button>
+            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">{{ 'detail.view_record' | translate }}</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">{{ 'guided_form.submit_another' | translate }}</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">{{ 'detail.back_to_list' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</button>
           </div>
         </cos-modal>
 
         <!-- Hide Details grid when review section is showing (review already displays all data) -->
         @if (!showReviewSection()) {
-        <h2 class="text-2xl font-bold mt-6 mb-4">Details</h2>
+        <h2 class="text-2xl font-bold mt-6 mb-4">{{ 'detail.details' | translate }}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
           @if (detailRenderables$ | async; as renderables) {
             @for (item of renderables; track item.itemType === 'static_text' ? 'st_' + item.id : item.column_name) {
@@ -138,7 +138,7 @@
                         {{ item.many_to_many_meta!.extraColumns.length > 0 ? formatRichJunctionLabel(val.display_name, val._junction, item.many_to_many_meta!.extraColumns) : val.display_name }}
                       </a>
                     } @empty {
-                      <span class="text-base-content/50 italic text-sm">None</span>
+                      <span class="text-base-content/50 italic text-sm">{{ 'state.none' | translate }}</span>
                     }
                     @if (!isExpanded && allItems.length > INLINE_M2M_CHIP_LIMIT) {
                       <button
@@ -198,7 +198,7 @@
         @if (inverseRelationships$ | async; as relationships) {
           @if (relationships.length > 0) {
             <div class="mt-8">
-              <h2 class="text-2xl font-bold mb-4">Related Records</h2>
+              <h2 class="text-2xl font-bold mb-4">{{ 'detail.related' | translate }}</h2>
 
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @for (relationship of relationships; track relationship.meta.sourceTable) {
@@ -211,7 +211,7 @@
 
                       <!-- Large relationship: Show only "View all" button -->
                       @if (relationship.totalCount > LARGE_RELATIONSHIP_THRESHOLD) {
-                        <p class="text-sm opacity-70">This relationship has many records. Click below to view the full list.</p>
+                        <p class="text-sm opacity-70">{{ 'detail.large_relationship' | translate }}</p>
                         <div class="card-actions">
                           <a
                             [routerLink]="'/view/' + relationship.meta.sourceTable"
@@ -222,7 +222,7 @@
                             }"
                             class="btn btn-sm btn-primary"
                           >
-                            View all {{ relationship.totalCount }} records
+                            {{ 'detail.view_all_records' | translate:{ count: relationship.totalCount } }}
                             <span class="material-symbols-outlined ml-1">arrow_forward</span>
                           </a>
                         </div>
@@ -251,7 +251,7 @@
                               }"
                               class="btn btn-sm btn-outline"
                             >
-                              View all {{ relationship.totalCount }}
+                              {{ 'detail.view_all_count' | translate:{ count: relationship.totalCount } }}
                               <span class="material-symbols-outlined ml-1">arrow_forward</span>
                             </a>
                           </div>
@@ -313,7 +313,7 @@
           (closed)="closeDeleteModal()"
           size="sm"
           [closeOnBackdrop]="!deleteLoading()">
-          <h3 class="font-bold text-lg mb-4">Delete {{ entity.display_name }}?</h3>
+          <h3 class="font-bold text-lg mb-4">{{ 'action.delete' | translate }} {{ entity.display_name }}?</h3>
 
           <!-- Error Alert -->
           @if (deleteError()) {
@@ -323,7 +323,7 @@
           }
 
           <p class="mb-6">
-            Are you sure you want to delete <strong>{{ data.display_name || '#' + data.id }}</strong>? This action cannot be undone.
+            {{ 'detail.confirm_delete_named' | translate:{ name: data.display_name || '#' + data.id } }}
           </p>
 
           <!-- Actions -->
@@ -332,7 +332,7 @@
               class="btn"
               (click)="closeDeleteModal()"
               [disabled]="deleteLoading()">
-              Cancel
+              {{ 'action.cancel' | translate }}
             </button>
             <button
               class="btn btn-error"
@@ -340,10 +340,10 @@
               [disabled]="deleteLoading()">
               @if (deleteLoading()) {
                 <span class="loading loading-spinner loading-sm"></span>
-                Deleting...
+                {{ 'state.deleting' | translate }}
               } @else {
                 <span class="material-symbols-outlined">delete</span>
-                Delete
+                {{ 'action.delete' | translate }}
               }
             </button>
           </div>
@@ -392,7 +392,7 @@
                 <span>{{ actionSuccess() }}</span>
               </div>
             } @else {
-              <p class="mb-4">{{ action.confirmation_message || 'Are you sure you want to proceed?' }}</p>
+              <p class="mb-4">{{ action.confirmation_message || ('detail.confirm_action' | translate) }}</p>
 
               <!-- Action Parameter Form (v0.32.0) -->
               @if (actionParamForm(); as form) {
@@ -487,7 +487,7 @@
                           <select
                             class="select select-bordered w-full"
                             [formControlName]="param.param_name">
-                            <option [ngValue]="null">-- Select --</option>
+                            <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
                               <option [ngValue]="option.id">{{ option.display_name }}</option>
                             }
@@ -497,7 +497,7 @@
                           <select
                             class="select select-bordered w-full"
                             [formControlName]="param.param_name">
-                            <option [ngValue]="null">-- Select --</option>
+                            <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
                               <option [ngValue]="option.id">{{ option.display_name }}</option>
                             }
@@ -507,7 +507,7 @@
                           <select
                             class="select select-bordered w-full"
                             [formControlName]="param.param_name">
-                            <option [ngValue]="null">-- Select --</option>
+                            <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
                               <option [ngValue]="option.id">{{ option[getParamDisplayColumn(param)] }}</option>
                             }
@@ -517,7 +517,7 @@
                           <select
                             class="select select-bordered w-full"
                             [formControlName]="param.param_name">
-                            <option [ngValue]="null">-- Select --</option>
+                            <option [ngValue]="null">{{ 'form.select_option' | translate }}</option>
                             @for (option of actionParamOptions()[param.param_name]; track option.id) {
                               <option [ngValue]="option.id">{{ option.display_name }}</option>
                             }
@@ -534,14 +534,14 @@
                           @if (actionFileUploading()) {
                             <div class="flex items-center gap-2 text-sm mt-1">
                               <span class="loading loading-spinner loading-sm"></span>
-                              <span>Uploading...</span>
+                              <span>{{ 'file.uploading' | translate }}</span>
                             </div>
                           }
                           @if (actionUploadError()) {
                             <p class="text-error text-sm mt-1">{{ actionUploadError() }}</p>
                           }
                           @if (actionUploadedFile()[param.param_name]; as fileRef) {
-                            <p class="text-success text-sm mt-1">Uploaded: {{ fileRef.file_name }}</p>
+                            <p class="text-success text-sm mt-1">{{ 'file.uploaded' | translate }}: {{ fileRef.file_name }}</p>
                           }
                         }
                         @case ('photo_gallery') {
@@ -570,7 +570,7 @@
 
                       <!-- Validation error message -->
                       @if (form.get(param.param_name)?.touched && form.get(param.param_name)?.hasError('required')) {
-                        <p class="text-error text-sm mt-1">{{ param.display_name }} is required</p>
+                        <p class="text-error text-sm mt-1">{{ 'form.field_required' | translate:{ field: param.display_name } }}</p>
                       }
                     </fieldset>
                   }
@@ -583,7 +583,7 @@
                   class="btn"
                   (click)="closeActionModal()"
                   [disabled]="actionLoading()">
-                  Cancel
+                  {{ 'action.cancel' | translate }}
                 </button>
                 <button
                   [class]="'btn btn-' + action.button_style"
@@ -592,7 +592,7 @@
                   @if (actionLoading()) {
                     <span class="loading loading-spinner loading-sm"></span>
                   }
-                  Confirm
+                  {{ 'action.confirm' | translate }}
                 </button>
               </div>
             }
@@ -604,7 +604,7 @@
           <div class="fixed inset-0 bg-base-100/50 flex items-center justify-center z-50">
             <div class="flex flex-col items-center gap-2">
               <span class="loading loading-spinner loading-lg"></span>
-              <span class="text-sm opacity-70">Processing...</span>
+              <span class="text-sm opacity-70">{{ 'detail.processing' | translate }}</span>
             </div>
           </div>
         }
@@ -615,14 +615,14 @@
             <!-- Loading state -->
             <div class="flex flex-col items-center justify-center gap-4 py-12">
               <span class="loading loading-spinner loading-lg"></span>
-              <p class="text-base-content/60">Loading record...</p>
+              <p class="text-base-content/60">{{ 'state.loading' | translate }}</p>
             </div>
           } @else if (!auth.authenticated()) {
             <!-- User is not logged in - RLS returned nothing -->
             <app-empty-state
               icon="lock"
-              title="Sign in to view this record"
-              message="Log in to access this information."
+              [title]="'state.sign_in_prompt' | translate"
+              [message]="'detail.sign_in_message' | translate"
               alertType="info"
               [showLoginButton]="true">
             </app-empty-state>
@@ -630,8 +630,8 @@
             <!-- Record not found or RLS filtered it out -->
             <app-empty-state
               icon="error"
-              title="Record not found"
-              message="The record you're looking for doesn't exist or you don't have access."
+              [title]="'error.not_found' | translate"
+              [message]="'detail.not_found_message' | translate"
               alertType="error">
             </app-empty-state>
           }
@@ -645,8 +645,8 @@
         <!-- Anonymous user - the entity might exist but they have no privileges to see it -->
         <app-empty-state
           icon="lock"
-          title="Sign in to view this record"
-          message="Log in to access this information."
+          [title]="'state.sign_in_prompt' | translate"
+          [message]="'detail.sign_in_message' | translate"
           alertType="info"
           [showLoginButton]="true">
         </app-empty-state>
@@ -654,8 +654,8 @@
         <!-- Authenticated but entity truly doesn't exist or user has no access -->
         <app-empty-state
           icon="error"
-          title="Record not found"
-          message="The record you're looking for doesn't exist or you don't have access."
+          [title]="'error.not_found' | translate"
+          [message]="'detail.not_found_message' | translate"
           alertType="error">
         </app-empty-state>
       }

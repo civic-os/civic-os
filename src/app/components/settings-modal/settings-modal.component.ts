@@ -26,6 +26,8 @@ import { PermissionsService, Role } from '../../services/permissions.service';
 import { getMatomoConfig, getSmsConfig, getAppTitle } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { ThemePickerComponent } from '../theme-picker/theme-picker.component';
+import { LocaleService } from '../../services/locale.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Settings modal component for user preferences.
@@ -36,7 +38,7 @@ import { ThemePickerComponent } from '../theme-picker/theme-picker.component';
  */
 @Component({
   selector: 'app-settings-modal',
-  imports: [CommonModule, FormsModule, CosModalComponent, ThemePickerComponent],
+  imports: [CommonModule, FormsModule, CosModalComponent, ThemePickerComponent, TranslatePipe],
   templateUrl: './settings-modal.component.html',
   styleUrl: './settings-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,6 +55,7 @@ export class SettingsModalComponent {
   readonly auth = inject(AuthService);
   readonly impersonation = inject(ImpersonationService);
   private readonly permissionsService = inject(PermissionsService);
+  readonly localeService = inject(LocaleService);
 
   // Input: Control visibility of modal
   showModal = input.required<boolean>();

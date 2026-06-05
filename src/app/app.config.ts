@@ -22,6 +22,7 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
+import { localeInterceptor } from './interceptors/locale.interceptor';
 import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
 import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/markdown-widget.component';
@@ -35,6 +36,7 @@ import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
 import { videoEmbedExtension } from './markdown/video-embed.extension';
 import { markdownSanitize } from './markdown/markdown-sanitize';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
+import { TranslationService } from './services/translation.service';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
 
 export const appConfig: ApplicationConfig = {
@@ -74,6 +76,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([
       includeBearerTokenInterceptor,
       impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
+      localeInterceptor,          // Adds Accept-Language header for i18n translation lookup
       authErrorInterceptor        // Safety net: redirects to login on 401 for authenticated users
     ])),
 
@@ -100,6 +103,11 @@ export const appConfig: ApplicationConfig = {
         { provide: MARKED_EXTENSIONS, useValue: videoEmbedExtension, multi: true },
       ],
       sanitize: { provide: SANITIZE, useValue: markdownSanitize },
+    }),
+
+    // Eagerly initialize TranslationService so translations load at startup
+    provideAppInitializer(() => {
+      inject(TranslationService);
     }),
 
     // Register widget components at startup (Phase 1 + Phase 2)

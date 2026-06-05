@@ -51,6 +51,7 @@ import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inl
 import { RichM2mDiff } from '../../components/fk-search-modal/fk-search-modal.component';
 import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { AnalyticsService } from '../../services/analytics.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
@@ -69,7 +70,8 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     CommonModule,
     ReactiveFormsModule,
     CosModalComponent,
-    RouterModule
+    RouterModule,
+    TranslatePipe
 ],
     templateUrl: './edit.page.html',
     styleUrl: './edit.page.css'

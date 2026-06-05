@@ -22,6 +22,7 @@ import { provideRouter } from '@angular/router';
 import { DisplayPropertyComponent } from './display-property.component';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { MOCK_PROPERTIES, MOCK_DATA, createMockProperty } from '../../testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { DebugElement } from '@angular/core';
 
@@ -34,7 +35,8 @@ describe('DisplayPropertyComponent', () => {
       imports: [DisplayPropertyComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideRouter([])
+        provideRouter([]),
+        provideTranslationTesting()
       ]
     })
     .compileComponents();

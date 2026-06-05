@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -99,6 +99,9 @@ export class ErrorService {
    * Parse API error to human-readable message (static version, no tracking, no lookup).
    * Kept for backwards compatibility. Does NOT perform constraint message lookups.
    * Use parseToHumanWithLookup() instance method for full functionality.
+   *
+   * Note: Error string i18n deferred to Phase 2 to avoid circular dependency
+   * (ErrorService → TranslationService → LocaleService → AuthService → DataService → ErrorService).
    */
   public static parseToHuman(err: ApiError): string {
     //https://postgrest.org/en/stable/references/errors.html

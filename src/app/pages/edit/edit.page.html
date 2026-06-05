@@ -48,7 +48,7 @@
               @if (showValidationError()) {
                 <div role="alert" class="alert alert-error mb-4">
                   <span class="material-symbols-outlined">error</span>
-                  <span>Please fix the errors highlighted below before saving.</span>
+                  <span>{{ 'form.fix_errors' | translate }}</span>
                 </div>
               }
               <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
@@ -80,7 +80,7 @@
                               }
                             </a>
                           } @empty {
-                            <span class="text-sm text-base-content/60">None</span>
+                            <span class="text-sm text-base-content/60">{{ 'state.none' | translate }}</span>
                           }
                         </div>
                       </div>
@@ -109,17 +109,17 @@
                   <!-- Completed step display mode: show Edit button (unless locked) -->
                   @if (!isGuidedFormLocked()) {
                     <button type="button" class="btn btn-accent" (click)="enterEditMode()">
-                      <span class="material-symbols-outlined">edit</span> Edit
+                      <span class="material-symbols-outlined">edit</span> {{ 'action.edit' | translate }}
                     </button>
                   } @else {
                     <button type="button" class="btn btn-accent" disabled>
-                      <span class="material-symbols-outlined">edit_off</span> Edit Locked
+                      <span class="material-symbols-outlined">edit_off</span> {{ 'guided_form.edit_locked' | translate }}
                     </button>
                   }
                 } @else {
                   <!-- Draft step or editing completed step: show Save buttons -->
                   <button type="submit" class="btn btn-accent">
-                    <span class="material-symbols-outlined">save</span> Save
+                    <span class="material-symbols-outlined">save</span> {{ 'action.save' | translate }}
                   </button>
                   @if (isGuidedFormMode() && isGuidedFormDraft()) {
                     <button type="button" class="btn btn-primary" (click)="saveAndContinue($event)" [disabled]="savingAndContinuing()">
@@ -128,27 +128,27 @@
                       } @else {
                         <span class="material-symbols-outlined">arrow_forward</span>
                       }
-                      Save & Continue
+                      {{ 'guided_form.save_and_continue' | translate }}
                     </button>
                   }
                   @if (isGuidedFormMode() && isGuidedFormDraft() && isCurrentStepSkippable()) {
                     <button type="button" class="btn btn-outline" (click)="skipStep()">
                       <span class="material-symbols-outlined">skip_next</span>
-                      Skip
+                      {{ 'guided_form.skip' | translate }}
                     </button>
                   }
                   @if (isGuidedFormMode() && !isGuidedFormDraft() && isEditingCompletedStep()) {
                     <button type="button" class="btn btn-ghost" (click)="cancelEditMode()">
-                      <span class="material-symbols-outlined">close</span> Cancel
+                      <span class="material-symbols-outlined">close</span> {{ 'action.cancel' | translate }}
                     </button>
                   }
                 }
                 @if (isGuidedFormMode() && isGuidedFormDraft() && autoSaveStatus() !== 'idle') {
                   <span class="text-sm opacity-60 flex items-center gap-1">
                     @if (autoSaveStatus() === 'saving') {
-                      <span class="loading loading-spinner loading-xs"></span> Saving…
+                      <span class="loading loading-spinner loading-xs"></span> {{ 'state.saving' | translate }}
                     } @else if (autoSaveStatus() === 'saved') {
-                      <span class="material-symbols-outlined text-sm">check</span> Saved
+                      <span class="material-symbols-outlined text-sm">check</span> {{ 'form.saved' | translate }}
                     }
                   </span>
                 }
@@ -160,16 +160,16 @@
             @if (!auth.authenticated()) {
               <app-empty-state
                 icon="lock"
-                title="Sign in to edit records"
-                message="Log in to access this feature."
+                [title]="'form.sign_in_to_edit' | translate"
+                [message]="'form.sign_in_message' | translate"
                 alertType="info"
                 [showLoginButton]="true">
               </app-empty-state>
             } @else {
               <app-empty-state
                 icon="block"
-                title="Access denied"
-                message="You don't have permission to edit records of this type."
+                [title]="'error.forbidden' | translate"
+                [message]="'form.no_edit_permission' | translate"
                 alertType="error">
               </app-empty-state>
             }
@@ -182,30 +182,30 @@
             <!-- Loading state -->
             <div class="flex flex-col items-center justify-center gap-4 py-12">
               <span class="loading loading-spinner loading-lg"></span>
-              <p class="text-base-content/60">Loading record...</p>
+              <p class="text-base-content/60">{{ 'state.loading' | translate }}</p>
             </div>
           } @else if (!entity.update && !entity.guided_form_key) {
             @if (!auth.authenticated()) {
               <app-empty-state
                 icon="lock"
-                title="Sign in to edit records"
-                message="Log in to access this feature."
+                [title]="'form.sign_in_to_edit' | translate"
+                [message]="'form.sign_in_message' | translate"
                 alertType="info"
                 [showLoginButton]="true">
               </app-empty-state>
             } @else {
               <app-empty-state
                 icon="block"
-                title="Access denied"
-                message="You don't have permission to edit records of this type."
+                [title]="'error.forbidden' | translate"
+                [message]="'form.no_edit_permission' | translate"
                 alertType="error">
               </app-empty-state>
             }
           } @else {
             <app-empty-state
               icon="error"
-              title="Record not found"
-              message="The record you're looking for doesn't exist."
+              [title]="'error.not_found' | translate"
+              [message]="'form.record_not_found' | translate"
               alertType="error">
             </app-empty-state>
           }
@@ -219,10 +219,10 @@
         <h3 class="font-bold text-lg mb-4">
           @if (saveComplete()) {
             <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
-            Saved
+            {{ 'form.saved' | translate }}
           } @else {
             <span class="material-symbols-outlined text-primary align-middle mr-2 animate-spin">progress_activity</span>
-            Saving...
+            {{ 'state.saving' | translate }}
           }
         </h3>
         <app-save-progress
@@ -231,20 +231,20 @@
         ></app-save-progress>
         @if (saveComplete()) {
           <div class="flex flex-col gap-2 w-full mt-4">
-            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">{{ 'form.back_to_record' | translate }}</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
           </div>
         }
       } @else {
         <!-- Standard success (no M:M steps) -->
         <h3 class="font-bold text-lg mb-4">
           <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
-          Success
+          {{ 'form.success' | translate }}
         </h3>
-        <p class="mb-4">Record updated successfully.</p>
+        <p class="mb-4">{{ 'form.update_success' | translate }}</p>
         <div class="flex flex-col gap-2 w-full">
-          <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">Back to record</button>
-          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+          <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">{{ 'form.back_to_record' | translate }}</button>
+          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
         </div>
       }
     </cos-modal>
@@ -253,7 +253,7 @@
     <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm">
       <h3 class="font-bold text-lg mb-4">
         <span class="material-symbols-outlined text-error align-middle mr-2">error</span>
-        Error
+        {{ 'state.error' | translate }}
       </h3>
       @if (currentError(); as err) {
         <div class="collapse collapse-plus bg-base-200 mb-4">
@@ -270,8 +270,8 @@
         </div>
       }
       <div class="flex flex-col gap-2 w-full">
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">Try again</button>
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">{{ 'form.try_again' | translate }}</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
       </div>
     </cos-modal>
 

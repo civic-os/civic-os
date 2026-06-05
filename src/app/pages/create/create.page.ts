@@ -45,6 +45,7 @@ import { GalleryService } from '../../services/gallery.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ApiError, ApiResponse } from '../../interfaces/api';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
@@ -62,7 +63,8 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     CommonModule,
     ReactiveFormsModule,
     CosModalComponent,
-    RouterModule
+    RouterModule,
+    TranslatePipe
 ]
 })
 export class CreatePage {

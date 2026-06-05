@@ -37,6 +37,7 @@ import { TimeSlotCalendarComponent, CalendarEvent } from '../../components/time-
 import { ImportExportButtonsComponent } from '../../components/import-export-buttons/import-export-buttons.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 
 interface FilterChip {
@@ -64,7 +65,8 @@ interface FilterChip {
     TimeSlotCalendarComponent,
     ImportExportButtonsComponent,
     EmptyStateComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
 ]
 })
 export class ListPage implements OnInit, OnDestroy {

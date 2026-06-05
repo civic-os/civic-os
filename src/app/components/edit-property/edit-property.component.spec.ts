@@ -26,6 +26,7 @@ import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { MOCK_PROPERTIES, createMockProperty } from '../../testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 
 describe('EditPropertyComponent', () => {
@@ -56,6 +57,7 @@ describe('EditPropertyComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
+        provideTranslationTesting(),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService }
       ]
@@ -156,8 +158,8 @@ describe('EditPropertyComponent', () => {
       const noLabel = fixture.debugElement.query(By.css('.boolean-no'));
       expect(yesLabel).toBeTruthy();
       expect(noLabel).toBeTruthy();
-      expect(yesLabel.nativeElement.textContent).toBe('Yes');
-      expect(noLabel.nativeElement.textContent).toBe('No');
+      expect(yesLabel.nativeElement.textContent.trim()).toBe('Yes');
+      expect(noLabel.nativeElement.textContent.trim()).toBe('No');
     });
 
     it('should show "No" as active when value is false', () => {
@@ -373,7 +375,7 @@ describe('EditPropertyComponent', () => {
       fixture.detectChanges();
 
       const options = fixture.debugElement.queryAll(By.css('option'));
-      expect(options[0].nativeElement.textContent).toContain('Select an Option');
+      expect(options[0].nativeElement.textContent).toContain('Select...');
     });
 
     it('should not include null option for non-nullable foreign keys', async () => {
@@ -927,7 +929,7 @@ describe('EditPropertyComponent', () => {
 
       const errorDiv = fixture.debugElement.query(By.css('.text-error'));
       expect(errorDiv).toBeTruthy();
-      expect(errorDiv.nativeElement.textContent).toContain('Name is required');
+      expect(errorDiv.nativeElement.textContent).toContain('This field is required');
     });
 
     it('should not show error when field is valid', () => {
@@ -998,7 +1000,7 @@ describe('EditPropertyComponent', () => {
 
       const errorDiv = fixture.debugElement.query(By.css('.text-error'));
       expect(errorDiv).toBeTruthy();
-      expect(errorDiv.nativeElement.textContent).toContain('Name is required');
+      expect(errorDiv.nativeElement.textContent).toContain('This field is required');
     });
 
     it('should show custom message when validation_rules has matching rule', () => {
@@ -1046,7 +1048,7 @@ describe('EditPropertyComponent', () => {
 
       const errorDiv = fixture.debugElement.query(By.css('.text-error'));
       expect(errorDiv).toBeTruthy();
-      expect(errorDiv.nativeElement.textContent).toContain('Name is required');
+      expect(errorDiv.nativeElement.textContent).toContain('This field is required');
     });
 
     it('should show min error with custom message', () => {
@@ -1092,7 +1094,7 @@ describe('EditPropertyComponent', () => {
 
       const errorDiv = fixture.debugElement.query(By.css('.text-error'));
       expect(errorDiv).toBeTruthy();
-      expect(errorDiv.nativeElement.textContent).toContain('Value must be at least 5');
+      expect(errorDiv.nativeElement.textContent).toContain('Minimum value: 5');
     });
   });
 

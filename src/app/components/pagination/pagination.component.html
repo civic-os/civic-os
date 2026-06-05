@@ -4,7 +4,7 @@
     <!-- Results summary (always shown to prevent layout shift) -->
     <div class="text-sm flex items-center gap-2">
       @if (totalCountSignal() > 0) {
-        <span class="font-medium">Showing {{ startItem() }}-{{ endItem() }} of {{ totalCountSignal() }} results</span>
+        <span class="font-medium">{{ 'pagination.showing' | translate }} {{ startItem() }}-{{ endItem() }} {{ 'pagination.of' | translate }} {{ totalCountSignal() }} results</span>
       } @else {
         <span class="font-medium">0 results</span>
       }
@@ -22,9 +22,9 @@
             [disabled]="isFirstPage() || loading"
             (click)="goToPrevious()"
             type="button"
-            aria-label="Previous page">
+            [attr.aria-label]="'pagination.previous' | translate">
             <span class="material-symbols-outlined text-base">chevron_left</span>
-            <span class="hidden sm:inline">Previous</span>
+            <span class="hidden sm:inline">{{ 'pagination.previous' | translate }}</span>
           </button>
 
           <!-- Page number buttons -->
@@ -51,8 +51,8 @@
             [disabled]="isLastPage() || loading"
             (click)="goToNext()"
             type="button"
-            aria-label="Next page">
-            <span class="hidden sm:inline">Next</span>
+            [attr.aria-label]="'pagination.next' | translate">
+            <span class="hidden sm:inline">{{ 'pagination.next' | translate }}</span>
             <span class="material-symbols-outlined text-base">chevron_right</span>
           </button>
         </div>
@@ -61,7 +61,7 @@
       <!-- Page size selector (only shown when > 10 results) -->
       @if (showPageSizeSelector()) {
         <div class="flex items-center gap-2">
-          <label for="pageSize" class="text-sm font-medium whitespace-nowrap">Items per page:</label>
+          <label for="pageSize" class="text-sm font-medium whitespace-nowrap">{{ 'pagination.items' | translate }} {{ 'pagination.per_page' | translate }}:</label>
           <select
             id="pageSize"
             class="select select-bordered select-sm"

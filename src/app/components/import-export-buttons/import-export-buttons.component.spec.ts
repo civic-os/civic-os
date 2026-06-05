@@ -29,6 +29,7 @@ import {
   EntityPropertyType
 } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('ImportExportButtonsComponent', () => {
   let component: ImportExportButtonsComponent;
@@ -118,6 +119,7 @@ describe('ImportExportButtonsComponent', () => {
       imports: [ImportExportButtonsComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: ImportExportService, useValue: mockImportExportService },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: DataService, useValue: mockDataService },

@@ -39,6 +39,7 @@ import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.compo
 import { PhotoGalleryEditorComponent } from '../photo-gallery-editor/photo-gallery-editor.component';
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-edit-property',
@@ -57,7 +58,8 @@ import { getS3Config } from '../../config/runtime';
     PaymentBadgeComponent,
     FkSearchModalComponent,
     PhotoGalleryEditorComponent,
-    FileThumbnailComponent
+    FileThumbnailComponent,
+    TranslatePipe
 ],
     providers: [
         provideNgxMask(),

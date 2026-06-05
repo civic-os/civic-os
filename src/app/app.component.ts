@@ -35,6 +35,8 @@ import { DashboardSelectorComponent } from './components/dashboard-selector/dash
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
 import { getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './config/runtime';
+import { LocaleService } from './services/locale.service';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
     selector: 'app-root',
@@ -44,7 +46,8 @@ import { getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './config/runt
     FormsModule,
     DashboardSelectorComponent,
     SettingsModalComponent,
-    AboutModalComponent
+    AboutModalComponent,
+    TranslatePipe
 ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
@@ -56,6 +59,7 @@ export class AppComponent {
   private elementRef = inject(ElementRef);
   public auth = inject(AuthService);
   public themeService = inject(ThemeService);
+  private localeService = inject(LocaleService);
   public impersonation = inject(ImpersonationService);
   private userManagement = inject(UserManagementService);
   private staticAssets = inject(StaticAssetsService);

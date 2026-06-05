@@ -52,5 +52,9 @@ export const environment: Environment = {
         defaultTheme: 'corporate'
     },
     appTitle: 'Civic OS',
-    faviconUrl: ''
+    faviconUrl: '',
+    locale: {
+        defaultLocale: 'en',
+        supportedLocales: ['en', 'es']
+    }
 };

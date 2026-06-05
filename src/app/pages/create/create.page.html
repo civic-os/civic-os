@@ -6,7 +6,7 @@
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
         <h1 class="mb-0">
-          New {{ entity.display_name }}
+          {{ 'form.create_title' | translate:{ entity: entity.display_name } }}
           @if (entity.description) {
             <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
               <span class="material-symbols-outlined text-info cursor-help ml-2 text-xl align-middle">help_outline</span>
@@ -26,7 +26,7 @@
             @if (showValidationError) {
               <div role="alert" class="alert alert-error mb-4">
                 <span class="material-symbols-outlined">error</span>
-                <span>Please fix the errors highlighted below before saving.</span>
+                <span>{{ 'form.fix_errors' | translate }}</span>
               </div>
             }
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-8 gap-6">
@@ -57,7 +57,7 @@
             <div class="divider"></div>
             <div class="flex gap-3">
               <button type="submit" class="btn btn-accent">
-                <span class="material-symbols-outlined">save</span> Save
+                <span class="material-symbols-outlined">save</span> {{ 'action.save' | translate }}
               </button>
               @if (isGuidedFormMode()) {
                 <button type="button" class="btn btn-primary" (click)="saveAndContinue($event)" [disabled]="savingAndContinuing()">
@@ -66,7 +66,7 @@
                   } @else {
                     <span class="material-symbols-outlined">arrow_forward</span>
                   }
-                  Save & Continue
+                  {{ 'guided_form.save_and_continue' | translate }}
                 </button>
               }
             </div>
@@ -78,16 +78,16 @@
           @if (!auth.authenticated()) {
             <app-empty-state
               icon="lock"
-              title="Sign in to create records"
-              message="Log in to access this feature."
+              [title]="'form.sign_in_to_create' | translate"
+              [message]="'form.sign_in_message' | translate"
               alertType="info"
               [showLoginButton]="true">
             </app-empty-state>
           } @else {
             <app-empty-state
               icon="block"
-              title="Access denied"
-              message="You don't have permission to create records of this type."
+              [title]="'error.forbidden' | translate"
+              [message]="'form.no_create_permission' | translate"
               alertType="error">
             </app-empty-state>
           }
@@ -100,10 +100,10 @@
         <h3 class="font-bold text-lg mb-4">
           @if (saveComplete()) {
             <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
-            Created
+            {{ 'form.created' | translate }}
           } @else {
             <span class="material-symbols-outlined text-primary align-middle mr-2 animate-spin">progress_activity</span>
-            Creating...
+            {{ 'form.creating' | translate }}
           }
         </h3>
         <app-save-progress
@@ -112,21 +112,21 @@
         ></app-save-progress>
         @if (saveComplete()) {
           <div class="flex flex-col gap-2 w-full mt-4">
-            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToDetail()">View created {{entity.display_name}}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToCreate(entity.table_name)">Create another {{entity.display_name}}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToDetail()">{{ 'form.view_created' | translate:{ entity: entity.display_name } }}</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToCreate(entity.table_name)">{{ 'form.create_another' | translate:{ entity: entity.display_name } }}</button>
+            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
           </div>
         }
       } @else {
         <h3 class="font-bold text-lg mb-4">
           <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
-          Success
+          {{ 'form.success' | translate }}
         </h3>
-        <p class="mb-4">Record created successfully.</p>
+        <p class="mb-4">{{ 'form.create_success' | translate }}</p>
         <div class="flex flex-col gap-2 w-full">
-          <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToDetail()">View created {{entity.display_name}}</button>
-          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToCreate(entity.table_name)">Create another {{entity.display_name}}</button>
-          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+          <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToDetail()">{{ 'form.view_created' | translate:{ entity: entity.display_name } }}</button>
+          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToCreate(entity.table_name)">{{ 'form.create_another' | translate:{ entity: entity.display_name } }}</button>
+          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
         </div>
       }
     </cos-modal>
@@ -135,7 +135,7 @@
     <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm">
       <h3 class="font-bold text-lg mb-4">
         <span class="material-symbols-outlined text-error align-middle mr-2">error</span>
-        Error
+        {{ 'state.error' | translate }}
       </h3>
       @if (currentError(); as err) {
         <div class="collapse collapse-plus bg-base-200 mb-4">
@@ -152,8 +152,8 @@
         </div>
       }
       <div class="flex flex-col gap-2 w-full">
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">Try again</button>
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">Back to {{entity.display_name}} list</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">{{ 'form.try_again' | translate }}</button>
+        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
       </div>
     </cos-modal>
   }

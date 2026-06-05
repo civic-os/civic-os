@@ -106,6 +106,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Excel Import/Export**: Bulk data operations on List pages with FK name resolution and validation. **Custom Import Mode** (v0.31.0+) for non-entity imports. See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for specification.
 
+**Multi-Language (i18n)** (v0.57.0+): Framework UI strings render in the user's preferred language. Phase 1 covers ~250 Angular UI keys with English/Spanish support. Architecture: `LocaleService` (signal-based locale), `TranslationService` (DB fetch + bundled English fallback), `TranslatePipe` (`{{ 'key' | translate }}`), locale HTTP interceptor (`Accept-Language` header), `metadata.translations` table, `metadata.t()` lookup function. Language tab appears in Settings when `supportedLocales` has 2+ entries. English short-circuits with zero DB overhead. See `docs/INTEGRATOR_GUIDE.md` (Multi-Language section) and `docs/notes/I18N_DESIGN.md` for architecture.
+
 ## Custom Dashboards
 
 **Status**: Phase 2 complete - Dynamic widgets (filtered lists, maps with clustering)

@@ -50,5 +50,9 @@ export interface Environment {
         defaultTheme: string
     },
     appTitle?: string,
-    faviconUrl?: string
+    faviconUrl?: string,
+    locale?: {
+        defaultLocale: string,
+        supportedLocales: string[]
+    }
 }

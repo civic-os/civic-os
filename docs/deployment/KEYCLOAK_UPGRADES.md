@@ -162,15 +162,27 @@ pg_dump -h localhost -U postgres keycloak > keycloak-db-backup-$(date +%Y%m%d).s
 
 ### Upgrade the Server
 
+First, download and extract the new Keycloak distribution. `kc.sh build` does NOT download new versions — it only rebuilds the Quarkus configuration for the installed binaries.
+
 ```bash
-# Stop Keycloak service
-sudo systemctl stop keycloak
+# Download new version (update version number as needed)
+KC_VERSION=26.6.1
+curl -LO https://github.com/keycloak/keycloak/releases/download/$KC_VERSION/keycloak-$KC_VERSION.tar.gz
 
-# Run the upgrade (downloads new binaries and migrates database)
-/opt/keycloak/bin/kc.sh build
+# Extract to a staging directory (old Keycloak keeps running)
+sudo tar xzf keycloak-$KC_VERSION.tar.gz
+sudo rsync -a keycloak-$KC_VERSION/ /opt/keycloak-new/
+sudo cp /opt/keycloak/conf/keycloak.conf /opt/keycloak-new/conf/
+sudo chown -R keycloak:keycloak /opt/keycloak-new
+rm -rf keycloak-$KC_VERSION keycloak-$KC_VERSION.tar.gz
 
-# Start Keycloak
-sudo systemctl start keycloak
+# Build in staging directory (old Keycloak still running)
+# Omitting --db=postgres defaults to H2 and breaks startup
+sudo -u keycloak /opt/keycloak-new/bin/kc.sh build --db=postgres
+
+# Swap directories and restart — only downtime is this step (~10-15 seconds)
+sudo mv /opt/keycloak /opt/keycloak.bak && sudo mv /opt/keycloak-new /opt/keycloak
+sudo systemctl restart keycloak
 
 # Watch logs for migration output
 journalctl -u keycloak -f
@@ -200,7 +212,7 @@ sudo systemctl restart civic-os-worker
 
 ### Total Downtime
 
-**~5-10 minutes** for bare-metal upgrades (longer than containerized due to binary download/extraction).
+**~10-15 seconds** for bare-metal upgrades (restart only — the build runs while the old instance serves traffic).
 
 ## Post-Upgrade Verification
 

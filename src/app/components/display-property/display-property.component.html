@@ -84,7 +84,7 @@
         </div>
       }
       @if (!datum()) {
-        <em>No location set</em>
+        <em>{{ 'detail.no_location' | translate }}</em>
       }
     }
     @if (propType() == EntityPropertyType.GeoPolygon) {
@@ -98,7 +98,7 @@
         </div>
       }
       @if (!datum()) {
-        <em>No boundary set</em>
+        <em>{{ 'detail.no_boundary' | translate }}</em>
       }
     }
     @if (propType() == EntityPropertyType.Color) {
@@ -147,7 +147,7 @@
             </div>
           }
         } @else {
-          <em class="text-base-content/60">None</em>
+          <em class="text-base-content/60">{{ 'state.none' | translate }}</em>
         }
       </div>
     }
@@ -267,7 +267,7 @@
             </span>
           }
         } @else {
-          <em class="text-base-content/60">No photos</em>
+          <em class="text-base-content/60">{{ 'gallery.empty' | translate }}</em>
         }
       }
     }
@@ -276,7 +276,7 @@
     }
   }
   @if (datum() == null) {
-    <em>Not Set</em>
+    <em>{{ 'state.not_set' | translate }}</em>
   }
   </div>
 </div>

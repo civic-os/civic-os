@@ -24,6 +24,7 @@ import { FkSearchModalComponent } from './fk-search-modal.component';
 import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
 import { createMockEntity, createMockProperty } from '../../testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { EntityPropertyType } from '../../interfaces/entity';
 
 describe('FkSearchModalComponent', () => {
@@ -94,6 +95,7 @@ describe('FkSearchModalComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
+        provideTranslationTesting(),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService }
       ]

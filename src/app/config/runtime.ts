@@ -65,6 +65,10 @@ declare global {
       };
       appTitle?: string;
       faviconUrl?: string;
+      locale?: {
+        defaultLocale: string;
+        supportedLocales: string[];
+      };
     };
   }
 }
@@ -222,4 +226,18 @@ export function getAppTitle(): string {
  */
 export function getFaviconUrl(): string {
   return window.civicOsConfig?.faviconUrl || environment.faviconUrl || '';
+}
+
+/**
+ * Get locale/i18n configuration.
+ * Used by LocaleService to determine default and supported locales.
+ *
+ * @returns Locale config object with defaultLocale and supportedLocales array
+ */
+export function getLocaleConfig(): { defaultLocale: string; supportedLocales: string[] } {
+  const config = window.civicOsConfig?.locale || environment.locale;
+  return {
+    defaultLocale: config?.defaultLocale || 'en',
+    supportedLocales: config?.supportedLocales || ['en']
+  };
 }

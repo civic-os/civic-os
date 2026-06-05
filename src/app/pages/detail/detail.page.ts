@@ -48,6 +48,7 @@ import { ExceptionEditorComponent, ExceptionEditorResult } from '../../component
 import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-form-nav.component';
 import { GuidedFormReviewSectionComponent } from '../../components/guided-form-review-section/guided-form-review-section.component';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { GuidedFormContext } from '../../interfaces/guided-form';
 
 /**
@@ -105,7 +106,8 @@ export interface CalendarSection {
     CosModalComponent,
     GuidedFormNavComponent,
     GuidedFormReviewSectionComponent,
-    PhotoGalleryEditorComponent
+    PhotoGalleryEditorComponent,
+    TranslatePipe
     // TimeSlotCalendarComponent
   ]
 })
