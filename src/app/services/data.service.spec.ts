@@ -21,6 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { DataService } from './data.service';
 import { AnalyticsService } from './analytics.service';
+import { provideTranslationTesting } from '../testing/translation-testing';
 
 // EWKB test data constants - All using Downtown Flint, MI area coordinates
 // Format: [byte order][type][SRID][X coord][Y coord]
@@ -64,6 +65,7 @@ describe('DataService', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslationTesting(),
         { provide: AnalyticsService, useValue: mockAnalytics },
         DataService
       ]

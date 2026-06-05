@@ -5487,6 +5487,139 @@ The complete key list is in `src/app/i18n/en.translations.ts`.
 
 See `docs/notes/I18N_DESIGN.md` for full architecture details.
 
+### Metadata Translations (Phase 2)
+
+> v0.58.0+ — Translating instance-specific entity names, property labels, statuses, etc.
+
+Phase 2 extends translations beyond framework UI strings to **instance-specific metadata**: entity display names, property labels, status names, category names, action buttons, guided form steps, and static text blocks. When a user switches to Spanish, "Building Use Application" becomes "Solicitud de Uso de Edificio" and "Street Address" becomes "Dirección".
+
+#### How It Works
+
+Seven public VIEWs are wrapped with `metadata.t()` on translatable text columns. The `Accept-Language` header (already sent by the locale interceptor from Phase 1) drives translation lookup at query time. For English, `t()` short-circuits with zero overhead — no table lookups occur.
+
+When the user changes locale, the frontend automatically clears schema and dashboard caches, triggering re-fetches of metadata VIEWs with the new `Accept-Language` header.
+
+#### Adding Metadata Translations for Your Instance
+
+To translate your instance's metadata into a new locale:
+
+**Step 1: Identify what needs translating**
+
+```sql
+-- See all entity display names (these appear in sidebar, page titles)
+SELECT table_name, display_name, description
+FROM metadata.entities
+WHERE display_name IS NOT NULL;
+
+-- See all property labels (these appear as column headers, form labels)
+SELECT table_name, column_name, display_name, description
+FROM metadata.properties
+WHERE display_name IS NOT NULL;
+
+-- See status names
+SELECT entity_type, status_key, display_name, description
+FROM metadata.statuses;
+
+-- See category names
+SELECT entity_type, category_key, display_name, description
+FROM metadata.categories;
+```
+
+**Step 2: Insert translations using the correct source keys**
+
+```sql
+-- Entity translations
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text)
+VALUES
+  ('entity', 'Issue.display_name', 'es', 'Problemas'),
+  ('entity', 'Issue.description', 'es', 'Rastrea problemas reportados por la comunidad'),
+  ('entity', 'Inspector.display_name', 'es', 'Inspectores')
+ON CONFLICT (source_type, source_key, locale)
+DO UPDATE SET translated_text = EXCLUDED.translated_text, updated_at = NOW();
+
+-- Property translations
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text)
+VALUES
+  ('property', 'Issue.street_address.display_name', 'es', 'Dirección'),
+  ('property', 'Issue.street_address.description', 'es', 'Dirección de la calle del problema'),
+  ('property', 'Issue.status_id.display_name', 'es', 'Estado')
+ON CONFLICT (source_type, source_key, locale)
+DO UPDATE SET translated_text = EXCLUDED.translated_text, updated_at = NOW();
+
+-- Status translations (use status_key, not display_name)
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text)
+VALUES
+  ('status', 'issue.open.display_name', 'es', 'Abierto'),
+  ('status', 'issue.in_progress.display_name', 'es', 'En Progreso'),
+  ('status', 'issue.closed.display_name', 'es', 'Cerrado')
+ON CONFLICT (source_type, source_key, locale)
+DO UPDATE SET translated_text = EXCLUDED.translated_text, updated_at = NOW();
+
+-- Category translations (use category_key, not display_name)
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text)
+VALUES
+  ('category', 'time_entry.billable.display_name', 'es', 'Facturable')
+ON CONFLICT (source_type, source_key, locale)
+DO UPDATE SET translated_text = EXCLUDED.translated_text, updated_at = NOW();
+```
+
+Or use the bulk RPC:
+
+```sql
+SELECT upsert_translations('[
+  {"source_type": "entity", "source_key": "Issue.display_name", "locale": "es", "translated_text": "Problemas"},
+  {"source_type": "property", "source_key": "Issue.street_address.display_name", "locale": "es", "translated_text": "Dirección"},
+  {"source_type": "status", "source_key": "issue.open.display_name", "locale": "es", "translated_text": "Abierto"}
+]'::jsonb);
+```
+
+**Step 3: Verify translations are served**
+
+```bash
+# English (default)
+curl -s "$POSTGREST/schema_entities?table_name=eq.Issue&select=display_name"
+# → [{"display_name": "Issues"}]
+
+# Spanish (via Accept-Language header)
+curl -s "$POSTGREST/schema_entities?table_name=eq.Issue&select=display_name" \
+  -H "Accept-Language: es"
+# → [{"display_name": "Problemas"}]
+```
+
+#### Metadata Source Key Reference
+
+Each metadata type uses a unique `source_type` and hierarchical dot-notation `source_key`:
+
+| Source Type | Key Pattern | Example Key | VIEW |
+|-------------|-------------|-------------|------|
+| `entity` | `{table_name}.display_name` | `Issue.display_name` | `schema_entities` |
+| `entity` | `{table_name}.description` | `Issue.description` | `schema_entities` |
+| `property` | `{table_name}.{column_name}.display_name` | `Issue.street_address.display_name` | `schema_properties` |
+| `property` | `{table_name}.{column_name}.description` | `Issue.street_address.description` | `schema_properties` |
+| `status` | `{entity_type}.{status_key}.display_name` | `issue.open.display_name` | `statuses` |
+| `status` | `{entity_type}.{status_key}.description` | `issue.open.description` | `statuses` |
+| `category` | `{entity_type}.{category_key}.display_name` | `time_entry.billable.display_name` | `categories` |
+| `category` | `{entity_type}.{category_key}.description` | `time_entry.billable.description` | `categories` |
+| `static_text` | `{table_name}.{id}` | `Issue.42` | `static_text` |
+| `action` | `{table_name}.{action_name}.{column}` | `Issue.approve.display_name` | `schema_entity_actions` |
+| `action_param` | `{table_name}.{action_name}.{param_name}.{column}` | `Issue.approve.reason.display_name` | `schema_entity_actions` |
+| `guided_form_step` | `{guided_form_key}.{step_key}.display_name` | `building_use.contact_info.display_name` | `schema_guided_form_steps` |
+
+**Key design choices**:
+- Status and category keys use `status_key`/`category_key` (not `display_name`) for stability across renames
+- `table_name` in keys uses the actual PostgreSQL table name (e.g., `Pot_Hole`), not the display name
+- Action columns include: `display_name`, `description`, `confirmation_message`, `disabled_tooltip`, `success_message`
+- Action param columns include: `display_name`, `placeholder`
+
+#### What's Not Yet Translated (Phase 3)
+
+- Dashboard widget titles and JSONB config text (Markdown content, nav button labels)
+- Dashboard RPC functions (`get_dashboards`/`get_dashboard` bypass VIEWs)
+- Schema decisions (developer-facing ADR content)
+- Admin translation management UI
+
+See `docs/notes/I18N_DESIGN.md` for full architecture details.
+
 ---
 
 ## Production Considerations

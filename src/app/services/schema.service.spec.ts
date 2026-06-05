@@ -22,6 +22,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { SchemaService } from './schema.service';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable } from '../interfaces/entity';
 import { createMockEntity, createMockProperty, MOCK_PROPERTIES, MOCK_ENTITIES, expectPostgrestRequest, flushM2mMetadata } from '../testing';
+import { provideTranslationTesting } from '../testing/translation-testing';
+import { LocaleService } from './locale.service';
 import { environment } from '../../environments/environment';
 import { Validators } from '@angular/forms';
 
@@ -35,6 +37,7 @@ describe('SchemaService', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslationTesting(),
         SchemaService
       ]
     });
@@ -2395,6 +2398,65 @@ describe('SchemaService', () => {
 
       // Properties with column_width should use that value
       expect(SchemaService.getRenderableColumnSpan(propertyItem)).toBe(1);
+    });
+  });
+
+  describe('Locale-aware cache invalidation', () => {
+    it('should not trigger refreshCache on initial locale', () => {
+      // The service was created with locale='en' (default from mock).
+      // No HTTP requests should have been made for schema_entities since
+      // we haven't called init() or getEntities(). The initial locale
+      // should NOT trigger a refresh.
+      httpMock.expectNone(req => req.url.includes('schema_entities'));
+    });
+
+    it('should trigger refreshCache when locale changes', () => {
+      const localeService = TestBed.inject(LocaleService);
+
+      // Flush the initial effect execution (reads locale signal, sets initial=true→false)
+      TestBed.flushEffects();
+
+      // Change locale to trigger the effect
+      (localeService.locale as any).set('es');
+      TestBed.flushEffects();
+
+      // refreshCache() triggers getSchema(), getProperties(), and getConstraintMessages()
+      const schemaReq = httpMock.match(req => req.url.includes('schema_entities'));
+      expect(schemaReq.length).toBeGreaterThanOrEqual(1);
+      schemaReq.forEach(r => r.flush([]));
+
+      const propsReq = httpMock.match(req => req.url.includes('schema_properties'));
+      propsReq.forEach(r => r.flush([]));
+
+      const constraintReq = httpMock.match(req => req.url.includes('constraint_messages'));
+      constraintReq.forEach(r => r.flush([]));
+    });
+
+    it('should clear category caches on refreshCache', () => {
+      // Pre-populate category cache
+      service.getCategoriesForEntity('test_type').subscribe();
+      const statusReq = httpMock.match(req => req.url.includes('statuses'));
+      statusReq.forEach(r => r.flush([]));
+
+      // Call refreshCache directly
+      service.refreshCache();
+
+      // Verify categories are cleared by checking that a new request is needed
+      service.getCategoriesForEntity('test_type').subscribe();
+
+      // Should see new HTTP requests for schema + categories
+      const schemaReq = httpMock.match(req => req.url.includes('schema_entities'));
+      schemaReq.forEach(r => r.flush([]));
+
+      const propsReq = httpMock.match(req => req.url.includes('schema_properties'));
+      propsReq.forEach(r => r.flush([]));
+
+      const constraintReq = httpMock.match(req => req.url.includes('constraint_messages'));
+      constraintReq.forEach(r => r.flush([]));
+
+      const catReq = httpMock.match(req => req.url.includes('categories'));
+      expect(catReq.length).toBeGreaterThanOrEqual(1);
+      catReq.forEach(r => r.flush([]));
     });
   });
 });

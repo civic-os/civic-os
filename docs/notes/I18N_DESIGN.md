@@ -180,19 +180,89 @@ Shared test utility at `src/app/testing/translation-testing.ts` that provides mo
 
 Required in any spec file where components import `TranslatePipe`.
 
+## Phase 2: Metadata Translations (v0.58.0)
+
+Phase 2 wraps instance-specific metadata text (entity names, property labels, status names, etc.) with `metadata.t()` in 7 public VIEWs. The `Accept-Language` header — already sent by the locale interceptor — drives translation lookup at query time.
+
+### Source Types and Key Conventions
+
+Each metadata type uses a unique `source_type` and hierarchical dot-notation `source_key`:
+
+| Source Type | Key Pattern | Example |
+|-------------|-------------|---------|
+| `entity` | `{table_name}.display_name` | `Issue.display_name` |
+| `entity` | `{table_name}.description` | `Issue.description` |
+| `property` | `{table_name}.{column_name}.display_name` | `Issue.street_address.display_name` |
+| `property` | `{table_name}.{column_name}.description` | `Issue.description.description` |
+| `status` | `{entity_type}.{status_key}.display_name` | `issue.new.display_name` |
+| `status` | `{entity_type}.{status_key}.description` | `issue.new.description` |
+| `category` | `{entity_type}.{category_key}.display_name` | `time_entry.billable.display_name` |
+| `static_text` | `{table_name}.{id}` | `Issue.42` |
+| `action` | `{table_name}.{action_name}.{column}` | `Issue.approve.display_name` |
+| `action_param` | `{table_name}.{action_name}.{param_name}.{column}` | `Issue.approve.reason.display_name` |
+| `guided_form_step` | `{guided_form_key}.{step_key}.display_name` | `building_use.contact_info.display_name` |
+
+**Key design choice**: Status and category keys use `status_key`/`category_key` (not `display_name`) for stability across renames.
+
+### VIEWs Modified
+
+All 7 VIEWs are recreated with `metadata.t()` wrapping on translatable text columns:
+
+1. `schema_entities` — `display_name`, `description`
+2. `schema_properties` — `display_name`, `description`
+3. `statuses` — `display_name`, `description`
+4. `categories` — `display_name`, `description`
+5. `static_text` — `content`
+6. `schema_entity_actions` — `display_name`, `description`, `confirmation_message`, `disabled_tooltip`, `default_success_message` + embedded param `display_name`, `placeholder`
+7. `schema_guided_form_steps` — `display_name`, `description`
+
+### PostgREST 13 Header Handling
+
+PostgREST 13+ stores request headers in a single `request.headers` JSON GUC, not individual `request.header.<name>` GUCs. Hyphenated header names like `accept-language` can never be individual GUCs because PostgreSQL identifiers don't support hyphens. The `metadata.current_locale()` function was updated to read from the JSON blob with a legacy fallback:
+
+```sql
+SELECT COALESCE(
+  NULLIF(current_setting('request.headers', true)::json->>'accept-language', ''),
+  NULLIF(current_setting('request.header.accept-language', true), ''),
+  'en'
+);
+```
+
+### VIEW Recreation (Collation)
+
+VIEWs wrapped with `metadata.t()` must use `DROP VIEW IF EXISTS ... CASCADE` + `CREATE VIEW`, not `CREATE OR REPLACE VIEW`. The `t()` function returns `TEXT` with collation `"C"`, while original columns use collation `"default"` — PostgreSQL rejects collation changes via `CREATE OR REPLACE`. The `schema_entity_dependencies` VIEW (depends on `schema_properties`) must be explicitly recreated after the CASCADE drop.
+
+### Frontend Cache Invalidation
+
+When the user changes locale, the frontend must re-fetch schema metadata because VIEWs return different text based on `Accept-Language`. Both `SchemaService` and `DashboardService` use an `effect()` watching `LocaleService.locale()` that calls `refreshCache()` on changes (skipping the initial emission).
+
+**Bug fix**: `SchemaService.refreshCache()` was missing category cache clearing — status caches were cleared but categories were not.
+
+### Circular Dependency: `Injector.get()` Pattern
+
+Adding `LocaleService` to `SchemaService` (for locale-aware cache invalidation) created a circular DI chain: `SchemaService` → `LocaleService` → `AuthService` → `SchemaService`. The fix: `LocaleService` uses `inject(Injector)` instead of `inject(AuthService)`, then lazily resolves `AuthService` via `this.injector.get(AuthService)` only inside `setLocale()`. This breaks the cycle because Angular's DI doesn't try to resolve `AuthService` during `LocaleService` construction.
+
+### Deferred to Phase 3
+
+- Dashboard widget JSONB `config` translations (embedded text in Markdown widgets, nav buttons)
+- Dashboard RPC function modifications (`get_dashboards`/`get_dashboard` don't use VIEWs)
+- `schema_decisions` translation (developer-facing, not user-facing)
+- Admin translation management UI
+
 ## Phase Roadmap
 
 | Phase | Version | Scope |
 |-------|---------|-------|
-| **Phase 1** (this) | v0.57.0 | Foundation tables, Angular UI strings (~250 keys), locale service, settings Language tab |
-| Phase 2 | v0.58.0 | Metadata translations — wrap schema VIEWs with `t()`, widget i18n, per-locale schema caching |
-| Phase 3 | v0.59.0 | Admin translation UI, notification template localization, CSV import/export for translations |
+| Phase 1 | v0.57.0 | Foundation tables, Angular UI strings (~250 keys), locale service, settings Language tab |
+| **Phase 2** | v0.58.0 | Metadata translations — wrap 7 VIEWs with `t()`, locale-aware cache invalidation, pothole Spanish seeds |
+| Phase 3 | v0.59.0 | Dashboard RPC translations, admin translation UI, notification template localization |
 
 ## File Reference
 
 | File | Purpose |
 |------|---------|
-| `postgres/migrations/deploy/v0-57-0-add-i18n.sql` | Migration: tables, functions, seeds |
+| `postgres/migrations/deploy/v0-57-0-add-i18n.sql` | Phase 1: tables, functions, UI string seeds |
+| `postgres/migrations/deploy/v0-58-0-metadata-translations.sql` | Phase 2: VIEW rewrites, metadata seeds |
 | `src/app/i18n/en.translations.ts` | Single source of truth for English strings |
 | `src/app/services/locale.service.ts` | Signal-based locale management |
 | `src/app/services/translation.service.ts` | Translation lookup + cache |

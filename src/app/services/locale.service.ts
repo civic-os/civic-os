@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, signal, Signal, effect, inject } from '@angular/core';
+import { Injectable, Injector, signal, Signal, effect, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { getLocaleConfig, getPostgrestUrl } from '../config/runtime';
 import { AuthService } from './auth.service';
@@ -47,7 +47,7 @@ const LOCALE_DISPLAY_NAMES: Record<string, LocaleInfo> = {
 })
 export class LocaleService {
   private readonly http = inject(HttpClient);
-  private readonly auth = inject(AuthService);
+  private readonly injector = inject(Injector);
   private readonly config = getLocaleConfig();
 
   private readonly STORAGE_KEY = 'civic-os-locale';
@@ -135,8 +135,11 @@ export class LocaleService {
     }
 
     // Persist to user profile if authenticated
-    if (this.auth.authenticated()) {
-      this.auth.getCurrentUserId().subscribe(userId => {
+    // Lazy-resolve AuthService to avoid circular dependency:
+    // SchemaService → LocaleService → AuthService → SchemaService
+    const auth = this.injector.get(AuthService);
+    if (auth.authenticated()) {
+      auth.getCurrentUserId().subscribe(userId => {
         if (userId) {
           this.http.patch(
             getPostgrestUrl() + 'civic_os_users?id=eq.' + userId,

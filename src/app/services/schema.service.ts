@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,7 +16,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
@@ -25,6 +25,7 @@ import { ValidatorFn, Validators } from '@angular/forms';
 import { getPostgrestUrl } from '../config/runtime';
 import { isSystemType } from '../constants/system-types';
 import { ConstraintMessage } from '../interfaces/api';
+import { LocaleService } from './locale.service';
 
 /**
  * Metadata for synthetic M:M properties from schema_m2m_properties VIEW.
@@ -77,6 +78,7 @@ export interface CategoryOption {
 })
 export class SchemaService {
   private http = inject(HttpClient);
+  private readonly localeService = inject(LocaleService);
 
   public properties?: SchemaEntityProperty[];
   public constraintMessages?: ConstraintMessage[];
@@ -118,6 +120,19 @@ export class SchemaService {
     map(tables => tables!)
   );
 
+  // Re-fetch schema data when locale changes (VIEWs return locale-aware text via t())
+  private localeEffect = (() => {
+    let initial = true;
+    return effect(() => {
+      this.localeService.locale(); // Track the signal
+      if (initial) {
+        initial = false;
+        return;
+      }
+      this.refreshCache();
+    });
+  })();
+
   private getSchema() {
     if (!this.schemaCache$) {
       this.schemaCache$ = this.http.get<SchemaEntityTable[]>(getPostgrestUrl() + 'schema_entities')
@@ -155,6 +170,10 @@ export class SchemaService {
     this.statusesCache.clear();
     this.statusOptionsCache.set(new Map());
     this.loadingStatuses.clear();
+    // Clear category cache (keyed by entity_type)
+    this.categoriesCache.clear();
+    this.categoryOptionsCache.set(new Map());
+    this.loadingCategories.clear();
     // Reset loading flags to allow new fetches
     this.loadingEntities = false;
     this.loadingProperties = false;

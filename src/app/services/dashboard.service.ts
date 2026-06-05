@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,11 +16,12 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { Dashboard, DashboardWidget, WidgetType } from '../interfaces/dashboard';
 import { ApiResponse } from '../interfaces/api';
 import { getPostgrestUrl } from '../config/runtime';
+import { LocaleService } from './locale.service';
 
 /**
  * Dashboard Service
@@ -36,9 +37,23 @@ import { getPostgrestUrl } from '../config/runtime';
 })
 export class DashboardService {
   private http = inject(HttpClient);
+  private readonly localeService = inject(LocaleService);
 
   // Cache dashboard list in signal for reactivity
   private dashboardsCache = signal<Dashboard[] | undefined>(undefined);
+
+  // Re-fetch dashboards when locale changes (preparatory for Phase 3 RPC translation)
+  private localeEffect = (() => {
+    let initial = true;
+    return effect(() => {
+      this.localeService.locale(); // Track the signal
+      if (initial) {
+        initial = false;
+        return;
+      }
+      this.refreshCache();
+    });
+  })();
 
   /**
    * Get all visible dashboards (public + user's private).

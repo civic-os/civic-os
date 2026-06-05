@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { DashboardService } from './dashboard.service';
 import { Dashboard, WidgetType } from '../interfaces/dashboard';
 import { createMockDashboard, createMockWidgetType, MOCK_DASHBOARDS, MOCK_WIDGET_TYPES } from '../testing';
+import { provideTranslationTesting } from '../testing/translation-testing';
+import { LocaleService } from './locale.service';
 
 describe('DashboardService', () => {
   let service: DashboardService;
@@ -39,6 +41,7 @@ describe('DashboardService', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslationTesting(),
         DashboardService
       ]
     });
@@ -306,6 +309,34 @@ describe('DashboardService', () => {
       // Clean up pending request
       const req = httpMock.match(testPostgrestUrl + 'rpc/get_dashboards');
       req.forEach(r => r.flush([]));
+    });
+  });
+
+  describe('Locale-aware cache invalidation', () => {
+    it('should clear dashboard cache when locale changes', () => {
+      const localeService = TestBed.inject(LocaleService);
+
+      // Pre-populate cache
+      service.getDashboards().subscribe();
+      const initialReq = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
+      initialReq.flush([MOCK_DASHBOARDS.welcome]);
+
+      // Flush the initial effect execution (reads locale signal, sets initial=true→false)
+      TestBed.flushEffects();
+
+      // Change locale
+      (localeService.locale as any).set('es');
+      TestBed.flushEffects();
+
+      // refreshCache() should have triggered a new getDashboards() fetch
+      const refreshReq = httpMock.match(testPostgrestUrl + 'rpc/get_dashboards');
+      expect(refreshReq.length).toBeGreaterThanOrEqual(1);
+      refreshReq.forEach(r => r.flush([MOCK_DASHBOARDS.welcome]));
+    });
+
+    it('should not trigger refresh on initial locale', () => {
+      // Service was just created with default locale — no automatic fetch
+      httpMock.expectNone(testPostgrestUrl + 'rpc/get_dashboards');
     });
   });
 
