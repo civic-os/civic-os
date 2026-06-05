@@ -222,20 +222,10 @@ type NotificationTemplate struct {
 	SMS     string
 }
 
-// loadTemplate fetches template from database
+// loadTemplate fetches template from database.
+// Delegates to the shared loadTemplateFromDB() function in send_email_worker.go.
 func (w *NotificationWorker) loadTemplate(ctx context.Context, templateName string) (*NotificationTemplate, error) {
-	var tmpl NotificationTemplate
-	err := w.dbPool.QueryRow(ctx, `
-		SELECT subject_template, html_template, text_template, COALESCE(sms_template, '')
-		FROM metadata.notification_templates
-		WHERE name = $1
-	`, templateName).Scan(&tmpl.Subject, &tmpl.HTML, &tmpl.Text, &tmpl.SMS)
-
-	if err != nil {
-		return nil, fmt.Errorf("template '%s' not found: %w", templateName, err)
-	}
-
-	return &tmpl, nil
+	return loadTemplateFromDB(ctx, w.dbPool, templateName)
 }
 
 // sendEmail sends email via SMTP with STARTTLS

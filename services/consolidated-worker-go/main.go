@@ -275,6 +275,14 @@ func main() {
 	})
 	log.Println("[Init] ✓ NotificationWorker registered (queue: notifications, priority 1)")
 
+	// Send Email Worker (notifications queue, priority 2 — multi-recipient email)
+	river.AddWorker(workers, &SendEmailWorker{
+		dbPool:     dbPool,
+		renderer:   renderer,
+		smtpConfig: smtpConfig,
+	})
+	log.Println("[Init] ✓ SendEmailWorker registered (queue: notifications, priority 2)")
+
 	// Validation Worker (notifications queue, priority 4)
 	river.AddWorker(workers, &ValidationWorker{
 		dbPool:   dbPool,
@@ -414,6 +422,7 @@ func main() {
 	log.Println("  - s3_presign (queue: s3_signer, 20 workers)")
 	log.Println("  - thumbnail_generate (queue: thumbnails,", thumbnailMaxWorkers, "workers)")
 	log.Println("  - send_notification (queue: notifications, 30 workers)")
+	log.Println("  - send_email (queue: notifications)")
 	log.Println("  - validate_template_parts (queue: notifications)")
 	log.Println("  - preview_template_parts (queue: notifications)")
 	log.Println("  - expand_recurring_series (queue: recurring, 5 workers)")
