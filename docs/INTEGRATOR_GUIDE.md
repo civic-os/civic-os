@@ -811,50 +811,62 @@ Calendar widget (requires time_slot column):
 
 Setup: `cd examples/storymap && docker-compose up -d && npm run generate storymap && npm start`
 
+**Chart Widget** (v0.61.0):
+
+Chart widgets render pre-aggregated data from PostgreSQL VIEWs as grouped bar charts. The aggregation logic lives entirely in SQL — the widget is a presentation layer only.
+
+**Step 1**: Create a chart-ready VIEW (pre-aggregated, no `id` column):
+```sql
+CREATE OR REPLACE VIEW issues_by_status AS
+SELECT
+  s.display_name AS status_label,
+  COUNT(*) AS issue_count
+FROM issues i
+JOIN metadata.statuses s ON i.status_id = s.id
+GROUP BY s.display_name, s.sort_order
+ORDER BY s.sort_order;
+
+GRANT SELECT ON issues_by_status TO web_anon, authenticated;
+```
+
+**Step 2**: Add chart widget to a dashboard:
+```sql
+INSERT INTO metadata.dashboard_widgets (
+  dashboard_id, widget_type, entity_key, title, config, sort_order, width, height
+) VALUES (
+  1, 'chart', 'issues_by_status', 'Issues by Status',
+  jsonb_build_object(
+    'labelColumn', 'status_label',
+    'valueColumns', jsonb_build_array('issue_count'),
+    'xAxisLabel', 'Status',
+    'yAxisLabel', 'Count'
+  ),
+  5, 2, 2  -- full width, 2 rows tall
+);
+```
+
+**Grouped bars** (multi-series): Use multiple entries in `valueColumns`:
+```sql
+jsonb_build_object(
+  'labelColumn', 'week_label',
+  'valueColumns', jsonb_build_array('total_referrals', 'poor_outcome_referrals'),
+  'seriesLabels', jsonb_build_array('Total Referrals', 'Poor Outcome'),
+  'orderBy', 'week_start',
+  'orderDirection', 'asc'
+)
+```
+
+**Custom colors**: `seriesColors` accepts DaisyUI theme names (`'primary'`, `'error'`) or hex values (`'#ff0000'`). Theme names follow the active DaisyUI theme automatically:
+```sql
+jsonb_build_object(
+  'colorMode', 'custom',
+  'seriesColors', jsonb_build_array('primary', 'error')
+)
+```
+
+See `docs/development/DASHBOARD_WIDGETS.md` (ChartWidgetConfig section) for full config reference and troubleshooting.
+
 **Adding Custom Widget Types**:
-1. Insert into `metadata.widget_types`:
-   ```sql
-   INSERT INTO metadata.widget_types (name, description)
-   VALUES ('chart', 'Interactive chart visualization');
-   ```
-
-2. Create Angular component implementing widget interface:
-   ```typescript
-   @Component({
-     selector: 'app-chart-widget',
-     // ... component implementation
-   })
-   export class ChartWidgetComponent {
-     @Input() config!: ChartWidgetConfig;  // Type-safe config
-     // ... rendering logic
-   }
-   ```
-
-3. Register in `WidgetComponentRegistry` via `app.config.ts`:
-   ```typescript
-   export const appConfig: ApplicationConfig = {
-     providers: [
-       {
-         provide: APP_INITIALIZER,
-         useFactory: (registry: WidgetComponentRegistry) => () => {
-           registry.register('chart', ChartWidgetComponent);
-         },
-         deps: [WidgetComponentRegistry],
-         multi: true
-       }
-     ]
-   };
-   ```
-
-4. Define TypeScript interface for widget config:
-   ```typescript
-   interface ChartWidgetConfig {
-     chartType: 'line' | 'bar' | 'pie';
-     dataSource: string;  // RPC function or view name
-     xAxis: string;
-     yAxis: string;
-   }
-   ```
 
 See `docs/notes/DASHBOARD_DESIGN.md` for complete architecture, Phase 2-5 roadmap, and future features.
 

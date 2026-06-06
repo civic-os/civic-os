@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -15,11 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Application version.
- *
- * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
- * This file is generated from package.json by scripts/update-version.js
- * Run 'npm run update-version' to regenerate after version changes.
- */
-export const APP_VERSION = '0.61.0';
+.chart-widget-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Axis labels and ticks inherit base-content color for theme compatibility */
+:host ::ng-deep .unovis-axis text {
+  fill: oklch(var(--bc));
+}
+
+:host ::ng-deep .unovis-axis line,
+:host ::ng-deep .unovis-axis .domain {
+  stroke: oklch(var(--bc) / 0.2);
+}
+
+:host ::ng-deep .unovis-axis .grid-line line {
+  stroke: oklch(var(--bc) / 0.1);
+}

@@ -188,6 +188,27 @@ export interface DashboardNavigationWidgetConfig {
 }
 
 /**
+ * Configuration for chart widget (v0.61.0).
+ * Renders pre-aggregated data as grouped bar charts using Unovis.
+ * Aggregation lives in PostgreSQL VIEWs; the widget is presentation only.
+ * Stored in dashboard_widgets.config as JSONB.
+ */
+export interface ChartWidgetConfig extends FilteredEntityWidgetBase {
+  chartType?: 'bar';               // Extensible later: 'line' | 'pie' | 'donut'
+  labelColumn: string;             // x-axis categories (e.g., 'week_label')
+  valueColumns: string[];          // y-axis values — one bar per column per label
+                                   // Single entry = simple bar; multiple = grouped bar
+  seriesLabels?: string[];         // Legend labels per series (e.g., ['Total', 'Poor Outcome'])
+  orderBy?: string;                // Sort column (default: labelColumn)
+  orderDirection?: 'asc' | 'desc';
+  limit?: number;                  // Max bars (default: 50)
+  colorMode?: 'theme' | 'custom';  // 'theme' = DaisyUI palette, 'custom' = explicit colors
+  seriesColors?: string[];         // Colors per series: DaisyUI names ('primary', 'error') or hex ('#ff0000')
+  yAxisLabel?: string;
+  xAxisLabel?: string;
+}
+
+/**
  * Configuration for stat card widget (Phase 5).
  * Extends the base filtered entity pattern with aggregation-specific options.
  * Stored in dashboard_widgets.config as JSONB.

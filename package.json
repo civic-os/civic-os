@@ -1,6 +1,6 @@
 {
   "name": "civic-os",
-  "version": "0.60.1",
+  "version": "0.61.0",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
@@ -46,6 +46,8 @@
     "@texel/color": "^1.1.10",
     "@types/dagre": "^0.7.53",
     "@types/leaflet": "^1.9.20",
+    "@unovis/angular": "^1.6.5",
+    "@unovis/ts": "^1.6.5",
     "blockly": "^12.3.1",
     "chrono-node": "^2.9.0",
     "dagre": "^0.8.5",

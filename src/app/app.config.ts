@@ -32,6 +32,7 @@ import { DashboardNavigationWidgetComponent } from './components/widgets/dashboa
 import { CalendarWidgetComponent } from './components/widgets/calendar-widget/calendar-widget.component';
 import { NavButtonsWidgetComponent } from './components/widgets/nav-buttons-widget/nav-buttons-widget.component';
 import { ImageWidgetComponent } from './components/widgets/image-widget/image-widget.component';
+import { ChartWidgetComponent } from './components/widgets/chart-widget/chart-widget.component';
 import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
 import { videoEmbedExtension } from './markdown/video-embed.extension';
 import { markdownSanitize } from './markdown/markdown-sanitize';
@@ -120,6 +121,7 @@ export const appConfig: ApplicationConfig = {
       registry.register('calendar', CalendarWidgetComponent);           // Phase 2
       registry.register('nav_buttons', NavButtonsWidgetComponent);      // Phase 2
       registry.register('image', ImageWidgetComponent);                  // v0.38.0
+      registry.register('chart', ChartWidgetComponent);                  // v0.61.0
     })
   ]
 };

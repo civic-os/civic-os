@@ -555,6 +555,132 @@ jsonb_build_object(
 | Header/Description | Yes | No |
 | Best for | Quick actions, link hubs | Sequential storymap flows |
 
+## ChartWidgetConfig
+
+**Version**: v0.61.0
+**Library**: Unovis (F5) — SVG rendering, CSS variable theming
+**Registration key**: `chart`
+
+Renders pre-aggregated data from PostgreSQL VIEWs as grouped bar charts. Aggregation logic lives in SQL; the widget is presentation-only.
+
+### Config Interface
+
+```typescript
+interface ChartWidgetConfig extends FilteredEntityWidgetBase {
+  chartType?: 'bar';               // Extensible later: 'line' | 'pie' | 'donut'
+  labelColumn: string;             // x-axis categories (e.g., 'week_label')
+  valueColumns: string[];          // y-axis values — one column per bar series
+  seriesLabels?: string[];         // Legend labels (e.g., ['Total', 'Poor Outcome'])
+  orderBy?: string;                // Sort column (default: labelColumn)
+  orderDirection?: 'asc' | 'desc';
+  limit?: number;                  // Max data points (default: 50)
+  colorMode?: 'theme' | 'custom';  // 'theme' = DaisyUI palette (default)
+  seriesColors?: string[];         // DaisyUI names ('primary', 'error') or hex ('#ff0000')
+  yAxisLabel?: string;
+  xAxisLabel?: string;
+}
+```
+
+### Key Design Decisions
+
+1. **`isSummaryView: true`**: Chart VIEWs lack `id` columns. This flag prevents DataService from auto-appending `id` to the select list.
+2. **No SchemaService**: Chart VIEWs return flat, denormalized data — no FK expansion needed.
+3. **`not-prose` wrapper**: Prevents Tailwind Typography from interfering with SVG elements.
+4. **Theme reactivity**: Colors re-resolve on theme change via `effect()` watching `ThemeService.theme()`.
+5. **DaisyUI color names**: `seriesColors` accepts DaisyUI names like `'primary'`, `'error'` — resolved to hex at render time, so they follow the active theme.
+
+### SQL Example: Simple Bar Chart
+
+```sql
+-- 1. Create a chart-ready VIEW (pre-aggregated, no id column)
+CREATE OR REPLACE VIEW issues_by_status AS
+SELECT
+  s.display_name AS status_label,
+  COUNT(*) AS issue_count
+FROM issues i
+JOIN metadata.statuses s ON i.status_id = s.id
+GROUP BY s.display_name, s.sort_order
+ORDER BY s.sort_order;
+
+GRANT SELECT ON issues_by_status TO web_anon, authenticated;
+
+-- 2. Add chart widget to dashboard
+INSERT INTO metadata.dashboard_widgets (
+  dashboard_id, widget_type, entity_key, title, config, sort_order, width, height
+) VALUES (
+  1, 'chart', 'issues_by_status', 'Issues by Status',
+  jsonb_build_object(
+    'labelColumn', 'status_label',
+    'valueColumns', jsonb_build_array('issue_count'),
+    'xAxisLabel', 'Status',
+    'yAxisLabel', 'Count'
+  ),
+  5, 2, 2
+);
+```
+
+### SQL Example: Grouped Bar Chart (Multi-Series)
+
+```sql
+-- 1. Create VIEW with multiple value columns
+CREATE OR REPLACE VIEW referrals_per_week AS
+SELECT
+  TO_CHAR(DATE_TRUNC('week', referral_date), 'MM/DD') AS week_label,
+  DATE_TRUNC('week', referral_date)::date AS week_start,
+  COUNT(*) AS total_referrals,
+  COUNT(*) FILTER (WHERE outcome = 'poor') AS poor_outcome_referrals
+FROM referrals
+GROUP BY DATE_TRUNC('week', referral_date)
+ORDER BY week_start DESC LIMIT 12;
+
+GRANT SELECT ON referrals_per_week TO web_anon, authenticated;
+
+-- 2. Widget config: multiple valueColumns = grouped bars
+INSERT INTO metadata.dashboard_widgets (
+  dashboard_id, widget_type, entity_key, title, config, sort_order, width, height
+) VALUES (
+  1, 'chart', 'referrals_per_week', 'Referrals Per Week',
+  jsonb_build_object(
+    'labelColumn', 'week_label',
+    'valueColumns', jsonb_build_array('total_referrals', 'poor_outcome_referrals'),
+    'seriesLabels', jsonb_build_array('Total Referrals', 'Poor Outcome'),
+    'seriesColors', jsonb_build_array('primary', 'error'),
+    'colorMode', 'custom',
+    'orderBy', 'week_start',
+    'orderDirection', 'asc',
+    'xAxisLabel', 'Week',
+    'yAxisLabel', 'Referrals'
+  ),
+  5, 2, 2
+);
+```
+
+### Config Reference
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `labelColumn` | Yes | — | Column for x-axis labels |
+| `valueColumns` | Yes | — | Array of columns for bar heights |
+| `seriesLabels` | No | — | Legend labels (one per valueColumn) |
+| `chartType` | No | `'bar'` | Chart type (only `'bar'` for v1) |
+| `orderBy` | No | `labelColumn` | Sort column |
+| `orderDirection` | No | `'asc'` | Sort direction |
+| `limit` | No | `50` | Max data points |
+| `colorMode` | No | `'theme'` | `'theme'` = auto DaisyUI, `'custom'` = explicit |
+| `seriesColors` | No | — | DaisyUI names or hex per series |
+| `xAxisLabel` | No | — | X-axis label text |
+| `yAxisLabel` | No | — | Y-axis label text |
+| `filters` | No | `[]` | PostgREST filters (inherited from base) |
+
+### Troubleshooting
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| "No data to display" | VIEW returns no rows, or `entity_key` doesn't match VIEW name | Check PostgREST: `curl http://localhost:3000/your_view` |
+| Bars all black | Running in SSR or `getComputedStyle` returns empty | Fallback palette used — check Canvas API availability |
+| X-axis labels missing | `labelColumn` doesn't match a column in the VIEW | Verify column names match exactly |
+| 404 from PostgREST | VIEW not granted to `web_anon`/`authenticated` | Add `GRANT SELECT ON your_view TO authenticated;` |
+
 ## Widget Grid Layout
 
 Widgets use a 2-column grid system:
