@@ -8,8 +8,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files for dependency installation
-COPY package*.json ./
+# Copy package files and npm config for dependency installation
+COPY package*.json .npmrc ./
 
 # Install all dependencies from lockfile (including devDeps needed for Angular build)
 # PUPPETEER_SKIP_DOWNLOAD avoids downloading Chromium (only needed for testing)
