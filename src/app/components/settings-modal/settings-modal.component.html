@@ -141,13 +141,13 @@
                   <input
                     type="checkbox"
                     class="checkbox checkbox-sm hidden"
-                    [checked]="isRoleSelected(role.display_name)"
-                    (change)="toggleRole(role.display_name)"
+                    [checked]="isRoleSelected(role.role_key)"
+                    (change)="toggleRole(role.role_key)"
                   />
                   <span
                     class="badge badge-lg cursor-pointer transition-colors"
-                    [class.badge-primary]="isRoleSelected(role.display_name)"
-                    [class.badge-outline]="!isRoleSelected(role.display_name)"
+                    [class.badge-primary]="isRoleSelected(role.role_key)"
+                    [class.badge-outline]="!isRoleSelected(role.role_key)"
                   >
                     {{ role.display_name }}
                   </span>

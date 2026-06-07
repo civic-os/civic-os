@@ -180,7 +180,7 @@ export class SettingsModalComponent {
     this.permissionsService.getRoles().subscribe({
       next: (roles) => {
         // Filter out 'anonymous' - can't impersonate as anonymous
-        this.availableRoles.set(roles.filter(r => r.display_name !== 'anonymous'));
+        this.availableRoles.set(roles.filter(r => r.role_key !== 'anonymous'));
       },
       error: (err) => {
         console.error('Failed to load roles for impersonation:', err);
