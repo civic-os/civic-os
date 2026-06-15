@@ -135,29 +135,6 @@ BEGIN
     4, 2, 2
   );
 
-  -- Widget 5: Referrals Per Week Chart
-  INSERT INTO metadata.dashboard_widgets (
-    dashboard_id, widget_type, entity_key, title,
-    config, sort_order, width, height
-  ) VALUES (
-    v_dashboard_id,
-    'chart',
-    'referrals_per_week',
-    'Referrals Per Week',
-    jsonb_build_object(
-      'labelColumn', 'week_label',
-      'valueColumns', jsonb_build_array('total_referrals', 'poor_outcome_referrals'),
-      'seriesLabels', jsonb_build_array('Total Referrals', 'Poor Outcome'),
-      'colorMode', 'custom',
-      'seriesColors', jsonb_build_array('primary', 'warning'),
-      'orderBy', 'week_start',
-      'orderDirection', 'asc',
-      'xAxisLabel', 'Week',
-      'yAxisLabel', 'Referrals'
-    ),
-    5, 2, 2
-  );
-
   -- Assign this dashboard as the default for ic_staff and admin roles
   INSERT INTO metadata.dashboard_role_defaults (role_id, dashboard_id, priority)
   SELECT r.id, v_dashboard_id, CASE r.role_key WHEN 'admin' THEN 10 ELSE 0 END

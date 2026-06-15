@@ -249,34 +249,6 @@ ON CONFLICT (table_name, column_name) DO UPDATE SET
   show_on_edit = EXCLUDED.show_on_edit;
 
 
--- ============================================================================
--- 6. Referrals Per Week (Chart-ready VIEW for dashboard widget)
--- ============================================================================
--- Pre-aggregated weekly data for the chart widget. No id column — consumed
--- via isSummaryView: true in the frontend DataService.
-
-CREATE OR REPLACE VIEW referrals_per_week AS
-SELECT
-  DATE_TRUNC('week', r.referral_date)::date AS week_start,
-  TO_CHAR(DATE_TRUNC('week', r.referral_date), 'MM/DD') AS week_label,
-  COUNT(*) AS total_referrals,
-  COUNT(*) FILTER (WHERE
-    ttc.category_key IN ('more_than_5_days', 'unable_to_contact')
-    OR h.category_key IN ('not_helpful', 'could_not_contact')
-  ) AS poor_outcome_referrals
-FROM referrals r
-LEFT JOIN follow_up_surveys s ON s.referral_id = r.id
-LEFT JOIN metadata.categories ttc ON ttc.id = s.time_to_contact_id
-  AND ttc.entity_type = 'time_to_contact'
-LEFT JOIN metadata.categories h ON h.id = s.helpfulness_id
-  AND h.entity_type = 'helpfulness'
-GROUP BY DATE_TRUNC('week', r.referral_date)
-ORDER BY week_start DESC
-LIMIT 12;
-
-GRANT SELECT ON referrals_per_week TO web_anon, authenticated;
-
-
 -- Notify PostgREST to reload schema cache
 NOTIFY pgrst, 'reload schema';
 
