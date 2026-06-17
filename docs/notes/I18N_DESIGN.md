@@ -57,12 +57,19 @@ When `TranslationService.get(key)` is called:
 
 ### Locale Resolution Priority
 
-When `LocaleService` initializes, it resolves the initial locale:
+Locale resolution happens in two phases because the JWT isn't available at service init time (Keycloak auth flow hasn't completed yet).
 
-1. JWT `locale` claim (synced from `civic_os_users_private.locale` via Keycloak)
-2. `navigator.language` (browser preference)
-3. Instance `defaultLocale` from runtime config
-4. `'en'` hardcoded fallback
+**Phase 1 — Immediate (in `resolveInitialLocale()`, before auth):**
+
+1. `localStorage['civic-os-locale']` — cached from last explicit choice (fast bootstrap, avoids flash of wrong language)
+2. `navigator.language` — browser preference (first two-letter segment, e.g., `en-US` → `en`)
+3. Instance `defaultLocale` from runtime config (falls back to `'en'` if unset)
+
+**Phase 2 — After auth (in `initFromJwt()`):**
+
+4. JWT `locale` claim (synced from `civic_os_users_private.locale` via Keycloak) — overrides Phase 1 result and syncs back to localStorage
+
+**Dual-write on `setLocale()`:** When the user explicitly changes their language in Settings, it writes to both `localStorage` (for fast bootstrap on next page load) and `civic_os_users_private.locale` via PostgREST PATCH (canonical source of truth for authenticated users). This keeps the two in sync so Phase 1 and Phase 2 agree on next visit.
 
 ## Key Design Decisions
 

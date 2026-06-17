@@ -34,6 +34,7 @@ import { ImportExportService } from '../../services/import-export.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Import workflow steps:
@@ -75,7 +76,7 @@ type ImportStep = 'choose' | 'validating' | 'results' | 'importing' | 'success';
  */
 @Component({
   selector: 'app-import-modal',
-  imports: [CommonModule, CosModalComponent],
+  imports: [CommonModule, CosModalComponent, TranslatePipe],
   templateUrl: './import-modal.component.html',
   styleUrl: './import-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

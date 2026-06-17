@@ -164,7 +164,8 @@ export class SchemaService {
     this.m2mMetadataCache$ = undefined;
     this.constraintMessagesCache$ = undefined;
     this.staticTextCache$ = undefined;
-    // Clear processed cache
+    // Clear processed cache (properties must be cleared so next fetch uses new locale)
+    this.properties = undefined;
     this.constraintMessages = undefined;
     // Clear status cache (keyed by entity_type)
     this.statusesCache.clear();
@@ -179,10 +180,12 @@ export class SchemaService {
     this.loadingProperties = false;
     this.loadingConstraintMessages = false;
     this.loadingStaticText = false;
-    // Refresh schema in background - new values will emit to subscribers
+    // Refresh schema eagerly (entities drive sidebar rendering).
+    // Properties and constraint messages are NOT eagerly re-fetched here;
+    // clearing their processed caches (above) ensures the next consumer
+    // triggers a fresh fetch with the correct Accept-Language header,
+    // while avoiding unnecessary form rebuilds across the app.
     this.getSchema().subscribe();
-    this.getProperties().subscribe();
-    this.getConstraintMessages().subscribe();
   }
 
   /**

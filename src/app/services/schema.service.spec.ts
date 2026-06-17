@@ -849,20 +849,21 @@ describe('SchemaService', () => {
   });
 
   describe('refreshCache()', () => {
-    it('should trigger background refresh of schema and properties', () => {
+    it('should eagerly refresh schema but lazily invalidate properties and constraint messages', () => {
       service.refreshCache();
 
-      // refreshCache() calls getSchema(), getProperties(), and getConstraintMessages()
-      // getProperties() internally calls getEntities() which may trigger another getSchema()
-      // So we may get 2 schema_entities requests (race condition), 1 schema_properties request, and 1 constraint_messages request
+      // refreshCache() eagerly calls getSchema() for sidebar rendering,
+      // but properties and constraint messages are only invalidated (not re-fetched)
+      // so the next consumer triggers a fresh fetch with the correct locale.
       const requests = httpMock.match(req => req.url.includes('schema_entities'));
-      const propsReq = httpMock.expectOne(req => req.url.includes('schema_properties'));
-      const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
+      expect(requests.length).toBeGreaterThan(0);
 
-      // Flush all requests
+      // Properties and constraint messages should NOT be eagerly fetched
+      httpMock.expectNone(req => req.url.includes('schema_properties'));
+      httpMock.expectNone(req => req.url.includes('constraint_messages'));
+
+      // Flush schema requests
       requests.forEach(req => req.flush([]));
-      propsReq.flush([]);
-      constraintMsgsReq.flush([]);
     });
   });
 
@@ -955,24 +956,25 @@ describe('SchemaService', () => {
       // Refresh cache
       service.refreshCache();
 
-      // Should make new requests (cache was cleared) - entities, properties, AND constraint_messages
-      const requests = httpMock.match(req =>
-        req.url.includes('schema_entities') ||
-        req.url.includes('schema_properties') ||
-        req.url.includes('constraint_messages')
-      );
-      expect(requests.length).toBe(3); // All three caches should refetch
+      // Should make a new schema_entities request (eagerly refreshed)
+      const entitiesRequests = httpMock.match(req => req.url.includes('schema_entities'));
+      expect(entitiesRequests.length).toBe(1);
 
-      // Flush all requests
-      requests.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush(mockEntities);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush(mockProperties);
-        } else if (req.request.url.includes('constraint_messages')) {
-          req.flush(mockConstraintMessages);
-        }
-      });
+      // Properties and constraint messages are lazily invalidated, NOT eagerly fetched
+      httpMock.expectNone(req => req.url.includes('schema_properties'));
+      httpMock.expectNone(req => req.url.includes('constraint_messages'));
+
+      entitiesRequests.forEach(req => req.flush(mockEntities));
+
+      // After refreshCache, calling getProperties() should trigger a new request
+      service.getProperties().subscribe();
+      const propsReq = httpMock.expectOne(req => req.url.includes('schema_properties'));
+      propsReq.flush(mockProperties);
+
+      // Same for constraint messages
+      service.getConstraintMessages().subscribe();
+      const constraintReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
+      constraintReq.flush(mockConstraintMessages);
     });
   });
 
@@ -2222,21 +2224,25 @@ describe('SchemaService', () => {
 
       // First load
       service.getConstraintMessages().subscribe(() => {
-        // Refresh cache - this triggers getEntities(), getProperties(), and getConstraintMessages()
+        // Refresh cache - lazily invalidates properties and constraint messages
         service.refreshCache();
 
-        // Flush all HTTP requests from refreshCache()
+        // Flush schema request (eagerly triggered)
         const entitiesRequests = httpMock.match(req => req.url.includes('schema_entities'));
-        const propsReq = httpMock.expectOne(req => req.url.includes('schema_properties'));
-        const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
-
         entitiesRequests.forEach(req => req.flush([]));
-        propsReq.flush([]);
-        constraintMsgsReq.flush(secondMessages);  // Return new data
 
-        // Verify second data was loaded
-        expect(service.constraintMessages).toEqual(secondMessages);
-        done();
+        // Properties and constraint messages are NOT eagerly fetched
+        httpMock.expectNone(req => req.url.includes('schema_properties'));
+        httpMock.expectNone(req => req.url.includes('constraint_messages'));
+
+        // Next call to getConstraintMessages() should trigger a new fetch
+        service.getConstraintMessages().subscribe(() => {
+          expect(service.constraintMessages).toEqual(secondMessages);
+          done();
+        });
+
+        const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
+        constraintMsgsReq.flush(secondMessages);
       });
 
       expectPostgrestRequest(httpMock, 'constraint_messages', firstMessages);

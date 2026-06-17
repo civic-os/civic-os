@@ -29,6 +29,7 @@ import {
   ValidationErrorSummary
 } from '../../interfaces/entity';
 import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
+import { TranslationService } from '../../services/translation.service';
 
 describe('ImportModalComponent', () => {
   let component: ImportModalComponent;
@@ -36,6 +37,7 @@ describe('ImportModalComponent', () => {
   let mockImportExportService: jasmine.SpyObj<ImportExportService>;
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
   let mockDataService: jasmine.SpyObj<DataService>;
+  let mockTranslationService: jasmine.SpyObj<TranslationService>;
 
   // Helper function to create mock properties
   const createMockProperty = (overrides: Partial<SchemaEntityProperty>): SchemaEntityProperty => ({
@@ -103,6 +105,10 @@ describe('ImportModalComponent', () => {
     ]);
     mockSchemaService = jasmine.createSpyObj('SchemaService', ['getPropsForCreate']);
     mockDataService = jasmine.createSpyObj('DataService', ['bulkInsert', 'bulkInsertJunctions']);
+    mockTranslationService = jasmine.createSpyObj('TranslationService', ['get'], {
+      version: () => 1
+    });
+    mockTranslationService.get.and.callFake((key: string) => key);
 
     await TestBed.configureTestingModule({
       imports: [ImportModalComponent],
@@ -110,7 +116,8 @@ describe('ImportModalComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ImportExportService, useValue: mockImportExportService },
         { provide: SchemaService, useValue: mockSchemaService },
-        { provide: DataService, useValue: mockDataService }
+        { provide: DataService, useValue: mockDataService },
+        { provide: TranslationService, useValue: mockTranslationService }
       ]
     }).compileComponents();
 
