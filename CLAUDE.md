@@ -419,11 +419,11 @@ When creating new documentation files, follow this structure:
 
 Keep all three fresh with every feature. Stale docs are worse than no docs.
 
-**Features require E2E validation.** A feature is never finished until validated end-to-end across the full stack:
-1. Unit tests (`npm run test:headless`) — all passing
-2. Docker (`docker compose down -v && up`) — migrations apply cleanly
-3. SQL (`psql`) — verify columns, constraints, VIEW output
-4. curl — verify PostgREST serves new fields correctly
+**i18n is a feature requirement.** Any feature that adds user-visible strings must ship with translations. See `docs/notes/I18N_DESIGN.md` (New Feature i18n Checklist) for the full checklist. Quick summary:
+1. Add English keys to `src/app/i18n/en.translations.ts` and use `{{ key | translate }}` in templates
+2. Seed both English AND Spanish rows in the migration (`INSERT INTO metadata.translations`)
+3. If adding new metadata types, ensure they are included in `get_translation_defaults()` and `get_missing_translations()`
+
 **⚠️ MANDATORY: Comprehensive E2E Verification**
 
 You **MUST** perform comprehensive end-to-end verification after ALL code changes, before declaring work complete or committing. This is non-negotiable. Do not skip layers. Do not stop after unit tests.
