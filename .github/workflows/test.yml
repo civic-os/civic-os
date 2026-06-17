@@ -34,6 +34,7 @@ jobs:
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         if: always()
+        continue-on-error: true
         with:
           files: ./coverage/civic-os/lcov.info
           flags: angular
@@ -272,6 +273,7 @@ jobs:
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         if: success()
+        continue-on-error: true
         with:
           file: services/${{ matrix.service }}/coverage.out
           flags: go-${{ matrix.service }}
