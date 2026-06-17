@@ -131,7 +131,14 @@ export class ImportExportService {
       const exportData = this.transformForExport(allData, exportProperties);
 
       // 5. Generate Excel workbook
-      const worksheet = utils.json_to_sheet(exportData);
+      // Row 1 = entity info hints, Row 2 = headers, Row 3+ = data
+      // (matches parseExcelFile range:1 convention for re-import compatibility)
+      const headers = exportData.length > 0 ? Object.keys(exportData[0]) : [];
+      const hintRow: Record<string, string> = {};
+      if (headers.length > 0) {
+        hintRow[headers[0]] = entity.display_name + (entity.description ? ` — ${entity.description}` : '');
+      }
+      const worksheet = utils.json_to_sheet([hintRow, ...exportData], { header: headers, skipHeader: false });
       const workbook = utils.book_new();
       utils.book_append_sheet(workbook, worksheet, entity.display_name);
 

@@ -122,6 +122,11 @@ export class AppComponent {
 
   public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
 
+  // Show Translations link when admin AND multiple locales are configured
+  public hasTranslationAdminPermission = computed(() =>
+    this.auth.isAdmin() && this.localeService.supportedLocales.length > 1
+  );
+
   // Show Admin section if user is admin OR has access to feature-specific pages
   public showAdminSection = computed(() => {
     // Admin always sees the section
@@ -261,6 +266,11 @@ export class AppComponent {
 
   public navigateToCategoryAdmin() {
     this.router.navigate(['admin', 'categories']);
+    this.drawerOpen = false;
+  }
+
+  public navigateToTranslationAdmin() {
+    this.router.navigate(['admin', 'translations']);
     this.drawerOpen = false;
   }
 

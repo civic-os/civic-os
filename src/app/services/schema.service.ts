@@ -1467,14 +1467,15 @@ export class SchemaService {
    * @returns Observable of entities excluding detected junction tables
    */
   public getEntitiesForMenu(): Observable<SchemaEntityTable[]> {
-    return this.getDetectedJunctionTables().pipe(
-      map(junctions => {
-        const allTables = this.tables();
-        if (!allTables) return [];
-        return allTables.filter(t =>
+    return combineLatest([
+      this.getEntities(),
+      this.getDetectedJunctionTables()
+    ]).pipe(
+      map(([allTables, junctions]) =>
+        allTables.filter(t =>
           !junctions.has(t.table_name) && t.show_in_sidebar !== false
-        );
-      })
+        )
+      )
     );
   }
 
@@ -1484,12 +1485,13 @@ export class SchemaService {
    * so admins can toggle visibility.
    */
   public getEntitiesForManagement(): Observable<SchemaEntityTable[]> {
-    return this.getDetectedJunctionTables().pipe(
-      map(junctions => {
-        const allTables = this.tables();
-        if (!allTables) return [];
-        return allTables.filter(t => !junctions.has(t.table_name));
-      })
+    return combineLatest([
+      this.getEntities(),
+      this.getDetectedJunctionTables()
+    ]).pipe(
+      map(([allTables, junctions]) =>
+        allTables.filter(t => !junctions.has(t.table_name))
+      )
     );
   }
 

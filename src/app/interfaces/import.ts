@@ -36,7 +36,13 @@ export interface ImportColumn {
  */
 export interface CustomImportConfig {
   title: string;
+  /** Noun for confirmation message (e.g., "users", "translations"). Defaults to "rows". */
+  itemLabel?: string;
   columns: ImportColumn[];
+  /** Optional pre-filter applied after validation, before counting/submitting.
+   *  Use to silently discard rows that pass validation but shouldn't be imported
+   *  (e.g., template rows where the translator left Translated Text empty). */
+  preFilter?: (rows: Record<string, any>[]) => Record<string, any>[];
   submit: (validRows: Record<string, any>[]) => Observable<CustomImportResult>;
   generateTemplate: () => void;
 }

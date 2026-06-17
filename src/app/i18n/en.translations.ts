@@ -45,6 +45,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'sidebar.galleries': 'Galleries',
   'sidebar.recurring_schedules': 'Recurring Schedules',
   'sidebar.payments': 'Payments',
+  'sidebar.translations': 'Translations',
 
   'action.save': 'Save',
   'action.cancel': 'Cancel',
@@ -205,6 +206,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'error.timeout': 'Request timed out',
   'error.unknown_category': 'Unknown error',
 
+  'list.title_suffix': 'List',
   'list.search_placeholder': 'Search {{entity}}...',
   'list.no_records': 'No {{entity}} found',
   'list.no_entries': 'No entries',

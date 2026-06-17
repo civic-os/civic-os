@@ -242,20 +242,76 @@ When the user changes locale, the frontend must re-fetch schema metadata because
 
 Adding `LocaleService` to `SchemaService` (for locale-aware cache invalidation) created a circular DI chain: `SchemaService` → `LocaleService` → `AuthService` → `SchemaService`. The fix: `LocaleService` uses `inject(Injector)` instead of `inject(AuthService)`, then lazily resolves `AuthService` via `this.injector.get(AuthService)` only inside `setLocale()`. This breaks the cycle because Angular's DI doesn't try to resolve `AuthService` during `LocaleService` construction.
 
-### Deferred to Phase 3
+### Deferred to Future Phases
 
-- Dashboard widget JSONB `config` translations (embedded text in Markdown widgets, nav buttons)
-- Dashboard RPC function modifications (`get_dashboards`/`get_dashboard` don't use VIEWs)
+- **Admin page string translation** — Admin pages (Permissions, Entity/Property Management, Status/Category Admin, File Admin, Gallery Admin, Translation Admin) contain many hardcoded English strings in headings, labels, and messages. These should be wrapped with `{{ key | translate }}` and seeded. Lower priority since admin pages are used by technical staff, but important for fully bilingual deployments.
+- **Notification template translation** — Templates use Go template syntax with JSONB entity snapshots. Requires locale-aware Go worker refactoring or per-locale template variants. Entity *data* in notifications (addresses, names) is user-entered content, not translatable.
 - `schema_decisions` translation (developer-facing, not user-facing)
-- Admin translation management UI
+- **Admin language management UI** — Self-service locale add/remove from the `LOCALE_DISPLAY_NAMES` registry. Currently locale config is deploy-time only (`SUPPORTED_LOCALES` env var via Docker).
+
+## Phase 3: Dashboard Translations + Admin Translation UI (v0.62.0)
+
+### Dashboard RPC Translation
+
+Unlike Phase 2 (which modified VIEWs), dashboards are served via RPC functions (`get_dashboards()`, `get_dashboard()`). Phase 3 modifies these function bodies to wrap translatable fields with `metadata.t()`.
+
+**`get_dashboards()`** — Wraps `display_name` and `description` with `metadata.t('dashboard', ...)`. Since `RETURNS TABLE` defines `display_name` as `VARCHAR(100)`, the `t()` result (which returns `TEXT`) is cast back: `metadata.t(...)::VARCHAR(100)`.
+
+**`get_dashboard()`** — Three layers of translation:
+1. **Dashboard-level**: `display_name`, `description` wrapped with `metadata.t('dashboard', ...)`
+2. **Widget title**: Each widget's `title` wrapped with `metadata.t('dashboard', ...)`
+3. **Widget config JSONB**: Delegated to `metadata.translate_widget_config()` helper
+
+### Widget Config JSONB Translation
+
+Widget config is JSONB — not a simple text column. The `metadata.translate_widget_config(widget_type, dashboard_id, widget_id, config)` helper function introspects the widget type to determine which JSON paths contain translatable text:
+
+| Widget Type | Translatable Paths |
+|---|---|
+| `markdown` | `config.content` |
+| `nav_buttons` | `config.header`, `config.description`, `config.buttons[].text` |
+| `dashboard_navigation` | `config.backward.text`, `config.forward.text`, `config.chips[].text` |
+| Other types | No translatable config text |
+
+The function uses `jsonb_set()` to replace specific paths in the JSONB, preserving all other config properties. Short-circuits for English locale (zero overhead).
+
+### Dashboard Source Key Conventions
+
+| Source Type | Key Pattern | Example |
+|---|---|---|
+| `dashboard` | `dashboard.{id}.display_name` | `dashboard.1.display_name` |
+| `dashboard` | `dashboard.{id}.description` | `dashboard.1.description` |
+| `dashboard` | `dashboard.{id}.widget.{widget_id}.title` | `dashboard.1.widget.3.title` |
+| `widget_config` | `dashboard.{id}.widget.{widget_id}.{path}` | `dashboard.1.widget.5.content` |
+| `widget_config` | `dashboard.{id}.widget.{widget_id}.buttons.{i}.text` | `dashboard.1.widget.5.buttons.0.text` |
+
+**Design choice**: Keys use numeric IDs (not display names) because dashboard/widget names aren't unique identifiers and may change.
+
+### Admin Translation Management UI
+
+New page at `/admin/translations` for non-developer translators to manage translations without SQL access.
+
+**Architecture**: Follows the admin-categories pattern (signal-based state, `OnPush` change detection, DaisyUI 5 components, lazy-loaded route with `authGuard`).
+
+**Features**:
+- **Locale selector**: Dropdown of non-English supported locales
+- **Source type filter**: Filter by `ui`, `entity`, `property`, `status`, etc.
+- **Search**: Free-text search across source_key and translated_text
+- **Translations tab**: Browse existing translations with edit/delete actions
+- **Missing tab**: Shows keys that have English text but no translation for the selected locale, with an "Add" button for quick entry
+- **Live preview**: After save, `TranslationService.clearCache()` + `SchemaService.refreshCache()` + `DashboardService.refreshCache()` are called so changes appear immediately without page reload
+
+**Visibility**: Sidebar link appears only when `isAdmin() && supportedLocales.length > 1` (same condition as the Language tab in Settings).
+
+**Service**: `TranslationAdminService` uses PostgREST REST for CRUD on the `translations` VIEW plus existing RPCs (`get_missing_translations`, `upsert_translations`).
 
 ## Phase Roadmap
 
 | Phase | Version | Scope |
 |-------|---------|-------|
 | Phase 1 | v0.57.0 | Foundation tables, Angular UI strings (~250 keys), locale service, settings Language tab |
-| **Phase 2** | v0.58.0 | Metadata translations — wrap 7 VIEWs with `t()`, locale-aware cache invalidation, pothole Spanish seeds |
-| Phase 3 | v0.59.0 | Dashboard RPC translations, admin translation UI, notification template localization |
+| Phase 2 | v0.58.0 | Metadata translations — wrap 7 VIEWs with `t()`, locale-aware cache invalidation, pothole Spanish seeds |
+| **Phase 3** | v0.62.0 | Dashboard RPC translations, widget config JSONB translation, admin translation management UI |
 
 ## File Reference
 
@@ -263,9 +319,45 @@ Adding `LocaleService` to `SchemaService` (for locale-aware cache invalidation) 
 |------|---------|
 | `postgres/migrations/deploy/v0-57-0-add-i18n.sql` | Phase 1: tables, functions, UI string seeds |
 | `postgres/migrations/deploy/v0-58-0-metadata-translations.sql` | Phase 2: VIEW rewrites, metadata seeds |
+| `postgres/migrations/deploy/v0-62-0-dashboard-translations.sql` | Phase 3: RPC rewrites, widget config helper, `get_translation_defaults()` RPC, updated `get_missing_translations()` |
 | `src/app/i18n/en.translations.ts` | Single source of truth for English strings |
 | `src/app/services/locale.service.ts` | Signal-based locale management |
 | `src/app/services/translation.service.ts` | Translation lookup + cache |
+| `src/app/services/translation-admin.service.ts` | Admin translation CRUD service |
+| `src/app/pages/admin-translations/admin-translations.page.ts` | Admin translation management page |
 | `src/app/pipes/translate.pipe.ts` | Template translation pipe |
 | `src/app/interceptors/locale.interceptor.ts` | Accept-Language header injection |
 | `src/app/testing/translation-testing.ts` | Shared test mock utility |
+
+## New Feature i18n Checklist
+
+Every feature that adds user-visible strings must ship with i18n support. This checklist prevents the common failure mode where English works but translations show raw keys or "—" defaults.
+
+### Core vs Instance Translations — Layering Rule
+
+**Core migrations** (`postgres/migrations/`) seed ONLY `source_type = 'ui'` translations (framework strings like "Home", "Search", "Filters"). These are the same for every Civic OS deployment.
+
+**Instance-specific translations** (entity names, property labels, status values) go in `examples/<name>/init-scripts/` or in the instance's own deployment scripts. These vary per deployment and must never pollute core migrations.
+
+### UI Strings (Angular templates)
+
+1. **Add English keys** to `src/app/i18n/en.translations.ts` using dot-notation namespace (e.g., `sidebar.translations`, `form.new_field`)
+2. **Use `{{ key | translate }}` pipe** in templates instead of hardcoded English text
+3. **Seed both `en` and `es` rows** in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports). The Spanish row is needed so the feature actually translates.
+4. **Use `ON CONFLICT DO NOTHING`** on seed INSERTs to make migrations re-runnable
+
+### Instance Metadata (new translatable metadata types)
+
+If the feature adds a new metadata table whose values should be translatable:
+
+1. **Wrap the VIEW/RPC output** with `metadata.t(source_type, key, default_text)` using a consistent key format
+2. **Add the source table** to `get_translation_defaults()` RPC (in the UNION chain) so the admin page shows English defaults from the source table, not just from `metadata.translations`
+3. **`get_missing_translations()`** automatically picks up new sources because it delegates to `get_translation_defaults()`
+4. **Document the key format** in the table at the top of this file (Phase 2 Key Formats section)
+
+### Verification
+
+1. Switch to Spanish in Settings > Language
+2. Verify the new UI strings display in Spanish (not raw keys)
+3. Visit `/admin/translations` > Missing tab — new metadata keys should appear if untranslated
+4. Visit `/admin/translations` > filter by source type — "English Default" column should show actual text, not "—"

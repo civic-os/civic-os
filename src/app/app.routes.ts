@@ -121,6 +121,12 @@ export const routes: Routes = [
         canActivate: [schemaVersionGuard, authGuard]
     },
     {
+        path: 'admin/translations',
+        loadComponent: () => import('./pages/admin-translations/admin-translations.page')
+            .then(m => m.AdminTranslationsPage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    {
         path: 'admin/galleries',
         loadComponent: () => import('./pages/admin-galleries/admin-galleries.page')
             .then(m => m.AdminGalleriesPage),

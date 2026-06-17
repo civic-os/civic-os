@@ -175,7 +175,7 @@
         <div class="alert alert-warning">
           <span class="material-symbols-outlined">info</span>
           @if (customImport) {
-            <span>This will submit {{ validRowCount() }} users for provisioning.</span>
+            <span>This will import {{ validRowCount() }} {{ customImport.itemLabel || 'rows' }}.</span>
           } @else {
             <span>This will insert {{ validRowCount() }} new records. This action cannot be undone.</span>
           }
@@ -201,7 +201,7 @@
   @if (currentStep() === 'importing') {
     <div class="space-y-4">
       @if (customImport) {
-        <p>Submitting {{ validRowCount() }} users for provisioning...</p>
+        <p>Importing {{ validRowCount() }} {{ customImport.itemLabel || 'rows' }}...</p>
         <div class="flex justify-center py-4">
           <span class="loading loading-spinner loading-lg"></span>
         </div>
@@ -229,7 +229,7 @@
       <div class="alert alert-success">
         <span class="material-symbols-outlined">check_circle</span>
         @if (customImport) {
-          <span>Successfully submitted {{ importedCount() }} users for provisioning!</span>
+          <span>Successfully imported {{ importedCount() }} {{ customImport.itemLabel || 'rows' }}!</span>
         } @else {
           <span>Successfully imported {{ importedCount() }} records!</span>
         }

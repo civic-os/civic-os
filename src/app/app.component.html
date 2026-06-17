@@ -178,6 +178,17 @@
                 </a>
               </li>
             }
+            <!-- Translations (admin + multi-locale) -->
+            @if (hasTranslationAdminPermission()) {
+              <li (click)="navigateToTranslationAdmin()">
+                <a [class.menu-active]="isRouteActive('/admin/translations')"
+                   [class.font-bold]="isRouteActive('/admin/translations')"
+                   [class.opacity-85]="!isRouteActive('/admin/translations')">
+                  <span class="material-symbols-outlined" aria-hidden="true">translate</span>
+                  {{ 'sidebar.translations' | translate }}
+                </a>
+              </li>
+            }
             @if (auth.isAdmin()) {
               <li (click)="navigateToNotificationTemplates()">
                 <a [class.menu-active]="isRouteActive('/notifications/templates')"

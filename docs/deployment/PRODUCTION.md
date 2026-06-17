@@ -213,6 +213,14 @@ DEFAULT_THEME=corporate
 APP_TITLE=Civic OS
 FAVICON_URL=
 
+# Locale Configuration (Optional, v0.62.0+)
+# DEFAULT_LOCALE sets the initial language for new users (before they choose their own).
+# SUPPORTED_LOCALES is a comma-separated list of locale codes (e.g., en,es).
+# When only one locale is listed, the Language tab in Settings and the
+# Translation Administration page are hidden automatically.
+DEFAULT_LOCALE=en
+SUPPORTED_LOCALES=en
+
 # Map Configuration (Optional)
 MAP_DEFAULT_LAT=43.0125
 MAP_DEFAULT_LNG=-83.6875

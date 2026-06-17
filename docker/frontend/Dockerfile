@@ -59,7 +59,9 @@ ENV POSTGREST_URL=http://localhost:3000/ \
     MAP_DEFAULT_LNG=-83.6875 \
     MAP_DEFAULT_ZOOM=13 \
     APP_TITLE="Civic OS" \
-    FAVICON_URL=""
+    FAVICON_URL="" \
+    DEFAULT_LOCALE=en \
+    SUPPORTED_LOCALES=en
 
 # Expose port 80
 EXPOSE 80

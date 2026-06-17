@@ -5625,12 +5625,48 @@ Each metadata type uses a unique `source_type` and hierarchical dot-notation `so
 - Action columns include: `display_name`, `description`, `confirmation_message`, `disabled_tooltip`, `success_message`
 - Action param columns include: `display_name`, `placeholder`
 
-#### What's Not Yet Translated (Phase 3)
+#### Dashboard Translations (Phase 3, v0.62.0)
 
-- Dashboard widget titles and JSONB config text (Markdown content, nav button labels)
-- Dashboard RPC functions (`get_dashboards`/`get_dashboard` bypass VIEWs)
-- Schema decisions (developer-facing ADR content)
-- Admin translation management UI
+Dashboard content is served via RPC functions (not VIEWs), so Phase 3 modifies `get_dashboards()` and `get_dashboard()` to wrap translatable fields with `metadata.t()`.
+
+**Dashboard source key conventions:**
+
+| Source Type | Key Pattern | Example |
+|---|---|---|
+| `dashboard` | `dashboard.{id}.display_name` | `dashboard.1.display_name` |
+| `dashboard` | `dashboard.{id}.description` | `dashboard.1.description` |
+| `dashboard` | `dashboard.{id}.widget.{widget_id}.title` | `dashboard.1.widget.3.title` |
+| `widget_config` | `dashboard.{id}.widget.{widget_id}.{path}` | `dashboard.1.widget.5.content` |
+
+**Widget config JSONB translation**: Only three widget types have translatable text in config — `markdown` (content), `nav_buttons` (header, description, buttons[].text), and `dashboard_navigation` (backward.text, forward.text, chips[].text). Other widget types pass through unchanged. The `metadata.translate_widget_config()` helper handles this automatically.
+
+**Adding dashboard translations:**
+```sql
+INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
+('dashboard', 'dashboard.1.display_name', 'es', 'Bienvenida'),
+('dashboard', 'dashboard.1.widget.3.title', 'es', 'Problemas Recientes'),
+('widget_config', 'dashboard.1.widget.5.content', 'es', '# Hola\nBienvenido al portal.');
+```
+
+#### Admin Translation Management
+
+Admins can manage translations at `/admin/translations` without writing SQL. The page appears in the sidebar when the instance has multiple supported locales.
+
+**Features:**
+- **Locale selector**: Choose which language to manage (English is excluded — it's the source language)
+- **Source type filter**: Narrow by type (UI, Entity, Status, Dashboard, etc.)
+- **Search**: Filter by key or translation text
+- **Missing tab**: Shows English keys without translations for the selected locale — click "Add" to translate
+- **Live preview**: Changes apply immediately to the running UI (no page reload needed)
+
+**When to use the admin UI vs SQL:**
+- **Admin UI**: Individual translation edits, reviewing coverage, non-technical translators
+- **SQL**: Bulk seeding translations for a new instance, migration scripts, automated workflows
+
+#### What's Not Yet Translated
+
+- Notification template translations (requires Go worker refactoring)
+- Schema decisions (developer-facing ADR content, not user-facing)
 
 See `docs/notes/I18N_DESIGN.md` for full architecture details.
 

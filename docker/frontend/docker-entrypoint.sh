@@ -27,6 +27,8 @@ echo "  SMS_CONFIGURED: $SMS_CONFIGURED"
 echo "  DEFAULT_THEME: $DEFAULT_THEME"
 echo "  APP_TITLE: $APP_TITLE"
 echo "  FAVICON_URL: $FAVICON_URL"
+echo "  DEFAULT_LOCALE: $DEFAULT_LOCALE"
+echo "  SUPPORTED_LOCALES: $SUPPORTED_LOCALES"
 echo ""
 
 # Generate inline config script
@@ -66,6 +68,10 @@ window.civicOsConfig = {
   },
   theme: {
     defaultTheme: '${DEFAULT_THEME}' || 'corporate'
+  },
+  locale: {
+    defaultLocale: '${DEFAULT_LOCALE}' || 'en',
+    supportedLocales: ('${SUPPORTED_LOCALES}' || 'en').split(',').map(function(s) { return s.trim(); })
   },
   appTitle: '$(echo "${APP_TITLE}" | sed "s/'/\\\\'/g")' || 'Civic OS',
   faviconUrl: '${FAVICON_URL}'

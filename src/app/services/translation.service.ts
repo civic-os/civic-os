@@ -147,10 +147,13 @@ export class TranslationService {
   }
 
   /**
-   * Clear cached translations (useful after admin edits translations).
+   * Clear cached translations and re-fetch for the current locale.
+   * Used after admin edits translations so the live UI reflects changes
+   * without a page reload.
    */
   clearCache(): void {
     this.cache.clear();
-    this._version.update(v => v + 1);
+    // Re-fetch for current locale to pick up the edits
+    this.loadTranslations(this.localeService.locale());
   }
 }

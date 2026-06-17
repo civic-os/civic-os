@@ -189,6 +189,10 @@ services:
       APP_TITLE: ${APP_TITLE:-Civic OS}
       FAVICON_URL: ${FAVICON_URL:-}
 
+      # Locale configuration (optional, v0.62.0+)
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-en}
+      SUPPORTED_LOCALES: ${SUPPORTED_LOCALES:-en}
+
       # Analytics configuration (optional)
       MATOMO_URL: ${MATOMO_URL:-}
       MATOMO_SITE_ID: ${MATOMO_SITE_ID:-}

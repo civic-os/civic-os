@@ -823,6 +823,7 @@ export class UserManagementPage {
   /** Custom import configuration for the import modal */
   userImportConfig: CustomImportConfig = {
     title: 'Import Users',
+    itemLabel: 'users',
     columns: this.userImportColumns,
     submit: (validRows: Record<string, any>[]): Observable<CustomImportResult> => {
       return this.submitUserImport(validRows);

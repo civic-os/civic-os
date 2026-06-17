@@ -207,11 +207,20 @@ export class ImportModalComponent implements OnDestroy {
     this.validationProgress.set(0);
 
     const columns = this.customImport.columns;
+
+    // Filter out completely blank rows (Excel often includes trailing empties)
+    const nonBlankData = data.filter(row =>
+      columns.some(col => {
+        const v = row[col.name];
+        return v != null && String(v).trim() !== '';
+      })
+    );
+
     const validRows: Record<string, any>[] = [];
     const allErrors: ImportError[] = [];
 
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i];
+    for (let i = 0; i < nonBlankData.length; i++) {
+      const row = nonBlankData[i];
       const rowNumber = i + 3; // +3 for 1-indexing, hint row, and header row
       const validatedRow: Record<string, any> = {};
       let rowHasError = false;
@@ -311,7 +320,7 @@ export class ImportModalComponent implements OnDestroy {
       }
 
       // Update progress
-      this.validationProgress.set(Math.round(((i + 1) / data.length) * 100));
+      this.validationProgress.set(Math.round(((i + 1) / nonBlankData.length) * 100));
     }
 
     // Build error summary
@@ -330,9 +339,10 @@ export class ImportModalComponent implements OnDestroy {
       allErrors
     };
 
-    this.validatedData = validRows;
+    const filtered = this.customImport?.preFilter ? this.customImport.preFilter(validRows) : validRows;
+    this.validatedData = filtered;
     this.errorSummary.set(errorSummary);
-    this.validRowCount.set(validRows.length);
+    this.validRowCount.set(filtered.length);
     this.currentStep.set('results');
   }
 

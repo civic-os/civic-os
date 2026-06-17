@@ -1,7 +1,7 @@
 @if (entity$ | async; as entity) {
   <div class="prose">
     <h1>
-      {{ entity.display_name }} List
+      {{ entity.display_name }} {{ 'list.title_suffix' | translate }}
       @if (entity.description) {
         <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
           <span class="material-symbols-outlined text-info cursor-help ml-2 text-2xl align-middle">help_outline</span>
@@ -126,7 +126,7 @@
       <div class="overflow-x-auto">
         <table class="table table-zebra">
         @if (displayProperties$ | async; as props) {
-          <caption class="sr-only">{{ entity.display_name }} List</caption>
+          <caption class="sr-only">{{ entity.display_name }} {{ 'list.title_suffix' | translate }}</caption>
           <!-- head -->
           <thead>
             <tr>
