@@ -17,7 +17,7 @@
 
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { APP_VERSION } from '../../config/version';
-import { getApiDocsUrl, getAppTitle } from '../../config/runtime';
+import { getApiDocsUrl } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 
 /**
@@ -42,9 +42,6 @@ export class AboutModalComponent {
 
   // Output: Notify parent to close modal
   closeModal = output<void>();
-
-  // App title from runtime config
-  readonly appTitle = getAppTitle();
 
   // App version from version.ts
   readonly appVersion = APP_VERSION;

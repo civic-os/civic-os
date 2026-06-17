@@ -189,7 +189,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'auth.account_settings': 'Account Settings',
   'auth.viewing_as': 'Viewing as:',
   'auth.stop_impersonation': 'Stop Impersonation',
-  'auth.about': 'About {{appTitle}}',
+  'auth.about': 'About Civic OS',
 
   'error.generic': 'An error occurred',
   'error.not_found': 'Record not found',
