@@ -2,6 +2,11 @@ tr.pointer {
     cursor: pointer;
 }
 
+/* Anchor cell content to top so tall cells (e.g. map thumbnails) don't push siblings to middle */
+.table td {
+    vertical-align: top;
+}
+
 /* Sortable header styles */
 th.sortable {
     cursor: pointer;
