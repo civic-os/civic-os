@@ -424,7 +424,17 @@ Keep all three fresh with every feature. Stale docs are worse than no docs.
 2. Docker (`docker compose down -v && up`) — migrations apply cleanly
 3. SQL (`psql`) — verify columns, constraints, VIEW output
 4. curl — verify PostgREST serves new fields correctly
-5. Chrome — browser automation to test the actual UI flow
+**⚠️ MANDATORY: Comprehensive E2E Verification**
+
+You **MUST** perform comprehensive end-to-end verification after ALL code changes, before declaring work complete or committing. This is non-negotiable. Do not skip layers. Do not stop after unit tests.
+
+1. **Unit tests** — `npm run test:headless` — all passing
+2. **Docker** — `docker compose down -v && docker compose up -d` — migrations apply cleanly, check `docker compose logs postgres`
+3. **SQL** — Use MCP postgres tool or `psql` to verify schema changes, VIEWs, RLS policies, and functions
+4. **curl** — Verify PostgREST serves correct data: `curl -s http://localhost:3000/entity?limit=1 | jq .`
+5. **Browser** — Use Playwright MCP to navigate affected pages, interact with UI, and verify rendering/behavior
+
+Run all 5 layers proactively without being asked. See `docs/development/E2E_VERIFICATION.md` for detailed commands and verification queries.
 
 ## Git Commit Guidelines
 
