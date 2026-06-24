@@ -17,7 +17,7 @@ This document provides a comprehensive guide to achieving WCAG compliance in Civ
 
 ## Current Progress Status
 
-**Last Updated:** 2025-11-05
+**Last Updated:** 2026-06-23
 **Status:** ~60% WCAG 2.1 Level AA Compliance Achieved
 **Testing Infrastructure:** ✅ Complete
 
@@ -83,7 +83,7 @@ All zero-visual-impact improvements:
 3. **Form validation announcements** ✅
    - Error messages have `role="alert"` and `aria-live="polite"`
 
-4. **Modal focus management** ⏳ **Deferred to Phase 3 Remaining Work**
+4. **Modal focus management** ✅ Complete (`cdkTrapFocus` in `cos-modal.component.html` with `A11yModule`)
 
 ### Pa11y Audit Results (2025-11-05)
 
@@ -128,13 +128,8 @@ All zero-visual-impact improvements:
 - [ ] Update pa11y config to exclude Keycloak URLs (5 minutes)
 - [ ] Fix 3 color contrast issues (30-60 minutes)
 
-#### Phase 3 - Remaining Item (2-3 hours)
-- [ ] Modal focus management with Angular CDK
-  - Install `@angular/cdk` A11yModule
-  - Add `FocusTrap` directive to modals
-  - Implement `role="dialog"`, `aria-modal="true"`
-  - Auto-focus first element, restore focus on close
-  - Files: `import-modal.component`, `dialog.component`, detail page delete modal
+#### Phase 3 - Remaining Item ✅ Complete
+- [x] Modal focus management with Angular CDK — implemented via `cdkTrapFocus` directive in `cos-modal.component.html` with `A11yModule` import. Covers all modals that use the shared `cos-modal` component.
 
 #### Phase 4 - Polish & Advanced Features (4-6 hours)
 - [ ] Focus indicators (`:focus-visible` styles)

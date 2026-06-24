@@ -42,8 +42,8 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 ### Property Type System
 
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
-- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports `options_source_rpc` + `depends_on_columns` cascading (v0.44.0), `fk_search_modal` (v0.45.0) with modal state persistence (v0.56.0), and `options_filter_column` server-side filtering (v0.53.0). See `docs/INTEGRATOR_GUIDE.md` (FK sections) and `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md`.
-- `User`: UUID with `join_table = 'civic_os_users'` → User display component with unified view access. Renders as FK search modal (v0.49.1) for scaling beyond small teams, with ILIKE substring search for partial phone/email matching. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
+- `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports cascading dropdowns, search modals with state persistence, and server-side filtering. See `docs/INTEGRATOR_GUIDE.md` (FK sections) and `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md`.
+- `User`: UUID with `join_table = 'civic_os_users'` → User display component with FK search modal. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
 - `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
 - `Boolean`: `bool` → Checkbox
@@ -72,7 +72,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Video Embeds** (v0.50.0+): `@[video](url)` markdown syntax for embedding YouTube videos within Static Text Blocks and notes. Uses DOMPurify sanitization with `privacy-enhanced` nocookie domain for GDPR compliance. Supported in all markdown rendering contexts (Static Text, Entity Notes, Dashboard Markdown widgets).
 
-**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports action parameters (v0.32.0+), filtered FK param dropdowns with `options_source_rpc`/`depends_on_params` (v0.54.0+), photo gallery params (v0.55.0+), and dot-notation visibility/enabled conditions (v0.53.2+). **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
+**Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports action parameters, filtered FK param dropdowns, photo gallery params, and dot-notation visibility/enabled conditions. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
 **Recurring Time Slots** (v0.19.0+): RFC 5545 RRULE-compliant recurring schedules. Enable via `supports_recurring=true` in `metadata.entities`. See `docs/notes/RECURRING_TIMESLOT_DESIGN.md` for architecture.
 
@@ -106,11 +106,11 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Excel Import/Export**: Bulk data operations on List pages with FK name resolution and validation. **Custom Import Mode** (v0.31.0+) for non-entity imports. **M:M Import** (v0.60.0): Pure junction M:M properties import via comma-separated values with two-phase insert (main rows first, then junction records). Rich junctions and parent-hop M:M excluded. See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for specification.
 
-**Multi-Language (i18n)** (v0.57.0+): Framework UI strings and instance metadata render in the user's preferred language. Phase 1 (v0.57.0): ~250 Angular UI keys with English/Spanish. Phase 2 (v0.58.0): Instance metadata translations across 7 public VIEWs. Phase 3 (v0.62.0): Dashboard RPC translations with JSONB config. **Phase 4 (v0.64.0): RTL layout support** — CSS logical properties throughout, Arabic UI translations (~279 keys), `LocaleService.isRtl` signal, FullCalendar/gallery/boolean-toggle RTL adaptations. RTL locales: ar, he, fa, ur, ps, prs. **Admin Translation Management** (v0.62.0+): Page at `/admin/translations` for browsing/editing translations with coverage reports. Language tab in Settings when `supportedLocales` has 2+ entries. See `docs/INTEGRATOR_GUIDE.md` (Multi-Language section) and `docs/notes/I18N_DESIGN.md` for architecture.
+**Multi-Language (i18n)** (v0.57.0+): Framework UI strings and instance metadata render in the user's preferred language, with RTL layout support (v0.64.0). **Admin Translation Management** (v0.62.0+): Page at `/admin/translations` for browsing/editing translations with coverage reports. See `docs/notes/I18N_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (Multi-Language section) for setup.
 
 ## Custom Dashboards
 
-**Status**: Phase 2 complete - Dynamic widgets (filtered lists, maps with clustering)
+**Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0)
 
 The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards.
 
@@ -272,7 +272,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 
 **Admin Features** (require `admin` role):
 - **Permissions Page** (`/permissions`) - Manage role-based table permissions, entity action permissions, and role delegation (v0.31.0+)
-- **User Management Page** (`/admin/users`) - Create, edit, and manage user accounts with async Keycloak provisioning, inline role assignment/revocation, and bulk import from Excel with partial success handling (v0.31.0+). **Last-Login Tracking** (v0.52.0): OIDC name claims (`given_name`, `family_name`) auto-populate user records, with backfill for provisioned users on first login. See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
+- **User Management Page** (`/admin/users`) - Create, edit, manage users with Keycloak provisioning, role assignment, and bulk import (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
 - **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
 - **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
 - **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
@@ -285,7 +285,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 
 **Role Delegation** (v0.31.0+): Admin-configurable matrix controlling which roles can assign/revoke which other roles. Configured via "Role Delegation" tab on Permissions page. Uses `metadata.role_can_manage` table. The `anonymous` role is excluded from delegation (framework-only permission role). See `docs/INTEGRATOR_GUIDE.md` (Role Delegation section) for details.
 
-**Admin Page Architecture**: Admin pages (User Management, Permissions, Entity/Property Management) use **read-only VIEWs** for data retrieval and **RPCs** for mutations. System views like `managed_users` are excluded from `schema_entities` via its WHERE clause so they don't appear in the sidebar or Schema Editor ERD. This pattern avoids the complexity of INSTEAD OF triggers while keeping PostgREST's native filtering/pagination for reads. **Before building a new admin page**, read `docs/notes/ADMIN_PAGE_PITFALLS.md` for common mistakes with multi-phase data loading, reactive state, and `<select>` binding.
+**Admin Page Architecture**: Admin pages use read-only VIEWs + RPCs (not INSTEAD OF triggers). **Before building a new admin page**, read `docs/notes/ADMIN_PAGE_PITFALLS.md` for common mistakes.
 
 **Keycloak Service Account** (v0.31.0+): The consolidated worker uses a `civic-os-service-account` client (client credentials flow) for Keycloak API access. This enables user provisioning (creating Keycloak users) and role sync (creating/deleting realm roles). See `docs/AUTHENTICATION.md` (Step 8) for setup.
 
@@ -421,10 +421,7 @@ When creating new documentation files, follow this structure:
 
 Keep all three fresh with every feature. Stale docs are worse than no docs.
 
-**i18n is a feature requirement.** Any feature that adds user-visible strings must ship with translations. See `docs/notes/I18N_DESIGN.md` (New Feature i18n Checklist) for the full checklist. Quick summary:
-1. Add English keys to `src/app/i18n/en.translations.ts` and use `{{ key | translate }}` in templates
-2. Seed English, Spanish, AND Arabic rows in the migration (`INSERT INTO metadata.translations`)
-3. If adding new metadata types, ensure they are included in `get_translation_defaults()` and `get_missing_translations()`
+**i18n is a feature requirement.** Any feature adding user-visible strings must ship with translations. See `docs/notes/I18N_DESIGN.md` (New Feature i18n Checklist) for the required steps.
 
 **⚠️ MANDATORY: Comprehensive E2E Verification**
 

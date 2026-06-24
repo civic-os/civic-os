@@ -108,7 +108,10 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [ ] **Phase 3 - Management**: Dashboard management UI, widget editor, user preferences, global filter bar
   - [x] **Role-based default dashboards** (v0.37.0) - `metadata.dashboard_role_defaults` table so different roles land on different dashboards (e.g., staff → Staff Portal, managers → Admin Overview)
 - [ ] **Phase 4 - Polish**: Drag-and-drop reordering, dashboard templates, embedded links, mobile optimizations
-- [ ] **Phase 5 - Advanced Widgets**: Stat cards (backend aggregation required), charts (Chart.js), query results from views
+- [~] **Phase 5 - Advanced Widgets**: Stat cards, charts, query results
+  - [x] Chart widget (grouped bar via Unovis, v0.61.0)
+  - [ ] Stat cards (backend aggregation required)
+  - [ ] Query results from views
 - [ ] **Phase 6 - Permissions**: Role-based visibility, widget-level permissions, private dashboards
 
 ### General
@@ -194,8 +197,12 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### Utilities
 - [x] Build notification service (v0.11.0 - database templates, River-based worker, email via AWS SES)
-  - [ ] **External recipient notifications** - Send email/SMS to non-system users (e.g., partners, vendors, applicants who don't have accounts). Currently notifications can only target `civic_os_users`. Common pattern: property change trigger fires on status change → enqueues email to an external contact's email address from the record. *(Identified via IC pilot)*
-  - [ ] **Multi-recipient notifications** - Send a single notification to multiple recipients (system users and/or external contacts) in one call. Currently `send_notification()` accepts one `p_user_id UUID`. Use case: a referral event notifies both the partner ("you have a new referral for Client X") and the client ("you've been referred to Partner Y") from one trigger. Could accept `p_user_ids UUID[]` and/or `p_external_emails TEXT[]`. *(Identified via IC pilot)*
+  - [~] **External recipient notifications** - Send email/SMS to non-system users (e.g., partners, vendors, applicants who don't have accounts).
+    - [x] Email to arbitrary addresses via `metadata.send_email()` (v0.59.0) — supports `p_to_addresses TEXT[]`, `p_cc_addresses TEXT[]`, template rendering, no `civic_os_users` row required
+    - [ ] SMS to non-system users
+  - [~] **Multi-recipient notifications** - Send a single notification to multiple recipients (system users and/or external contacts) in one call.
+    - [x] `send_email()` natively supports multi-recipient arrays (`p_to_addresses TEXT[]`, `p_cc_addresses TEXT[]`)
+    - [ ] `send_notification()` still accepts single `p_user_id UUID` — needs `p_user_ids UUID[]` overload for system users
 
 - [ ] **Outbound Webhooks** - HTTP callbacks to external systems on entity events
   - [ ] `metadata.webhooks` table (URL, entity_type, event_type, secret, active flag)
