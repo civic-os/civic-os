@@ -122,9 +122,9 @@ export class AppComponent {
 
   public hasCategoryAdminPermission = computed(() => this.auth.hasPermission('metadata.categories', 'update'));
 
-  // Show Translations link when admin AND multiple locales are configured
+  // Show Translations link when user has translation permissions AND multiple locales are configured
   public hasTranslationAdminPermission = computed(() =>
-    this.auth.isAdmin() && this.localeService.supportedLocales.length > 1
+    this.auth.hasPermission('metadata.translations', 'update') && this.localeService.supportedLocales.length > 1
   );
 
   // Show Admin section if user is admin OR has access to feature-specific pages
@@ -146,6 +146,8 @@ export class AppComponent {
     // Non-admins see it if they have status/category admin access
     if (this.hasStatusAdminPermission()) return true;
     if (this.hasCategoryAdminPermission()) return true;
+    // Non-admins see it if they have translation admin access
+    if (this.hasTranslationAdminPermission()) return true;
     return false;
   });
 
