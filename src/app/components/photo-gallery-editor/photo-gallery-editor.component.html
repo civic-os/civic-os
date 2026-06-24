@@ -67,14 +67,14 @@
           <!-- Remove button overlay -->
           <button
             type="button"
-            class="absolute top-1 right-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 transition-opacity"
+            class="absolute top-1 end-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 transition-opacity"
             (click)="removeImage(image); $event.stopPropagation()"
             aria-label="Remove image">
             <span class="material-symbols-outlined text-xs">close</span>
           </button>
 
           <!-- Sort order badge -->
-          <div class="absolute bottom-1 left-1 badge badge-sm badge-ghost opacity-0 group-hover:opacity-80 transition-opacity">
+          <div class="absolute bottom-1 start-1 badge badge-sm badge-ghost opacity-0 group-hover:opacity-80 transition-opacity">
             {{ i + 1 }}
           </div>
 

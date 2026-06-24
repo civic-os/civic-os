@@ -152,3 +152,81 @@ Create and Edit pages are transient workflow steps. Use `replaceUrl: true` on na
 **Technical Debt**: `form-control` and `label-text` are widely used in this codebase but don't exist in DaisyUI 5. The forms still render acceptably due to Tailwind defaults, but this should be addressed.
 
 When adding DaisyUI components, always verify class names against the [DaisyUI 5 documentation](https://daisyui.com/components/). The v5 docs use the pattern `$$class` in examples to indicate the actual class name.
+
+## RTL Support & CSS Direction Conventions
+
+**Since v0.64.0**, Civic OS supports right-to-left (RTL) languages (Arabic, Hebrew, Persian, Urdu, Pashto, Dari). The `LocaleService` sets `document.documentElement.dir` to `'rtl'` or `'ltr'` based on the active locale, and DaisyUI + Tailwind handle the rest — **if you use logical properties**.
+
+### Always Use Logical Properties
+
+**CRITICAL**: Never use physical direction classes (`ml-`, `mr-`, `pl-`, `pr-`, `left-`, `right-`, `text-left`, `text-right`, `border-l-`, `border-r-`). Always use their logical equivalents:
+
+| Physical (never use) | Logical (always use) |
+|----------------------|---------------------|
+| `ml-X` | `ms-X` |
+| `mr-X` | `me-X` |
+| `pl-X` | `ps-X` |
+| `pr-X` | `pe-X` |
+| `left-X` | `start-X` |
+| `right-X` | `end-X` |
+| `text-left` | `text-start` |
+| `text-right` | `text-end` |
+| `border-l-X` | `border-s-X` |
+| `border-r-X` | `border-e-X` |
+| `-ml-X` | `-ms-X` |
+| `-mr-X` | `-me-X` |
+
+These resolve identically in LTR mode (`ms-2` = `ml-2` when `dir="ltr"`), so there is zero visual change for English/Spanish users. In RTL mode, they automatically mirror.
+
+Tailwind variant prefixes work the same way: `md:ps-4`, `focus:start-0`, etc.
+
+### CSS Custom Properties
+
+In component `.css` files, use CSS logical properties:
+
+| Physical (never use) | Logical (always use) |
+|----------------------|---------------------|
+| `margin-left` | `margin-inline-start` |
+| `margin-right` | `margin-inline-end` |
+| `padding-left` | `padding-inline-start` |
+| `padding-right` | `padding-inline-end` |
+| `left` | `inset-inline-start` |
+| `right` | `inset-inline-end` |
+| `border-left` | `border-inline-start` |
+| `border-right` | `border-inline-end` |
+| `text-align: left` | `text-align: start` |
+| `text-align: right` | `text-align: end` |
+
+**Exception**: Symmetric properties (`left: 0; right: 0` used together for full-width overlays) are fine as physical values since they don't need mirroring.
+
+### Directional Icons
+
+Material icons like `chevron_left`/`chevron_right` and `arrow_back`/`arrow_forward` have inherent directionality. For user-facing navigation (prev/next), swap them in RTL:
+
+```html
+<span class="material-symbols-outlined">
+  {{ isRtl() ? 'chevron_right' : 'chevron_left' }}
+</span>
+```
+
+Inject `LocaleService` and expose `isRtl = this.localeService.isRtl` for this pattern. Keyboard arrow keys stay physical (ArrowLeft/ArrowRight match screen direction by convention).
+
+### RTL-Specific CSS Overrides
+
+When CSS animations or transforms depend on direction (e.g., slide transitions), use `[dir="rtl"]` selectors:
+
+```css
+.slide-label {
+  transform: translateX(-100%);
+}
+[dir="rtl"] .slide-label {
+  transform: translateX(100%);
+}
+```
+
+### Third-Party Libraries
+
+- **DaisyUI 5**: Auto-mirrors all components when `dir="rtl"` — no overrides needed
+- **FullCalendar**: Set `direction: 'rtl'` via `api.setOption()` — see `TimeSlotCalendarComponent` for the effect-based pattern
+- **Leaflet**: Map content is geographic, not directional — no RTL changes needed. UI controls (reset buttons) use `inset-inline-end`
+- **JointJS/Schema Editor**: Admin-only canvas, out of scope for RTL

@@ -90,10 +90,10 @@
             @if (hasSearchFields()) {
               <div class="mb-3 shrink-0">
                 <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+                  <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
                   <input
                     type="text"
-                    class="input input-bordered w-full pl-10"
+                    class="input input-bordered w-full ps-10"
                     placeholder="Search..."
                     [ngModel]="searchQuery()"
                     (ngModelChange)="onSearchInput($event)"
@@ -192,7 +192,7 @@
           </div>
 
           <!-- Right panel: selected chips -->
-          <div class="max-h-32 md:max-h-none border-t md:border-t-0 md:border-l border-base-300 pt-3 md:pt-0 md:pl-4 pr-2 flex flex-col min-h-0">
+          <div class="max-h-32 md:max-h-none border-t md:border-t-0 md:border-s border-base-300 pt-3 md:pt-0 md:ps-4 pe-2 flex flex-col min-h-0">
             <h4 class="font-semibold text-sm mb-3 shrink-0">Selected ({{ workingSelection().size }})</h4>
             <div class="flex-1 min-h-0 overflow-y-auto space-y-1">
               @for (chip of selectedChips(); track chip.id) {
@@ -256,10 +256,10 @@
       @if (hasSearchFields()) {
         <div class="mb-3 shrink-0">
           <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+            <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
             <input
               type="text"
-              class="input input-bordered w-full pl-10"
+              class="input input-bordered w-full ps-10"
               placeholder="Search..."
               [ngModel]="searchQuery()"
               (ngModelChange)="onSearchInput($event)"

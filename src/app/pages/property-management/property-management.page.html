@@ -22,7 +22,7 @@
   @if (!adminLoading() && isAdmin()) {
     <!-- Entity Selector -->
     <div class="mb-6">
-      <label class="label mr-2">
+      <label class="label me-2">
         <span class="label-text font-semibold">Select Entity</span>
       </label>
       <select
@@ -58,7 +58,7 @@
             <!-- Static Text Row -->
             @if (isStaticTextRow(item)) {
               <div
-                class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow border-l-4 border-info"
+                class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow border-s-4 border-info"
                 cdkDrag>
                 <div class="card-body p-4">
                   <div class="flex items-center gap-4">
@@ -240,7 +240,7 @@
                           <span class="label-text text-xs">Sortable</span>
                         </label>
                         @if (isFilterableType(item)) {
-                          <label class="label cursor-pointer justify-start gap-2 ml-2">
+                          <label class="label cursor-pointer justify-start gap-2 ms-2">
                             <input
                               type="checkbox"
                               class="checkbox checkbox-sm"

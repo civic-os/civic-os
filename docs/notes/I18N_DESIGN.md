@@ -312,13 +312,48 @@ New page at `/admin/translations` for non-developer translators to manage transl
 
 **Service**: `TranslationAdminService` uses PostgREST REST for CRUD on the `translations` VIEW plus existing RPCs (`get_missing_translations`, `upsert_translations`).
 
+## Phase 4: RTL Layout Support (v0.64.0)
+
+Phase 4 adds right-to-left language support across the entire framework, plus Arabic as the first RTL language with ~279 seeded UI translations.
+
+### RTL Locale Detection
+
+`LocaleService` maintains a `RTL_LOCALES` constant (`Set<string>`) covering Arabic, Hebrew, Persian, Urdu, Pashto, and Dari. The `isRtl` computed signal derives from the active locale. An `effect()` in the constructor sets `document.documentElement.dir` to `'rtl'` or `'ltr'` whenever the locale changes. DaisyUI 5 and Tailwind CSS automatically mirror layout when `dir="rtl"` is present on the root element.
+
+### CSS Logical Property Strategy
+
+All Tailwind utility classes and CSS custom properties use **logical** (start/end) instead of **physical** (left/right) direction keywords. This is a zero-risk change for LTR users — `ms-2` resolves identically to `ml-2` in `dir="ltr"`.
+
+Conversion scope: ~63 physical direction classes across 27 HTML templates, plus 5 component CSS files. See `docs/development/ANGULAR.md` (RTL Support section) for the full mapping table and conventions.
+
+### Component-Level RTL Adaptations
+
+- **Boolean toggle** (`edit-property.component.css`): `[dir="rtl"]` CSS overrides reverse the `translateX` slide animation
+- **Gallery lightbox** (`gallery-lightbox.component`): Chevron icons swap via `isRtl()` conditional — `chevron_left`↔`chevron_right` for prev/next
+- **FullCalendar** (`time-slot-calendar.component`): `api.setOption('direction', 'rtl')` synced via effect when locale changes
+
+### Arabic Translation Seeds
+
+Migration `v0-64-0-add-arabic-translations.sql` seeds ~279 Arabic UI translations (formal Modern Standard Arabic) covering all keys from `en.translations.ts`. Uses `ON CONFLICT DO NOTHING` for safe re-running.
+
+### Out of Scope
+
+- Admin page icon swaps (pagination chevrons) — cosmetic, admin-only
+- Schema Editor (JointJS canvas) — admin-only, canvas-based, not affected by text direction
+- `arrow_back`/`arrow_forward` icons in system pages — follow-up item
+
+### Development Environment
+
+The `environment.ts` `supportedLocales` array was expanded to include all locales in `LOCALE_DISPLAY_NAMES` (16 total), so dev environments can test any locale without runtime config overrides.
+
 ## Phase Roadmap
 
 | Phase | Version | Scope |
 |-------|---------|-------|
 | Phase 1 | v0.57.0 | Foundation tables, Angular UI strings (~250 keys), locale service, settings Language tab |
 | Phase 2 | v0.58.0 | Metadata translations — wrap 7 VIEWs with `t()`, locale-aware cache invalidation, pothole Spanish seeds |
-| **Phase 3** | v0.62.0 | Dashboard RPC translations, widget config JSONB translation, admin translation management UI |
+| Phase 3 | v0.62.0 | Dashboard RPC translations, widget config JSONB translation, admin translation management UI |
+| **Phase 4** | v0.64.0 | RTL layout support, CSS logical properties, Arabic UI translations |
 
 ## File Reference
 
@@ -327,6 +362,7 @@ New page at `/admin/translations` for non-developer translators to manage transl
 | `postgres/migrations/deploy/v0-57-0-add-i18n.sql` | Phase 1: tables, functions, UI string seeds |
 | `postgres/migrations/deploy/v0-58-0-metadata-translations.sql` | Phase 2: VIEW rewrites, metadata seeds |
 | `postgres/migrations/deploy/v0-62-0-dashboard-translations.sql` | Phase 3: RPC rewrites, widget config helper, `get_translation_defaults()` RPC, updated `get_missing_translations()` |
+| `postgres/migrations/deploy/v0-64-0-add-arabic-translations.sql` | Phase 4: Arabic UI translation seeds (~279 keys) |
 | `src/app/i18n/en.translations.ts` | Single source of truth for English strings |
 | `src/app/services/locale.service.ts` | Signal-based locale management |
 | `src/app/services/translation.service.ts` | Translation lookup + cache |
@@ -350,7 +386,7 @@ Every feature that adds user-visible strings must ship with i18n support. This c
 
 1. **Add English keys** to `src/app/i18n/en.translations.ts` using dot-notation namespace (e.g., `sidebar.translations`, `form.new_field`)
 2. **Use `{{ key | translate }}` pipe** in templates instead of hardcoded English text
-3. **Seed both `en` and `es` rows** in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports). The Spanish row is needed so the feature actually translates.
+3. **Seed `en`, `es`, and `ar` rows** in the **core migration** via `INSERT INTO metadata.translations`. The English row is needed for the `get_translation_defaults()` RPC (admin coverage reports). The Spanish and Arabic rows are needed so the feature translates in both LTR and RTL languages.
 4. **Use `ON CONFLICT DO NOTHING`** on seed INSERTs to make migrations re-runnable
 
 ### Instance Metadata (new translatable metadata types)

@@ -16,7 +16,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, combineLatest, filter, map, of, tap, shareReplay, finalize, catchError, take } from 'rxjs';
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, InverseRelationshipMeta, ManyToManyMeta, ParentHop, StatusValue, CategoryValue, StaticText, RenderableItem, PropertyItem, isStaticText, isProperty, EntityAction } from '../interfaces/entity';
@@ -121,6 +121,8 @@ export class SchemaService {
   );
 
   // Re-fetch schema data when locale changes (VIEWs return locale-aware text via t())
+  // IMPORTANT: refreshCache() clears and re-reads caches — must use untracked()
+  // to prevent those signal reads from becoming tracked dependencies (infinite loop).
   private localeEffect = (() => {
     let initial = true;
     return effect(() => {
@@ -129,7 +131,7 @@ export class SchemaService {
         initial = false;
         return;
       }
-      this.refreshCache();
+      untracked(() => this.refreshCache());
     });
   })();
 

@@ -789,5 +789,7 @@ COMMENT ON VIEW public.schema_cache_versions IS
 
 GRANT SELECT ON public.schema_cache_versions TO authenticated, web_anon;
 
+-- Reload PostgREST schema cache so translated VIEWs are discoverable
+NOTIFY pgrst, 'reload schema';
 
 COMMIT;

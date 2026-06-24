@@ -96,7 +96,7 @@
 
 :host ::ng-deep .fc-daygrid-event .fc-event-time {
   font-weight: 500;
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 
 :host ::ng-deep .fc-daygrid-event .fc-event-title {

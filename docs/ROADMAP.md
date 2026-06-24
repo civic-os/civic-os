@@ -211,6 +211,8 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Tenant management UI for provisioning and configuration
   - [ ] Schema-per-tenant option for stronger data boundaries
 
+- [ ] **Optimistic Concurrency Control** - Use PostgREST `ETag` / `If-Match` headers to prevent silent overwrites on Edit pages. Pure frontend change, no schema work. See `docs/notes/ETAG_CONCURRENCY_DESIGN.md`.
+
 - [ ] **Activity/Audit Log** - Track who changed what and when
   - [ ] Database schema (`metadata.audit_log` table, polymorphic design)
   - [ ] PostgreSQL trigger function for automatic change capture

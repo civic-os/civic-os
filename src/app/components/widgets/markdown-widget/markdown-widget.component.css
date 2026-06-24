@@ -67,8 +67,8 @@
 
 /* Blockquotes */
 .markdown-widget :deep(blockquote) {
-  border-left: 4px solid oklch(var(--p));
-  padding-left: 1rem;
+  border-inline-start: 4px solid oklch(var(--p));
+  padding-inline-start: 1rem;
   color: oklch(var(--bc) / 0.8);
   font-style: italic;
 }
@@ -84,7 +84,7 @@
 .markdown-widget :deep(td) {
   border: 1px solid oklch(var(--b3));
   padding: 0.5rem;
-  text-align: left;
+  text-align: start;
 }
 
 .markdown-widget :deep(th) {

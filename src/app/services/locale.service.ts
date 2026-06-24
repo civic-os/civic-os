@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, Injector, signal, Signal, effect, inject } from '@angular/core';
+import { Injectable, Injector, signal, Signal, computed, effect, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { getLocaleConfig, getPostgrestUrl } from '../config/runtime';
 import { AuthService } from './auth.service';
@@ -26,6 +26,9 @@ export interface LocaleInfo {
   name: string;        // Native name (e.g., "Español")
   englishName: string;  // English name (e.g., "Spanish")
 }
+
+/** Locales that use right-to-left script direction */
+const RTL_LOCALES = new Set(['ar', 'he', 'fa', 'ur', 'ps', 'prs']);
 
 /** Map of supported locales to their display info */
 const LOCALE_DISPLAY_NAMES: Record<string, LocaleInfo> = {
@@ -38,6 +41,11 @@ const LOCALE_DISPLAY_NAMES: Record<string, LocaleInfo> = {
   'ko': { code: 'ko', name: '한국어', englishName: 'Korean' },
   'ja': { code: 'ja', name: '日本語', englishName: 'Japanese' },
   'ar': { code: 'ar', name: 'العربية', englishName: 'Arabic' },
+  'he': { code: 'he', name: 'עברית', englishName: 'Hebrew' },
+  'fa': { code: 'fa', name: 'فارسی', englishName: 'Persian' },
+  'ur': { code: 'ur', name: 'اردو', englishName: 'Urdu' },
+  'ps': { code: 'ps', name: 'پښتو', englishName: 'Pashto' },
+  'prs': { code: 'prs', name: 'دری', englishName: 'Dari' },
   'hi': { code: 'hi', name: 'हिन्दी', englishName: 'Hindi' },
   'vi': { code: 'vi', name: 'Tiếng Việt', englishName: 'Vietnamese' },
 };
@@ -58,6 +66,9 @@ export class LocaleService {
   /** Current locale (readonly signal) */
   readonly locale: Signal<string> = this._locale.asReadonly();
 
+  /** Whether the current locale uses right-to-left script direction */
+  readonly isRtl = computed(() => RTL_LOCALES.has(this._locale()));
+
   /** Supported locales for this instance */
   readonly supportedLocales: LocaleInfo[];
 
@@ -72,7 +83,7 @@ export class LocaleService {
       const loc = this._locale();
       if (typeof document !== 'undefined') {
         document.documentElement.lang = loc;
-        document.documentElement.dir = loc === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.dir = RTL_LOCALES.has(loc) ? 'rtl' : 'ltr';
       }
     });
   }
@@ -134,21 +145,18 @@ export class LocaleService {
       } catch { /* localStorage full or unavailable */ }
     }
 
-    // Persist to user profile if authenticated
+    // Persist to user profile if authenticated via RPC
+    // (civic_os_users VIEW is non-updatable; RPC writes to civic_os_users_private directly)
     // Lazy-resolve AuthService to avoid circular dependency:
     // SchemaService → LocaleService → AuthService → SchemaService
     const auth = this.injector.get(AuthService);
     if (auth.authenticated()) {
-      auth.getCurrentUserId().subscribe(userId => {
-        if (userId) {
-          this.http.patch(
-            getPostgrestUrl() + 'civic_os_users?id=eq.' + userId,
-            { locale },
-            { headers: { 'Prefer': 'return=minimal' } }
-          ).subscribe({
-            error: (err) => console.warn('Failed to persist locale to user profile:', err)
-          });
-        }
+      this.http.post(
+        getPostgrestUrl() + 'rpc/set_user_locale',
+        { p_locale: locale },
+        { headers: { 'Prefer': 'return=minimal' } }
+      ).subscribe({
+        error: (err) => console.warn('Failed to persist locale to user profile:', err)
       });
     }
   }

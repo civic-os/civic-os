@@ -587,4 +587,7 @@ AS $$
   ORDER BY sort_order, display_name;
 $$;
 
+-- Reload PostgREST schema cache so new RPCs are discoverable
+NOTIFY pgrst, 'reload schema';
+
 COMMIT;

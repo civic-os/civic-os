@@ -27,7 +27,7 @@
           <input type="checkbox" checked />
           <div class="collapse-title font-medium">
             {{ entityDisplayName() }}
-            <span class="badge badge-success badge-sm ml-2">Complete</span>
+            <span class="badge badge-success badge-sm ms-2">Complete</span>
           </div>
           <div class="collapse-content">
             @if (parentRecord() && parentProperties().length > 0) {
@@ -59,9 +59,9 @@
           <div class="collapse-title font-medium">
             {{ step.display_name }}
             @if (step.isCompleted) {
-              <span class="badge badge-success badge-sm ml-2">Complete</span>
+              <span class="badge badge-success badge-sm ms-2">Complete</span>
             } @else {
-              <span class="badge badge-ghost badge-sm ml-2">Skipped</span>
+              <span class="badge badge-ghost badge-sm ms-2">Skipped</span>
             }
           </div>
           <div class="collapse-content">

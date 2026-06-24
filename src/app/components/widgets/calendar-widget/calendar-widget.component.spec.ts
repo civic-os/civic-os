@@ -25,6 +25,7 @@ import { SchemaService } from '../../../services/schema.service';
 import { AuthService } from '../../../services/auth.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 import { DataQuery, FilterCriteria } from '../../../interfaces/query';
+import { provideTranslationTesting } from '../../../testing/translation-testing';
 
 describe('CalendarWidgetComponent', () => {
   let component: CalendarWidgetComponent;
@@ -128,6 +129,7 @@ describe('CalendarWidgetComponent', () => {
       imports: [CalendarWidgetComponent],
       providers: [
         provideZonelessChangeDetection(),
+        ...provideTranslationTesting(),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: AuthService, useValue: mockAuthService },

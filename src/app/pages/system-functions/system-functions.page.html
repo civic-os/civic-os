@@ -50,7 +50,7 @@
         @for (fn of filteredFunctions(); track fn.function_name) {
           <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg"
                [class.collapse-open]="isExpanded(fn.function_name)">
-            <div class="collapse-title cursor-pointer flex items-center gap-3 pr-12"
+            <div class="collapse-title cursor-pointer flex items-center gap-3 pe-12"
                  (click)="toggleFunction(fn.function_name)">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
@@ -92,7 +92,7 @@
                         <span class="badge badge-sm">
                           {{ effect.effect }} {{ effect.table }}
                           @if (effect.auto_detected) {
-                            <span class="text-base-content/40 ml-1">(auto)</span>
+                            <span class="text-base-content/40 ms-1">(auto)</span>
                           }
                         </span>
                       }

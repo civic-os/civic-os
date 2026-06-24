@@ -40,7 +40,7 @@
           />
           <span>{{ 'settings.analytics_label' | translate:{ appTitle: appTitle } }}</span>
         </label>
-        <p class="text-xs opacity-70 mt-1 ml-9">
+        <p class="text-xs opacity-70 mt-1 ms-9">
           {{ 'settings.analytics_description' | translate }}
         </p>
       </div>
@@ -65,7 +65,7 @@
               />
               <span>{{ 'settings.email_notifications' | translate }}</span>
             </label>
-            <p class="text-xs opacity-70 mt-1 ml-9">
+            <p class="text-xs opacity-70 mt-1 ms-9">
               {{ 'settings.send_to' | translate }} <strong>{{ email.email_address }}</strong>
             </p>
           </div>
@@ -84,10 +84,10 @@
                 />
                 <span>{{ 'settings.sms_notifications' | translate }}</span>
               </label>
-              <p class="text-xs opacity-70 mt-1 ml-9">
+              <p class="text-xs opacity-70 mt-1 ms-9">
                 {{ 'settings.send_to' | translate }} <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
               </p>
-              <p class="text-xs opacity-70 mt-1 ml-9">
+              <p class="text-xs opacity-70 mt-1 ms-9">
                 {{ 'settings.sms_consent' | translate:{ appTitle: appTitle } }}
               </p>
             </div>

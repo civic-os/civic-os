@@ -16,7 +16,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { Dashboard, DashboardWidget, WidgetType } from '../interfaces/dashboard';
 import { ApiResponse } from '../interfaces/api';
@@ -43,6 +43,8 @@ export class DashboardService {
   private dashboardsCache = signal<Dashboard[] | undefined>(undefined);
 
   // Re-fetch dashboards when locale changes (preparatory for Phase 3 RPC translation)
+  // IMPORTANT: refreshCache() reads dashboardsCache signal internally — must use untracked()
+  // to prevent it from becoming a tracked dependency and creating an infinite loop.
   private localeEffect = (() => {
     let initial = true;
     return effect(() => {
@@ -51,7 +53,7 @@ export class DashboardService {
         initial = false;
         return;
       }
-      this.refreshCache();
+      untracked(() => this.refreshCache());
     });
   })();
 

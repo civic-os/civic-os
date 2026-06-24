@@ -5,7 +5,7 @@
         {{ prop().display_name }}
         @if (prop().description) {
           <div class="tooltip tooltip-right inline-block" [attr.data-tip]="prop().description">
-            <span class="material-symbols-outlined text-info cursor-help ml-1 text-base align-middle">help_outline</span>
+            <span class="material-symbols-outlined text-info cursor-help ms-1 text-base align-middle">help_outline</span>
           </div>
         }
       </span>
@@ -170,7 +170,7 @@
               [alt]="'PDF Preview: ' + datum().file_name"
               class="not-prose w-24 h-32 object-cover rounded border hover:opacity-80 transition-opacity"
             />
-            <div class="absolute top-1 right-1 badge badge-sm badge-primary">PDF</div>
+            <div class="absolute top-1 end-1 badge badge-sm badge-primary">PDF</div>
           </div>
         } @else {
           <div class="w-12 h-12 flex items-center justify-center bg-base-200 rounded">

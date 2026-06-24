@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TimeSlotCalendarComponent, CalendarEvent } from './time-slot-calendar.component';
 import { FullCalendarComponent } from '@fullcalendar/angular';
 import { ThemeService } from '../../services/theme.service';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('TimeSlotCalendarComponent', () => {
   let component: TimeSlotCalendarComponent;
@@ -35,7 +36,8 @@ describe('TimeSlotCalendarComponent', () => {
       imports: [TimeSlotCalendarComponent],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: ThemeService, useValue: mockThemeService }
+        { provide: ThemeService, useValue: mockThemeService },
+        ...provideTranslationTesting()
       ]
     }).compileComponents();
 

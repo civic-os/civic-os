@@ -100,7 +100,7 @@
           size="sm"
           [closeOnBackdrop]="true">
           <h3 class="font-bold text-lg mb-4">
-            <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+            <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
             {{ 'guided_form.submitted' | translate }}
           </h3>
           <p class="mb-4">{{ 'guided_form.submitted_message' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</p>
@@ -223,7 +223,7 @@
                             class="btn btn-sm btn-primary"
                           >
                             {{ 'detail.view_all_records' | translate:{ count: relationship.totalCount } }}
-                            <span class="material-symbols-outlined ml-1">arrow_forward</span>
+                            <span class="material-symbols-outlined ms-1">arrow_forward</span>
                           </a>
                         </div>
                       } @else {
@@ -252,7 +252,7 @@
                               class="btn btn-sm btn-outline"
                             >
                               {{ 'detail.view_all_count' | translate:{ count: relationship.totalCount } }}
-                              <span class="material-symbols-outlined ml-1">arrow_forward</span>
+                              <span class="material-symbols-outlined ms-1">arrow_forward</span>
                             </a>
                           </div>
                         }

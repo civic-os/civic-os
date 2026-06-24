@@ -13,7 +13,7 @@
 
       <!-- Close Button -->
       <button
-        class="btn btn-sm btn-circle btn-ghost ml-2"
+        class="btn btn-sm btn-circle btn-ghost ms-2"
         (click)="onClose()"
         aria-label="Close inspector panel"
         title="Close (ESC)">
@@ -130,13 +130,13 @@
                       <!-- Column Name -->
                       <div class="text-sm mb-2">
                         <span class="text-base-content/60">Column:</span>
-                        <code class="ml-2 text-xs text-base-content/80">{{ property.column_name }}</code>
+                        <code class="ms-2 text-xs text-base-content/80">{{ property.column_name }}</code>
                       </div>
 
                       <!-- Data Type -->
                       <div class="text-sm mb-1">
                         <span class="text-base-content/60">Type:</span>
-                        <code class="ml-2 bg-base-300 px-2 py-0.5 rounded">{{ formatDataType(property) }}</code>
+                        <code class="ms-2 bg-base-300 px-2 py-0.5 rounded">{{ formatDataType(property) }}</code>
                       </div>
 
                   <!-- System Type Reference (Files, Users) -->
@@ -155,7 +155,7 @@
                   @else if (property.join_table && !property.many_to_many_meta) {
                     <div class="text-sm mb-1">
                       <span class="text-base-content/60">References:</span>
-                      <code class="ml-2 text-secondary">{{ property.join_table }}.{{ property.join_column || 'id' }}</code>
+                      <code class="ms-2 text-secondary">{{ property.join_table }}.{{ property.join_column || 'id' }}</code>
                     </div>
                   }
 
@@ -163,11 +163,11 @@
                   @if (property.many_to_many_meta) {
                     <div class="text-sm mb-1">
                       <span class="text-base-content/60">Related Entity:</span>
-                      <code class="ml-2 text-accent">{{ property.many_to_many_meta.relatedTable }}</code>
+                      <code class="ms-2 text-accent">{{ property.many_to_many_meta.relatedTable }}</code>
                     </div>
                     <div class="text-sm mb-1">
                       <span class="text-base-content/60">Junction Table:</span>
-                      <code class="ml-2 text-base-content/50">{{ property.many_to_many_meta.junctionTable }}</code>
+                      <code class="ms-2 text-base-content/50">{{ property.many_to_many_meta.junctionTable }}</code>
                     </div>
                   }
 
@@ -175,7 +175,7 @@
                   @if (property.column_default) {
                     <div class="text-sm mb-1">
                       <span class="text-base-content/60">Default:</span>
-                      <code class="ml-2 text-accent">{{ property.column_default }}</code>
+                      <code class="ms-2 text-accent">{{ property.column_default }}</code>
                     </div>
                   }
 

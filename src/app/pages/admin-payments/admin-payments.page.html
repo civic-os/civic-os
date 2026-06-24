@@ -176,7 +176,7 @@
                   </div>
                 </td>
                 <!-- Amount -->
-                <td class="text-right font-mono">
+                <td class="text-end font-mono">
                   {{ payment.amount | currency:payment.currency:'symbol':'1.2-2' }}
                 </td>
                 <!-- Refund -->
@@ -192,7 +192,7 @@
                         </span>
                       }
                       <button
-                        class="link link-primary text-xs mt-1 text-left"
+                        class="link link-primary text-xs mt-1 text-start"
                         (click)="openRefundHistoryModal(payment)">
                         {{ payment.refund_count }} refund{{ payment.refund_count !== 1 ? 's' : '' }}
                         @if (payment.pending_refund_count > 0) {
@@ -436,7 +436,7 @@
                 @if (refund.error_message) {
                   <tr class="bg-error/10">
                     <td colspan="5" class="text-xs text-error">
-                      <span class="material-symbols-outlined text-xs align-middle mr-1">error</span>
+                      <span class="material-symbols-outlined text-xs align-middle me-1">error</span>
                       {{ refund.error_message }}
                     </td>
                   </tr>

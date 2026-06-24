@@ -40,7 +40,7 @@
               <th>Slug</th>
               <th>Crops</th>
               <th>Created</th>
-              <th class="text-right">Actions</th>
+              <th class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -87,7 +87,7 @@
                 <td>
                   <div class="text-sm text-base-content/70">{{ formatDate(asset.created_at) }}</div>
                 </td>
-                <td class="text-right">
+                <td class="text-end">
                   <div class="flex gap-1 justify-end">
                     <button class="btn btn-sm btn-ghost" (click)="openEditModal(asset)" title="Re-crop">
                       <span class="material-symbols-outlined text-base">crop</span>
@@ -131,7 +131,7 @@
 
   <!-- Close button (always visible unless saving) -->
   @if (!saving()) {
-    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+    <button class="btn btn-sm btn-circle btn-ghost absolute end-2 top-2"
             (click)="closeModals()" title="Close">
       <span class="material-symbols-outlined text-base">close</span>
     </button>
@@ -186,7 +186,7 @@
           class="btn btn-outline justify-start h-auto py-3 px-4"
           [class.btn-primary]="selectedProfile().name === profile.name"
           (click)="selectProfile(profile)">
-          <div class="text-left">
+          <div class="text-start">
             <div class="font-medium">{{ profile.name }}</div>
             <div class="text-xs opacity-70">{{ profile.description }}</div>
             <div class="text-xs mt-1 font-mono">
@@ -230,7 +230,7 @@
 
   <!-- Step: Crop (Desktop / Tablet / Mobile) -->
   @if (cropStep().startsWith('crop-')) {
-    <div class="flex justify-between items-center mb-4 pr-8">
+    <div class="flex justify-between items-center mb-4 pe-8">
       <h3 class="font-bold text-lg">
         Crop for {{ currentCropBreakpoint()?.label }}
       </h3>

@@ -24,8 +24,8 @@
 @source inline("
   btn-primary btn-secondary btn-accent btn-neutral
   btn-info btn-success btn-warning btn-error btn-ghost
-  border-l-primary border-l-secondary border-l-accent border-l-neutral
-  border-l-info border-l-success border-l-warning border-l-error border-l-base-300
+  border-s-primary border-s-secondary border-s-accent border-s-neutral
+  border-s-info border-s-success border-s-warning border-s-error border-s-base-300
 ");
 
 /* Override prose max-width (was in tailwind.config.js theme.extend.typography) */

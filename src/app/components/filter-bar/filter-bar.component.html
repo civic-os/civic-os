@@ -17,7 +17,7 @@
 
     <!-- Filter Controls Drawer (Collapsible) -->
     @if (isExpanded()) {
-      <div class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg" [class.left-0]="alignLeft()" [class.right-6]="!alignLeft()" [style.max-width]="dropdownMaxWidth()">
+      <div class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg" [class.start-0]="alignLeft()" [class.end-6]="!alignLeft()" [style.max-width]="dropdownMaxWidth()">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold">Filter Options</h3>
           @if (activeFilterCount() > 0) {
@@ -44,7 +44,7 @@
                     <div class="text-sm text-base-content/60">Loading options...</div>
                   }
                   @for (option of getFilterOptions(prop.column_name); track option.id) {
-                    <label class="label cursor-pointer justify-start gap-2 py-1 pr-4">
+                    <label class="label cursor-pointer justify-start gap-2 py-1 pe-4">
                       <input
                         type="checkbox"
                         class="checkbox checkbox-sm"
@@ -60,7 +60,7 @@
               @if (prop.type === EntityPropertyType.Payment) {
                 <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
                   @for (option of getFilterOptions(prop.column_name); track option.id) {
-                    <label class="label cursor-pointer justify-start gap-2 py-1 pr-4">
+                    <label class="label cursor-pointer justify-start gap-2 py-1 pe-4">
                       <input
                         type="checkbox"
                         class="checkbox checkbox-sm"

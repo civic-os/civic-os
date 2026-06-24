@@ -5416,7 +5416,7 @@ ON CONFLICT (source_type, source_key, locale)
 DO UPDATE SET translated_text = EXCLUDED.translated_text,
              updated_at = NOW();
 
--- Check translation coverage for a locale
+-- Check translation coverage for a locale (UI keys only)
 SELECT count(*) as total_keys,
        count(*) FILTER (WHERE t.id IS NOT NULL) as translated,
        count(*) FILTER (WHERE t.id IS NULL) as missing
@@ -5424,7 +5424,23 @@ FROM metadata.translations en
 LEFT JOIN metadata.translations t
   ON en.source_key = t.source_key AND t.locale = 'fr' AND t.source_type = en.source_type
 WHERE en.locale = 'en' AND en.source_type = 'ui';
+
+-- Comprehensive missing translations (all source types: UI, entities,
+-- properties, statuses, categories, actions, dashboards, widget config).
+-- Uses get_translation_defaults() which is granted to PUBLIC, making it
+-- safe for readonly roles (MCP servers, monitoring, CI checks).
+SELECT d.source_type, d.source_key, d.default_text
+FROM get_translation_defaults() d
+WHERE NOT EXISTS (
+  SELECT 1 FROM metadata.translations t
+  WHERE t.source_type = d.source_type
+  AND t.source_key = d.source_key
+  AND t.locale = 'es'  -- target locale
+)
+ORDER BY d.source_type, d.source_key;
 ```
+
+> **Tip:** The `get_missing_translations('es')` RPC wraps this same logic but requires authenticated/admin access. The `get_translation_defaults()` + `NOT EXISTS` approach above works identically and is available to any database role, including readonly MCP connections.
 
 #### Via PostgREST API
 

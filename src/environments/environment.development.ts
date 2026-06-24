@@ -50,6 +50,6 @@ export const environment: Environment = {
     },
     locale: {
         defaultLocale: 'en',
-        supportedLocales: ['en', 'es']
+        supportedLocales: ['en', 'es', 'ar', 'he', 'fa', 'ur', 'ps', 'prs', 'fr', 'de', 'pt', 'zh', 'ko', 'ja', 'hi', 'vi']
     }
 };

@@ -3,8 +3,8 @@
   <!-- Dropdown Button -->
   <div tabindex="0" role="button" class="btn btn-ghost">
     <span class="material-symbols-outlined">dashboard</span>
-    <span class="hidden sm:inline ml-2">{{ getCurrentDashboardName() }}</span>
-    <span class="material-symbols-outlined ml-1">expand_more</span>
+    <span class="hidden sm:inline ms-2">{{ getCurrentDashboardName() }}</span>
+    <span class="material-symbols-outlined ms-1">expand_more</span>
   </div>
 
   <!-- Dropdown Menu -->
@@ -23,7 +23,7 @@
           <span class="material-symbols-outlined">home</span>
           <span>Default Dashboard</span>
           @if (currentDashboardId() === undefined) {
-            <span class="material-symbols-outlined ml-auto text-primary">check</span>
+            <span class="material-symbols-outlined ms-auto text-primary">check</span>
           }
         </a>
       </li>
@@ -50,7 +50,7 @@
               }
             </div>
             @if (currentDashboardId() === dashboard.id) {
-              <span class="material-symbols-outlined ml-auto text-primary">check</span>
+              <span class="material-symbols-outlined ms-auto text-primary">check</span>
             }
           </a>
         </li>
@@ -67,7 +67,7 @@
       <li class="menu-disabled">
         <a class="flex items-center justify-center">
           <span class="loading loading-spinner loading-sm"></span>
-          <span class="ml-2">Loading dashboards...</span>
+          <span class="ms-2">Loading dashboards...</span>
         </a>
       </li>
     </ul>

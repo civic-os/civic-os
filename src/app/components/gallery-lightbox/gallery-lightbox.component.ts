@@ -7,9 +7,10 @@
  * (at your option) any later version.
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject } from '@angular/core';
 import { GalleryImage } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
+import { LocaleService } from '../../services/locale.service';
 
 /**
  * Full-screen lightbox for gallery image viewing with keyboard navigation.
@@ -40,6 +41,9 @@ import { getS3Config } from '../../config/runtime';
   templateUrl: './gallery-lightbox.component.html'
 })
 export class GalleryLightboxComponent {
+  private localeService = inject(LocaleService);
+  readonly isRtl = this.localeService.isRtl;
+
   images = input.required<GalleryImage[]>();
   isOpen = input<boolean>(false);
   startIndex = input<number>(0);

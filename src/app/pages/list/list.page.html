@@ -4,7 +4,7 @@
       {{ entity.display_name }} {{ 'list.title_suffix' | translate }}
       @if (entity.description) {
         <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
-          <span class="material-symbols-outlined text-info cursor-help ml-2 text-2xl align-middle">help_outline</span>
+          <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle">help_outline</span>
         </div>
       }
     </h1>
@@ -84,7 +84,7 @@
             @for (chip of chips; track chip.column) {
               <div class="badge badge-md gap-1 border border-primary bg-primary/10">
                 <span>{{ chip.columnLabel }} ({{ chip.displayValue }})</span>
-                <button class="btn btn-ghost btn-xs btn-circle hover:bg-primary/20 -mr-1" (click)="removeFilter(chip.column)" type="button" [attr.aria-label]="('action.remove' | translate) + ' ' + chip.columnLabel">
+                <button class="btn btn-ghost btn-xs btn-circle hover:bg-primary/20 -me-1" (click)="removeFilter(chip.column)" type="button" [attr.aria-label]="('action.remove' | translate) + ' ' + chip.columnLabel">
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                 </button>
               </div>
@@ -148,7 +148,7 @@
                       <span class="material-symbols-outlined sort-icon" aria-hidden="true">sort</span>
                     }
                     @if (isColumnFiltered(prop.column_name)) {
-                      <span class="material-symbols-outlined text-base-content/50 text-sm ml-1" aria-hidden="true">filter_alt</span>
+                      <span class="material-symbols-outlined text-base-content/50 text-sm ms-1" aria-hidden="true">filter_alt</span>
                     }
                   </span>
                 </th>

@@ -35,6 +35,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ThemeService } from '../../services/theme.service';
+import { LocaleService } from '../../services/locale.service';
 
 export interface CalendarEvent {
   id: string | number;
@@ -77,6 +78,7 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
   @ViewChild('calendar') calendarComponent?: FullCalendarComponent;
 
   private themeService = inject(ThemeService);
+  private localeService = inject(LocaleService);
 
   // Inputs
   mode = input<'display' | 'edit' | 'list'>('display');
@@ -101,6 +103,15 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
   // State
   isDark = this.themeService.isDark;
   private viewInitialized = signal(false); // Track whether ngAfterViewInit has run
+
+  /** Sync FullCalendar direction when locale RTL state changes */
+  private syncDirection = effect(() => {
+    const isRtl = this.localeService.isRtl();
+    const api = this.calendarComponent?.getApi();
+    if (api?.setOption) {
+      api.setOption('direction', isRtl ? 'rtl' : 'ltr');
+    }
+  });
 
   constructor() {
     // Update FullCalendar when events change (bridge between reactive signals and imperative API)

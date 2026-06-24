@@ -101,10 +101,10 @@
           (click)="setActiveTab('subject')">
           Subject
           @if (isValidating('subject')) {
-            <span class="loading loading-spinner loading-xs ml-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2"></span>
           }
           @if (!isValidating('subject') && getValidationResult('subject')?.valid) {
-            <span class="text-success ml-2">✓</span>
+            <span class="text-success ms-2">✓</span>
           }
         </a>
         <a
@@ -114,10 +114,10 @@
           (click)="setActiveTab('html')">
           HTML
           @if (isValidating('html')) {
-            <span class="loading loading-spinner loading-xs ml-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2"></span>
           }
           @if (!isValidating('html') && getValidationResult('html')?.valid) {
-            <span class="text-success ml-2">✓</span>
+            <span class="text-success ms-2">✓</span>
           }
         </a>
         <a
@@ -127,10 +127,10 @@
           (click)="setActiveTab('text')">
           Text
           @if (isValidating('text')) {
-            <span class="loading loading-spinner loading-xs ml-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2"></span>
           }
           @if (!isValidating('text') && getValidationResult('text')?.valid) {
-            <span class="text-success ml-2">✓</span>
+            <span class="text-success ms-2">✓</span>
           }
         </a>
         <a
@@ -140,10 +140,10 @@
           (click)="setActiveTab('sms')">
           SMS (Optional)
           @if (isValidating('sms')) {
-            <span class="loading loading-spinner loading-xs ml-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2"></span>
           }
           @if (!isValidating('sms') && getValidationResult('sms')?.valid) {
-            <span class="text-success ml-2">✓</span>
+            <span class="text-success ms-2">✓</span>
           }
         </a>
       </div>

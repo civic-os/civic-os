@@ -6,6 +6,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GalleryLightboxComponent } from './gallery-lightbox.component';
 import { GalleryImage } from '../../interfaces/entity';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('GalleryLightboxComponent', () => {
   let component: GalleryLightboxComponent;
@@ -46,7 +47,7 @@ describe('GalleryLightboxComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GalleryLightboxComponent],
-      providers: [provideZonelessChangeDetection()]
+      providers: [provideZonelessChangeDetection(), ...provideTranslationTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalleryLightboxComponent);

@@ -106,7 +106,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Excel Import/Export**: Bulk data operations on List pages with FK name resolution and validation. **Custom Import Mode** (v0.31.0+) for non-entity imports. **M:M Import** (v0.60.0): Pure junction M:M properties import via comma-separated values with two-phase insert (main rows first, then junction records). Rich junctions and parent-hop M:M excluded. See `docs/development/IMPORT_EXPORT.md` and `docs/INTEGRATOR_GUIDE.md` for specification.
 
-**Multi-Language (i18n)** (v0.57.0+): Framework UI strings and instance metadata render in the user's preferred language. Phase 1 (v0.57.0): ~250 Angular UI keys with English/Spanish. Phase 2 (v0.58.0): Instance metadata translations across 7 public VIEWs. Phase 3 (v0.62.0): Dashboard RPC translations with JSONB config. **Admin Translation Management** (v0.62.0+): Page at `/admin/translations` for browsing/editing translations with coverage reports. Language tab in Settings when `supportedLocales` has 2+ entries. See `docs/INTEGRATOR_GUIDE.md` (Multi-Language section) and `docs/notes/I18N_DESIGN.md` for architecture.
+**Multi-Language (i18n)** (v0.57.0+): Framework UI strings and instance metadata render in the user's preferred language. Phase 1 (v0.57.0): ~250 Angular UI keys with English/Spanish. Phase 2 (v0.58.0): Instance metadata translations across 7 public VIEWs. Phase 3 (v0.62.0): Dashboard RPC translations with JSONB config. **Phase 4 (v0.64.0): RTL layout support** — CSS logical properties throughout, Arabic UI translations (~279 keys), `LocaleService.isRtl` signal, FullCalendar/gallery/boolean-toggle RTL adaptations. RTL locales: ar, he, fa, ur, ps, prs. **Admin Translation Management** (v0.62.0+): Page at `/admin/translations` for browsing/editing translations with coverage reports. Language tab in Settings when `supportedLocales` has 2+ entries. See `docs/INTEGRATOR_GUIDE.md` (Multi-Language section) and `docs/notes/I18N_DESIGN.md` for architecture.
 
 ## Custom Dashboards
 
@@ -376,6 +376,8 @@ See `docs/development/ANGULAR.md` for code examples, the OnPush + async pipe pat
 
 **CRITICAL: `not-prose` for sensitive components.** All CRUD pages wrap content in `<div class="prose">`. Tailwind Typography applies styles to bare HTML elements (`img`, `video`, `table`, `hr`, headings, etc.) — any component that dynamically creates these elements (maps, diagrams, rich editors, canvas libraries) **must** add `not-prose` to its outermost wrapper div. Without it, elements like Leaflet tile `<img>` tags get `margin: 2em 0` which causes subtle visual bugs. See `docs/notes/MAP_SHIFT_INVESTIGATION.md` for the full story.
 
+**CRITICAL: Always use CSS logical properties for direction.** Never use physical direction classes (`ml-`, `mr-`, `pl-`, `pr-`, `left-`, `right-`, `text-left`, `text-right`). Always use logical equivalents (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`, `text-start`, `text-end`). Same applies in component CSS files (`margin-inline-start` not `margin-left`, etc.). This ensures RTL languages render correctly. See `docs/development/ANGULAR.md` (RTL Support section) for the complete mapping table.
+
 ## TypeScript Configuration
 
 - Strict mode enabled
@@ -421,7 +423,7 @@ Keep all three fresh with every feature. Stale docs are worse than no docs.
 
 **i18n is a feature requirement.** Any feature that adds user-visible strings must ship with translations. See `docs/notes/I18N_DESIGN.md` (New Feature i18n Checklist) for the full checklist. Quick summary:
 1. Add English keys to `src/app/i18n/en.translations.ts` and use `{{ key | translate }}` in templates
-2. Seed both English AND Spanish rows in the migration (`INSERT INTO metadata.translations`)
+2. Seed English, Spanish, AND Arabic rows in the migration (`INSERT INTO metadata.translations`)
 3. If adding new metadata types, ensure they are included in `get_translation_defaults()` and `get_missing_translations()`
 
 **⚠️ MANDATORY: Comprehensive E2E Verification**

@@ -9,34 +9,34 @@
 
     <!-- Close button -->
     <button
-      class="absolute top-4 right-4 btn btn-circle btn-ghost text-white z-10"
+      class="absolute top-4 end-4 btn btn-circle btn-ghost text-white z-10"
       (click)="close()"
       aria-label="Close gallery">
       <span class="material-symbols-outlined text-2xl">close</span>
     </button>
 
     <!-- Image counter -->
-    <div class="absolute top-4 left-4 text-white/80 text-sm font-mono z-10">
+    <div class="absolute top-4 start-4 text-white/80 text-sm font-mono z-10">
       {{ currentIndex() + 1 }} / {{ imageCount() }}
     </div>
 
     <!-- Previous button -->
     @if (imageCount() > 1) {
       <button
-        class="absolute left-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
+        class="absolute start-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
         (click)="prev(); $event.stopPropagation()"
         aria-label="Previous image">
-        <span class="material-symbols-outlined text-3xl">chevron_left</span>
+        <span class="material-symbols-outlined text-3xl">{{ isRtl() ? 'chevron_right' : 'chevron_left' }}</span>
       </button>
     }
 
     <!-- Next button -->
     @if (imageCount() > 1) {
       <button
-        class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
+        class="absolute end-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
         (click)="next(); $event.stopPropagation()"
         aria-label="Next image">
-        <span class="material-symbols-outlined text-3xl">chevron_right</span>
+        <span class="material-symbols-outlined text-3xl">{{ isRtl() ? 'chevron_left' : 'chevron_right' }}</span>
       </button>
     }
 

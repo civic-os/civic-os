@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Provider, signal } from '@angular/core';
+import { Provider, signal, computed } from '@angular/core';
 import { TranslationService } from '../services/translation.service';
 import { LocaleService } from '../services/locale.service';
 import { EN_TRANSLATIONS } from '../i18n/en.translations';
@@ -41,6 +41,7 @@ import { EN_TRANSLATIONS } from '../i18n/en.translations';
 export function provideTranslationTesting(): Provider[] {
   const mockLocaleService = {
     locale: signal('en'),
+    isRtl: computed(() => false),
     supportedLocales: [{ code: 'en', name: 'English' }],
     setLocale: () => {},
     isSupported: (code: string) => code === 'en',

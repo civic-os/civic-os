@@ -9,7 +9,7 @@
           {{ 'form.create_title' | translate:{ entity: entity.display_name } }}
           @if (entity.description) {
             <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
-              <span class="material-symbols-outlined text-info cursor-help ml-2 text-xl align-middle">help_outline</span>
+              <span class="material-symbols-outlined text-info cursor-help ms-2 text-xl align-middle">help_outline</span>
             </div>
           }
         </h1>
@@ -91,10 +91,10 @@
       @if (saveSteps(); as steps) {
         <h3 class="font-bold text-lg mb-4">
           @if (saveComplete()) {
-            <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+            <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
             {{ 'form.created' | translate }}
           } @else {
-            <span class="material-symbols-outlined text-primary align-middle mr-2 animate-spin">progress_activity</span>
+            <span class="material-symbols-outlined text-primary align-middle me-2 animate-spin">progress_activity</span>
             {{ 'form.creating' | translate }}
           }
         </h3>
@@ -111,7 +111,7 @@
         }
       } @else {
         <h3 class="font-bold text-lg mb-4">
-          <span class="material-symbols-outlined text-success align-middle mr-2">check_circle</span>
+          <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
           {{ 'form.success' | translate }}
         </h3>
         <p class="mb-4">{{ 'form.create_success' | translate }}</p>
@@ -126,7 +126,7 @@
     <!-- Error Modal -->
     <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm">
       <h3 class="font-bold text-lg mb-4">
-        <span class="material-symbols-outlined text-error align-middle mr-2">error</span>
+        <span class="material-symbols-outlined text-error align-middle me-2">error</span>
         {{ 'state.error' | translate }}
       </h3>
       @if (currentError(); as err) {

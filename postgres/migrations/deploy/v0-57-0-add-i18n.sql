@@ -817,5 +817,7 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
 ('ui', 'calendar.day', 'en', 'Day'),
 ('ui', 'calendar.day', 'es', 'Día');
 
+-- Reload PostgREST schema cache so new RPCs are discoverable
+NOTIFY pgrst, 'reload schema';
 
 COMMIT;

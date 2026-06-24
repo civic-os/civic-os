@@ -7,7 +7,7 @@
     </div>
     @if (isAdmin() && !loading()) {
       <button class="btn btn-primary" (click)="openCreateModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         Create Template
@@ -44,7 +44,7 @@
               <th>Entity Type</th>
               <th>Channels</th>
               <th>Created</th>
-              <th class="text-right">Actions</th>
+              <th class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -78,7 +78,7 @@
                     {{ formatDate(template.created_at) }}
                   </div>
                 </td>
-                <td class="text-right">
+                <td class="text-end">
                   <div class="flex gap-2 justify-end">
                     <button
                       class="btn btn-sm btn-ghost"
