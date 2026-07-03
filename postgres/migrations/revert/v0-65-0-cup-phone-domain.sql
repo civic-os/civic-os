@@ -2,7 +2,8 @@
 
 BEGIN;
 
--- Drop user_fk_column override from config table
+-- Drop VIEW first (it depends on user_fk_column), then drop the column
+DROP VIEW IF EXISTS public.user_profile_extensions;
 ALTER TABLE metadata.user_profile_extensions DROP COLUMN IF EXISTS user_fk_column;
 
 -- Recreate VIEW without user_fk_column
