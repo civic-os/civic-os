@@ -120,7 +120,8 @@ export class FilteredListWidgetComponent {
           // Build query with proper select strings
           const query: DataQuery = {
             ...params,
-            fields: columns
+            fields: columns,
+            limit: cfg.limit
           };
 
           // Fetch filtered data with proper column expansion

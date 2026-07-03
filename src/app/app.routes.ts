@@ -29,137 +29,152 @@ import { DashboardPage } from './pages/dashboard/dashboard.page';
 import { SeriesGroupManagementPage } from './pages/series-group-management/series-group-management.page';
 import { schemaVersionGuard } from './guards/schema-version.guard';
 import { authGuard } from './guards/auth.guard';
+import { profileCompletionGuard } from './guards/profile-completion.guard';
 
 export const routes: Routes = [
+    // Profile page sits outside the completion guard wrapper (prevents redirect loop)
+    {
+        path: 'profile',
+        loadComponent: () => import('./pages/profile/profile.page')
+            .then(m => m.ProfilePage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
+    // All other routes wrapped with profileCompletionGuard via canActivateChild
     {
         path: '',
-        component: DashboardPage,
-        canActivate: [schemaVersionGuard]
-    },
-    {
-        path: 'dashboard/:id',
-        component: DashboardPage,
-        canActivate: [schemaVersionGuard]
-    },
-    {
-        path: 'schema-editor',
-        loadComponent: () => import('./pages/schema-editor/schema-editor.page')
-            .then(m => m.SchemaEditorPage),
-        canActivate: [schemaVersionGuard]
-    },
-    {
-        path: 'system/functions',
-        loadComponent: () => import('./pages/system-functions/system-functions.page')
-            .then(m => m.SystemFunctionsPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'system/entity-code/:tableName',
-        loadComponent: () => import('./pages/entity-code/entity-code.page')
-            .then(m => m.EntityCodePage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'system/policies',
-        loadComponent: () => import('./pages/system-policies/system-policies.page')
-            .then(m => m.SystemPoliciesPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'permissions',
-        component: PermissionsPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'entity-management',
-        component: EntityManagementPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'property-management',
-        component: PropertyManagementPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'notifications/templates',
-        component: TemplateManagementPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/payments',
-        component: AdminPaymentsPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/users',
-        loadComponent: () => import('./pages/user-management/user-management.page')
-            .then(m => m.UserManagementPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/static-assets',
-        loadComponent: () => import('./pages/static-assets/static-assets.page')
-            .then(m => m.StaticAssetsPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/files',
-        loadComponent: () => import('./pages/admin-files/admin-files.page')
-            .then(m => m.AdminFilesPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/statuses',
-        loadComponent: () => import('./pages/admin-statuses/admin-statuses.page')
-            .then(m => m.AdminStatusesPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/categories',
-        loadComponent: () => import('./pages/admin-categories/admin-categories.page')
-            .then(m => m.AdminCategoriesPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/translations',
-        loadComponent: () => import('./pages/admin-translations/admin-translations.page')
-            .then(m => m.AdminTranslationsPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/galleries',
-        loadComponent: () => import('./pages/admin-galleries/admin-galleries.page')
-            .then(m => m.AdminGalleriesPage),
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/recurring-schedules',
-        component: SeriesGroupManagementPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'admin/recurring-schedules/:groupId',
-        component: SeriesGroupManagementPage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'view/:entityKey',
-        component: ListPage,
-        canActivate: [schemaVersionGuard]
-    },
-    {
-        path: 'view/:entityKey/:entityId',
-        component: DetailPage,
-        canActivate: [schemaVersionGuard]
-    },
-    {
-        path: 'create/:entityKey',
-        component: CreatePage,
-        canActivate: [schemaVersionGuard, authGuard]
-    },
-    {
-        path: 'edit/:entityKey/:entityId',
-        component: EditPage,
-        canActivate: [schemaVersionGuard, authGuard]
+        canActivateChild: [profileCompletionGuard],
+        children: [
+            {
+                path: '',
+                component: DashboardPage,
+                canActivate: [schemaVersionGuard]
+            },
+            {
+                path: 'dashboard/:id',
+                component: DashboardPage,
+                canActivate: [schemaVersionGuard]
+            },
+            {
+                path: 'schema-editor',
+                loadComponent: () => import('./pages/schema-editor/schema-editor.page')
+                    .then(m => m.SchemaEditorPage),
+                canActivate: [schemaVersionGuard]
+            },
+            {
+                path: 'system/functions',
+                loadComponent: () => import('./pages/system-functions/system-functions.page')
+                    .then(m => m.SystemFunctionsPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'system/entity-code/:tableName',
+                loadComponent: () => import('./pages/entity-code/entity-code.page')
+                    .then(m => m.EntityCodePage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'system/policies',
+                loadComponent: () => import('./pages/system-policies/system-policies.page')
+                    .then(m => m.SystemPoliciesPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'permissions',
+                component: PermissionsPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'entity-management',
+                component: EntityManagementPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'property-management',
+                component: PropertyManagementPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'notifications/templates',
+                component: TemplateManagementPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/payments',
+                component: AdminPaymentsPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/users',
+                loadComponent: () => import('./pages/user-management/user-management.page')
+                    .then(m => m.UserManagementPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/static-assets',
+                loadComponent: () => import('./pages/static-assets/static-assets.page')
+                    .then(m => m.StaticAssetsPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/files',
+                loadComponent: () => import('./pages/admin-files/admin-files.page')
+                    .then(m => m.AdminFilesPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/statuses',
+                loadComponent: () => import('./pages/admin-statuses/admin-statuses.page')
+                    .then(m => m.AdminStatusesPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/categories',
+                loadComponent: () => import('./pages/admin-categories/admin-categories.page')
+                    .then(m => m.AdminCategoriesPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/translations',
+                loadComponent: () => import('./pages/admin-translations/admin-translations.page')
+                    .then(m => m.AdminTranslationsPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/galleries',
+                loadComponent: () => import('./pages/admin-galleries/admin-galleries.page')
+                    .then(m => m.AdminGalleriesPage),
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/recurring-schedules',
+                component: SeriesGroupManagementPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'admin/recurring-schedules/:groupId',
+                component: SeriesGroupManagementPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'view/:entityKey',
+                component: ListPage,
+                canActivate: [schemaVersionGuard]
+            },
+            {
+                path: 'view/:entityKey/:entityId',
+                component: DetailPage,
+                canActivate: [schemaVersionGuard]
+            },
+            {
+                path: 'create/:entityKey',
+                component: CreatePage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+            {
+                path: 'edit/:entityKey/:entityId',
+                component: EditPage,
+                canActivate: [schemaVersionGuard, authGuard]
+            },
+        ]
     },
 ];

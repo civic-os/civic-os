@@ -72,6 +72,7 @@ import { PaymentCheckoutComponent } from '../../components/payment-checkout/paym
 import { EntityNotesComponent } from '../../components/entity-notes/entity-notes.component';
 import { StaticTextComponent } from '../../components/static-text/static-text.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
 import { Subject, startWith } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -107,6 +108,7 @@ export interface CalendarSection {
     GuidedFormNavComponent,
     GuidedFormReviewSectionComponent,
     PhotoGalleryEditorComponent,
+    RelatedRecordsComponent,
     TranslatePipe
     // TimeSlotCalendarComponent
   ]
@@ -678,9 +680,6 @@ export class DetailPage {
       // Filter out sections with no events
       map(sections => sections.filter(s => s.events.length > 0))
     );
-
-  // Threshold for showing preview vs "View all" only
-  readonly LARGE_RELATIONSHIP_THRESHOLD = 20;
 
   // Inline M:M chip cap (show first N, then "+ x more" to expand)
   readonly INLINE_M2M_CHIP_LIMIT = 10;

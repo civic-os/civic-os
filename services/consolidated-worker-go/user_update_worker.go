@@ -14,13 +14,14 @@ import (
 // User Update Worker (update_keycloak_user)
 // ============================================================================
 
-// UpdateKeycloakUserArgs defines the job arguments for updating user info in Keycloak
+// UpdateKeycloakUserArgs defines the job arguments for updating user info in Keycloak.
+// Phone is intentionally excluded — the database is the authority for phone numbers,
+// managed via the profile page and admin UI. Keycloak doesn't need phone for auth.
 type UpdateKeycloakUserArgs struct {
 	UserID    string `json:"user_id"`
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Phone     string `json:"phone"`
 }
 
 func (UpdateKeycloakUserArgs) Kind() string { return "update_keycloak_user" }
@@ -45,7 +46,9 @@ func (w *UpdateKeycloakUserWorker) Work(ctx context.Context, job *river.Job[Upda
 	log.Printf("[Job %d] Starting user update (attempt %d/%d): user=%s name=%s %s",
 		job.ID, job.Attempt, job.MaxAttempts, job.Args.UserID, job.Args.FirstName, job.Args.LastName)
 
-	err := w.keycloakClient.UpdateUser(ctx, job.Args.UserID, job.Args.Email, job.Args.FirstName, job.Args.LastName, job.Args.Phone)
+	// Phone is always empty — database is the authority for phone, not Keycloak.
+	// This clears Keycloak's phoneNumber attribute to avoid stale data.
+	err := w.keycloakClient.UpdateUser(ctx, job.Args.UserID, job.Args.Email, job.Args.FirstName, job.Args.LastName, "")
 	if err != nil {
 		return fmt.Errorf("update user failed: %w", err)
 	}

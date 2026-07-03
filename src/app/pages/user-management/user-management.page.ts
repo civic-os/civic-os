@@ -19,9 +19,11 @@ import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { Subject, switchMap, of, debounceTime, startWith, combineLatest, Observable, map } from 'rxjs';
 import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest, AdminNotificationPreference } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
+import { ProfileService, ProfileExtension } from '../../services/profile.service';
 import { getSmsConfig } from '../../config/runtime';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../interfaces/import';
@@ -29,7 +31,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, ImportModalComponent],
+  imports: [CommonModule, DatePipe, FormsModule, RouterModule, ImportModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-4 max-w-7xl mx-auto">
@@ -438,6 +440,39 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             }
           }
 
+          <!-- Profile Extensions Section -->
+          @if (editProfileExtensions().length > 0) {
+            <div class="divider">Profile Extensions</div>
+            @if (editExtensionsLoading()) {
+              <div class="text-sm opacity-70">Loading profile extensions...</div>
+            } @else {
+              <div class="space-y-2">
+                @for (ext of editProfileExtensions(); track ext.table_name) {
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm">{{ ext.display_name }}</span>
+                      @if (ext.has_record) {
+                        <span class="badge badge-success badge-xs">Complete</span>
+                      } @else if (ext.is_required) {
+                        <span class="badge badge-error badge-xs">Required</span>
+                      } @else {
+                        <span class="badge badge-ghost badge-xs">Missing</span>
+                      }
+                    </div>
+                    @if (ext.has_record) {
+                      <a class="btn btn-xs btn-ghost"
+                         [routerLink]="['/view', ext.table_name]"
+                         [queryParams]="getExtensionQueryParams(ext)"
+                         (click)="closeEditModal()">
+                        View
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+
           @if (editError()) {
             <div class="alert alert-error mt-4 text-sm">{{ editError() }}</div>
           }
@@ -470,6 +505,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
 export class UserManagementPage {
   private userService = inject(UserManagementService);
   private importExportService = inject(ImportExportService);
+  private profileService = inject(ProfileService);
 
   // Search and filter state
   searchTerm = signal('');
@@ -514,6 +550,10 @@ export class UserManagementPage {
   editNotifLoading = signal(false);
   editEmailNotif = signal<AdminNotificationPreference | undefined>(undefined);
   editSmsNotif = signal<AdminNotificationPreference | undefined>(undefined);
+
+  // Profile extensions for edit modal
+  editProfileExtensions = signal<ProfileExtension[]>([]);
+  editExtensionsLoading = signal(false);
 
   // Error detail modal
   showErrorModal = signal(false);
@@ -661,11 +701,31 @@ export class UserManagementPage {
       },
       error: () => this.editNotifLoading.set(false)
     });
+
+    // Load profile extensions
+    this.editExtensionsLoading.set(true);
+    this.editProfileExtensions.set([]);
+    this.profileService.getProfileExtensionsAdmin(user.id).subscribe({
+      next: (extensions) => {
+        this.editProfileExtensions.set(extensions);
+        this.editExtensionsLoading.set(false);
+      },
+      error: () => this.editExtensionsLoading.set(false)
+    });
   }
 
   closeEditModal(): void {
     this.showEditModal.set(false);
     this.loadUsers();
+  }
+
+  getExtensionQueryParams(ext: ProfileExtension): Record<string, string> {
+    const params: Record<string, string> = {};
+    const userId = this.editUser()?.id;
+    if (userId) {
+      params[ext.user_fk_column] = userId;
+    }
+    return params;
   }
 
   getRoleDisplayName(roleKey: string): string {

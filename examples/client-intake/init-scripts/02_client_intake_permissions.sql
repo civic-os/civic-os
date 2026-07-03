@@ -3,7 +3,7 @@
 -- =====================================================
 -- Permission Model:
 --   - user: Self-service client — create own intake, view own data (RLS ownership)
---   - ic_staff: IC staff — full CRUD on all entities, notes, reports
+--   - ic_staff: IC staff — full CRUD on all entities, notes, reports, translations
 --   - admin: Full access + permissions UI, user management
 --
 -- RLS ownership model:
@@ -147,6 +147,20 @@ CROSS JOIN metadata.roles r
 WHERE p.table_name = 'follow_up_surveys'
   AND p.permission IN ('read', 'create', 'update', 'delete')
   AND r.role_key IN ('ic_staff', 'admin')
+ON CONFLICT DO NOTHING;
+
+-- -----------------------------------------------
+-- metadata.translations: ic_staff=create+update, admin=all (via core migration)
+-- Allows staff to manage translations without full admin access
+-- -----------------------------------------------
+
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'metadata.translations'
+  AND p.permission IN ('create', 'update')
+  AND r.role_key = 'ic_staff'
 ON CONFLICT DO NOTHING;
 
 -- =====================================================

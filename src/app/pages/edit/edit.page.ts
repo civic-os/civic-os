@@ -40,6 +40,7 @@ import { GuidedFormNavComponent } from '../../components/guided-form-nav/guided-
 import { ApiError, ApiResponse } from '../../interfaces/api';
 import Keycloak from 'keycloak-js';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { ProfileService } from '../../services/profile.service';
 import { GuidedFormContext } from '../../interfaces/guided-form';
 
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
@@ -85,6 +86,7 @@ export class EditPage implements OnDestroy {
   private analytics = inject(AnalyticsService);
   private recurringService = inject(RecurringService);
   private navigation = inject(NavigationService);
+  private profileService = inject(ProfileService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -191,6 +193,9 @@ export class EditPage implements OnDestroy {
 
         // Guided form mode: trigger context loading (handled by guidedFormContextEffect)
         this.initGuidedFormMode(this.currentEntity, data);
+
+        // Read returnTo param for auto-navigation on save
+        this.returnTo = this.route.snapshot?.queryParamMap?.get('returnTo') ?? null;
       }
       this.loading.set(false);  // Clear loading state after data loads
       this.dataLoading.set(false);  // Clear data loading state
@@ -236,6 +241,9 @@ export class EditPage implements OnDestroy {
 
   // v0.60.1: Double-submit guard
   public isSaving = signal(false);
+
+  // v0.65.0: returnTo support — auto-navigate on success instead of showing modal
+  private returnTo: string | null = null;
 
   // Series membership (for recurring time slots)
   public seriesMembership = signal<SeriesMembership | undefined>(undefined);
@@ -399,7 +407,7 @@ export class EditPage implements OnDestroy {
                   }
 
                   this.isSaving.set(false);
-                  this.showSuccessModal.set(true);
+                  this.handleSaveSuccess();
                 } else {
                   console.error('[EDIT SUBMIT] API returned error:', result.error);
                   console.error('[EDIT SUBMIT] Error details:', {
@@ -494,7 +502,7 @@ export class EditPage implements OnDestroy {
                   this.analytics.trackEvent('Entity', 'EditSeriesAll', this.entityKey);
                 }
 
-                this.showSuccessModal.set(true);
+                this.handleSaveSuccess();
               } else {
                 console.error('[SERIES UPDATE] API returned error:', result.message);
                 this.currentError.set({
@@ -612,6 +620,13 @@ export class EditPage implements OnDestroy {
     this.pendingRichM2mDiffs.set(new Map());
     if (this.entityKey) {
       this.analytics.trackEvent('Entity', 'Edit', this.entityKey);
+    }
+
+    // v0.65.0: If returnTo is set, auto-navigate instead of showing success buttons
+    if (this.returnTo) {
+      this.profileService.invalidateCache();
+      this.showSuccessModal.set(false);
+      this.router.navigateByUrl(this.returnTo, { replaceUrl: true });
     }
   }
 
@@ -749,6 +764,19 @@ export class EditPage implements OnDestroy {
   }
 
   /** Close success modal */
+  /**
+   * Handle successful save. If returnTo is set, auto-navigate back
+   * instead of showing the success modal.
+   */
+  private handleSaveSuccess(): void {
+    if (this.returnTo) {
+      this.profileService.invalidateCache();
+      this.router.navigateByUrl(this.returnTo, { replaceUrl: true });
+    } else {
+      this.showSuccessModal.set(true);
+    }
+  }
+
   closeSuccessModal(): void {
     this.showSuccessModal.set(false);
   }

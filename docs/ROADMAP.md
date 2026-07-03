@@ -112,7 +112,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Chart widget (grouped bar via Unovis, v0.61.0)
   - [ ] Stat cards (backend aggregation required)
   - [ ] Query results from views
-- [ ] **Phase 6 - Permissions**: Role-based visibility, widget-level permissions, private dashboards
+- [ ] **Phase 6 - Permissions**: Role-gated dashboard visibility (`allowed_roles` column + RLS policy so non-public dashboards can be restricted to specific roles instead of only the creator), widget-level permissions, private dashboards
 
 ### General
 - [~] **ADA/WCAG Compatibility** - ~60% complete (Phases 1-3 done)
@@ -130,6 +130,9 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Allow Angular app to be configured at container runtime (for flexible deployments)
 - [x] Save selected Theme in localstorage and use on reload
 - [x] Allow user profile editing (via Keycloak account console with JWT sync)
+- [x] Self-service "My Profile" page with profile extensions, completion guard, and related records (v0.65.0)
+- [ ] View other users' profiles by ID (requires privacy controls, permission model, separate RPC)
+- [ ] Profile extension data in user import/export (1:1 extension columns merged into user CSV)
 - [x] App and Database update deployments
 - [x] Automatically assign new users the "user" role
 - [x] Title updates (v0.42.0 - APP_TITLE/FAVICON_URL env vars via Angular runtime config)

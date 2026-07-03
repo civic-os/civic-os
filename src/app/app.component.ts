@@ -36,6 +36,8 @@ import { SettingsModalComponent } from './components/settings-modal/settings-mod
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
 import { getKeycloakAccountUrl, getAppTitle, getFaviconUrl } from './config/runtime';
 import { LocaleService } from './services/locale.service';
+import { ProfileService } from './services/profile.service';
+import { CosModalComponent } from './components/cos-modal/cos-modal.component';
 import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
@@ -47,6 +49,7 @@ import { TranslatePipe } from './pipes/translate.pipe';
     DashboardSelectorComponent,
     SettingsModalComponent,
     AboutModalComponent,
+    CosModalComponent,
     TranslatePipe
 ],
     templateUrl: './app.component.html',
@@ -60,6 +63,7 @@ export class AppComponent {
   public auth = inject(AuthService);
   public themeService = inject(ThemeService);
   private localeService = inject(LocaleService);
+  public profileService = inject(ProfileService);
   public impersonation = inject(ImpersonationService);
   private userManagement = inject(UserManagementService);
   private staticAssets = inject(StaticAssetsService);
@@ -201,6 +205,13 @@ export class AppComponent {
     this.drawerOpen = false;
   }
 
+  public navigateToProfile() {
+    this.router.navigate(['profile']);
+    // Close the profile dropdown
+    const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
+    if (profileDropdown) profileDropdown.open = false;
+  }
+
   public navigate(key: string) {
     this.router.navigate(['view', key]);
     this.drawerOpen = false;
@@ -307,6 +318,21 @@ export class AppComponent {
    */
   public openAbout() {
     this.showAboutModal.set(true);
+  }
+
+  /**
+   * Open the profile page in a new tab and dismiss the incomplete prompt.
+   */
+  public openProfileInNewTab() {
+    window.open('/profile', '_blank');
+    this.profileService.incompleteRequired.set([]);
+  }
+
+  /**
+   * Dismiss the incomplete profile prompt without opening profile.
+   */
+  public dismissIncompletePrompt() {
+    this.profileService.incompleteRequired.set([]);
   }
 
   /**

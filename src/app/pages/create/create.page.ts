@@ -44,6 +44,7 @@ import { DataService } from '../../services/data.service';
 import { GalleryService } from '../../services/gallery.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ApiError, ApiResponse } from '../../interfaces/api';
@@ -77,6 +78,7 @@ export class CreatePage {
   private analytics = inject(AnalyticsService);
   private navigation = inject(NavigationService);
   private guidedForm = inject(GuidedFormService);
+  private profileService = inject(ProfileService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -133,10 +135,11 @@ export class CreatePage {
               }
             });
 
-            // NEW: Apply query param defaults after form is ready
+            // Apply query param defaults after form is ready
             this.route.queryParams.pipe(take(1)).subscribe(params => {
               this.applyQueryParamDefaults(params);
               this.detectGuidedFormMode(e, params);
+              this.returnTo = params['returnTo'] || null;
             });
           })
         );
@@ -186,6 +189,9 @@ export class CreatePage {
 
   // v0.60.1: Double-submit guard
   public isSaving = signal(false);
+
+  // v0.65.0: returnTo support — auto-navigate on success instead of showing modal
+  private returnTo: string | null = null;
 
   // v0-48-0: Guided form mode
   public guidedFormKey = signal<string | null>(null);
@@ -249,7 +255,7 @@ export class CreatePage {
                     this.createdRecordId = result.body[0].id;
                   }
 
-                  this.showSuccessModal.set(true);
+                  this.handleSaveSuccess();
                 } else {
                   console.error('[CREATE SUBMIT] API returned error:', result.error);
                   console.error('[CREATE SUBMIT] Error details:', {
@@ -325,6 +331,13 @@ export class CreatePage {
     this.pendingGalleryDrafts.set(new Map());
     if (this.entityKey) {
       this.analytics.trackEvent('Entity', 'Create', this.entityKey);
+    }
+
+    // v0.65.0: If returnTo is set, auto-navigate instead of showing success buttons
+    if (this.returnTo) {
+      this.profileService.invalidateCache();
+      this.showSuccessModal.set(false);
+      this.router.navigateByUrl(this.returnTo, { replaceUrl: true });
     }
   }
 
@@ -534,6 +547,19 @@ export class CreatePage {
     }
   }
 
+  /**
+   * Handle successful save. If returnTo is set, auto-navigate back
+   * instead of showing the success modal.
+   */
+  private handleSaveSuccess(): void {
+    if (this.returnTo) {
+      this.profileService.invalidateCache();
+      this.router.navigateByUrl(this.returnTo, { replaceUrl: true });
+    } else {
+      this.showSuccessModal.set(true);
+    }
+  }
+
   /** Close success modal */
   closeSuccessModal(): void {
     this.showSuccessModal.set(false);
@@ -723,10 +749,10 @@ export class CreatePage {
 
             const wk = this.guidedFormKey();
             if (!wk || !recordId) {
-              // Non-guided-form fallback: show success modal
+              // Non-guided-form fallback
               this.savingAndContinuing.set(false);
               this.createdRecordId = recordId;
-              this.showSuccessModal.set(true);
+              this.handleSaveSuccess();
               return;
             }
 
@@ -773,10 +799,10 @@ export class CreatePage {
                 });
               },
               error: () => {
-                // Context load failed — fall back to success modal
+                // Context load failed — fall back
                 this.savingAndContinuing.set(false);
                 this.createdRecordId = recordId;
-                this.showSuccessModal.set(true);
+                this.handleSaveSuccess();
               }
             });
           },

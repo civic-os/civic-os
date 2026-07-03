@@ -5688,6 +5688,92 @@ See `docs/notes/I18N_DESIGN.md` for full architecture details.
 
 ---
 
+## User Profile Extensions (v0.65.0+)
+
+User Profile Extensions let integrators register any table as a "user profile extension" — a 1:1 table linked to `civic_os_users` that appears on the self-service My Profile page.
+
+### Requirements for Extension Tables
+
+Extension tables MUST have:
+1. A `UUID` FK column referencing `metadata.civic_os_users(id)` (or the `civic_os_users` VIEW)
+2. A `UNIQUE` constraint on that FK column (enforcing 0-or-1 records per user)
+3. Standard PostgREST grants and RLS policies
+
+### Registering an Extension
+
+```sql
+-- 1. Create your extension table
+CREATE TABLE public.borrower_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES metadata.civic_os_users(id) ON DELETE CASCADE,
+    library_card_number TEXT,
+    max_items INT DEFAULT 5,
+    preferred_branch TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT unique_borrower_per_user UNIQUE (user_id)
+);
+
+-- 2. Standard grants
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.borrower_profiles TO authenticated;
+
+-- 3. RLS (users can only see/edit their own profile)
+ALTER TABLE public.borrower_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own borrower profile"
+  ON public.borrower_profiles
+  FOR ALL TO authenticated
+  USING (user_id = public.current_user_id())
+  WITH CHECK (user_id = public.current_user_id());
+
+-- 4. Register as entity
+INSERT INTO metadata.entities (table_name, display_name)
+VALUES ('borrower_profiles', 'Borrower Profile');
+
+-- 5. Register as profile extension
+INSERT INTO metadata.user_profile_extensions (table_name, sort_order, is_required, display_name, description)
+VALUES ('borrower_profiles', 1, true, 'Borrower Profile', 'Your library borrowing information');
+```
+
+### Configuration Options
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `table_name` | `NAME` | References `metadata.entities(table_name)` |
+| `sort_order` | `INT` | Display order on the profile page (lower = higher) |
+| `is_required` | `BOOLEAN` | When `true`, the completion guard blocks navigation until the user creates a record |
+| `display_name` | `TEXT` | Overrides the entity's `display_name` in the profile context (optional) |
+| `description` | `TEXT` | Help text shown in the section header when no record exists |
+
+### Profile Completion Guard
+
+When `is_required = true` on any extension, the profile completion guard automatically redirects users to `/profile?incomplete=true` on any navigation attempt. The guard:
+- Skips for unauthenticated users (authGuard handles login)
+- Skips when already on `/profile` (prevents redirect loop)
+- Fails open on RPC errors (doesn't lock users out)
+- Caches results for 60 seconds (avoids per-navigation RPC calls)
+
+### Self-Service Profile Page
+
+The `/profile` page shows three collapsible sections:
+1. **Personal Information** — First name, last name, phone (inline edit). Email is read-only (Keycloak-managed).
+2. **Notification Preferences** — Email/SMS toggles (same as Settings modal).
+3. **Extension Sections** — One per registered extension, showing completion status and data.
+
+### Admin Integration
+
+The User Management edit modal shows a "Profile Extensions" section with completion badges for each extension. Admins can click "View" to navigate to the extension record.
+
+### RPCs
+
+| RPC | Purpose | Auth |
+|-----|---------|------|
+| `update_own_profile(p_first_name, p_last_name, p_phone)` | Self-service name/phone update + Keycloak sync | `authenticated` (JWT identity) |
+| `get_user_profile_extensions()` | Returns extensions + per-user completion status | `authenticated` |
+| `get_user_profile_extensions_admin(p_user_id)` | Admin version with target user | `civic_os_users_private:update` |
+
+See `docs/notes/USER_PROFILE_EXTENSION_DESIGN.md` for architecture details.
+
+---
+
 ## Production Considerations
 
 ### Sqitch Migrations

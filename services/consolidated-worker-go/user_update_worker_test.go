@@ -405,13 +405,13 @@ func TestUpdateKeycloakUserArgsInsertOpts(t *testing.T) {
 
 // TestUpdateKeycloakUserArgsJSON verifies JSON serialization matches
 // the field names expected by the SQL RPC's json_build_object.
+// Phone is intentionally excluded — database is the authority for phone.
 func TestUpdateKeycloakUserArgsJSON(t *testing.T) {
 	args := UpdateKeycloakUserArgs{
 		UserID:    "abc-123",
 		Email:     "jane@example.com",
 		FirstName: "Jane",
 		LastName:  "Doe",
-		Phone:     "5559876543",
 	}
 
 	data, err := json.Marshal(args)
@@ -427,12 +427,16 @@ func TestUpdateKeycloakUserArgsJSON(t *testing.T) {
 		"email":      "jane@example.com",
 		"first_name": "Jane",
 		"last_name":  "Doe",
-		"phone":      "5559876543",
 	}
 
 	for key, want := range expected {
 		if got := parsed[key]; got != want {
 			t.Errorf("JSON key %q: expected %q, got %q", key, want, got)
 		}
+	}
+
+	// Verify phone is NOT in the JSON output
+	if _, hasPhone := parsed["phone"]; hasPhone {
+		t.Error("expected no 'phone' key in JSON output — phone is managed by database, not Keycloak sync")
 	}
 }

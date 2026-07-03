@@ -21,6 +21,7 @@ import { of, Subject } from 'rxjs';
 import { UserManagementPage } from './user-management.page';
 import { UserManagementService, ManagedUser } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
+import { ProfileService } from '../../services/profile.service';
 import { ApiResponse } from '../../interfaces/api';
 
 describe('UserManagementPage', () => {
@@ -28,6 +29,7 @@ describe('UserManagementPage', () => {
   let fixture: ComponentFixture<UserManagementPage>;
   let mockUserService: jasmine.SpyObj<UserManagementService>;
   let mockImportExportService: jasmine.SpyObj<ImportExportService>;
+  let mockProfileService: jasmine.SpyObj<ProfileService>;
 
   beforeEach(async () => {
     mockUserService = jasmine.createSpyObj('UserManagementService', [
@@ -49,6 +51,10 @@ describe('UserManagementPage', () => {
       'parseExcelFile',
       'generateUserImportTemplate'
     ]);
+    mockProfileService = jasmine.createSpyObj('ProfileService', [
+      'getProfileExtensionsAdmin',
+      'invalidateCache'
+    ]);
 
     // Default mocks
     mockUserService.getManagedUsers.and.returnValue(of([]));
@@ -62,13 +68,15 @@ describe('UserManagementPage', () => {
     mockUserService.revokeUserRole.and.returnValue(of({ success: true }));
     mockUserService.getNotificationPreferences.and.returnValue(of([]));
     mockUserService.updateNotificationPreference.and.returnValue(of({ success: true }));
+    mockProfileService.getProfileExtensionsAdmin.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [UserManagementPage],
       providers: [
         provideZonelessChangeDetection(),
         { provide: UserManagementService, useValue: mockUserService },
-        { provide: ImportExportService, useValue: mockImportExportService }
+        { provide: ImportExportService, useValue: mockImportExportService },
+        { provide: ProfileService, useValue: mockProfileService }
       ]
     }).compileComponents();
 

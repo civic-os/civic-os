@@ -108,6 +108,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Multi-Language (i18n)** (v0.57.0+): Framework UI strings and instance metadata render in the user's preferred language, with RTL layout support (v0.64.0). **Admin Translation Management** (v0.62.0+): Page at `/admin/translations` for browsing/editing translations with coverage reports. See `docs/notes/I18N_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (Multi-Language section) for setup.
 
+**User Profile Extensions** (v0.65.0+): Metadata-driven system for registering tables as user profile extensions via `metadata.user_profile_extensions`. Self-service "My Profile" page (`/profile`) with collapsible sections for core info, notification prefs, and extension data. Profile completion guard blocks navigation when required extensions are missing. Admin integration shows extension status in User Management edit modal. See `docs/notes/USER_PROFILE_EXTENSION_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (User Profile Extensions section) for setup.
+
 ## Custom Dashboards
 
 **Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0)
@@ -445,4 +447,5 @@ Run all 5 layers proactively without being asked. See `docs/development/E2E_VERI
 - NEVER include attribution like "Generated with Claude Code" or "Co-Authored-By: Claude"
 - Focus on the technical changes and their purpose
 - **Never commit SQL data dumps** (e.g., `*_dump.sql`, seed data exports) — they bloat the repo and may contain PII. Data stays outside version control.
+- **Version tagging**: Before creating a git tag (`git tag vX.Y.Z`), verify that `package.json` `version` matches the tag version. CI will reject tags where the versions don't match. Bump `package.json` and commit before tagging.
 - **Copyright years**: Update `Copyright (C) 2023-YYYY` to the current year in files you substantively modify. Do not do bulk sweeps across untouched files.

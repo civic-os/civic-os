@@ -60,6 +60,7 @@
                 <li><a class="text-warning font-medium" (click)="stopImpersonation()">{{ 'auth.stop_impersonation' | translate }}</a></li>
                 <li class="border-t border-base-300 my-1"></li>
               }
+              <li><a (click)="navigateToProfile()">{{ 'profile.my_profile' | translate }}</a></li>
               <li><a (click)="openSettings()">{{ 'auth.preferences' | translate }}</a></li>
               <li><a [href]="getKeycloakAccountUrl()">{{ 'auth.account_settings' | translate }}</a></li>
               <li><a (click)="this.auth.logout()">{{ 'action.logout' | translate }}</a></li>
@@ -299,3 +300,33 @@
   [showModal]="showAboutModal()"
   (closeModal)="showAboutModal.set(false)"
 />
+
+<!-- Profile Incomplete Prompt (shown globally when guard detects missing required extensions) -->
+@if (profileService.incompleteRequired().length > 0) {
+  <cos-modal
+    [isOpen]="true"
+    [closeOnBackdrop]="true"
+    [closeOnEscape]="true"
+    (closed)="dismissIncompletePrompt()"
+    size="md">
+    <h3 class="font-bold text-lg mb-2">{{ 'profile.complete_required' | translate }}</h3>
+    <p class="mb-4">{{ 'profile.complete_required_description' | translate }}</p>
+    <ul class="space-y-2 mb-4">
+      @for (ext of profileService.incompleteRequired(); track ext.table_name) {
+        <li class="flex items-center gap-2">
+          <span class="badge badge-error badge-sm">{{ 'profile.required' | translate }}</span>
+          {{ ext.display_name }}
+        </li>
+      }
+    </ul>
+    <div class="cos-modal-action">
+      <button class="btn btn-primary" (click)="openProfileInNewTab()">
+        <span class="material-symbols-outlined text-sm">open_in_new</span>
+        {{ 'profile.complete_profile' | translate }}
+      </button>
+      <button class="btn btn-ghost" (click)="dismissIncompletePrompt()">
+        {{ 'action.dismiss' | translate }}
+      </button>
+    </div>
+  </cos-modal>
+}

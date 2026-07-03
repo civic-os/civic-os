@@ -92,3 +92,5 @@ v0-62-0-dashboard-translations [v0-61-0-add-chart-widget-type] 2026-06-15T12:00:
 v0-63-0-import-modal-translations [v0-62-0-dashboard-translations] 2026-06-17T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add English and Spanish translations for import modal component
 v0-64-0-add-arabic-translations [v0-63-0-import-modal-translations] 2026-06-23T00:00:00Z Daniel Kurin <daniel@civic-os.com> # Add Arabic UI translations for RTL support
 v0-64-1-i18n-expansion [v0-64-0-add-arabic-translations] 2026-06-24T12:00:00Z Daniel Kurin <daniel@civic-os.com> # Add ps/fr/de UI translations and migrate translation RLS to RBAC permissions
+v0-65-0-user-profile-extensions [v0-64-1-i18n-expansion] 2026-06-25T12:00:00Z Daniel Kurin <daniel@civic-os.com> # Add user profile extension system with self-service profile page and completion guard
+v0-65-0-cup-phone-domain [v0-65-0-user-profile-extensions] 2026-06-26T12:00:00Z Daniel Kurin <daniel@civic-os.com> # Migrate civic_os_users_private.phone to phone_number domain, deprecate JWT phone sync, fix SMS pref trigger
