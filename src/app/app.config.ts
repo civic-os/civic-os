@@ -35,6 +35,7 @@ import { ImageWidgetComponent } from './components/widgets/image-widget/image-wi
 import { ChartWidgetComponent } from './components/widgets/chart-widget/chart-widget.component';
 import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
 import { videoEmbedExtension } from './markdown/video-embed.extension';
+import { authButtonExtension } from './markdown/auth-button.extension';
 import { markdownSanitize } from './markdown/markdown-sanitize';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
 import { TranslationService } from './services/translation.service';
@@ -102,6 +103,7 @@ export const appConfig: ApplicationConfig = {
     provideMarkdown({
       markedExtensions: [
         { provide: MARKED_EXTENSIONS, useValue: videoEmbedExtension, multi: true },
+        { provide: MARKED_EXTENSIONS, useValue: authButtonExtension, multi: true },
       ],
       sanitize: { provide: SANITIZE, useValue: markdownSanitize },
     }),

@@ -302,6 +302,10 @@ export class AuthService {
     this.keycloak.login();
   }
 
+  loginWithRedirect(redirectUri: string): void {
+    this.keycloak.login({ redirectUri });
+  }
+
   logout() {
     // Clear impersonation state synchronously BEFORE redirect
     // The AuthLogout event won't fire in time since keycloak.logout() redirects immediately

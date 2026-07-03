@@ -32,6 +32,19 @@ import { authGuard } from './guards/auth.guard';
 import { profileCompletionGuard } from './guards/profile-completion.guard';
 
 export const routes: Routes = [
+    // Auth action routes — no guards (login/logout must work for unauthenticated users)
+    {
+        path: 'login',
+        loadComponent: () => import('./pages/auth-action/auth-action.page')
+            .then(m => m.AuthActionPage),
+        data: { mode: 'login' }
+    },
+    {
+        path: 'logout',
+        loadComponent: () => import('./pages/auth-action/auth-action.page')
+            .then(m => m.AuthActionPage),
+        data: { mode: 'logout' }
+    },
     // Profile page sits outside the completion guard wrapper (prevents redirect loop)
     {
         path: 'profile',

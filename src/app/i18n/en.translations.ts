@@ -343,6 +343,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
 
   'theme.change': 'Change theme',
 
+  'nav.redirecting': 'Redirecting...',
+
   'time.start': 'Start',
   'time.end': 'End'
 };
