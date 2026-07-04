@@ -21,7 +21,6 @@ import { of, Subject } from 'rxjs';
 import { UserManagementPage } from './user-management.page';
 import { UserManagementService, ManagedUser } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
-import { ProfileService } from '../../services/profile.service';
 import { ApiResponse } from '../../interfaces/api';
 
 describe('UserManagementPage', () => {
@@ -29,7 +28,6 @@ describe('UserManagementPage', () => {
   let fixture: ComponentFixture<UserManagementPage>;
   let mockUserService: jasmine.SpyObj<UserManagementService>;
   let mockImportExportService: jasmine.SpyObj<ImportExportService>;
-  let mockProfileService: jasmine.SpyObj<ProfileService>;
 
   beforeEach(async () => {
     mockUserService = jasmine.createSpyObj('UserManagementService', [
@@ -51,10 +49,6 @@ describe('UserManagementPage', () => {
       'parseExcelFile',
       'generateUserImportTemplate'
     ]);
-    mockProfileService = jasmine.createSpyObj('ProfileService', [
-      'getProfileExtensionsAdmin',
-      'invalidateCache'
-    ]);
 
     // Default mocks
     mockUserService.getManagedUsers.and.returnValue(of([]));
@@ -63,20 +57,15 @@ describe('UserManagementPage', () => {
       { role_id: 2, display_name: 'editor', description: 'Can edit', role_key: 'editor' }
     ]));
     mockUserService.createUser.and.returnValue(of({ success: true }));
-    mockUserService.updateUserInfo.and.returnValue(of({ success: true }));
     mockUserService.assignUserRole.and.returnValue(of({ success: true }));
     mockUserService.revokeUserRole.and.returnValue(of({ success: true }));
-    mockUserService.getNotificationPreferences.and.returnValue(of([]));
-    mockUserService.updateNotificationPreference.and.returnValue(of({ success: true }));
-    mockProfileService.getProfileExtensionsAdmin.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [UserManagementPage],
       providers: [
         provideZonelessChangeDetection(),
         { provide: UserManagementService, useValue: mockUserService },
-        { provide: ImportExportService, useValue: mockImportExportService },
-        { provide: ProfileService, useValue: mockProfileService }
+        { provide: ImportExportService, useValue: mockImportExportService }
       ]
     }).compileComponents();
 
@@ -301,13 +290,10 @@ describe('UserManagementPage', () => {
       sms_opted_out: null
     };
 
-    it('should populate edit signals from user data', () => {
+    it('should populate roles from user data', () => {
       component.openEditModal(mockActiveUser);
 
       expect(component.showEditModal()).toBe(true);
-      expect(component.editFirstName()).toBe('John');
-      expect(component.editLastName()).toBe('Doe');
-      expect(component.editPhone()).toBe('5551234567');
       expect(component.editRoles().has('user')).toBe(true);
       expect(component.editRoles().has('editor')).toBe(true);
       expect(component.editUser()).toEqual(mockActiveUser);
@@ -332,129 +318,6 @@ describe('UserManagementPage', () => {
 
       expect(component.showEditModal()).toBe(false);
       expect(mockUserService.getManagedUsers).toHaveBeenCalled();
-    });
-
-    it('should reject empty first name', () => {
-      component.openEditModal(mockActiveUser);
-      component.editFirstName.set('');
-
-      component.submitEditUser();
-
-      expect(component.editError()).toBe('First name and last name are required');
-      expect(mockUserService.updateUserInfo).not.toHaveBeenCalled();
-    });
-
-    it('should reject empty last name', () => {
-      component.openEditModal(mockActiveUser);
-      component.editLastName.set('');
-
-      component.submitEditUser();
-
-      expect(component.editError()).toBe('First name and last name are required');
-      expect(mockUserService.updateUserInfo).not.toHaveBeenCalled();
-    });
-
-    it('should reject whitespace-only first name', () => {
-      component.openEditModal(mockActiveUser);
-      component.editFirstName.set('   ');
-
-      component.submitEditUser();
-
-      expect(component.editError()).toBe('First name and last name are required');
-    });
-
-    it('should call updateUserInfo and close modal on success', () => {
-      component.openEditModal(mockActiveUser);
-      component.editFirstName.set('Jane');
-      component.editLastName.set('Smith');
-      component.editPhone.set('5559876543');
-
-      component.submitEditUser();
-
-      expect(mockUserService.updateUserInfo).toHaveBeenCalledWith({
-        user_id: 'uuid-123',
-        first_name: 'Jane',
-        last_name: 'Smith',
-        phone: '5559876543'
-      });
-      expect(component.showEditModal()).toBe(false);
-      expect(component.successMessage()).toContain('Jane Smith');
-    });
-
-    it('should send undefined phone when cleared', () => {
-      component.openEditModal(mockActiveUser);
-      component.editPhone.set('');
-
-      component.submitEditUser();
-
-      const calledWith = mockUserService.updateUserInfo.calls.mostRecent().args[0];
-      expect(calledWith.phone).toBeUndefined();
-    });
-
-    it('should show error and keep modal open on failure', () => {
-      mockUserService.updateUserInfo.and.returnValue(of({
-        success: false,
-        error: { message: 'Permission denied', humanMessage: 'You do not have permission to edit users' }
-      }));
-
-      component.openEditModal(mockActiveUser);
-      component.submitEditUser();
-
-      expect(component.editError()).toBe('You do not have permission to edit users');
-      expect(component.showEditModal()).toBe(true);
-    });
-
-    it('should set editLoading during submission', () => {
-      const subject = new Subject<ApiResponse>();
-      mockUserService.updateUserInfo.and.returnValue(subject.asObservable());
-
-      component.openEditModal(mockActiveUser);
-      component.submitEditUser();
-
-      expect(component.editLoading()).toBe(true);
-
-      subject.next({ success: true });
-      subject.complete();
-
-      expect(component.editLoading()).toBe(false);
-    });
-
-    it('should load notification preferences when opening edit modal', () => {
-      mockUserService.getNotificationPreferences.and.returnValue(of([
-        { channel: 'email' as const, enabled: true, email_address: 'john@example.com', phone_number: null, sms_opted_out: false },
-        { channel: 'sms' as const, enabled: false, email_address: null, phone_number: '5551234567', sms_opted_out: false }
-      ]));
-
-      component.openEditModal(mockActiveUser);
-
-      expect(mockUserService.getNotificationPreferences).toHaveBeenCalledWith('uuid-123');
-      expect(component.editEmailNotif()?.enabled).toBe(true);
-      expect(component.editSmsNotif()?.enabled).toBe(false);
-      expect(component.editNotifLoading()).toBe(false);
-    });
-
-    it('should call updateNotificationPreference when toggling email', () => {
-      mockUserService.getNotificationPreferences.and.returnValue(of([
-        { channel: 'email' as const, enabled: true, email_address: 'john@example.com', phone_number: null, sms_opted_out: false }
-      ]));
-
-      component.openEditModal(mockActiveUser);
-      component.toggleEditNotifPref('email', false);
-
-      expect(mockUserService.updateNotificationPreference).toHaveBeenCalledWith('uuid-123', 'email', false);
-    });
-
-    it('should update local signal state on successful toggle', () => {
-      mockUserService.getNotificationPreferences.and.returnValue(of([
-        { channel: 'email' as const, enabled: true, email_address: 'john@example.com', phone_number: null, sms_opted_out: false }
-      ]));
-
-      component.openEditModal(mockActiveUser);
-      expect(component.editEmailNotif()?.enabled).toBe(true);
-
-      component.toggleEditNotifPref('email', false);
-
-      expect(component.editEmailNotif()?.enabled).toBe(false);
     });
   });
 

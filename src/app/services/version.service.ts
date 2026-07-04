@@ -21,7 +21,7 @@ import { Observable, map } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 
 export interface CacheVersion {
-  cache_name: 'entities' | 'properties' | 'constraint_messages';
+  cache_name: 'entities' | 'properties' | 'constraint_messages' | 'profile_extensions';
   version: string; // ISO timestamp
 }
 
@@ -29,6 +29,7 @@ export interface CacheUpdateCheck {
   entitiesNeedsRefresh: boolean;
   propertiesNeedsRefresh: boolean;
   constraintMessagesNeedsRefresh: boolean;
+  profileExtensionsNeedsRefresh: boolean;
   hasChanges: boolean;
 }
 
@@ -42,6 +43,7 @@ export class VersionService {
   private entitiesVersion: string | null = null;
   private propertiesVersion: string | null = null;
   private constraintMessagesVersion: string | null = null;
+  private profileExtensionsVersion: string | null = null;
 
   /**
    * Initialize version tracking by fetching current versions from database.
@@ -68,12 +70,14 @@ export class VersionService {
           entitiesNeedsRefresh: false,
           propertiesNeedsRefresh: false,
           constraintMessagesNeedsRefresh: false,
+          profileExtensionsNeedsRefresh: false,
           hasChanges: false
         };
 
         const dbEntitiesVersion = versions.find(v => v.cache_name === 'entities')?.version;
         const dbPropertiesVersion = versions.find(v => v.cache_name === 'properties')?.version;
         const dbConstraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages')?.version;
+        const dbProfileExtensionsVersion = versions.find(v => v.cache_name === 'profile_extensions')?.version;
 
         // Check entities cache
         if (dbEntitiesVersion && this.entitiesVersion && dbEntitiesVersion !== this.entitiesVersion) {
@@ -90,6 +94,12 @@ export class VersionService {
         // Check constraint_messages cache
         if (dbConstraintMessagesVersion && this.constraintMessagesVersion && dbConstraintMessagesVersion !== this.constraintMessagesVersion) {
           result.constraintMessagesNeedsRefresh = true;
+          result.hasChanges = true;
+        }
+
+        // Check profile_extensions cache
+        if (dbProfileExtensionsVersion && this.profileExtensionsVersion && dbProfileExtensionsVersion !== this.profileExtensionsVersion) {
+          result.profileExtensionsNeedsRefresh = true;
           result.hasChanges = true;
         }
 
@@ -118,6 +128,7 @@ export class VersionService {
     const entitiesVersion = versions.find(v => v.cache_name === 'entities');
     const propertiesVersion = versions.find(v => v.cache_name === 'properties');
     const constraintMessagesVersion = versions.find(v => v.cache_name === 'constraint_messages');
+    const profileExtensionsVersion = versions.find(v => v.cache_name === 'profile_extensions');
 
     if (entitiesVersion) {
       this.entitiesVersion = entitiesVersion.version;
@@ -130,6 +141,10 @@ export class VersionService {
     if (constraintMessagesVersion) {
       this.constraintMessagesVersion = constraintMessagesVersion.version;
     }
+
+    if (profileExtensionsVersion) {
+      this.profileExtensionsVersion = profileExtensionsVersion.version;
+    }
   }
 
   /**
@@ -139,6 +154,7 @@ export class VersionService {
     this.entitiesVersion = null;
     this.propertiesVersion = null;
     this.constraintMessagesVersion = null;
+    this.profileExtensionsVersion = null;
   }
 
   /**

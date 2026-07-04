@@ -52,6 +52,12 @@ export const routes: Routes = [
             .then(m => m.ProfilePage),
         canActivate: [schemaVersionGuard, authGuard]
     },
+    {
+        path: 'profile/:userId',
+        loadComponent: () => import('./pages/profile/profile.page')
+            .then(m => m.ProfilePage),
+        canActivate: [schemaVersionGuard, authGuard]
+    },
     // All other routes wrapped with profileCompletionGuard via canActivateChild
     {
         path: '',

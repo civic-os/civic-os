@@ -20,6 +20,7 @@ import { CanActivateFn } from '@angular/router';
 import { map } from 'rxjs';
 import { VersionService } from '../services/version.service';
 import { SchemaService } from '../services/schema.service';
+import { ProfileService } from '../services/profile.service';
 
 /**
  * Navigation guard that checks for schema cache updates before each route activation.
@@ -40,6 +41,7 @@ import { SchemaService } from '../services/schema.service';
 export const schemaVersionGuard: CanActivateFn = (route, state) => {
   const versionService = inject(VersionService);
   const schemaService = inject(SchemaService);
+  const profileService = inject(ProfileService);
 
   // Check for version updates
   return versionService.checkForUpdates().pipe(
@@ -56,6 +58,10 @@ export const schemaVersionGuard: CanActivateFn = (route, state) => {
 
       if (updateCheck.propertiesNeedsRefresh) {
         schemaService.refreshPropertiesCache();
+      }
+
+      if (updateCheck.profileExtensionsNeedsRefresh) {
+        profileService.invalidateCache();
       }
 
       // Allow navigation to proceed (refresh happens in background)

@@ -6,13 +6,26 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
 import { getPostgrestUrl } from '../config/runtime';
+import { AuthService } from './auth.service';
 
 // ============================================================================
 // Interfaces
 // ============================================================================
 
+/** Raw metadata from the user_profile_extensions VIEW (no has_record). */
+export interface ProfileExtensionMeta {
+  table_name: string;
+  sort_order: number;
+  is_required: boolean;
+  display_name: string;
+  description: string | null;
+  user_fk_column: string;
+  user_fk_constraint: string;
+}
+
+/** Full extension data with has_record resolved via PostgREST embedding. */
 export interface ProfileExtension {
   table_name: string;
   sort_order: number;
@@ -36,6 +49,7 @@ export interface UserPrivateRecord {
   last_name: string | null;
   email: string | null;
   phone: string | null;
+  locale?: string | null;
 }
 
 // ============================================================================
@@ -47,10 +61,12 @@ export interface UserPrivateRecord {
 })
 export class ProfileService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private baseUrl = getPostgrestUrl();
 
-  /** Cached profile extensions for the current user (used by guard + page) */
+  /** Cached profile extensions (used by guard + page) */
   private cachedExtensions = signal<ProfileExtension[] | null>(null);
+  private cachedUserId: string | undefined;
   private cacheTimestamp = 0;
   private readonly CACHE_TTL_MS = 60_000; // 60 seconds
 
@@ -71,43 +87,83 @@ export class ProfileService {
   // ==========================================================================
 
   /**
-   * Get profile extensions for the current user.
-   * Returns cached result if available and fresh; otherwise fetches from RPC.
+   * Get profile extensions for a user (own profile or other user).
+   * Two-step: fetch metadata from VIEW (cached), then build a single
+   * PostgREST query with embedded resources for has_record checks.
+   *
+   * @param userId - Target user ID. If omitted, uses current user.
    */
-  getProfileExtensions(): Observable<ProfileExtension[]> {
+  getProfileExtensions(userId?: string): Observable<ProfileExtension[]> {
     const cached = this.cachedExtensions();
     const now = Date.now();
-    if (cached !== null && (now - this.cacheTimestamp) < this.CACHE_TTL_MS) {
+    if (cached !== null && this.cachedUserId === userId && (now - this.cacheTimestamp) < this.CACHE_TTL_MS) {
       return of(cached);
     }
 
-    return this.http.post<ProfileExtension[]>(
-      `${this.baseUrl}rpc/get_user_profile_extensions`,
-      {}
-    ).pipe(
+    return this.fetchExtensionMetadata().pipe(
+      switchMap(metas => {
+        if (metas.length === 0) return of([]);
+        const userId$ = userId ? of(userId) : this.auth.getCurrentUserId().pipe(take(1));
+        return userId$.pipe(
+          switchMap(resolvedId => {
+            if (!resolvedId) return of(metas.map(m => ({ ...m, has_record: false })));
+            return this.checkHasRecords(metas, resolvedId);
+          })
+        );
+      }),
       tap(extensions => {
         this.cachedExtensions.set(extensions);
+        this.cachedUserId = userId;
         this.cacheTimestamp = Date.now();
       }),
-      catchError(error => {
-        console.error('Error fetching profile extensions:', error);
-        return of([]);
-      })
+      catchError(() => of([]))
     );
   }
 
   /**
-   * Get profile extensions for a specific user (admin only).
+   * Fetch extension metadata from the user_profile_extensions VIEW.
    */
-  getProfileExtensionsAdmin(userId: string): Observable<ProfileExtension[]> {
-    return this.http.post<ProfileExtension[]>(
-      `${this.baseUrl}rpc/get_user_profile_extensions_admin`,
-      { p_user_id: userId }
+  private fetchExtensionMetadata(): Observable<ProfileExtensionMeta[]> {
+    return this.http.get<ProfileExtensionMeta[]>(
+      `${this.baseUrl}user_profile_extensions?order=sort_order,table_name`
+    );
+  }
+
+  /**
+   * Single PostgREST query with resource embedding for has_record checks.
+   *
+   * Builds a select string that embeds each extension table through
+   * civic_os_users, using the FK constraint name from the VIEW
+   * (pre-resolved with COALESCE default) to disambiguate when a table
+   * has multiple FKs to civic_os_users.
+   *
+   * Example query:
+   *   GET /civic_os_users?id=eq.{userId}&select=id,clients!clients_user_id_fkey(id)
+   *
+   * RLS naturally gates results:
+   * - Own profile: user_id = current_user_id() → extension embeds populated
+   * - Admin: table-level read permission → embeds populated
+   * - No permission: embed returns [] → has_record = false (correct)
+   */
+  private checkHasRecords(metas: ProfileExtensionMeta[], userId: string): Observable<ProfileExtension[]> {
+    const embeds = metas.map(m => `${m.table_name}!${m.user_fk_constraint}(id)`);
+    const select = ['id', ...embeds].join(',');
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}civic_os_users?id=eq.${userId}&select=${select}`
     ).pipe(
-      catchError(error => {
-        console.error('Error fetching admin profile extensions:', error);
-        return of([]);
-      })
+      map(rows => {
+        if (rows.length === 0) return metas.map(m => ({ ...m, has_record: false }));
+        const user = rows[0];
+        return metas.map(m => ({
+          ...m,
+          // One-to-one FK (UNIQUE constraint): PostgREST returns object or null
+          // One-to-many FK: PostgREST returns array
+          has_record: user[m.table_name] != null &&
+            (Array.isArray(user[m.table_name]) ? user[m.table_name].length > 0 : true)
+        }));
+      }),
+      catchError(() => of(metas.map(m => ({ ...m, has_record: false }))))
     );
   }
 
@@ -134,6 +190,28 @@ export class ProfileService {
           success: false,
           error: error.error?.message || 'An unexpected error occurred'
         });
+      })
+    );
+  }
+
+  // ==========================================================================
+  // Other User Profile Access
+  // ==========================================================================
+
+  /**
+   * Get another user's profile record via the civic_os_users VIEW.
+   * The VIEW's permission-gated CASE expressions control field visibility:
+   * - Self or has civic_os_users_private:read → full data
+   * - Otherwise → NULLs for private fields
+   */
+  getUserProfileRecord(userId: string): Observable<UserPrivateRecord | null> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}civic_os_users?id=eq.${userId}&select=id,display_name,first_name,last_name,email,phone,locale`
+    ).pipe(
+      map(rows => rows.length > 0 ? rows[0] as UserPrivateRecord : null),
+      catchError(error => {
+        console.error('Error fetching user profile record:', error);
+        return of(null);
       })
     );
   }
@@ -178,10 +256,12 @@ export class ProfileService {
   // ==========================================================================
 
   /**
-   * Invalidate the cached extensions (e.g., after creating/editing an extension record).
+   * Invalidate the cached extensions (e.g., after creating/editing an extension record,
+   * or when schema_cache_versions detects a profile_extensions version change).
    */
   invalidateCache(): void {
     this.cachedExtensions.set(null);
+    this.cachedUserId = undefined;
     this.cacheTimestamp = 0;
     this.profileComplete = false;
   }

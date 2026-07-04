@@ -3,18 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { Component, ChangeDetectionStrategy, inject, signal, effect, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, ChangeDetectionStrategy, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { forkJoin, of, take } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Router, ActivatedRoute } from '@angular/router';
+import { combineLatest, forkJoin, of, take } from 'rxjs';
+import { filter, switchMap } from 'rxjs/operators';
 import { ProfileService, ProfileExtension, UserPrivateRecord } from '../../services/profile.service';
 import { NotificationService, NotificationPreference } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
+import { UserManagementService } from '../../services/user-management.service';
+import { LocaleService } from '../../services/locale.service';
 import { SchemaEntityProperty, InverseRelationshipData, EntityPropertyType } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
@@ -31,50 +33,102 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class ProfilePage {
   private profileService = inject(ProfileService);
   private notificationService = inject(NotificationService);
-  private auth = inject(AuthService);
+  auth = inject(AuthService);
   private schemaService = inject(SchemaService);
   private dataService = inject(DataService);
+  private userManagementService = inject(UserManagementService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
+  localeService = inject(LocaleService);
 
   // SMS config
   smsConfigured = getSmsConfig().configured;
 
-  // ─── Loading state ─────────────────────────────────────────────────
+  // ─── Route mode signals ──────────────────────────────────────────
+  isOwnProfile = signal(true);
+  targetUserId = signal<string | null>(null);
+  canEditCoreInfo = signal(false);
+  notFound = signal(false);
+
+  // ─── Loading state ───────────────────────────────────────────────
   loading = signal(true);
 
-  // ─── Core user info ────────────────────────────────────────────────
+  // ─── Core user info ──────────────────────────────────────────────
   userRecord = signal<UserPrivateRecord | null>(null);
   editingCoreInfo = signal(false);
   editFirstName = '';
   editLastName = '';
   editPhone = '';
+  editLocale = '';
   saving = signal(false);
   saveMessage = signal('');
   saveSuccess = signal(false);
 
-  // ─── Notification preferences ──────────────────────────────────────
+  // ─── Notification preferences ────────────────────────────────────
   preferencesLoading = signal(false);
   emailPreference = signal<NotificationPreference | undefined>(undefined);
   smsPreference = signal<NotificationPreference | undefined>(undefined);
 
-  // ─── Profile extensions ────────────────────────────────────────────
+  // ─── Profile extensions ──────────────────────────────────────────
   extensions = signal<ProfileExtension[]>([]);
   extensionProperties = signal<Map<string, SchemaEntityProperty[]>>(new Map());
   extensionRecords = signal<Map<string, any>>(new Map());
 
-  // ─── Related records ──────────────────────────────────────────────
+  // ─── Related records ─────────────────────────────────────────────
   relatedRecords = signal<InverseRelationshipData[]>([]);
-
 
   // Columns to exclude from extension display
   private systemColumns = new Set([
     'id', 'created_at', 'updated_at', 'civic_os_text_search', 'display_name'
   ]);
 
-  // ─── Phase 1: Load core data ───────────────────────────────────────
-  private loadDataEffect = effect(() => {
-    // This runs once on init. We read auth.authenticated() to ensure user is ready.
+  constructor() {
+    // Observable that emits once when permissions are loaded (handles async permission cache)
+    const permissionsLoaded$ = toObservable(this.auth.permissionsLoaded).pipe(
+      filter(loaded => loaded),
+      take(1)
+    );
+
+    this.route.paramMap.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
+      const userId = params.get('userId');
+
+      // Reset state on route change
+      this.loading.set(true);
+      this.notFound.set(false);
+
+      if (userId) {
+        // Wait for both user ID and permissions cache before proceeding.
+        // permissionsCache is loaded asynchronously via RPC after Keycloak Ready,
+        // so hasPermission() may return false if checked too early.
+        combineLatest([
+          this.auth.getCurrentUserId().pipe(take(1)),
+          permissionsLoaded$
+        ]).pipe(take(1)).subscribe(([ownId]) => {
+          if (userId === ownId) {
+            this.router.navigate(['/profile'], { replaceUrl: true });
+            return;
+          }
+
+          this.isOwnProfile.set(false);
+          this.targetUserId.set(userId);
+          this.canEditCoreInfo.set(this.auth.hasPermission('civic_os_users_private', 'update'));
+          this.loadOtherProfile(userId);
+        });
+      } else {
+        this.isOwnProfile.set(true);
+        this.targetUserId.set(null);
+        this.canEditCoreInfo.set(true);
+        this.loadOwnProfile();
+      }
+    });
+  }
+
+  // ─── Own profile loading ─────────────────────────────────────────
+
+  private loadOwnProfile(): void {
     if (!this.auth.authenticated()) return;
 
     forkJoin({
@@ -87,26 +141,46 @@ export class ProfilePage {
       this.userRecord.set(result.user);
       this.extensions.set(result.extensions);
 
-      // Set notification preferences
       this.emailPreference.set(result.prefs.find(p => p.channel === 'email'));
       this.smsPreference.set(result.prefs.find(p => p.channel === 'sms'));
 
       this.loading.set(false);
 
-      // Trigger phase 2: load extension schemas + records
       this.loadExtensionData(result.extensions, result.user?.id || '');
-
-      // Trigger phase 3: load related records (inverse relationships)
       this.loadRelatedRecords(result.extensions, result.user?.id || '');
     });
-  });
+  }
 
-  // ─── Phase 2: Load extension schemas and records ───────────────────
+  // ─── Other user profile loading ──────────────────────────────────
+
+  private loadOtherProfile(userId: string): void {
+    forkJoin({
+      user: this.profileService.getUserProfileRecord(userId),
+      extensions: this.profileService.getProfileExtensions(userId)
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(result => {
+      if (!result.user) {
+        this.notFound.set(true);
+        this.loading.set(false);
+        return;
+      }
+
+      this.userRecord.set(result.user);
+      this.extensions.set(result.extensions);
+      this.loading.set(false);
+
+      this.loadExtensionData(result.extensions, userId);
+      this.loadRelatedRecords(result.extensions, userId);
+    });
+  }
+
+  // ─── Phase 2: Load extension schemas and records ─────────────────
+
   private loadExtensionData(extensions: ProfileExtension[], userId: string): void {
     const completedExtensions = extensions.filter(e => e.has_record);
     if (completedExtensions.length === 0) return;
 
-    // Load schema properties for all completed extension tables
     const entityRequests: Record<string, any> = {};
     for (const ext of completedExtensions) {
       entityRequests[ext.table_name] = this.schemaService.getEntity(ext.table_name).pipe(take(1));
@@ -125,7 +199,6 @@ export class ProfilePage {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(propsByTable => {
-      // Build FK column set from extensions
       const fkColumns = new Set(extensions.map(e => e.user_fk_column));
 
       const propsMap = new Map<string, SchemaEntityProperty[]>();
@@ -137,7 +210,6 @@ export class ProfilePage {
       }
       this.extensionProperties.set(propsMap);
 
-      // Now load actual records
       this.loadExtensionRecords(completedExtensions, userId, propsMap);
     });
   }
@@ -165,7 +237,6 @@ export class ProfilePage {
         const arr = records as any[];
         if (arr.length > 0) {
           const record = arr[0];
-          // Transform M:M junction data so DisplayPropertyComponent gets flat items
           const tableProps = propsMap.get(table) || [];
           for (const p of tableProps) {
             if (p.type === EntityPropertyType.ManyToMany && p.many_to_many_meta) {
@@ -187,11 +258,11 @@ export class ProfilePage {
     });
   }
 
-  // ─── Phase 3: Load related records (inverse relationships) ────────
+  // ─── Phase 3: Load related records (inverse relationships) ───────
+
   private loadRelatedRecords(extensions: ProfileExtension[], userId: string): void {
     if (!userId) return;
 
-    // Exclude extension tables (shown in their own sections) and framework tables
     const excludeTables = new Set([
       ...extensions.map(e => e.table_name),
       'civic_os_users_private'
@@ -201,7 +272,6 @@ export class ProfilePage {
       switchMap(relationships => {
         if (relationships.length === 0) return of([]);
 
-        // Fetch preview data for each relationship in parallel
         const dataRequests = relationships.map(meta =>
           this.dataService.getInverseRelationshipData(meta, userId)
         );
@@ -209,12 +279,11 @@ export class ProfilePage {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(results => {
-      // Only show relationships with records
       this.relatedRecords.set(results.filter(r => r.totalCount > 0));
     });
   }
 
-  // ─── Core info editing ─────────────────────────────────────────────
+  // ─── Core info editing ───────────────────────────────────────────
 
   startEditCoreInfo(): void {
     const user = this.userRecord();
@@ -222,6 +291,7 @@ export class ProfilePage {
     this.editFirstName = user.first_name || '';
     this.editLastName = user.last_name || '';
     this.editPhone = user.phone || '';
+    this.editLocale = this.localeService.locale();
     this.editingCoreInfo.set(true);
     this.saveMessage.set('');
   }
@@ -244,6 +314,14 @@ export class ProfilePage {
     this.saving.set(true);
     this.saveMessage.set('');
 
+    if (this.isOwnProfile()) {
+      this.saveOwnProfile();
+    } else {
+      this.saveOtherUserProfile();
+    }
+  }
+
+  private saveOwnProfile(): void {
     this.profileService.updateOwnProfile(
       this.editFirstName.trim(),
       this.editLastName.trim(),
@@ -255,7 +333,6 @@ export class ProfilePage {
       if (result.success) {
         this.saveSuccess.set(true);
         this.saveMessage.set(result.message || 'Profile updated successfully');
-        // Update the local record
         const user = this.userRecord();
         if (user) {
           this.userRecord.set({
@@ -268,8 +345,12 @@ export class ProfilePage {
         }
         this.editingCoreInfo.set(false);
 
-        // Reload notification preferences — the trigger updates SMS phone_number
-        // on phone change, so the UI needs to reflect the new state
+        // Apply locale change only on successful save
+        if (this.editLocale !== this.localeService.locale()) {
+          this.localeService.setLocale(this.editLocale);
+        }
+
+        // Reload notification preferences (trigger may have updated SMS phone)
         this.notificationService.getUserPreferences().pipe(
           takeUntilDestroyed(this.destroyRef)
         ).subscribe(prefs => {
@@ -283,7 +364,41 @@ export class ProfilePage {
     });
   }
 
-  // ─── Phone formatting ──────────────────────────────────────────────
+  private saveOtherUserProfile(): void {
+    const userId = this.targetUserId();
+    if (!userId) return;
+
+    this.userManagementService.updateUserInfo({
+      user_id: userId,
+      first_name: this.editFirstName.trim(),
+      last_name: this.editLastName.trim(),
+      phone: this.editPhone || undefined
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(result => {
+      this.saving.set(false);
+      if (result.success) {
+        this.saveSuccess.set(true);
+        this.saveMessage.set('Profile updated successfully');
+        const user = this.userRecord();
+        if (user) {
+          this.userRecord.set({
+            ...user,
+            first_name: this.editFirstName.trim(),
+            last_name: this.editLastName.trim(),
+            phone: this.editPhone || null,
+            display_name: `${this.editFirstName.trim()} ${this.editLastName.trim()}`
+          });
+        }
+        this.editingCoreInfo.set(false);
+      } else {
+        this.saveSuccess.set(false);
+        this.saveMessage.set(result.error?.humanMessage || 'Failed to update profile');
+      }
+    });
+  }
+
+  // ─── Phone formatting ────────────────────────────────────────────
 
   /** Format raw digits as (555) 123-4567 for display */
   getFormattedPhone(rawDigits?: string | null): string {
@@ -300,15 +415,12 @@ export class ProfilePage {
     const cursorPos = input.selectionStart || 0;
     const digitsBeforeCursor = input.value.slice(0, cursorPos).replace(/\D/g, '').length;
 
-    // Extract only digits, limit to 10
     const digits = input.value.replace(/\D/g, '').slice(0, 10);
     this.editPhone = digits;
 
-    // Format for display
     const formatted = this.getFormattedPhone(digits);
     input.value = formatted;
 
-    // Restore cursor position
     let newCursorPos = 0;
     let digitCount = 0;
     for (let i = 0; i < formatted.length && digitCount < digitsBeforeCursor; i++) {
@@ -318,7 +430,7 @@ export class ProfilePage {
     input.setSelectionRange(newCursorPos, newCursorPos);
   }
 
-  // ─── Notification toggles ─────────────────────────────────────────
+  // ─── Notification toggles ───────────────────────────────────────
 
   onEmailToggle(enabled: boolean): void {
     this.notificationService.updatePreference('email', enabled).pipe(
@@ -346,25 +458,33 @@ export class ProfilePage {
     });
   }
 
-  // ─── Extension navigation ─────────────────────────────────────────
+  // ─── Extension navigation ───────────────────────────────────────
 
   navigateToEditExtension(tableName: string, recordId: string): void {
+    const returnTo = this.isOwnProfile() ? '/profile' : `/profile/${this.targetUserId()}`;
     this.router.navigate(['edit', tableName, recordId], {
-      queryParams: { returnTo: '/profile' }
+      queryParams: { returnTo }
     });
   }
 
   navigateToCreateExtension(tableName: string, fkColumn: string): void {
-    this.auth.getCurrentUserId().pipe(take(1)).subscribe(userId => {
-      if (userId) {
-        this.router.navigate(['create', tableName], {
-          queryParams: { [fkColumn]: userId, returnTo: '/profile' }
-        });
-      }
-    });
+    const userId = this.targetUserId();
+    if (this.isOwnProfile()) {
+      this.auth.getCurrentUserId().pipe(take(1)).subscribe(ownId => {
+        if (ownId) {
+          this.router.navigate(['create', tableName], {
+            queryParams: { [fkColumn]: ownId, returnTo: '/profile' }
+          });
+        }
+      });
+    } else if (userId) {
+      this.router.navigate(['create', tableName], {
+        queryParams: { [fkColumn]: userId, returnTo: `/profile/${userId}` }
+      });
+    }
   }
 
-  // ─── Helpers ───────────────────────────────────────────────────────
+  // ─── Helpers ─────────────────────────────────────────────────────
 
   getColSpan(prop: SchemaEntityProperty): string {
     const span = SchemaService.getColumnSpan(prop);

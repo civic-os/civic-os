@@ -1,5 +1,9 @@
 <div class="prose max-w-4xl mx-auto p-4">
-  <h1>{{ 'profile.title' | translate }}</h1>
+  @if (isOwnProfile()) {
+    <h1>{{ 'profile.title' | translate }}</h1>
+  } @else {
+    <h1>{{ userRecord()?.display_name || ('profile.user_profile' | translate) }}</h1>
+  }
 
   @if (loading()) {
     <div class="flex justify-center py-8">
@@ -7,7 +11,14 @@
     </div>
   }
 
-  @if (!loading()) {
+  @if (!loading() && notFound()) {
+    <div class="not-prose text-center py-12">
+      <span class="material-symbols-outlined text-4xl opacity-40">person_off</span>
+      <p class="mt-2 opacity-60">{{ 'profile.user_not_found' | translate }}</p>
+    </div>
+  }
+
+  @if (!loading() && !notFound()) {
     <div class="not-prose space-y-4">
 
       <!-- ================================================================ -->
@@ -31,7 +42,9 @@
                 <div>
                   <div class="text-sm opacity-60">{{ 'profile.email' | translate }}</div>
                   <div class="font-medium">{{ user.email || '—' }}</div>
-                  <div class="text-xs opacity-50 mt-0.5">{{ 'profile.email_readonly' | translate }}</div>
+                  @if (isOwnProfile()) {
+                    <div class="text-xs opacity-50 mt-0.5">{{ 'profile.email_readonly' | translate }}</div>
+                  }
                 </div>
                 <div>
                   <div class="text-sm opacity-60">{{ 'profile.phone' | translate }}</div>
@@ -42,10 +55,21 @@
                   }
                 </div>
               </div>
-              <button class="btn btn-sm btn-outline mt-4 w-fit" (click)="startEditCoreInfo()">
-                <span class="material-symbols-outlined text-sm">edit</span>
-                {{ 'action.edit' | translate }}
-              </button>
+
+              <!-- Language (own profile only, read-only in display mode) -->
+              @if (isOwnProfile() && localeService.supportedLocales.length > 1) {
+                <div class="mt-4">
+                  <div class="text-sm opacity-60">{{ 'profile.language' | translate }}</div>
+                  <div class="font-medium">{{ localeService.getLocaleInfo(localeService.locale()).name }}</div>
+                </div>
+              }
+
+              @if (canEditCoreInfo()) {
+                <button class="btn btn-sm btn-outline mt-4 w-fit" (click)="startEditCoreInfo()">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                  {{ 'action.edit' | translate }}
+                </button>
+              }
             }
           } @else {
             <!-- Edit mode -->
@@ -80,6 +104,34 @@
                   }
                 </div>
               </div>
+
+              <!-- Language selector in edit mode (own profile only) -->
+              @if (isOwnProfile() && localeService.supportedLocales.length > 1) {
+                <div>
+                  <div class="text-sm opacity-60 mb-2">{{ 'profile.language' | translate }}</div>
+                  <div class="flex flex-wrap gap-2">
+                    @for (loc of localeService.supportedLocales; track loc.code) {
+                      <label class="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="profile-locale-edit"
+                          class="radio hidden"
+                          [checked]="editLocale === loc.code"
+                          (change)="editLocale = loc.code"
+                        />
+                        <span
+                          class="badge badge-lg cursor-pointer transition-colors"
+                          [class.badge-primary]="editLocale === loc.code"
+                          [class.badge-outline]="editLocale !== loc.code"
+                        >
+                          {{ loc.name }}
+                        </span>
+                      </label>
+                    }
+                  </div>
+                </div>
+              }
+
               <div class="flex gap-2 mt-4">
                 <button type="submit" class="btn btn-primary btn-sm" [disabled]="saving() || isPhoneInvalid()">
                   @if (saving()) {
@@ -104,61 +156,63 @@
       </div>
 
       <!-- ================================================================ -->
-      <!-- Notification Preferences Section                                 -->
+      <!-- Notification Preferences Section (own profile only)              -->
       <!-- ================================================================ -->
-      <div class="collapse collapse-arrow bg-base-200">
-        <input type="checkbox" checked />
-        <div class="collapse-title font-medium">
-          {{ 'profile.notifications' | translate }}
-        </div>
-        <div class="collapse-content">
-          @if (preferencesLoading()) {
-            <div class="text-sm opacity-70">{{ 'settings.loading_preferences' | translate }}</div>
-          } @else {
-            <!-- Email Notifications -->
-            @if (emailPreference(); as email) {
-              <div class="mb-4">
-                <label class="flex items-start cursor-pointer gap-3">
-                  <input
-                    type="checkbox"
-                    class="checkbox flex-shrink-0 mt-0.5"
-                    [checked]="email.enabled"
-                    (change)="onEmailToggle($any($event.target).checked)"
-                  />
-                  <span>{{ 'settings.email_notifications' | translate }}</span>
-                </label>
-                <p class="text-xs opacity-70 mt-1 ms-9">
-                  {{ 'settings.send_to' | translate }} <strong>{{ email.email_address }}</strong>
-                </p>
-              </div>
-            }
-
-            <!-- SMS Notifications -->
-            @if (smsConfigured) {
-              @if (smsPreference(); as sms) {
+      @if (isOwnProfile()) {
+        <div class="collapse collapse-arrow bg-base-200">
+          <input type="checkbox" checked />
+          <div class="collapse-title font-medium">
+            {{ 'profile.notifications' | translate }}
+          </div>
+          <div class="collapse-content">
+            @if (preferencesLoading()) {
+              <div class="text-sm opacity-70">{{ 'settings.loading_preferences' | translate }}</div>
+            } @else {
+              <!-- Email Notifications -->
+              @if (emailPreference(); as email) {
                 <div class="mb-4">
                   <label class="flex items-start cursor-pointer gap-3">
                     <input
                       type="checkbox"
                       class="checkbox flex-shrink-0 mt-0.5"
-                      [checked]="sms.enabled"
-                      (change)="onSmsToggle($any($event.target).checked)"
+                      [checked]="email.enabled"
+                      (change)="onEmailToggle($any($event.target).checked)"
                     />
-                    <span>{{ 'settings.sms_notifications' | translate }}</span>
+                    <span>{{ 'settings.email_notifications' | translate }}</span>
                   </label>
                   <p class="text-xs opacity-70 mt-1 ms-9">
-                    {{ 'settings.send_to' | translate }} <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
+                    {{ 'settings.send_to' | translate }} <strong>{{ email.email_address }}</strong>
                   </p>
                 </div>
               }
-            }
 
-            @if (!emailPreference() && !smsPreference()) {
-              <p class="text-sm opacity-70">{{ 'settings.no_preferences' | translate }}</p>
+              <!-- SMS Notifications -->
+              @if (smsConfigured) {
+                @if (smsPreference(); as sms) {
+                  <div class="mb-4">
+                    <label class="flex items-start cursor-pointer gap-3">
+                      <input
+                        type="checkbox"
+                        class="checkbox flex-shrink-0 mt-0.5"
+                        [checked]="sms.enabled"
+                        (change)="onSmsToggle($any($event.target).checked)"
+                      />
+                      <span>{{ 'settings.sms_notifications' | translate }}</span>
+                    </label>
+                    <p class="text-xs opacity-70 mt-1 ms-9">
+                      {{ 'settings.send_to' | translate }} <strong>{{ sms.phone_number | slice:0:3 }}-{{ sms.phone_number | slice:3:6 }}-{{ sms.phone_number | slice:6:10 }}</strong>
+                    </p>
+                  </div>
+                }
+              }
+
+              @if (!emailPreference() && !smsPreference()) {
+                <p class="text-sm opacity-70">{{ 'settings.no_preferences' | translate }}</p>
+              }
             }
-          }
+          </div>
         </div>
-      </div>
+      }
 
       <!-- ================================================================ -->
       <!-- Extension Sections                                               -->
@@ -191,10 +245,12 @@
                       </div>
                     }
                   </div>
-                  <button class="btn btn-sm btn-outline mt-4" (click)="navigateToEditExtension(ext.table_name, record['id'])">
-                    <span class="material-symbols-outlined text-sm">edit</span>
-                    {{ 'action.edit' | translate }}
-                  </button>
+                  @if (isOwnProfile() || auth.hasPermission(ext.table_name, 'update')) {
+                    <button class="btn btn-sm btn-outline mt-4" (click)="navigateToEditExtension(ext.table_name, record['id'])">
+                      <span class="material-symbols-outlined text-sm">edit</span>
+                      {{ 'action.edit' | translate }}
+                    </button>
+                  }
                 }
               } @else {
                 <div class="flex justify-center py-4">
@@ -206,10 +262,12 @@
               @if (ext.description) {
                 <p class="text-sm opacity-70 mb-3">{{ ext.description }}</p>
               }
-              <button class="btn btn-primary btn-sm" (click)="navigateToCreateExtension(ext.table_name, ext.user_fk_column)">
-                <span class="material-symbols-outlined text-sm">add</span>
-                {{ 'action.add' | translate }}
-              </button>
+              @if (isOwnProfile() || auth.hasPermission(ext.table_name, 'create')) {
+                <button class="btn btn-primary btn-sm" (click)="navigateToCreateExtension(ext.table_name, ext.user_fk_column)">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                  {{ 'action.add' | translate }}
+                </button>
+              }
             }
           </div>
         </div>
@@ -236,4 +294,3 @@
     </div>
   }
 </div>
-

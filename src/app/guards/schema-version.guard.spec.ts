@@ -1,18 +1,6 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023-2026 Civic OS, L3C
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import { TestBed } from '@angular/core/testing';
@@ -22,22 +10,26 @@ import { of } from 'rxjs';
 import { schemaVersionGuard } from './schema-version.guard';
 import { VersionService, CacheUpdateCheck } from '../services/version.service';
 import { SchemaService } from '../services/schema.service';
+import { ProfileService } from '../services/profile.service';
 
 describe('schemaVersionGuard', () => {
   let mockVersionService: jasmine.SpyObj<VersionService>;
   let mockSchemaService: jasmine.SpyObj<SchemaService>;
+  let mockProfileService: jasmine.SpyObj<ProfileService>;
   let mockRoute: ActivatedRouteSnapshot;
   let mockState: RouterStateSnapshot;
 
   beforeEach(() => {
     mockVersionService = jasmine.createSpyObj('VersionService', ['checkForUpdates']);
     mockSchemaService = jasmine.createSpyObj('SchemaService', ['refreshEntitiesCache', 'refreshPropertiesCache']);
+    mockProfileService = jasmine.createSpyObj('ProfileService', ['invalidateCache']);
 
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         { provide: VersionService, useValue: mockVersionService },
-        { provide: SchemaService, useValue: mockSchemaService }
+        { provide: SchemaService, useValue: mockSchemaService },
+        { provide: ProfileService, useValue: mockProfileService }
       ]
     });
 
@@ -53,6 +45,7 @@ describe('schemaVersionGuard', () => {
       entitiesNeedsRefresh: false,
       propertiesNeedsRefresh: false,
       constraintMessagesNeedsRefresh: false,
+      profileExtensionsNeedsRefresh: false,
       hasChanges: false
     };
     mockVersionService.checkForUpdates.and.returnValue(of(noChanges));
@@ -65,6 +58,7 @@ describe('schemaVersionGuard', () => {
           expect(result).toBe(true);
           expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
           expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
           expect(console.log).not.toHaveBeenCalled();
           done();
         });
@@ -77,6 +71,7 @@ describe('schemaVersionGuard', () => {
       entitiesNeedsRefresh: true,
       propertiesNeedsRefresh: false,
       constraintMessagesNeedsRefresh: false,
+      profileExtensionsNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(entitiesChanged));
@@ -89,6 +84,7 @@ describe('schemaVersionGuard', () => {
           expect(result).toBe(true);
           expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
           expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
           done();
         });
       }
@@ -100,6 +96,7 @@ describe('schemaVersionGuard', () => {
       entitiesNeedsRefresh: false,
       propertiesNeedsRefresh: true,
       constraintMessagesNeedsRefresh: false,
+      profileExtensionsNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(propertiesChanged));
@@ -112,6 +109,7 @@ describe('schemaVersionGuard', () => {
           expect(result).toBe(true);
           expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
           expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
+          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
           done();
         });
       }
@@ -123,6 +121,7 @@ describe('schemaVersionGuard', () => {
       entitiesNeedsRefresh: true,
       propertiesNeedsRefresh: true,
       constraintMessagesNeedsRefresh: false,
+      profileExtensionsNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(bothChanged));
@@ -135,6 +134,32 @@ describe('schemaVersionGuard', () => {
           expect(result).toBe(true);
           expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
           expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
+          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
+          done();
+        });
+      }
+    });
+  });
+
+  it('should invalidate profile cache when profile extensions version changed', (done) => {
+    const profileChanged: CacheUpdateCheck = {
+      entitiesNeedsRefresh: false,
+      propertiesNeedsRefresh: false,
+      constraintMessagesNeedsRefresh: false,
+      profileExtensionsNeedsRefresh: true,
+      hasChanges: true
+    };
+    mockVersionService.checkForUpdates.and.returnValue(of(profileChanged));
+
+    TestBed.runInInjectionContext(() => {
+      const result$ = schemaVersionGuard(mockRoute, mockState);
+
+      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+        (result$ as any).subscribe((result: boolean) => {
+          expect(result).toBe(true);
+          expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
+          expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+          expect(mockProfileService.invalidateCache).toHaveBeenCalledTimes(1);
           done();
         });
       }
@@ -146,6 +171,7 @@ describe('schemaVersionGuard', () => {
       entitiesNeedsRefresh: true,
       propertiesNeedsRefresh: true,
       constraintMessagesNeedsRefresh: false,
+      profileExtensionsNeedsRefresh: false,
       hasChanges: true
     };
     mockVersionService.checkForUpdates.and.returnValue(of(bothChanged));

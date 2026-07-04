@@ -29,25 +29,29 @@ describe('VersionService', () => {
   const mockVersions: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
     { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
+    { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
   ];
 
   const updatedEntitiesVersion: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
     { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
+    { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
   ];
 
   const updatedPropertiesVersion: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
     { cache_name: 'properties', version: '2025-01-02T00:00:00Z' },
-    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
+    { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
   ];
 
   const updatedBothVersions: CacheVersion[] = [
     { cache_name: 'entities', version: '2025-01-02T00:00:00Z' },
     { cache_name: 'properties', version: '2025-01-02T00:00:00Z' },
-    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+    { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
+    { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
   ];
 
   beforeEach(() => {
@@ -199,6 +203,7 @@ describe('VersionService', () => {
         expect(result.entitiesNeedsRefresh).toBe(true);
         expect(result.propertiesNeedsRefresh).toBe(true);
         expect(result.constraintMessagesNeedsRefresh).toBe(false); // Not present, so no refresh
+        expect(result.profileExtensionsNeedsRefresh).toBe(false); // Not present, so no refresh
         expect(result.hasChanges).toBe(true);
         done();
       });
@@ -211,19 +216,42 @@ describe('VersionService', () => {
       const constraintMessagesChanged: CacheVersion[] = [
         { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
         { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'constraint_messages', version: '2025-01-02T00:00:00Z' }
+        { cache_name: 'constraint_messages', version: '2025-01-02T00:00:00Z' },
+        { cache_name: 'profile_extensions', version: '2025-01-01T00:00:00Z' }
       ];
 
       service.checkForUpdates().subscribe(result => {
         expect(result.entitiesNeedsRefresh).toBe(false);
         expect(result.propertiesNeedsRefresh).toBe(false);
         expect(result.constraintMessagesNeedsRefresh).toBe(true);
+        expect(result.profileExtensionsNeedsRefresh).toBe(false);
         expect(result.hasChanges).toBe(true);
         done();
       });
 
       const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
       req.flush(constraintMessagesChanged);
+    });
+
+    it('should detect when only profile_extensions changed', (done) => {
+      const profileExtensionsChanged: CacheVersion[] = [
+        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' },
+        { cache_name: 'profile_extensions', version: '2025-01-02T00:00:00Z' }
+      ];
+
+      service.checkForUpdates().subscribe(result => {
+        expect(result.entitiesNeedsRefresh).toBe(false);
+        expect(result.propertiesNeedsRefresh).toBe(false);
+        expect(result.constraintMessagesNeedsRefresh).toBe(false);
+        expect(result.profileExtensionsNeedsRefresh).toBe(true);
+        expect(result.hasChanges).toBe(true);
+        done();
+      });
+
+      const req = httpMock.expectOne(testPostgrestUrl + 'schema_cache_versions');
+      req.flush(profileExtensionsChanged);
     });
   });
 

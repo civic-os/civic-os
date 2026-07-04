@@ -2,95 +2,97 @@
 %project=civic_os
 %uri=https://github.com/civic-os/frontend
 
-v0-4-0-baseline 2025-10-23T23:18:17Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Civic OS v0.4.0 baseline schema
-v0-5-0-add-file-storage [v0-4-0-baseline] 2025-10-24T16:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add S3-based file storage with UUIDv7 and thumbnail generation
-v0-6-0-add-phone-jwt-sync [v0-5-0-add-file-storage] 2025-10-26T01:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add phone number sync from Keycloak JWT to user profile
-v0-8-2-fix-schema-relations-cross-schema-bug [v0-6-0-add-phone-jwt-sync] 2025-10-30T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix cross-schema FK matching bug in schema_relations_func()
-v0-9-0-add-time-slot-domain [v0-8-2-fix-schema-relations-cross-schema-bug] 2025-11-02T17:22:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add time_slot domain and calendar view metadata
-v0-9-0-add-constraint-messages-view [v0-9-0-add-time-slot-domain] 2025-11-04T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add public view for constraint messages and update cache versioning
-v0-10-0-add-river-queue [v0-9-0-add-constraint-messages-view] 2025-11-05T12:15:08Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add River job queue schema for Go microservices migration
-v0-10-8-fix-thumbnail-bucket-config [v0-10-0-add-river-queue] 2025-11-06T00:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix thumbnail bucket configuration to use database column
-v0-11-0-add-notifications [v0-10-8-fix-thumbnail-bucket-config] 2025-11-07T16:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add notification system with templates, preferences, and River workers
-v0-11-0-add-user-roles [v0-11-0-add-notifications] 2025-11-08T02:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add user_roles table to persist JWT role assignments for role-based queries
-v0-12-0-add-map-widget-type [v0-11-0-add-user-roles] 2025-01-15T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Dashboard Phase 2: Add map widget type with clustering support
-v0-12-2-add-navigation-widget-type [v0-12-0-add-map-widget-type] 2025-11-19T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add dashboard_navigation widget type for storymap navigation
-v0-12-3-add-calendar-widget-type [v0-12-2-add-navigation-widget-type] 2025-11-21T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Dashboard Phase 2: Add calendar widget type for time_slot visualization
-v0-13-0-add-payments-poc [v0-12-3-add-calendar-widget-type] 2025-01-22T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Payment Processing POC: Minimal vertical slice with sync RPC, River jobs, and Stripe integration
-v0-13-0-fix-dashboards-cascade [v0-13-0-add-payments-poc] 2025-11-23T00:20:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix dashboards.created_by constraint to allow user deletion
-v0-13-0-add-payment-metadata [v0-13-0-add-payments-poc] 2025-11-23T17:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add payment_initiation_rpc and payment_capture_mode columns to metadata.entities
-v0-14-0-add-payment-admin [v0-13-0-add-payment-metadata] 2025-11-25T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Payment Admin: Refund support, admin permissions, effective_status computed field
-v0-15-0-add-status-type [v0-14-0-add-payment-admin] 2025-11-26T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Status Type System: centralized statuses table with validation trigger
-v0-16-0-add-entity-notes [v0-15-0-add-status-type] 2025-12-11T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Entity Notes: polymorphic notes system for any entity
-v0-17-0-add-static-text [v0-16-0-add-entity-notes] 2025-12-11T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Static Text: markdown content blocks for Detail/Edit/Create pages
-v0-18-0-entity-actions [v0-17-0-add-static-text] 2025-12-12T15:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Entity Actions: metadata-driven action buttons for Detail pages
-v0-18-1-refactor-entity-action-permissions [v0-18-0-entity-actions] 2025-12-12T17:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Refactor: entity_actions as source of truth, entity_action_roles for permissions
-v0-19-0-add-recurring-timeslot [v0-18-1-refactor-entity-action-permissions] 2025-12-12T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Recurring TimeSlot System: RRULE-compliant recurring events with series groups, conflict preview, and exception handling
-v0-20-2-auto-create-permissions [v0-19-0-add-recurring-timeslot] 2025-12-19T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Auto-create missing permission entries in set_role_permission RPC
-v0-20-3-fix-permission-type-cast [v0-20-2-auto-create-permissions] 2025-12-19T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix type cast: metadata.permission_type -> metadata.permission
-v0-20-4-fix-upsert-null-handling [v0-20-3-fix-permission-type-cast] 2025-12-19T19:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix upsert_property_metadata to allow explicit NULL values
-v0-21-0-add-processing-fees [v0-20-4-fix-upsert-null-handling] 2025-12-19T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add configurable processing fees for payment transactions
-v0-22-0-add-scheduled-jobs [v0-21-0-add-processing-fees] 2025-12-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Scheduled Jobs System: metadata-driven cron execution with run history
-v0-23-0-system-introspection [v0-22-0-add-scheduled-jobs] 2025-12-24T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add System Introspection: RPC registry, trigger documentation, entity dependency graphs
-v0-24-0-schema-reorganization [v0-23-0-system-introspection] 2025-12-24T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Schema Reorganization: extensions to plugins, framework functions to metadata
-v0-25-1-add-status-key [v0-24-0-schema-reorganization] 2026-01-10T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add status_key column for stable programmatic reference to statuses
-v0-26-0-impersonation [v0-25-1-add-status-key] 2026-01-17T19:53:42Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add admin role impersonation for testing permissions
-v0-27-0-ical-helpers [v0-26-0-impersonation] 2026-01-24T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add iCal export helpers for calendar subscription feeds
-v0-28-0-virtual-entities [v0-27-0-ical-helpers] 2026-01-25T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Virtual Entities: VIEWs with INSTEAD OF triggers as entities
-v0-28-1-filter-system-views [v0-28-0-virtual-entities] 2026-01-26T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Filter system/framework views from entity list
-v0-29-0-source-code-visibility [v0-28-1-filter-system-views] 2026-02-10T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add source code visibility for functions, triggers, views, and RLS policies
-v0-30-0-schema-decisions [v0-29-0-source-code-visibility] 2026-02-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Schema Decisions (ADR) system for tracking schema evolution rationale
-v0-31-0-user-provisioning [v0-30-0-schema-decisions] 2026-02-27T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add user provisioning with Keycloak sync and role delegation
-v0-31-0-edit-user-info [v0-31-0-user-provisioning] 2026-02-28T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add edit user info with first_name/last_name columns and Keycloak sync
-v0-32-0-entity-action-params [v0-31-0-edit-user-info] 2026-03-01T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add entity action parameters for user-provided input in action modals
-v0-32-0-fix-database-search-path [v0-32-0-entity-action-params] 2026-03-02T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix database-level search_path to include plugins schema for worker connections
-v0-32-2-fix-recurring-template-validation [v0-32-0-fix-database-search-path] 2026-03-06T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix recurring template validation to allow show_on_create fields
-v0-33-0-causal-bindings [v0-32-2-fix-recurring-template-validation] 2026-03-04T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add causal bindings: status transitions and property change triggers for event-to-function metadata
-v0-33-0-add-nav-buttons-widget-type [v0-33-0-causal-bindings] 2026-03-06T22:45:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add nav_buttons widget type for dashboard navigation button groups
-v0-34-0-add-category-system [v0-33-0-add-nav-buttons-widget-type] 2026-03-06T23:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add Category system for non-workflow categorization (rich enums parallel to Status)
-v0-34-1-fix-recurring-series-worker [v0-34-0-add-category-system] 2026-03-07T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix recurring series worker: accurate error classification, insert_failed exception type
-v0-35-0-add-sms-opted-out [v0-34-1-fix-recurring-series-worker] 2026-03-07T21:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add sms_opted_out column to notification_preferences for carrier-level STOP tracking
-v0-35-0-admin-notification-prefs [v0-35-0-add-sms-opted-out] 2026-03-12T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Admin RPCs for notification preference management and managed_users view extension
-v0-36-0-add-role-key [v0-35-0-admin-notification-prefs] 2026-03-12T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add role_key column for stable programmatic reference and JWT matching
-v0-36-0-notification-role-helpers [v0-36-0-add-role-key] 2026-03-13T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add get_users_by_role() and send_notification_to_role() helpers
-v0-36-0-keycloak-sync-triggers [v0-36-0-notification-role-helpers] 2026-03-13T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Move Keycloak sync to triggers, refactor refresh_current_user to diff-based
-v0-37-0-dashboard-features [v0-36-0-keycloak-sync-triggers] 2026-03-13T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add show_title toggle and role-based default dashboards
-v0-37-0-fix-sms-preference-trigger [v0-37-0-dashboard-features] 2026-03-13T21:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix SMS preference trigger to fire on phone update, backfill existing users
-v0-38-0-add-static-assets [v0-37-0-fix-sms-preference-trigger] 2026-03-13T22:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add static assets with responsive breakpoint crops and image dashboard widget
-v0-38-4-fix-admin-notif-pref-permission [v0-38-0-add-static-assets] 2026-03-16T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix admin_get_user_notification_preferences permission: read → update
-v0-38-4-fix-role-key-view [v0-38-4-fix-admin-notif-pref-permission] 2026-03-16T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix managed_users VIEW to use role_key and add role_key immutability trigger
-v0-38-5-recurring-dtstart-local-time [v0-38-4-fix-role-key-view] 2026-03-16T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix recurring dtstart from TIMESTAMPTZ to TIMESTAMP for timezone handling
-v0-38-5-configurable-expand-horizon [v0-38-5-recurring-dtstart-local-time] 2026-03-17T00:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add configurable expansion horizon parameter to recurring series functions
-v0-39-0-add-file-admin [v0-38-5-configurable-expand-horizon] 2026-03-18T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add file admin: property_name tracking, tiered RLS, storage stats RPC
-v0-40-0-status-category-admin-rpcs [v0-39-0-add-file-admin] 2026-03-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add status/category admin CRUD RPCs, permission caching RPC, metadata RLS upgrade
-v0-41-0-schema-functions-perf [v0-40-0-status-category-admin-rpcs] 2026-03-21T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Rewrite schema metadata functions from information_schema to pg_catalog for 50-60x speedup
-v0-41-1-add-category-action-param-type [v0-41-0-schema-functions-perf] 2026-03-27T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add category as entity action param type (missed during v0.34.0 Category system)
-v0-41-2-fix-impersonation-refresh [v0-41-1-add-category-action-param-type] 2026-04-01T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix impersonation header poisoning refresh_current_user role sync
-v0-43-0-user-welcome-notification [v0-41-2-fix-impersonation-refresh] 2026-04-17T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Replace Keycloak welcome email with Civic OS notification template
-v0-43-1-resolve-role-key [v0-43-0-user-welcome-notification] 2026-04-17T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Accept both role_key and display_name in user provisioning and role RPCs
-v0-44-0-options-source-rpc [v0-43-1-resolve-role-key] 2026-04-18T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add options_source_rpc and depends_on_columns to metadata.properties for custom FK/M:M option loading
-v0-45-0-fk-search-modal [v0-44-0-options-source-rpc] 2026-04-19T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add fk_search_modal flag for searchable FK modal rendering
-v0-46-0-m2m-search-modal [v0-45-0-fk-search-modal] 2026-04-20T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add show_inline flag for inline M:M positioning in property grid
-v0-47-0-add-photo-gallery [v0-46-0-m2m-search-modal] 2026-04-20T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add PhotoGallery property type: multi-image galleries with drag-drop reorder and lightbox
-v0-47-1-fix-keycloak-update-email [v0-47-0-add-photo-gallery] 2026-04-22T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix Keycloak user update clearing email by adding fetch-then-merge pattern
-v0-48-0-workflow-system [v0-47-1-fix-keycloak-update-email] 2026-04-21T23:11:02Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add multi-step workflow framework
-v0-49-0-add-geo-polygon [v0-48-0-workflow-system] 2026-04-29T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add GeoPolygon support with map_color_property for per-polygon coloring
-v0-49-1-user-search-modal [v0-49-0-add-geo-polygon] 2026-04-30T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add civic_os_text_search to civic_os_users VIEW for user search modal
-v0-50-1-phone-search-tokens [v0-49-1-user-search-modal] 2026-05-01T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add phone_search_tokens() and simplify User search to use tsvector
-v0-50-2-fix-notification-preferences-rls [v0-50-1-phone-search-tokens] 2026-05-01T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix notification_preferences VIEW missing security_invoker
-v0-51-0-rich-junction-m2m [v0-50-2-fix-notification-preferences-rls] 2026-05-02T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add is_rich_junction flag for M:M junctions with extra editable columns
-v0-52-0-add-last-login-tracking [v0-51-0-rich-junction-m2m] 2026-05-03T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add last_login_at tracking, OIDC name claims, and provisioned user name backfill
-v0-53-0-options-filter-column [v0-52-0-add-last-login-tracking] 2026-05-16T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add options_filter_column for server-side computed column filtering in FK search modals
-v0-54-0-action-param-options-rpc [v0-53-0-options-filter-column] 2026-05-18T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add options_source_rpc and depends_on_params to entity_action_params for filtered cascading FK dropdowns
-v0-55-0-photo-gallery-action-param [v0-54-0-action-param-options-rpc] 2026-05-19T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add photo_gallery action param type with target_column for gallery config lookup
-v0-55-2-submit-form-status-fix [v0-55-0-photo-gallery-action-param] 2026-05-23T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add name_search_tokens for user search + rename guided form status_id to guided_form_status_id
-v0-56-1-fix-managed-db-admin-guard [v0-55-2-submit-form-status-fix] 2026-05-25T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Fix admin guard for managed DB compatibility (DigitalOcean, AWS RDS, Google Cloud SQL)
-v0-57-0-add-i18n [v0-56-1-fix-managed-db-admin-guard] 2026-06-04T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add multi-language (i18n) foundation: translations table, t() function, locale support
-v0-58-0-metadata-translations [v0-57-0-add-i18n] 2026-06-04T18:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Phase 2 i18n: wrap metadata VIEWs with t() for locale-aware entity names, property labels, statuses
-v0-59-0-send-email-rpc [v0-58-0-metadata-translations] 2026-06-04T20:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add metadata.send_email() for flexible multi-recipient email via River queue
-v0-61-0-add-chart-widget-type [v0-59-0-send-email-rpc] 2026-06-05T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add chart widget type for grouped bar chart visualization
-v0-62-0-dashboard-translations [v0-61-0-add-chart-widget-type] 2026-06-15T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Phase 3 i18n: dashboard RPC translations, widget config JSONB helper
-v0-63-0-import-modal-translations [v0-62-0-dashboard-translations] 2026-06-17T12:00:00Z Daniel Kurin <danielkurin@Daniels-MacBook-Pro.local> # Add English and Spanish translations for import modal component
-v0-64-0-add-arabic-translations [v0-63-0-import-modal-translations] 2026-06-23T00:00:00Z Daniel Kurin <daniel@civic-os.com> # Add Arabic UI translations for RTL support
-v0-64-1-i18n-expansion [v0-64-0-add-arabic-translations] 2026-06-24T12:00:00Z Daniel Kurin <daniel@civic-os.com> # Add ps/fr/de UI translations and migrate translation RLS to RBAC permissions
-v0-65-0-user-profile-extensions [v0-64-1-i18n-expansion] 2026-06-25T12:00:00Z Daniel Kurin <daniel@civic-os.com> # Add user profile extension system with self-service profile page and completion guard
-v0-65-0-cup-phone-domain [v0-65-0-user-profile-extensions] 2026-06-26T12:00:00Z Daniel Kurin <daniel@civic-os.com> # Migrate civic_os_users_private.phone to phone_number domain, deprecate JWT phone sync, fix SMS pref trigger
+v0-4-0-baseline 2025-10-23T23:18:17Z Daniel Kurin <dkurin@civic-os.org> # Civic OS v0.4.0 baseline schema
+v0-5-0-add-file-storage [v0-4-0-baseline] 2025-10-24T16:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add S3-based file storage with UUIDv7 and thumbnail generation
+v0-6-0-add-phone-jwt-sync [v0-5-0-add-file-storage] 2025-10-26T01:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add phone number sync from Keycloak JWT to user profile
+v0-8-2-fix-schema-relations-cross-schema-bug [v0-6-0-add-phone-jwt-sync] 2025-10-30T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix cross-schema FK matching bug in schema_relations_func()
+v0-9-0-add-time-slot-domain [v0-8-2-fix-schema-relations-cross-schema-bug] 2025-11-02T17:22:00Z Daniel Kurin <dkurin@civic-os.org> # Add time_slot domain and calendar view metadata
+v0-9-0-add-constraint-messages-view [v0-9-0-add-time-slot-domain] 2025-11-04T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add public view for constraint messages and update cache versioning
+v0-10-0-add-river-queue [v0-9-0-add-constraint-messages-view] 2025-11-05T12:15:08Z Daniel Kurin <dkurin@civic-os.org> # Add River job queue schema for Go microservices migration
+v0-10-8-fix-thumbnail-bucket-config [v0-10-0-add-river-queue] 2025-11-06T00:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix thumbnail bucket configuration to use database column
+v0-11-0-add-notifications [v0-10-8-fix-thumbnail-bucket-config] 2025-11-07T16:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add notification system with templates, preferences, and River workers
+v0-11-0-add-user-roles [v0-11-0-add-notifications] 2025-11-08T02:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add user_roles table to persist JWT role assignments for role-based queries
+v0-12-0-add-map-widget-type [v0-11-0-add-user-roles] 2025-01-15T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Dashboard Phase 2: Add map widget type with clustering support
+v0-12-2-add-navigation-widget-type [v0-12-0-add-map-widget-type] 2025-11-19T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add dashboard_navigation widget type for storymap navigation
+v0-12-3-add-calendar-widget-type [v0-12-2-add-navigation-widget-type] 2025-11-21T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Dashboard Phase 2: Add calendar widget type for time_slot visualization
+v0-13-0-add-payments-poc [v0-12-3-add-calendar-widget-type] 2025-01-22T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Payment Processing POC: Minimal vertical slice with sync RPC, River jobs, and Stripe integration
+v0-13-0-fix-dashboards-cascade [v0-13-0-add-payments-poc] 2025-11-23T00:20:00Z Daniel Kurin <dkurin@civic-os.org> # Fix dashboards.created_by constraint to allow user deletion
+v0-13-0-add-payment-metadata [v0-13-0-add-payments-poc] 2025-11-23T17:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add payment_initiation_rpc and payment_capture_mode columns to metadata.entities
+v0-14-0-add-payment-admin [v0-13-0-add-payment-metadata] 2025-11-25T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Payment Admin: Refund support, admin permissions, effective_status computed field
+v0-15-0-add-status-type [v0-14-0-add-payment-admin] 2025-11-26T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Status Type System: centralized statuses table with validation trigger
+v0-16-0-add-entity-notes [v0-15-0-add-status-type] 2025-12-11T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Entity Notes: polymorphic notes system for any entity
+v0-17-0-add-static-text [v0-16-0-add-entity-notes] 2025-12-11T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Static Text: markdown content blocks for Detail/Edit/Create pages
+v0-18-0-entity-actions [v0-17-0-add-static-text] 2025-12-12T15:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Entity Actions: metadata-driven action buttons for Detail pages
+v0-18-1-refactor-entity-action-permissions [v0-18-0-entity-actions] 2025-12-12T17:00:00Z Daniel Kurin <dkurin@civic-os.org> # Refactor: entity_actions as source of truth, entity_action_roles for permissions
+v0-19-0-add-recurring-timeslot [v0-18-1-refactor-entity-action-permissions] 2025-12-12T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Recurring TimeSlot System: RRULE-compliant recurring events with series groups, conflict preview, and exception handling
+v0-20-2-auto-create-permissions [v0-19-0-add-recurring-timeslot] 2025-12-19T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Auto-create missing permission entries in set_role_permission RPC
+v0-20-3-fix-permission-type-cast [v0-20-2-auto-create-permissions] 2025-12-19T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix type cast: metadata.permission_type -> metadata.permission
+v0-20-4-fix-upsert-null-handling [v0-20-3-fix-permission-type-cast] 2025-12-19T19:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix upsert_property_metadata to allow explicit NULL values
+v0-21-0-add-processing-fees [v0-20-4-fix-upsert-null-handling] 2025-12-19T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add configurable processing fees for payment transactions
+v0-22-0-add-scheduled-jobs [v0-21-0-add-processing-fees] 2025-12-20T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Scheduled Jobs System: metadata-driven cron execution with run history
+v0-23-0-system-introspection [v0-22-0-add-scheduled-jobs] 2025-12-24T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add System Introspection: RPC registry, trigger documentation, entity dependency graphs
+v0-24-0-schema-reorganization [v0-23-0-system-introspection] 2025-12-24T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Schema Reorganization: extensions to plugins, framework functions to metadata
+v0-25-1-add-status-key [v0-24-0-schema-reorganization] 2026-01-10T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add status_key column for stable programmatic reference to statuses
+v0-26-0-impersonation [v0-25-1-add-status-key] 2026-01-17T19:53:42Z Daniel Kurin <dkurin@civic-os.org> # Add admin role impersonation for testing permissions
+v0-27-0-ical-helpers [v0-26-0-impersonation] 2026-01-24T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add iCal export helpers for calendar subscription feeds
+v0-28-0-virtual-entities [v0-27-0-ical-helpers] 2026-01-25T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Virtual Entities: VIEWs with INSTEAD OF triggers as entities
+v0-28-1-filter-system-views [v0-28-0-virtual-entities] 2026-01-26T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Filter system/framework views from entity list
+v0-29-0-source-code-visibility [v0-28-1-filter-system-views] 2026-02-10T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add source code visibility for functions, triggers, views, and RLS policies
+v0-30-0-schema-decisions [v0-29-0-source-code-visibility] 2026-02-20T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Schema Decisions (ADR) system for tracking schema evolution rationale
+v0-31-0-user-provisioning [v0-30-0-schema-decisions] 2026-02-27T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add user provisioning with Keycloak sync and role delegation
+v0-31-0-edit-user-info [v0-31-0-user-provisioning] 2026-02-28T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add edit user info with first_name/last_name columns and Keycloak sync
+v0-32-0-entity-action-params [v0-31-0-edit-user-info] 2026-03-01T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add entity action parameters for user-provided input in action modals
+v0-32-0-fix-database-search-path [v0-32-0-entity-action-params] 2026-03-02T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix database-level search_path to include plugins schema for worker connections
+v0-32-2-fix-recurring-template-validation [v0-32-0-fix-database-search-path] 2026-03-06T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix recurring template validation to allow show_on_create fields
+v0-33-0-causal-bindings [v0-32-2-fix-recurring-template-validation] 2026-03-04T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add causal bindings: status transitions and property change triggers for event-to-function metadata
+v0-33-0-add-nav-buttons-widget-type [v0-33-0-causal-bindings] 2026-03-06T22:45:00Z Daniel Kurin <dkurin@civic-os.org> # Add nav_buttons widget type for dashboard navigation button groups
+v0-34-0-add-category-system [v0-33-0-add-nav-buttons-widget-type] 2026-03-06T23:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Category system for non-workflow categorization (rich enums parallel to Status)
+v0-34-1-fix-recurring-series-worker [v0-34-0-add-category-system] 2026-03-07T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix recurring series worker: accurate error classification, insert_failed exception type
+v0-35-0-add-sms-opted-out [v0-34-1-fix-recurring-series-worker] 2026-03-07T21:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add sms_opted_out column to notification_preferences for carrier-level STOP tracking
+v0-35-0-admin-notification-prefs [v0-35-0-add-sms-opted-out] 2026-03-12T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Admin RPCs for notification preference management and managed_users view extension
+v0-36-0-add-role-key [v0-35-0-admin-notification-prefs] 2026-03-12T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add role_key column for stable programmatic reference and JWT matching
+v0-36-0-notification-role-helpers [v0-36-0-add-role-key] 2026-03-13T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add get_users_by_role() and send_notification_to_role() helpers
+v0-36-0-keycloak-sync-triggers [v0-36-0-notification-role-helpers] 2026-03-13T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Move Keycloak sync to triggers, refactor refresh_current_user to diff-based
+v0-37-0-dashboard-features [v0-36-0-keycloak-sync-triggers] 2026-03-13T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add show_title toggle and role-based default dashboards
+v0-37-0-fix-sms-preference-trigger [v0-37-0-dashboard-features] 2026-03-13T21:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix SMS preference trigger to fire on phone update, backfill existing users
+v0-38-0-add-static-assets [v0-37-0-fix-sms-preference-trigger] 2026-03-13T22:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add static assets with responsive breakpoint crops and image dashboard widget
+v0-38-4-fix-admin-notif-pref-permission [v0-38-0-add-static-assets] 2026-03-16T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix admin_get_user_notification_preferences permission: read → update
+v0-38-4-fix-role-key-view [v0-38-4-fix-admin-notif-pref-permission] 2026-03-16T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix managed_users VIEW to use role_key and add role_key immutability trigger
+v0-38-5-recurring-dtstart-local-time [v0-38-4-fix-role-key-view] 2026-03-16T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix recurring dtstart from TIMESTAMPTZ to TIMESTAMP for timezone handling
+v0-38-5-configurable-expand-horizon [v0-38-5-recurring-dtstart-local-time] 2026-03-17T00:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add configurable expansion horizon parameter to recurring series functions
+v0-39-0-add-file-admin [v0-38-5-configurable-expand-horizon] 2026-03-18T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add file admin: property_name tracking, tiered RLS, storage stats RPC
+v0-40-0-status-category-admin-rpcs [v0-39-0-add-file-admin] 2026-03-20T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add status/category admin CRUD RPCs, permission caching RPC, metadata RLS upgrade
+v0-41-0-schema-functions-perf [v0-40-0-status-category-admin-rpcs] 2026-03-21T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Rewrite schema metadata functions from information_schema to pg_catalog for 50-60x speedup
+v0-41-1-add-category-action-param-type [v0-41-0-schema-functions-perf] 2026-03-27T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add category as entity action param type (missed during v0.34.0 Category system)
+v0-41-2-fix-impersonation-refresh [v0-41-1-add-category-action-param-type] 2026-04-01T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix impersonation header poisoning refresh_current_user role sync
+v0-43-0-user-welcome-notification [v0-41-2-fix-impersonation-refresh] 2026-04-17T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Replace Keycloak welcome email with Civic OS notification template
+v0-43-1-resolve-role-key [v0-43-0-user-welcome-notification] 2026-04-17T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Accept both role_key and display_name in user provisioning and role RPCs
+v0-44-0-options-source-rpc [v0-43-1-resolve-role-key] 2026-04-18T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add options_source_rpc and depends_on_columns to metadata.properties for custom FK/M:M option loading
+v0-45-0-fk-search-modal [v0-44-0-options-source-rpc] 2026-04-19T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add fk_search_modal flag for searchable FK modal rendering
+v0-46-0-m2m-search-modal [v0-45-0-fk-search-modal] 2026-04-20T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add show_inline flag for inline M:M positioning in property grid
+v0-47-0-add-photo-gallery [v0-46-0-m2m-search-modal] 2026-04-20T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add PhotoGallery property type: multi-image galleries with drag-drop reorder and lightbox
+v0-47-1-fix-keycloak-update-email [v0-47-0-add-photo-gallery] 2026-04-22T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix Keycloak user update clearing email by adding fetch-then-merge pattern
+v0-48-0-workflow-system [v0-47-1-fix-keycloak-update-email] 2026-04-21T23:11:02Z Daniel Kurin <dkurin@civic-os.org> # Add multi-step workflow framework
+v0-49-0-add-geo-polygon [v0-48-0-workflow-system] 2026-04-29T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add GeoPolygon support with map_color_property for per-polygon coloring
+v0-49-1-user-search-modal [v0-49-0-add-geo-polygon] 2026-04-30T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add civic_os_text_search to civic_os_users VIEW for user search modal
+v0-50-1-phone-search-tokens [v0-49-1-user-search-modal] 2026-05-01T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add phone_search_tokens() and simplify User search to use tsvector
+v0-50-2-fix-notification-preferences-rls [v0-50-1-phone-search-tokens] 2026-05-01T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix notification_preferences VIEW missing security_invoker
+v0-51-0-rich-junction-m2m [v0-50-2-fix-notification-preferences-rls] 2026-05-02T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add is_rich_junction flag for M:M junctions with extra editable columns
+v0-52-0-add-last-login-tracking [v0-51-0-rich-junction-m2m] 2026-05-03T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add last_login_at tracking, OIDC name claims, and provisioned user name backfill
+v0-53-0-options-filter-column [v0-52-0-add-last-login-tracking] 2026-05-16T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add options_filter_column for server-side computed column filtering in FK search modals
+v0-54-0-action-param-options-rpc [v0-53-0-options-filter-column] 2026-05-18T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add options_source_rpc and depends_on_params to entity_action_params for filtered cascading FK dropdowns
+v0-55-0-photo-gallery-action-param [v0-54-0-action-param-options-rpc] 2026-05-19T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add photo_gallery action param type with target_column for gallery config lookup
+v0-55-2-submit-form-status-fix [v0-55-0-photo-gallery-action-param] 2026-05-23T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add name_search_tokens for user search + rename guided form status_id to guided_form_status_id
+v0-56-1-fix-managed-db-admin-guard [v0-55-2-submit-form-status-fix] 2026-05-25T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix admin guard for managed DB compatibility (DigitalOcean, AWS RDS, Google Cloud SQL)
+v0-57-0-add-i18n [v0-56-1-fix-managed-db-admin-guard] 2026-06-04T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add multi-language (i18n) foundation: translations table, t() function, locale support
+v0-58-0-metadata-translations [v0-57-0-add-i18n] 2026-06-04T18:00:00Z Daniel Kurin <dkurin@civic-os.org> # Phase 2 i18n: wrap metadata VIEWs with t() for locale-aware entity names, property labels, statuses
+v0-59-0-send-email-rpc [v0-58-0-metadata-translations] 2026-06-04T20:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add metadata.send_email() for flexible multi-recipient email via River queue
+v0-61-0-add-chart-widget-type [v0-59-0-send-email-rpc] 2026-06-05T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add chart widget type for grouped bar chart visualization
+v0-62-0-dashboard-translations [v0-61-0-add-chart-widget-type] 2026-06-15T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Phase 3 i18n: dashboard RPC translations, widget config JSONB helper
+v0-63-0-import-modal-translations [v0-62-0-dashboard-translations] 2026-06-17T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add English and Spanish translations for import modal component
+v0-64-0-add-arabic-translations [v0-63-0-import-modal-translations] 2026-06-23T00:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add Arabic UI translations for RTL support
+v0-64-1-i18n-expansion [v0-64-0-add-arabic-translations] 2026-06-24T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add ps/fr/de UI translations and migrate translation RLS to RBAC permissions
+v0-65-0-user-profile-extensions [v0-64-1-i18n-expansion] 2026-06-25T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add user profile extension system with self-service profile page and completion guard
+v0-65-0-cup-phone-domain [v0-65-0-user-profile-extensions] 2026-06-26T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Migrate civic_os_users_private.phone to phone_number domain, deprecate JWT phone sync, fix SMS pref trigger
+v0-65-1-auth-route-translations [v0-65-0-cup-phone-domain] 2026-06-30T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add nav.redirecting translation and login button to default Welcome dashboard
+v0-65-2-profile-i18n-fixes [v0-65-1-auth-route-translations] 2026-07-03T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Wrap profile extension RPCs with metadata.t() and seed missing profile translation keys

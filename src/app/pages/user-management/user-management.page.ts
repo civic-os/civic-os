@@ -21,9 +21,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Subject, switchMap, of, debounceTime, startWith, combineLatest, Observable, map } from 'rxjs';
-import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest, AdminNotificationPreference } from '../../services/user-management.service';
+import { UserManagementService, ManagedUser, ManageableRole, ProvisionUserRequest } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
-import { ProfileService, ProfileExtension } from '../../services/profile.service';
 import { getSmsConfig } from '../../config/runtime';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../interfaces/import';
@@ -313,7 +312,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
       </div>
     }
 
-    <!-- Edit User Modal -->
+    <!-- Edit User Modal (Roles + View Profile link) -->
     @if (showEditModal()) {
       <div class="modal modal-open">
         <div class="modal-box">
@@ -327,35 +326,13 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             }
           </p>
 
-          <!-- User Info Section -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="label"><span class="label-text">First Name *</span></label>
-              <input type="text" class="input input-bordered w-full"
-                     [ngModel]="editFirstName()"
-                     (ngModelChange)="editFirstName.set($event)" />
-            </div>
-            <div>
-              <label class="label"><span class="label-text">Last Name *</span></label>
-              <input type="text" class="input input-bordered w-full"
-                     [ngModel]="editLastName()"
-                     (ngModelChange)="editLastName.set($event)" />
-            </div>
-          </div>
-
-          <div class="mt-3">
-            <label class="label"><span class="label-text">Phone</span></label>
-            <input type="tel" class="input input-bordered w-full" placeholder="5551234567"
-                   [ngModel]="editPhone()"
-                   (ngModelChange)="editPhone.set($event)" />
-          </div>
-
-          <div class="mt-3">
-            <label class="label"><span class="label-text">Email</span></label>
-            <input type="email" class="input input-bordered w-full" disabled
-                   [value]="editUser()?.email" />
-            <div class="text-xs text-base-content/50 mt-1">Email address cannot be changed from this page</div>
-          </div>
+          <!-- View Profile Link -->
+          <a class="btn btn-sm btn-outline mb-4"
+             [routerLink]="['/profile', editUser()?.id]"
+             (click)="closeEditModal()">
+            <span class="material-symbols-outlined text-sm">person</span>
+            View Profile
+          </a>
 
           <!-- Divider -->
           <div class="divider">Roles</div>
@@ -376,116 +353,12 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             }
           </div>
 
-          <!-- Divider -->
-          <div class="divider">Notifications</div>
-
-          <!-- Notification Preferences Section -->
-          @if (editNotifLoading()) {
-            <div class="text-sm opacity-70">Loading notification preferences...</div>
-          } @else {
-            <!-- Email Notification Toggle -->
-            @if (editEmailNotif(); as emailNotif) {
-              <label class="flex items-start cursor-pointer gap-3 mb-3">
-                <input
-                  type="checkbox"
-                  class="checkbox flex-shrink-0 mt-0.5"
-                  [checked]="emailNotif.enabled"
-                  (change)="toggleEditNotifPref('email', $any($event.target).checked)"
-                />
-                <div>
-                  <span>Email notifications</span>
-                  @if (emailNotif.email_address) {
-                    <p class="text-xs opacity-70">{{ emailNotif.email_address }}</p>
-                  }
-                </div>
-              </label>
-            }
-
-            <!-- SMS Notification Toggle (only when SMS is configured) -->
-            @if (smsConfigured) {
-              @if (editSmsNotif(); as smsNotif) {
-                <label class="flex items-start cursor-pointer gap-3 mb-3"
-                       [class.opacity-50]="smsNotif.sms_opted_out">
-                  <input
-                    type="checkbox"
-                    class="checkbox flex-shrink-0 mt-0.5"
-                    [checked]="smsNotif.enabled"
-                    [disabled]="smsNotif.sms_opted_out"
-                    (change)="toggleEditNotifPref('sms', $any($event.target).checked)"
-                  />
-                  <div>
-                    <span>SMS notifications</span>
-                    @if (smsNotif.phone_number) {
-                      <p class="text-xs opacity-70">
-                        {{ formatPhone(smsNotif.phone_number) }}
-                      </p>
-                    }
-                  </div>
-                </label>
-                @if (smsNotif.sms_opted_out) {
-                  <div class="alert alert-warning text-xs py-2 mt-1">
-                    <span class="material-symbols-outlined text-sm">sms_failed</span>
-                    <span>Carrier blocked — user must text START to re-enable SMS</span>
-                  </div>
-                  <button class="btn btn-xs btn-warning btn-outline mt-1"
-                          (click)="clearSmsOptedOut()">
-                    Clear opt-out &amp; retry
-                  </button>
-                }
-              }
-            }
-
-            @if (!editEmailNotif() && !editSmsNotif()) {
-              <p class="text-sm opacity-70">No notification preferences found for this user.</p>
-            }
-          }
-
-          <!-- Profile Extensions Section -->
-          @if (editProfileExtensions().length > 0) {
-            <div class="divider">Profile Extensions</div>
-            @if (editExtensionsLoading()) {
-              <div class="text-sm opacity-70">Loading profile extensions...</div>
-            } @else {
-              <div class="space-y-2">
-                @for (ext of editProfileExtensions(); track ext.table_name) {
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm">{{ ext.display_name }}</span>
-                      @if (ext.has_record) {
-                        <span class="badge badge-success badge-xs">Complete</span>
-                      } @else if (ext.is_required) {
-                        <span class="badge badge-error badge-xs">Required</span>
-                      } @else {
-                        <span class="badge badge-ghost badge-xs">Missing</span>
-                      }
-                    </div>
-                    @if (ext.has_record) {
-                      <a class="btn btn-xs btn-ghost"
-                         [routerLink]="['/view', ext.table_name]"
-                         [queryParams]="getExtensionQueryParams(ext)"
-                         (click)="closeEditModal()">
-                        View
-                      </a>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          }
-
           @if (editError()) {
             <div class="alert alert-error mt-4 text-sm">{{ editError() }}</div>
           }
 
           <div class="modal-action">
-            <button class="btn" (click)="closeEditModal()">Cancel</button>
-            <button class="btn btn-primary" [disabled]="editLoading()"
-                    (click)="submitEditUser()">
-              @if (editLoading()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              }
-              Save Changes
-            </button>
+            <button class="btn" (click)="closeEditModal()">Close</button>
           </div>
         </div>
         <div class="modal-backdrop" (click)="closeEditModal()"></div>
@@ -505,7 +378,6 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
 export class UserManagementPage {
   private userService = inject(UserManagementService);
   private importExportService = inject(ImportExportService);
-  private profileService = inject(ProfileService);
 
   // Search and filter state
   searchTerm = signal('');
@@ -535,25 +407,13 @@ export class UserManagementPage {
 
   // Edit modal state
   showEditModal = signal(false);
-  editLoading = signal(false);
   editError = signal<string | undefined>(undefined);
   editUser = signal<ManagedUser | undefined>(undefined);
-  editFirstName = signal('');
-  editLastName = signal('');
-  editPhone = signal('');
   editRoles = signal<Set<string>>(new Set());
   editRolesLoading = signal<Set<string>>(new Set());
 
-  // Notification preferences for edit modal
+  // SMS config (used in list table)
   readonly smsConfigured = getSmsConfig().configured;
-  editNotifPrefs = signal<AdminNotificationPreference[]>([]);
-  editNotifLoading = signal(false);
-  editEmailNotif = signal<AdminNotificationPreference | undefined>(undefined);
-  editSmsNotif = signal<AdminNotificationPreference | undefined>(undefined);
-
-  // Profile extensions for edit modal
-  editProfileExtensions = signal<ProfileExtension[]>([]);
-  editExtensionsLoading = signal(false);
 
   // Error detail modal
   showErrorModal = signal(false);
@@ -678,54 +538,15 @@ export class UserManagementPage {
       return;
     }
     this.editUser.set(user);
-    this.editFirstName.set(user.first_name || '');
-    this.editLastName.set(user.last_name || '');
-    this.editPhone.set(user.phone || '');
     this.editRoles.set(new Set(user.roles || []));
     this.editRolesLoading.set(new Set());
     this.editError.set(undefined);
-    this.editLoading.set(false);
     this.showEditModal.set(true);
-
-    // Load notification preferences
-    this.editNotifLoading.set(true);
-    this.editNotifPrefs.set([]);
-    this.editEmailNotif.set(undefined);
-    this.editSmsNotif.set(undefined);
-    this.userService.getNotificationPreferences(user.id).subscribe({
-      next: (prefs) => {
-        this.editNotifPrefs.set(prefs);
-        this.editEmailNotif.set(prefs.find(p => p.channel === 'email'));
-        this.editSmsNotif.set(prefs.find(p => p.channel === 'sms'));
-        this.editNotifLoading.set(false);
-      },
-      error: () => this.editNotifLoading.set(false)
-    });
-
-    // Load profile extensions
-    this.editExtensionsLoading.set(true);
-    this.editProfileExtensions.set([]);
-    this.profileService.getProfileExtensionsAdmin(user.id).subscribe({
-      next: (extensions) => {
-        this.editProfileExtensions.set(extensions);
-        this.editExtensionsLoading.set(false);
-      },
-      error: () => this.editExtensionsLoading.set(false)
-    });
   }
 
   closeEditModal(): void {
     this.showEditModal.set(false);
     this.loadUsers();
-  }
-
-  getExtensionQueryParams(ext: ProfileExtension): Record<string, string> {
-    const params: Record<string, string> = {};
-    const userId = this.editUser()?.id;
-    if (userId) {
-      params[ext.user_fk_column] = userId;
-    }
-    return params;
   }
 
   getRoleDisplayName(roleKey: string): string {
@@ -766,74 +587,6 @@ export class UserManagementPage {
         this.editError.set(undefined);
       } else {
         this.editError.set(response.error?.humanMessage || 'Failed to update role');
-      }
-    });
-  }
-
-  toggleEditNotifPref(channel: string, enabled: boolean): void {
-    const user = this.editUser();
-    if (!user?.id) return;
-
-    this.userService.updateNotificationPreference(user.id, channel, enabled).subscribe(response => {
-      if (response.success) {
-        if (channel === 'email') {
-          const pref = this.editEmailNotif();
-          if (pref) this.editEmailNotif.set({ ...pref, enabled });
-        } else if (channel === 'sms') {
-          const pref = this.editSmsNotif();
-          if (pref) this.editSmsNotif.set({ ...pref, enabled });
-        }
-      } else {
-        this.editError.set(response.error?.humanMessage || 'Failed to update notification preference');
-      }
-    });
-  }
-
-  clearSmsOptedOut(): void {
-    const user = this.editUser();
-    if (!user?.id) return;
-
-    this.userService.updateNotificationPreference(user.id, 'sms', true, true).subscribe(response => {
-      if (response.success) {
-        const pref = this.editSmsNotif();
-        if (pref) this.editSmsNotif.set({ ...pref, enabled: true, sms_opted_out: false });
-      } else {
-        this.editError.set(response.error?.humanMessage || 'Failed to clear SMS opt-out');
-      }
-    });
-  }
-
-  submitEditUser(): void {
-    const user = this.editUser();
-    if (!user?.id) return;
-
-    const firstName = this.editFirstName().trim();
-    const lastName = this.editLastName().trim();
-
-    if (!firstName || !lastName) {
-      this.editError.set('First name and last name are required');
-      return;
-    }
-
-    this.editLoading.set(true);
-    this.editError.set(undefined);
-
-    const phone = this.editPhone().trim();
-
-    this.userService.updateUserInfo({
-      user_id: user.id,
-      first_name: firstName,
-      last_name: lastName,
-      phone: phone || undefined
-    }).subscribe(response => {
-      this.editLoading.set(false);
-      if (response.success) {
-        this.showEditModal.set(false);
-        this.successMessage.set(`User ${firstName} ${lastName} updated successfully.`);
-        this.loadUsers();
-        setTimeout(() => this.successMessage.set(undefined), 5000);
-      } else {
-        this.editError.set(response.error?.humanMessage || 'Failed to update user');
       }
     });
   }

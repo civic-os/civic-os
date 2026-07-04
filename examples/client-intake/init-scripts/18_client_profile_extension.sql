@@ -55,6 +55,20 @@ VALUES (
 );
 
 
+-- ============================================================================
+-- 4. SHOW user_id ON CREATE FORM
+-- ============================================================================
+-- By default, FK columns to civic_os_users have show_on_create=false (they're
+-- usually auto-filled). For profile extensions, admins may create records on
+-- behalf of users, so the FK dropdown must be visible. When navigated from
+-- /profile, the query param pre-fills the current user automatically.
+
+INSERT INTO metadata.properties (table_name, column_name, show_on_create)
+VALUES ('clients', 'user_id', true)
+ON CONFLICT (table_name, column_name) DO UPDATE
+SET show_on_create = true;
+
+
 NOTIFY pgrst, 'reload schema';
 
 COMMIT;
