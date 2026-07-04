@@ -5729,8 +5729,10 @@ INSERT INTO metadata.entities (table_name, display_name)
 VALUES ('borrower_profiles', 'Borrower Profile');
 
 -- 5. Register as profile extension
-INSERT INTO metadata.user_profile_extensions (table_name, sort_order, is_required, display_name, description)
-VALUES ('borrower_profiles', 1, true, 'Borrower Profile', 'Your library borrowing information');
+INSERT INTO metadata.user_profile_extensions
+  (table_name, sort_order, is_required, display_name, description, user_fk_column)
+VALUES
+  ('borrower_profiles', 1, true, 'Borrower Profile', 'Your library borrowing information', 'user_id');
 ```
 
 ### Configuration Options
@@ -5740,35 +5742,81 @@ VALUES ('borrower_profiles', 1, true, 'Borrower Profile', 'Your library borrowin
 | `table_name` | `NAME` | References `metadata.entities(table_name)` |
 | `sort_order` | `INT` | Display order on the profile page (lower = higher) |
 | `is_required` | `BOOLEAN` | When `true`, the completion guard blocks navigation until the user creates a record |
-| `display_name` | `TEXT` | Overrides the entity's `display_name` in the profile context (optional) |
-| `description` | `TEXT` | Help text shown in the section header when no record exists |
+| `display_name` | `TEXT` | Overrides the entity's `display_name` in the profile context. Translatable via `metadata.t()` (optional) |
+| `description` | `TEXT` | Help text shown in the section header. Translatable via `metadata.t()` (optional) |
+| `user_fk_column` | `NAME` | FK column name pointing to `civic_os_users(id)` (required) |
+| `user_fk_constraint` | `NAME` | FK constraint name for PostgREST embedding hints. Defaults to `{table_name}_{user_fk_column}_fkey` if NULL (optional) |
+
+### How It Works (v0.65.2+)
+
+The profile extension system separates metadata from data following the standard Civic OS pattern:
+
+**Metadata**: The `public.user_profile_extensions` VIEW serves extension configuration with i18n-translated `display_name` and `description` (via `metadata.t()`), plus a computed `user_fk_constraint` for PostgREST embedding hints.
+
+**Data (has_record check)**: The Angular frontend builds a single PostgREST query with resource embedding to check record existence for all extensions at once:
+
+```
+GET /civic_os_users?id=eq.{userId}&select=id,borrower_profiles!borrower_profiles_user_id_fkey(id)
+```
+
+Response: `[{ "id": "...", "borrower_profiles": {"id": "rec-1"} }]` (record exists) or `borrower_profiles: null` (no record). RLS naturally gates results — users see their own extensions, admins see all.
+
+**Cache invalidation**: The `schema_cache_versions` VIEW includes a `profile_extensions` row tracking `metadata.user_profile_extensions.updated_at`. When extension config changes (add/remove/reorder), the frontend automatically detects the version bump and refetches metadata.
 
 ### Profile Completion Guard
 
 When `is_required = true` on any extension, the profile completion guard automatically redirects users to `/profile?incomplete=true` on any navigation attempt. The guard:
 - Skips for unauthenticated users (authGuard handles login)
 - Skips when already on `/profile` (prevents redirect loop)
-- Fails open on RPC errors (doesn't lock users out)
-- Caches results for 60 seconds (avoids per-navigation RPC calls)
+- Fails open on errors (doesn't lock users out)
+- Caches results for 60 seconds (avoids per-navigation API calls)
 
 ### Self-Service Profile Page
 
 The `/profile` page shows three collapsible sections:
 1. **Personal Information** — First name, last name, phone (inline edit). Email is read-only (Keycloak-managed).
 2. **Notification Preferences** — Email/SMS toggles (same as Settings modal).
-3. **Extension Sections** — One per registered extension, showing completion status and data.
+3. **Extension Sections** — One per registered extension, showing completion badges ("Complete", "Required", or "Not Started") and data.
+
+### Viewing Other Users' Profiles (v0.65.0+)
+
+Navigate to `/profile/:userId` to view another user's profile. Behavior depends on permissions:
+- **Admin** (has `civic_os_users_private:update`): Can view and edit core info (first name, last name, phone) plus see extension status
+- **Non-admin**: Can view the profile if they have `civic_os_users_private:read`, but cannot edit
+- **No permission**: Shows "User not found"
+
+Extension visibility respects per-table RLS — each extension table's policies determine whether the viewer can see extension data.
 
 ### Admin Integration
 
 The User Management edit modal shows a "Profile Extensions" section with completion badges for each extension. Admins can click "View" to navigate to the extension record.
 
-### RPCs
+### RPC
 
 | RPC | Purpose | Auth |
 |-----|---------|------|
 | `update_own_profile(p_first_name, p_last_name, p_phone)` | Self-service name/phone update + Keycloak sync | `authenticated` (JWT identity) |
-| `get_user_profile_extensions()` | Returns extensions + per-user completion status | `authenticated` |
-| `get_user_profile_extensions_admin(p_user_id)` | Admin version with target user | `civic_os_users_private:update` |
+
+### Overriding the FK Constraint Name
+
+By default, the VIEW computes the FK constraint name as `{table_name}_{user_fk_column}_fkey` (PostgreSQL naming convention). If your table uses a non-standard constraint name, set `user_fk_constraint` explicitly:
+
+```sql
+-- For a table where the FK constraint has a custom name
+UPDATE metadata.user_profile_extensions
+SET user_fk_constraint = 'my_custom_fk_constraint_name'
+WHERE table_name = 'my_extension_table';
+```
+
+This is needed for PostgREST resource embedding disambiguation — when a table has multiple FKs to `civic_os_users` (e.g., `user_id` + `created_by`), the constraint name tells PostgREST which FK to follow.
+
+### v0.65.2 Upgrade Notes
+
+If you have custom integrations that called the v0.65.0 RPCs directly:
+- `get_user_profile_extensions()` — **Removed**. Use `GET /user_profile_extensions` (VIEW) for metadata, plus PostgREST resource embedding for `has_record` checks.
+- `get_user_profile_extensions_admin(p_user_id)` — **Removed**. The same VIEW + embedding pattern works for any user when the caller has appropriate RLS permissions.
+- `update_own_profile()` — **Unchanged**, still available.
+- `civic_os_users` VIEW now includes `first_name` and `last_name` columns (permission-gated like `email`/`phone`).
 
 See `docs/notes/USER_PROFILE_EXTENSION_DESIGN.md` for architecture details.
 

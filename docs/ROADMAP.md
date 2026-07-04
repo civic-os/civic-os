@@ -131,7 +131,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 - [x] Save selected Theme in localstorage and use on reload
 - [x] Allow user profile editing (via Keycloak account console with JWT sync)
 - [x] Self-service "My Profile" page with profile extensions, completion guard, and related records (v0.65.0)
-- [ ] View other users' profiles by ID (requires privacy controls, permission model, separate RPC)
+- [x] View other users' profiles by ID with permission-gated editing (v0.65.0)
 - [ ] Profile extension data in user import/export (1:1 extension columns merged into user CSV)
 - [x] App and Database update deployments
 - [x] Automatically assign new users the "user" role

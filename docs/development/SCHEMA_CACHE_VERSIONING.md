@@ -6,9 +6,9 @@ The schema cache versioning system enables automatic detection and refresh of fr
 
 ## Architecture
 
-### Two-Cache Strategy
+### Seven-Cache Strategy
 
-The system tracks two independent caches:
+The system tracks seven independent caches via the `schema_cache_versions` VIEW:
 
 1. **Entities Cache** - Depends on:
    - `metadata.entities` (table display names, sort order, descriptions)
@@ -19,6 +19,25 @@ The system tracks two independent caches:
 2. **Properties Cache** - Depends on:
    - `metadata.properties` (column labels, visibility, sorting)
    - `metadata.validations` (validation rules)
+
+3. **Constraint Messages Cache** - Depends on:
+   - `metadata.constraint_messages` (friendly error messages for DB constraints)
+
+4. **Introspection Cache** - Depends on:
+   - `metadata.rpc_functions` (registered RPC documentation)
+   - `metadata.database_triggers` (registered trigger documentation)
+   - `metadata.rpc_entity_effects` / `metadata.trigger_entity_effects` (entity relationships)
+   - `metadata.notification_triggers` (notification workflow documentation)
+
+5. **Categories Cache** - Depends on:
+   - `metadata.categories` (category values)
+   - `metadata.category_groups` (category group definitions)
+
+6. **Translations Cache** - Depends on:
+   - `metadata.translations` (i18n string translations)
+
+7. **Profile Extensions Cache** (v0.65.2+) - Depends on:
+   - `metadata.user_profile_extensions` (profile extension configuration)
 
 ### Components
 
@@ -33,10 +52,15 @@ The system tracks two independent caches:
 ```sql
 SELECT * FROM schema_cache_versions;
 
- cache_name |            version
-------------+-------------------------------
- entities   | 2025-10-13 23:25:34.865997+00
- properties | 2025-10-13 23:25:56.720367+00
+     cache_name      |            version
+---------------------+-------------------------------
+ entities            | 2025-10-13 23:25:34.865997+00
+ properties          | 2025-10-13 23:25:56.720367+00
+ constraint_messages | 2025-10-13 23:25:34.865997+00
+ introspection       | 2025-10-13 23:25:34.865997+00
+ categories          | 2025-10-13 23:25:34.865997+00
+ translations        | 2025-10-13 23:25:34.865997+00
+ profile_extensions  | 2025-10-13 23:25:34.865997+00
 ```
 
 #### Frontend Layer
@@ -101,7 +125,7 @@ Navigation proceeds (cache refresh happens in background)
 ### Performance
 - **Reduced network traffic**: Only refresh changed cache (not both)
 - **Efficient polling**: Only checks on navigation (not timer-based)
-- **Lightweight queries**: Single view query returns 2 rows
+- **Lightweight queries**: Single view query returns 7 rows
 
 ### User Experience
 - **No page refresh needed**: Changes appear on next navigation
@@ -242,4 +266,4 @@ Possible improvements (not currently implemented):
 
 ## License
 
-Copyright (C) 2023-2025 Civic OS, L3C. Licensed under AGPL-3.0-or-later.
+Copyright (C) 2023-2026 Civic OS, L3C. Licensed under AGPL-3.0-or-later.
