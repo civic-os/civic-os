@@ -328,15 +328,15 @@ jobs:
         id: context
         run: |
           TAG=${{ steps.version.outputs.tag }}
-          # Find the previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          # Find the previous non-prerelease tag (skip rc/beta/alpha tags)
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v '-' | grep -v "^${TAG}$" | head -1)
           if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag found, using first commit"
+            echo "No previous release tag found, using first commit"
             RANGE=$(git rev-list --max-parents=0 HEAD)..${TAG}
           else
             RANGE="${PREV_TAG}..${TAG}"
           fi
-          echo "Generating context for range: $RANGE"
+          echo "Generating context for range: $RANGE (previous release: ${PREV_TAG:-none})"
 
           # Build release-context.txt with layered context (highest signal first)
           {
@@ -439,7 +439,7 @@ jobs:
         if: steps.aws_creds.outcome != 'success' || steps.llm.outcome != 'success' || steps.llm.outputs.llm_success != 'true'
         run: |
           TAG=${{ steps.version.outputs.tag }}
-          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v '-' | grep -v "^${TAG}$" | head -1)
           if [ -z "$PREV_TAG" ]; then
             RANGE=$(git rev-list --max-parents=0 HEAD)..${TAG}
           else
@@ -459,7 +459,7 @@ jobs:
           ORG=${{ github.repository_owner }}
           VERSION=${{ steps.version.outputs.version }}
           TAG=${{ steps.version.outputs.tag }}
-          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v '-' | grep -v "^${TAG}$" | head -1)
 
           {
             cat ai-release-notes.md
