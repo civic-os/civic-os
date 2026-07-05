@@ -298,6 +298,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
+      id-token: write  # Required for AWS OIDC federation
 
     steps:
       - name: Checkout repository
@@ -312,72 +313,197 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Generate container image URLs
-        id: images
+      # --- LLM Release Notes Pipeline ---
+
+      - name: Configure AWS credentials (OIDC)
+        id: aws_creds
+        uses: aws-actions/configure-aws-credentials@v4
+        continue-on-error: true
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/civic-os-release-notes
+          aws-region: us-east-1
+
+      - name: Collect release context
+        if: steps.aws_creds.outcome == 'success'
+        id: context
+        run: |
+          TAG=${{ steps.version.outputs.tag }}
+          # Find the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, using first commit"
+            RANGE=$(git rev-list --max-parents=0 HEAD)..${TAG}
+          else
+            RANGE="${PREV_TAG}..${TAG}"
+          fi
+          echo "Generating context for range: $RANGE"
+
+          # Build release-context.txt with layered context (highest signal first)
+          {
+            echo "## Commits"
+            git log "$RANGE" --oneline --no-merges | grep -v '^$' || echo "(no commits)"
+
+            echo ""
+            echo "## Documentation Changes"
+            git diff "$RANGE" -- 'docs/**/*.md' 'CLAUDE.md' 2>/dev/null || echo "(no doc changes)"
+
+            echo ""
+            echo "## Migration Scripts"
+            # Show full content of new/changed deploy scripts
+            for f in $(git diff "$RANGE" --name-only -- 'postgres/migrations/deploy/*.sql' 2>/dev/null); do
+              if [ -f "$f" ]; then
+                echo "--- $f ---"
+                cat "$f"
+                echo ""
+              fi
+            done
+            if [ -z "$(git diff "$RANGE" --name-only -- 'postgres/migrations/deploy/*.sql' 2>/dev/null)" ]; then
+              echo "(no migration changes)"
+            fi
+
+            echo ""
+            echo "## Frontend Changes"
+            git diff "$RANGE" -- 'src/app/**/*.ts' 'src/app/**/*.html' 'src/app/**/*.css' \
+              ':!src/app/**/*.spec.ts' 2>/dev/null || echo "(no frontend changes)"
+
+            echo ""
+            echo "## Backend Service Changes"
+            git diff "$RANGE" -- 'services/**/*.go' ':!services/**/*_test.go' 2>/dev/null \
+              || echo "(no backend changes)"
+          } > release-context.txt
+
+          # Safety truncation at 200KB
+          if [ $(wc -c < release-context.txt) -gt 204800 ]; then
+            truncate -s 204800 release-context.txt
+            echo "(truncated at 200KB)" >> release-context.txt
+          fi
+
+          CONTEXT_SIZE=$(wc -c < release-context.txt | tr -d ' ')
+          echo "Context size: ${CONTEXT_SIZE} bytes"
+
+      - name: Generate LLM release notes
+        if: steps.aws_creds.outcome == 'success'
+        id: llm
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          # Build the Bedrock request payload
+          # Uses --rawfile to safely handle large diffs with special characters
+          jq -n \
+            --arg system 'You are a release notes writer for Civic OS, an open-source meta-application framework that auto-generates CRUD interfaces from PostgreSQL schemas. The audience is integrators and operators who deploy Civic OS instances.
+
+          You will receive rich context: documentation changes, migration SQL, Angular source diffs, Go service diffs, and commit subjects. Use ALL of these to understand what changed and why.
+
+          Rules:
+          - Group changes: Features, Improvements, Bug Fixes (omit empty sections)
+          - 1-2 sentences per item, focused on user-facing impact
+          - Prioritize documentation diffs for understanding features — they explain changes in human terms
+          - Use migration SQL comments to understand schema-level changes and their rationale
+          - Use source code diffs to identify UI/UX changes not captured in docs
+          - No commit hashes, no file paths, no version suffixes like "(v0.65.0)"
+          - Combine related commits (e.g., a feature commit and its revert fix = one entry)
+          - Present tense ("Adds", "Fixes")
+          - Under 500 words, valid Markdown with ## headers
+          - Start with a 1-2 sentence overview paragraph, no closing remarks' \
+            --arg version "$VERSION" \
+            --rawfile context release-context.txt \
+            '{
+              "anthropic_version": "bedrock-2023-05-31",
+              "max_tokens": 2048,
+              "temperature": 0.3,
+              "system": $system,
+              "messages": [{"role": "user", "content": ("Generate release notes for Civic OS v" + $version + ".\n\n" + $context)}]
+            }' > bedrock-request.json
+
+          # Call Bedrock
+          aws bedrock-runtime invoke-model \
+            --model-id anthropic.claude-sonnet-5 \
+            --content-type application/json \
+            --accept application/json \
+            --body fileb://bedrock-request.json \
+            bedrock-response.json
+
+          # Extract the text response
+          jq -r '.content[0].text' bedrock-response.json > ai-release-notes.md
+
+          if [ -s ai-release-notes.md ]; then
+            echo "llm_success=true" >> $GITHUB_OUTPUT
+            echo "LLM release notes generated successfully"
+          else
+            echo "llm_success=false" >> $GITHUB_OUTPUT
+            echo "LLM returned empty response"
+          fi
+
+      - name: Generate fallback release notes
+        if: steps.aws_creds.outcome != 'success' || steps.llm.outputs.llm_success != 'true'
+        run: |
+          TAG=${{ steps.version.outputs.tag }}
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            RANGE=$(git rev-list --max-parents=0 HEAD)..${TAG}
+          else
+            RANGE="${PREV_TAG}..${TAG}"
+          fi
+
+          {
+            echo "## What's Changed"
+            echo ""
+            git log "$RANGE" --oneline --no-merges | sed 's/^[a-f0-9]* /- /' || echo "- Initial release"
+          } > ai-release-notes.md
+
+      # --- Assemble Final Release Notes ---
+
+      - name: Assemble full release notes
         run: |
           ORG=${{ github.repository_owner }}
           VERSION=${{ steps.version.outputs.version }}
+          TAG=${{ steps.version.outputs.tag }}
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
 
-          cat > release-notes-footer.md <<EOF
+          {
+            cat ai-release-notes.md
+
+            if [ -n "$PREV_TAG" ]; then
+              echo ""
+              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}"
+            fi
+
+            cat <<EOF
 
           ## Container Images
 
           All containers for this release have been published to GitHub Container Registry:
 
-          ### Frontend
-          \`\`\`bash
-          docker pull ghcr.io/${ORG}/frontend:v${VERSION}
-          docker pull ghcr.io/${ORG}/frontend:${VERSION}
-          \`\`\`
-
-          ### PostgREST API
-          \`\`\`bash
-          docker pull ghcr.io/${ORG}/postgrest:v${VERSION}
-          docker pull ghcr.io/${ORG}/postgrest:${VERSION}
-          \`\`\`
-
-          ### Database Migrations
-          \`\`\`bash
-          docker pull ghcr.io/${ORG}/migrations:v${VERSION}
-          docker pull ghcr.io/${ORG}/migrations:${VERSION}
-          \`\`\`
-
-          ### Consolidated Worker (S3 Signer + Thumbnail Worker + Notification Worker)
-          \`\`\`bash
-          docker pull ghcr.io/${ORG}/consolidated-worker:v${VERSION}
-          docker pull ghcr.io/${ORG}/consolidated-worker:${VERSION}
-          \`\`\`
-
-          ### Payment Worker (Stripe Payment Processing) - Optional
-          \`\`\`bash
-          docker pull ghcr.io/${ORG}/payment-worker:v${VERSION}
-          docker pull ghcr.io/${ORG}/payment-worker:${VERSION}
-          \`\`\`
+          | Service | Pull Command |
+          |---------|-------------|
+          | Frontend | \`docker pull ghcr.io/${ORG}/frontend:v${VERSION}\` |
+          | PostgREST API | \`docker pull ghcr.io/${ORG}/postgrest:v${VERSION}\` |
+          | Migrations | \`docker pull ghcr.io/${ORG}/migrations:v${VERSION}\` |
+          | Consolidated Worker | \`docker pull ghcr.io/${ORG}/consolidated-worker:v${VERSION}\` |
+          | Payment Worker | \`docker pull ghcr.io/${ORG}/payment-worker:v${VERSION}\` |
 
           ## Documentation
 
-          - [Production Deployment Guide](https://github.com/${{ github.repository }}/blob/${{ steps.version.outputs.tag }}/docs/deployment/PRODUCTION.md)
-          - [Docker Documentation](https://github.com/${{ github.repository }}/blob/${{ steps.version.outputs.tag }}/docker/README.md)
-          - [Database Migrations](https://github.com/${{ github.repository }}/blob/${{ steps.version.outputs.tag }}/postgres/migrations/README.md)
+          - [Production Deployment Guide](https://github.com/${{ github.repository }}/blob/${TAG}/docs/deployment/PRODUCTION.md)
+          - [Docker Documentation](https://github.com/${{ github.repository }}/blob/${TAG}/docker/README.md)
+          - [Database Migrations](https://github.com/${{ github.repository }}/blob/${TAG}/postgres/migrations/README.md)
 
           ## Upgrading
-
-          To upgrade from a previous version:
 
           1. Update your \`.env\` file: \`VERSION=v${VERSION}\`
           2. Pull new images: \`docker-compose pull\`
           3. Run migrations: \`docker-compose up migrations\`
           4. Restart services: \`docker-compose up -d\`
 
-          See the [Production Deployment Guide](https://github.com/${{ github.repository }}/blob/${{ steps.version.outputs.tag }}/docs/deployment/PRODUCTION.md#upgrading-to-new-version) for detailed upgrade instructions.
+          See the [Production Deployment Guide](https://github.com/${{ github.repository }}/blob/${TAG}/docs/deployment/PRODUCTION.md#upgrading-to-new-version) for detailed upgrade instructions.
           EOF
+          } > release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           name: Version ${{ steps.version.outputs.version }}
-          body_path: release-notes-footer.md
-          generate_release_notes: true
+          body_path: release-notes.md
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
         env:
