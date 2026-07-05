@@ -15,13 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, viewChild, ElementRef } from '@angular/core';
 import { DashboardWidget, ChartWidgetConfig } from '../../../interfaces/dashboard';
 import { DataService } from '../../../services/data.service';
 import { ThemeService } from '../../../services/theme.service';
 import { DataQuery } from '../../../interfaces/query';
 import { EntityData } from '../../../interfaces/entity';
 import { getDaisyUIChartColors, resolveChartColor } from '../../../utils/chart-colors';
+import { sanitizeFilename, renderChartToCanvas, downloadDataUrl, exportChartAsCsv } from '../../../utils/chart-export';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { NumericAccessor, BulletLegendItemInterface } from '@unovis/ts';
 import {
   VisXYContainerModule,
@@ -45,6 +47,7 @@ import {
     VisGroupedBarModule,
     VisAxisModule,
     VisBulletLegendModule,
+    TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './chart-widget.component.html',
@@ -140,6 +143,27 @@ export class ChartWidgetComponent {
     }));
   });
 
+  private chartContainerRef = viewChild<ElementRef<HTMLDivElement>>('chartContainer');
+
+  async downloadPng(): Promise<void> {
+    const container = this.chartContainerRef()?.nativeElement;
+    if (!container) return;
+    const filename = `${sanitizeFilename(this.widget().title, this.widget().entity_key)}.png`;
+    const items = this.legendItems().map(item => ({
+      name: String(item.name ?? ''),
+      color: Array.isArray(item.color) ? item.color[0] || '#6366f1' : item.color || '#6366f1',
+    }));
+    const canvas = await renderChartToCanvas(container, items);
+    if (!canvas) return;
+    downloadDataUrl(canvas.toDataURL('image/png'), filename);
+  }
+
+  downloadCsv(): void {
+    const cfg = this.config();
+    const filename = sanitizeFilename(this.widget().title, this.widget().entity_key);
+    exportChartAsCsv(this.chartData(), cfg.labelColumn, cfg.valueColumns, cfg.seriesLabels, filename);
+  }
+
   constructor() {
     // Effect 1: Read theme colors (re-runs on theme change)
     effect(() => {
@@ -191,5 +215,6 @@ export class ChartWidgetComponent {
         }
       });
     });
+
   }
 }

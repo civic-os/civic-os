@@ -15,7 +15,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
-<div class="chart-widget-container not-prose">
+<div class="chart-widget-container not-prose" #chartContainer>
   @if (isLoading()) {
     <div class="flex items-center justify-center py-8">
       <span class="loading loading-spinner loading-md"></span>
@@ -26,6 +26,16 @@
       <span>{{ error() }}</span>
     </div>
   } @else if (chartData().length > 0) {
+    <!-- Positioned relative to widget-container (ancestor with position:relative) -->
+    <details class="dropdown dropdown-end absolute top-2 end-2 z-10">
+      <summary class="btn btn-ghost btn-xs btn-square opacity-50 hover:opacity-100">
+        <span class="material-symbols-outlined text-base">download</span>
+      </summary>
+      <ul class="menu dropdown-content bg-base-100 rounded-box z-20 w-48 p-2 shadow">
+        <li><a (click)="downloadPng()">{{ 'chart.download_png' | translate }}</a></li>
+        <li><a (click)="downloadCsv()">{{ 'chart.download_csv' | translate }}</a></li>
+      </ul>
+    </details>
     @if (legendItems().length > 0) {
       <vis-bullet-legend [items]="legendItems()" />
     }

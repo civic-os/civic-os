@@ -339,6 +339,9 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'file.max_size': 'Maximum file size: {{size}}MB',
   'file.download': 'Download',
 
+  'chart.download_png': 'Download as PNG',
+  'chart.download_csv': 'Download as CSV',
+
   'calendar.today': 'Today',
   'calendar.month': 'Month',
   'calendar.week': 'Week',

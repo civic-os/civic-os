@@ -17,10 +17,11 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { of, throwError, EMPTY } from 'rxjs';
 import { ChartWidgetComponent } from './chart-widget.component';
 import { DataService } from '../../../services/data.service';
 import { ThemeService } from '../../../services/theme.service';
+import { TranslationService } from '../../../services/translation.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 
 describe('ChartWidgetComponent', () => {
@@ -28,6 +29,7 @@ describe('ChartWidgetComponent', () => {
   let fixture: ComponentFixture<ChartWidgetComponent>;
   let mockDataService: jasmine.SpyObj<DataService>;
   let mockThemeService: { theme: ReturnType<typeof signal>; isDark: ReturnType<typeof signal> };
+  let mockTranslationService: jasmine.SpyObj<TranslationService>;
 
   const mockChartData = [
     { week_label: '01/06', total_referrals: 12, poor_outcome_referrals: 3, week_start: '2026-01-05' },
@@ -64,6 +66,10 @@ describe('ChartWidgetComponent', () => {
       theme: signal('corporate'),
       isDark: signal(false),
     };
+    mockTranslationService = jasmine.createSpyObj('TranslationService', ['get'], {
+      version: () => 1
+    });
+    mockTranslationService.get.and.callFake((key: string) => key);
 
     mockDataService.getData.and.returnValue(of(mockChartData as any));
 
@@ -73,6 +79,7 @@ describe('ChartWidgetComponent', () => {
         provideZonelessChangeDetection(),
         { provide: DataService, useValue: mockDataService },
         { provide: ThemeService, useValue: mockThemeService },
+        { provide: TranslationService, useValue: mockTranslationService },
       ]
     }).compileComponents();
 
@@ -318,6 +325,65 @@ describe('ChartWidgetComponent', () => {
       expect(formatter(2, 2, [])).toBe('01/20');
       // Out of range returns empty string
       expect(formatter(99, 99, [])).toBe('');
+      done();
+    }, 10);
+  });
+
+  it('should show download button when chart has data', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const downloadBtn = el.querySelector('details.dropdown summary');
+      expect(downloadBtn).toBeTruthy();
+      done();
+    }, 10);
+  });
+
+  it('should hide download button when loading', () => {
+    mockDataService.getData.and.returnValue(EMPTY);
+
+    const loadingFixture = TestBed.createComponent(ChartWidgetComponent);
+    loadingFixture.componentRef.setInput('widget', mockWidget);
+    loadingFixture.detectChanges();
+
+    const el = loadingFixture.nativeElement as HTMLElement;
+    const downloadBtn = el.querySelector('details.dropdown summary');
+    expect(downloadBtn).toBeFalsy();
+  });
+
+  it('should hide download button when data is empty', (done) => {
+    mockDataService.getData.and.returnValue(of([] as any));
+
+    fixture = TestBed.createComponent(ChartWidgetComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('widget', mockWidget);
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const downloadBtn = el.querySelector('details.dropdown summary');
+      expect(downloadBtn).toBeFalsy();
+      done();
+    }, 10);
+  });
+
+  it('should have downloadCsv method callable without error', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      expect(() => component.downloadCsv()).not.toThrow();
+      done();
+    }, 10);
+  });
+
+  it('should have downloadPng method callable without error', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      expect(() => component.downloadPng()).not.toThrow();
       done();
     }, 10);
   });

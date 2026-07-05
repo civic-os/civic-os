@@ -40,7 +40,7 @@ const FALLBACK_PALETTE = [
  * Converts a CSS color string (including oklch) to a hex color using Canvas API.
  * Canvas always resolves to sRGB regardless of input color space.
  */
-function cssColorToHex(cssColor: string): string | null {
+export function cssColorToHex(cssColor: string): string | null {
   try {
     const canvas = document.createElement('canvas');
     canvas.width = 1;
