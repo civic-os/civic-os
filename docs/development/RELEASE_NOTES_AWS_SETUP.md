@@ -70,7 +70,7 @@ aws iam create-role \
 
 ## Step 3: Attach Permission Policy
 
-Create and attach an inline policy that only allows invoking a single Bedrock model:
+Create and attach an inline policy that allows invoking Sonnet models via inference profiles:
 
 ```bash
 aws iam put-role-policy \
@@ -82,11 +82,16 @@ aws iam put-role-policy \
       {
         "Effect": "Allow",
         "Action": "bedrock:InvokeModel",
-        "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-*"
+        "Resource": [
+          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-*",
+          "arn:aws:bedrock:us-east-1:YOUR_ACCOUNT_ID:inference-profile/us.anthropic.claude-sonnet-*"
+        ]
       }
     ]
   }'
 ```
+
+> **Note**: Replace `YOUR_ACCOUNT_ID` with your 12-digit AWS account ID. Newer Bedrock models require inference profiles (`us.` prefix) instead of direct model IDs. The policy covers both ARN formats for forward compatibility.
 
 **Blast radius**: Even if credentials leaked (impossible with OIDC, but hypothetically), the attacker can only call `InvokeModel` on this one model. No other AWS services, no S3, no EC2, no IAM changes.
 
