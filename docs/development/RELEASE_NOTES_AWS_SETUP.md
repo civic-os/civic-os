@@ -83,15 +83,15 @@ aws iam put-role-policy \
         "Effect": "Allow",
         "Action": "bedrock:InvokeModel",
         "Resource": [
-          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-*",
-          "arn:aws:bedrock:us-east-1:YOUR_ACCOUNT_ID:inference-profile/us.anthropic.claude-sonnet-*"
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-*",
+          "arn:aws:bedrock:*:YOUR_ACCOUNT_ID:inference-profile/us.anthropic.claude-sonnet-*"
         ]
       }
     ]
   }'
 ```
 
-> **Note**: Replace `YOUR_ACCOUNT_ID` with your 12-digit AWS account ID. Newer Bedrock models require inference profiles (`us.` prefix) instead of direct model IDs. The policy covers both ARN formats for forward compatibility.
+> **Note**: Replace `YOUR_ACCOUNT_ID` with your 12-digit AWS account ID. The region is wildcarded (`*`) because cross-region inference profiles (`us.` prefix) route requests to any US region (us-east-1, us-east-2, us-west-2), and IAM checks evaluate against the destination region's ARN. The policy covers both foundation model and inference profile ARN formats.
 
 **Blast radius**: Even if credentials leaked (impossible with OIDC, but hypothetically), the attacker can only call `InvokeModel` on this one model. No other AWS services, no S3, no EC2, no IAM changes.
 
