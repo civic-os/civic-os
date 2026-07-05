@@ -404,7 +404,7 @@ jobs:
           - No commit hashes, no file paths, no version suffixes like "(v0.65.0)"
           - Combine related commits (e.g., a feature commit and its revert fix = one entry)
           - Present tense ("Adds", "Fixes")
-          - Under 500 words, valid Markdown with ## headers
+          - Scale length to match scope: ~100 words for minor releases, up to ~800 words for feature-rich releases. Valid Markdown with ## headers
           - Start with a 1-2 sentence overview paragraph, no closing remarks' \
             --arg version "$VERSION" \
             --rawfile context release-context.txt \
