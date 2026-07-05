@@ -418,7 +418,7 @@ jobs:
 
           # Call Bedrock
           aws bedrock-runtime invoke-model \
-            --model-id us.anthropic.claude-sonnet-5 \
+            --model-id us.anthropic.claude-sonnet-4-6 \
             --content-type application/json \
             --accept application/json \
             --body fileb://bedrock-request.json \
