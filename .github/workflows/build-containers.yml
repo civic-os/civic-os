@@ -384,6 +384,7 @@ jobs:
       - name: Generate LLM release notes
         if: steps.aws_creds.outcome == 'success'
         id: llm
+        continue-on-error: true
         run: |
           VERSION=${{ steps.version.outputs.version }}
 
@@ -435,7 +436,7 @@ jobs:
           fi
 
       - name: Generate fallback release notes
-        if: steps.aws_creds.outcome != 'success' || steps.llm.outputs.llm_success != 'true'
+        if: steps.aws_creds.outcome != 'success' || steps.llm.outcome != 'success' || steps.llm.outputs.llm_success != 'true'
         run: |
           TAG=${{ steps.version.outputs.tag }}
           PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
