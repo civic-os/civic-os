@@ -22,6 +22,18 @@
     <div class="not-prose space-y-4">
 
       <!-- ================================================================ -->
+      <!-- Entity Actions (reusable component)                              -->
+      <!-- ================================================================ -->
+      @if (userRecord(); as user) {
+        <app-entity-action-panel
+          tableName="civic_os_users"
+          [entityId]="user.id"
+          [entityData]="enrichedUserData() ?? user"
+          (actionExecuted)="reloadProfile()">
+        </app-entity-action-panel>
+      }
+
+      <!-- ================================================================ -->
       <!-- Core User Info Section (always visible, not collapsible)          -->
       <!-- ================================================================ -->
       <div class="card bg-base-200">

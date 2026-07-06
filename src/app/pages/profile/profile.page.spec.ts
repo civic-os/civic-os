@@ -84,10 +84,14 @@ describe('ProfilePage', () => {
       'refreshEntitiesCache',
       'refreshPropertiesCache',
       'getPropertiesForEntity',
-      'getInverseRelationships'
+      'getInverseRelationships',
+      'getEntityActions'
     ]);
     mockDataService = jasmine.createSpyObj('DataService', [
-      'getInverseRelationshipData'
+      'getInverseRelationshipData',
+      'executeRpc',
+      'callRpc',
+      'getData'
     ]);
     mockUserManagementService = jasmine.createSpyObj('UserManagementService', [
       'updateUserInfo'
@@ -130,6 +134,8 @@ describe('ProfilePage', () => {
     mockSchemaService.getEntities.and.returnValue(of([]));
     mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
     mockSchemaService.getInverseRelationships.and.returnValue(of([]));
+    mockSchemaService.getEntityActions.and.returnValue(of([]));
+    mockProfileService.getExtensionRecord.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [ProfilePage],
@@ -346,6 +352,117 @@ describe('ProfilePage', () => {
     it('should accept empty phone (optional)', () => {
       component.editPhone = '';
       expect(component.isPhoneInvalid()).toBe(false);
+    });
+  });
+
+  describe('Entity Actions', () => {
+    it('should call getEntityActions for civic_os_users when profile loads', async () => {
+      await fixture.whenStable();
+      expect(mockSchemaService.getEntityActions).toHaveBeenCalledWith('civic_os_users');
+    });
+
+    it('should reload own profile on reloadProfile()', async () => {
+      await fixture.whenStable();
+      mockProfileService.getCurrentUserPrivateRecord.calls.reset();
+
+      component.reloadProfile();
+      await fixture.whenStable();
+
+      expect(mockProfileService.getCurrentUserPrivateRecord).toHaveBeenCalled();
+    });
+
+    it('should reload other user profile on reloadProfile()', async () => {
+      mockAuthService.hasPermission.and.returnValue(true);
+      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+      await fixture.whenStable();
+
+      mockProfileService.getUserProfileRecord.calls.reset();
+      component.reloadProfile();
+      await fixture.whenStable();
+
+      expect(mockProfileService.getUserProfileRecord).toHaveBeenCalledWith('other-user-456');
+    });
+  });
+
+  describe('Enriched User Data', () => {
+    it('should include core user fields', async () => {
+      await fixture.whenStable();
+
+      const enriched = component.enrichedUserData();
+      expect(enriched).toBeTruthy();
+      expect(enriched!['id']).toBe('user-123');
+      expect(enriched!['display_name']).toBe('John Doe');
+      expect(enriched!['first_name']).toBe('John');
+      expect(enriched!['last_name']).toBe('Doe');
+      expect(enriched!['email']).toBe('john@example.com');
+    });
+
+    it('should include has_record from extension metadata', async () => {
+      mockProfileService.getProfileExtensions.and.returnValue(of([mockExtension]));
+
+      fixture = TestBed.createComponent(ProfilePage);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+
+      const enriched = component.enrichedUserData();
+      expect(enriched).toBeTruthy();
+      expect(enriched!['borrowers']).toEqual({ has_record: false });
+    });
+
+    it('should merge extension record data when available', async () => {
+      const completedExtension: ProfileExtension = {
+        ...mockExtension,
+        has_record: true
+      };
+      mockProfileService.getProfileExtensions.and.returnValue(of([completedExtension]));
+      mockSchemaService.getEntity.and.returnValue(of({ table_name: 'borrowers' } as any));
+      mockSchemaService.getPropsForDetail.and.returnValue(of([]));
+      mockProfileService.getExtensionRecord.and.returnValue(of([{ id: 'rec-5', status_id: 1, household_size: 3 }]));
+
+      fixture = TestBed.createComponent(ProfilePage);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+
+      const enriched = component.enrichedUserData();
+      expect(enriched).toBeTruthy();
+      expect(enriched!['borrowers']).toEqual({ id: 'rec-5', status_id: 1, household_size: 3, has_record: true });
+    });
+
+    it('should return null when no user record', async () => {
+      mockProfileService.getCurrentUserPrivateRecord.and.returnValue(of(null));
+
+      fixture = TestBed.createComponent(ProfilePage);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+
+      expect(component.enrichedUserData()).toBeNull();
+    });
+
+    it('should update reactively when extensionRecords changes', async () => {
+      const completedExtension: ProfileExtension = {
+        ...mockExtension,
+        has_record: true
+      };
+      mockProfileService.getProfileExtensions.and.returnValue(of([completedExtension]));
+      mockSchemaService.getEntity.and.returnValue(of({ table_name: 'borrowers' } as any));
+      mockSchemaService.getPropsForDetail.and.returnValue(of([]));
+      // Phase 3 returns empty — no record found initially
+      mockProfileService.getExtensionRecord.and.returnValue(of([]));
+
+      fixture = TestBed.createComponent(ProfilePage);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+
+      // After Phase 3 with empty results: only has_record from extension metadata
+      expect(component.enrichedUserData()!['borrowers']).toEqual({ has_record: true });
+
+      // Simulate a later update (e.g., after creating a record and reloading)
+      const recordsMap = new Map<string, any>();
+      recordsMap.set('borrowers', { id: 'rec-5', status_id: 1 });
+      component.extensionRecords.set(recordsMap);
+
+      // Computed should reactively update with the full record
+      expect(component.enrichedUserData()!['borrowers']).toEqual({ id: 'rec-5', status_id: 1, has_record: true });
     });
   });
 

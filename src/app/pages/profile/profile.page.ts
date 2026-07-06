@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { Component, ChangeDetectionStrategy, inject, signal, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,13 +20,14 @@ import { LocaleService } from '../../services/locale.service';
 import { SchemaEntityProperty, InverseRelationshipData, EntityPropertyType } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { RelatedRecordsComponent } from '../../components/related-records/related-records.component';
+import { EntityActionPanelComponent } from '../../components/entity-action-panel/entity-action-panel.component';
 import { getSmsConfig } from '../../config/runtime';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DisplayPropertyComponent, RelatedRecordsComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, DisplayPropertyComponent, RelatedRecordsComponent, EntityActionPanelComponent, TranslatePipe],
   templateUrl: './profile.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -77,6 +78,26 @@ export class ProfilePage {
 
   // ─── Related records ─────────────────────────────────────────────
   relatedRecords = signal<InverseRelationshipData[]>([]);
+
+  // ─── Enriched user data (for entity action conditions) ──────────
+  enrichedUserData = computed(() => {
+    const user = this.userRecord();
+    if (!user) return null;
+
+    const enriched: Record<string, any> = { ...user };
+
+    // Add has_record flags for all extensions (available after Phase 1)
+    for (const ext of this.extensions()) {
+      enriched[ext.table_name] = { has_record: ext.has_record };
+    }
+
+    // Overlay full extension records when available (after Phase 3)
+    for (const [tableName, record] of this.extensionRecords().entries()) {
+      enriched[tableName] = { ...record, has_record: true };
+    }
+
+    return enriched;
+  });
 
   // Columns to exclude from extension display
   private systemColumns = new Set([
@@ -481,6 +502,17 @@ export class ProfilePage {
       this.router.navigate(['create', tableName], {
         queryParams: { [fkColumn]: userId, returnTo: `/profile/${userId}` }
       });
+    }
+  }
+
+  // ─── Profile reload (triggered by entity action panel) ──────────
+
+  reloadProfile(): void {
+    if (this.isOwnProfile()) {
+      this.loadOwnProfile();
+    } else {
+      const userId = this.targetUserId();
+      if (userId) this.loadOtherProfile(userId);
     }
   }
 
