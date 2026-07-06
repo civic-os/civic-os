@@ -24,6 +24,7 @@ import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOK
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
 import { localeInterceptor } from './interceptors/locale.interceptor';
 import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
+import { errorTrackingInterceptor } from './interceptors/error-tracking.interceptor';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
 import { MarkdownWidgetComponent } from './components/widgets/markdown-widget/markdown-widget.component';
 import { FilteredListWidgetComponent } from './components/widgets/filtered-list-widget/filtered-list-widget.component';
@@ -79,7 +80,8 @@ export const appConfig: ApplicationConfig = {
       includeBearerTokenInterceptor,
       impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
       localeInterceptor,          // Adds Accept-Language header for i18n translation lookup
-      authErrorInterceptor        // Safety net: redirects to login on 401 for authenticated users
+      authErrorInterceptor,       // Safety net: redirects to login on 401 for authenticated users
+      errorTrackingInterceptor    // Logs all HTTP errors to Matomo analytics
     ])),
 
     // Matomo analytics - conditionally provided if configured
