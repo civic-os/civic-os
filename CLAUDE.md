@@ -199,8 +199,8 @@ Civic OS uses **Sqitch** for versioned database schema migrations in both develo
 **Quick Commands:**
 
 ```bash
-# Generate new migration
-./scripts/generate-migration.sh add_feature "Add feature X"
+# Create new migration scaffolding
+sqitch add v0-66-0-add_feature --requires v0-65-1-auth-route-translations -n "Add feature X"
 
 # Test locally
 sqitch deploy dev --verify
@@ -211,7 +211,7 @@ sqitch deploy dev --verify      # Re-deploy
 ./scripts/migrate-production.sh latest $DATABASE_URL
 ```
 
-Generated migrations require **manual enhancement** (metadata inserts, grants, RLS policies). See `postgres/migrations/README.md` for comprehensive documentation.
+Use templates in `postgres/migrations/templates/` as starting points for common operations (`add_metadata_table`, `add_rpc_function`, `add_domain`, `modify_metadata_view`). See `postgres/migrations/README.md` for comprehensive documentation.
 
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 

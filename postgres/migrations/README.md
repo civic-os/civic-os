@@ -94,19 +94,6 @@ apt-get install sqitch libdbd-pg-perl postgresql-client
 sqitch --version
 ```
 
-Install Atlas for migration generation:
-
-```bash
-# macOS
-brew install ariga/tap/atlas
-
-# Linux
-curl -sSf https://atlasgo.sh | sh
-
-# Verify
-atlas version
-```
-
 ### Development Workflow
 
 #### 1. Make Schema Changes in Dev Database
@@ -125,21 +112,29 @@ psql $DEV_DB_URL -c "CREATE TABLE tags (
 );"
 ```
 
-#### 2. Generate Migration
+#### 2. Create Migration Scaffolding
 
-Run the migration generator:
+Use `sqitch add` to create the migration structure, then populate from a template:
 
 ```bash
-./scripts/generate-migration.sh add_tags_table "Add tags table for issue categorization"
+# Determine the last migration name from sqitch.plan
+tail -1 sqitch.plan
+
+# Add new migration (requires the previous migration)
+sqitch add v0-66-0-add_tags_table \
+  --requires v0-65-1-auth-route-translations \
+  -n "Add tags table for issue categorization"
+
+# Start from a template
+cp postgres/migrations/templates/add_metadata_table.sql \
+   postgres/migrations/deploy/v0-66-0-add_tags_table.sql
 ```
 
-This script will:
-- Start a temporary clean database
-- Apply existing migrations
-- Use Atlas to diff dev → clean
-- Generate `deploy.sql`, `revert.sql`, `verify.sql`
-- Update `sqitch.plan`
-- Clean up temp resources
+Available templates in `postgres/migrations/templates/`:
+- `add_metadata_table.sql` — New table with metadata entries, grants, RLS
+- `add_rpc_function.sql` — New RPC function with grants
+- `add_domain.sql` — New custom domain type
+- `modify_metadata_view.sql` — Changes to schema_entities/schema_properties views
 
 #### 3. Review and Enhance Migration
 
@@ -148,7 +143,7 @@ This script will:
 nano postgres/migrations/deploy/v0-4-0-add_tags_table.sql
 ```
 
-Add metadata coordination that Atlas can't detect:
+Add metadata coordination (not included in templates by default):
 ```sql
 -- Add metadata entries
 INSERT INTO metadata.entities (table_name, display_name, description, icon, sort_order)
@@ -371,8 +366,7 @@ postgres/migrations/
 ├── revert/                      # Revert scripts (rollback)
 │   └── v0-4-0-add_tags_table.sql
 ├── verify/                      # Verification scripts
-│   ├── v0-4-0-add_tags_table.sql         # Quick checks
-│   └── v0-4-0-add_tags_table.expected.sql # Full schema snapshot
+│   └── v0-4-0-add_tags_table.sql         # Quick checks
 ├── scripts/                     # Helper scripts
 │   └── verify-full.sh           # Comprehensive verification
 └── templates/                   # Migration templates
@@ -517,9 +511,9 @@ This catches issues that single-step revert testing (`--to @HEAD^`) misses, part
 2. **Write complete revert scripts**
    - Don't use `ROLLBACK;` placeholders in production
 
-3. **Add metadata coordination**
-   - Atlas only detects schema, not metadata insertions
-   - Manually add INSERT INTO metadata.* statements
+3. **Use templates for common operations**
+   - Start from `postgres/migrations/templates/` for standard patterns
+   - Include metadata INSERTs, grants, RLS policies, and NOTIFY in every migration
 
 4. **Use meaningful migration notes**
    - Good: `add_tags_table "Add tags table for issue categorization"`
@@ -561,7 +555,6 @@ This catches issues that single-step revert testing (`--to @HEAD^`) misses, part
 ## Additional Resources
 
 - [Sqitch Tutorial](https://sqitch.org/docs/manual/sqitchtutorial/)
-- [Atlas Migration Guides](https://atlasgo.io/guides)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Civic OS Production Deployment Guide](../../docs/deployment/PRODUCTION.md)
 
