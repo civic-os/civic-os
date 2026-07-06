@@ -1026,6 +1026,111 @@ describe('ListPage', () => {
     });
   });
 
+  describe('Analytics Tracking', () => {
+    it('should track unfiltered list view as Entity/List', (done) => {
+      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
+      mockSchemaService.getPropsForList.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 }));
+
+      routeParams.next({ entityKey: 'issues' });
+
+      setTimeout(() => {
+        expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
+        done();
+      }, 100);
+    });
+
+    it('should include filter column names in label', (done) => {
+      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
+      mockSchemaService.getPropsForList.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 15 }));
+
+      // Apply filters via indexed query params (f0_col, f0_op, f0_val format)
+      queryParams.next({ f0_col: 'priority', f0_op: 'eq', f0_val: 'high', f1_col: 'status_id', f1_op: 'eq', f1_val: '1' });
+
+      routeParams.next({ entityKey: 'issues' });
+
+      setTimeout(() => {
+        expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith(
+          'Entity', 'List', 'issues:priority,status_id', 15
+        );
+        done();
+      }, 100);
+    });
+
+    it('should include search indicator in label', (done) => {
+      const entityWithSearch = { ...MOCK_ENTITIES.issue, search_fields: ['display_name'] };
+      mockSchemaService.getEntity.and.returnValue(of(entityWithSearch));
+      mockSchemaService.getPropsForList.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 5 }));
+
+      queryParams.next({ q: 'pothole' });
+      routeParams.next({ entityKey: 'issues' });
+
+      setTimeout(() => {
+        expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith(
+          'Entity', 'List', 'issues:search', 5
+        );
+        done();
+      }, 100);
+    });
+
+    it('should combine filters, search, and pagination in label', (done) => {
+      const entityWithSearch = { ...MOCK_ENTITIES.issue, search_fields: ['display_name'] };
+      mockSchemaService.getEntity.and.returnValue(of(entityWithSearch));
+      mockSchemaService.getPropsForList.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 3 }));
+
+      queryParams.next({ q: 'pothole', f0_col: 'status_id', f0_op: 'eq', f0_val: '1', page: '3' });
+      routeParams.next({ entityKey: 'issues' });
+
+      setTimeout(() => {
+        expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith(
+          'Entity', 'List', 'issues:status_id:search:p3', 3
+        );
+        done();
+      }, 100);
+    });
+
+    it('should track pagination as separate event from page 1', (done) => {
+      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
+      mockSchemaService.getPropsForList.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 }));
+
+      routeParams.next({ entityKey: 'issues' });
+
+      setTimeout(() => {
+        // First load: page 1
+        expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
+
+        // Navigate to page 2
+        mockAnalyticsService.trackEvent.calls.reset();
+        queryParams.next({ page: '2' });
+
+        setTimeout(() => {
+          // Should fire new event with page indicator
+          expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:p2', 42);
+          done();
+        }, 100);
+      }, 100);
+    });
+
+    it('should omit page indicator for page 1', (done) => {
+      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
+      mockSchemaService.getPropsForList.and.returnValue(of([MOCK_PROPERTIES.textShort]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [{ id: 1, display_name: 'Item 1' }], totalCount: 42 }));
+
+      queryParams.next({ page: '1' });
+      routeParams.next({ entityKey: 'issues' });
+
+      setTimeout(() => {
+        // Page 1 should NOT have :p1 suffix
+        expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
+        done();
+      }, 100);
+    });
+  });
+
   describe('isSummaryView computed signal', () => {
     it('should be true when entity is_view and not insertable', () => {
       const summaryEntity = createMockEntity({

@@ -88,6 +88,9 @@ export class ListPage implements OnInit, OnDestroy {
   // Start as true - data pipeline will set to false when complete
   public isLoading = signal<boolean>(true);
 
+  // Deduplication key for list view analytics (prevents re-tracking when data$ re-emits for same state)
+  private lastListTrackingKey = '';
+
   // Row hover stream for debouncing map interactions
   private rowHover$ = new Subject<number | null>();
 
@@ -187,6 +190,7 @@ export class ListPage implements OnInit, OnDestroy {
       // Wait for query param clearing to complete before proceeding
       if (this.entityKey && this.entityKey !== p['entityKey']) {
         this.entityKey = p['entityKey'];
+        this.lastListTrackingKey = ''; // Reset so first load of new entity always tracks
         // Convert Promise to Observable and wait for navigation to complete
         return from(
           this.router.navigate([], {
@@ -315,7 +319,31 @@ export class ListPage implements OnInit, OnDestroy {
                 isSummaryView: !!(entity?.is_view && !entity?.insert)
               }).pipe(
                 // Only set loading=false AFTER API data arrives, not after the initial clearing emission
-                tap(() => this.isLoading.set(false))
+                tap((result: any) => {
+                  this.isLoading.set(false);
+
+                  // Track list view — unified event for every distinct view state
+                  if (this.entityKey) {
+                    const filterColumns = (filters || [])
+                      .map(f => f.column)
+                      .filter((col, i, arr) => arr.indexOf(col) === i)
+                      .sort()
+                      .join(',');
+                    const hasSearch = !!(search && search.trim().length > 0);
+                    const page = pagination?.page || 1;
+                    const trackingKey = `${this.entityKey}|${filterColumns}|${hasSearch}|${page}`;
+
+                    if (trackingKey !== this.lastListTrackingKey) {
+                      this.lastListTrackingKey = trackingKey;
+
+                      const parts = [this.entityKey];
+                      if (filterColumns) parts.push(filterColumns);
+                      if (hasSearch) parts.push('search');
+                      if (page > 1) parts.push(`p${page}`);
+                      this.analytics.trackEvent('Entity', 'List', parts.join(':'), result.totalCount);
+                    }
+                  }
+                })
               )
             );
           } else {

@@ -356,6 +356,10 @@ Civic OS provides **dual enforcement** validation: frontend via `metadata.valida
 
 **Notification System** (v0.11.0+ email, v0.35.0+ SMS): Multi-channel notifications via database templates and River-based Go worker. See `docs/development/NOTIFICATIONS.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (Notification System section) for SQL examples.
 
+### Application Analytics
+
+**Application Analytics** (v0.26.0+): Matomo integration via `AnalyticsService`. HTTP error tracking interceptor, auth events, CRUD operation tracking, and list page view tracking with filter/search context. See `docs/development/ANALYTICS_TRACKING.md` for event conventions and implementation guide.
+
 ### Visual Diagramming with JointJS
 
 **Reference Implementation**: Schema Editor (`/schema-editor`). Use this pattern when building visual editors or workflow designers. See `docs/development/JOINTJS_INTEGRATION.md` for integration guide and `docs/notes/SCHEMA_EDITOR_DESIGN.md` for design details.
