@@ -45,12 +45,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports cascading dropdowns, search modals with state persistence, and server-side filtering. See `docs/INTEGRATOR_GUIDE.md` (FK sections) and `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md`.
 - `User`: UUID with `join_table = 'civic_os_users'` → User display component with FK search modal. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
 - `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
-- `DateTime`, `DateTimeLocal`, `Date`: Timestamp types → Date/time inputs
-- `Boolean`: `bool` → Checkbox
-- `Money`: `money` → Currency input (ngx-currency)
-- `IntegerNumber`: `int4`/`int8` → Number input
-- `TextShort`: `varchar` → Text input
-- `TextLong`: `text` → Textarea
+- Simple scalar types (`Boolean`, `Money`, `IntegerNumber`, `TextShort`, `TextLong`, `DateTime`, `DateTimeLocal`, `Date`) map directly to standard HTML inputs
 - `GeoPoint`: `geography(Point, 4326)` → Interactive map (Leaflet) with location picker
 - `GeoPolygon`: `geography(Polygon, 4326)` → Interactive polygon map (Leaflet + leaflet-geoman-free) with draw/edit/delete
 - `Color`: `hex_color` → Color chip display with native HTML5 color picker
@@ -115,8 +110,6 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 **Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0)
 
 The home page (`/`) displays configurable dashboards with extensible widget types. Dashboard selector in navbar switches between available dashboards.
-
-**Current**: ✅ View dashboards ✅ Markdown widgets ✅ Filtered list widgets ✅ Map widgets with clustering ✅ Calendar widgets ✅ Chart widgets (grouped bar, v0.61.0) ❌ Management UI ❌ Auto-refresh
 
 **Configuration**: Create dashboards via SQL INSERT into `metadata.dashboards` and `metadata.dashboard_widgets`. Requires `created_by = current_user_id()` for ownership. Widget types use registry pattern. See `docs/development/DASHBOARD_WIDGETS.md` for complete widget type reference, filter operators, and troubleshooting. See `docs/INTEGRATOR_GUIDE.md` for SQL examples and `docs/notes/DASHBOARD_DESIGN.md` for architecture.
 
@@ -183,21 +176,15 @@ npm run generate community-center     # Generate for Community Center example
 ./examples/generate.sh broader-impacts
 ```
 
-The mock data generator is **validation-aware**: it fetches validation rules from `metadata.validations` and generates compliant data (respects min/max, minLength/maxLength, pattern constraints). Each example has its own `mock-data-config.json` to control record counts and geography bounds.
+The mock data generator is validation-aware (respects `metadata.validations` constraints). Each example has its own `mock-data-config.json`.
 
-**Important**: Mock data should be generated AFTER database initialization (after `docker-compose up`), not during init scripts. This allows schema changes to flow smoothly without being blocked by stale static SQL files. Examples are located in the `examples/` directory (pothole, broader-impacts, community-center, mottpark, storymap). All examples use the same port configuration - only run one example at a time.
-
-**Examples Overview**: See `docs/EXAMPLES.md` for a comparison of all examples showing which features each demonstrates (calendar, payments, notifications, etc.) and recommended learning paths.
+**Important**: Generate mock data AFTER `docker-compose up`, not during init scripts. Only run one example at a time. See `docs/EXAMPLES.md` for example comparison and learning paths.
 
 ## Database Setup
 
 Docker Compose runs PostgreSQL 17 with PostGIS 3.5 and PostgREST locally with Keycloak authentication. The development environment uses **Sqitch migrations** (same as production) to set up the core Civic OS schema, ensuring dev/prod parity.
 
-**Migration Flow** (automatic on first `docker-compose up`):
-1. Postgres container builds custom image with Sqitch installed (`docker/dev-postgres/Dockerfile`)
-2. Init script creates authenticator role (`examples/<example-name>/init-scripts/00_create_authenticator.sh`)
-3. Init script runs Sqitch migrations to deploy core schema (`postgres/migrations/`)
-4. Example-specific scripts run (pothole tables, permissions, etc.)
+**Migration Flow**: On first `docker-compose up`, the Postgres container runs Sqitch migrations then example-specific init scripts automatically. See `postgres/migrations/README.md` for architecture details.
 
 **Important**: Schema changes should be made via migrations (see Database Migrations section below). To apply new migrations, recreate the database (`docker-compose down -v && docker-compose up -d`) or run migrations manually via the migrations container.
 
@@ -240,13 +227,7 @@ See `docs/deployment/PRODUCTION.md` for complete deployment guide, `docker/READM
 
 ## PostgREST Integration
 
-All API calls use PostgREST conventions:
-- **Select fields**: `?select=id,name,created_at`
-- **Embedded resources**: `?select=id,author:users(display_name)`
-- **Filters**: `?id=eq.5`
-- **Ordering**: `?order=created_at.desc`
-
-The `SchemaService.propertyToSelectString()` method builds PostgREST-compatible select strings for foreign keys and user references.
+All API calls use PostgREST conventions (select, filter, order, embed). `SchemaService.propertyToSelectString()` builds PostgREST-compatible select strings for foreign keys and user references. See `docs/INTEGRATOR_GUIDE.md` for query patterns.
 
 **API Testing with JWT Generation**: Generate JWTs from the example `.env` secret to test RLS policies, permissions, and multi-tenant scenarios. See `docs/development/TESTING.md` (PostgREST API Testing section) for workflow.
 
@@ -270,7 +251,7 @@ All example docker-compose files include a pre-configured Keycloak service. The 
 
 **Permissions Model** (v0.48.0+): Three-layer access control (database GRANTs → RBAC → RLS ownership). Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for complete architecture and anti-patterns.
 
-**RBAC System**: Permissions are stored in database (`metadata.roles`, `metadata.permissions`, `metadata.permission_roles`). Each role has an immutable `role_key` (programmatic identifier for JWT matching and SQL lookups) and a freely-editable `display_name` (human label). Use `get_role_id(role_key)` helper for lookups. PostgreSQL functions (`get_user_roles()`, `has_permission()`, `is_admin()`) extract roles from JWT claims and enforce permissions via Row Level Security policies.
+**RBAC System**: Database-driven permissions via `metadata.roles`, `metadata.permissions`, and `metadata.permission_roles` with `role_key`-based lookups. See `docs/development/PERMISSIONS_MODEL.md` for architecture and anti-patterns.
 
 **Default Roles** (by `role_key`): `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)
 

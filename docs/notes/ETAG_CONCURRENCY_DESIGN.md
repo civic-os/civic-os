@@ -1,6 +1,7 @@
 # ETag-Based Optimistic Concurrency Control
 
 > Status: **Proposed** — design document, not yet implemented.
+> **Target:** Pre-v1.0 release
 
 ## Problem
 

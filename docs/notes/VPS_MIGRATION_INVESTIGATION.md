@@ -1,7 +1,7 @@
 # VPS Migration Investigation: From DOKS to Per-Instance Droplets
 
 **Date:** 2026-01-16
-**Status:** Research Complete - Awaiting Decision
+**Status:** Decided — VPS adopted briefly for cost, then reverted to K8s for maintenance advantages. VPS remains as a legacy option.
 **Related Task:** `~/.claude/tasks/2026-01-13-k8s-to-vps-investigation.md`
 
 ---

@@ -1,5 +1,7 @@
 # Consolidated Worker Plan
 
+> **Status:** Implemented (v0.31.0) — Historical plan document. See `docs/development/GO_MICROSERVICES_GUIDE.md` for current architecture.
+
 **Purpose**: Combine s3-signer, thumbnail-worker, and notification-worker into a single Go binary to minimize database connections for demo environments with limited connection pools (22 connections).
 
 **Target**: Execute after finalizing the notifications service
