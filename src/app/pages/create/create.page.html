@@ -8,7 +8,7 @@
         <h1 class="mb-0">
           {{ 'form.create_title' | translate:{ entity: entity.display_name } }}
           @if (entity.description) {
-            <div class="tooltip tooltip-right inline-block" [attr.data-tip]="entity.description">
+            <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description">
               <span class="material-symbols-outlined text-info cursor-help ms-2 text-xl align-middle">help_outline</span>
             </div>
           }
