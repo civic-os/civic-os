@@ -4,13 +4,18 @@
 </a>
 
 <div class="drawer">
-  <input id="main-drawer" [(ngModel)]="drawerOpen" type="checkbox" class="drawer-toggle" />
+  <!-- The checkbox is DaisyUI's CSS drawer mechanism only; it is removed from the
+       tab order and accessibility tree. The real keyboard/AT interface is the
+       toggle <button> below (aria-expanded/aria-controls). -->
+  <input id="main-drawer" [(ngModel)]="drawerOpen" type="checkbox" class="drawer-toggle" tabindex="-1" aria-hidden="true" />
   <div class="drawer-content">
     <div class="navbar bg-base-300">
       <div class="flex-none">
-        <label for="main-drawer" class="btn btn-square btn-ghost drawer-button" [attr.aria-label]="'nav.open_menu' | translate">
+        <button type="button" class="btn btn-square btn-ghost drawer-button" (click)="drawerOpen = !drawerOpen"
+                [attr.aria-expanded]="drawerOpen" aria-controls="main-drawer-side"
+                [attr.aria-label]="'nav.open_menu' | translate">
           <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </label>
+        </button>
       </div>
       <div class="flex-1">
         <a class="btn btn-ghost text-xl">{{ appTitle }}</a>
@@ -77,15 +82,18 @@
       <router-outlet></router-outlet>
     </main>
   </div>
-  <div class="drawer-side">
-    <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+  <div class="drawer-side" id="main-drawer-side">
+    <!-- Overlay is a mouse convenience for closing; the close <button> below and
+         the toggle button's aria-expanded are the keyboard/AT interface. -->
+    <label for="main-drawer" aria-hidden="true" class="drawer-overlay"></label>
     @if (menuItems$ | async; as menuItems) {
       <div class="w-80 min-h-full bg-base-200 text-base-content flex flex-col">
         <div class="navbar bg-base-300">
           <div class="flex-none">
-            <label for="main-drawer" class="btn btn-square btn-ghost" [attr.aria-label]="'nav.close_menu' | translate">
+            <button type="button" class="btn btn-square btn-ghost" (click)="drawerOpen = false"
+                    [attr.aria-label]="'nav.close_menu' | translate">
               <span class="material-symbols-outlined" aria-hidden="true">close</span>
-            </label>
+            </button>
           </div>
         </div>
         <ul class="menu menu-md p-4 flex-1">
