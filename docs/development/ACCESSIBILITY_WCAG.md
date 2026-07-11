@@ -1034,6 +1034,13 @@ These require visual verification:
 
 ### Manual Testing Checklist
 
+> **For a hands-on, step-by-step walkthrough of *how* to perform this manual
+> verification** — turning on VoiceOver/NVDA, the keys you need, a keyboard-only
+> pass and a scripted screen-reader pass against the pothole example's real flows,
+> plus the axe DevTools extension — see
+> [`ACCESSIBILITY_MANUAL_TESTING.md`](./ACCESSIBILITY_MANUAL_TESTING.md). The
+> checklist below is the *what*; that guide is the *how*.
+
 #### Keyboard Navigation
 - [ ] All interactive elements accessible via Tab
 - [ ] Tab order is logical
