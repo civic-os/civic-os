@@ -22,6 +22,7 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { StatusAdminService, StatusType, StatusValue, StatusTransition } from '../../services/status-admin.service';
 import { SchemaService } from '../../services/schema.service';
+import { getContrastTextColor } from '../../utils/color.utils';
 
 type ActiveTab = 'statuses' | 'transitions';
 
@@ -461,6 +462,14 @@ export class AdminStatusesPage {
   }
 
   // ── Helpers ───────────────────────────────────
+
+  /**
+   * Compute the higher-contrast text color (black/white) for a badge painted
+   * with an admin-chosen hex background, via the WCAG contrast util.
+   */
+  getBadgeTextColor(color: string | null | undefined): string {
+    return getContrastTextColor(color || '#3B82F6');
+  }
 
   dismissSuccess() {
     this.successMessage.set(undefined);

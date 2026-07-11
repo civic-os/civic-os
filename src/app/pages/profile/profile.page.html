@@ -89,11 +89,11 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                 <div class="form-control w-full">
                   <label class="label"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></label>
-                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" required />
+                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" autocomplete="given-name" required />
                 </div>
                 <div class="form-control w-full">
                   <label class="label"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></label>
-                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" required />
+                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" autocomplete="family-name" required />
                 </div>
                 <div class="form-control w-full">
                   <label class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></label>
@@ -110,7 +110,8 @@
                     (input)="onPhoneInput($event)"
                     placeholder="(555) 123-4567"
                     maxlength="14"
-                    name="phone" />
+                    name="phone"
+                    autocomplete="tel" />
                   @if (isPhoneInvalid()) {
                     <span class="text-error text-xs mt-1">{{ 'profile.phone_invalid' | translate }}</span>
                   }

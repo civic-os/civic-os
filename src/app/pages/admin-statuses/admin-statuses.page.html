@@ -185,13 +185,13 @@
                 @for (transition of transitions(); track transition.id) {
                   <tr>
                     <td>
-                      <span class="badge gap-1" [style.backgroundColor]="transition.from_color || '#3B82F6'" [style.color]="'white'">
+                      <span class="badge gap-1" [style.backgroundColor]="transition.from_color || '#3B82F6'" [style.color]="getBadgeTextColor(transition.from_color)">
                         {{ transition.from_display_name }}
                       </span>
                     </td>
                     <td><span class="material-symbols-outlined text-base-content/40" aria-hidden="true">arrow_forward</span></td>
                     <td>
-                      <span class="badge gap-1" [style.backgroundColor]="transition.to_color || '#3B82F6'" [style.color]="'white'">
+                      <span class="badge gap-1" [style.backgroundColor]="transition.to_color || '#3B82F6'" [style.color]="getBadgeTextColor(transition.to_color)">
                         {{ transition.to_display_name }}
                       </span>
                     </td>

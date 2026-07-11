@@ -118,6 +118,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.apply_coordinates': 'Apply coordinates',
   'a11y.coords_error_line': 'Line {{line}}: enter a valid "latitude, longitude" pair (latitude -90 to 90, longitude -180 to 180)',
   'a11y.coords_error_min_points': 'Enter at least 3 coordinate pairs to form a polygon',
+  'a11y.reduced_contrast': 'Reduced contrast',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',

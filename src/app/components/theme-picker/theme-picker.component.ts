@@ -18,6 +18,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { ThemeService } from '../../services/theme.service';
 import { RECOMMENDED_THEMES, detectAvailableThemes, themeNameToLabel } from '../../constants/themes';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface ThemeItem {
   name: string;
@@ -27,6 +28,7 @@ interface ThemeItem {
 @Component({
   selector: 'app-theme-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslatePipe],
   template: `
     <!-- Current selection -->
     <div class="mb-4">
@@ -56,6 +58,7 @@ interface ThemeItem {
             class="rounded-lg p-1 cursor-pointer transition-all hover:scale-[1.02]"
             [class.ring-2]="themeService.theme() === theme.name"
             [class.ring-primary]="themeService.theme() === theme.name"
+            [attr.aria-pressed]="themeService.theme() === theme.name"
             (click)="selectTheme(theme.name)"
           >
             <div class="rounded-md p-2 bg-base-100 flex items-center gap-2" [attr.data-theme]="theme.name">
@@ -82,6 +85,7 @@ interface ThemeItem {
               class="rounded-lg p-1 cursor-pointer transition-all hover:scale-[1.02]"
               [class.ring-2]="themeService.theme() === theme.name"
               [class.ring-primary]="themeService.theme() === theme.name"
+              [attr.aria-pressed]="themeService.theme() === theme.name"
               (click)="selectTheme(theme.name)"
             >
               <div class="rounded-md p-2 bg-base-100 flex items-center gap-2" [attr.data-theme]="theme.name">
@@ -91,8 +95,10 @@ interface ThemeItem {
                   <span class="badge badge-xs bg-accent border-0"></span>
                   <span class="badge badge-xs bg-neutral border-0"></span>
                 </div>
-                <span class="text-xs text-base-content truncate">{{ theme.label }}</span>
+                <span class="text-xs text-base-content truncate flex-1">{{ theme.label }}</span>
               </div>
+              <!-- Unvetted (not contrast-reviewed) themes are labeled -->
+              <span class="block text-[10px] leading-tight opacity-50 ps-2 pt-0.5 text-start">{{ 'a11y.reduced_contrast' | translate }}</span>
             </button>
           }
         </div>

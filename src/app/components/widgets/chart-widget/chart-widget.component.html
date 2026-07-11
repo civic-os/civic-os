@@ -36,28 +36,53 @@
         <li><a (click)="downloadCsv()">{{ 'chart.download_csv' | translate }}</a></li>
       </ul>
     </details>
-    @if (legendItems().length > 0) {
-      <vis-bullet-legend [items]="legendItems()" />
-    }
-    <vis-xy-container [data]="chartData()" [height]="containerHeight()">
-      <vis-grouped-bar
-        [x]="xAccessor"
-        [y]="yAccessors()"
-        [color]="colorAccessor()"
-        [roundedCorners]="4"
-        [barPadding]="0.1"
-        [groupPadding]="0.2"
-      />
-      <vis-axis type="x"
-        [tickFormat]="xTickFormat()"
-        [label]="config().xAxisLabel ?? ''"
-        [gridLine]="false"
-      />
-      <vis-axis type="y"
-        [label]="config().yAxisLabel ?? ''"
-        [tickFormat]="yTickFormat"
-      />
-    </vis-xy-container>
+    <!-- Visual chart is decorative for AT; the sr-only table below is the text alternative -->
+    <div aria-hidden="true">
+      @if (legendItems().length > 0) {
+        <vis-bullet-legend [items]="legendItems()" />
+      }
+      <vis-xy-container [data]="chartData()" [height]="containerHeight()">
+        <vis-grouped-bar
+          [x]="xAccessor"
+          [y]="yAccessors()"
+          [color]="colorAccessor()"
+          [roundedCorners]="4"
+          [barPadding]="0.1"
+          [groupPadding]="0.2"
+        />
+        <vis-axis type="x"
+          [tickFormat]="xTickFormat()"
+          [label]="config().xAxisLabel ?? ''"
+          [gridLine]="false"
+        />
+        <vis-axis type="y"
+          [label]="config().yAxisLabel ?? ''"
+          [tickFormat]="yTickFormat"
+        />
+      </vis-xy-container>
+    </div>
+    <!-- Screen-reader data table: same data as the chart (WCAG 1.1.1) -->
+    <table class="sr-only">
+      <caption>{{ widget().title }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ srCategoryHeader() }}</th>
+          @for (header of srSeriesHeaders(); track $index) {
+            <th scope="col">{{ header }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of chartData(); track $index) {
+          <tr>
+            <th scope="row">{{ row[config().labelColumn] }}</th>
+            @for (col of config().valueColumns; track col) {
+              <td>{{ row[col] }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
   } @else {
     <div class="flex flex-col items-center justify-center py-8">
       <span class="material-symbols-outlined text-5xl text-base-content opacity-30" aria-hidden="true">bar_chart</span>

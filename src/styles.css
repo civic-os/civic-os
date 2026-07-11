@@ -89,6 +89,35 @@ select.ng-invalid.ng-touched:focus {
     border-color: #ef4444 !important;
 }
 
+/* Global keyboard focus ring (WCAG 2.4.7).
+   :focus-visible only matches keyboard/AT focus, so mouse clicks don't get an
+   outline. Theme-aware via the DaisyUI --color-primary variable. The invalid
+   field rule above uses !important and still wins for erroring inputs. */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Suppress the default outline only when focus is NOT keyboard-driven, so we
+   don't double up on elements that already render their own focus styling. */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Respect user preference for reduced motion (WCAG 2.3.3).
+   Near-instant durations keep transitions functional (dropdowns, collapses,
+   accordions still open/close) without conveying motion. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 /* Video embed responsive container (v0.50.0) */
 .video-embed {
     width: 100%;

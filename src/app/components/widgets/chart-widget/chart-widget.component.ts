@@ -144,6 +144,19 @@ export class ChartWidgetComponent {
     }));
   });
 
+  // Computed: column headers for the screen-reader data table.
+  // Prefers human-readable seriesLabels, falls back to raw valueColumn names.
+  srSeriesHeaders = computed<string[]>(() => {
+    const cfg = this.config();
+    return cfg.seriesLabels?.length ? cfg.seriesLabels : cfg.valueColumns;
+  });
+
+  // Computed: header for the category/x column of the SR data table.
+  srCategoryHeader = computed<string>(() => {
+    const cfg = this.config();
+    return cfg.xAxisLabel || cfg.labelColumn;
+  });
+
   private chartContainerRef = viewChild<ElementRef<HTMLDivElement>>('chartContainer');
 
   async downloadPng(): Promise<void> {

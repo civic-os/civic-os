@@ -16,6 +16,7 @@
  */
 
 import { environment } from '../../environments/environment';
+import { resolveDefaultTheme } from '../constants/themes';
 
 /**
  * Runtime configuration helpers.
@@ -199,12 +200,13 @@ export function getStripePublishableKey(): string {
  * Get theme configuration.
  * Used by ThemeService to determine the default theme.
  *
- * @returns Theme config object with defaultTheme. Falls back to 'corporate' if not configured.
+ * @returns Theme config object with defaultTheme. Falls back to 'corporate' if not
+ *          configured, or if the configured theme is not in the vetted list.
  */
 export function getThemeConfig(): { defaultTheme: string } {
   const config = window.civicOsConfig?.theme || environment.theme;
   return {
-    defaultTheme: config?.defaultTheme || 'corporate'
+    defaultTheme: resolveDefaultTheme(config?.defaultTheme || 'corporate')
   };
 }
 
