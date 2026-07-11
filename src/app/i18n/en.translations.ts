@@ -83,6 +83,12 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.next_image': 'Next image',
   'a11y.gallery_image': 'Gallery image',
   'a11y.color_swatch': 'Color swatch',
+  'a11y.filters': 'Filters',
+  'a11y.filter_start_date': '{{field}} start date',
+  'a11y.filter_end_date': '{{field}} end date',
+  'a11y.filter_min': '{{field}} minimum',
+  'a11y.filter_max': '{{field}} maximum',
+  'a11y.pagination': 'Pagination',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',

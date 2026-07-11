@@ -19,6 +19,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PaginationComponent } from './pagination.component';
 
 describe('PaginationComponent', () => {
@@ -28,7 +30,11 @@ describe('PaginationComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PaginationComponent, CommonModule, FormsModule],
-      providers: [provideZonelessChangeDetection()]
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PaginationComponent);
@@ -37,6 +43,18 @@ describe('PaginationComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('unique instance id', () => {
+    it('should generate a uid for building unique DOM ids', () => {
+      expect(component.uid).toMatch(/^pagination-\d+$/);
+    });
+
+    it('should give each instance a distinct uid (no duplicate id="pageSize")', () => {
+      const secondFixture = TestBed.createComponent(PaginationComponent);
+      expect(secondFixture.componentInstance.uid).not.toBe(component.uid);
+      secondFixture.destroy();
+    });
   });
 
   describe('Signal Initialization', () => {

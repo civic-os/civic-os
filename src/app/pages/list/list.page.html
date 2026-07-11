@@ -124,7 +124,7 @@
     <!-- Grid container for table and map -->
     <div class="list-content-grid" [class.with-map]="showMap()">
       <div class="overflow-x-auto">
-        <table class="table table-zebra">
+        <table class="table table-zebra" [attr.aria-busy]="isLoading()">
         @if (displayProperties$ | async; as props) {
           <caption class="sr-only">{{ entity.display_name }} {{ 'list.title_suffix' | translate }}</caption>
           <!-- head -->
@@ -185,11 +185,11 @@
                 }
               } @else {
                 <tr>
-                  <td colspan="100%" class="p-8">
+                  <td [attr.colspan]="props.length" class="p-8">
                     @if (isLoading()) {
                       <!-- Loading state - show spinner while data is being fetched -->
-                      <div class="flex flex-col items-center justify-center gap-4 py-12">
-                        <span class="loading loading-spinner loading-lg"></span>
+                      <div class="flex flex-col items-center justify-center gap-4 py-12" role="status">
+                        <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
                         <p class="text-base-content/60">{{ 'state.loading' | translate }}</p>
                       </div>
                     } @else if (!auth.authenticated() && dataSignal().length === 0) {

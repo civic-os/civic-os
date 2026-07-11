@@ -22,6 +22,7 @@ import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entit
 import { FilterCriteria } from '../../interfaces/query';
 import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface FilterState {
   [column: string]: any;
@@ -45,7 +46,7 @@ const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
 
 @Component({
   selector: 'app-filter-bar',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './filter-bar.component.html',
   styleUrl: './filter-bar.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,6 +54,13 @@ const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
 export class FilterBarComponent {
   private dataService = inject(DataService);
   private schemaService = inject(SchemaService);
+
+  // Incrementing counter → unique DOM id prefix per component instance.
+  // Prevents duplicate `id` collisions when multiple filter bars render on
+  // one page (e.g. list page + FK search modal), which would otherwise break
+  // label[for]/aria-controls associations.
+  private static nextInstanceId = 0;
+  public readonly uid = `filter-bar-${FilterBarComponent.nextInstanceId++}`;
 
   properties = input<SchemaEntityProperty[]>([]);
   entityKey = input<string | undefined>(undefined);

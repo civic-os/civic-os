@@ -4,20 +4,23 @@
     <button
       type="button"
       class="btn btn-outline btn-sm gap-2"
-      (click)="toggleExpanded()">
-      <span class="material-symbols-outlined">filter_list</span>
+      (click)="toggleExpanded()"
+      [attr.aria-expanded]="isExpanded()"
+      [attr.aria-controls]="uid + '-drawer'"
+      [attr.aria-label]="'a11y.filters' | translate">
+      <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
       <span class="hidden sm:inline">Filters</span>
       @if (activeFilterCount() > 0) {
         <span class="badge badge-primary badge-sm">{{ activeFilterCount() }}</span>
       }
-      <span class="material-symbols-outlined">
+      <span class="material-symbols-outlined" aria-hidden="true">
         {{ isExpanded() ? 'expand_less' : 'expand_more' }}
       </span>
     </button>
 
     <!-- Filter Controls Drawer (Collapsible) -->
     @if (isExpanded()) {
-      <div class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg" [class.start-0]="alignLeft()" [class.end-6]="!alignLeft()" [style.max-width]="dropdownMaxWidth()">
+      <div [id]="uid + '-drawer'" class="card bg-base-200 p-4 mt-2 absolute z-20 shadow-lg" [class.start-0]="alignLeft()" [class.end-6]="!alignLeft()" [style.max-width]="dropdownMaxWidth()">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold">Filter Options</h3>
           @if (activeFilterCount() > 0) {
@@ -39,43 +42,51 @@
 
               <!-- Foreign Key / User / Status / Category: Checkbox list -->
               @if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.User || prop.type === EntityPropertyType.Status || prop.type === EntityPropertyType.Category) {
-                <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
-                  @if (getFilterOptions(prop.column_name).length === 0) {
-                    <div class="text-sm text-base-content/60">Loading options...</div>
-                  }
-                  @for (option of getFilterOptions(prop.column_name); track option.id) {
-                    <label class="label cursor-pointer justify-start gap-2 py-1 pe-4">
-                      <input
-                        type="checkbox"
-                        class="checkbox checkbox-sm"
-                        [checked]="isOptionSelected(prop.column_name, option.id)"
-                        (change)="toggleOption(prop.column_name, option.id)" />
-                      <span class="label-text text-sm">{{ option.display_name }}</span>
-                    </label>
-                  }
-                </div>
+                <fieldset class="border-0 p-0 m-0 min-w-0">
+                  <legend class="sr-only">{{ prop.display_name }}</legend>
+                  <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
+                    @if (getFilterOptions(prop.column_name).length === 0) {
+                      <div class="text-sm text-base-content/60">Loading options...</div>
+                    }
+                    @for (option of getFilterOptions(prop.column_name); track option.id) {
+                      <label class="label cursor-pointer justify-start gap-2 py-1 pe-4">
+                        <input
+                          type="checkbox"
+                          class="checkbox checkbox-sm"
+                          [checked]="isOptionSelected(prop.column_name, option.id)"
+                          (change)="toggleOption(prop.column_name, option.id)" />
+                        <span class="label-text text-sm">{{ option.display_name }}</span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
               }
 
               <!-- Payment: Status checkbox list (effective_status) -->
               @if (prop.type === EntityPropertyType.Payment) {
-                <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
-                  @for (option of getFilterOptions(prop.column_name); track option.id) {
-                    <label class="label cursor-pointer justify-start gap-2 py-1 pe-4">
-                      <input
-                        type="checkbox"
-                        class="checkbox checkbox-sm"
-                        [checked]="isOptionSelected(prop.column_name, option.id)"
-                        (change)="toggleOption(prop.column_name, option.id)" />
-                      <span class="label-text text-sm">{{ option.display_name }}</span>
-                    </label>
-                  }
-                </div>
+                <fieldset class="border-0 p-0 m-0 min-w-0">
+                  <legend class="sr-only">{{ prop.display_name }}</legend>
+                  <div class="border border-base-300 rounded-lg p-2 gap-2 max-h-48 overflow-y-auto bg-base-100">
+                    @for (option of getFilterOptions(prop.column_name); track option.id) {
+                      <label class="label cursor-pointer justify-start gap-2 py-1 pe-4">
+                        <input
+                          type="checkbox"
+                          class="checkbox checkbox-sm"
+                          [checked]="isOptionSelected(prop.column_name, option.id)"
+                          (change)="toggleOption(prop.column_name, option.id)" />
+                        <span class="label-text text-sm">{{ option.display_name }}</span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
               }
 
               <!-- Boolean: Dropdown (All/Yes/No) -->
               @if (prop.type === EntityPropertyType.Boolean) {
                 <select
                   class="select select-bordered select-sm w-full"
+                  [id]="uid + '-bool-' + prop.column_name"
+                  [attr.aria-label]="prop.display_name"
                   [(ngModel)]="filterState()[prop.column_name]"
                   (ngModelChange)="onFilterChange()">
                   <option value="all">All</option>
@@ -90,16 +101,18 @@
                   <input
                     type="date"
                     class="input input-bordered input-sm w-full"
+                    [id]="uid + '-start-' + prop.column_name"
+                    [attr.aria-label]="'a11y.filter_start_date' | translate:{ field: prop.display_name }"
                     [value]="filterState()[prop.column_name + '_start'] || ''"
-                    (change)="onDateChange($event, prop.column_name + '_start')"
-                    placeholder="Start date" />
+                    (change)="onDateChange($event, prop.column_name + '_start')" />
                   <span class="text-xs text-center text-base-content/60">to</span>
                   <input
                     type="date"
                     class="input input-bordered input-sm w-full"
+                    [id]="uid + '-end-' + prop.column_name"
+                    [attr.aria-label]="'a11y.filter_end_date' | translate:{ field: prop.display_name }"
                     [value]="filterState()[prop.column_name + '_end'] || ''"
-                    (change)="onDateChange($event, prop.column_name + '_end')"
-                    placeholder="End date" />
+                    (change)="onDateChange($event, prop.column_name + '_end')" />
                 </div>
               }
 
@@ -109,6 +122,8 @@
                   <input
                     type="number"
                     class="input input-bordered input-sm w-full"
+                    [id]="uid + '-min-' + prop.column_name"
+                    [attr.aria-label]="'a11y.filter_min' | translate:{ field: prop.display_name }"
                     [value]="filterState()[prop.column_name + '_min'] || ''"
                     (input)="onNumberChange($event, prop.column_name + '_min')"
                     placeholder="Min" />
@@ -116,6 +131,8 @@
                   <input
                     type="number"
                     class="input input-bordered input-sm w-full"
+                    [id]="uid + '-max-' + prop.column_name"
+                    [attr.aria-label]="'a11y.filter_max' | translate:{ field: prop.display_name }"
                     [value]="filterState()[prop.column_name + '_max'] || ''"
                     (input)="onNumberChange($event, prop.column_name + '_max')"
                     placeholder="Max" />
