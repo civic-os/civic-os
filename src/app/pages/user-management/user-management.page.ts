@@ -41,11 +41,11 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           <p class="text-base-content/60 mt-1">Create and manage user accounts</p>
         </div>
         <div class="flex gap-2">
-          <button class="btn btn-outline" (click)="openImportModal()">
+          <button type="button" class="btn btn-outline" (click)="openImportModal()">
             <span class="material-symbols-outlined" aria-hidden="true">upload</span>
             Import Users
           </button>
-          <button class="btn btn-primary" (click)="openCreateModal()">
+          <button type="button" class="btn btn-primary" (click)="openCreateModal()">
             <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
             Create User
           </button>
@@ -170,17 +170,17 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
                         }
                       }
                       @if (user.status === 'active' && user.id) {
-                        <button class="btn btn-xs btn-ghost" title="Edit user" [attr.aria-label]="'a11y.edit_user' | translate"
+                        <button type="button" class="btn btn-xs btn-ghost" title="Edit user" [attr.aria-label]="'a11y.edit_user' | translate"
                                 (click)="openEditModal(user)">
                           <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                         </button>
                       }
                       @if (user.status === 'failed') {
-                        <button class="btn btn-xs btn-ghost" title="View error" [attr.aria-label]="'a11y.view_error' | translate"
+                        <button type="button" class="btn btn-xs btn-ghost" title="View error" [attr.aria-label]="'a11y.view_error' | translate"
                                 (click)="viewError(user)">
                           <span class="material-symbols-outlined text-sm" aria-hidden="true">info</span>
                         </button>
-                        <button class="btn btn-xs btn-primary" title="Retry" [attr.aria-label]="'a11y.retry' | translate"
+                        <button type="button" class="btn btn-xs btn-primary" title="Retry" [attr.aria-label]="'a11y.retry' | translate"
                                 (click)="retryUser(user)">
                           <span class="material-symbols-outlined text-sm" aria-hidden="true">refresh</span>
                         </button>
@@ -199,7 +199,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
         <div class="alert alert-error mt-4">
           <span class="material-symbols-outlined" aria-hidden="true">error</span>
           <span>{{ errorMessage() }}</span>
-          <button class="btn btn-sm btn-ghost" (click)="errorMessage.set(undefined)">Dismiss</button>
+          <button type="button" class="btn btn-sm btn-ghost" (click)="errorMessage.set(undefined)">Dismiss</button>
         </div>
       }
 
@@ -208,7 +208,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
         <div class="alert alert-success mt-4">
           <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
           <span>{{ successMessage() }}</span>
-          <button class="btn btn-sm btn-ghost" (click)="successMessage.set(undefined)">Dismiss</button>
+          <button type="button" class="btn btn-sm btn-ghost" (click)="successMessage.set(undefined)">Dismiss</button>
         </div>
       }
     </div>
@@ -221,13 +221,13 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="label"><span class="label-text">First Name *</span></label>
+              <div class="label"><span class="label-text">First Name *</span></div>
               <input type="text" class="input input-bordered w-full"
                      [ngModel]="newUser.first_name"
                      (ngModelChange)="newUser.first_name = $event" />
             </div>
             <div>
-              <label class="label"><span class="label-text">Last Name *</span></label>
+              <div class="label"><span class="label-text">Last Name *</span></div>
               <input type="text" class="input input-bordered w-full"
                      [ngModel]="newUser.last_name"
                      (ngModelChange)="newUser.last_name = $event" />
@@ -235,21 +235,21 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           </div>
 
           <div class="mt-3">
-            <label class="label"><span class="label-text">Email *</span></label>
+            <div class="label"><span class="label-text">Email *</span></div>
             <input type="email" class="input input-bordered w-full"
                    [ngModel]="newUser.email"
                    (ngModelChange)="newUser.email = $event" />
           </div>
 
           <div class="mt-3">
-            <label class="label"><span class="label-text">Phone</span></label>
+            <div class="label"><span class="label-text">Phone</span></div>
             <input type="tel" class="input input-bordered w-full" placeholder="5551234567"
                    [ngModel]="newUser.phone"
                    (ngModelChange)="newUser.phone = $event" />
           </div>
 
           <div class="mt-3">
-            <label class="label"><span class="label-text">Roles</span></label>
+            <div class="label"><span class="label-text">Roles</span></div>
             <div class="flex flex-wrap gap-2">
               @for (role of manageableRoles(); track role.role_id) {
                 <label class="cursor-pointer flex items-center gap-1">
@@ -284,8 +284,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           }
 
           <div class="modal-action">
-            <button class="btn" (click)="closeCreateModal()">Cancel</button>
-            <button class="btn btn-primary" [disabled]="createLoading()"
+            <button type="button" class="btn" (click)="closeCreateModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" [disabled]="createLoading()"
                     (click)="submitCreateUser()">
               @if (createLoading()) {
                 <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
@@ -306,7 +306,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           <p class="text-sm text-base-content/70 mb-4">{{ errorDetailUser()?.display_name }} ({{ errorDetailUser()?.email }})</p>
           <div class="bg-error/10 text-error p-3 rounded-lg text-sm font-mono whitespace-pre-wrap">{{ errorDetailUser()?.error_message }}</div>
           <div class="modal-action">
-            <button class="btn" (click)="showErrorModal.set(false)">Close</button>
+            <button type="button" class="btn" (click)="showErrorModal.set(false)">Close</button>
           </div>
         </div>
         <button type="button" class="modal-backdrop" [attr.aria-label]="'a11y.close_dialog' | translate" (click)="showErrorModal.set(false)"></button>
@@ -359,7 +359,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           }
 
           <div class="modal-action">
-            <button class="btn" (click)="closeEditModal()">Close</button>
+            <button type="button" class="btn" (click)="closeEditModal()">Close</button>
           </div>
         </div>
         <button type="button" class="modal-backdrop" [attr.aria-label]="'a11y.close_dialog' | translate" (click)="closeEditModal()"></button>

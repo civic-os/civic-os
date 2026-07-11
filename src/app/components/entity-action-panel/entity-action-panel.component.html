@@ -48,10 +48,10 @@
         <div [formGroup]="form" class="space-y-4 mb-6">
           @for (param of action.parameters; track param.param_name) {
             <fieldset>
-              <label class="label font-semibold">
+              <div class="label font-semibold">
                 {{ param.display_name }}
                 @if (param.required) { <span class="text-error">*</span> }
-              </label>
+              </div>
 
               @switch (param.param_type) {
                 @case ('text') {
@@ -227,13 +227,13 @@
 
       <!-- Actions -->
       <div class="cos-modal-action">
-        <button
+        <button type="button"
           class="btn"
           (click)="closeActionModal()"
           [disabled]="actionLoading()">
           {{ 'action.cancel' | translate }}
         </button>
-        <button
+        <button type="button"
           [class]="'btn btn-' + action.button_style"
           (click)="confirmEntityAction()"
           [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">

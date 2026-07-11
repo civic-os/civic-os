@@ -75,7 +75,7 @@ export interface ActionButton {
     <div class="flex gap-2 items-center" #container>
       <!-- Visible buttons -->
       @for (btn of visibleButtons(); track btn.id) {
-        <button
+        <button type="button"
           [class]="'btn btn-sm ' + btn.style"
           [disabled]="btn.disabled"
           [title]="btn.tooltip || ''"
@@ -91,14 +91,14 @@ export interface ActionButton {
       <!-- More dropdown (when overflow exists) -->
       @if (overflowButtons().length > 0) {
         <div class="dropdown dropdown-end">
-          <button tabindex="0" class="btn btn-sm btn-ghost btn-outline">
+          <button type="button" tabindex="0" class="btn btn-sm btn-ghost btn-outline">
             More
             <span class="material-symbols-outlined text-lg" aria-hidden="true">expand_more</span>
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box shadow-lg z-10 w-56 p-2">
             @for (btn of overflowButtons(); track btn.id) {
               <li>
-                <button
+                <button type="button"
                   [disabled]="btn.disabled"
                   [class]="getDropdownItemClass(btn)"
                   [title]="btn.tooltip || ''"
@@ -118,7 +118,7 @@ export interface ActionButton {
     <!-- Hidden measurement container for calculating button widths -->
     <div class="absolute opacity-0 pointer-events-none flex gap-2" #measureContainer aria-hidden="true">
       @for (btn of buttons(); track btn.id) {
-        <button [class]="'btn btn-sm ' + btn.style">
+        <button type="button" [class]="'btn btn-sm ' + btn.style">
           @if (btn.icon) {
             <span class="material-symbols-outlined text-lg" aria-hidden="true">{{btn.icon}}</span>
           }

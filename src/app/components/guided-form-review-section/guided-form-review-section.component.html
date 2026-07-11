@@ -43,7 +43,7 @@
               </div>
             }
             @if (!readOnly()) {
-              <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep('__parent__')">
+              <button type="button" class="btn btn-sm btn-outline mt-4" (click)="onEditStep('__parent__')">
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                 Edit
               </button>
@@ -85,7 +85,7 @@
                 </div>
               }
               @if (!readOnly()) {
-                <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
+                <button type="button" class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   Edit
                 </button>
@@ -93,7 +93,7 @@
             } @else {
               <p class="text-sm opacity-60">This optional step was skipped.</p>
               @if (!readOnly()) {
-                <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
+                <button type="button" class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   Fill In
                 </button>
@@ -107,7 +107,7 @@
 
   @if (!submitted()) {
     <div class="mt-6 flex justify-end">
-      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting()">
+      <button type="button" class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting()">
         @if (submitting()) {
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Submitting...

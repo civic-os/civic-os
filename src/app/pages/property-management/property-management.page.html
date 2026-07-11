@@ -22,9 +22,9 @@
   @if (!adminLoading() && isAdmin()) {
     <!-- Entity Selector -->
     <div class="mb-6">
-      <label class="label me-2">
+      <div class="label me-2">
         <span class="label-text font-semibold">Select Entity</span>
-      </label>
+      </div>
       <select
         class="select select-bordered w-full max-w-md"
         [(ngModel)]="selectedEntity"
@@ -91,7 +91,7 @@
                     <div class="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                       <!-- Type indicator -->
                       <div>
-                        <label class="label label-text text-xs">Type</label>
+                        <div class="label label-text text-xs">Type</div>
                         <div class="flex items-center gap-2">
                           <span class="material-symbols-outlined text-info" aria-hidden="true">description</span>
                           <span class="text-sm font-semibold text-info">Static Text</span>
@@ -100,7 +100,7 @@
 
                       <!-- Content preview -->
                       <div class="md:col-span-2">
-                        <label class="label label-text text-xs">Content Preview</label>
+                        <div class="label label-text text-xs">Content Preview</div>
                         <div class="text-sm text-base-content/70 line-clamp-1">
                           {{ item.content.substring(0, 100) }}{{ item.content.length > 100 ? '...' : '' }}
                         </div>
@@ -108,7 +108,7 @@
 
                       <!-- Expand Button -->
                       <div class="flex items-center gap-2 justify-end">
-                        <button
+                        <button type="button"
                           class="btn btn-sm btn-ghost"
                           (click)="toggleExpanded(item)"
                           [attr.aria-label]="item.expanded ? ('a11y.collapse_row' | translate) : ('a11y.expand_row' | translate)">
@@ -137,7 +137,7 @@
                       <div class="grid grid-cols-1 gap-4">
                         <!-- Full Content Preview -->
                         <div>
-                          <label class="label label-text text-xs">Full Content</label>
+                          <div class="label label-text text-xs">Full Content</div>
                           <div class="prose prose-sm max-w-none bg-base-100 p-4 rounded-lg">
                             {{ item.content }}
                           </div>
@@ -145,7 +145,7 @@
 
                         <!-- Column Width -->
                         <div>
-                          <label class="label label-text text-xs">Grid Width (columns)</label>
+                          <div class="label label-text text-xs">Grid Width (columns)</div>
                           <input
                             type="number"
                             class="input input-sm input-bordered w-full max-w-xs"
@@ -155,14 +155,14 @@
                             placeholder="8 (full width)"
                             min="1"
                             max="8" />
-                          <label class="label">
+                          <div class="label">
                             <span class="label-text-alt text-xs text-base-content/60">1-8 columns (8 = full width on large screens)</span>
-                          </label>
+                          </div>
                         </div>
 
                         <!-- Visibility Toggles -->
                         <div>
-                          <label class="label label-text text-xs font-semibold">Visibility</label>
+                          <div class="label label-text text-xs font-semibold">Visibility</div>
                           <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div class="form-control">
                               <label class="label cursor-pointer justify-start gap-2">
@@ -240,19 +240,19 @@
                     <div class="flex-grow grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
                       <!-- Column Name (read-only) -->
                       <div>
-                        <label class="label label-text text-xs">Column Name</label>
+                        <div class="label label-text text-xs">Column Name</div>
                         <div class="font-mono text-sm font-semibold">{{ item.column_name }}</div>
                       </div>
 
                       <!-- Type (read-only) -->
                       <div>
-                        <label class="label label-text text-xs">Type</label>
+                        <div class="label label-text text-xs">Type</div>
                         <div class="text-sm">{{ getPropertyTypeLabel(item) }}</div>
                       </div>
 
                       <!-- Default Value (read-only) -->
                       <div>
-                        <label class="label label-text text-xs">Default</label>
+                        <div class="label label-text text-xs">Default</div>
                         <div class="text-sm text-base-content/60">
                           {{ item.column_default || '-' }}
                         </div>
@@ -260,7 +260,7 @@
 
                       <!-- Display Name (editable) -->
                       <div>
-                        <label class="label label-text text-xs">Display Name</label>
+                        <div class="label label-text text-xs">Display Name</div>
                         <input
                           type="text"
                           class="input input-sm input-bordered w-full"
@@ -294,7 +294,7 @@
 
                       <!-- Expand Button -->
                       <div class="flex items-center gap-2 justify-end">
-                        <button
+                        <button type="button"
                           class="btn btn-sm btn-ghost"
                           (click)="toggleExpanded(item)"
                           [attr.aria-label]="item.expanded ? ('a11y.collapse_row' | translate) : ('a11y.expand_row' | translate)">
@@ -323,7 +323,7 @@
                       <div class="grid grid-cols-1 gap-4">
                         <!-- Description -->
                         <div>
-                          <label class="label label-text text-xs">Description</label>
+                          <div class="label label-text text-xs">Description</div>
                           <textarea
                             class="textarea textarea-bordered w-full"
                             rows="3"
@@ -335,7 +335,7 @@
 
                         <!-- Column Width -->
                         <div>
-                          <label class="label label-text text-xs">Grid Width (columns)</label>
+                          <div class="label label-text text-xs">Grid Width (columns)</div>
                           <input
                             type="number"
                             class="input input-sm input-bordered w-full max-w-xs"
@@ -345,14 +345,14 @@
                             placeholder="Auto (1 or 2 based on type)"
                             min="1"
                             max="8" />
-                          <label class="label">
+                          <div class="label">
                             <span class="label-text-alt text-xs text-base-content/60">1-8 columns (8 = full width on large screens)</span>
-                          </label>
+                          </div>
                         </div>
 
                         <!-- Visibility Toggles -->
                         <div>
-                          <label class="label label-text text-xs font-semibold">Visibility</label>
+                          <div class="label label-text text-xs font-semibold">Visibility</div>
                           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="form-control">
                               <label class="label cursor-pointer justify-start gap-2">

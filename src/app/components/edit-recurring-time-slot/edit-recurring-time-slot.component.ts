@@ -109,9 +109,9 @@ export interface RecurringTimeSlotValue {
       <!-- Time Slot Inputs -->
       <div class="grid grid-cols-2 gap-4">
         <div class="form-control">
-          <label class="label">
+          <div class="label">
             <span class="label-text">Start</span>
-          </label>
+          </div>
           <input
             type="datetime-local"
             class="input input-bordered w-full"
@@ -121,9 +121,9 @@ export interface RecurringTimeSlotValue {
           />
         </div>
         <div class="form-control">
-          <label class="label">
+          <div class="label">
             <span class="label-text">End</span>
-          </label>
+          </div>
           <input
             type="datetime-local"
             class="input input-bordered w-full"
@@ -159,9 +159,9 @@ export interface RecurringTimeSlotValue {
         <div class="border rounded-lg p-4 bg-base-200/50 space-y-4">
           <!-- Series Name -->
           <div class="form-control">
-            <label class="label">
+            <div class="label">
               <span class="label-text font-medium">Series Name</span>
-            </label>
+            </div>
             <input
               type="text"
               class="input input-bordered w-full"
@@ -174,9 +174,9 @@ export interface RecurringTimeSlotValue {
 
           <!-- Series Description (optional) -->
           <div class="form-control">
-            <label class="label">
+            <div class="label">
               <span class="label-text">Description (optional)</span>
-            </label>
+            </div>
             <textarea
               class="textarea textarea-bordered"
               rows="2"
@@ -189,9 +189,9 @@ export interface RecurringTimeSlotValue {
 
           <!-- Series Color (optional) -->
           <div class="form-control">
-            <label class="label">
+            <div class="label">
               <span class="label-text">Color (optional)</span>
-            </label>
+            </div>
             <div class="flex items-center gap-2">
               <input
                 type="color"

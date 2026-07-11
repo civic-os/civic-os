@@ -66,9 +66,9 @@
                     } @else if (showCompletedStepDisplayMode() && isProperty(item) && item.type === 17 && item.show_inline) {
                       <!-- Completed step display mode: read-only M:M chips -->
                       <div class="col-span-full py-4">
-                        <label class="label">
+                        <div class="label">
                           <span class="font-semibold text-base">{{ item.display_name }}</span>
-                        </label>
+                        </div>
                         <div class="flex flex-wrap gap-2">
                           @for (rel of currentData?.[item.column_name] || []; track rel.id) {
                             <a
@@ -231,8 +231,8 @@
         ></app-save-progress>
         @if (saveComplete()) {
           <div class="flex flex-col gap-2 w-full mt-4">
-            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">{{ 'form.back_to_record' | translate }}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
+            <button type="button" class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">{{ 'form.back_to_record' | translate }}</button>
+            <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
           </div>
         }
       } @else {
@@ -243,8 +243,8 @@
         </h3>
         <p class="mb-4">{{ 'form.update_success' | translate }}</p>
         <div class="flex flex-col gap-2 w-full">
-          <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">{{ 'form.back_to_record' | translate }}</button>
-          <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
+          <button type="button" class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="navToRecord(entity.table_name, entityId)">{{ 'form.back_to_record' | translate }}</button>
+          <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
         </div>
       }
     </cos-modal>
@@ -270,8 +270,8 @@
         </div>
       }
       <div class="flex flex-col gap-2 w-full">
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">{{ 'form.try_again' | translate }}</button>
-        <button class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
+        <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="closeErrorModal()">{{ 'form.try_again' | translate }}</button>
+        <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="navToList(entity.table_name)">{{ 'detail.back_to_list' | translate:{ entity: entity.display_name } }}</button>
       </div>
     </cos-modal>
 

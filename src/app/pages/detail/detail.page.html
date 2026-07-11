@@ -37,7 +37,7 @@
           <!-- Continue button for in-progress draft guided forms -->
           @if (guidedFormStatusKey() === 'draft' && !showReviewSection()) {
             <div class="flex justify-center my-4">
-              <button class="btn btn-primary btn-lg gap-2" (click)="continueGuidedForm()">
+              <button type="button" class="btn btn-primary btn-lg gap-2" (click)="continueGuidedForm()">
                 <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
                 {{ 'guided_form.continue' | translate }}
               </button>
@@ -106,9 +106,9 @@
           </h3>
           <p class="mb-4">{{ 'guided_form.submitted_message' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</p>
           <div class="flex flex-col gap-2 w-full">
-            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">{{ 'detail.view_record' | translate }}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">{{ 'guided_form.submit_another' | translate }}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">{{ 'detail.back_to_list' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</button>
+            <button type="button" class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">{{ 'detail.view_record' | translate }}</button>
+            <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">{{ 'guided_form.submit_another' | translate }}</button>
+            <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">{{ 'detail.back_to_list' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</button>
           </div>
         </cos-modal>
 
@@ -125,7 +125,7 @@
               } @else if (isProperty(item) && item.type === 17 && item.show_inline) {
                 <!-- v0.46.0: Inline M:M — read-only chip display in property grid -->
                 <div class="col-span-full">
-                  <label class="label"><span class="font-semibold">{{ item.display_name }}</span></label>
+                  <div class="label"><span class="font-semibold">{{ item.display_name }}</span></div>
                   <div class="flex flex-wrap gap-1">
                     @let allItems = data[item.column_name] || [];
                     @let isExpanded = isInlineM2mExpanded(item.column_name);
@@ -142,7 +142,7 @@
                       <span class="text-base-content/50 italic text-sm">{{ 'state.none' | translate }}</span>
                     }
                     @if (!isExpanded && allItems.length > INLINE_M2M_CHIP_LIMIT) {
-                      <button
+                      <button type="button"
                         class="badge badge-lg badge-ghost gap-1 py-3 px-3 cursor-pointer hover:bg-base-200 transition-colors"
                         (click)="toggleInlineM2mExpand(item.column_name)">
                         + {{ allItems.length - INLINE_M2M_CHIP_LIMIT }} more
@@ -272,13 +272,13 @@
 
           <!-- Actions -->
           <div class="cos-modal-action">
-            <button
+            <button type="button"
               class="btn"
               (click)="closeDeleteModal()"
               [disabled]="deleteLoading()">
               {{ 'action.cancel' | translate }}
             </button>
-            <button
+            <button type="button"
               class="btn btn-error"
               (click)="confirmDelete()"
               [disabled]="deleteLoading()">
@@ -344,10 +344,10 @@
                 <div [formGroup]="form" class="space-y-4 mb-6">
                   @for (param of action.parameters; track param.param_name) {
                     <fieldset>
-                      <label class="label font-semibold">
+                      <div class="label font-semibold">
                         {{ param.display_name }}
                         @if (param.required) { <span class="text-error">*</span> }
-                      </label>
+                      </div>
 
                       @switch (param.param_type) {
                         @case ('text') {
@@ -524,13 +524,13 @@
 
               <!-- Actions -->
               <div class="cos-modal-action">
-                <button
+                <button type="button"
                   class="btn"
                   (click)="closeActionModal()"
                   [disabled]="actionLoading()">
                   {{ 'action.cancel' | translate }}
                 </button>
-                <button
+                <button type="button"
                   [class]="'btn btn-' + action.button_style"
                   (click)="confirmEntityAction()"
                   [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">

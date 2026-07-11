@@ -64,12 +64,12 @@
         <!-- Add Button -->
         @if (entity.insert) {
           @if (entity.guided_form_key) {
-            <button class="btn btn-primary btn-sm" (click)="startGuidedForm(entity)" [attr.aria-label]="('guided_form.start_new' | translate) + ' ' + entity.display_name">
+            <button type="button" class="btn btn-primary btn-sm" (click)="startGuidedForm(entity)" [attr.aria-label]="('guided_form.start_new' | translate) + ' ' + entity.display_name">
               <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
               <span class="hidden sm:inline">{{ 'guided_form.start_new' | translate }} {{ entity.display_name }}</span>
             </button>
           } @else {
-            <button class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="('list.add_new' | translate) + ' ' + entity.display_name">
+            <button type="button" class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="('list.add_new' | translate) + ' ' + entity.display_name">
               <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
               <span class="hidden sm:inline">{{ 'action.add' | translate }} {{ entity.display_name }}</span>
             </button>
@@ -300,7 +300,7 @@
     </h3>
     <p class="mb-6">{{ guidedFormErrorMessage() }}</p>
     <div class="cos-modal-action">
-      <button class="btn" (click)="closeGuidedFormError()">{{ 'action.close' | translate }}</button>
+      <button type="button" class="btn" (click)="closeGuidedFormError()">{{ 'action.close' | translate }}</button>
     </div>
   </cos-modal>
   </div>

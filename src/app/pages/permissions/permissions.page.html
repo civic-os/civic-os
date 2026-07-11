@@ -3,7 +3,7 @@
 
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <button
+      <button type="button"
         class="btn btn-ghost btn-sm absolute top-2 end-2"
         (click)="dismissSuccess()">
         ✕
@@ -49,7 +49,7 @@
             }
           </select>
         </div>
-        <button
+        <button type="button"
           class="btn btn-primary"
           (click)="openCreateRoleModal()">
           + New Role
@@ -58,21 +58,21 @@
 
       <!-- Tabs (DaisyUI 5 syntax) -->
       <div role="tablist" class="tabs tabs-lift tabs-lg mb-6">
-        <button
+        <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'tables'"
           (click)="switchTab('tables')">
           Table Permissions
         </button>
-        <button
+        <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'actions'"
           (click)="switchTab('actions')">
           Entity Actions
         </button>
-        <button
+        <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'delegation'"
@@ -244,7 +244,7 @@
 
           <!-- Delete Role Button -->
           <div class="mt-6 pt-4 border-t border-base-300">
-            <button
+            <button type="button"
               class="btn btn-error btn-sm"
               (click)="openDeleteRoleModal()">
               <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
@@ -266,8 +266,8 @@
     </p>
 
     <div class="cos-modal-action">
-      <button class="btn" (click)="closeDeleteRoleModal()" [disabled]="deleteLoading()">Cancel</button>
-      <button class="btn btn-error" (click)="submitDeleteRole()" [disabled]="deleteLoading()">
+      <button type="button" class="btn" (click)="closeDeleteRoleModal()" [disabled]="deleteLoading()">Cancel</button>
+      <button type="button" class="btn btn-error" (click)="submitDeleteRole()" [disabled]="deleteLoading()">
         @if (deleteLoading()) {
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Deleting...
@@ -326,13 +326,13 @@
 
     <!-- Actions -->
     <div class="cos-modal-action">
-      <button
+      <button type="button"
         class="btn"
         (click)="closeCreateRoleModal()"
         [disabled]="createLoading()">
         Cancel
       </button>
-      <button
+      <button type="button"
         class="btn btn-primary"
         (click)="submitCreateRole()"
         [disabled]="createLoading()">

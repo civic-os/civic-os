@@ -61,13 +61,13 @@
 
     <!-- Submit Button -->
     <div class="flex gap-2 justify-end">
-      <button
+      <button type="button"
         class="btn"
         (click)="handleClose()"
         [disabled]="processing()">
         Cancel
       </button>
-      <button
+      <button type="button"
         class="btn btn-primary"
         (click)="handleSubmit()"
         [disabled]="processing()">
@@ -85,7 +85,7 @@
   <!-- Error State Actions -->
   @if (error() && !loading()) {
     <div class="flex justify-end">
-      <button class="btn" (click)="handleClose()">Close</button>
+      <button type="button" class="btn" (click)="handleClose()">Close</button>
     </div>
   }
 

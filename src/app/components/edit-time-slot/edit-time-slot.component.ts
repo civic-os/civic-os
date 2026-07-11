@@ -44,9 +44,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   template: `
     <div class="time-slot-editor grid grid-cols-1 gap-4">
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text">Start</span>
-        </label>
+        </div>
         <input
           type="datetime-local"
           class="input input-bordered w-full"
@@ -57,9 +57,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       </div>
 
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text">End</span>
-        </label>
+        </div>
         <input
           type="datetime-local"
           class="input input-bordered w-full"

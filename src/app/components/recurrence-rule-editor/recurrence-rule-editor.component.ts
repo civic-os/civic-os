@@ -59,9 +59,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     <div class="recurrence-editor space-y-4">
       <!-- Frequency -->
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text font-medium">Repeat</span>
-        </label>
+        </div>
         <select
           class="select select-bordered w-full"
           [ngModel]="frequency()"
@@ -77,9 +77,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- Interval -->
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text">Every</span>
-        </label>
+        </div>
         <div class="flex items-center gap-2">
           <input
             type="number"
@@ -97,9 +97,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       <!-- Day of Week (for WEEKLY) -->
       @if (frequency() === 'WEEKLY') {
         <div class="form-control">
-          <label class="label">
+          <div class="label">
             <span class="label-text">On these days</span>
-          </label>
+          </div>
           <div class="flex flex-wrap gap-2">
             @for (day of daysOfWeek; track day.code) {
               <label class="cursor-pointer">
@@ -123,9 +123,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       <!-- Monthly Type Selector (for MONTHLY) -->
       @if (frequency() === 'MONTHLY') {
         <div class="form-control mb-2">
-          <label class="label">
+          <div class="label">
             <span class="label-text">Repeat by</span>
-          </label>
+          </div>
           <div class="space-y-2">
             <!-- Day of Month option -->
             <label class="flex items-center gap-2 cursor-pointer">
@@ -189,9 +189,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- End Condition -->
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text font-medium">Ends</span>
-        </label>
+        </div>
         <div class="space-y-2">
           <label class="flex items-center gap-2 cursor-pointer">
             <input

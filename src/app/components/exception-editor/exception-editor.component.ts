@@ -165,9 +165,9 @@ export interface ExceptionEditorResult {
       <!-- Reason (for delete) -->
       @if (operation === 'delete' && selectedScope() === 'this_only') {
         <div class="form-control mt-4">
-          <label class="label">
+          <div class="label">
             <span class="label-text">Reason (optional)</span>
-          </label>
+          </div>
           <textarea
             class="textarea textarea-bordered"
             rows="2"
@@ -179,8 +179,9 @@ export interface ExceptionEditorResult {
       }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn btn-ghost" (click)="onCancel()">Cancel</button>
         <button
+          type="button"
           class="btn"
           [class.btn-error]="operation === 'delete'"
           [class.btn-primary]="operation !== 'delete'"

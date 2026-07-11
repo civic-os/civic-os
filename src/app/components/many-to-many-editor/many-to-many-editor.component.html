@@ -1,13 +1,13 @@
 <div class="many-to-many-editor py-4">
-  <label class="label">
+  <div class="label">
     <span class="font-semibold text-base">{{ property().display_name }}</span>
-  </label>
+  </div>
 
   <!-- Error message -->
   @if (error()) {
     <div class="alert alert-error mb-3">
       <span>{{ error() }}</span>
-      <button class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
     </div>
   }
 

@@ -59,13 +59,13 @@
   </div>
 
   <div class="cos-modal-action">
-    <button
+    <button type="button"
       class="btn btn-ghost"
       (click)="closeExportModal()"
       [disabled]="isExporting()">
       {{ 'action.cancel' | translate }}
     </button>
-    <button
+    <button type="button"
       class="btn btn-primary"
       (click)="confirmExport()"
       [disabled]="isExporting()">

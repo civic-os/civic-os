@@ -115,7 +115,7 @@ type EditTab = 'info' | 'schedule' | 'template';
             </div>
           </div>
 
-          <button class="btn btn-ghost btn-sm btn-circle" (click)="onClose()" [attr.aria-label]="'action.close' | translate">
+          <button type="button" class="btn btn-ghost btn-sm btn-circle" (click)="onClose()" [attr.aria-label]="'action.close' | translate">
             <span class="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
@@ -144,7 +144,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                 <span class="material-symbols-outlined text-base" aria-hidden="true">schedule</span>
                 Schedule
               </h3>
-              <button class="btn btn-ghost btn-xs" (click)="openEditModal('schedule')" [attr.aria-label]="'action.edit' | translate">
+              <button type="button" class="btn btn-ghost btn-xs" (click)="openEditModal('schedule')" [attr.aria-label]="'action.edit' | translate">
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
               </button>
             </div>
@@ -185,7 +185,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                 <span class="material-symbols-outlined text-base" aria-hidden="true">description</span>
                 Template
               </h3>
-              <button class="btn btn-ghost btn-xs" (click)="openEditModal('template')" [attr.aria-label]="'action.edit' | translate">
+              <button type="button" class="btn btn-ghost btn-xs" (click)="openEditModal('template')" [attr.aria-label]="'action.edit' | translate">
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
               </button>
             </div>
@@ -272,6 +272,7 @@ type EditTab = 'info' | 'schedule' | 'template';
           <!-- Instance Filter Tabs -->
           <div class="tabs tabs-box mb-3 text-sm">
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'upcoming'"
               (click)="setInstanceFilter('upcoming')"
@@ -279,6 +280,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Upcoming
             </button>
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'past'"
               (click)="setInstanceFilter('past')"
@@ -286,6 +288,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Past
             </button>
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'exceptions'"
               (click)="setInstanceFilter('exceptions')"
@@ -293,6 +296,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Exceptions
             </button>
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'all'"
               (click)="setInstanceFilter('all')"
@@ -360,11 +364,11 @@ type EditTab = 'info' | 'schedule' | 'template';
 
         <!-- Actions -->
         <div class="flex gap-2 pt-4 border-t">
-          <button class="btn btn-outline btn-primary flex-1" (click)="openEditModal('info')">
+          <button type="button" class="btn btn-outline btn-primary flex-1" (click)="openEditModal('info')">
             <span class="material-symbols-outlined" aria-hidden="true">edit</span>
             Edit
           </button>
-          <button class="btn btn-outline btn-error flex-1" (click)="onDeleteClick()">
+          <button type="button" class="btn btn-outline btn-error flex-1" (click)="onDeleteClick()">
             <span class="material-symbols-outlined" aria-hidden="true">delete</span>
             Delete
           </button>
@@ -379,8 +383,8 @@ type EditTab = 'info' | 'schedule' | 'template';
               <p class="text-sm">This will delete all {{ group.active_instance_count || 0 }} occurrences. This cannot be undone.</p>
             </div>
             <div class="flex gap-2">
-              <button class="btn btn-sm btn-ghost" (click)="showDeleteConfirm.set(false)">Cancel</button>
-              <button class="btn btn-sm btn-error" (click)="confirmDelete()">Delete</button>
+              <button type="button" class="btn btn-sm btn-ghost" (click)="showDeleteConfirm.set(false)">Cancel</button>
+              <button type="button" class="btn btn-sm btn-error" (click)="confirmDelete()">Delete</button>
             </div>
           </div>
         }
@@ -399,6 +403,7 @@ type EditTab = 'info' | 'schedule' | 'template';
           <!-- Tab Navigation (DaisyUI 5 lift style) -->
           <div role="tablist" class="tabs tabs-lift mb-4">
             <button
+              type="button"
               role="tab"
               class="tab"
               [class.tab-active]="editTab() === 'info'"
@@ -407,6 +412,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Info
             </button>
             <button
+              type="button"
               role="tab"
               class="tab"
               [class.tab-active]="editTab() === 'schedule'"
@@ -415,6 +421,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Schedule
             </button>
             <button
+              type="button"
               role="tab"
               class="tab"
               [class.tab-active]="editTab() === 'template'"
@@ -429,9 +436,9 @@ type EditTab = 'info' | 'schedule' | 'template';
           @if (editTab() === 'info') {
             <div class="space-y-4">
               <div class="form-control">
-                <label class="label">
+                <div class="label">
                   <span class="label-text">Display Name</span>
-                </label>
+                </div>
                 <input
                   type="text"
                   class="input input-bordered w-full"
@@ -441,9 +448,9 @@ type EditTab = 'info' | 'schedule' | 'template';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <div class="label">
                   <span class="label-text">Description</span>
-                </label>
+                </div>
                 <textarea
                   class="textarea textarea-bordered w-full"
                   rows="3"
@@ -453,9 +460,9 @@ type EditTab = 'info' | 'schedule' | 'template';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <div class="label">
                   <span class="label-text">Color</span>
-                </label>
+                </div>
                 <div class="flex items-center gap-3">
                   <input
                     type="color"
@@ -561,8 +568,8 @@ type EditTab = 'info' | 'schedule' | 'template';
           }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
-        <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving()">
+        <button type="button" class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveEdit()" [disabled]="saving()">
           @if (saving()) {
             <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }

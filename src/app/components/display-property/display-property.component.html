@@ -1,6 +1,6 @@
 <div class="mb-4 w-full">
   @if (showLabel()) {
-    <label class="label">
+    <div class="label">
       <span class="font-semibold">
         {{ prop().display_name }}
         @if (prop().description) {
@@ -10,7 +10,7 @@
           <span class="sr-only">{{ prop().description }}</span>
         }
       </span>
-    </label>
+    </div>
   }
   <div>
 @if (datum() != null) {

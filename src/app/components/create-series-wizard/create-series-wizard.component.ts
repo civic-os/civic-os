@@ -82,7 +82,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       <!-- Header with Steps -->
       <div class="flex items-center justify-between mb-6">
         <h3 class="font-bold text-lg">Create Recurring Series</h3>
-        <button class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()" [attr.aria-label]="'action.close' | translate">
+        <button type="button" class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()" [attr.aria-label]="'action.close' | translate">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
@@ -106,9 +106,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             @if (currentStep() === 1) {
               <form [formGroup]="infoForm" class="space-y-4">
                 <div class="form-control">
-                  <label class="label">
+                  <div class="label">
                     <span class="label-text font-medium">Entity Type *</span>
-                  </label>
+                  </div>
                   <select
                     class="select select-bordered w-full"
                     formControlName="entity_table"
@@ -127,9 +127,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                 </div>
 
                 <div class="form-control">
-                  <label class="label">
+                  <div class="label">
                     <span class="label-text font-medium">Series Name *</span>
-                  </label>
+                  </div>
                   <input
                     type="text"
                     class="input input-bordered w-full"
@@ -139,9 +139,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                 </div>
 
                 <div class="form-control">
-                  <label class="label">
+                  <div class="label">
                     <span class="label-text">Description</span>
-                  </label>
+                  </div>
                   <textarea
                     class="textarea textarea-bordered w-full"
                     rows="3"
@@ -151,9 +151,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                 </div>
 
                 <div class="form-control">
-                  <label class="label">
+                  <div class="label">
                     <span class="label-text">Color</span>
-                  </label>
+                  </div>
                   <div class="flex items-center gap-3">
                     <input
                       type="color"
@@ -307,14 +307,14 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- Footer with Navigation -->
       <div class="cos-modal-action border-t pt-4 mt-4">
-        <button class="btn btn-ghost" (click)="onCancel()" [disabled]="creating()">
+        <button type="button" class="btn btn-ghost" (click)="onCancel()" [disabled]="creating()">
           Cancel
         </button>
 
         <div class="flex-1"></div>
 
         @if (currentStep() > 1) {
-          <button class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
+          <button type="button" class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
             <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
             Back
           </button>
@@ -322,6 +322,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
         @if (currentStep() < 4) {
           <button
+            type="button"
             class="btn btn-primary"
             (click)="nextStep()"
             [disabled]="!canProceed()"
@@ -331,6 +332,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
           </button>
         } @else {
           <button
+            type="button"
             class="btn btn-primary"
             (click)="createSeries()"
             [disabled]="creating() || loadingPreview() || previewOccurrences().length === 0"

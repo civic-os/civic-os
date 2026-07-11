@@ -6,7 +6,7 @@
         <h2 class="card-title text-xl">Notes</h2>
         <div class="flex gap-2">
           @if (canCreate() && !showAddForm()) {
-            <button
+            <button type="button"
               class="btn btn-sm btn-outline gap-1"
               (click)="showAddForm.set(true)">
               <span class="material-symbols-outlined text-lg" aria-hidden="true">add</span>
@@ -14,7 +14,7 @@
             </button>
           }
           @if (hasNotes() && canRead()) {
-            <button
+            <button type="button"
               class="btn btn-sm btn-ghost gap-1"
               (click)="exportNotes()"
               title="Export notes to Excel">
@@ -32,7 +32,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>{{ error() }}</span>
-          <button class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
+          <button type="button" class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
         </div>
       }
 
@@ -90,13 +90,13 @@
               </textarea>
             </div>
             <div class="flex justify-end gap-2 mt-2">
-              <button
+              <button type="button"
                 class="btn btn-ghost btn-sm"
                 (click)="showAddForm.set(false); newNoteContent.set('')"
                 [disabled]="submitting()">
                 Cancel
               </button>
-              <button
+              <button type="button"
                 class="btn btn-primary btn-sm"
                 (click)="addNote()"
                 [disabled]="!newNoteContent().trim() || submitting()">
@@ -131,7 +131,7 @@
                       [disabled]="saving()">
                     </textarea>
                     <div class="flex gap-2 mt-2">
-                      <button
+                      <button type="button"
                         class="btn btn-primary btn-sm"
                         (click)="saveEdit()"
                         [disabled]="!editingContent().trim() || saving()">
@@ -140,7 +140,7 @@
                         }
                         Save
                       </button>
-                      <button
+                      <button type="button"
                         class="btn btn-ghost btn-sm"
                         (click)="cancelEditing()"
                         [disabled]="saving()">
@@ -175,7 +175,7 @@
                     @if (canEditNote(note) || canDeleteNote(note)) {
                       <div class="flex-shrink-0 flex gap-1">
                         @if (canEditNote(note)) {
-                          <button
+                          <button type="button"
                             class="btn btn-ghost btn-xs"
                             title="Edit"
                             (click)="startEditing(note)">
@@ -185,7 +185,7 @@
                           </button>
                         }
                         @if (canDeleteNote(note)) {
-                          <button
+                          <button type="button"
                             class="btn btn-ghost btn-xs text-error"
                             title="Delete"
                             (click)="deleteNote(note)">
@@ -204,13 +204,13 @@
 
           <!-- Show more / Show less button -->
           @if (hiddenNotesCount() > 0) {
-            <button
+            <button type="button"
               class="btn btn-ghost btn-sm w-full mt-2"
               (click)="showAllNotes()">
               Show {{ hiddenNotesCount() }} more note{{ hiddenNotesCount() === 1 ? '' : 's' }}
             </button>
           } @else if (notes().length > INITIAL_DISPLAY_LIMIT) {
-            <button
+            <button type="button"
               class="btn btn-ghost btn-sm w-full mt-2"
               (click)="collapseNotes()">
               Show less

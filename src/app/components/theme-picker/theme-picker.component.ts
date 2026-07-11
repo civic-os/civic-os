@@ -54,7 +54,7 @@ interface ThemeItem {
       <h4 class="text-sm font-semibold opacity-70 mb-2">Recommended</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         @for (theme of recommendedItems(); track theme.name) {
-          <button
+          <button type="button"
             class="rounded-lg p-1 cursor-pointer transition-all hover:scale-[1.02]"
             [class.ring-2]="themeService.theme() === theme.name"
             [class.ring-primary]="themeService.theme() === theme.name"
@@ -81,7 +81,7 @@ interface ThemeItem {
         <h4 class="text-sm font-semibold opacity-70 mb-2">All Colors</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           @for (theme of otherItems(); track theme.name) {
-            <button
+            <button type="button"
               class="rounded-lg p-1 cursor-pointer transition-all hover:scale-[1.02]"
               [class.ring-2]="themeService.theme() === theme.name"
               [class.ring-primary]="themeService.theme() === theme.name"

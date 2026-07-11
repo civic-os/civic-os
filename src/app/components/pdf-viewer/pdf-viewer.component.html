@@ -15,7 +15,7 @@
         <!-- Fallback for browsers without PDF support -->
         <div class="p-8 text-center">
           <p class="mb-4">Your browser doesn't support embedded PDF viewing.</p>
-          <button (click)="downloadPdf()" class="btn btn-primary">
+          <button type="button" (click)="downloadPdf()" class="btn btn-primary">
             Download PDF
           </button>
         </div>
@@ -25,12 +25,12 @@
 
   <!-- Actions -->
   <div class="cos-modal-action">
-    <button (click)="openFullScreen()" class="btn">
+    <button type="button" (click)="openFullScreen()" class="btn">
       Open in New Tab
     </button>
-    <button (click)="downloadPdf()" class="btn btn-primary">
+    <button type="button" (click)="downloadPdf()" class="btn btn-primary">
       Download
     </button>
-    <button (click)="close()" class="btn">Close</button>
+    <button type="button" (click)="close()" class="btn">Close</button>
   </div>
 </cos-modal>

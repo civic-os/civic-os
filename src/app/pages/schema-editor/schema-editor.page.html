@@ -3,7 +3,7 @@
   <div class="toolbar">
     <h1 class="text-2xl font-bold">Schema Editor</h1>
     @if (!loading() && !error() && editMode()) {
-      <button class="btn btn-primary ms-4" (click)="autoArrange()">
+      <button type="button" class="btn btn-primary ms-4" (click)="autoArrange()">
         <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
         Auto-Arrange
       </button>
@@ -40,13 +40,13 @@
         <!-- Zoom Controls -->
         <div class="zoom-controls">
           <div class="join join-vertical">
-            <button class="btn btn-sm join-item" (click)="zoomIn()" title="Zoom In" [attr.aria-label]="'a11y.zoom_in' | translate">
+            <button type="button" class="btn btn-sm join-item" (click)="zoomIn()" title="Zoom In" [attr.aria-label]="'a11y.zoom_in' | translate">
               <span class="material-symbols-outlined" aria-hidden="true">add</span>
             </button>
-            <button class="btn btn-sm join-item" (click)="zoomOut()" title="Zoom Out" [attr.aria-label]="'a11y.zoom_out' | translate">
+            <button type="button" class="btn btn-sm join-item" (click)="zoomOut()" title="Zoom Out" [attr.aria-label]="'a11y.zoom_out' | translate">
               <span class="material-symbols-outlined" aria-hidden="true">remove</span>
             </button>
-            <button class="btn btn-sm join-item" (click)="zoomToFit()" title="Zoom to Fit" [attr.aria-label]="'a11y.zoom_to_fit' | translate">
+            <button type="button" class="btn btn-sm join-item" (click)="zoomToFit()" title="Zoom to Fit" [attr.aria-label]="'a11y.zoom_to_fit' | translate">
               <span class="material-symbols-outlined" aria-hidden="true">fit_screen</span>
             </button>
           </div>
@@ -70,7 +70,7 @@
                   <li>System types (Files, Users) appear as property types, not relationships</li>
                 </ul>
               </div>
-              <button class="btn btn-sm btn-circle btn-ghost" (click)="toggleInstructions()" title="Minimize" [attr.aria-label]="'a11y.minimize' | translate">
+              <button type="button" class="btn btn-sm btn-circle btn-ghost" (click)="toggleInstructions()" title="Minimize" [attr.aria-label]="'a11y.minimize' | translate">
                 <span class="material-symbols-outlined" aria-hidden="true">remove</span>
               </button>
             </div>
@@ -78,7 +78,7 @@
         } @else {
           <!-- Minimized: Info Icon Button -->
           <div class="instructions-minimized">
-            <button class="btn btn-circle btn-info btn-sm" (click)="toggleInstructions()" title="Show Instructions" [attr.aria-label]="'a11y.show_instructions' | translate">
+            <button type="button" class="btn btn-circle btn-info btn-sm" (click)="toggleInstructions()" title="Show Instructions" [attr.aria-label]="'a11y.show_instructions' | translate">
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>

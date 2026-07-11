@@ -93,6 +93,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
         <!-- Tabs -->
         <div class="tabs tabs-box mb-4">
           <button
+            type="button"
             class="tab"
             [class.tab-active]="activeTab() === 'info'"
             (click)="activeTab.set('info')"
@@ -100,6 +101,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             Series Info
           </button>
           <button
+            type="button"
             class="tab"
             [class.tab-active]="activeTab() === 'template'"
             (click)="activeTab.set('template')"
@@ -107,6 +109,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             {{ group?.entity_table || 'Entity' }} Fields
           </button>
           <button
+            type="button"
             class="tab"
             [class.tab-active]="activeTab() === 'schedule'"
             (click)="activeTab.set('schedule')"
@@ -120,9 +123,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
           @if (activeTab() === 'info') {
             <div class="space-y-4">
               <div class="form-control">
-                <label class="label">
+                <div class="label">
                   <span class="label-text font-medium">Series Name</span>
-                </label>
+                </div>
                 <input
                   type="text"
                   class="input input-bordered w-full"
@@ -132,9 +135,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <div class="label">
                   <span class="label-text">Description (optional)</span>
-                </label>
+                </div>
                 <textarea
                   class="textarea textarea-bordered w-full"
                   rows="3"
@@ -144,9 +147,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <div class="label">
                   <span class="label-text">Color</span>
-                </label>
+                </div>
                 <div class="flex items-center gap-3">
                   <input
                     type="color"
@@ -212,10 +215,11 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="onCancel()" [disabled]="saving()">
+        <button type="button" class="btn btn-ghost" (click)="onCancel()" [disabled]="saving()">
           Cancel
         </button>
         <button
+          type="button"
           class="btn btn-primary"
           (click)="onSave()"
           [disabled]="saving() || loading() || !form.valid || !scheduleValue().isValid"

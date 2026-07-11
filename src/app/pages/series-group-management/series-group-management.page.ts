@@ -62,7 +62,7 @@ import { catchError, map } from 'rxjs/operators';
           <p class="text-base-content/70">Manage recurring time slot series</p>
         </div>
         @if (hasPermission() && hasCreatePermission()) {
-          <button class="btn btn-primary" (click)="openCreateWizard()">
+          <button type="button" class="btn btn-primary" (click)="openCreateWizard()">
             <span class="material-symbols-outlined" aria-hidden="true">add</span>
             Create Series
           </button>
@@ -134,11 +134,11 @@ import { catchError, map } from 'rxjs/operators';
                 <span class="material-symbols-outlined text-6xl text-base-content/30 mb-4" aria-hidden="true">event_repeat</span>
                 <p class="text-lg text-base-content/70">No recurring schedules found</p>
                 @if (searchQuery() || entityTypeFilter() || statusFilter()) {
-                  <button class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
+                  <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
                     Clear Filters
                   </button>
                 } @else if (hasCreatePermission()) {
-                  <button class="btn btn-primary btn-sm mt-4" (click)="openCreateWizard()">
+                  <button type="button" class="btn btn-primary btn-sm mt-4" (click)="openCreateWizard()">
                     <span class="material-symbols-outlined" aria-hidden="true">add</span>
                     Create your first series
                   </button>
@@ -238,8 +238,8 @@ import { catchError, map } from 'rxjs/operators';
         This action cannot be undone.
       </p>
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
+        <button type="button" class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
           @if (deleting()) {
             <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }

@@ -3,20 +3,20 @@
 
   <!-- Tabs -->
   <div class="tabs tabs-lift mb-4" role="tablist">
-    <button
+    <button type="button"
       class="tab"
       [class.tab-active]="selectedTab() === 'preferences'"
       (click)="selectedTab.set('preferences')"
       role="tab"
     >{{ 'settings.preferences' | translate }}</button>
-    <button
+    <button type="button"
       class="tab"
       [class.tab-active]="selectedTab() === 'colors'"
       (click)="selectedTab.set('colors')"
       role="tab"
     >{{ 'settings.colors' | translate }}</button>
     @if (localeService.supportedLocales.length > 1) {
-      <button
+      <button type="button"
         class="tab"
         [class.tab-active]="selectedTab() === 'language'"
         (click)="selectedTab.set('language')"
@@ -120,7 +120,7 @@
             <p class="text-sm mb-2">
               {{ 'impersonation.viewing_as' | translate }} <strong>{{ impersonation.impersonatedRoles().join(', ') }}</strong>
             </p>
-            <button
+            <button type="button"
               class="btn btn-warning btn-sm"
               (click)="stopImpersonation()"
               [disabled]="impersonationLoading()"
@@ -156,7 +156,7 @@
             </div>
           </div>
 
-          <button
+          <button type="button"
             class="btn btn-primary btn-sm"
             (click)="startImpersonation()"
             [disabled]="selectedRoles().length === 0 || impersonationLoading()"
@@ -204,6 +204,6 @@
   }
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="close()">{{ 'action.close' | translate }}</button>
+    <button type="button" class="btn" (click)="close()">{{ 'action.close' | translate }}</button>
   </div>
 </cos-modal>

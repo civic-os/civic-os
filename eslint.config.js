@@ -89,15 +89,13 @@ export default tseslint.config(
       '@angular-eslint/template/table-scope': 'error',
       '@angular-eslint/template/mouse-events-have-key-events': 'error',
 
-      // Enabled and visible, but at 'warn' (not a blocking error) because they
-      // reveal a large pre-audit backlog (128 label + 253 button hits) that is
-      // out of scope for this guardrail batch — fixing all of them is a
-      // dedicated mechanical sweep with form-submit risk, tracked separately.
-      // Keeping them as warnings surfaces every hit and every NEW violation
-      // without blocking CI on the legacy backlog. Promote to 'error' after the
-      // backlog sweep lands.
-      '@angular-eslint/template/label-has-associated-control': 'warn',
-      '@angular-eslint/template/button-has-type': 'warn',
+      // The pre-audit backlog (128 label + 253 button hits) was cleared in the
+      // July 2026 mechanical sweep (all typeless buttons given type="button";
+      // DaisyUI caption-wrapper `<label class="label">` misuse converted to
+      // `<div>`), so these are now enforced as errors alongside the rest of the
+      // a11y guardrail.
+      '@angular-eslint/template/label-has-associated-control': 'error',
+      '@angular-eslint/template/button-has-type': 'error',
 
       // Non-a11y template rules downgraded (see TS block rationale).
       '@angular-eslint/template/eqeqeq': 'off',

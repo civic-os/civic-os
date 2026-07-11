@@ -47,7 +47,7 @@ import { MarkdownModule } from 'ngx-markdown';
           <span class="font-mono font-medium truncate">{{ title() }}</span>
           <div class="flex items-center gap-1">
             @if (isLong()) {
-              <button class="btn btn-ghost btn-xs"
+              <button type="button" class="btn btn-ghost btn-xs"
                       (click)="collapsed.set(!collapsed())">
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">
                   {{ collapsed() ? 'expand_more' : 'expand_less' }}
@@ -55,7 +55,7 @@ import { MarkdownModule } from 'ngx-markdown';
                 {{ collapsed() ? 'Expand' : 'Collapse' }}
               </button>
             }
-            <button class="btn btn-ghost btn-xs" (click)="copyToClipboard()">
+            <button type="button" class="btn btn-ghost btn-xs" (click)="copyToClipboard()">
               <span class="material-symbols-outlined text-sm" aria-hidden="true">
                 {{ copied() ? 'check' : 'content_copy' }}
               </span>

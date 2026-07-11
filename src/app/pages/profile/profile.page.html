@@ -77,7 +77,7 @@
               }
 
               @if (canEditCoreInfo()) {
-                <button class="btn btn-sm btn-outline mt-4 w-fit" (click)="startEditCoreInfo()">
+                <button type="button" class="btn btn-sm btn-outline mt-4 w-fit" (click)="startEditCoreInfo()">
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   {{ 'action.edit' | translate }}
                 </button>
@@ -88,22 +88,22 @@
             <form (ngSubmit)="saveCoreInfo()" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></label>
+                  <div class="label"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></div>
                   <input type="text" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" autocomplete="given-name" required />
                 </div>
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></label>
+                  <div class="label"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></div>
                   <input type="text" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" autocomplete="family-name" required />
                 </div>
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></label>
+                  <div class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></div>
                   <div class="input input-bordered w-full flex items-center bg-base-200 cursor-not-allowed opacity-70">
                     {{ userRecord()?.email || '—' }}
                   </div>
                   <span class="text-xs opacity-60 mt-1">{{ 'profile.email_readonly' | translate }}</span>
                 </div>
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.phone' | translate }}</span></label>
+                  <div class="label"><span class="label-text">{{ 'profile.phone' | translate }}</span></div>
                   <input type="tel"
                     class="input input-bordered w-full"
                     [value]="getFormattedPhone(editPhone)"
@@ -259,7 +259,7 @@
                     }
                   </div>
                   @if (isOwnProfile() || auth.hasPermission(ext.table_name, 'update')) {
-                    <button class="btn btn-sm btn-outline mt-4" (click)="navigateToEditExtension(ext.table_name, record['id'])">
+                    <button type="button" class="btn btn-sm btn-outline mt-4" (click)="navigateToEditExtension(ext.table_name, record['id'])">
                       <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       {{ 'action.edit' | translate }}
                     </button>
@@ -276,7 +276,7 @@
                 <p class="text-sm opacity-70 mb-3">{{ ext.description }}</p>
               }
               @if (isOwnProfile() || auth.hasPermission(ext.table_name, 'create')) {
-                <button class="btn btn-primary btn-sm" (click)="navigateToCreateExtension(ext.table_name, ext.user_fk_column)">
+                <button type="button" class="btn btn-primary btn-sm" (click)="navigateToCreateExtension(ext.table_name, ext.user_fk_column)">
                   <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
                   {{ 'action.add' | translate }}
                 </button>

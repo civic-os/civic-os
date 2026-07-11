@@ -18,12 +18,12 @@
 
   <!-- Actions -->
   <div class="cos-modal-action">
-    <button (click)="toggleZoom()" class="btn">
+    <button type="button" (click)="toggleZoom()" class="btn">
       {{ zoomed() ? 'Fit to Screen' : 'Actual Size' }}
     </button>
-    <button (click)="downloadImage()" class="btn btn-primary">
+    <button type="button" (click)="downloadImage()" class="btn btn-primary">
       Download
     </button>
-    <button (click)="close()" class="btn">Close</button>
+    <button type="button" (click)="close()" class="btn">Close</button>
   </div>
 </cos-modal>

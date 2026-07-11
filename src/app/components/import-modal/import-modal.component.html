@@ -29,7 +29,7 @@
             <h4 class="card-title text-base">{{ 'import_modal.download_template' | translate }}</h4>
             <p class="text-sm">{{ 'import_modal.download_template_desc' | translate }}</p>
             <div class="card-actions justify-end">
-              <button class="btn btn-sm btn-primary" (click)="downloadTemplate()">
+              <button type="button" class="btn btn-sm btn-primary" (click)="downloadTemplate()">
                 <span class="material-symbols-outlined" aria-hidden="true">download</span>
                 {{ 'action.download' | translate }}
               </button>
@@ -75,7 +75,7 @@
       </div>
       @if (!customImport) {
         <div class="flex justify-end">
-          <button class="btn btn-sm" (click)="cancelValidation()">{{ 'action.cancel' | translate }}</button>
+          <button type="button" class="btn btn-sm" (click)="cancelValidation()">{{ 'action.cancel' | translate }}</button>
         </div>
       }
     </div>
@@ -162,7 +162,7 @@
 
           @if (!customImport) {
             <div class="flex gap-2">
-              <button class="btn btn-sm" (click)="downloadErrorReport()">
+              <button type="button" class="btn btn-sm" (click)="downloadErrorReport()">
                 <span class="material-symbols-outlined" aria-hidden="true">download</span>
                 {{ 'import_modal.download_full_report' | translate }}
               </button>
@@ -187,12 +187,12 @@
       }
 
       <div class="flex justify-between">
-        <button class="btn btn-sm" (click)="startOver()">
+        <button type="button" class="btn btn-sm" (click)="startOver()">
           <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           {{ 'import_modal.start_over' | translate }}
         </button>
         @if (canProceedToImport()) {
-          <button class="btn btn-sm btn-primary" (click)="proceedWithImport()">
+          <button type="button" class="btn btn-sm btn-primary" (click)="proceedWithImport()">
             {{ 'import_modal.proceed' | translate }}
             <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </button>
@@ -239,7 +239,7 @@
         }
       </div>
       <div class="flex justify-end">
-        <button class="btn btn-primary" (click)="completeImport()">
+        <button type="button" class="btn btn-primary" (click)="completeImport()">
           {{ 'action.close' | translate }}
         </button>
       </div>
@@ -249,7 +249,7 @@
   <!-- Close Button -->
   @if (currentStep() === 'choose' || currentStep() === 'results') {
     <div class="cos-modal-action">
-      <button class="btn btn-sm" (click)="closeModal()">{{ 'action.close' | translate }}</button>
+      <button type="button" class="btn btn-sm" (click)="closeModal()">{{ 'action.close' | translate }}</button>
     </div>
   }
 </cos-modal>

@@ -122,10 +122,10 @@ export interface ConflictPreviewResult {
       }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn btn-ghost" (click)="onCancel()">Cancel</button>
 
         @if (!loading && conflictCount() > 0) {
-          <button
+          <button type="button"
             class="btn btn-outline btn-primary"
             (click)="onAction('create_available')"
             [disabled]="availableCount() === 0"
@@ -135,7 +135,7 @@ export interface ConflictPreviewResult {
         }
 
         @if (!loading) {
-          <button
+          <button type="button"
             class="btn btn-primary"
             (click)="onAction('create_all')"
             [disabled]="conflicts.length === 0"

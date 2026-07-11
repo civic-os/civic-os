@@ -6,7 +6,7 @@
       <p class="text-base-content/60 mt-1">Manage email and SMS notification templates</p>
     </div>
     @if (isAdmin() && !loading()) {
-      <button class="btn btn-primary" (click)="openCreateModal()">
+      <button type="button" class="btn btn-primary" (click)="openCreateModal()">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
@@ -80,7 +80,7 @@
                 </td>
                 <td class="text-end">
                   <div class="flex gap-2 justify-end">
-                    <button
+                    <button type="button"
                       class="btn btn-sm btn-ghost"
                       (click)="openEditModal(template)"
                       title="Edit template">
@@ -88,7 +88,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button
+                    <button type="button"
                       class="btn btn-sm btn-ghost text-error"
                       (click)="confirmDelete(template)"
                       title="Delete template">
@@ -111,7 +111,7 @@
         </svg>
         <h3 class="text-xl font-semibold mb-2">No templates yet</h3>
         <p class="text-base-content/60 mb-4">Create your first notification template to get started.</p>
-        <button class="btn btn-primary" (click)="openCreateModal()">
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
           Create Template
         </button>
       </div>
@@ -127,8 +127,8 @@
         This action cannot be undone.
       </p>
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
-        <button class="btn btn-error" (click)="deleteTemplate()">Delete</button>
+        <button type="button" class="btn btn-ghost" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-error" (click)="deleteTemplate()">Delete</button>
       </div>
     }
   </cos-modal>

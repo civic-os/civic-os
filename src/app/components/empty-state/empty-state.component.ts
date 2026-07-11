@@ -39,13 +39,13 @@ import { AuthService } from '../../services/auth.service';
         <p class="text-sm">{{ message() }}</p>
       </div>
       @if (showLoginButton() && !auth.authenticated()) {
-        <button class="btn btn-primary btn-sm" (click)="onLogin()">
+        <button type="button" class="btn btn-primary btn-sm" (click)="onLogin()">
           <span class="material-symbols-outlined text-lg" aria-hidden="true">login</span>
           Log In
         </button>
       }
       @if (showClearFiltersButton()) {
-        <button class="btn btn-outline btn-sm" (click)="clearFilters.emit()">
+        <button type="button" class="btn btn-outline btn-sm" (click)="clearFilters.emit()">
           Clear Filters
         </button>
       }

@@ -36,9 +36,9 @@
         <div class="grid gap-4" [style.grid-template-columns]="gridColumns()">
           @for (prop of properties(); track prop.column_name) {
             <div class="form-control">
-              <label class="label pb-1 pt-0">
+              <div class="label pb-1 pt-0">
                 <span class="label-text font-semibold">{{ prop.display_name }}</span>
-              </label>
+              </div>
 
               <!-- Foreign Key / User / Status / Category: Checkbox list -->
               @if (prop.type === EntityPropertyType.ForeignKeyName || prop.type === EntityPropertyType.User || prop.type === EntityPropertyType.Status || prop.type === EntityPropertyType.Category) {
