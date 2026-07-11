@@ -45,9 +45,11 @@ import { getS3Config } from '../../config/runtime';
  *
  * Added in v0.47.0.
  */
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-file-thumbnail',
   standalone: true,
+  imports: [LoadingIndicatorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (thumbnailUrl()) {
@@ -61,15 +63,15 @@ import { getS3Config } from '../../config/runtime';
       />
     } @else if (isLoading()) {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
-        <span class="loading loading-spinner"></span>
+        <app-loading-indicator />
       </div>
     } @else if (isFailed()) {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
-        <span class="material-symbols-outlined text-2xl text-warning">broken_image</span>
+        <span class="material-symbols-outlined text-2xl text-warning" aria-hidden="true">broken_image</span>
       </div>
     } @else {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
-        <span class="material-symbols-outlined text-2xl text-base-content/40">image</span>
+        <span class="material-symbols-outlined text-2xl text-base-content/40" aria-hidden="true">image</span>
       </div>
     }
   `

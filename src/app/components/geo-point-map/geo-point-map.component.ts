@@ -28,10 +28,11 @@ export interface MapMarker {
   wkt: string;
 }
 
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-geo-point-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './geo-point-map.component.html',
   styleUrl: './geo-point-map.component.css'
 })

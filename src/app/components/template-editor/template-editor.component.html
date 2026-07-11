@@ -58,7 +58,7 @@
         </label>
         <div class="flex items-center gap-2 h-10">
           @if (loadingSampleData()) {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
             <span class="text-sm text-base-content/60">Loading...</span>
           } @else if (templateForm.get('entity_type')?.value) {
             <button type="button" class="btn btn-xs btn-ghost" (click)="toggleSampleData()">
@@ -101,7 +101,7 @@
           (click)="setActiveTab('subject')">
           Subject
           @if (isValidating('subject')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('subject') && getValidationResult('subject')?.valid) {
             <span class="text-success ms-2">✓</span>
@@ -114,7 +114,7 @@
           (click)="setActiveTab('html')">
           HTML
           @if (isValidating('html')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('html') && getValidationResult('html')?.valid) {
             <span class="text-success ms-2">✓</span>
@@ -127,7 +127,7 @@
           (click)="setActiveTab('text')">
           Text
           @if (isValidating('text')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('text') && getValidationResult('text')?.valid) {
             <span class="text-success ms-2">✓</span>
@@ -140,7 +140,7 @@
           (click)="setActiveTab('sms')">
           SMS (Optional)
           @if (isValidating('sms')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('sms') && getValidationResult('sms')?.valid) {
             <span class="text-success ms-2">✓</span>
@@ -177,7 +177,7 @@
                 (click)="previewSingleTemplate('subject')"
                 [disabled]="previewing() || !templateForm.get('subject_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview Subject
               </button>
@@ -224,7 +224,7 @@
                 (click)="previewSingleTemplate('html')"
                 [disabled]="previewing() || !templateForm.get('html_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview HTML
               </button>
@@ -271,7 +271,7 @@
                 (click)="previewSingleTemplate('text')"
                 [disabled]="previewing() || !templateForm.get('text_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview Text
               </button>
@@ -313,7 +313,7 @@
                 (click)="previewSingleTemplate('sms')"
                 [disabled]="previewing() || !templateForm.get('sms_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview SMS
               </button>
@@ -337,7 +337,7 @@
 
       <!-- Template Syntax Help -->
       <div class="alert alert-info text-xs mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
@@ -352,7 +352,7 @@
     <!-- Error Alert -->
     @if (saveError()) {
       <div class="alert alert-error mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>{{ saveError() }}</span>
@@ -369,7 +369,7 @@
         class="btn btn-primary"
         [disabled]="saving() || templateForm.invalid">
         @if (saving()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         }
         {{ template ? 'Update Template' : 'Create Template' }}
       </button>

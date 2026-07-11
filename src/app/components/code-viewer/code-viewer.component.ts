@@ -52,13 +52,13 @@ type ViewMode = 'blocks' | 'source';
           <button class="btn btn-sm join-item"
                   [class.btn-active]="viewMode() === 'blocks'"
                   (click)="setViewMode('blocks')">
-            <span class="material-symbols-outlined text-sm mr-1">extension</span>
+            <span class="material-symbols-outlined text-sm mr-1" aria-hidden="true">extension</span>
             Blocks
           </button>
           <button class="btn btn-sm join-item"
                   [class.btn-active]="viewMode() === 'source'"
                   (click)="setViewMode('source')">
-            <span class="material-symbols-outlined text-sm mr-1">code</span>
+            <span class="material-symbols-outlined text-sm mr-1" aria-hidden="true">code</span>
             Source
           </button>
         </div>

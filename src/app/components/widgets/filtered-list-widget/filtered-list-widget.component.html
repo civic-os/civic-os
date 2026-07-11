@@ -19,12 +19,12 @@
   @if (isLoading()) {
     <!-- Loading state -->
     <div class="flex items-center justify-center py-8">
-      <span class="loading loading-spinner loading-md"></span>
+      <app-loading-indicator />
     </div>
   } @else if (error()) {
     <!-- Error state -->
     <div class="alert alert-error">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       <span>{{ error() }}</span>
@@ -87,7 +87,7 @@
   } @else {
     <!-- Empty state -->
     <div class="flex flex-col items-center justify-center py-8">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
       </svg>
       <p class="mt-4 text-base-content opacity-60">No results found</p>

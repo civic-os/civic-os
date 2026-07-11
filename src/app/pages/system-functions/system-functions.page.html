@@ -3,14 +3,14 @@
 
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
 
   @if (loading()) {
     <div class="flex items-center justify-center h-64">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -42,7 +42,7 @@
     <!-- Function list -->
     @if (filteredFunctions().length === 0) {
       <div class="text-center py-12 text-base-content/50">
-        <span class="material-symbols-outlined text-4xl mb-2">search_off</span>
+        <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">search_off</span>
         <p>No functions match your search.</p>
       </div>
     } @else {

@@ -5,7 +5,7 @@
       {{ currentCount() }} / {{ maxImages() }} images
     </span>
     @if (uploading()) {
-      <span class="loading loading-spinner loading-sm"></span>
+      <app-loading-indicator size="sm" />
     }
   </div>
 
@@ -79,7 +79,7 @@
             class="absolute top-1 end-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 transition-opacity"
             (click)="removeImage(image); $event.stopPropagation()"
             aria-label="Remove image">
-            <span class="material-symbols-outlined text-xs">close</span>
+            <span class="material-symbols-outlined text-xs" aria-hidden="true">close</span>
           </button>
 
           <!-- Sort order badge -->

@@ -11,7 +11,7 @@
 <!-- Action Error Alert (for non-modal actions) -->
 @if (actionError() && !showActionModal()) {
   <div class="alert alert-error mb-4">
-    <span class="material-symbols-outlined">error</span>
+    <span class="material-symbols-outlined" aria-hidden="true">error</span>
     <span>{{ actionError() }}</span>
   </div>
 }
@@ -29,7 +29,7 @@
     <!-- Error Alert -->
     @if (actionError()) {
       <div class="alert alert-error mb-4">
-        <span class="material-symbols-outlined">error</span>
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
         <span>{{ actionError() }}</span>
       </div>
     }
@@ -37,7 +37,7 @@
     <!-- Success Alert -->
     @if (actionSuccess()) {
       <div class="alert alert-success mb-4">
-        <span class="material-symbols-outlined">check_circle</span>
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
         <span>{{ actionSuccess() }}</span>
       </div>
     } @else {
@@ -182,7 +182,7 @@
 
                   @if (actionFileUploading()) {
                     <div class="flex items-center gap-2 text-sm mt-1">
-                      <span class="loading loading-spinner loading-sm"></span>
+                      <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                       <span>{{ 'file.uploading' | translate }}</span>
                     </div>
                   }
@@ -238,7 +238,7 @@
           (click)="confirmEntityAction()"
           [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">
           @if (actionLoading()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           {{ 'action.confirm' | translate }}
         </button>
@@ -251,7 +251,7 @@
 @if (actionOverlayLoading()) {
   <div class="fixed inset-0 bg-base-100/50 flex items-center justify-center z-50">
     <div class="flex flex-col items-center gap-2">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
       <span class="text-sm opacity-70">{{ 'detail.processing' | translate }}</span>
     </div>
   </div>

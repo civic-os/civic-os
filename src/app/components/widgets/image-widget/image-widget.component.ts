@@ -42,9 +42,10 @@ import { getS3Config } from '../../../config/runtime';
  *   "linkUrl": "/view/events"          // Click navigates here (optional)
  * }
  */
+import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-image-widget',
-  imports: [RouterLink],
+  imports: [LoadingIndicatorComponent, RouterLink],
   templateUrl: './image-widget.component.html',
   styleUrl: './image-widget.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

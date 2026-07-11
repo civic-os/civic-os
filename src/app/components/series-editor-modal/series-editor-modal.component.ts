@@ -77,13 +77,13 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   template: `
     <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg" [label]="'a11y.edit_recurring_series' | translate">
       <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-        <span class="material-symbols-outlined">edit</span>
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
         Edit Recurring Series
       </h3>
 
       @if (loading()) {
         <div class="flex items-center justify-center py-12">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
         </div>
       } @else if (error()) {
         <div class="alert alert-error mb-4">
@@ -169,7 +169,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             <div class="space-y-4">
               @if (templateProperties().length === 0) {
                 <div class="alert">
-                  <span class="material-symbols-outlined">info</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">info</span>
                   <span>No editable template fields found.</span>
                 </div>
               } @else {
@@ -202,7 +202,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
               @if (series?.expanded_until) {
                 <div class="alert alert-info">
-                  <span class="material-symbols-outlined">info</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">info</span>
                   <span>Series expanded until {{ formatDateTime(series!.expanded_until!) }}</span>
                 </div>
               }
@@ -221,7 +221,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
           [disabled]="saving() || loading() || !form.valid || !scheduleValue().isValid"
         >
           @if (saving()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           Save Changes
         </button>

@@ -36,9 +36,10 @@ import { DataQuery, FilterCriteria } from '../../../interfaces/query';
  *
  * Phase 2 implementation with auto-refresh and empty state handling.
  */
+import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-calendar-widget',
-  imports: [CommonModule, TimeSlotCalendarComponent],
+  imports: [LoadingIndicatorComponent, CommonModule, TimeSlotCalendarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './calendar-widget.component.html',
   styleUrl: './calendar-widget.component.css'

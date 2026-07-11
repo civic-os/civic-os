@@ -25,7 +25,7 @@
 
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -153,11 +153,11 @@
       @if (activeTab() === 'actions') {
         @if (entityActionLoading()) {
           <div class="flex justify-center items-center min-h-[200px]">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           </div>
         } @else if (entityActionPermissions().length === 0) {
           <div class="alert alert-info">
-            <span class="material-symbols-outlined">info</span>
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
             <span>No entity actions have been configured yet. Entity actions are defined in the database via the <code>metadata.entity_actions</code> table.</span>
           </div>
         } @else {
@@ -199,7 +199,7 @@
       @if (activeTab() === 'delegation') {
         @if (delegationLoading()) {
           <div class="flex justify-center items-center min-h-[200px]">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           </div>
         } @else {
           <div class="mb-4">
@@ -247,7 +247,7 @@
             <button
               class="btn btn-error btn-sm"
               (click)="openDeleteRoleModal()">
-              <span class="material-symbols-outlined text-sm">delete</span>
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
               Delete Selected Role
             </button>
           </div>
@@ -269,7 +269,7 @@
       <button class="btn" (click)="closeDeleteRoleModal()" [disabled]="deleteLoading()">Cancel</button>
       <button class="btn btn-error" (click)="submitDeleteRole()" [disabled]="deleteLoading()">
         @if (deleteLoading()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Deleting...
         } @else {
           Delete Role
@@ -337,7 +337,7 @@
         (click)="submitCreateRole()"
         [disabled]="createLoading()">
         @if (createLoading()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Creating...
         } @else {
           Create Role

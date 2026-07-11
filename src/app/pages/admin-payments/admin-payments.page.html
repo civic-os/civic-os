@@ -4,10 +4,10 @@
   <!-- Success Message -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -15,7 +15,7 @@
   <!-- Error Message -->
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
@@ -23,7 +23,7 @@
   <!-- Permission Check -->
   @if (!canViewPayments()) {
     <div class="alert alert-warning">
-      <span class="material-symbols-outlined">lock</span>
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span>
       <span>You do not have permission to view payments. Contact an administrator to request access.</span>
     </div>
   } @else {
@@ -73,7 +73,7 @@
             <span class="label-text font-semibold">&nbsp;</span>
           </label>
           <label class="input input-bordered input-sm flex items-center gap-2">
-            <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+            <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
             <input
               type="text"
               placeholder="Search description or email..."
@@ -86,8 +86,9 @@
           class="btn btn-sm btn-square btn-ghost"
           (click)="refresh()"
           [disabled]="loading()"
-          title="Refresh">
-          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+          title="Refresh"
+          [attr.aria-label]="'action.refresh' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true" [class.animate-spin]="loading()">refresh</span>
         </button>
       </div>
     </div>
@@ -95,7 +96,7 @@
     <!-- Loading Spinner -->
     @if (loading()) {
       <div class="flex justify-center items-center min-h-[400px]">
-        <span class="loading loading-spinner loading-lg"></span>
+        <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
       </div>
     } @else {
       <!-- Payments Table -->
@@ -165,7 +166,7 @@
                     <a
                       [routerLink]="getEntityRoute(payment)"
                       class="link link-primary text-sm flex items-center gap-1">
-                      <span class="material-symbols-outlined text-xs">open_in_new</span>
+                      <span class="material-symbols-outlined text-xs" aria-hidden="true">open_in_new</span>
                       {{ payment.entity_display_name }}
                     </a>
                   } @else {
@@ -175,7 +176,7 @@
                 <!-- Status -->
                 <td>
                   <div class="badge gap-1 whitespace-normal h-auto min-h-[1.5rem] text-center" [ngClass]="getStatusBadgeClass(payment.effective_status)">
-                    <span class="material-symbols-outlined text-xs shrink-0">{{ getStatusIcon(payment.effective_status) }}</span>
+                    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">{{ getStatusIcon(payment.effective_status) }}</span>
                     {{ getStatusLabel(payment.effective_status) }}
                   </div>
                 </td>
@@ -214,7 +215,7 @@
                     <button
                       class="btn btn-sm btn-outline btn-error"
                       (click)="openRefundModal(payment)">
-                      <span class="material-symbols-outlined text-sm">undo</span>
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">undo</span>
                       Refund
                     </button>
                   }
@@ -241,8 +242,8 @@
             <button
               class="join-item btn btn-sm"
               [disabled]="!hasPrevPage()"
-              (click)="prevPage()">
-              <span class="material-symbols-outlined">chevron_left</span>
+              (click)="prevPage()" [attr.aria-label]="'a11y.previous_page' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
             </button>
             <button class="join-item btn btn-sm">
               Page {{ currentPage() }} of {{ totalPages() }}
@@ -250,8 +251,8 @@
             <button
               class="join-item btn btn-sm"
               [disabled]="!hasNextPage()"
-              (click)="nextPage()">
-              <span class="material-symbols-outlined">chevron_right</span>
+              (click)="nextPage()" [attr.aria-label]="'a11y.next_page' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
             </button>
           </div>
         </div>
@@ -290,7 +291,7 @@
       <!-- Error Alert -->
       @if (refundError()) {
         <div class="alert alert-error mb-4 text-sm">
-          <span class="material-symbols-outlined text-base">error</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">error</span>
           <span>{{ refundError() }}</span>
         </div>
       }
@@ -338,10 +339,10 @@
           (click)="submitRefund()"
           [disabled]="refundLoading()">
           @if (refundLoading()) {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
             Processing...
           } @else {
-            <span class="material-symbols-outlined text-base">undo</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">undo</span>
             Issue Refund
           }
         </button>
@@ -380,7 +381,7 @@
       <!-- Refunds List -->
       @if (refundHistoryLoading()) {
         <div class="flex justify-center py-8">
-          <span class="loading loading-spinner loading-md"></span>
+          <span class="loading loading-spinner loading-md" aria-hidden="true"></span>
         </div>
       } @else if (refundHistory().length === 0) {
         <div class="text-center py-8 text-base-content/60">
@@ -412,11 +413,11 @@
                       'badge-error': refund.status === 'failed'
                     }">
                       @if (refund.status === 'succeeded') {
-                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                        <span class="material-symbols-outlined text-xs" aria-hidden="true">check_circle</span>
                       } @else if (refund.status === 'pending') {
-                        <span class="material-symbols-outlined text-xs">schedule</span>
+                        <span class="material-symbols-outlined text-xs" aria-hidden="true">schedule</span>
                       } @else {
-                        <span class="material-symbols-outlined text-xs">error</span>
+                        <span class="material-symbols-outlined text-xs" aria-hidden="true">error</span>
                       }
                       {{ refund.status }}
                     </div>
@@ -440,7 +441,7 @@
                 @if (refund.error_message) {
                   <tr class="bg-error/10">
                     <td colspan="5" class="text-xs text-error">
-                      <span class="material-symbols-outlined text-xs align-middle me-1">error</span>
+                      <span class="material-symbols-outlined text-xs align-middle me-1" aria-hidden="true">error</span>
                       {{ refund.error_message }}
                     </td>
                   </tr>

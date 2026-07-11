@@ -3,7 +3,7 @@
     @for (step of stepStates(); track step.label; let i = $index) {
       <li>
         <div class="flex items-start gap-3">
-          <span class="material-symbols-outlined text-xl mt-0.5" [class]="getIconClass(step.status)">
+          <span class="material-symbols-outlined text-xl mt-0.5" aria-hidden="true" [class]="getIconClass(step.status)">
             {{ getIcon(step.status) }}
           </span>
           <div class="flex-1">

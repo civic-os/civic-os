@@ -7,7 +7,7 @@
     </div>
     @if (!loading()) {
       <button class="btn btn-primary" (click)="openCreateModal()">
-        <span class="material-symbols-outlined text-base">add_photo_alternate</span>
+        <span class="material-symbols-outlined text-base" aria-hidden="true">add_photo_alternate</span>
         Upload Image
       </button>
     }
@@ -24,7 +24,7 @@
   <!-- Loading State -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -55,7 +55,7 @@
                     </div>
                   } @else {
                     <div class="w-16 h-12 rounded bg-base-200 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-base-content/30">image</span>
+                      <span class="material-symbols-outlined text-base-content/30" aria-hidden="true">image</span>
                     </div>
                   }
                 </td>
@@ -89,11 +89,11 @@
                 </td>
                 <td class="text-end">
                   <div class="flex gap-1 justify-end">
-                    <button class="btn btn-sm btn-ghost" (click)="openEditModal(asset)" title="Re-crop">
-                      <span class="material-symbols-outlined text-base">crop</span>
+                    <button class="btn btn-sm btn-ghost" (click)="openEditModal(asset)" title="Re-crop" [attr.aria-label]="'a11y.recrop' | translate">
+                      <span class="material-symbols-outlined text-base" aria-hidden="true">crop</span>
                     </button>
-                    <button class="btn btn-sm btn-ghost text-error" (click)="confirmDelete(asset)" title="Delete">
-                      <span class="material-symbols-outlined text-base">delete</span>
+                    <button class="btn btn-sm btn-ghost text-error" (click)="confirmDelete(asset)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                      <span class="material-symbols-outlined text-base" aria-hidden="true">delete</span>
                     </button>
                   </div>
                 </td>
@@ -111,7 +111,7 @@
     } @else {
       <!-- Empty State -->
       <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4">add_photo_alternate</span>
+        <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4" aria-hidden="true">add_photo_alternate</span>
         <h3 class="text-xl font-semibold mb-2">No static assets yet</h3>
         <p class="text-base-content/60 mb-4">Upload your first image to use in dashboard widgets.</p>
         <button class="btn btn-primary" (click)="openCreateModal()">Upload Image</button>
@@ -133,8 +133,8 @@
   <!-- Close button (always visible unless saving) -->
   @if (!saving()) {
     <button class="btn btn-sm btn-circle btn-ghost absolute end-2 top-2"
-            (click)="closeModals()" title="Close">
-      <span class="material-symbols-outlined text-base">close</span>
+            (click)="closeModals()" title="Close" [attr.aria-label]="'action.close' | translate">
+      <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
     </button>
   }
 
@@ -167,7 +167,7 @@
       <button class="btn btn-primary" (click)="proceedToProfile()"
               [disabled]="!imageFile() || !assetName()">
         Next: Choose Crop Profile
-        <span class="material-symbols-outlined text-base">arrow_forward</span>
+        <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
       </button>
     </div>
   }
@@ -216,7 +216,7 @@
     <div class="cos-modal-action">
       @if (!isEditing()) {
         <button class="btn btn-ghost" (click)="cropStep.set('upload')">
-          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
           Back
         </button>
       } @else {
@@ -224,7 +224,7 @@
       }
       <button class="btn btn-primary" (click)="proceedToCropping()">
         Start Cropping
-        <span class="material-symbols-outlined text-base">crop</span>
+        <span class="material-symbols-outlined text-base" aria-hidden="true">crop</span>
       </button>
     </div>
   }
@@ -253,10 +253,10 @@
       <button class="btn btn-xs btn-ghost gap-1" (click)="toggleRatioLock()"
               [title]="ratioLocked() ? 'Unlock aspect ratio for freeform cropping' : 'Lock to default aspect ratio'">
         @if (ratioLocked()) {
-          <span class="material-symbols-outlined text-base">lock</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">lock</span>
           {{ currentCropBreakpoint()?.label }}
         } @else {
-          <span class="material-symbols-outlined text-base">lock_open</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">lock_open</span>
           @if (liveRatioDisplay()) {
             {{ liveRatioDisplay() }}
           } @else {
@@ -285,16 +285,16 @@
 
     <div class="cos-modal-action mt-4">
       <button class="btn btn-ghost" (click)="goBackCrop()">
-        <span class="material-symbols-outlined text-base">arrow_back</span>
+        <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
         Back
       </button>
       <button class="btn btn-primary" (click)="confirmCrop()">
         @if (cropStep() === 'crop-mobile') {
-          <span class="material-symbols-outlined text-base">save</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">save</span>
           Save Asset
         } @else {
           Next Breakpoint
-          <span class="material-symbols-outlined text-base">arrow_forward</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
         }
       </button>
     </div>
@@ -304,7 +304,7 @@
   @if (cropStep() === 'saving') {
     <h3 class="font-bold text-lg mb-4">Saving Asset...</h3>
     <div class="flex flex-col items-center gap-4 py-8">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
       <p class="text-base-content/60">{{ saveProgress() }}</p>
     </div>
   }
@@ -339,10 +339,10 @@
       <button class="btn" (click)="closeModals()" [disabled]="deleteLoading()">Cancel</button>
       <button class="btn btn-error" (click)="deleteAsset()" [disabled]="deleteLoading()">
         @if (deleteLoading()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Deleting...
         } @else {
-          <span class="material-symbols-outlined text-base">delete</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">delete</span>
           Delete
         }
       </button>

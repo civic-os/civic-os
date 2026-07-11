@@ -24,10 +24,10 @@
   <!-- Success Alert -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -35,10 +35,10 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4 relative">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissError()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissError()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -90,14 +90,14 @@
               (click)="exportTranslations()"
               [disabled]="loading() || filteredTranslations().length === 0"
               title="Export translations to Excel">
-        <span class="material-symbols-outlined text-sm">download</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">download</span>
         Export
       </button>
       <button class="btn btn-outline btn-sm"
               (click)="openImportModal()"
               [disabled]="loading()"
               title="Import translations from Excel">
-        <span class="material-symbols-outlined text-sm">upload</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">upload</span>
         Import
       </button>
     </div>
@@ -125,14 +125,14 @@
   <!-- Loading -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[300px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   } @else {
     <!-- Translations Tab -->
     @if (activeTab() === 'translations') {
       @if (filteredTranslations().length === 0) {
         <div class="alert alert-info">
-          <span class="material-symbols-outlined">info</span>
+          <span class="material-symbols-outlined" aria-hidden="true">info</span>
           <span>No translations found for the selected filters.</span>
         </div>
       } @else {
@@ -167,11 +167,11 @@
                   </td>
                   <td>
                     <div class="flex gap-1">
-                      <button class="btn btn-ghost btn-sm" (click)="openEditModal(t)" title="Edit">
-                        <span class="material-symbols-outlined text-sm">edit</span>
+                      <button class="btn btn-ghost btn-sm" (click)="openEditModal(t)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       </button>
-                      <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteModal(t)" title="Delete">
-                        <span class="material-symbols-outlined text-sm">delete</span>
+                      <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteModal(t)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   </td>
@@ -188,12 +188,12 @@
       @if (filteredMissing().length === 0) {
         @if (searchQuery() || selectedSourceType()) {
           <div class="alert alert-info">
-            <span class="material-symbols-outlined">info</span>
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
             <span>No missing translations found for the selected filters.</span>
           </div>
         } @else {
           <div class="alert alert-success">
-            <span class="material-symbols-outlined">check_circle</span>
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
             <span>All translations are complete for this language!</span>
           </div>
         }
@@ -224,8 +224,8 @@
                     <div class="whitespace-pre-line line-clamp-3">{{ m.default_text }}</div>
                   </td>
                   <td>
-                    <button class="btn btn-primary btn-sm" (click)="openCreateFromMissing(m)" title="Add Translation">
-                      <span class="material-symbols-outlined text-sm">add</span>
+                    <button class="btn btn-primary btn-sm" (click)="openCreateFromMissing(m)" title="Add Translation" [attr.aria-label]="'a11y.add_translation' | translate">
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
                     </button>
                   </td>
                 </tr>
@@ -246,7 +246,7 @@
 
   @if (editError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ editError() }}</span>
     </div>
   }
@@ -293,7 +293,7 @@
     <button class="btn" (click)="closeEditModal()" [disabled]="editSaving()">Cancel</button>
     <button class="btn btn-primary" (click)="submitEdit()" [disabled]="editSaving()">
       @if (editSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingTranslation() ? 'Update' : 'Create' }}
@@ -313,7 +313,7 @@
     <button class="btn" (click)="closeDeleteModal()" [disabled]="deleteLoading()">Cancel</button>
     <button class="btn btn-error" (click)="submitDelete()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete

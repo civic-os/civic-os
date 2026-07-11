@@ -47,11 +47,12 @@ import { getS3Config } from '../../config/runtime';
  *
  * Added in v0.47.0.
  */
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-photo-gallery-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DragDropModule, GalleryLightboxComponent, FileThumbnailComponent, TranslatePipe],
+  imports: [LoadingIndicatorComponent, DragDropModule, GalleryLightboxComponent, FileThumbnailComponent, TranslatePipe],
   templateUrl: './photo-gallery-editor.component.html'
 })
 export class PhotoGalleryEditorComponent {

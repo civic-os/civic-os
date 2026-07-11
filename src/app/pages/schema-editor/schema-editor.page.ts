@@ -49,10 +49,11 @@ import type { dia, shapes } from '@joint/core';
  *
  * Instead, they appear in the Properties tab with icons (e.g., "📄 File", "👤 User").
  */
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-schema-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, SchemaInspectorPanelComponent],
+  imports: [TranslatePipe, CommonModule, SchemaInspectorPanelComponent],
   templateUrl: './schema-editor.page.html',
   styleUrl: './schema-editor.page.css'
 })

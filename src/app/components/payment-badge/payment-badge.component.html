@@ -11,17 +11,17 @@
      [class.tooltip-bottom]="hasTooltip()"
      [attr.data-tip]="hasTooltip() ? tooltip() : null">
   @if (payment()?.effective_status === 'succeeded') {
-    <span class="material-symbols-outlined text-xs shrink-0">check_circle</span>
+    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">check_circle</span>
   } @else if (payment()?.effective_status === 'pending' || payment()?.effective_status === 'pending_intent') {
-    <span class="material-symbols-outlined text-xs shrink-0">schedule</span>
+    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">schedule</span>
   } @else if (payment()?.effective_status === 'refund_pending') {
-    <span class="material-symbols-outlined text-xs shrink-0">hourglass_top</span>
+    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">hourglass_top</span>
   } @else if (payment()?.effective_status === 'failed') {
-    <span class="material-symbols-outlined text-xs shrink-0">error</span>
+    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">error</span>
   } @else if (payment()?.effective_status === 'canceled') {
-    <span class="material-symbols-outlined text-xs shrink-0">cancel</span>
+    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">cancel</span>
   } @else if (payment()?.effective_status === 'refunded' || payment()?.effective_status === 'partially_refunded') {
-    <span class="material-symbols-outlined text-xs shrink-0">undo</span>
+    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">undo</span>
   }
   {{ displayText() }}
 </div>

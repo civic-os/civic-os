@@ -27,10 +27,11 @@ import { getSmsConfig } from '../../config/runtime';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../interfaces/import';
 
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterModule, ImportModalComponent],
+  imports: [TranslatePipe, CommonModule, DatePipe, FormsModule, RouterModule, ImportModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-4 max-w-7xl mx-auto">
@@ -41,11 +42,11 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
         </div>
         <div class="flex gap-2">
           <button class="btn btn-outline" (click)="openImportModal()">
-            <span class="material-symbols-outlined">upload</span>
+            <span class="material-symbols-outlined" aria-hidden="true">upload</span>
             Import Users
           </button>
           <button class="btn btn-primary" (click)="openCreateModal()">
-            <span class="material-symbols-outlined">person_add</span>
+            <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
             Create User
           </button>
         </div>
@@ -81,11 +82,11 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
       <!-- Users Table -->
       @if (loading()) {
         <div class="flex justify-center py-12">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
         </div>
       } @else if (users().length === 0) {
         <div class="text-center py-12 text-base-content/60">
-          <span class="material-symbols-outlined text-4xl mb-2">group</span>
+          <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">group</span>
           <p>No users found</p>
         </div>
       } @else {
@@ -119,7 +120,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                   <td>
                     <div class="flex gap-0.5">
                       @if (user.email_notif_enabled !== null) {
-                        <span class="material-symbols-outlined text-sm"
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true"
                               [class.opacity-30]="!user.email_notif_enabled"
                               [title]="'Email ' + (user.email_notif_enabled ? 'enabled' : 'disabled')">
                           mail
@@ -127,12 +128,12 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                       }
                       @if (smsConfigured && user.sms_notif_enabled !== null) {
                         @if (user.sms_opted_out) {
-                          <span class="material-symbols-outlined text-sm text-warning"
+                          <span class="material-symbols-outlined text-sm text-warning" aria-hidden="true"
                                 title="SMS blocked by carrier (user must text START)">
                             sms_failed
                           </span>
                         } @else {
-                          <span class="material-symbols-outlined text-sm"
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true"
                                 [class.opacity-30]="!user.sms_notif_enabled"
                                 [title]="'SMS ' + (user.sms_notif_enabled ? 'enabled' : 'disabled')">
                             sms
@@ -157,31 +158,31 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                     <div class="flex gap-1 items-center">
                       @if (user.status === 'active') {
                         @if (user.last_login_at) {
-                          <span class="material-symbols-outlined text-sm"
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true"
                                 [title]="'Last login: ' + (user.last_login_at | date:'short')">
                             schedule
                           </span>
                         } @else {
-                          <span class="material-symbols-outlined text-sm opacity-40"
+                          <span class="material-symbols-outlined text-sm opacity-40" aria-hidden="true"
                                 title="Never logged in">
                             help
                           </span>
                         }
                       }
                       @if (user.status === 'active' && user.id) {
-                        <button class="btn btn-xs btn-ghost" title="Edit user"
+                        <button class="btn btn-xs btn-ghost" title="Edit user" [attr.aria-label]="'a11y.edit_user' | translate"
                                 (click)="openEditModal(user)">
-                          <span class="material-symbols-outlined text-sm">edit</span>
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                         </button>
                       }
                       @if (user.status === 'failed') {
-                        <button class="btn btn-xs btn-ghost" title="View error"
+                        <button class="btn btn-xs btn-ghost" title="View error" [attr.aria-label]="'a11y.view_error' | translate"
                                 (click)="viewError(user)">
-                          <span class="material-symbols-outlined text-sm">info</span>
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">info</span>
                         </button>
-                        <button class="btn btn-xs btn-primary" title="Retry"
+                        <button class="btn btn-xs btn-primary" title="Retry" [attr.aria-label]="'a11y.retry' | translate"
                                 (click)="retryUser(user)">
-                          <span class="material-symbols-outlined text-sm">refresh</span>
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">refresh</span>
                         </button>
                       }
                     </div>
@@ -196,7 +197,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
       <!-- Error Alert -->
       @if (errorMessage()) {
         <div class="alert alert-error mt-4">
-          <span class="material-symbols-outlined">error</span>
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
           <span>{{ errorMessage() }}</span>
           <button class="btn btn-sm btn-ghost" (click)="errorMessage.set(undefined)">Dismiss</button>
         </div>
@@ -205,7 +206,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
       <!-- Success Alert -->
       @if (successMessage()) {
         <div class="alert alert-success mt-4">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
           <span>{{ successMessage() }}</span>
           <button class="btn btn-sm btn-ghost" (click)="successMessage.set(undefined)">Dismiss</button>
         </div>
@@ -287,7 +288,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
             <button class="btn btn-primary" [disabled]="createLoading()"
                     (click)="submitCreateUser()">
               @if (createLoading()) {
-                <span class="loading loading-spinner loading-sm"></span>
+                <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
               }
               Create
             </button>
@@ -330,7 +331,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
           <a class="btn btn-sm btn-outline mb-4"
              [routerLink]="['/profile', editUser()?.id]"
              (click)="closeEditModal()">
-            <span class="material-symbols-outlined text-sm">person</span>
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">person</span>
             View Profile
           </a>
 
@@ -347,7 +348,7 @@ import { CustomImportConfig, ImportColumn, CustomImportResult } from '../../inte
                        (change)="toggleEditRole(role.role_key)" />
                 <span class="text-sm">{{ role.display_name }}</span>
                 @if (editRolesLoading().has(role.role_key)) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
               </label>
             }

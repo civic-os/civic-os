@@ -5,10 +5,10 @@
   <!-- Success Alert -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -16,10 +16,10 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4 relative">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissError()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissError()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -27,7 +27,7 @@
   <!-- Loading -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   } @else {
     <!-- Entity Type Selector + Actions -->
@@ -50,15 +50,15 @@
 
       <div class="flex gap-2">
         <button class="btn btn-primary btn-sm" (click)="openCreateGroupModal()">
-          <span class="material-symbols-outlined text-sm">add</span>
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
           Add Group
         </button>
         @if (selectedEntityType()) {
-          <button class="btn btn-sm" (click)="openEditGroupModal()">
-            <span class="material-symbols-outlined text-sm">edit</span>
+          <button class="btn btn-sm" (click)="openEditGroupModal()" [attr.aria-label]="'action.edit' | translate">
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
           </button>
-          <button class="btn btn-error btn-sm" (click)="openDeleteGroupModal()">
-            <span class="material-symbols-outlined text-sm">delete</span>
+          <button class="btn btn-error btn-sm" (click)="openDeleteGroupModal()" [attr.aria-label]="'action.delete' | translate">
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
           </button>
         }
       </div>
@@ -74,14 +74,14 @@
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Categories</h2>
         <button class="btn btn-primary btn-sm" (click)="openCreateCategoryModal()">
-          <span class="material-symbols-outlined text-sm">add</span>
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
           Add Category
         </button>
       </div>
 
       @if (categories().length === 0) {
         <div class="alert alert-info">
-          <span class="material-symbols-outlined">info</span>
+          <span class="material-symbols-outlined" aria-hidden="true">info</span>
           <span>No categories defined for this group yet. Click "Add Category" to create one.</span>
         </div>
       } @else {
@@ -108,11 +108,11 @@
                   <td>{{ cat.sort_order }}</td>
                   <td>
                     <div class="flex gap-1">
-                      <button class="btn btn-ghost btn-sm" (click)="openEditCategoryModal(cat)" title="Edit">
-                        <span class="material-symbols-outlined text-sm">edit</span>
+                      <button class="btn btn-ghost btn-sm" (click)="openEditCategoryModal(cat)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       </button>
-                      <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteCategoryModal(cat)" title="Delete">
-                        <span class="material-symbols-outlined text-sm">delete</span>
+                      <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteCategoryModal(cat)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   </td>
@@ -124,7 +124,7 @@
       }
     } @else if (categoryGroups().length === 0) {
       <div class="alert alert-info">
-        <span class="material-symbols-outlined">info</span>
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
         <span>No category groups defined yet. Click "Add Group" to create one.</span>
       </div>
     }
@@ -139,7 +139,7 @@
 
   @if (groupError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ groupError() }}</span>
     </div>
   }
@@ -179,7 +179,7 @@
     <button class="btn" (click)="closeGroupModal()" [disabled]="groupSaving()">Cancel</button>
     <button class="btn btn-primary" (click)="submitGroup()" [disabled]="groupSaving()">
       @if (groupSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingGroup() ? 'Update' : 'Create' }}
@@ -196,7 +196,7 @@
 
   @if (categoryError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ categoryError() }}</span>
     </div>
   }
@@ -258,7 +258,7 @@
     <button class="btn" (click)="closeCategoryModal()" [disabled]="categorySaving()">Cancel</button>
     <button class="btn btn-primary" (click)="submitCategory()" [disabled]="categorySaving()">
       @if (categorySaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingCategory() ? 'Update' : 'Create' }}
@@ -277,7 +277,7 @@
     <button class="btn" (click)="closeDeleteGroupModal()" [disabled]="deleteLoading()">Cancel</button>
     <button class="btn btn-error" (click)="submitDeleteGroup()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Group
@@ -296,7 +296,7 @@
     <button class="btn" (click)="closeDeleteCategoryModal()" [disabled]="deleteLoading()">Cancel</button>
     <button class="btn btn-error" (click)="submitDeleteCategory()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Category

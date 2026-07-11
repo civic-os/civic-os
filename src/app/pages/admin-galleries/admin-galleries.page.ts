@@ -58,10 +58,11 @@ interface GalleryAdminRow {
  *
  * @since v0.47.0
  */
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-admin-galleries',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, RouterLink, PaginationComponent],
+  imports: [TranslatePipe, CommonModule, FormsModule, DatePipe, RouterLink, PaginationComponent],
   templateUrl: './admin-galleries.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

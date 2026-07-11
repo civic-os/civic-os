@@ -81,7 +81,7 @@ export interface ActionButton {
           [title]="btn.tooltip || ''"
           (click)="buttonClick.emit(btn.id)">
           @if (btn.icon) {
-            <span class="material-symbols-outlined text-lg">{{btn.icon}}</span>
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">{{btn.icon}}</span>
           }
           <span class="hidden sm:inline">{{btn.label}}</span>
           <span class="sm:hidden">{{btn.label}}</span>
@@ -93,7 +93,7 @@ export interface ActionButton {
         <div class="dropdown dropdown-end">
           <button tabindex="0" class="btn btn-sm btn-ghost btn-outline">
             More
-            <span class="material-symbols-outlined text-lg">expand_more</span>
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">expand_more</span>
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box shadow-lg z-10 w-56 p-2">
             @for (btn of overflowButtons(); track btn.id) {
@@ -104,7 +104,7 @@ export interface ActionButton {
                   [title]="btn.tooltip || ''"
                   (click)="onDropdownButtonClick(btn.id, $event)">
                   @if (btn.icon) {
-                    <span class="material-symbols-outlined">{{btn.icon}}</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">{{btn.icon}}</span>
                   }
                   {{btn.label}}
                 </button>
@@ -120,7 +120,7 @@ export interface ActionButton {
       @for (btn of buttons(); track btn.id) {
         <button [class]="'btn btn-sm ' + btn.style">
           @if (btn.icon) {
-            <span class="material-symbols-outlined text-lg">{{btn.icon}}</span>
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">{{btn.icon}}</span>
           }
           <span>{{btn.label}}</span>
         </button>

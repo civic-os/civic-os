@@ -63,7 +63,7 @@ import { catchError, map } from 'rxjs/operators';
         </div>
         @if (hasPermission() && hasCreatePermission()) {
           <button class="btn btn-primary" (click)="openCreateWizard()">
-            <span class="material-symbols-outlined">add</span>
+            <span class="material-symbols-outlined" aria-hidden="true">add</span>
             Create Series
           </button>
         }
@@ -71,7 +71,7 @@ import { catchError, map } from 'rxjs/operators';
 
       @if (!hasPermission()) {
         <div class="alert alert-warning">
-          <span class="material-symbols-outlined">lock</span>
+          <span class="material-symbols-outlined" aria-hidden="true">lock</span>
           <span>You don't have permission to view recurring schedules.</span>
         </div>
       } @else {
@@ -81,7 +81,7 @@ import { catchError, map } from 'rxjs/operators';
             <!-- Search -->
             <div class="form-control flex-1 min-w-[200px]">
               <label class="input input-bordered flex items-center gap-2 w-full">
-                <span class="material-symbols-outlined text-base-content/50">search</span>
+                <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">search</span>
                 <input
                   type="text"
                   class="grow"
@@ -127,11 +127,11 @@ import { catchError, map } from 'rxjs/operators';
           <div class="flex-1">
             @if (loading()) {
               <div class="flex items-center justify-center py-12">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
               </div>
             } @else if (filteredGroups().length === 0) {
               <div class="text-center py-12">
-                <span class="material-symbols-outlined text-6xl text-base-content/30 mb-4">event_repeat</span>
+                <span class="material-symbols-outlined text-6xl text-base-content/30 mb-4" aria-hidden="true">event_repeat</span>
                 <p class="text-lg text-base-content/70">No recurring schedules found</p>
                 @if (searchQuery() || entityTypeFilter() || statusFilter()) {
                   <button class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
@@ -139,7 +139,7 @@ import { catchError, map } from 'rxjs/operators';
                   </button>
                 } @else if (hasCreatePermission()) {
                   <button class="btn btn-primary btn-sm mt-4" (click)="openCreateWizard()">
-                    <span class="material-symbols-outlined">add</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">add</span>
                     Create your first series
                   </button>
                 }
@@ -180,21 +180,21 @@ import { catchError, map } from 'rxjs/operators';
 
                           <div class="flex items-center gap-4 mt-2 text-sm text-base-content/60">
                             <span class="flex items-center gap-1">
-                              <span class="material-symbols-outlined text-sm">schedule</span>
+                              <span class="material-symbols-outlined text-sm" aria-hidden="true">schedule</span>
                               {{ group.version_count || 1 }} version(s)
                             </span>
                             <span class="flex items-center gap-1">
-                              <span class="material-symbols-outlined text-sm">event</span>
+                              <span class="material-symbols-outlined text-sm" aria-hidden="true">event</span>
                               {{ group.active_instance_count || 0 }} occurrences
                             </span>
                             <span class="flex items-center gap-1">
-                              <span class="material-symbols-outlined text-sm">date_range</span>
+                              <span class="material-symbols-outlined text-sm" aria-hidden="true">date_range</span>
                               {{ getFirstInstanceDate(group) }} – {{ getEndDateDisplay(group) }}
                             </span>
                           </div>
                         </div>
 
-                        <span class="material-symbols-outlined text-base-content/30">chevron_right</span>
+                        <span class="material-symbols-outlined text-base-content/30" aria-hidden="true">chevron_right</span>
                       </div>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ import { catchError, map } from 'rxjs/operators';
         <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
           @if (deleting()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           Delete Series
         </button>

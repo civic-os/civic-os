@@ -82,8 +82,8 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       <!-- Header with Steps -->
       <div class="flex items-center justify-between mb-6">
         <h3 class="font-bold text-lg">Create Recurring Series</h3>
-        <button class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()">
-          <span class="material-symbols-outlined">close</span>
+        <button class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()" [attr.aria-label]="'action.close' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
@@ -176,11 +176,11 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               <div class="space-y-4">
                 @if (loadingSchema()) {
                   <div class="flex items-center justify-center py-12">
-                    <span class="loading loading-spinner loading-lg"></span>
+                    <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
                   </div>
                 } @else if (templateProperties().length === 0) {
                   <div class="alert alert-info">
-                    <span class="material-symbols-outlined">info</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">info</span>
                     <span>No configurable template fields found for this entity.</span>
                   </div>
                 } @else {
@@ -220,12 +220,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               <div class="space-y-4">
                 @if (loadingPreview()) {
                   <div class="flex items-center justify-center py-12">
-                    <span class="loading loading-spinner loading-lg"></span>
+                    <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
                     <span class="ml-3">Generating preview...</span>
                   </div>
                 } @else if (previewError()) {
                   <div class="alert alert-error">
-                    <span class="material-symbols-outlined">error</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">error</span>
                     <span>{{ previewError() }}</span>
                   </div>
                 } @else {
@@ -282,7 +282,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                     <div class="max-h-48 overflow-y-auto">
                       @for (occ of previewOccurrences().slice(0, 20); track occ.start) {
                         <div class="flex items-center gap-3 p-3 border-b last:border-b-0">
-                          <span class="material-symbols-outlined text-base-content/40 text-sm">event</span>
+                          <span class="material-symbols-outlined text-base-content/40 text-sm" aria-hidden="true">event</span>
                           <span class="text-sm flex-1">{{ formatDateTime(occ.start) }}</span>
                         </div>
                       }
@@ -296,7 +296,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
                   @if (createError()) {
                     <div class="alert alert-error">
-                      <span class="material-symbols-outlined">error</span>
+                      <span class="material-symbols-outlined" aria-hidden="true">error</span>
                       <span>{{ createError() }}</span>
                     </div>
                   }
@@ -315,7 +315,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
         @if (currentStep() > 1) {
           <button class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
-            <span class="material-symbols-outlined">chevron_left</span>
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
             Back
           </button>
         }
@@ -327,7 +327,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             [disabled]="!canProceed()"
           >
             Next
-            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
           </button>
         } @else {
           <button
@@ -336,7 +336,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             [disabled]="creating() || loadingPreview() || previewOccurrences().length === 0"
           >
             @if (creating()) {
-              <span class="loading loading-spinner loading-sm"></span>
+              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
             }
             Create Series
           </button>

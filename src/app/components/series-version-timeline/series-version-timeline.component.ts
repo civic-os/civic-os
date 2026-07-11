@@ -48,7 +48,7 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
       } @else if (versions.length === 1) {
         <!-- Single version - simplified display -->
         <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
-          <span class="material-symbols-outlined text-primary">schedule</span>
+          <span class="material-symbols-outlined text-primary" aria-hidden="true">schedule</span>
           <div>
             <p class="font-medium">{{ versions[0].rrule_description || 'Recurring Schedule' }}</p>
             <p class="text-sm text-base-content/70">
@@ -76,11 +76,11 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
                    [class.bg-primary]="version.series_id === currentVersionId || isCurrentVersion(version)"
                    [class.bg-base-300]="version.series_id !== currentVersionId && !isCurrentVersion(version)">
                 @if (isCurrentVersion(version)) {
-                  <span class="material-symbols-outlined text-primary-content text-sm">radio_button_checked</span>
+                  <span class="material-symbols-outlined text-primary-content text-sm" aria-hidden="true">radio_button_checked</span>
                 } @else if (version.terminated_at) {
-                  <span class="material-symbols-outlined text-base-content/50 text-sm">history</span>
+                  <span class="material-symbols-outlined text-base-content/50 text-sm" aria-hidden="true">history</span>
                 } @else {
-                  <span class="material-symbols-outlined text-base-content/70 text-sm">schedule</span>
+                  <span class="material-symbols-outlined text-base-content/70 text-sm" aria-hidden="true">schedule</span>
                 }
               </div>
 
@@ -120,7 +120,7 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
 
               <!-- Selection indicator -->
               @if (version.series_id === currentVersionId) {
-                <span class="material-symbols-outlined text-primary">chevron_right</span>
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">chevron_right</span>
               }
             </div>
           }

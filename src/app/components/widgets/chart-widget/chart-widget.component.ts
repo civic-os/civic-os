@@ -40,9 +40,10 @@ import {
  *
  * Uses Unovis (F5) for SVG rendering with DaisyUI theme-aware colors.
  */
+import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-chart-widget',
-  imports: [
+  imports: [LoadingIndicatorComponent, 
     VisXYContainerModule,
     VisGroupedBarModule,
     VisAxisModule,

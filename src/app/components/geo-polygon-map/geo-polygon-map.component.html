@@ -12,8 +12,9 @@
     <button type="button"
             class="map-reset-button"
             (click)="onResetView()"
+            [attr.aria-label]="'a11y.reset_map_view' | translate"
             title="Reset view to show all polygons">
-      <span class="material-symbols-outlined" style="font-size: 18px; line-height: 1;">home</span>
+      <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px; line-height: 1;">home</span>
     </button>
   }
 </div>

@@ -54,10 +54,11 @@ interface EntityOption {
  *
  * v0.39.0
  */
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-admin-files',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, RouterLink, PaginationComponent, FilterBarComponent],
+  imports: [TranslatePipe, CommonModule, FormsModule, DatePipe, RouterLink, PaginationComponent, FilterBarComponent],
   templateUrl: './admin-files.page.html',
   styleUrl: './admin-files.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -15,7 +15,7 @@
 
   @if (loading()) {
     <div class="flex justify-center py-8">
-      <span class="loading loading-spinner loading-md"></span>
+      <span class="loading loading-spinner loading-md" aria-hidden="true"></span>
     </div>
   }
 
@@ -44,7 +44,7 @@
             }
             @if (!readOnly()) {
               <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep('__parent__')">
-                <span class="material-symbols-outlined text-sm">edit</span>
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                 Edit
               </button>
             }
@@ -86,7 +86,7 @@
               }
               @if (!readOnly()) {
                 <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   Edit
                 </button>
               }
@@ -94,7 +94,7 @@
               <p class="text-sm opacity-60">This optional step was skipped.</p>
               @if (!readOnly()) {
                 <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   Fill In
                 </button>
               }
@@ -109,7 +109,7 @@
     <div class="mt-6 flex justify-end">
       <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting()">
         @if (submitting()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Submitting...
         } @else {
           Submit {{ entityDisplayName() || '' }}

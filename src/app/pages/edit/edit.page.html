@@ -14,26 +14,26 @@
         @if (guidedFormContext()) {
           @if (entity.description) {
             <div class="alert alert-info mb-4">
-              <span class="material-symbols-outlined">info</span>
+              <span class="material-symbols-outlined" aria-hidden="true">info</span>
               <span>{{ entity.description }}</span>
             </div>
           }
         } @else {
           <div class="flex items-center gap-4 mb-4">
-            <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
-              <span class="material-symbols-outlined">arrow_back</span>
+            <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button" [attr.aria-label]="'action.back' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             </button>
             <h1 class="mb-0">
               {{ entity.display_name }}: {{ data.display_name || '#' + data.id }} <sub>(Id: {{entityId}})</sub>
               @if (entity.description) {
                 <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description">
-                  <span class="material-symbols-outlined text-info cursor-help ms-2 text-xl align-middle">help_outline</span>
+                  <span class="material-symbols-outlined text-info cursor-help ms-2 text-xl align-middle" aria-hidden="true">help_outline</span>
                 </div>
               }
             </h1>
             @if (seriesMembership()?.is_member) {
               <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
-                <span class="material-symbols-outlined text-sm">repeat</span>
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">repeat</span>
                 {{ seriesMembership()?.group_name || 'Recurring' }}
               </a>
             }
@@ -41,13 +41,13 @@
         }
         @if (loading()) {
           <div class="flex justify-center my-8">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           </div>
         } @else if ((entity.update || entity.guided_form_key) && editForm; as form) {
             <form [formGroup]="form" (ngSubmit)="submitForm($event)">
               @if (showValidationError()) {
                 <div role="alert" class="alert alert-error mb-4">
-                  <span class="material-symbols-outlined">error</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">error</span>
                   <span>{{ 'form.fix_errors' | translate }}</span>
                 </div>
               }
@@ -109,46 +109,46 @@
                   <!-- Completed step display mode: show Edit button (unless locked) -->
                   @if (!isGuidedFormLocked()) {
                     <button type="button" class="btn btn-accent" (click)="enterEditMode()">
-                      <span class="material-symbols-outlined">edit</span> {{ 'action.edit' | translate }}
+                      <span class="material-symbols-outlined" aria-hidden="true">edit</span> {{ 'action.edit' | translate }}
                     </button>
                   } @else {
                     <button type="button" class="btn btn-accent" disabled>
-                      <span class="material-symbols-outlined">edit_off</span> {{ 'guided_form.edit_locked' | translate }}
+                      <span class="material-symbols-outlined" aria-hidden="true">edit_off</span> {{ 'guided_form.edit_locked' | translate }}
                     </button>
                   }
                 } @else {
                   <!-- Draft step or editing completed step: show Save buttons -->
                   <button type="submit" class="btn btn-accent" [disabled]="isSaving()">
-                    <span class="material-symbols-outlined">save</span> {{ 'action.save' | translate }}
+                    <span class="material-symbols-outlined" aria-hidden="true">save</span> {{ 'action.save' | translate }}
                   </button>
                   @if (isGuidedFormMode() && isGuidedFormDraft()) {
                     <button type="button" class="btn btn-primary" (click)="saveAndContinue($event)" [disabled]="savingAndContinuing()">
                       @if (savingAndContinuing()) {
-                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                       } @else {
-                        <span class="material-symbols-outlined">arrow_forward</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
                       }
                       {{ 'guided_form.save_and_continue' | translate }}
                     </button>
                   }
                   @if (isGuidedFormMode() && isGuidedFormDraft() && isCurrentStepSkippable()) {
                     <button type="button" class="btn btn-outline" (click)="skipStep()">
-                      <span class="material-symbols-outlined">skip_next</span>
+                      <span class="material-symbols-outlined" aria-hidden="true">skip_next</span>
                       {{ 'guided_form.skip' | translate }}
                     </button>
                   }
                   @if (isGuidedFormMode() && !isGuidedFormDraft() && isEditingCompletedStep()) {
                     <button type="button" class="btn btn-ghost" (click)="cancelEditMode()">
-                      <span class="material-symbols-outlined">close</span> {{ 'action.cancel' | translate }}
+                      <span class="material-symbols-outlined" aria-hidden="true">close</span> {{ 'action.cancel' | translate }}
                     </button>
                   }
                 }
                 @if (isGuidedFormMode() && isGuidedFormDraft() && autoSaveStatus() !== 'idle') {
                   <span class="text-sm opacity-60 flex items-center gap-1">
                     @if (autoSaveStatus() === 'saving') {
-                      <span class="loading loading-spinner loading-xs"></span> {{ 'state.saving' | translate }}
+                      <span class="loading loading-spinner loading-xs" aria-hidden="true"></span> {{ 'state.saving' | translate }}
                     } @else if (autoSaveStatus() === 'saved') {
-                      <span class="material-symbols-outlined text-sm">check</span> {{ 'form.saved' | translate }}
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">check</span> {{ 'form.saved' | translate }}
                     }
                   </span>
                 }
@@ -181,7 +181,7 @@
           @if (dataLoading()) {
             <!-- Loading state -->
             <div class="flex flex-col items-center justify-center gap-4 py-12">
-              <span class="loading loading-spinner loading-lg"></span>
+              <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
               <p class="text-base-content/60">{{ 'state.loading' | translate }}</p>
             </div>
           } @else if (!entity.update && !entity.guided_form_key) {
@@ -218,10 +218,10 @@
         <!-- Coordinated save: show step progress -->
         <h3 class="font-bold text-lg mb-4">
           @if (saveComplete()) {
-            <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
+            <span class="material-symbols-outlined text-success align-middle me-2" aria-hidden="true">check_circle</span>
             {{ 'form.saved' | translate }}
           } @else {
-            <span class="material-symbols-outlined text-primary align-middle me-2 animate-spin">progress_activity</span>
+            <span class="material-symbols-outlined text-primary align-middle me-2 animate-spin" aria-hidden="true">progress_activity</span>
             {{ 'state.saving' | translate }}
           }
         </h3>
@@ -238,7 +238,7 @@
       } @else {
         <!-- Standard success (no M:M steps) -->
         <h3 class="font-bold text-lg mb-4">
-          <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
+          <span class="material-symbols-outlined text-success align-middle me-2" aria-hidden="true">check_circle</span>
           {{ 'form.success' | translate }}
         </h3>
         <p class="mb-4">{{ 'form.update_success' | translate }}</p>
@@ -252,7 +252,7 @@
     <!-- Error Modal -->
     <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm" [label]="'state.error' | translate">
       <h3 class="font-bold text-lg mb-4">
-        <span class="material-symbols-outlined text-error align-middle me-2">error</span>
+        <span class="material-symbols-outlined text-error align-middle me-2" aria-hidden="true">error</span>
         {{ 'state.error' | translate }}
       </h3>
       @if (currentError(); as err) {

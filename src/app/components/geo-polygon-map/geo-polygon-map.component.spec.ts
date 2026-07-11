@@ -8,6 +8,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPolygonMapComponent, resolveColor } from './geo-polygon-map.component';
 import { ThemeService } from '../../services/theme.service';
@@ -30,6 +31,7 @@ describe('GeoPolygonMapComponent', () => {
       imports: [GeoPolygonMapComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: ThemeService, useValue: mockThemeService },
       ]
     }).compileComponents();

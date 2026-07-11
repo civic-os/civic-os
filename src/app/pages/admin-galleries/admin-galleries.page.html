@@ -4,15 +4,15 @@
     <h1 class="text-3xl font-bold">Gallery Administration</h1>
     @if (canView()) {
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">photo_library</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">photo_library</span>
         {{ totalGalleries() | number }} {{ totalGalleries() === 1 ? 'gallery' : 'galleries' }}
       </div>
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">image</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">image</span>
         {{ totalImages() | number }} {{ totalImages() === 1 ? 'image' : 'images' }}
       </div>
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">hard_drive</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">hard_drive</span>
         {{ formatFileSize(totalStorageBytes()) }}
       </div>
     }
@@ -21,7 +21,7 @@
   <!-- Error Message -->
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
@@ -29,7 +29,7 @@
   <!-- Permission Check -->
   @if (!canView()) {
     <div class="alert alert-warning">
-      <span class="material-symbols-outlined">lock</span>
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span>
       <span>You do not have permission to view galleries. Administrator access required.</span>
     </div>
   } @else {
@@ -95,7 +95,7 @@
           <span class="label-text font-semibold">&nbsp;</span>
         </label>
         <label class="input input-bordered input-sm flex items-center gap-2">
-          <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+          <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
           <input
             type="text"
             placeholder="Search entity ID..."
@@ -117,8 +117,9 @@
           class="btn btn-sm btn-square btn-ghost"
           (click)="refresh()"
           [disabled]="loading()"
-          title="Refresh">
-          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+          title="Refresh"
+          [attr.aria-label]="'action.refresh' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true" [class.animate-spin]="loading()">refresh</span>
         </button>
       </div>
     </div>
@@ -127,13 +128,13 @@
     @if (loading()) {
       <div class="flex justify-center items-center min-h-[400px]">
         <div class="flex items-center gap-2">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           <span class="text-base-content/60">Loading galleries...</span>
         </div>
       </div>
     } @else if (galleries().length === 0) {
       <div class="text-center py-8 text-base-content/60">
-        <span class="material-symbols-outlined text-4xl mb-2">photo_library</span>
+        <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">photo_library</span>
         <p>No galleries found matching your filters.</p>
       </div>
     } @else {
@@ -198,7 +199,7 @@
                 <td class="font-mono text-sm">{{ gallery.property_name }}</td>
                 <td>
                   <div class="badge badge-ghost gap-1">
-                    <span class="material-symbols-outlined text-sm">image</span>
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">image</span>
                     {{ gallery.image_count }}
                   </div>
                 </td>

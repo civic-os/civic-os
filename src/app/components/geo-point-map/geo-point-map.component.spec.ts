@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
 import { ThemeService } from '../../services/theme.service';
@@ -70,7 +71,7 @@ describe('GeoPointMapComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GeoPointMapComponent],
-      providers: [provideZonelessChangeDetection()]
+      providers: [provideZonelessChangeDetection(), provideTranslationTesting()]
     })
     .compileComponents();
 

@@ -69,7 +69,7 @@ export interface ExceptionEditorResult {
       @if (membership) {
         <div class="mb-4 p-3 bg-base-200 rounded-lg">
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-info">repeat</span>
+            <span class="material-symbols-outlined text-info" aria-hidden="true">repeat</span>
             <span class="font-medium">{{ membership.group_name }}</span>
           </div>
           @if (membership.occurrence_date) {

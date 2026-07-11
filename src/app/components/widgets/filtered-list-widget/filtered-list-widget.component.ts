@@ -34,9 +34,10 @@ import { DataQuery } from '../../../interfaces/query';
  *
  * Phase 2 implementation - basic functionality without auto-refresh.
  */
+import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-filtered-list-widget',
-  imports: [CommonModule, DisplayPropertyComponent, RouterLink, TranslatePipe],
+  imports: [LoadingIndicatorComponent, CommonModule, DisplayPropertyComponent, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './filtered-list-widget.component.html',
   styleUrl: './filtered-list-widget.component.css'

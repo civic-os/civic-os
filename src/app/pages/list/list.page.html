@@ -4,7 +4,7 @@
       {{ entity.display_name }} {{ 'list.title_suffix' | translate }}
       @if (entity.description) {
         <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description">
-          <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle">help_outline</span>
+          <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle" aria-hidden="true">help_outline</span>
         </div>
       }
     </h1>
@@ -294,7 +294,7 @@
     size="sm"
     [label]="('guided_form.unable_to_start' | translate) + ' ' + entity.display_name">
     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-      <span class="material-symbols-outlined text-error">error</span>
+      <span class="material-symbols-outlined text-error" aria-hidden="true">error</span>
       {{ 'guided_form.unable_to_start' | translate }} {{ entity.display_name }}
     </h3>
     <p class="mb-6">{{ guidedFormErrorMessage() }}</p>

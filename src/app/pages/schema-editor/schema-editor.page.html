@@ -4,7 +4,7 @@
     <h1 class="text-2xl font-bold">Schema Editor</h1>
     @if (!loading() && !error() && editMode()) {
       <button class="btn btn-primary ms-4" (click)="autoArrange()">
-        <span class="material-symbols-outlined">auto_awesome</span>
+        <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
         Auto-Arrange
       </button>
     }
@@ -13,7 +13,7 @@
   <!-- Loading State -->
   @if (loading()) {
     <div class="loading-container">
-      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
       <p class="mt-4 text-lg">Loading schema data...</p>
     </div>
   }
@@ -22,7 +22,7 @@
   @if (error(); as errorMsg) {
     <div class="error-container">
       <div class="alert alert-error">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>{{ errorMsg }}</span>
@@ -40,14 +40,14 @@
         <!-- Zoom Controls -->
         <div class="zoom-controls">
           <div class="join join-vertical">
-            <button class="btn btn-sm join-item" (click)="zoomIn()" title="Zoom In">
-              <span class="material-symbols-outlined">add</span>
+            <button class="btn btn-sm join-item" (click)="zoomIn()" title="Zoom In" [attr.aria-label]="'a11y.zoom_in' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
             </button>
-            <button class="btn btn-sm join-item" (click)="zoomOut()" title="Zoom Out">
-              <span class="material-symbols-outlined">remove</span>
+            <button class="btn btn-sm join-item" (click)="zoomOut()" title="Zoom Out" [attr.aria-label]="'a11y.zoom_out' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">remove</span>
             </button>
-            <button class="btn btn-sm join-item" (click)="zoomToFit()" title="Zoom to Fit">
-              <span class="material-symbols-outlined">fit_screen</span>
+            <button class="btn btn-sm join-item" (click)="zoomToFit()" title="Zoom to Fit" [attr.aria-label]="'a11y.zoom_to_fit' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">fit_screen</span>
             </button>
           </div>
         </div>
@@ -57,7 +57,7 @@
           <!-- Expanded: Full Instructions Panel -->
           <div class="instructions">
             <div class="alert alert-info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <div>
@@ -70,16 +70,16 @@
                   <li>System types (Files, Users) appear as property types, not relationships</li>
                 </ul>
               </div>
-              <button class="btn btn-sm btn-circle btn-ghost" (click)="toggleInstructions()" title="Minimize">
-                <span class="material-symbols-outlined">remove</span>
+              <button class="btn btn-sm btn-circle btn-ghost" (click)="toggleInstructions()" title="Minimize" [attr.aria-label]="'a11y.minimize' | translate">
+                <span class="material-symbols-outlined" aria-hidden="true">remove</span>
               </button>
             </div>
           </div>
         } @else {
           <!-- Minimized: Info Icon Button -->
           <div class="instructions-minimized">
-            <button class="btn btn-circle btn-info btn-sm" (click)="toggleInstructions()" title="Show Instructions">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current w-5 h-5">
+            <button class="btn btn-circle btn-info btn-sm" (click)="toggleInstructions()" title="Show Instructions" [attr.aria-label]="'a11y.show_instructions' | translate">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </button>

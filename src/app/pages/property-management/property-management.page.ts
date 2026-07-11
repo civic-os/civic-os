@@ -76,10 +76,11 @@ interface AdminCheckData {
   error?: string;
 }
 
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-property-management',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [TranslatePipe, CommonModule, FormsModule, DragDropModule],
   templateUrl: './property-management.page.html',
   styleUrl: './property-management.page.css'
 })

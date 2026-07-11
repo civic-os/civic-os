@@ -4,11 +4,11 @@
     <h1 class="text-3xl font-bold">File Administration</h1>
     @if (canViewFiles()) {
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">inventory_2</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">inventory_2</span>
         {{ totalFileCount() | number }}
       </div>
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">hard_drive</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">hard_drive</span>
         {{ formatFileSize(totalFileSize()) }}
       </div>
     }
@@ -17,7 +17,7 @@
   <!-- Error Message -->
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
@@ -25,7 +25,7 @@
   <!-- Permission Check -->
   @if (!canViewFiles()) {
     <div class="alert alert-warning">
-      <span class="material-symbols-outlined">lock</span>
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span>
       <span>You do not have permission to view files. Contact an administrator to request access.</span>
     </div>
   } @else {
@@ -92,7 +92,7 @@
           <span class="label-text font-semibold">&nbsp;</span>
         </label>
         <label class="input input-bordered input-sm flex items-center gap-2">
-          <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+          <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
           <input
             type="text"
             placeholder="Search filename..."
@@ -124,8 +124,9 @@
           class="btn btn-sm btn-square btn-ghost"
           (click)="refresh()"
           [disabled]="loading()"
-          title="Refresh">
-          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+          title="Refresh"
+          [attr.aria-label]="'action.refresh' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true" [class.animate-spin]="loading()">refresh</span>
         </button>
       </div>
     </div>
@@ -134,7 +135,7 @@
     @if (loading()) {
       <div class="flex justify-center items-center min-h-[400px]">
         <div class="flex items-center gap-2">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           @if (loadingPhase() === 'searching-entities') {
             <span class="text-base-content/60">Searching entities...</span>
           } @else if (loadingPhase() === 'loading-files') {
@@ -208,7 +209,7 @@
                     </div>
                   } @else {
                     <div class="w-10 h-10 rounded bg-base-200 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-base-content/40">{{ getFileIcon(file.file_type) }}</span>
+                      <span class="material-symbols-outlined text-base-content/40" aria-hidden="true">{{ getFileIcon(file.file_type) }}</span>
                     </div>
                   }
                 </td>
@@ -223,7 +224,7 @@
                 <td>
                   <a [routerLink]="getEntityRoute(file)"
                     class="link link-primary text-sm flex items-center gap-1">
-                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                    <span class="material-symbols-outlined text-xs" aria-hidden="true">open_in_new</span>
                     {{ getEntityDisplayName(file) }}
                   </a>
                 </td>
@@ -255,7 +256,7 @@
       @if (selectedFileIds().size > 0) {
         <div class="mt-4">
           <button class="btn btn-sm btn-primary" (click)="downloadSelected()">
-            <span class="material-symbols-outlined text-base">download</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">download</span>
             Download Selected ({{ selectedFileIds().size }})
           </button>
         </div>

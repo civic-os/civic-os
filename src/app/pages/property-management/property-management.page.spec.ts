@@ -18,6 +18,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { PropertyManagementPage } from './property-management.page';
 import { SchemaService } from '../../services/schema.service';
 import { PropertyManagementService } from '../../services/property-management.service';
@@ -127,6 +128,7 @@ describe('PropertyManagementPage', () => {
       imports: [PropertyManagementPage],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: PropertyManagementService, useValue: mockPropertyManagementService }
       ]

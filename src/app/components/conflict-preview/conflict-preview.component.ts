@@ -58,7 +58,7 @@ export interface ConflictPreviewResult {
 
       @if (loading) {
         <div class="flex items-center justify-center py-8">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           <span class="ml-3">Checking for conflicts...</span>
         </div>
       } @else {
@@ -78,7 +78,7 @@ export interface ConflictPreviewResult {
 
         @if (conflictCount() > 0) {
           <div class="alert alert-warning mb-4">
-            <span class="material-symbols-outlined">warning</span>
+            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
             <span>{{ conflictCount() }} occurrence(s) conflict with existing schedules.</span>
           </div>
         }
@@ -91,9 +91,9 @@ export interface ConflictPreviewResult {
                  [class.bg-error/5]="item.has_conflict">
               <!-- Status Icon -->
               @if (item.has_conflict) {
-                <span class="material-symbols-outlined text-error">cancel</span>
+                <span class="material-symbols-outlined text-error" aria-hidden="true">cancel</span>
               } @else {
-                <span class="material-symbols-outlined text-success">check_circle</span>
+                <span class="material-symbols-outlined text-success" aria-hidden="true">check_circle</span>
               }
 
               <!-- Time Slot -->

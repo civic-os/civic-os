@@ -9,7 +9,7 @@
 
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -32,7 +32,7 @@
             <div class="flex items-center gap-4">
               <!-- Drag Handle -->
               <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
+                <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
               </div>
 
               <!-- Entity Info -->
@@ -198,9 +198,9 @@
               <!-- Status Indicator (aligned with input fields) -->
               <div class="flex-shrink-0 w-6 flex items-center justify-center self-center">
                 @if (isSaving(entity.table_name)) {
-                  <span class="loading loading-spinner loading-sm"></span>
+                  <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                 } @else if (isSaved(entity.table_name)) {
-                  <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
+                  <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000" aria-hidden="true"
                         [class.opacity-0]="isFading(entity.table_name)"
                         [class.opacity-100]="!isFading(entity.table_name)">check_circle</span>
                 }

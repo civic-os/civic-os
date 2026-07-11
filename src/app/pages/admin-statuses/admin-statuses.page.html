@@ -5,10 +5,10 @@
   <!-- Success Alert -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -16,10 +16,10 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4 relative">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissError()">
-        <span class="material-symbols-outlined">close</span>
+      <button class="btn btn-ghost btn-sm" (click)="dismissError()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -27,7 +27,7 @@
   <!-- Loading -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   } @else {
     <!-- Entity Type Selector + Actions -->
@@ -50,15 +50,15 @@
 
       <div class="flex gap-2">
         <button class="btn btn-primary btn-sm" (click)="openCreateTypeModal()">
-          <span class="material-symbols-outlined text-sm">add</span>
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
           Add Type
         </button>
         @if (selectedEntityType()) {
-          <button class="btn btn-sm" (click)="openEditTypeModal()">
-            <span class="material-symbols-outlined text-sm">edit</span>
+          <button class="btn btn-sm" (click)="openEditTypeModal()" [attr.aria-label]="'action.edit' | translate">
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
           </button>
-          <button class="btn btn-error btn-sm" (click)="openDeleteTypeModal()">
-            <span class="material-symbols-outlined text-sm">delete</span>
+          <button class="btn btn-error btn-sm" (click)="openDeleteTypeModal()" [attr.aria-label]="'action.delete' | translate">
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
           </button>
         }
       </div>
@@ -85,14 +85,14 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold">Statuses</h2>
           <button class="btn btn-primary btn-sm" (click)="openCreateStatusModal()">
-            <span class="material-symbols-outlined text-sm">add</span>
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
             Add Status
           </button>
         </div>
 
         @if (statuses().length === 0) {
           <div class="alert alert-info">
-            <span class="material-symbols-outlined">info</span>
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
             <span>No statuses defined for this type yet. Click "Add Status" to create one.</span>
           </div>
         } @else {
@@ -131,11 +131,11 @@
                     <td>{{ status.sort_order }}</td>
                     <td>
                       <div class="flex gap-1">
-                        <button class="btn btn-ghost btn-sm" (click)="openEditStatusModal(status)" title="Edit">
-                          <span class="material-symbols-outlined text-sm">edit</span>
+                        <button class="btn btn-ghost btn-sm" (click)="openEditStatusModal(status)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                         </button>
-                        <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteStatusModal(status)" title="Delete">
-                          <span class="material-symbols-outlined text-sm">delete</span>
+                        <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteStatusModal(status)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                         </button>
                       </div>
                     </td>
@@ -152,19 +152,19 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold">Transitions</h2>
           <button class="btn btn-primary btn-sm" (click)="openCreateTransitionModal()" [disabled]="statuses().length < 2">
-            <span class="material-symbols-outlined text-sm">add</span>
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
             Add Transition
           </button>
         </div>
 
         @if (statuses().length < 2) {
           <div class="alert alert-warning">
-            <span class="material-symbols-outlined">warning</span>
+            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
             <span>At least 2 statuses are required to create transitions.</span>
           </div>
         } @else if (transitions().length === 0) {
           <div class="alert alert-info">
-            <span class="material-symbols-outlined">info</span>
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
             <span>No transitions defined yet. Click "Add Transition" to define allowed status changes.</span>
           </div>
         } @else {
@@ -189,7 +189,7 @@
                         {{ transition.from_display_name }}
                       </span>
                     </td>
-                    <td><span class="material-symbols-outlined text-base-content/40">arrow_forward</span></td>
+                    <td><span class="material-symbols-outlined text-base-content/40" aria-hidden="true">arrow_forward</span></td>
                     <td>
                       <span class="badge gap-1" [style.backgroundColor]="transition.to_color || '#3B82F6'" [style.color]="'white'">
                         {{ transition.to_display_name }}
@@ -209,11 +209,11 @@
                     </td>
                     <td>
                       <div class="flex gap-1">
-                        <button class="btn btn-ghost btn-sm" (click)="openEditTransitionModal(transition)" title="Edit">
-                          <span class="material-symbols-outlined text-sm">edit</span>
+                        <button class="btn btn-ghost btn-sm" (click)="openEditTransitionModal(transition)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                         </button>
-                        <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteTransitionModal(transition)" title="Delete">
-                          <span class="material-symbols-outlined text-sm">delete</span>
+                        <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteTransitionModal(transition)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                         </button>
                       </div>
                     </td>
@@ -226,7 +226,7 @@
       }
     } @else if (statusTypes().length === 0) {
       <div class="alert alert-info">
-        <span class="material-symbols-outlined">info</span>
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
         <span>No status types defined yet. Click "Add Type" to create one.</span>
       </div>
     }
@@ -241,7 +241,7 @@
 
   @if (typeError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ typeError() }}</span>
     </div>
   }
@@ -281,7 +281,7 @@
     <button class="btn" (click)="closeTypeModal()" [disabled]="typeSaving()">Cancel</button>
     <button class="btn btn-primary" (click)="submitType()" [disabled]="typeSaving()">
       @if (typeSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingType() ? 'Update' : 'Create' }}
@@ -298,7 +298,7 @@
 
   @if (statusError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ statusError() }}</span>
     </div>
   }
@@ -378,7 +378,7 @@
     <button class="btn" (click)="closeStatusModal()" [disabled]="statusSaving()">Cancel</button>
     <button class="btn btn-primary" (click)="submitStatus()" [disabled]="statusSaving()">
       @if (statusSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingStatus() ? 'Update' : 'Create' }}
@@ -395,7 +395,7 @@
 
   @if (transitionError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ transitionError() }}</span>
     </div>
   }
@@ -414,7 +414,7 @@
       </select>
     </div>
     <div class="flex items-end pb-3">
-      <span class="material-symbols-outlined text-base-content/40">arrow_forward</span>
+      <span class="material-symbols-outlined text-base-content/40" aria-hidden="true">arrow_forward</span>
     </div>
     <div class="form-control flex-1">
       <label class="label"><span class="font-semibold">To Status</span></label>
@@ -477,7 +477,7 @@
     <button class="btn" (click)="closeTransitionModal()" [disabled]="transitionSaving()">Cancel</button>
     <button class="btn btn-primary" (click)="submitTransition()" [disabled]="transitionSaving()">
       @if (transitionSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingTransition() ? 'Update' : 'Create' }}
@@ -496,7 +496,7 @@
     <button class="btn" (click)="closeDeleteTypeModal()" [disabled]="deleteLoading()">Cancel</button>
     <button class="btn btn-error" (click)="submitDeleteType()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Type
@@ -515,7 +515,7 @@
     <button class="btn" (click)="closeDeleteStatusModal()" [disabled]="deleteLoading()">Cancel</button>
     <button class="btn btn-error" (click)="submitDeleteStatus()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Status
@@ -537,7 +537,7 @@
     <button class="btn" (click)="closeDeleteTransitionModal()" [disabled]="deleteLoading()">Cancel</button>
     <button class="btn btn-error" (click)="submitDeleteTransition()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Transition

@@ -36,10 +36,11 @@ interface CodeSection {
  *
  * @since v0.29.0
  */
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-entity-code',
   standalone: true,
-  imports: [CommonModule, CodeViewerComponent],
+  imports: [TranslatePipe, CommonModule, CodeViewerComponent],
   templateUrl: './entity-code.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -11,7 +11,7 @@
             <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="chip.color"></span>
           }
           {{ formatChipLabel(chip) }}
-          <span class="material-symbols-outlined text-xs">add</span>
+          <span class="material-symbols-outlined text-xs" aria-hidden="true">add</span>
         </span>
       } @else if (chip.state === 'removed') {
         <!-- Removed: strikethrough with reduced opacity -->
@@ -37,7 +37,7 @@
 
   <!-- Edit trigger -->
   <button type="button" class="btn btn-xs btn-outline" (click)="openModal()">
-    <span class="material-symbols-outlined text-sm">edit</span>
+    <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
     Change {{ property().display_name }}
   </button>
 

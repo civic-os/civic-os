@@ -14,7 +14,7 @@
       class="absolute top-4 end-4 btn btn-circle btn-ghost text-white z-10"
       (click)="close()"
       [attr.aria-label]="'a11y.close_gallery' | translate">
-      <span class="material-symbols-outlined text-2xl">close</span>
+      <span class="material-symbols-outlined text-2xl" aria-hidden="true">close</span>
     </button>
 
     <!-- Image counter -->
@@ -28,7 +28,7 @@
         class="absolute start-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
         (click)="prev(); $event.stopPropagation()"
         [attr.aria-label]="'a11y.previous_image' | translate">
-        <span class="material-symbols-outlined text-3xl">{{ isRtl() ? 'chevron_right' : 'chevron_left' }}</span>
+        <span class="material-symbols-outlined text-3xl" aria-hidden="true">{{ isRtl() ? 'chevron_right' : 'chevron_left' }}</span>
       </button>
     }
 
@@ -38,7 +38,7 @@
         class="absolute end-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
         (click)="next(); $event.stopPropagation()"
         [attr.aria-label]="'a11y.next_image' | translate">
-        <span class="material-symbols-outlined text-3xl">{{ isRtl() ? 'chevron_left' : 'chevron_right' }}</span>
+        <span class="material-symbols-outlined text-3xl" aria-hidden="true">{{ isRtl() ? 'chevron_left' : 'chevron_right' }}</span>
       </button>
     }
 

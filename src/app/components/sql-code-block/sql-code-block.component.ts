@@ -49,14 +49,14 @@ import { MarkdownModule } from 'ngx-markdown';
             @if (isLong()) {
               <button class="btn btn-ghost btn-xs"
                       (click)="collapsed.set(!collapsed())">
-                <span class="material-symbols-outlined text-sm">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">
                   {{ collapsed() ? 'expand_more' : 'expand_less' }}
                 </span>
                 {{ collapsed() ? 'Expand' : 'Collapse' }}
               </button>
             }
             <button class="btn btn-ghost btn-xs" (click)="copyToClipboard()">
-              <span class="material-symbols-outlined text-sm">
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">
                 {{ copied() ? 'check' : 'content_copy' }}
               </span>
               {{ copied() ? 'Copied' : 'Copy' }}

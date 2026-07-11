@@ -34,9 +34,10 @@ import { DataQuery } from '../../../interfaces/query';
  *
  * Phase 2 implementation - basic functionality without auto-refresh.
  */
+import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-map-widget',
-  imports: [CommonModule, GeoPointMapComponent, GeoPolygonMapComponent],
+  imports: [LoadingIndicatorComponent, CommonModule, GeoPointMapComponent, GeoPolygonMapComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './map-widget.component.html',
   styleUrl: './map-widget.component.css'

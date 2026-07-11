@@ -9,7 +9,7 @@
   <!-- Error Alert -->
   @if (errorMessage()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ errorMessage() }}</span>
     </div>
   }
@@ -27,7 +27,7 @@
             <p class="text-sm">{{ 'import_modal.download_template_desc' | translate }}</p>
             <div class="card-actions justify-end">
               <button class="btn btn-sm btn-primary" (click)="downloadTemplate()">
-                <span class="material-symbols-outlined">download</span>
+                <span class="material-symbols-outlined" aria-hidden="true">download</span>
                 {{ 'action.download' | translate }}
               </button>
             </div>
@@ -41,7 +41,7 @@
             <p class="text-sm">{{ 'import_modal.upload_file_desc' | translate }}</p>
             <div class="card-actions justify-end">
               <label class="btn btn-sm btn-primary">
-                <span class="material-symbols-outlined">upload</span>
+                <span class="material-symbols-outlined" aria-hidden="true">upload</span>
                 {{ 'import_modal.choose_file' | translate }}
                 <input type="file" class="hidden" accept=".xlsx,.xls" (change)="onFileSelected($event)">
               </label>
@@ -55,7 +55,7 @@
         class="border-2 border-dashed border-base-300 rounded-lg p-8 text-center hover:border-primary transition-colors"
         (drop)="onFileDrop($event)"
         (dragover)="onDragOver($event)">
-        <span class="material-symbols-outlined text-4xl text-base-content/50">cloud_upload</span>
+        <span class="material-symbols-outlined text-4xl text-base-content/50" aria-hidden="true">cloud_upload</span>
         <p class="mt-2 text-sm text-base-content/70">{{ 'import_modal.drag_drop_hint' | translate }}</p>
         <p class="text-xs text-base-content/50 mt-1">{{ 'import_modal.file_format_hint' | translate }}</p>
       </div>
@@ -84,11 +84,11 @@
       <!-- Partial Success (custom import only) -->
       @if (partialSuccessCount() > 0) {
         <div class="alert alert-success mb-2">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
           <span>{{ partialSuccessCount() }} users created successfully.</span>
         </div>
         <div class="alert alert-warning">
-          <span class="material-symbols-outlined">warning</span>
+          <span class="material-symbols-outlined" aria-hidden="true">warning</span>
           <span>{{ errorSummary()?.totalErrors }} failed with errors:</span>
         </div>
 
@@ -119,7 +119,7 @@
       } @else if (hasErrors()) {
         <!-- Errors Found (client-side validation) -->
         <div class="alert alert-warning">
-          <span class="material-symbols-outlined">warning</span>
+          <span class="material-symbols-outlined" aria-hidden="true">warning</span>
           <span>{{ 'import_modal.errors_found' | translate:{ count: errorSummary()!.totalErrors } }}</span>
         </div>
 
@@ -160,7 +160,7 @@
           @if (!customImport) {
             <div class="flex gap-2">
               <button class="btn btn-sm" (click)="downloadErrorReport()">
-                <span class="material-symbols-outlined">download</span>
+                <span class="material-symbols-outlined" aria-hidden="true">download</span>
                 {{ 'import_modal.download_full_report' | translate }}
               </button>
             </div>
@@ -169,12 +169,12 @@
       } @else {
         <!-- No Errors -->
         <div class="alert alert-success">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
           <span>{{ 'import_modal.validation_success' | translate:{ count: validRowCount() } }}</span>
         </div>
 
         <div class="alert alert-warning">
-          <span class="material-symbols-outlined">info</span>
+          <span class="material-symbols-outlined" aria-hidden="true">info</span>
           @if (customImport) {
             <span>This will import {{ validRowCount() }} {{ customImport.itemLabel || 'rows' }}.</span>
           } @else {
@@ -185,13 +185,13 @@
 
       <div class="flex justify-between">
         <button class="btn btn-sm" (click)="startOver()">
-          <span class="material-symbols-outlined">arrow_back</span>
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           {{ 'import_modal.start_over' | translate }}
         </button>
         @if (canProceedToImport()) {
           <button class="btn btn-sm btn-primary" (click)="proceedWithImport()">
             {{ 'import_modal.proceed' | translate }}
-            <span class="material-symbols-outlined">arrow_forward</span>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </button>
         }
       </div>
@@ -204,13 +204,13 @@
       @if (customImport) {
         <p>Importing {{ validRowCount() }} {{ customImport.itemLabel || 'rows' }}...</p>
         <div class="flex justify-center py-4">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
         </div>
       } @else {
         @if (importPhase() === 'associations') {
           <p>{{ 'import_modal.associating' | translate }}</p>
           <div class="flex justify-center py-4">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           </div>
         } @else {
           <p>{{ 'import_modal.importing_records' | translate:{ count: validRowCount() } }}</p>
@@ -228,7 +228,7 @@
   @if (currentStep() === 'success') {
     <div class="space-y-4">
       <div class="alert alert-success">
-        <span class="material-symbols-outlined">check_circle</span>
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
         @if (customImport) {
           <span>Successfully imported {{ importedCount() }} {{ customImport.itemLabel || 'rows' }}!</span>
         } @else {

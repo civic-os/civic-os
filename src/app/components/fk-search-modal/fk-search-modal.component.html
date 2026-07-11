@@ -66,7 +66,7 @@
           <!-- Footer: Back / Apply -->
           <div class="cos-modal-action shrink-0">
             <button type="button" class="btn btn-ghost" (click)="goToPage1()">
-              <span class="material-symbols-outlined text-base">arrow_back</span>
+              <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
               Back
             </button>
             <div class="flex-1"></div>
@@ -90,7 +90,7 @@
             @if (hasSearchFields()) {
               <div class="mb-3 shrink-0">
                 <div class="relative">
-                  <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+                  <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg" aria-hidden="true">search</span>
                   <input
                     type="text"
                     class="input input-bordered w-full ps-10"
@@ -169,7 +169,7 @@
                     <tr>
                       <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
                         @if (loading()) {
-                          <span class="loading loading-spinner loading-sm"></span>
+                          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                         } @else {
                           No results found
                         }
@@ -207,8 +207,9 @@
                     type="button"
                     class="btn btn-ghost btn-xs opacity-50 group-hover:opacity-100"
                     (click)="removeChip(chip.id)"
+                    [attr.aria-label]="('action.remove' | translate) + ' ' + chip.display_name"
                   >
-                    <span class="material-symbols-outlined text-sm">close</span>
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </div>
               } @empty {
@@ -231,7 +232,7 @@
               (click)="goToPage2()"
             >
               Next
-              <span class="material-symbols-outlined text-base">arrow_forward</span>
+              <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
             </button>
           } @else {
             <!-- Pure junction: direct "Apply" -->
@@ -258,7 +259,7 @@
       @if (hasSearchFields()) {
         <div class="mb-3 shrink-0">
           <div class="relative">
-            <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+            <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg" aria-hidden="true">search</span>
             <input
               type="text"
               class="input input-bordered w-full ps-10"
@@ -334,7 +335,7 @@
               <tr>
                 <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
                   @if (loading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                   } @else {
                     No results found
                   }
@@ -363,7 +364,7 @@
         <button type="button" class="btn" (click)="onCancel()">Cancel</button>
         @if (isNullable()) {
           <button type="button" class="btn btn-warning btn-outline" (click)="onClear()">
-            <span class="material-symbols-outlined text-base">close</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
             Clear
           </button>
         }

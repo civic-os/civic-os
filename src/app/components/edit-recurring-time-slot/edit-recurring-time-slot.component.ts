@@ -228,7 +228,7 @@ export interface RecurringTimeSlotValue {
                 (click)="previewConflicts()"
                 [disabled]="disabled() || !canPreview()"
               >
-                <span class="material-symbols-outlined text-base">preview</span>
+                <span class="material-symbols-outlined text-base" aria-hidden="true">preview</span>
                 Preview Schedule
               </button>
             </div>

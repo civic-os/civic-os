@@ -31,10 +31,11 @@ export function resolveColor(value: any, fallback: string = '#3388ff'): string {
   return fallback;
 }
 
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-geo-polygon-map',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './geo-polygon-map.component.html',
   styleUrl: './geo-polygon-map.component.css'
 })
