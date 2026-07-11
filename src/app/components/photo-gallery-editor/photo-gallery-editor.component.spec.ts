@@ -10,6 +10,7 @@ import { PhotoGalleryEditorComponent } from './photo-gallery-editor.component';
 import { GalleryService } from '../../services/gallery.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryImage, PhotoGalleryConfig } from '../../interfaces/entity';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('PhotoGalleryEditorComponent', () => {
   let component: PhotoGalleryEditorComponent;
@@ -55,6 +56,7 @@ describe('PhotoGalleryEditorComponent', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslationTesting(),
         GalleryService,
         { provide: FileUploadService, useValue: {} }
       ]

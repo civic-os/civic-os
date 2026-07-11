@@ -16,6 +16,7 @@ import { GalleryService } from '../../services/gallery.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.component';
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { getS3Config } from '../../config/runtime';
 
 /**
@@ -50,7 +51,7 @@ import { getS3Config } from '../../config/runtime';
   selector: 'app-photo-gallery-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DragDropModule, GalleryLightboxComponent, FileThumbnailComponent],
+  imports: [DragDropModule, GalleryLightboxComponent, FileThumbnailComponent, TranslatePipe],
   templateUrl: './photo-gallery-editor.component.html'
 })
 export class PhotoGalleryEditorComponent {

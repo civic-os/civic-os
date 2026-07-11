@@ -32,6 +32,15 @@ export const EN_TRANSLATIONS: Record<string, string> = {
 
   'a11y.user_menu': 'User menu',
   'a11y.select_dashboard': 'Select dashboard',
+  'a11y.search': 'Search',
+  'a11y.add_photos': 'Add photos',
+  'a11y.weekday_SU': 'Sunday',
+  'a11y.weekday_MO': 'Monday',
+  'a11y.weekday_TU': 'Tuesday',
+  'a11y.weekday_WE': 'Wednesday',
+  'a11y.weekday_TH': 'Thursday',
+  'a11y.weekday_FR': 'Friday',
+  'a11y.weekday_SA': 'Saturday',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',
@@ -327,6 +336,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'gallery.lightbox_close': 'Close',
   'gallery.lightbox_prev': 'Previous',
   'gallery.lightbox_next': 'Next',
+  'gallery.drop_hint': 'Drop images here or click to browse',
+  'gallery.upload_zone': 'Upload images. {{remaining}} slots remaining',
 
   'map.click_to_set': 'Click on the map to set location',
   'map.clear_location': 'Clear Location',

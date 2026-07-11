@@ -37,6 +37,7 @@ import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FilterBarComponent } from '../filter-bar/filter-bar.component';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
 import { SchemaEntityProperty, EntityData, EntityPropertyType } from '../../interfaces/entity';
@@ -72,7 +73,8 @@ export interface RichM2mDiff {
     CosModalComponent,
     PaginationComponent,
     FilterBarComponent,
-    DisplayPropertyComponent
+    DisplayPropertyComponent,
+    TranslatePipe
   ],
   templateUrl: './fk-search-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

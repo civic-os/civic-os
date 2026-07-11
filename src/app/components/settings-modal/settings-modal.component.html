@@ -140,12 +140,12 @@
                 <label class="cursor-pointer">
                   <input
                     type="checkbox"
-                    class="checkbox checkbox-sm hidden"
+                    class="checkbox checkbox-sm sr-only peer"
                     [checked]="isRoleSelected(role.role_key)"
                     (change)="toggleRole(role.role_key)"
                   />
                   <span
-                    class="badge badge-lg cursor-pointer transition-colors"
+                    class="badge badge-lg cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"
                     [class.badge-primary]="isRoleSelected(role.role_key)"
                     [class.badge-outline]="!isRoleSelected(role.role_key)"
                   >
@@ -186,12 +186,12 @@
             <input
               type="radio"
               name="locale"
-              class="radio hidden"
+              class="radio sr-only peer"
               [checked]="localeService.locale() === loc.code"
               (change)="localeService.setLocale(loc.code)"
             />
             <span
-              class="badge badge-lg cursor-pointer transition-colors"
+              class="badge badge-lg cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"
               [class.badge-primary]="localeService.locale() === loc.code"
               [class.badge-outline]="localeService.locale() !== loc.code"
             >

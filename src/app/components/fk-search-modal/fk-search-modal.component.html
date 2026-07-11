@@ -95,6 +95,7 @@
                     type="text"
                     class="input input-bordered w-full ps-10"
                     placeholder="Search..."
+                    [attr.aria-label]="'a11y.search' | translate"
                     [ngModel]="searchQuery()"
                     (ngModelChange)="onSearchInput($event)"
                     (keydown.enter)="$event.preventDefault()"
@@ -148,7 +149,7 @@
                       <td>
                         <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                [checked]="isInWorkingSelection(row.id)"
-                               tabindex="-1"
+                               [attr.aria-label]="row.display_name"
                                (click)="$event.stopPropagation(); toggleSelection(row.id!, row.display_name, $any(row).color)" />
                       </td>
                       @for (prop of listProperties(); track prop.column_name) {
@@ -261,6 +262,7 @@
               type="text"
               class="input input-bordered w-full ps-10"
               placeholder="Search..."
+              [attr.aria-label]="'a11y.search' | translate"
               [ngModel]="searchQuery()"
               (ngModelChange)="onSearchInput($event)"
               (keydown.enter)="$event.preventDefault()"
@@ -312,7 +314,7 @@
                 (click)="onRowClick(row)"
               >
                 <td>
-                  <input type="radio" class="radio radio-primary radio-sm" [checked]="isSelected(row.id)" tabindex="-1" />
+                  <input type="radio" class="radio radio-primary radio-sm" [checked]="isSelected(row.id)" [attr.aria-label]="row.display_name" />
                 </td>
                 @for (prop of listProperties(); track prop.column_name) {
                   <td>

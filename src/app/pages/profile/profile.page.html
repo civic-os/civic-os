@@ -127,12 +127,12 @@
                         <input
                           type="radio"
                           name="profile-locale-edit"
-                          class="radio hidden"
+                          class="radio sr-only peer"
                           [checked]="editLocale === loc.code"
                           (change)="editLocale = loc.code"
                         />
                         <span
-                          class="badge badge-lg cursor-pointer transition-colors"
+                          class="badge badge-lg cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"
                           [class.badge-primary]="editLocale === loc.code"
                           [class.badge-outline]="editLocale !== loc.code"
                         >

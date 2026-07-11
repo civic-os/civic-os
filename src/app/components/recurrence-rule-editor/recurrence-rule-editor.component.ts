@@ -18,6 +18,7 @@
 import { Component, forwardRef, signal, computed, effect, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RRuleFrequency, RRuleDayOfWeek, RRuleConfig } from '../../interfaces/entity';
 import { RecurringService } from '../../services/recurring.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -45,7 +46,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 @Component({
   selector: 'app-recurrence-rule-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -104,12 +105,13 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               <label class="cursor-pointer">
                 <input
                   type="checkbox"
-                  class="checkbox checkbox-sm hidden peer"
+                  class="checkbox checkbox-sm sr-only peer"
+                  [attr.aria-label]="('a11y.weekday_' + day.code) | translate"
                   [checked]="isDaySelected(day.code)"
                   (change)="toggleDay(day.code)"
                   [disabled]="disabled()"
                 />
-                <span class="btn btn-sm peer-checked:btn-primary">
+                <span class="btn btn-sm peer-checked:btn-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1">
                   {{ day.short }}
                 </span>
               </label>
