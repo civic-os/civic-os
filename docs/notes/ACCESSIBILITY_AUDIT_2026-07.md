@@ -1,5 +1,24 @@
 # Accessibility Audit — July 2026
 
+> **✅ Implementation status (completed, July 2026).** All batches in the plan
+> below were implemented and committed. Batches 1–11 remediated the catalogued
+> navigation, input, dialog, form-ARIA, list/filter, rows/sorting,
+> icons/spinners, routing/status, reorder, geo, and charts/contrast/motion
+> issues; Batch 13 added FullCalendar keyboard support. The final **Batch 12
+> (process guardrail)** installed an ESLint flat config (`eslint.config.js`)
+> that enables the `@angular-eslint/template` accessibility rules and runs in CI
+> (`.github/workflows/accessibility.yml`). The a11y lint gate is **live and
+> enforced** (`npm run lint` exits non-zero on keyboard/SR violations such as a
+> bare `(click)` on a non-interactive element). Residual keyboard hits in
+> not-yet-touched components (schema inspector, template editor, system
+> functions/policies, chart widget, guided-form nav, series views, user
+> management, display-property file/gallery thumbnails) were fixed as part of
+> Batch 12. Two high-volume legacy categories — `button-has-type` (253) and
+> `label-has-associated-control` (128) — are enabled at `warn` (visible,
+> tracked) rather than `error`, deferred to a dedicated mechanical sweep so the
+> guardrail batch stayed focused and low-risk; promote them to `error` after
+> that sweep lands.
+
 **Scope:** Full Angular frontend (`src/app`), WCAG 2.2 AA lens.
 **Method:** Static code audit of all 64 `.html` templates plus 22 inline-template components, six parallel deep inspections (forms, modals/focus, keyboard operability, data tables, app shell/SPA dynamics, non-text content/color), and verification of the claims in `docs/development/ACCESSIBILITY_WCAG.md` against the actual code.
 

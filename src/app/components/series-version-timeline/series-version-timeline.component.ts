@@ -18,6 +18,7 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeriesVersionSummary } from '../../interfaces/entity';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Series Version Timeline Component
@@ -39,7 +40,7 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
 @Component({
   selector: 'app-series-version-timeline',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="series-timeline">
@@ -69,7 +70,13 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
             <div
               class="relative flex items-start gap-4 pb-4 cursor-pointer hover:bg-base-200/50 rounded-lg p-2 -ml-2 transition-colors"
               [class.bg-primary/10]="version.series_id === currentVersionId"
+              role="button"
+              tabindex="0"
+              [attr.aria-pressed]="version.series_id === currentVersionId"
+              [attr.aria-label]="'a11y.select_version' | translate"
               (click)="selectVersion(version)"
+              (keydown.enter)="selectVersion(version)"
+              (keydown.space)="$event.preventDefault(); selectVersion(version)"
             >
               <!-- Timeline dot -->
               <div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"

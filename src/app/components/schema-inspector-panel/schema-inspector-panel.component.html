@@ -93,7 +93,12 @@
               @for (property of properties(); track property.column_name) {
                 <div
                   class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                  (click)="togglePropertyExpansion(property.column_name)">
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-expanded]="isPropertyExpanded(property.column_name)"
+                  (click)="togglePropertyExpansion(property.column_name)"
+                  (keydown.enter)="togglePropertyExpansion(property.column_name)"
+                  (keydown.space)="$event.preventDefault(); togglePropertyExpansion(property.column_name)">
 
                   <!-- Property Name & Badges (Always Visible) -->
                   <div class="flex items-start justify-between gap-2">
@@ -217,7 +222,12 @@
                 @for (relation of belongsToRelationships(); track relation.column_name) {
                   <div
                     class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                    (click)="onNavigateToEntity(relation.join_table)">
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'a11y.navigate_to_entity' | translate:{ name: relation.join_table }"
+                    (click)="onNavigateToEntity(relation.join_table)"
+                    (keydown.enter)="onNavigateToEntity(relation.join_table)"
+                    (keydown.space)="$event.preventDefault(); onNavigateToEntity(relation.join_table)">
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <h4 class="font-semibold text-base">{{ relation.display_name }}</h4>
@@ -250,7 +260,12 @@
                 @for (relation of hasManyRelationships(); track relation.table_name + relation.column_name) {
                   <div
                     class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                    (click)="onNavigateToEntity(relation.table_name)">
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'a11y.navigate_to_entity' | translate:{ name: relation.table_name }"
+                    (click)="onNavigateToEntity(relation.table_name)"
+                    (keydown.enter)="onNavigateToEntity(relation.table_name)"
+                    (keydown.space)="$event.preventDefault(); onNavigateToEntity(relation.table_name)">
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <h4 class="font-semibold text-base">{{ relation.table_name }}</h4>
@@ -283,7 +298,12 @@
                 @for (relation of manyToManyRelationships(); track relation.column_name) {
                   <div
                     class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                    (click)="onNavigateToEntity(relation.many_to_many_meta!.relatedTable)">
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'a11y.navigate_to_entity' | translate:{ name: relation.many_to_many_meta!.relatedTable }"
+                    (click)="onNavigateToEntity(relation.many_to_many_meta!.relatedTable)"
+                    (keydown.enter)="onNavigateToEntity(relation.many_to_many_meta!.relatedTable)"
+                    (keydown.space)="$event.preventDefault(); onNavigateToEntity(relation.many_to_many_meta!.relatedTable)">
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <h4 class="font-semibold text-base">{{ relation.display_name }}</h4>
@@ -348,7 +368,12 @@
               @for (property of propertiesWithValidations(); track property.column_name) {
                 <div
                   class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                  (click)="togglePropertyExpansion(property.column_name)">
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-expanded]="isPropertyExpanded(property.column_name)"
+                  (click)="togglePropertyExpansion(property.column_name)"
+                  (keydown.enter)="togglePropertyExpansion(property.column_name)"
+                  (keydown.space)="$event.preventDefault(); togglePropertyExpansion(property.column_name)">
 
                   <!-- Property Name & Summary (Always Visible) -->
                   <div class="flex items-start justify-between gap-2">

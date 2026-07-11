@@ -412,6 +412,8 @@ Keep all three fresh with every feature. Stale docs are worse than no docs.
 
 **i18n is a feature requirement.** Any feature adding user-visible strings must ship with translations. See `docs/notes/I18N_DESIGN.md` (New Feature i18n Checklist) for the required steps.
 
+**Accessibility is a feature requirement.** New user-facing features must pass the ESLint `@angular-eslint/template` a11y rules (`npm run lint`, enforced in CI via `.github/workflows/accessibility.yml`) — no bare `(click)` on non-interactive elements, use native `<button>`/`<a routerLink>`, associate labels, add translated `aria-label`s (via the translate pipe under the `a11y.` key prefix), and mark decorative icons `aria-hidden`. Keyboard- and screen-reader-verify any new interactive UI. See `docs/development/ACCESSIBILITY_WCAG.md` and `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md`.
+
 **⚠️ MANDATORY: Comprehensive E2E Verification**
 
 You **MUST** perform comprehensive end-to-end verification after ALL code changes, before declaring work complete or committing. This is non-negotiable. Do not skip layers. Do not stop after unit tests.

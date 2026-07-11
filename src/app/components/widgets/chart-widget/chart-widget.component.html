@@ -32,8 +32,8 @@
         <span class="material-symbols-outlined text-base" aria-hidden="true">download</span>
       </summary>
       <ul class="menu dropdown-content bg-base-100 rounded-box z-20 w-48 p-2 shadow">
-        <li><a (click)="downloadPng()">{{ 'chart.download_png' | translate }}</a></li>
-        <li><a (click)="downloadCsv()">{{ 'chart.download_csv' | translate }}</a></li>
+        <li><button type="button" class="w-full text-start" (click)="downloadPng()">{{ 'chart.download_png' | translate }}</button></li>
+        <li><button type="button" class="w-full text-start" (click)="downloadCsv()">{{ 'chart.download_csv' | translate }}</button></li>
       </ul>
     </details>
     <!-- Visual chart is decorative for AT; the sr-only table below is the text alternative -->

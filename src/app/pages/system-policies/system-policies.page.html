@@ -48,7 +48,12 @@
               <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg"
                    [class.collapse-open]="isExpanded(getPolicyKey(policy))">
                 <div class="collapse-title cursor-pointer flex items-center gap-3 pe-12"
-                     (click)="togglePolicy(getPolicyKey(policy))">
+                     role="button"
+                     tabindex="0"
+                     [attr.aria-expanded]="isExpanded(getPolicyKey(policy))"
+                     (click)="togglePolicy(getPolicyKey(policy))"
+                     (keydown.enter)="togglePolicy(getPolicyKey(policy))"
+                     (keydown.space)="$event.preventDefault(); togglePolicy(getPolicyKey(policy))">
                   <span class="font-mono text-sm flex-1">{{ policy.policy_name }}</span>
                   <div class="flex items-center gap-2 flex-shrink-0">
                     <span class="badge badge-sm" [ngClass]="getCommandBadgeClass(policy.command)">

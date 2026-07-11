@@ -9,10 +9,13 @@
     "wait": 1000
   },
   "urls": [
-    "http://localhost:4200",
-    "http://localhost:4200/view/issues",
-    "http://localhost:4200/detail/issues/1",
-    "http://localhost:4200/create/issues",
-    "http://localhost:4200/edit/issues/1"
+    "http://localhost:4200/",
+    "http://localhost:4200/view/Issue",
+    "http://localhost:4200/create/Issue",
+    "http://localhost:4200/detail/Issue/1",
+    "http://localhost:4200/edit/Issue/1",
+    "http://localhost:4200/permissions",
+    "http://localhost:4200/entity-management",
+    "http://localhost:4200/admin/users"
   ]
 }

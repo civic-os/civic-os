@@ -155,19 +155,24 @@
       </div>
     }
     @if (propType() == EntityPropertyType.FileImage) {
-      <div class="w-32 h-32 rounded border overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+      <button type="button" class="block w-32 h-32 rounded border overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
            [title]="'Click to view full size: ' + datum()?.file_name"
+           [attr.aria-label]="'a11y.view_full_size' | translate"
            (click)="onImageClick(datum())">
         <app-file-thumbnail
           [file]="datum()"
           [alt]="datum()?.file_name || ''"
         />
-      </div>
+      </button>
     }
     @if (propType() == EntityPropertyType.FilePDF) {
       <div class="flex items-center gap-2">
         @if (datum()?.s3_thumbnail_medium_key) {
-          <div class="cursor-pointer relative" (click)="onPdfClick(datum())">
+          <div class="cursor-pointer relative" role="button" tabindex="0"
+               [attr.aria-label]="'a11y.view_pdf' | translate"
+               (click)="onPdfClick(datum())"
+               (keydown.enter)="onPdfClick(datum())"
+               (keydown.space)="$event.preventDefault(); onPdfClick(datum())">
             <img
               [src]="getS3Url(datum().s3_thumbnail_medium_key)"
               [alt]="'PDF Preview: ' + datum().file_name"
@@ -181,9 +186,9 @@
           </div>
         }
         <div class="flex flex-col">
-          <span class="font-medium cursor-pointer hover:text-primary" (click)="onPdfClick(datum())">
+          <button type="button" class="font-medium cursor-pointer hover:text-primary text-start bg-transparent p-0 border-0" (click)="onPdfClick(datum())">
             {{ datum()?.file_name }}
-          </span>
+          </button>
           <span class="text-sm text-base-content/60">{{ formatFileSize(datum()?.file_size) }}</span>
         </div>
       </div>
@@ -242,13 +247,14 @@
             <!-- Detail view: full thumbnail grid with lightbox -->
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
               @for (image of galleryImages; track image.file_id; let i = $index) {
-                <div class="aspect-square rounded-lg overflow-hidden border border-base-300 cursor-pointer hover:opacity-80 transition-opacity"
+                <button type="button" class="block w-full aspect-square rounded-lg overflow-hidden border border-base-300 cursor-pointer hover:opacity-80 transition-opacity"
+                     [attr.aria-label]="'a11y.view_image' | translate"
                      (click)="onGalleryImageClick(i)">
                   <app-file-thumbnail
                     [file]="image.file ?? null"
                     [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
                   />
-                </div>
+                </button>
               }
             </div>
             <div class="text-sm text-base-content/60 mt-1">

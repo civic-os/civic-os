@@ -1,5 +1,6 @@
 @if (isOpen()) {
   <!-- Full-screen overlay -->
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- backdrop click-to-dismiss is a mouse convenience; keyboard close is handled by the Escape key (document:keydown HostListener) and the visible close button -->
   <div
     class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
     (click)="close()"
@@ -44,6 +45,7 @@
 
     <!-- Main image + caption container -->
     @if (currentImage(); as image) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- non-interactive wrapper; the click only stops propagation so clicking the image does not dismiss the dialog. No keyboard equivalent needed (nothing is activated). -->
       <div class="flex flex-col items-center max-h-[90vh] max-w-[90vw]" (click)="onContentClick($event)">
         <!-- Image -->
         <img

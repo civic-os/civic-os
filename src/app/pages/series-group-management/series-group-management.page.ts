@@ -151,7 +151,13 @@ import { catchError, map } from 'rxjs/operators';
                     class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                     [class.ring-2]="selectedGroupId() === group.id"
                     [class.ring-primary]="selectedGroupId() === group.id"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-pressed]="selectedGroupId() === group.id"
+                    [attr.aria-label]="('a11y.select_series_group' | translate) + ': ' + group.display_name"
                     (click)="selectGroup(group)"
+                    (keydown.enter)="selectGroup(group)"
+                    (keydown.space)="$event.preventDefault(); selectGroup(group)"
                   >
                     <div class="card-body p-4">
                       <div class="flex items-start gap-3">

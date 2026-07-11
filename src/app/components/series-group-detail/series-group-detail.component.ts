@@ -316,7 +316,12 @@ type EditTab = 'info' | 'schedule' | 'template';
               @for (instance of instances(); track instance.id) {
                 <div
                   class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 cursor-pointer transition-colors"
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-label]="'a11y.view_occurrence' | translate"
                   (click)="navigateToInstance(instance)"
+                  (keydown.enter)="navigateToInstance(instance)"
+                  (keydown.space)="$event.preventDefault(); navigateToInstance(instance)"
                 >
                   <span
                     class="material-symbols-outlined text-base" aria-hidden="true"

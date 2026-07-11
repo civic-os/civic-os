@@ -6,6 +6,7 @@ import { Component, input, output, computed, ChangeDetectionStrategy, inject } f
 import { CommonModule } from '@angular/common';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { GuidedFormContext, EffectiveGuidedFormStep } from '../../interfaces/guided-form';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /** Synthetic review step uses negative ID to avoid collision with real database IDs */
 const REVIEW_STEP_ID = -1;
@@ -14,7 +15,7 @@ const REVIEW_STEP_ORDER = Number.MAX_SAFE_INTEGER;
 @Component({
   selector: 'app-guided-form-nav',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './guided-form-nav.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

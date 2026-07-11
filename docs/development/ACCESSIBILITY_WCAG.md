@@ -17,9 +17,31 @@ This document provides a comprehensive guide to achieving WCAG compliance in Civ
 
 ## Current Progress Status
 
-**Last Updated:** 2026-06-23
-**Status:** ~60% WCAG 2.1 Level AA Compliance Achieved
+> **⚠️ SUPERSEDED — read this first.** The "~60% compliance" figure below was
+> written in Nov 2025 and reflected only three remediated templates. A full
+> WCAG 2.2 AA audit in **July 2026** found that the app was not actually
+> keyboard-accessible and that ~73% of templates had zero ARIA/role/alt
+> attributes. See **`docs/notes/ACCESSIBILITY_AUDIT_2026-07.md`** for the
+> authoritative findings and the batch remediation plan.
+>
+> **Remediation status (July 2026):** The catalogued issues were addressed
+> across 13 batches (navigation, form/input operability, dialog naming, form
+> ARIA, filter/list polish, rows/sorting, icons/spinners, routing/status,
+> keyboard reorder, geo fallbacks, charts/contrast/motion, plus FullCalendar
+> keyboard support). A final **process/guardrail batch** then installed an
+> **ESLint flat config** (`eslint.config.js`) that enables the
+> `@angular-eslint/template` accessibility rules and runs in CI
+> (`.github/workflows/accessibility.yml`), so keyboard/screen-reader
+> regressions (e.g. a bare `(click)` on a non-interactive element) now fail the
+> build. Two high-volume legacy categories (`button-has-type`,
+> `label-has-associated-control`) are enabled at `warn` and tracked as a
+> follow-up mechanical sweep. The percentage figure below is retained only for
+> historical context and should not be cited as the current state.
+
+**Last Updated:** 2026-06-23 (status superseded — see note above and the July 2026 audit)
+**Status:** ~60% WCAG 2.1 Level AA Compliance Achieved *(historical; superseded)*
 **Testing Infrastructure:** ✅ Complete
+**Regression guard:** ESLint a11y rules enforced in CI (July 2026)
 
 ### Completed Work (Phases 1-3)
 

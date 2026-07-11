@@ -94,7 +94,8 @@
     <div class="form-control">
       <!-- DaisyUI Tabs -->
       <div role="tablist" class="tabs tabs-border">
-        <a
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'subject'"
@@ -106,8 +107,9 @@
           @if (!isValidating('subject') && getValidationResult('subject')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
-        <a
+        </button>
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'html'"
@@ -119,8 +121,9 @@
           @if (!isValidating('html') && getValidationResult('html')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
-        <a
+        </button>
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'text'"
@@ -132,8 +135,9 @@
           @if (!isValidating('text') && getValidationResult('text')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
-        <a
+        </button>
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'sms'"
@@ -145,7 +149,7 @@
           @if (!isValidating('sms') && getValidationResult('sms')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
+        </button>
       </div>
 
       <!-- Tab Content -->

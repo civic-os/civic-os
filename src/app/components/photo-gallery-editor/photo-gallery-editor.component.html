@@ -69,9 +69,15 @@
             [file]="image.file ?? null"
             [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
             [poll]="true"
-            (clicked)="openLightbox(i)"
             (fileUpdated)="onThumbnailReady(image.file_id, $event)"
           />
+
+          <!-- Keyboard-accessible overlay to open the lightbox (thumbnail img is not interactive) -->
+          <button
+            type="button"
+            class="absolute inset-0 z-0 focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+            (click)="openLightbox(i)"
+            [attr.aria-label]="'a11y.view_image' | translate"></button>
 
           <!-- Remove button overlay -->
           <button

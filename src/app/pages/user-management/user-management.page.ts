@@ -294,7 +294,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
             </button>
           </div>
         </div>
-        <div class="modal-backdrop" (click)="closeCreateModal()"></div>
+        <button type="button" class="modal-backdrop" [attr.aria-label]="'a11y.close_dialog' | translate" (click)="closeCreateModal()"></button>
       </div>
     }
 
@@ -309,7 +309,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
             <button class="btn" (click)="showErrorModal.set(false)">Close</button>
           </div>
         </div>
-        <div class="modal-backdrop" (click)="showErrorModal.set(false)"></div>
+        <button type="button" class="modal-backdrop" [attr.aria-label]="'a11y.close_dialog' | translate" (click)="showErrorModal.set(false)"></button>
       </div>
     }
 
@@ -362,7 +362,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
             <button class="btn" (click)="closeEditModal()">Close</button>
           </div>
         </div>
-        <div class="modal-backdrop" (click)="closeEditModal()"></div>
+        <button type="button" class="modal-backdrop" [attr.aria-label]="'a11y.close_dialog' | translate" (click)="closeEditModal()"></button>
       </div>
     }
 

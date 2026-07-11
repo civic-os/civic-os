@@ -38,7 +38,6 @@ import { getS3Config } from '../../config/runtime';
  *     [file]="fileRef"
  *     [poll]="true"
  *     (fileUpdated)="onFileUpdated($event)"
- *     (clicked)="openViewer()"
  *   />
  * </div>
  * ```
@@ -59,7 +58,6 @@ import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicato
         class="not-prose w-full h-full"
         [class.object-cover]="objectFit() === 'cover'"
         [class.object-contain]="objectFit() === 'contain'"
-        (click)="clicked.emit()"
       />
     } @else if (isLoading()) {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
@@ -94,9 +92,6 @@ export class FileThumbnailComponent {
 
   /** Whether to poll for thumbnail completion when status is pending/processing */
   poll = input(false);
-
-  /** Emitted when the image is clicked */
-  clicked = output<void>();
 
   /** Emits the updated FileReference when polling detects thumbnail completion */
   fileUpdated = output<FileReference>();
