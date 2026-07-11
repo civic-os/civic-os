@@ -17,7 +17,8 @@
 
 import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
 import { filter } from 'rxjs';
 import { SchemaService } from './services/schema.service';
 import { VersionService } from './services/version.service';
@@ -39,6 +40,7 @@ import { LocaleService } from './services/locale.service';
 import { ProfileService } from './services/profile.service';
 import { CosModalComponent } from './components/cos-modal/cos-modal.component';
 import { TranslatePipe } from './pipes/translate.pipe';
+import { TranslationService } from './services/translation.service';
 
 @Component({
     selector: 'app-root',
@@ -61,6 +63,8 @@ export class AppComponent {
   private version = inject(VersionService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
+  private titleService = inject(Title);
+  private translation = inject(TranslationService);
   public auth = inject(AuthService);
   public themeService = inject(ThemeService);
   private localeService = inject(LocaleService);
@@ -71,6 +75,9 @@ export class AppComponent {
 
   public drawerOpen: boolean = false;
   appTitle = getAppTitle();
+
+  // Track the first NavigationEnd so we don't steal focus / re-set the title on initial load
+  private firstNavigation = true;
 
   // Track if current route is a dashboard page (home or /dashboard/:id)
   isDashboardRoute = signal(false);
@@ -170,12 +177,45 @@ export class AppComponent {
     // Check initial route
     this.checkIfDashboardRoute(this.router.url);
 
-    // Listen for navigation events to update dashboard route status
+    // Listen for navigation events to update dashboard route status,
+    // set the per-route page title, and move focus to the main content region.
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.checkIfDashboardRoute(event.urlAfterRedirects);
+
+      // Static routes carry a `titleKey` in their route data. Dynamic pages
+      // (list/detail/create/edit) set their own title once entity metadata resolves.
+      // Runs on the initial navigation too, so direct loads get a page title (WCAG 2.4.2).
+      const titleKey = this.getDeepestRouteData()['titleKey'] as string | undefined;
+      if (titleKey) {
+        this.titleService.setTitle(`${this.translation.get(titleKey)} – ${this.appTitle}`);
+      }
+
+      // Skip focus management on the initial navigation: stealing focus on
+      // first paint would be disorienting.
+      if (this.firstNavigation) {
+        this.firstNavigation = false;
+        return;
+      }
+
+      // Move focus to the main landmark so screen-reader/keyboard users land on the
+      // freshly rendered content instead of silently swapped page content.
+      const main = this.elementRef.nativeElement.querySelector('#main-content') as HTMLElement | null;
+      main?.focus();
     });
+  }
+
+  /**
+   * Walk the activated route snapshot tree to the deepest child and return its
+   * merged route `data`. Used to read the static `titleKey` for the current page.
+   */
+  private getDeepestRouteData(): Record<string, unknown> {
+    let route: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
+    while (route.firstChild) {
+      route = route.firstChild;
+    }
+    return route.data;
   }
 
   /**

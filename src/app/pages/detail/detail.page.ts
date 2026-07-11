@@ -57,11 +57,13 @@ import { GuidedFormContext } from '../../interfaces/guided-form';
 function isPaymentValue(value: any): value is PaymentValue {
   return value != null && typeof value === 'object' && 'id' in value && 'status' in value;
 }
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
+import { getAppTitle } from '../../config/runtime';
 
 import { CommonModule } from '@angular/common';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
@@ -123,6 +125,7 @@ export class DetailPage {
   private galleryService = inject(GalleryService);
   private guidedFormService = inject(GuidedFormService);
   private navigation = inject(NavigationService);
+  private titleService = inject(Title);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -341,6 +344,14 @@ export class DetailPage {
           tap(data => {
             // Detect guided form mode after data loads
             const entity = this.currentEntity();
+
+            // Set the document title once entity + record data resolve
+            // (e.g. "Issue: #42 – Civic OS"), mirroring the on-page heading.
+            if (entity?.display_name && data) {
+              const record = data.display_name || ('#' + data.id);
+              this.titleService.setTitle(`${entity.display_name}: ${record} – ${getAppTitle()}`);
+            }
+
             if (entity?.guided_form_key && data?.id) {
               this.isGuidedFormMode.set(true);
               this.showGuidedFormNav.set(true);

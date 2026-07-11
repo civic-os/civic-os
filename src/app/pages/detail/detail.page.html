@@ -59,7 +59,7 @@
 
         <!-- Payment Error Alert -->
         @if (paymentError()) {
-          <div class="alert alert-error mb-4">
+          <div role="alert" class="alert alert-error mb-4">
             <span class="material-symbols-outlined" aria-hidden="true">error</span>
             <span>{{ paymentError() }}</span>
           </div>
@@ -67,7 +67,7 @@
 
         <!-- Action Error Alert (for non-modal actions) -->
         @if (actionError() && !showActionModal()) {
-          <div class="alert alert-error mb-4">
+          <div role="alert" class="alert alert-error mb-4">
             <span class="material-symbols-outlined" aria-hidden="true">error</span>
             <span>{{ actionError() }}</span>
           </div>
@@ -76,7 +76,7 @@
         <!-- GuidedForm Review Section (v0-48-0) -->
         @if (showReviewSection()) {
           @if (guidedFormError()) {
-            <div class="alert alert-error mb-4">
+            <div role="alert" class="alert alert-error mb-4">
               <span class="material-symbols-outlined" aria-hidden="true">error</span>
               <span>{{ guidedFormError() }}</span>
             </div>
@@ -261,7 +261,7 @@
 
           <!-- Error Alert -->
           @if (deleteError()) {
-            <div class="alert alert-error mb-4">
+            <div role="alert" class="alert alert-error mb-4">
               <span>{{ deleteError() }}</span>
             </div>
           }
@@ -324,7 +324,7 @@
 
             <!-- Error Alert -->
             @if (actionError()) {
-              <div class="alert alert-error mb-4">
+              <div role="alert" class="alert alert-error mb-4">
                 <span class="material-symbols-outlined" aria-hidden="true">error</span>
                 <span>{{ actionError() }}</span>
               </div>

@@ -6,9 +6,12 @@
   [label]="customImport ? customImport.title : ('import_modal.title' | translate:{ entity: entity?.display_name || '' })">
   <h3 class="font-bold text-lg mb-4">{{ customImport ? customImport.title : ('import_modal.title' | translate:{ entity: entity?.display_name || '' }) }}</h3>
 
+  <!-- Screen-reader step announcement (visually hidden live region) -->
+  <div role="status" aria-live="polite" class="sr-only">{{ stepAnnouncement() }}</div>
+
   <!-- Error Alert -->
   @if (errorMessage()) {
-    <div class="alert alert-error mb-4">
+    <div role="alert" class="alert alert-error mb-4">
       <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ errorMessage() }}</span>
     </div>
@@ -40,10 +43,10 @@
             <h4 class="card-title text-base">{{ 'import_modal.upload_file' | translate }}</h4>
             <p class="text-sm">{{ 'import_modal.upload_file_desc' | translate }}</p>
             <div class="card-actions justify-end">
-              <label class="btn btn-sm btn-primary">
+              <label class="btn btn-sm btn-primary focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
                 <span class="material-symbols-outlined" aria-hidden="true">upload</span>
                 {{ 'import_modal.choose_file' | translate }}
-                <input type="file" class="hidden" accept=".xlsx,.xls" (change)="onFileSelected($event)">
+                <input type="file" class="sr-only" accept=".xlsx,.xls" (change)="onFileSelected($event)">
               </label>
             </div>
           </div>
@@ -67,7 +70,7 @@
     <div class="space-y-4">
       <p>{{ 'import_modal.validating' | translate }}</p>
       <div class="flex items-center gap-4">
-        <progress class="progress progress-primary w-full" [value]="validationProgress()" max="100"></progress>
+        <progress class="progress progress-primary w-full" [value]="validationProgress()" max="100" [attr.aria-label]="'import_modal.validation_progress' | translate"></progress>
         <span class="text-sm">{{ validationProgress() }}%</span>
       </div>
       @if (!customImport) {
@@ -87,7 +90,7 @@
           <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
           <span>{{ partialSuccessCount() }} users created successfully.</span>
         </div>
-        <div class="alert alert-warning">
+        <div role="alert" class="alert alert-warning">
           <span class="material-symbols-outlined" aria-hidden="true">warning</span>
           <span>{{ errorSummary()?.totalErrors }} failed with errors:</span>
         </div>
@@ -118,7 +121,7 @@
         }
       } @else if (hasErrors()) {
         <!-- Errors Found (client-side validation) -->
-        <div class="alert alert-warning">
+        <div role="alert" class="alert alert-warning">
           <span class="material-symbols-outlined" aria-hidden="true">warning</span>
           <span>{{ 'import_modal.errors_found' | translate:{ count: errorSummary()!.totalErrors } }}</span>
         </div>
@@ -215,7 +218,7 @@
         } @else {
           <p>{{ 'import_modal.importing_records' | translate:{ count: validRowCount() } }}</p>
           <div class="flex items-center gap-4">
-            <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100"></progress>
+            <progress class="progress progress-primary w-full" [value]="uploadProgress()" max="100" [attr.aria-label]="'import_modal.import_progress' | translate"></progress>
             <span class="text-sm">{{ uploadProgress() }}%</span>
           </div>
         }

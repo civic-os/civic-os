@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, DestroyRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, OnInit, OnDestroy, computed, effect, DestroyRef } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subject, map, mergeMap, of, combineLatest, debounceTime, distinctUntilChanged, take, tap, switchMap, from, forkJoin, BehaviorSubject, concat } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
@@ -39,6 +40,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
+import { getAppTitle } from '../../config/runtime';
 
 interface FilterChip {
   column: string;
@@ -77,7 +79,16 @@ export class ListPage implements OnInit, OnDestroy {
   private analytics = inject(AnalyticsService);
   private destroyRef = inject(DestroyRef);
   private guidedForm = inject(GuidedFormService);
+  private titleService = inject(Title);
   public auth = inject(AuthService);
+
+  // Set the document title once entity metadata resolves (e.g. "Issues – Civic OS").
+  private _titleEffect = effect(() => {
+    const entity = this.entitySignal();
+    if (entity?.display_name) {
+      this.titleService.setTitle(`${entity.display_name} – ${getAppTitle()}`);
+    }
+  });
 
   // Pagination constants
   private readonly PAGE_SIZE_STORAGE_KEY = 'civic_os_list_page_size';

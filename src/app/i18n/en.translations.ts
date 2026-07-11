@@ -123,6 +123,9 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'sidebar.payments': 'Payments',
   'sidebar.translations': 'Translations',
 
+  // Page titles (document <title>) for routes without a sidebar entry
+  'title.entity_code': 'Entity Code',
+
   'action.save': 'Save',
   'action.cancel': 'Cancel',
   'action.edit': 'Edit',
@@ -362,6 +365,13 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'import_modal.importing_records': 'Importing {{count}} records...',
   'import_modal.do_not_close': 'Please do not close this window.',
   'import_modal.success': 'Successfully imported {{count}} records!',
+  // Screen-reader step announcements (aria-live) and progress bar labels
+  'import_modal.step_validating': 'Validating file',
+  'import_modal.step_results': 'Validation results',
+  'import_modal.step_importing': 'Importing',
+  'import_modal.step_complete': 'Import complete',
+  'import_modal.validation_progress': 'Validation progress',
+  'import_modal.import_progress': 'Import progress',
 
   'dashboard.no_dashboards': 'No dashboards configured',
   'dashboard.select': 'Select Dashboard',

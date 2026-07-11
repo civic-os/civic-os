@@ -17,6 +17,7 @@
 
 
 import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { Observable, forkJoin, from, mergeMap, of, tap, map, take, catchError } from 'rxjs';
 import {
   SchemaEntityProperty,
@@ -47,6 +48,8 @@ import { GuidedFormService } from '../../services/guided-form.service';
 import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
+import { getAppTitle } from '../../config/runtime';
 import { ApiError, ApiResponse } from '../../interfaces/api';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
@@ -79,6 +82,8 @@ export class CreatePage {
   private navigation = inject(NavigationService);
   private guidedForm = inject(GuidedFormService);
   private profileService = inject(ProfileService);
+  private titleService = inject(Title);
+  private translation = inject(TranslationService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -92,6 +97,12 @@ export class CreatePage {
       return this.schema.getEntity(p['entityKey']);
     } else {
       return of(undefined);
+    }
+  }), tap(entity => {
+    // Set the document title once entity metadata resolves (e.g. "Create Issue – Civic OS").
+    if (entity?.display_name) {
+      const name = this.translation.get('form.create_title', { entity: entity.display_name });
+      this.titleService.setTitle(`${name} – ${getAppTitle()}`);
     }
   }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
