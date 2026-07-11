@@ -82,6 +82,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.previous_image': 'Previous image',
   'a11y.next_image': 'Next image',
   'a11y.gallery_image': 'Gallery image',
+  'a11y.color_swatch': 'Color swatch',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',

@@ -1,43 +1,72 @@
 <div [class]="compact() ? 'w-full' : 'mb-4 w-full'" [formGroup]="form()">
   @if (!compact()) {
-    <label class="label" [for]="prop().column_name">
+    <label class="label" [attr.for]="isCustomWidget() ? null : prop().column_name">
       <span class="font-semibold flex items-center min-w-0 max-w-full">
         <span class="truncate" [title]="prop().display_name">
           {{ prop().display_name }}{{ isRequired() ? '*' : '' }}
         </span>
         @if (prop().description) {
           <div class="tooltip tooltip-bottom sm:tooltip-right flex-shrink-0" [attr.data-tip]="prop().description">
-            <span class="material-symbols-outlined text-info cursor-help ms-1 text-base">help_outline</span>
+            <span class="material-symbols-outlined text-info cursor-help ms-1 text-base" aria-hidden="true">help_outline</span>
           </div>
         }
       </span>
     </label>
   }
 
+  <!-- Screen-reader-associated copy of the metadata description (visual tooltip above is kept for sighted users) -->
+  @if (prop().description) {
+    <span class="sr-only" [id]="prop().column_name + '-desc'">{{ prop().description }}</span>
+  }
+
   @if (propType() == EntityPropertyType.Date) {
-    <input type="date" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <input type="date" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.DateTime) {
-    <input type="datetime-local" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <input type="datetime-local" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.DateTimeLocal) {
-    <input type="datetime-local" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <input type="datetime-local" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.TextShort) {
-    <input type="text" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <input type="text" placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.TextLong) {
-    <textarea class="textarea h-24 w-full" placeholder="Type here" [id]="prop().column_name" [formControlName]="prop().column_name"></textarea>
+    <textarea class="textarea h-24 w-full" placeholder="Type here" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()"></textarea>
   }
   @if (propType() == EntityPropertyType.Money) {
-    <input type="text" currencyMask placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <input type="text" currencyMask placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.IntegerNumber) {
-    <input type="number" placeholder="Type here" step=1 mask="0*" [allowNegativeNumbers]="true" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name" />
+    <input type="number" placeholder="Type here" step=1 mask="0*" [allowNegativeNumbers]="true" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()" />
   }
   @if (propType() == EntityPropertyType.Boolean) {
     <label class="pt-2 flex items-center gap-3 cursor-pointer w-fit" [for]="prop().column_name">
-      <input type="checkbox" class="toggle" [id]="prop().column_name" [formControlName]="prop().column_name" />
+      <input type="checkbox" class="toggle" [id]="prop().column_name" [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()" />
       <span class="boolean-label-container">
         <span class="boolean-label boolean-yes" [class.active]="form().get(prop().column_name)?.value">{{ 'form.yes' | translate }}</span>
         <span class="boolean-label boolean-no" [class.active]="!form().get(prop().column_name)?.value">{{ 'form.no' | translate }}</span>
@@ -49,11 +78,13 @@
       <!-- FK search modal (v0.45.0) — highest priority rendering path -->
       <button type="button" class="btn btn-outline w-full justify-between"
               [id]="prop().column_name"
+              [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+              [attr.aria-describedby]="describedBy()"
               (click)="showFkSearchModal.set(true)">
         <span [class.text-base-content/50]="!selectedDisplayName()">
           {{ selectedDisplayName() || ('form.select_option' | translate) }}
         </span>
-        <span class="material-symbols-outlined">search</span>
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
       </button>
       <app-fk-search-modal
         [isOpen]="showFkSearchModal()"
@@ -70,7 +101,10 @@
       />
     } @else if (useRpcOptions()) {
       <!-- RPC-driven options via signal (v0.44.0) -->
-      <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
+      <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()">
         @if (prop().is_nullable || rpcSelectOptions().length === 0) {
           <option [value]="null">{{ 'form.select_option' | translate }}</option>
         }
@@ -79,7 +113,10 @@
         }
       </select>
     } @else if (selectOptions$ | async; as selectOptions) {
-      <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name">
+      <select class="select w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()">
         @if (prop().is_nullable) {
           <option [value]="null">{{ 'form.select_option' | translate }}</option>
         }
@@ -96,6 +133,9 @@
         class="select w-full"
         [id]="prop().column_name"
         [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()"
         [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedStatusColor(statusOptions)"
         [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedStatusColor(statusOptions) ? '2px' : null)"
         [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedStatusBackgroundColor(statusOptions)">
@@ -116,6 +156,9 @@
         class="select w-full"
         [id]="prop().column_name"
         [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()"
         [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryColor(filteredCategoryOptions())"
         [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedCategoryColor(filteredCategoryOptions()) ? '2px' : null)"
         [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryBackgroundColor(filteredCategoryOptions())">
@@ -131,6 +174,9 @@
         class="select w-full"
         [id]="prop().column_name"
         [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()"
         [style.border-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryColor(categoryOptions)"
         [style.border-width]="isControlInvalidAndTouched(prop().column_name) ? null : (getSelectedCategoryColor(categoryOptions) ? '2px' : null)"
         [style.background-color]="isControlInvalidAndTouched(prop().column_name) ? null : getSelectedCategoryBackgroundColor(categoryOptions)">
@@ -145,29 +191,37 @@
   }
 
   @if (propType() == EntityPropertyType.GeoPoint) {
-    <app-geo-point-map
-      mode="edit"
-      [initialValue]="form().get(prop().column_name)?.value"
-      width="100%"
-      height="250px"
-      (valueChange)="onMapValueChange($event)">
-    </app-geo-point-map>
+    <div role="group" [attr.aria-label]="prop().display_name">
+      <app-geo-point-map
+        mode="edit"
+        [initialValue]="form().get(prop().column_name)?.value"
+        width="100%"
+        height="250px"
+        (valueChange)="onMapValueChange($event)">
+      </app-geo-point-map>
+    </div>
   }
 
   @if (propType() == EntityPropertyType.GeoPolygon) {
-    <app-geo-polygon-map
-      mode="edit"
-      [initialValue]="form().get(prop().column_name)?.value"
-      width="100%"
-      height="400px"
-      (valueChange)="onMapValueChange($event)">
-    </app-geo-polygon-map>
+    <div role="group" [attr.aria-label]="prop().display_name">
+      <app-geo-polygon-map
+        mode="edit"
+        [initialValue]="form().get(prop().column_name)?.value"
+        width="100%"
+        height="400px"
+        (valueChange)="onMapValueChange($event)">
+      </app-geo-polygon-map>
+    </div>
   }
 
   @if (propType() == EntityPropertyType.Color) {
     <div class="flex items-center gap-4">
-      <input type="color" class="w-24 h-12 cursor-pointer" [id]="prop().column_name" [formControlName]="prop().column_name" aria-label="Color picker" />
-      <input type="text" placeholder="#3B82F6" class="input w-full font-mono" [formControlName]="prop().column_name" [attr.aria-label]="prop().display_name + ' (hex code)'" />
+      <input type="color" class="w-24 h-12 cursor-pointer" [formControlName]="prop().column_name"
+        [attr.aria-label]="prop().display_name + ' — ' + ('a11y.color_swatch' | translate)" />
+      <input type="text" placeholder="#3B82F6" class="input w-full font-mono" [id]="prop().column_name" [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()" />
     </div>
   }
 
@@ -178,6 +232,9 @@
       class="input input-bordered w-full"
       [id]="prop().column_name"
       [formControlName]="prop().column_name"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy()"
     />
   }
 
@@ -191,23 +248,30 @@
       [class.ng-touched]="form().controls[prop().column_name]?.touched"
       [id]="prop().column_name"
       [value]="getFormattedPhone(prop().column_name)"
+      [attr.aria-required]="isRequired() || null"
+      [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+      [attr.aria-describedby]="describedBy(prop().column_name + '-hint')"
       (input)="onPhoneInput($event, prop().column_name)"
       (blur)="onPhoneBlur(prop().column_name)"
     />
-    <div class="text-xs text-base-content/60 mt-1">
+    <div class="text-xs text-base-content/60 mt-1" [id]="prop().column_name + '-hint'">
       {{ 'form.phone_hint' | translate }}
     </div>
   }
 
   @if (propType() == EntityPropertyType.TimeSlot) {
-    <app-edit-time-slot [formControl]="$any(form().controls[prop().column_name])" />
+    <div role="group" [attr.aria-label]="prop().display_name">
+      <app-edit-time-slot [formControl]="$any(form().controls[prop().column_name])" />
+    </div>
   }
 
   @if (propType() == EntityPropertyType.RecurringTimeSlot) {
-    <app-edit-recurring-time-slot
-      [formControl]="$any(form().controls[prop().column_name])"
-      [entityTable]="entityType()"
-    />
+    <div role="group" [attr.aria-label]="prop().display_name">
+      <app-edit-recurring-time-slot
+        [formControl]="$any(form().controls[prop().column_name])"
+        [entityTable]="entityType()"
+      />
+    </div>
   }
 
   @if (propType() == EntityPropertyType.File || propType() == EntityPropertyType.FileImage || propType() == EntityPropertyType.FilePDF) {
@@ -219,6 +283,9 @@
         [accept]="getFileAccept()"
         (change)="onFileSelected($event, prop().column_name)"
         [disabled]="uploadingFile()"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy(prop().column_name + '-hints')"
       />
 
       <!-- Upload Progress -->
@@ -270,7 +337,7 @@
       }
 
       <!-- Validation Hints -->
-      <div class="text-xs text-base-content/60">
+      <div class="text-xs text-base-content/60" [id]="prop().column_name + '-hints'">
         @if (prop().validation_rules) {
           @for (rule of prop().validation_rules; track rule.type) {
             @if (rule.type === 'fileType') {
@@ -286,21 +353,25 @@
   }
 
   @if (propType() == EntityPropertyType.PhotoGallery) {
-    <app-photo-gallery-editor
-      [galleryId]="getGalleryId()"
-      [entityType]="entityType()"
-      [entityId]="entityId()"
-      [columnName]="prop().column_name"
-      [currentFiles]="getGalleryImages()"
-      [config]="galleryConfig()"
-      (galleryChanged)="onGalleryChanged()"
-      (draftGalleryCreated)="onDraftGalleryCreated($event)"
-    />
+    <div role="group" [attr.aria-label]="prop().display_name">
+      <app-photo-gallery-editor
+        [galleryId]="getGalleryId()"
+        [entityType]="entityType()"
+        [entityId]="entityId()"
+        [columnName]="prop().column_name"
+        [currentFiles]="getGalleryImages()"
+        [config]="galleryConfig()"
+        (galleryChanged)="onGalleryChanged()"
+        (draftGalleryCreated)="onDraftGalleryCreated($event)"
+      />
+    </div>
   }
 
   @if (propType() == EntityPropertyType.Payment) {
     <!-- Payment is display-only (not editable), show status badge -->
-    <app-payment-badge [payment]="form().controls[prop().column_name].value"></app-payment-badge>
+    <div role="group" [attr.aria-label]="prop().display_name">
+      <app-payment-badge [payment]="form().controls[prop().column_name].value"></app-payment-badge>
+    </div>
   }
 
   @if (propType() == EntityPropertyType.Unknown) {
@@ -308,7 +379,7 @@
 
   @if (form().controls[prop().column_name]; as ctl) {
     @if (ctl.invalid && (ctl.dirty || ctl.touched)) {
-      <div class="text-error text-sm mt-1" role="alert" aria-live="polite">
+      <div class="text-error text-sm mt-1" role="alert" aria-live="polite" [id]="prop().column_name + '-error'">
         @if (ctl.errors?.['required']) {
           <div>
             @if (getValidationMessage('required'); as customMsg) {

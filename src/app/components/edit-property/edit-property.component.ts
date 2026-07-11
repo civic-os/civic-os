@@ -138,6 +138,22 @@ export class EditPropertyComponent {
     return prop.validation_rules?.some(r => r.type === 'required') ?? false;
   });
 
+  /**
+   * Property types rendered by child components that expose no element with
+   * id=column_name, so the outer <label [for]> would dangle (S2). For these the
+   * label's `for` is dropped and the branch wrapper carries role="group" +
+   * aria-label instead. Native-input branches keep the label[for]/id wiring.
+   */
+  isCustomWidget = computed(() => {
+    const t = this.propType();
+    return t === EntityPropertyType.TimeSlot
+        || t === EntityPropertyType.RecurringTimeSlot
+        || t === EntityPropertyType.GeoPoint
+        || t === EntityPropertyType.GeoPolygon
+        || t === EntityPropertyType.PhotoGallery
+        || t === EntityPropertyType.Payment;
+  });
+
   // File upload state
   uploadingFile = signal(false);
   uploadError = signal<string | null>(null);
@@ -453,6 +469,33 @@ export class EditPropertyComponent {
   isControlInvalidAndTouched(columnName: string): boolean {
     const ctl = this.form().controls[columnName];
     return ctl?.invalid && ctl?.touched;
+  }
+
+  /**
+   * Whether the validation error block is currently shown for a control.
+   * Mirrors the template's error-display condition exactly (`invalid && (dirty
+   * || touched)`) so that aria-invalid and aria-describedby track the visible
+   * error state and don't emit aria-invalid=false noise.
+   */
+  isErrorShown(columnName: string): boolean {
+    const ctl = this.form().controls[columnName];
+    return !!ctl && ctl.invalid && (ctl.dirty || ctl.touched);
+  }
+
+  /**
+   * Build the aria-describedby id list for a control: the sr-only description
+   * (when the property has one), an optional branch-specific hint id (phone /
+   * file), and the error block (when the error is showing). Ids are derived from
+   * column_name so they are stable and unique per field. Returns null when there
+   * is nothing to reference.
+   */
+  describedBy(extraId?: string): string | null {
+    const col = this.prop().column_name;
+    const ids: string[] = [];
+    if (this.prop().description) ids.push(col + '-desc');
+    if (extraId) ids.push(extraId);
+    if (this.isErrorShown(col)) ids.push(col + '-error');
+    return ids.length ? ids.join(' ') : null;
   }
 
   // Format phone number for display: 5551234567 → (555) 123-4567
