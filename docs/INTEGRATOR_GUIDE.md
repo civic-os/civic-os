@@ -1300,6 +1300,8 @@ Polygon colors are resolved from a Category column on the same entity. The `reso
 - Clicking marker/polygon navigates to record detail
 - Dark mode automatically switches to ESRI World Dark Gray tiles
 
+**Accessibility (coordinate entry fallback)**: Both geo types provide a keyboard-accessible alternative to mouse interaction on Create/Edit forms. GeoPoint renders labeled decimal Latitude/Longitude inputs below the map, two-way synced with the marker. GeoPolygon offers a collapsible "Edit coordinates" textarea (one `lat, lng` pair per line, ring auto-closed, validated on Apply) synced with the drawn polygon.
+
 **Data Format (GeoPoint)**:
 - Insert/Update: EWKT `"SRID=4326;POINT(lng lat)"`
 - Read: WKT `"POINT(lng lat)"` (via computed field)

@@ -77,6 +77,13 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   // Signal to track when markercluster plugin is loaded (prevents race conditions)
   private markerClusterLoaded = signal(false);
 
+  // Keyboard-accessible coordinate fallback inputs (edit mode only).
+  // Kept as strings so partial input ("43.") isn't clobbered mid-typing.
+  public latValue = signal<string>('');
+  public lngValue = signal<string>('');
+  // Guards setLocation() from overwriting the inputs while the user is typing in them
+  private syncingFromInputs = false;
+
   private themeService = inject(ThemeService);
 
   constructor() {
@@ -186,6 +193,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     if (coords) {
       this.currentLng = coords[0];
       this.currentLat = coords[1];
+      this.updateCoordinateInputs(this.currentLat, this.currentLng);
       // Emit initial coordinates
       this.coordinatesChange.emit([coords[0], coords[1]]);
     }
@@ -317,6 +325,13 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
     this.currentLat = lat;
     this.currentLng = lng;
 
+    // Keep the coordinate fallback inputs in sync (map click, marker drag,
+    // Use My Location) — but not while the change originated from the inputs,
+    // to avoid clobbering partial input mid-typing.
+    if (!this.syncingFromInputs) {
+      this.updateCoordinateInputs(lat, lng);
+    }
+
     if (this.map) {
       this.map.setView([lat, lng], this.map.getZoom());
     }
@@ -350,6 +365,46 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       );
     } else {
       alert('Geolocation is not supported by your browser.');
+    }
+  }
+
+  // ============= Coordinate Fallback Inputs (Accessibility) =============
+  // Keyboard-accessible alternative to clicking the map (WCAG 2.1.1).
+  // These inputs reuse setLocation() — the same code path as map click,
+  // marker drag, and Use My Location — so the CVA/EWKT contract is unchanged.
+
+  /**
+   * Reflects a lat/lng pair into the fallback inputs (rounded to 6 decimals,
+   * matching the inputs' step of 0.000001).
+   */
+  private updateCoordinateInputs(lat: number, lng: number): void {
+    this.latValue.set(String(Math.round(lat * 1e6) / 1e6));
+    this.lngValue.set(String(Math.round(lng * 1e6) / 1e6));
+  }
+
+  /**
+   * Handles typing in the Latitude/Longitude fallback inputs.
+   * Only updates the marker + form value when BOTH fields hold valid,
+   * in-range numbers; empty/partial input is held without emitting.
+   */
+  public onCoordinateInput(axis: 'lat' | 'lng', value: string): void {
+    if (axis === 'lat') {
+      this.latValue.set(value);
+    } else {
+      this.lngValue.set(value);
+    }
+
+    const lat = parseFloat(this.latValue());
+    const lng = parseFloat(this.lngValue());
+
+    if (isNaN(lat) || isNaN(lng)) return;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
+
+    this.syncingFromInputs = true;
+    try {
+      this.setLocation(lat, lng);
+    } finally {
+      this.syncingFromInputs = false;
     }
   }
 

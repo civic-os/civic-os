@@ -71,6 +71,12 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
 
   private geomanLoaded = signal(false);
 
+  // Keyboard-accessible coordinate entry fallback (edit mode only, a11y decision D4).
+  // Collapsed by default; the textarea accepts one "lat, lng" pair per line.
+  public coordsPanelOpen = signal(false);
+  public coordsText = signal('');
+  public coordsError = signal<{ key: string; params?: Record<string, string | number> } | null>(null);
+
   private themeService = inject(ThemeService);
 
   constructor() {
@@ -303,42 +309,21 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
       this.drawnPolygon.on('pm:edit', () => {
         if (this.drawnPolygon) {
           this.valueChange.emit(this.toEWKT(this.drawnPolygon));
+          this.refreshCoordsTextIfOpen();
         }
       });
     }
 
     // Handle new polygon creation
     map.on('pm:create', (e: any) => {
-      // Remove any previously drawn polygon
-      if (this.drawnPolygon) {
-        this.drawnPolygon.remove();
-      }
-
-      this.drawnPolygon = e.layer as L.Polygon;
-      this.valueChange.emit(this.toEWKT(this.drawnPolygon));
-
-      // Disable drawing, enable editing + removal
-      map.pm.addControls({
-        drawPolygon: false,
-        editMode: true,
-        removalMode: true,
-      });
-
-      // Enable editing on the new polygon
-      this.drawnPolygon.pm.enable();
-
-      // Listen for edit events
-      this.drawnPolygon.on('pm:edit', () => {
-        if (this.drawnPolygon) {
-          this.valueChange.emit(this.toEWKT(this.drawnPolygon));
-        }
-      });
+      this.adoptDrawnPolygon(e.layer as L.Polygon);
     });
 
     // Handle polygon removal
     map.on('pm:remove', () => {
       this.drawnPolygon = undefined;
       this.valueChange.emit('');
+      this.refreshCoordsTextIfOpen();
 
       // Re-enable drawing
       map.pm.addControls({
@@ -347,6 +332,151 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
         removalMode: false,
       });
     });
+  }
+
+  /**
+   * Adopts a polygon as the single edited polygon: replaces any previous one,
+   * emits the EWKT form value, switches geoman controls to edit/removal mode,
+   * enables vertex editing, and wires up pm:edit. Shared by geoman's pm:create
+   * and the coordinate-entry Apply path so both produce identical values.
+   */
+  private adoptDrawnPolygon(polygon: L.Polygon): void {
+    // Remove any previously drawn polygon
+    if (this.drawnPolygon && this.drawnPolygon !== polygon) {
+      this.drawnPolygon.remove();
+    }
+
+    this.drawnPolygon = polygon;
+    this.valueChange.emit(this.toEWKT(polygon));
+
+    // Disable drawing, enable editing + removal
+    if (this.map && this.geomanLoaded()) {
+      this.map.pm.addControls({
+        drawPolygon: false,
+        editMode: true,
+        removalMode: true,
+      });
+
+      // Enable vertex editing on the new polygon
+      polygon.pm.enable();
+    }
+
+    // Listen for edit events
+    polygon.on('pm:edit', () => {
+      if (this.drawnPolygon) {
+        this.valueChange.emit(this.toEWKT(this.drawnPolygon));
+        this.refreshCoordsTextIfOpen();
+      }
+    });
+
+    this.refreshCoordsTextIfOpen();
+  }
+
+  // ============= Coordinate Entry Fallback (Accessibility) =============
+  // Keyboard-accessible alternative to mouse drawing on the geoman canvas
+  // (WCAG 2.1.1, a11y decision D4). This is a fallback, not a redesign: a
+  // compact collapsible textarea accepting one "lat, lng" pair per line.
+
+  /** Toggles the coordinate panel; refreshes the textarea from the map on open. */
+  public toggleCoordsPanel(): void {
+    const opening = !this.coordsPanelOpen();
+    this.coordsPanelOpen.set(opening);
+    if (opening) {
+      this.refreshCoordsText();
+    }
+  }
+
+  /** Rebuilds the textarea content from the currently drawn polygon. */
+  private refreshCoordsText(): void {
+    if (!this.drawnPolygon) {
+      this.coordsText.set('');
+      return;
+    }
+    const ring = this.drawnPolygon.getLatLngs()[0] as L.LatLng[];
+    this.coordsText.set(ring.map(ll => `${ll.lat}, ${ll.lng}`).join('\n'));
+  }
+
+  /**
+   * Refreshes the textarea only while the panel is open, so map-driven changes
+   * stay in sync without clobbering a collapsed (stale) panel unnecessarily.
+   */
+  private refreshCoordsTextIfOpen(): void {
+    if (this.coordsPanelOpen()) {
+      this.refreshCoordsText();
+    }
+  }
+
+  /**
+   * Parses textarea content: one "lat, lng" pair per line (comma and/or
+   * whitespace separated). Requires >= 3 points with lat in [-90, 90] and
+   * lng in [-180, 180]. A pasted closed ring (first pair repeated last) is
+   * accepted — the duplicate is dropped since the ring is auto-closed.
+   */
+  public parseCoordinateLines(text: string): { coords?: [number, number][]; error?: { key: string; params?: Record<string, string | number> } } {
+    const lines = text.split(/\r?\n/);
+    const coords: [number, number][] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const parts = line.split(/[,\s]+/).filter(p => p.length > 0);
+      const lat = parts.length === 2 ? Number(parts[0]) : NaN;
+      const lng = parts.length === 2 ? Number(parts[1]) : NaN;
+
+      if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        return { error: { key: 'a11y.coords_error_line', params: { line: i + 1 } } };
+      }
+      coords.push([lat, lng]);
+    }
+
+    // Drop an explicit closing point — toEWKT() re-closes the ring on output
+    if (coords.length > 1) {
+      const first = coords[0];
+      const last = coords[coords.length - 1];
+      if (first[0] === last[0] && first[1] === last[1]) {
+        coords.pop();
+      }
+    }
+
+    if (coords.length < 3) {
+      return { error: { key: 'a11y.coords_error_min_points' } };
+    }
+
+    return { coords };
+  }
+
+  /**
+   * Validates the textarea and, on success, replaces the drawn polygon and
+   * emits the form value through the same adopt/toEWKT path geoman uses.
+   * On failure, sets an inline error (announced via role="alert").
+   */
+  public applyCoordinates(): void {
+    const result = this.parseCoordinateLines(this.coordsText());
+    if (result.error || !result.coords) {
+      this.coordsError.set(result.error ?? null);
+      return;
+    }
+    this.coordsError.set(null);
+
+    const polygonColor = this.color();
+    const polygon = L.polygon(result.coords, {
+      color: polygonColor,
+      fillColor: polygonColor,
+      fillOpacity: 0.2,
+      weight: 2,
+    });
+
+    if (this.map) {
+      polygon.addTo(this.map);
+    }
+
+    this.adoptDrawnPolygon(polygon);
+
+    if (this.map) {
+      this.map.invalidateSize();
+      this.map.fitBounds(polygon.getBounds(), { padding: [20, 20] });
+    }
   }
 
   // ============= Tile Layer (Theme-Aware) =============

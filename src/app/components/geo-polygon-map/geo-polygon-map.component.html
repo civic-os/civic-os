@@ -17,4 +17,40 @@
       <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px; line-height: 1;">home</span>
     </button>
   }
+
+  <!-- Keyboard-accessible coordinate entry fallback (a11y decision D4):
+       compact collapsible textarea as an alternative to mouse drawing -->
+  @if (mode() === 'edit') {
+    <div class="mt-2">
+      <button type="button"
+              class="btn btn-ghost btn-sm"
+              (click)="toggleCoordsPanel()"
+              [attr.aria-expanded]="coordsPanelOpen()"
+              [attr.aria-controls]="coordsPanelOpen() ? mapId + '-coords' : null">
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ coordsPanelOpen() ? 'expand_less' : 'expand_more' }}</span>
+        {{ 'a11y.edit_coordinates' | translate }}
+      </button>
+
+      @if (coordsPanelOpen()) {
+        <div [id]="mapId + '-coords'" class="mt-1">
+          <label class="label py-0" [for]="mapId + '-coords-input'">
+            <span class="label-text text-sm">{{ 'a11y.polygon_coordinates' | translate }}</span>
+          </label>
+          <textarea [id]="mapId + '-coords-input'"
+                    class="textarea textarea-bordered w-full font-mono text-sm"
+                    rows="5"
+                    [value]="coordsText()"
+                    (input)="coordsText.set($any($event.target).value)"></textarea>
+          @if (coordsError(); as err) {
+            <div role="alert" class="text-error text-sm mt-1">
+              {{ err.key | translate:err.params }}
+            </div>
+          }
+          <button type="button" class="btn btn-sm btn-primary mt-1" (click)="applyCoordinates()">
+            {{ 'a11y.apply_coordinates' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
 </div>
