@@ -78,6 +78,7 @@ export class AppComponent {
 
   // Track the first NavigationEnd so we don't steal focus / re-set the title on initial load
   private firstNavigation = true;
+  private lastNavigationPath = '';
 
   // Track if current route is a dashboard page (home or /dashboard/:id)
   isDashboardRoute = signal(false);
@@ -196,8 +197,18 @@ export class AppComponent {
       // first paint would be disorienting.
       if (this.firstNavigation) {
         this.firstNavigation = false;
+        this.lastNavigationPath = event.urlAfterRedirects.split('?')[0];
         return;
       }
+
+      // Only move focus when the route PATH changes. Same-page query-param
+      // navigations (sorting, pagination, filters on list pages) must not
+      // steal focus from the control the user just activated.
+      const currentPath = event.urlAfterRedirects.split('?')[0];
+      if (currentPath === this.lastNavigationPath) {
+        return;
+      }
+      this.lastNavigationPath = currentPath;
 
       // Move focus to the main landmark so screen-reader/keyboard users land on the
       // freshly rendered content instead of silently swapped page content.
