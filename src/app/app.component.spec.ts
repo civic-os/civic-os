@@ -541,8 +541,8 @@ describe('AppComponent', () => {
       });
 
       const compiled = fixture.nativeElement as HTMLElement;
-      // Look for the dropdown menu content
-      const menuItems = compiled.querySelectorAll('.menu a');
+      // Look for the dropdown menu content (login is a pure-action <button>)
+      const menuItems = compiled.querySelectorAll('.menu a, .menu button');
       const loginLink = Array.from(menuItems).find(link => link.textContent?.includes('Log In'));
 
       expect(loginLink).toBeTruthy();

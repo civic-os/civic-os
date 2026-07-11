@@ -17,6 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { of, throwError, Observable, BehaviorSubject } from 'rxjs';
@@ -49,6 +50,7 @@ describe('DashboardSelectorComponent', () => {
       imports: [DashboardSelectorComponent, CommonModule],
       providers: [
         provideZonelessChangeDetection(),
+        provideHttpClient(),
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: { paramMap: paramMapSubject.asObservable() } }
@@ -394,7 +396,7 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        const menuItems = compiled.querySelectorAll('.dropdown-content li a');
+        const menuItems = compiled.querySelectorAll('.dropdown-content li button');
 
         // +1 for "Default Dashboard" item
         expect(menuItems.length).toBe(mockDashboards.length + 1);
@@ -413,7 +415,7 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li a'))
+        const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li button'))
           .find(el => el.textContent?.includes('Default Dashboard'));
 
         expect(defaultOption).toBeTruthy();
@@ -429,7 +431,7 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        const activeItems = compiled.querySelectorAll('.dropdown-content li a.menu-active');
+        const activeItems = compiled.querySelectorAll('.dropdown-content li button.menu-active');
 
         expect(activeItems.length).toBeGreaterThan(0);
         done();
@@ -448,7 +450,7 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        const menuItems = compiled.querySelectorAll('.dropdown-content li a');
+        const menuItems = compiled.querySelectorAll('.dropdown-content li button');
 
         // Check for public icon (skip first item which is "Default Dashboard")
         const publicItem = menuItems[1]; // First actual dashboard
@@ -489,7 +491,7 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        const dashboardItems = compiled.querySelectorAll('.dropdown-content li a');
+        const dashboardItems = compiled.querySelectorAll('.dropdown-content li button');
         const firstDashboard = dashboardItems[1] as HTMLElement; // Skip "Default Dashboard"
 
         firstDashboard.click();
@@ -511,7 +513,7 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li a'))
+        const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li button'))
           .find(el => el.textContent?.includes('Default Dashboard')) as HTMLElement;
 
         defaultOption?.click();
@@ -534,14 +536,14 @@ describe('DashboardSelectorComponent', () => {
         fixture.detectChanges();
 
         const compiled = fixture.nativeElement as HTMLElement;
-        let menuItems = compiled.querySelectorAll('.dropdown-content li a');
+        let menuItems = compiled.querySelectorAll('.dropdown-content li button');
         expect(menuItems.length).toBe(2); // Default + 1 dashboard
 
         // Update dashboards
         component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.userPrivate]);
         fixture.detectChanges();
 
-        menuItems = compiled.querySelectorAll('.dropdown-content li a');
+        menuItems = compiled.querySelectorAll('.dropdown-content li button');
         expect(menuItems.length).toBe(3); // Default + 2 dashboards
         done();
       }, 10);

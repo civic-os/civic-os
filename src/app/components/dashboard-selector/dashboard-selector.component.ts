@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Dashboard Selector Component
@@ -36,7 +37,7 @@ import { DashboardService } from '../../services/dashboard.service';
  */
 @Component({
   selector: 'app-dashboard-selector',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './dashboard-selector.component.html',
   styleUrl: './dashboard-selector.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

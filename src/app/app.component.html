@@ -36,7 +36,7 @@
         }
 
         <details id="profile-dropdown" class="dropdown dropdown-end">
-          <summary class="btn m-1" [class.btn-ghost]="!impersonation.isActive()" [class.btn-warning]="impersonation.isActive()" aria-label="User menu">
+          <summary class="btn m-1" [class.btn-ghost]="!impersonation.isActive()" [class.btn-warning]="impersonation.isActive()" [attr.aria-label]="'a11y.user_menu' | translate">
             @if (this.auth.authenticated()) {
               @if (impersonation.isActive()) {
                 <!-- Warning icon when impersonating -->
@@ -57,18 +57,18 @@
                     {{ 'auth.viewing_as' | translate }} {{ impersonation.impersonatedRoles().join(', ') }}
                   </span>
                 </li>
-                <li><a class="text-warning font-medium" (click)="stopImpersonation()">{{ 'auth.stop_impersonation' | translate }}</a></li>
+                <li><button type="button" class="text-warning font-medium" (click)="stopImpersonation()">{{ 'auth.stop_impersonation' | translate }}</button></li>
                 <li class="border-t border-base-300 my-1"></li>
               }
-              <li><a (click)="navigateToProfile()">{{ 'profile.my_profile' | translate }}</a></li>
-              <li><a (click)="openSettings()">{{ 'auth.preferences' | translate }}</a></li>
+              <li><a routerLink="/profile" (click)="closeProfileDropdown()">{{ 'profile.my_profile' | translate }}</a></li>
+              <li><button type="button" (click)="openSettings()">{{ 'auth.preferences' | translate }}</button></li>
               <li><a [href]="getKeycloakAccountUrl()">{{ 'auth.account_settings' | translate }}</a></li>
-              <li><a (click)="this.auth.logout()">{{ 'action.logout' | translate }}</a></li>
+              <li><button type="button" (click)="this.auth.logout()">{{ 'action.logout' | translate }}</button></li>
             } @else {
-              <li><a (click)="this.auth.login()">{{ 'action.login' | translate }}</a></li>
+              <li><button type="button" (click)="this.auth.login()">{{ 'action.login' | translate }}</button></li>
             }
             <li class="border-t border-base-300 my-1"></li>
-            <li><a (click)="openAbout()">{{ 'auth.about' | translate }}</a></li>
+            <li><button type="button" (click)="openAbout()">{{ 'auth.about' | translate }}</button></li>
           </ul>
         </details>
       </div>
@@ -90,8 +90,9 @@
         </div>
         <ul class="menu menu-md p-4 flex-1">
           <!-- Home -->
-          <li (click)="navigateToHome()">
-            <a [class.menu-active]="isRouteActive('/')"
+          <li>
+            <a routerLink="/" (click)="drawerOpen = false"
+               [class.menu-active]="isRouteActive('/')"
                [class.font-bold]="isRouteActive('/')"
                [class.opacity-85]="!isRouteActive('/')">
               <span class="material-symbols-outlined" aria-hidden="true">home</span>
@@ -104,8 +105,9 @@
             <span class="block px-4 py-2 text-base font-bold uppercase tracking-wide pointer-events-none">{{ 'nav.data' | translate }}</span>
           </li>
           @for (entity of menuItems; track entity) {
-            <li (click)="navigate(entity.table_name)">
-              <a [class.menu-active]="isRouteActive('/view/' + entity.table_name)"
+            <li>
+              <a [routerLink]="['/view', entity.table_name]" (click)="drawerOpen = false"
+                 [class.menu-active]="isRouteActive('/view/' + entity.table_name)"
                  [class.font-bold]="isRouteActive('/view/' + entity.table_name)"
                  [class.opacity-85]="!isRouteActive('/view/' + entity.table_name)">
                 {{ entity.display_name }}
@@ -117,8 +119,9 @@
           <li class="mt-4">
             <span class="block px-4 py-2 text-base font-bold uppercase tracking-wide pointer-events-none">{{ 'nav.about' | translate }}</span>
           </li>
-          <li (click)="navigateToSchemaEditor()">
-            <a [class.menu-active]="isRouteActive('/schema-editor')"
+          <li>
+            <a routerLink="/schema-editor" (click)="drawerOpen = false"
+               [class.menu-active]="isRouteActive('/schema-editor')"
                [class.font-bold]="isRouteActive('/schema-editor')"
                [class.opacity-85]="!isRouteActive('/schema-editor')">
               <span class="material-symbols-outlined" aria-hidden="true">account_tree</span>
@@ -132,24 +135,27 @@
             </li>
             <!-- Core admin items (admin-only) -->
             @if (auth.isAdmin()) {
-              <li (click)="navigateToEntityManagement()">
-                <a [class.menu-active]="isRouteActive('/entity-management')"
+              <li>
+                <a routerLink="/entity-management" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/entity-management')"
                    [class.font-bold]="isRouteActive('/entity-management')"
                    [class.opacity-85]="!isRouteActive('/entity-management')">
                   <span class="material-symbols-outlined" aria-hidden="true">dashboard_customize</span>
                   {{ 'sidebar.entities' | translate }}
                 </a>
               </li>
-              <li (click)="navigateToPropertyManagement()">
-                <a [class.menu-active]="isRouteActive('/property-management')"
+              <li>
+                <a routerLink="/property-management" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/property-management')"
                    [class.font-bold]="isRouteActive('/property-management')"
                    [class.opacity-85]="!isRouteActive('/property-management')">
                   <span class="material-symbols-outlined" aria-hidden="true">tune</span>
                   {{ 'sidebar.properties' | translate }}
                 </a>
               </li>
-              <li (click)="navigateToPermissions()">
-                <a [class.menu-active]="isRouteActive('/permissions')"
+              <li>
+                <a routerLink="/permissions" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/permissions')"
                    [class.font-bold]="isRouteActive('/permissions')"
                    [class.opacity-85]="!isRouteActive('/permissions')">
                   <span class="material-symbols-outlined" aria-hidden="true">lock</span>
@@ -159,8 +165,9 @@
             }
             <!-- Status Admin (permission-based) -->
             @if (hasStatusAdminPermission()) {
-              <li (click)="navigateToStatusAdmin()">
-                <a [class.menu-active]="isRouteActive('/admin/statuses')"
+              <li>
+                <a routerLink="/admin/statuses" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/statuses')"
                    [class.font-bold]="isRouteActive('/admin/statuses')"
                    [class.opacity-85]="!isRouteActive('/admin/statuses')">
                   <span class="material-symbols-outlined" aria-hidden="true">checklist</span>
@@ -170,8 +177,9 @@
             }
             <!-- Category Admin (permission-based) -->
             @if (hasCategoryAdminPermission()) {
-              <li (click)="navigateToCategoryAdmin()">
-                <a [class.menu-active]="isRouteActive('/admin/categories')"
+              <li>
+                <a routerLink="/admin/categories" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/categories')"
                    [class.font-bold]="isRouteActive('/admin/categories')"
                    [class.opacity-85]="!isRouteActive('/admin/categories')">
                   <span class="material-symbols-outlined" aria-hidden="true">category</span>
@@ -181,8 +189,9 @@
             }
             <!-- Translations (admin + multi-locale) -->
             @if (hasTranslationAdminPermission()) {
-              <li (click)="navigateToTranslationAdmin()">
-                <a [class.menu-active]="isRouteActive('/admin/translations')"
+              <li>
+                <a routerLink="/admin/translations" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/translations')"
                    [class.font-bold]="isRouteActive('/admin/translations')"
                    [class.opacity-85]="!isRouteActive('/admin/translations')">
                   <span class="material-symbols-outlined" aria-hidden="true">translate</span>
@@ -191,24 +200,27 @@
               </li>
             }
             @if (auth.isAdmin()) {
-              <li (click)="navigateToNotificationTemplates()">
-                <a [class.menu-active]="isRouteActive('/notifications/templates')"
+              <li>
+                <a routerLink="/notifications/templates" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/notifications/templates')"
                    [class.font-bold]="isRouteActive('/notifications/templates')"
                    [class.opacity-85]="!isRouteActive('/notifications/templates')">
                   <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
                   {{ 'sidebar.notifications' | translate }}
                 </a>
               </li>
-              <li (click)="navigateToSystemFunctions()">
-                <a [class.menu-active]="isRouteActive('/system/functions')"
+              <li>
+                <a routerLink="/system/functions" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/system/functions')"
                    [class.font-bold]="isRouteActive('/system/functions')"
                    [class.opacity-85]="!isRouteActive('/system/functions')">
                   <span class="material-symbols-outlined" aria-hidden="true">functions</span>
                   {{ 'sidebar.functions' | translate }}
                 </a>
               </li>
-              <li (click)="navigateToSystemPolicies()">
-                <a [class.menu-active]="isRouteActive('/system/policies')"
+              <li>
+                <a routerLink="/system/policies" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/system/policies')"
                    [class.font-bold]="isRouteActive('/system/policies')"
                    [class.opacity-85]="!isRouteActive('/system/policies')">
                   <span class="material-symbols-outlined" aria-hidden="true">shield</span>
@@ -218,8 +230,9 @@
             }
             <!-- User Management (shown to users with civic_os_users_private permissions) -->
             @if (hasUserManagementPermission()) {
-              <li (click)="navigateToUserManagement()">
-                <a [class.menu-active]="isRouteActive('/admin/users')"
+              <li>
+                <a routerLink="/admin/users" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/users')"
                    [class.font-bold]="isRouteActive('/admin/users')"
                    [class.opacity-85]="!isRouteActive('/admin/users')">
                   <span class="material-symbols-outlined" aria-hidden="true">group</span>
@@ -229,8 +242,9 @@
             }
             <!-- Static Assets (permission-based) -->
             @if (hasStaticAssetPermission()) {
-              <li (click)="navigateToStaticAssets()">
-                <a [class.menu-active]="isRouteActive('/admin/static-assets')"
+              <li>
+                <a routerLink="/admin/static-assets" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/static-assets')"
                    [class.font-bold]="isRouteActive('/admin/static-assets')"
                    [class.opacity-85]="!isRouteActive('/admin/static-assets')">
                   <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
@@ -240,8 +254,9 @@
             }
             <!-- Files (permission-based) -->
             @if (hasFilePermission()) {
-              <li (click)="navigateToFilesAdmin()">
-                <a [class.menu-active]="isRouteActive('/admin/files')"
+              <li>
+                <a routerLink="/admin/files" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/files')"
                    [class.font-bold]="isRouteActive('/admin/files')"
                    [class.opacity-85]="!isRouteActive('/admin/files')">
                   <span class="material-symbols-outlined" aria-hidden="true">folder_open</span>
@@ -251,8 +266,9 @@
             }
             <!-- Galleries (admin only) -->
             @if (hasGalleryAdminPermission()) {
-              <li (click)="navigateToGalleryAdmin()">
-                <a [class.menu-active]="isRouteActive('/admin/galleries')"
+              <li>
+                <a routerLink="/admin/galleries" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/galleries')"
                    [class.font-bold]="isRouteActive('/admin/galleries')"
                    [class.opacity-85]="!isRouteActive('/admin/galleries')">
                   <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
@@ -262,8 +278,9 @@
             }
             <!-- Feature-specific items (shown based on entity config + user permissions) -->
             @if (hasRecurringEntities() && hasRecurringSchedulePermission()) {
-              <li (click)="navigateToRecurringSchedules()">
-                <a [class.menu-active]="isRouteActive('/admin/recurring-schedules')"
+              <li>
+                <a routerLink="/admin/recurring-schedules" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/recurring-schedules')"
                    [class.font-bold]="isRouteActive('/admin/recurring-schedules')"
                    [class.opacity-85]="!isRouteActive('/admin/recurring-schedules')">
                   <span class="material-symbols-outlined" aria-hidden="true">event_repeat</span>
@@ -272,8 +289,9 @@
               </li>
             }
             @if (hasPaymentEntities() && hasPaymentPermission()) {
-              <li (click)="navigateToPaymentsAdmin()">
-                <a [class.menu-active]="isRouteActive('/admin/payments')"
+              <li>
+                <a routerLink="/admin/payments" (click)="drawerOpen = false"
+                   [class.menu-active]="isRouteActive('/admin/payments')"
                    [class.font-bold]="isRouteActive('/admin/payments')"
                    [class.opacity-85]="!isRouteActive('/admin/payments')">
                   <span class="material-symbols-outlined" aria-hidden="true">payments</span>

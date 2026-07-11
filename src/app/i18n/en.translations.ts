@@ -30,6 +30,9 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'nav.open_menu': 'Open navigation menu',
   'nav.close_menu': 'Close navigation menu',
 
+  'a11y.user_menu': 'User menu',
+  'a11y.select_dashboard': 'Select dashboard',
+
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',
   'sidebar.properties': 'Properties',

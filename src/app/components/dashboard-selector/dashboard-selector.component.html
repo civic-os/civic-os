@@ -1,11 +1,11 @@
 <!-- Dashboard Selector Dropdown (DaisyUI) -->
 <div class="dropdown dropdown-end">
   <!-- Dropdown Button -->
-  <div tabindex="0" role="button" class="btn btn-ghost">
-    <span class="material-symbols-outlined">dashboard</span>
+  <button type="button" class="btn btn-ghost" [attr.aria-label]="'a11y.select_dashboard' | translate">
+    <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
     <span class="hidden sm:inline ms-2">{{ getCurrentDashboardName() }}</span>
-    <span class="material-symbols-outlined ms-1">expand_more</span>
-  </div>
+    <span class="material-symbols-outlined ms-1" aria-hidden="true">expand_more</span>
+  </button>
 
   <!-- Dropdown Menu -->
   @if (!loading() && dashboards().length > 0) {
@@ -15,7 +15,8 @@
     >
       <!-- Default Dashboard -->
       <li>
-        <a
+        <button
+          type="button"
           (click)="selectDefaultDashboard()"
           [class.menu-active]="currentDashboardId() === undefined"
           class="flex items-center"
@@ -25,7 +26,7 @@
           @if (currentDashboardId() === undefined) {
             <span class="material-symbols-outlined ms-auto text-primary">check</span>
           }
-        </a>
+        </button>
       </li>
 
       <li class="menu-title">
@@ -35,7 +36,8 @@
       <!-- Dashboard List -->
       @for (dashboard of dashboards(); track dashboard.id) {
         <li>
-          <a
+          <button
+            type="button"
             (click)="selectDashboard(dashboard.id)"
             [class.menu-active]="currentDashboardId() === dashboard.id"
             class="flex items-center"
@@ -52,7 +54,7 @@
             @if (currentDashboardId() === dashboard.id) {
               <span class="material-symbols-outlined ms-auto text-primary">check</span>
             }
-          </a>
+          </button>
         </li>
       }
     </ul>

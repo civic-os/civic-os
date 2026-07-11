@@ -17,7 +17,7 @@
 
 import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { SchemaService } from './services/schema.service';
 import { VersionService } from './services/version.service';
@@ -44,6 +44,7 @@ import { TranslatePipe } from './pipes/translate.pipe';
     selector: 'app-root',
     imports: [
     RouterOutlet,
+    RouterLink,
     CommonModule,
     FormsModule,
     DashboardSelectorComponent,
@@ -200,101 +201,12 @@ export class AppComponent {
     }
   }
 
-  public navigateToHome() {
-    this.router.navigate(['/']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToProfile() {
-    this.router.navigate(['profile']);
-    // Close the profile dropdown
+  /**
+   * Close the profile dropdown (used when a menu item navigates via routerLink).
+   */
+  public closeProfileDropdown() {
     const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
     if (profileDropdown) profileDropdown.open = false;
-  }
-
-  public navigate(key: string) {
-    this.router.navigate(['view', key]);
-    this.drawerOpen = false;
-  }
-
-  public navigateToPermissions() {
-    this.router.navigate(['permissions']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToEntityManagement() {
-    this.router.navigate(['entity-management']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToPropertyManagement() {
-    this.router.navigate(['property-management']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToSchemaEditor() {
-    this.router.navigate(['schema-editor']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToNotificationTemplates() {
-    this.router.navigate(['notifications', 'templates']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToPaymentsAdmin() {
-    this.router.navigate(['admin', 'payments']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToRecurringSchedules() {
-    this.router.navigate(['admin', 'recurring-schedules']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToUserManagement() {
-    this.router.navigate(['admin', 'users']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToStaticAssets() {
-    this.router.navigate(['admin', 'static-assets']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToFilesAdmin() {
-    this.router.navigate(['admin', 'files']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToGalleryAdmin() {
-    this.router.navigate(['admin', 'galleries']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToStatusAdmin() {
-    this.router.navigate(['admin', 'statuses']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToCategoryAdmin() {
-    this.router.navigate(['admin', 'categories']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToTranslationAdmin() {
-    this.router.navigate(['admin', 'translations']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToSystemFunctions() {
-    this.router.navigate(['system', 'functions']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToSystemPolicies() {
-    this.router.navigate(['system', 'policies']);
-    this.drawerOpen = false;
   }
 
   /**
