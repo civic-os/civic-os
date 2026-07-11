@@ -122,19 +122,20 @@
               <table class="table table-zebra table-sm w-full">
                 <thead class="sticky top-0 bg-base-200 z-10">
                   <tr>
-                    <th class="w-8"></th>
+                    <th class="w-8" scope="col"></th>
                     @for (prop of listProperties(); track prop.column_name) {
                       <th
+                        scope="col"
                         class="cursor-pointer select-none"
                         [class.font-bold]="orderField() === prop.column_name"
-                        (click)="onSort(prop.column_name)"
+                        [attr.aria-sort]="orderField() === prop.column_name ? (orderDirection() === 'asc' ? 'ascending' : 'descending') : 'none'"
                       >
-                        <span class="flex items-center gap-1">
+                        <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort(prop.column_name)">
                           {{ prop.display_name }}
                           @if (getSortIcon(prop.column_name)) {
-                            <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon(prop.column_name) }}</span>
                           }
-                        </span>
+                        </button>
                       </th>
                     }
                   </tr>
@@ -289,19 +290,20 @@
         <table class="table table-zebra table-sm w-full">
           <thead class="sticky top-0 bg-base-200 z-10">
             <tr>
-              <th class="w-8"></th>
+              <th class="w-8" scope="col"></th>
               @for (prop of listProperties(); track prop.column_name) {
                 <th
+                  scope="col"
                   class="cursor-pointer select-none"
                   [class.font-bold]="orderField() === prop.column_name"
-                  (click)="onSort(prop.column_name)"
+                  [attr.aria-sort]="orderField() === prop.column_name ? (orderDirection() === 'asc' ? 'ascending' : 'descending') : 'none'"
                 >
-                  <span class="flex items-center gap-1">
+                  <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort(prop.column_name)">
                     {{ prop.display_name }}
                     @if (getSortIcon(prop.column_name)) {
-                      <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon(prop.column_name) }}</span>
                     }
-                  </span>
+                  </button>
                 </th>
               }
             </tr>

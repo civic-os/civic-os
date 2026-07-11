@@ -43,9 +43,27 @@
         <tbody>
           @for (record of records(); track record.id) {
             <tr class="hover:bg-base-200 cursor-pointer" (click)="onRowClick(record.id)">
-              @for (column of config().showColumns; track column) {
+              @for (column of config().showColumns; track column; let first = $first) {
                 <td>
-                  @if (getProperty(column); as property) {
+                  @if (first) {
+                    <a
+                      [routerLink]="['/view', entityKey(), record.id]"
+                      class="link link-hover"
+                      (click)="$event.stopPropagation()">
+                      @if (getProperty(column); as property) {
+                        <app-display-property
+                          [property]="property"
+                          [datum]="record[column]"
+                          [showLabel]="false"
+                        />
+                      } @else {
+                        {{ record[column] }}
+                      }
+                      @if (record[column] === null || record[column] === undefined || record[column] === '') {
+                        <span class="sr-only">{{ 'a11y.view_record' | translate:{ id: record.id } }}</span>
+                      }
+                    </a>
+                  } @else if (getProperty(column); as property) {
                     <app-display-property
                       [property]="property"
                       [datum]="record[column]"

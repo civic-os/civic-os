@@ -993,12 +993,11 @@ export class ListPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle keyboard navigation on table rows
+   * Handle row click - navigate to the record's detail page (mouse convenience).
+   * Keyboard users use the real first-cell link instead of the row.
    */
-  public onRowKeyPress(event: KeyboardEvent, recordId: number) {
+  public onRowClick(recordId: number) {
     if (this.isSummaryView()) return;
-    // Prevent default scrolling behavior for space key
-    event.preventDefault();
     if (this.entityKey) {
       this.router.navigate(['/view', this.entityKey, recordId]);
     }

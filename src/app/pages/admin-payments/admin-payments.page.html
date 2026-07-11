@@ -103,34 +103,38 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'created_at' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('created_at')">
                   Date
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('created_at') }}</span>
+                </button>
               </th>
-              <th>User</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('description')">
-                <div class="flex items-center gap-1">
+              <th scope="col">User</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'description' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('description')">
                   Description
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('description') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('description') }}</span>
+                </button>
               </th>
-              <th>Entity</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('effective_status')">
-                <div class="flex items-center gap-1">
+              <th scope="col">Entity</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'effective_status' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('effective_status')">
                   Status
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('effective_status') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('effective_status') }}</span>
+                </button>
               </th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('amount')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'amount' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('amount')">
                   Amount
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('amount') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('amount') }}</span>
+                </button>
               </th>
-              <th>Refund</th>
-              <th>Actions</th>
+              <th scope="col">Refund</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>

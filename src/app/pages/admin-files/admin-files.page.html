@@ -154,34 +154,38 @@
                   [checked]="isAllSelected()"
                   (change)="toggleSelectAll()" />
               </th>
-              <th>Preview</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('file_name')">
-                <div class="flex items-center gap-1">
+              <th scope="col">Preview</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'file_name' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('file_name')">
                   Filename
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('file_name') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('file_name') }}</span>
+                </button>
               </th>
-              <th>Entity</th>
+              <th scope="col">Entity</th>
               @if (currentEntityType() !== 'all') {
-                <th>Linked Property</th>
+                <th scope="col">Linked Property</th>
               }
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('file_type')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'file_type' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('file_type')">
                   Type
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('file_type') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('file_type') }}</span>
+                </button>
               </th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('file_size')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'file_size' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('file_size')">
                   Size
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('file_size') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('file_size') }}</span>
+                </button>
               </th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'created_at' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('created_at')">
                   Uploaded
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('created_at') }}</span>
+                </button>
               </th>
             </tr>
           </thead>

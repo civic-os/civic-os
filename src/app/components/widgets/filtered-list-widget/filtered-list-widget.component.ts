@@ -17,9 +17,10 @@
 
 import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DashboardWidget, FilteredListWidgetConfig } from '../../../interfaces/dashboard';
 import { DisplayPropertyComponent } from '../../display-property/display-property.component';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { SchemaEntityProperty, EntityData } from '../../../interfaces/entity';
@@ -35,7 +36,7 @@ import { DataQuery } from '../../../interfaces/query';
  */
 @Component({
   selector: 'app-filtered-list-widget',
-  imports: [CommonModule, DisplayPropertyComponent],
+  imports: [CommonModule, DisplayPropertyComponent, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './filtered-list-widget.component.html',
   styleUrl: './filtered-list-widget.component.css'
@@ -155,11 +156,16 @@ export class FilteredListWidgetComponent {
   }
 
   /**
-   * Navigate to detail page when row is clicked
+   * Entity key used for detail-page navigation (from widget or config).
+   */
+  entityKey = computed<string>(() => this.widget().entity_key || (this.config() as any).entityKey);
+
+  /**
+   * Navigate to detail page when row is clicked (mouse convenience).
+   * Keyboard users use the real first-cell link instead of the row.
    */
   onRowClick(recordId: number): void {
-    const entityKey = this.widget().entity_key || (this.config() as any).entityKey;
-    this.router.navigate(['/view', entityKey, recordId]);
+    this.router.navigate(['/view', this.entityKey(), recordId]);
   }
 
   /**

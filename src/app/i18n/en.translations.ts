@@ -33,6 +33,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.user_menu': 'User menu',
   'a11y.select_dashboard': 'Select dashboard',
   'a11y.search': 'Search',
+  'a11y.view_record': 'View record {{id}}',
   'a11y.add_photos': 'Add photos',
   'a11y.weekday_SU': 'Sunday',
   'a11y.weekday_MO': 'Monday',
