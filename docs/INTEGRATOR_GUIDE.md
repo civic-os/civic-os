@@ -77,6 +77,8 @@ INSERT INTO metadata.entities (
 );
 ```
 
+**Accessibility note**: Calendar events are keyboard-focusable and activatable (Tab to an event, then Enter/Space to open it) via FullCalendar's `eventInteractive` option. FullCalendar has no keyboard path for drag-selecting a time range to create a new event, so keyboard and screen-reader users create and edit time slots through the standard datetime inputs on the Create/Edit pages — the calendar is an equivalent visualization of records that remain fully reachable via the List and Detail pages.
+
 ---
 
 **`metadata.properties`** - Controls how individual columns are displayed and behave
