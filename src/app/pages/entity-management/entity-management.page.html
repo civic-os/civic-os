@@ -24,15 +24,35 @@
       class="space-y-2"
       cdkDropList
       (cdkDropListDropped)="onDrop($event)">
-      @for (entity of entities(); track entity.table_name) {
+      @for (entity of entities(); track entity.table_name; let i = $index) {
         <div
           class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
           cdkDrag>
           <div class="card-body p-4">
             <div class="flex items-center gap-4">
-              <!-- Drag Handle -->
-              <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+              <!-- Drag Handle + keyboard move buttons -->
+              <div class="flex-shrink-0 flex items-center gap-1">
+                <div class="cursor-move" cdkDragHandle>
+                  <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                </div>
+                <div class="flex flex-col">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs px-1"
+                    [disabled]="i === 0"
+                    (click)="moveUp(i)"
+                    [attr.aria-label]="'a11y.move_up' | translate:{ name: getEntityName(entity) }">
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs px-1"
+                    [disabled]="i === entities().length - 1"
+                    (click)="moveDown(i)"
+                    [attr.aria-label]="'a11y.move_down' | translate:{ name: getEntityName(entity) }">
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Entity Info -->
@@ -210,5 +230,8 @@
         </div>
       }
     </div>
+
+    <!-- Shared reorder announcement for screen readers (D3) -->
+    <div class="sr-only" aria-live="polite">{{ reorderAnnouncement() }}</div>
   }
 </div>

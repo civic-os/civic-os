@@ -105,6 +105,11 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.view_error': 'View error',
   'a11y.retry': 'Retry',
   'a11y.loading': 'Loading',
+  'a11y.move_up': 'Move {{name}} up',
+  'a11y.move_down': 'Move {{name}} down',
+  'a11y.move_earlier': 'Move {{name}} earlier',
+  'a11y.move_later': 'Move {{name}} later',
+  'a11y.moved_to_position': '{{name}} moved to position {{i}} of {{n}}',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',

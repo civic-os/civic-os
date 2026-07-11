@@ -23,6 +23,8 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
 import { EntityManagementService } from '../../services/entity-management.service';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { SchemaEntityTable } from '../../interfaces/entity';
 import { debounceTime, Subject, switchMap, of, map, catchError, forkJoin } from 'rxjs';
 
@@ -43,13 +45,14 @@ interface EntityData {
 @Component({
   selector: 'app-entity-management',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, TranslatePipe],
   templateUrl: './entity-management.page.html',
   styleUrl: './entity-management.page.css'
 })
 export class EntityManagementPage {
   private schemaService = inject(SchemaService);
   private entityManagementService = inject(EntityManagementService);
+  private translation = inject(TranslationService);
 
   // Mutable signals for user interactions
   entities = signal<EntityRow[]>([]);
@@ -57,6 +60,8 @@ export class EntityManagementPage {
   savingStates = signal<Map<string, boolean>>(new Map());
   savedStates = signal<Map<string, boolean>>(new Map()); // Track successful saves
   fadingStates = signal<Map<string, boolean>>(new Map()); // Track fading checkmarks
+  /** Shared aria-live announcement for keyboard reorder (D3) */
+  reorderAnnouncement = signal('');
 
   private saveSubjects = new Map<string, Subject<void>>();
 
@@ -151,6 +156,50 @@ export class EntityManagementPage {
   onDrop(event: CdkDragDrop<EntityRow[]>) {
     const entities = [...this.entities()];
     moveItemInArray(entities, event.previousIndex, event.currentIndex);
+    this.persistOrder(entities);
+  }
+
+  /**
+   * Keyboard-accessible reorder (D3). Moves the entity at `index` by `delta`
+   * (-1 = up, +1 = down), reusing the same persistence path as drag-drop, and
+   * announces the new position via the shared aria-live region.
+   */
+  moveUp(index: number) {
+    this.moveEntity(index, -1);
+  }
+
+  moveDown(index: number) {
+    this.moveEntity(index, 1);
+  }
+
+  private moveEntity(index: number, delta: number) {
+    const entities = [...this.entities()];
+    const target = index + delta;
+    if (target < 0 || target >= entities.length) return;
+    moveItemInArray(entities, index, target);
+    this.persistOrder(entities);
+
+    const moved = entities[target];
+    const name = this.getEntityName(moved);
+    this.reorderAnnouncement.set(
+      this.translation.get('a11y.moved_to_position', {
+        name,
+        i: target + 1,
+        n: entities.length
+      })
+    );
+  }
+
+  /** Display name used for reorder aria-labels/announcements. */
+  getEntityName(entity: EntityRow): string {
+    return entity.customDisplayName || entity.display_name || entity.table_name;
+  }
+
+  /**
+   * Apply a reordered array and persist new sort_order for every entity.
+   * Shared by drag-drop (onDrop) and keyboard move (moveEntity).
+   */
+  private persistOrder(entities: EntityRow[]) {
     this.entities.set(entities);
 
     // Update sort_order for all entities based on new positions

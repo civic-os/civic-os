@@ -76,11 +76,31 @@
           <!-- Remove button overlay -->
           <button
             type="button"
-            class="absolute top-1 end-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 transition-opacity"
+            class="absolute top-1 end-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
             (click)="removeImage(image); $event.stopPropagation()"
-            aria-label="Remove image">
+            [attr.aria-label]="('action.remove' | translate) + ' ' + getImageName(image, i)">
             <span class="material-symbols-outlined text-xs" aria-hidden="true">close</span>
           </button>
+
+          <!-- Keyboard reorder buttons (D3) — always visible for keyboard/SR users -->
+          <div class="absolute top-1 start-1 flex flex-col gap-0.5">
+            <button
+              type="button"
+              class="btn btn-circle btn-ghost btn-xs bg-base-100/80"
+              [disabled]="i === 0"
+              (click)="moveEarlier(i); $event.stopPropagation()"
+              [attr.aria-label]="'a11y.move_earlier' | translate:{ name: getImageName(image, i) }">
+              <span class="material-symbols-outlined text-xs" aria-hidden="true">arrow_upward</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-circle btn-ghost btn-xs bg-base-100/80"
+              [disabled]="i === images().length - 1"
+              (click)="moveLater(i); $event.stopPropagation()"
+              [attr.aria-label]="'a11y.move_later' | translate:{ name: getImageName(image, i) }">
+              <span class="material-symbols-outlined text-xs" aria-hidden="true">arrow_downward</span>
+            </button>
+          </div>
 
           <!-- Sort order badge -->
           <div class="absolute bottom-1 start-1 badge badge-sm badge-ghost opacity-0 group-hover:opacity-80 transition-opacity">
@@ -93,6 +113,9 @@
       }
     </div>
   }
+
+  <!-- Shared reorder announcement for screen readers (D3) -->
+  <div class="sr-only" aria-live="polite">{{ reorderAnnouncement() }}</div>
 
   <!-- Lightbox -->
   <app-gallery-lightbox

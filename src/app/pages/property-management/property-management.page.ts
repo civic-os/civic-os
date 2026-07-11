@@ -23,6 +23,7 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
 import { PropertyManagementService } from '../../services/property-management.service';
+import { TranslationService } from '../../services/translation.service';
 import { SchemaEntityTable, SchemaEntityProperty, StaticText } from '../../interfaces/entity';
 import { ApiResponse } from '../../interfaces/api';
 import { debounceTime, Subject, switchMap, of, map, catchError, Observable, combineLatest } from 'rxjs';
@@ -87,6 +88,10 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class PropertyManagementPage {
   private schemaService = inject(SchemaService);
   private propertyManagementService = inject(PropertyManagementService);
+  private translation = inject(TranslationService);
+
+  /** Shared aria-live announcement for keyboard reorder (D3) */
+  reorderAnnouncement = signal('');
 
   // Mutable signals for user interactions
   selectedEntity = signal<SchemaEntityTable | undefined>(undefined);
@@ -194,6 +199,54 @@ export class PropertyManagementPage {
   onDrop(event: CdkDragDrop<ManageableItem[]>) {
     const items = [...this.items()];
     moveItemInArray(items, event.previousIndex, event.currentIndex);
+    this.persistOrder(items);
+  }
+
+  /**
+   * Keyboard-accessible reorder (D3). Moves the item at `index` by `delta`
+   * (-1 = up, +1 = down), reusing the same persistence path as drag-drop, and
+   * announces the new position via the shared aria-live region.
+   */
+  moveUp(index: number) {
+    this.moveItem(index, -1);
+  }
+
+  moveDown(index: number) {
+    this.moveItem(index, 1);
+  }
+
+  private moveItem(index: number, delta: number) {
+    const items = [...this.items()];
+    const target = index + delta;
+    if (target < 0 || target >= items.length) return;
+    moveItemInArray(items, index, target);
+    this.persistOrder(items);
+
+    const name = this.getItemName(items[target]);
+    this.reorderAnnouncement.set(
+      this.translation.get('a11y.moved_to_position', {
+        name,
+        i: target + 1,
+        n: items.length
+      })
+    );
+  }
+
+  /** Display name used for reorder aria-labels/announcements. */
+  getItemName(item: ManageableItem): string {
+    if (isPropertyRow(item)) {
+      return item.customDisplayName || item.display_name || item.column_name;
+    }
+    const preview = (item.content || '').trim().slice(0, 40);
+    return preview ? `Static text: ${preview}` : 'Static text';
+  }
+
+  /**
+   * Apply a reordered array and persist new sort_order across both the
+   * properties and static-text tables. Shared by drag-drop (onDrop) and
+   * keyboard move (moveItem).
+   */
+  private persistOrder(items: ManageableItem[]) {
     this.items.set(items);
 
     // Separate updates by type

@@ -54,7 +54,7 @@
           class="space-y-2"
           cdkDropList
           (cdkDropListDropped)="onDrop($event)">
-          @for (item of items(); track isStaticTextRow(item) ? 'st_' + item.id : item.column_name) {
+          @for (item of items(); track isStaticTextRow(item) ? 'st_' + item.id : item.column_name; let i = $index) {
             <!-- Static Text Row -->
             @if (isStaticTextRow(item)) {
               <div
@@ -62,9 +62,29 @@
                 cdkDrag>
                 <div class="card-body p-4">
                   <div class="flex items-center gap-4">
-                    <!-- Drag Handle -->
-                    <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                      <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                    <!-- Drag Handle + keyboard move buttons -->
+                    <div class="flex-shrink-0 flex items-center gap-1">
+                      <div class="cursor-move" cdkDragHandle>
+                        <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === 0"
+                          (click)="moveUp(i)"
+                          [attr.aria-label]="'a11y.move_up' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === items().length - 1"
+                          (click)="moveDown(i)"
+                          [attr.aria-label]="'a11y.move_down' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Static Text Info -->
@@ -191,9 +211,29 @@
                 <!-- Main Row -->
                 <div class="card-body p-4">
                   <div class="flex items-center gap-4">
-                    <!-- Drag Handle -->
-                    <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                      <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                    <!-- Drag Handle + keyboard move buttons -->
+                    <div class="flex-shrink-0 flex items-center gap-1">
+                      <div class="cursor-move" cdkDragHandle>
+                        <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === 0"
+                          (click)="moveUp(i)"
+                          [attr.aria-label]="'a11y.move_up' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === items().length - 1"
+                          (click)="moveDown(i)"
+                          [attr.aria-label]="'a11y.move_down' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Property Info (condensed) -->
@@ -379,5 +419,8 @@
         </div>
       }
     }
+
+    <!-- Shared reorder announcement for screen readers (D3) -->
+    <div class="sr-only" aria-live="polite">{{ reorderAnnouncement() }}</div>
   }
 </div>

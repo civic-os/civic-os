@@ -23,6 +23,7 @@ import { SchemaService } from '../../services/schema.service';
 import { EntityManagementService } from '../../services/entity-management.service';
 import { of, throwError } from 'rxjs';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('EntityManagementPage', () => {
   let component: EntityManagementPage;
@@ -51,6 +52,7 @@ describe('EntityManagementPage', () => {
       imports: [EntityManagementPage],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: EntityManagementService, useValue: mockEntityManagementService }
       ]
@@ -258,6 +260,75 @@ describe('EntityManagementPage', () => {
           expect(component.error()).toBe('Update failed');
           done();
         }, 10);
+      }, 100);
+    });
+  });
+
+  describe('Keyboard Reorder (move buttons)', () => {
+    it('moveDown should reorder entities, persist new order, and announce position', (done) => {
+      mockEntityManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
+      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
+
+      fixture = TestBed.createComponent(EntityManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.moveDown(0); // Move 'Issue' down one position
+
+        expect(component.entities()[0].table_name).toBe('WorkPackage');
+        expect(component.entities()[1].table_name).toBe('Issue');
+        expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+          { table_name: 'WorkPackage', sort_order: 0 },
+          { table_name: 'Issue', sort_order: 1 },
+          { table_name: 'Bid', sort_order: 2 }
+        ]);
+        // Announcement mentions the moved entity's new position (2 of 3)
+        expect(component.reorderAnnouncement()).toContain('2');
+        expect(component.reorderAnnouncement()).toContain('3');
+        done();
+      }, 100);
+    });
+
+    it('moveUp should reorder entities and persist new order', (done) => {
+      mockEntityManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
+      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
+
+      fixture = TestBed.createComponent(EntityManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.moveUp(2); // Move 'Bid' up one position
+
+        expect(component.entities()[1].table_name).toBe('Bid');
+        expect(component.entities()[2].table_name).toBe('WorkPackage');
+        expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+          { table_name: 'Issue', sort_order: 0 },
+          { table_name: 'Bid', sort_order: 1 },
+          { table_name: 'WorkPackage', sort_order: 2 }
+        ]);
+        done();
+      }, 100);
+    });
+
+    it('should not move or persist when already at the boundary', (done) => {
+      mockEntityManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
+      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
+
+      fixture = TestBed.createComponent(EntityManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.moveUp(0); // First item cannot move up
+
+        expect(component.entities()[0].table_name).toBe('Issue');
+        expect(mockEntityManagementService.updateEntitiesOrder).not.toHaveBeenCalled();
+        done();
       }, 100);
     });
   });

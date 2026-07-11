@@ -394,6 +394,68 @@ describe('PropertyManagementPage', () => {
     });
   });
 
+  describe('Keyboard Reorder (move buttons)', () => {
+    it('moveDown should reorder items, persist new sort order, and announce position', (done) => {
+      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
+      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
+      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
+      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
+
+      fixture = TestBed.createComponent(PropertyManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.selectedEntity.set(mockEntities[0]);
+        component.onEntityChange();
+
+        setTimeout(() => {
+          component.moveDown(0); // Move 'title' down one position
+
+          const properties = getPropertyItems(component);
+          expect(properties[0].column_name).toBe('description');
+          expect(properties[1].column_name).toBe('title');
+
+          expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
+            { table_name: 'Issue', column_name: 'description', sort_order: 0 },
+            { table_name: 'Issue', column_name: 'title', sort_order: 1 }
+          ]);
+          expect(component.reorderAnnouncement()).toContain('2');
+          done();
+        }, 10);
+      }, 100);
+    });
+
+    it('moveUp at the top boundary should not reorder or persist', (done) => {
+      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
+      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
+      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
+      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
+      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
+
+      fixture = TestBed.createComponent(PropertyManagementPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      setTimeout(() => {
+        component.selectedEntity.set(mockEntities[0]);
+        component.onEntityChange();
+
+        setTimeout(() => {
+          component.moveUp(0);
+
+          const properties = getPropertyItems(component);
+          expect(properties[0].column_name).toBe('title');
+          expect(mockPropertyManagementService.updatePropertiesOrder).not.toHaveBeenCalled();
+          done();
+        }, 10);
+      }, 100);
+    });
+  });
+
   describe('Metadata Saving', () => {
     it('should save metadata on blur', (done) => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
