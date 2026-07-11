@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { SeriesEditorModalComponent } from './series-editor-modal.component';
@@ -44,6 +45,7 @@ describe('SeriesEditorModalComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SeriesEditorModalComponent],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         provideHttpClient(),
         { provide: SchemaService, useValue: mockSchemaService },

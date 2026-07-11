@@ -326,7 +326,8 @@
     [closeOnBackdrop]="true"
     [closeOnEscape]="true"
     (closed)="dismissIncompletePrompt()"
-    size="md">
+    size="md"
+    [label]="'profile.complete_required' | translate">
     <h3 class="font-bold text-lg mb-2">{{ 'profile.complete_required' | translate }}</h3>
     <p class="mb-4">{{ 'profile.complete_required_description' | translate }}</p>
     <ul class="space-y-2 mb-4">

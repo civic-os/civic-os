@@ -1,4 +1,4 @@
-<cos-modal [isOpen]="isOpen()" (closed)="close()" size="xl">
+<cos-modal [isOpen]="isOpen()" (closed)="close()" size="xl" [label]="currentImage()?.file_name || ('a11y.image_viewer' | translate)">
   <!-- Header -->
   <div class="flex justify-between items-center mb-4">
     <h3 class="font-bold text-lg">{{ currentImage()?.file_name }}</h3>

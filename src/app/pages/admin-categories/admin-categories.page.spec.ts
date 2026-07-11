@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { AdminCategoriesPage } from './admin-categories.page';
@@ -52,6 +53,7 @@ describe('AdminCategoriesPage', () => {
     await TestBed.configureTestingModule({
       imports: [AdminCategoriesPage],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         { provide: CategoryAdminService, useValue: mockCategoryAdmin },
         { provide: SchemaService, useValue: mockSchema }

@@ -5,13 +5,15 @@
     (click)="close()"
     role="dialog"
     aria-modal="true"
-    aria-label="Image gallery viewer">
+    [attr.aria-label]="'a11y.image_gallery_viewer' | translate"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
 
     <!-- Close button -->
     <button
       class="absolute top-4 end-4 btn btn-circle btn-ghost text-white z-10"
       (click)="close()"
-      aria-label="Close gallery">
+      [attr.aria-label]="'a11y.close_gallery' | translate">
       <span class="material-symbols-outlined text-2xl">close</span>
     </button>
 
@@ -25,7 +27,7 @@
       <button
         class="absolute start-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
         (click)="prev(); $event.stopPropagation()"
-        aria-label="Previous image">
+        [attr.aria-label]="'a11y.previous_image' | translate">
         <span class="material-symbols-outlined text-3xl">{{ isRtl() ? 'chevron_right' : 'chevron_left' }}</span>
       </button>
     }
@@ -35,7 +37,7 @@
       <button
         class="absolute end-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost text-white z-10"
         (click)="next(); $event.stopPropagation()"
-        aria-label="Next image">
+        [attr.aria-label]="'a11y.next_image' | translate">
         <span class="material-symbols-outlined text-3xl">{{ isRtl() ? 'chevron_left' : 'chevron_right' }}</span>
       </button>
     }
@@ -46,7 +48,7 @@
         <!-- Image -->
         <img
           [src]="getImageUrl(image)"
-          [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
+          [alt]="image.alt_text || image.file?.file_name || ('a11y.gallery_image' | translate)"
           class="not-prose max-h-[80vh] max-w-[90vw] object-contain rounded"
         />
 

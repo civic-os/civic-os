@@ -33,6 +33,7 @@ import { SeriesGroup, Series, SchemaEntityProperty, EntityPropertyType } from '.
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { SchemaService } from '../../services/schema.service';
 import { RecurringService } from '../../services/recurring.service';
 import { forkJoin, of } from 'rxjs';
@@ -69,11 +70,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg">
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg" [label]="'a11y.edit_recurring_series' | translate">
       <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
         <span class="material-symbols-outlined">edit</span>
         Edit Recurring Series

@@ -8,9 +8,11 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { GalleryImage } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
 import { LocaleService } from '../../services/locale.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Full-screen lightbox for gallery image viewing with keyboard navigation.
@@ -37,6 +39,7 @@ import { LocaleService } from '../../services/locale.service';
 @Component({
   selector: 'app-gallery-lightbox',
   standalone: true,
+  imports: [A11yModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gallery-lightbox.component.html'
 })
@@ -99,12 +102,15 @@ export class GalleryLightboxComponent {
         this.close();
         break;
       case 'ArrowLeft':
+        // Match the key direction to the visible chevron direction. In RTL the
+        // start-side (visually right) chevron points to "next", so ArrowLeft
+        // advances to the next image instead of the previous one.
         event.preventDefault();
-        this.prev();
+        this.isRtl() ? this.next() : this.prev();
         break;
       case 'ArrowRight':
         event.preventDefault();
-        this.next();
+        this.isRtl() ? this.prev() : this.next();
         break;
     }
   }

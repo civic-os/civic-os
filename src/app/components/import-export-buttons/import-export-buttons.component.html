@@ -37,7 +37,7 @@
 }
 
 <!-- Export Options Modal (shown when entity has notes enabled) -->
-<cos-modal [isOpen]="showExportModal()" (closed)="closeExportModal()" size="sm">
+<cos-modal [isOpen]="showExportModal()" (closed)="closeExportModal()" size="sm" [label]="('action.export' | translate) + ' ' + entity.display_name">
   <h3 class="font-bold text-lg mb-4">{{ 'action.export' | translate }} {{ entity.display_name }}</h3>
 
   <div class="form-control mb-4">

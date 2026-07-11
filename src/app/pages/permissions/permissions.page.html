@@ -257,7 +257,7 @@
   }
 
   <!-- Delete Role Modal -->
-  <cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteRoleModal()" size="sm">
+  <cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteRoleModal()" size="sm" [label]="'a11y.delete_role' | translate">
     <h3 class="font-bold text-lg mb-4">Delete Role</h3>
     <p>Are you sure you want to delete the selected role?</p>
     <p class="text-sm text-base-content/60 mt-2">
@@ -279,7 +279,7 @@
   </cos-modal>
 
   <!-- Create Role Modal -->
-  <cos-modal [isOpen]="showCreateModal()" (closed)="closeCreateRoleModal()" size="sm">
+  <cos-modal [isOpen]="showCreateModal()" (closed)="closeCreateRoleModal()" size="sm" [label]="'a11y.create_role' | translate">
     <h3 class="font-bold text-lg mb-4">Create New Role</h3>
 
     <!-- Error Alert -->

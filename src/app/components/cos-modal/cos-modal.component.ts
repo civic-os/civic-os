@@ -72,6 +72,12 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
   /** Whether pressing ESC closes the modal */
   closeOnEscape = input<boolean>(true);
 
+  /**
+   * Accessible name for the dialog. Should match the modal's visible heading.
+   * Applied as `aria-label` so screen readers announce a name for the dialog.
+   */
+  label = input<string>();
+
   /** Emitted when the modal should be closed */
   closed = output<void>();
 
@@ -83,9 +89,6 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
 
   /** Stored scroll position for restoration after close */
   private scrollY = 0;
-
-  /** Unique ID for ARIA labelling */
-  readonly titleId = `cos-modal-title-${Math.random().toString(36).slice(2)}`;
 
   /** Computed CSS class for size variant */
   sizeClass = computed(() => {

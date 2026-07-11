@@ -239,7 +239,7 @@
 </div>
 
 <!-- Edit/Create Translation Modal -->
-<cos-modal [isOpen]="showEditModal()" (closed)="closeEditModal()">
+<cos-modal [isOpen]="showEditModal()" (closed)="closeEditModal()" [label]="(editingTranslation() ? 'a11y.edit_translation' : 'a11y.add_translation') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingTranslation() ? 'Edit Translation' : 'Add Translation' }}
   </h3>
@@ -303,7 +303,7 @@
 </cos-modal>
 
 <!-- Delete Confirmation Modal -->
-<cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteModal()" size="sm">
+<cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteModal()" size="sm" [label]="'a11y.delete_translation' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Translation</h3>
   <p>Are you sure you want to delete the translation for:</p>
   <p class="mt-2"><code class="bg-base-200 px-1 rounded text-sm">{{ deletingTranslation()?.source_key }}</code></p>

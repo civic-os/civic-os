@@ -37,6 +37,7 @@ import { SeriesVersionTimelineComponent } from '../series-version-timeline/serie
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RecurringService } from '../../services/recurring.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
@@ -86,7 +87,8 @@ type EditTab = 'info' | 'schedule' | 'template';
     SeriesVersionTimelineComponent,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -386,7 +388,7 @@ type EditTab = 'info' | 'schedule' | 'template';
     }
 
     <!-- Unified Edit Modal -->
-    <cos-modal [isOpen]="showEditModal()" (closed)="cancelEdit()" size="lg">
+    <cos-modal [isOpen]="showEditModal()" (closed)="cancelEdit()" size="lg" [label]="'a11y.edit_series' | translate">
       <h3 class="font-bold text-lg mb-4">Edit Series</h3>
 
           <!-- Tab Navigation (DaisyUI 5 lift style) -->

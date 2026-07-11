@@ -119,7 +119,7 @@
   }
 
   <!-- Delete Confirmation Modal -->
-  <cos-modal [isOpen]="!!deletingTemplate()" (closed)="closeModals()" size="sm">
+  <cos-modal [isOpen]="!!deletingTemplate()" (closed)="closeModals()" size="sm" [label]="'a11y.delete_template' | translate">
     @if (deletingTemplate()) {
       <h3 class="font-bold text-lg mb-4">Delete Template?</h3>
       <p class="mb-4">
@@ -134,7 +134,7 @@
   </cos-modal>
 
   <!-- Create/Edit Template Modal -->
-  <cos-modal [isOpen]="showCreateModal() || !!editingTemplate()" (closed)="closeModals()" size="xl">
+  <cos-modal [isOpen]="showCreateModal() || !!editingTemplate()" (closed)="closeModals()" size="xl" [label]="(editingTemplate() ? 'a11y.edit_template' : 'a11y.create_template') | translate">
     <h3 class="font-bold text-lg mb-4">
       {{ editingTemplate() ? 'Edit Template' : 'Create Template' }}
     </h3>

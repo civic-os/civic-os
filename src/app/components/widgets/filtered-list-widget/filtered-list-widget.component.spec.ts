@@ -20,6 +20,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { FilteredListWidgetComponent } from './filtered-list-widget.component';
+import { provideTranslationTesting } from '../../../testing/translation-testing';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
@@ -112,6 +113,7 @@ describe('FilteredListWidgetComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FilteredListWidgetComponent],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService },

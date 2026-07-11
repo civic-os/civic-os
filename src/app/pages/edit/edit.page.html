@@ -213,7 +213,7 @@
       }
     }
     <!-- Success Modal (also used for coordinated save progress, v0.46.0) -->
-    <cos-modal [isOpen]="showSuccessModal()" (closed)="closeSuccessModal()" size="sm">
+    <cos-modal [isOpen]="showSuccessModal()" (closed)="closeSuccessModal()" size="sm" [label]="'form.success' | translate">
       @if (saveSteps(); as steps) {
         <!-- Coordinated save: show step progress -->
         <h3 class="font-bold text-lg mb-4">
@@ -250,7 +250,7 @@
     </cos-modal>
 
     <!-- Error Modal -->
-    <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm">
+    <cos-modal [isOpen]="showErrorModal()" (closed)="closeErrorModal()" size="sm" [label]="'state.error' | translate">
       <h3 class="font-bold text-lg mb-4">
         <span class="material-symbols-outlined text-error align-middle me-2">error</span>
         {{ 'state.error' | translate }}

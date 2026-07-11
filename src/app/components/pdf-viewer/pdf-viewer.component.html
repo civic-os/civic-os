@@ -1,4 +1,4 @@
-<cos-modal [isOpen]="isOpen()" (closed)="close()" size="xl">
+<cos-modal [isOpen]="isOpen()" (closed)="close()" size="xl" [label]="currentPdf()?.file_name || ('a11y.pdf_document' | translate)">
   <!-- Header -->
   <div class="flex justify-between items-center mb-4">
     <h3 class="font-bold text-lg">{{ currentPdf()?.file_name }}</h3>
@@ -9,6 +9,7 @@
     @if (currentPdf()) {
       <iframe
         [src]="getSanitizedPdfUrl()"
+        [title]="currentPdf()?.file_name || ('a11y.pdf_document' | translate)"
         class="w-full h-full"
         type="application/pdf">
         <!-- Fallback for browsers without PDF support -->

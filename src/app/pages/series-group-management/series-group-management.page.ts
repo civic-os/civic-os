@@ -26,6 +26,7 @@ import { AuthService } from '../../services/auth.service';
 import { SeriesGroupDetailComponent } from '../../components/series-group-detail/series-group-detail.component';
 import { CreateSeriesWizardComponent } from '../../components/create-series-wizard/create-series-wizard.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -48,7 +49,8 @@ import { catchError, map } from 'rxjs/operators';
     FormsModule,
     SeriesGroupDetailComponent,
     CreateSeriesWizardComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -222,7 +224,7 @@ import { catchError, map } from 'rxjs/operators';
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <cos-modal [isOpen]="showDeleteModal()" (closed)="cancelDelete()" size="sm">
+    <cos-modal [isOpen]="showDeleteModal()" (closed)="cancelDelete()" size="sm" [label]="'a11y.delete_recurring_series' | translate">
       <h3 class="font-bold text-lg">Delete Recurring Series?</h3>
       <p class="py-4">
         This will permanently delete the series "{{ groupToDelete()?.display_name }}"

@@ -2,7 +2,8 @@
   [isOpen]="isOpen()"
   (closed)="closeModal()"
   size="xl"
-  [closeOnBackdrop]="currentStep() === 'choose' || currentStep() === 'results'">
+  [closeOnBackdrop]="currentStep() === 'choose' || currentStep() === 'results'"
+  [label]="customImport ? customImport.title : ('import_modal.title' | translate:{ entity: entity?.display_name || '' })">
   <h3 class="font-bold text-lg mb-4">{{ customImport ? customImport.title : ('import_modal.title' | translate:{ entity: entity?.display_name || '' }) }}</h3>
 
   <!-- Error Alert -->

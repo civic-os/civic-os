@@ -19,6 +19,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { APP_VERSION } from '../../config/version';
 import { getApiDocsUrl } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * About modal component displaying application version and information.
@@ -31,7 +32,7 @@ import { CosModalComponent } from '../cos-modal/cos-modal.component';
  */
 @Component({
   selector: 'app-about-modal',
-  imports: [CosModalComponent],
+  imports: [CosModalComponent, TranslatePipe],
   templateUrl: './about-modal.component.html',
   styleUrl: './about-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -74,6 +75,7 @@ describe('AdminPaymentsPage', () => {
     await TestBed.configureTestingModule({
       imports: [AdminPaymentsPage],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),

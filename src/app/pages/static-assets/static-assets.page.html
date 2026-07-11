@@ -127,7 +127,8 @@
   [isOpen]="showCreateModal()"
   (closed)="closeModals()"
   [size]="cropStep().startsWith('crop') ? 'lg' : 'md'"
-  [closeOnBackdrop]="!saving()">
+  [closeOnBackdrop]="!saving()"
+  [label]="'a11y.image_asset' | translate">
 
   <!-- Close button (always visible unless saving) -->
   @if (!saving()) {
@@ -316,7 +317,8 @@
   [isOpen]="!!deletingAsset()"
   (closed)="closeModals()"
   size="sm"
-  [closeOnBackdrop]="!deleteLoading()">
+  [closeOnBackdrop]="!deleteLoading()"
+  [label]="'a11y.delete_asset' | translate">
   @if (deletingAsset()) {
     <h3 class="font-bold text-lg mb-4">Delete Asset?</h3>
 

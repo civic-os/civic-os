@@ -5,7 +5,7 @@
     [class.cos-modal-open]="animationReady()"
     role="dialog"
     aria-modal="true"
-    [attr.aria-labelledby]="titleId"
+    [attr.aria-label]="label() || null"
     (keydown)="onKeydown($event)"
     cdkTrapFocus
     [cdkTrapFocusAutoCapture]="true">

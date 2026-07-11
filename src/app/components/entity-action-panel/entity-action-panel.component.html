@@ -21,7 +21,8 @@
   [isOpen]="showActionModal()"
   (closed)="closeActionModal()"
   [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
-  [closeOnBackdrop]="!actionLoading()">
+  [closeOnBackdrop]="!actionLoading()"
+  [label]="currentAction()?.display_name">
   @if (currentAction(); as action) {
     <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
 

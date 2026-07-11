@@ -98,7 +98,8 @@
           [isOpen]="showGuidedFormSuccessModal()"
           (closed)="onGuidedFormSuccessViewRecord()"
           size="sm"
-          [closeOnBackdrop]="true">
+          [closeOnBackdrop]="true"
+          [label]="'guided_form.submitted' | translate">
           <h3 class="font-bold text-lg mb-4">
             <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
             {{ 'guided_form.submitted' | translate }}
@@ -254,7 +255,8 @@
           [isOpen]="showDeleteModal()"
           (closed)="closeDeleteModal()"
           size="sm"
-          [closeOnBackdrop]="!deleteLoading()">
+          [closeOnBackdrop]="!deleteLoading()"
+          [label]="('action.delete' | translate) + ' ' + entity.display_name">
           <h3 class="font-bold text-lg mb-4">{{ 'action.delete' | translate }} {{ entity.display_name }}?</h3>
 
           <!-- Error Alert -->
@@ -315,7 +317,8 @@
           [isOpen]="showActionModal()"
           (closed)="closeActionModal()"
           [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
-          [closeOnBackdrop]="!actionLoading()">
+          [closeOnBackdrop]="!actionLoading()"
+          [label]="currentAction()?.display_name">
           @if (currentAction(); as action) {
             <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
 

@@ -19,13 +19,14 @@ import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@a
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { CategoryAdminService, CategoryGroup, CategoryValue } from '../../services/category-admin.service';
 import { SchemaService } from '../../services/schema.service';
 
 @Component({
   selector: 'app-admin-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, CosModalComponent],
+  imports: [CommonModule, FormsModule, CosModalComponent, TranslatePipe],
   templateUrl: './admin-categories.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

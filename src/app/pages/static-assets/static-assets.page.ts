@@ -20,6 +20,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage, CropperPosition } from 'ngx-image-cropper';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { StaticAssetsService, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from '../../services/static-assets.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { StaticAsset, CropState, CropCoordinates, CropBreakpoint, CropPresetProfile } from '../../interfaces/dashboard';
@@ -30,7 +31,7 @@ type CropStep = 'upload' | 'profile' | 'crop-desktop' | 'crop-tablet' | 'crop-mo
 @Component({
   selector: 'app-static-assets',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageCropperComponent, CosModalComponent],
+  imports: [CommonModule, FormsModule, ImageCropperComponent, CosModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './static-assets.page.html',
   styleUrl: './static-assets.page.css'

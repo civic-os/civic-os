@@ -132,7 +132,7 @@
 </div>
 
 <!-- Group Create/Edit Modal -->
-<cos-modal [isOpen]="showGroupModal()" (closed)="closeGroupModal()">
+<cos-modal [isOpen]="showGroupModal()" (closed)="closeGroupModal()" [label]="(editingGroup() ? 'a11y.edit_category_group' : 'a11y.create_category_group') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingGroup() ? 'Edit Category Group' : 'Create Category Group' }}
   </h3>
@@ -189,7 +189,7 @@
 </cos-modal>
 
 <!-- Category Create/Edit Modal -->
-<cos-modal [isOpen]="showCategoryModal()" (closed)="closeCategoryModal()">
+<cos-modal [isOpen]="showCategoryModal()" (closed)="closeCategoryModal()" [label]="(editingCategory() ? 'a11y.edit_category' : 'a11y.create_category') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingCategory() ? 'Edit Category' : 'Create Category' }}
   </h3>
@@ -268,7 +268,7 @@
 </cos-modal>
 
 <!-- Delete Group Confirmation -->
-<cos-modal [isOpen]="showDeleteGroupModal()" (closed)="closeDeleteGroupModal()" size="sm">
+<cos-modal [isOpen]="showDeleteGroupModal()" (closed)="closeDeleteGroupModal()" size="sm" [label]="'a11y.delete_category_group' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Category Group</h3>
   <p>Are you sure you want to delete the category group <strong>{{ selectedEntityType() }}</strong>?</p>
   <p class="text-sm text-base-content/60 mt-2">This will also delete all categories in this group. This action cannot be undone.</p>
@@ -287,7 +287,7 @@
 </cos-modal>
 
 <!-- Delete Category Confirmation -->
-<cos-modal [isOpen]="showDeleteCategoryModal()" (closed)="closeDeleteCategoryModal()" size="sm">
+<cos-modal [isOpen]="showDeleteCategoryModal()" (closed)="closeDeleteCategoryModal()" size="sm" [label]="'a11y.delete_category' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Category</h3>
   <p>Are you sure you want to delete the category <strong>{{ deletingCategory()?.display_name }}</strong>?</p>
   <p class="text-sm text-base-content/60 mt-2">Records referencing this category may be affected.</p>

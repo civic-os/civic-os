@@ -23,6 +23,7 @@ import { Observable, Subject, Subscription, debounceTime } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { utils, writeFileXLSX, WorkBook } from 'xlsx';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ImportModalComponent } from '../../components/import-modal/import-modal.component';
 import { CustomImportConfig, CustomImportResult } from '../../interfaces/import';
 import { TranslationAdminService, Translation, MissingTranslation, UpsertTranslation } from '../../services/translation-admin.service';
@@ -42,7 +43,7 @@ const SOURCE_TYPES = [
 @Component({
   selector: 'app-admin-translations',
   standalone: true,
-  imports: [CommonModule, FormsModule, CosModalComponent, ImportModalComponent],
+  imports: [CommonModule, FormsModule, CosModalComponent, ImportModalComponent, TranslatePipe],
   templateUrl: './admin-translations.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

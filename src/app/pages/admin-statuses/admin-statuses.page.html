@@ -234,7 +234,7 @@
 </div>
 
 <!-- Type Create/Edit Modal -->
-<cos-modal [isOpen]="showTypeModal()" (closed)="closeTypeModal()">
+<cos-modal [isOpen]="showTypeModal()" (closed)="closeTypeModal()" [label]="(editingType() ? 'a11y.edit_status_type' : 'a11y.create_status_type') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingType() ? 'Edit Status Type' : 'Create Status Type' }}
   </h3>
@@ -291,7 +291,7 @@
 </cos-modal>
 
 <!-- Status Create/Edit Modal -->
-<cos-modal [isOpen]="showStatusModal()" (closed)="closeStatusModal()">
+<cos-modal [isOpen]="showStatusModal()" (closed)="closeStatusModal()" [label]="(editingStatus() ? 'a11y.edit_status' : 'a11y.create_status') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingStatus() ? 'Edit Status' : 'Create Status' }}
   </h3>
@@ -388,7 +388,7 @@
 </cos-modal>
 
 <!-- Transition Create/Edit Modal -->
-<cos-modal [isOpen]="showTransitionModal()" (closed)="closeTransitionModal()">
+<cos-modal [isOpen]="showTransitionModal()" (closed)="closeTransitionModal()" [label]="(editingTransition() ? 'a11y.edit_transition' : 'a11y.create_transition') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingTransition() ? 'Edit Transition' : 'Create Transition' }}
   </h3>
@@ -487,7 +487,7 @@
 </cos-modal>
 
 <!-- Delete Type Confirmation -->
-<cos-modal [isOpen]="showDeleteTypeModal()" (closed)="closeDeleteTypeModal()" size="sm">
+<cos-modal [isOpen]="showDeleteTypeModal()" (closed)="closeDeleteTypeModal()" size="sm" [label]="'a11y.delete_status_type' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Status Type</h3>
   <p>Are you sure you want to delete the status type <strong>{{ selectedEntityType() }}</strong>?</p>
   <p class="text-sm text-base-content/60 mt-2">This will also delete all statuses and transitions in this type. This action cannot be undone.</p>
@@ -506,7 +506,7 @@
 </cos-modal>
 
 <!-- Delete Status Confirmation -->
-<cos-modal [isOpen]="showDeleteStatusModal()" (closed)="closeDeleteStatusModal()" size="sm">
+<cos-modal [isOpen]="showDeleteStatusModal()" (closed)="closeDeleteStatusModal()" size="sm" [label]="'a11y.delete_status' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Status</h3>
   <p>Are you sure you want to delete the status <strong>{{ deletingStatus()?.display_name }}</strong>?</p>
   <p class="text-sm text-base-content/60 mt-2">Records and transitions referencing this status may be affected.</p>
@@ -525,7 +525,7 @@
 </cos-modal>
 
 <!-- Delete Transition Confirmation -->
-<cos-modal [isOpen]="showDeleteTransitionModal()" (closed)="closeDeleteTransitionModal()" size="sm">
+<cos-modal [isOpen]="showDeleteTransitionModal()" (closed)="closeDeleteTransitionModal()" size="sm" [label]="'a11y.delete_transition' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Transition</h3>
   <p>Are you sure you want to delete the transition
     <strong>{{ deletingTransition()?.from_display_name }}</strong>

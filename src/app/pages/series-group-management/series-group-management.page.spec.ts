@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -89,6 +90,7 @@ describe('SeriesGroupManagementPage', () => {
     return TestBed.configureTestingModule({
       imports: [SeriesGroupManagementPage],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         provideHttpClient(),
         { provide: RecurringService, useValue: mockRecurringService },

@@ -26,6 +26,7 @@ import { NgxCurrencyDirective } from '@dintecom/ngx-currency';
 import { AuthService } from '../../services/auth.service';
 import { getPostgrestUrl } from '../../config/runtime';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Payment transaction from the payment_transactions view
@@ -98,7 +99,7 @@ interface RefundFormData {
 @Component({
   selector: 'app-admin-payments',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe, RouterLink, NgxCurrencyDirective, CosModalComponent],
+  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe, RouterLink, NgxCurrencyDirective, CosModalComponent, TranslatePipe],
   templateUrl: './admin-payments.page.html',
   styleUrl: './admin-payments.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush

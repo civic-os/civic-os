@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { PermissionsPage } from './permissions.page';
@@ -57,6 +58,7 @@ describe('PermissionsPage', () => {
     await TestBed.configureTestingModule({
       imports: [PermissionsPage],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         { provide: PermissionsService, useValue: mockPermissionsService },
         { provide: AuthService, useValue: mockAuthService }

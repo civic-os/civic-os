@@ -37,6 +37,7 @@ import { SchemaEntityTable, SchemaEntityProperty, CreateSeriesResult } from '../
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { catchError, of, forkJoin, map } from 'rxjs';
 import { RRule } from 'rrule';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -72,11 +73,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="xl" [closeOnBackdrop]="!creating()">
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="xl" [closeOnBackdrop]="!creating()" [label]="'a11y.create_recurring_series' | translate">
       <!-- Header with Steps -->
       <div class="flex items-center justify-between mb-6">
         <h3 class="font-bold text-lg">Create Recurring Series</h3>

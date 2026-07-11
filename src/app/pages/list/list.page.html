@@ -268,7 +268,8 @@
   <cos-modal
     [isOpen]="showGuidedFormError()"
     (closed)="closeGuidedFormError()"
-    size="sm">
+    size="sm"
+    [label]="('guided_form.unable_to_start' | translate) + ' ' + entity.display_name">
     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
       <span class="material-symbols-outlined text-error">error</span>
       {{ 'guided_form.unable_to_start' | translate }} {{ entity.display_name }}

@@ -3,7 +3,8 @@
   [isOpen]="isOpen()"
   (closed)="handleClose()"
   size="md"
-  [closeOnBackdrop]="!processing() && !loading()">
+  [closeOnBackdrop]="!processing() && !loading()"
+  [label]="'a11y.complete_payment' | translate">
   <h3 class="font-bold text-lg mb-4">
     <span class="material-symbols-outlined align-middle me-2">payment</span>
     Complete Payment

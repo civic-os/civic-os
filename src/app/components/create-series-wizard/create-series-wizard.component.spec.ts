@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { CreateSeriesWizardComponent } from './create-series-wizard.component';
@@ -104,6 +105,7 @@ describe('CreateSeriesWizardComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CreateSeriesWizardComponent],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         provideHttpClient(),
         { provide: SchemaService, useValue: mockSchemaService },
