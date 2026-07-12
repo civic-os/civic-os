@@ -7,7 +7,7 @@
   @if (error()) {
     <div class="alert alert-error mb-3">
       <span>{{ error() }}</span>
-      <button type="button" class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="error.set(undefined)" [attr.aria-label]="'action.dismiss' | translate"><span aria-hidden="true">×</span></button>
     </div>
   }
 
@@ -96,6 +96,7 @@
           type="search"
           class="input input-sm input-bordered w-full mb-2"
           placeholder="Search..."
+          [attr.aria-label]="'a11y.search' | translate"
           [value]="searchTerm()"
           (input)="searchTerm.set($any($event.target).value)"
         />

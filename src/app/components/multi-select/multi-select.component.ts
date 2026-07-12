@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface MultiSelectOption {
   id: number;
@@ -32,7 +33,7 @@ export interface MultiSelectOption {
   selector: 'app-multi-select',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './multi-select.component.html',
   styleUrl: './multi-select.component.css',
   providers: [
