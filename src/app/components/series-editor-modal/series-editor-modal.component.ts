@@ -123,11 +123,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
           @if (activeTab() === 'info') {
             <div class="space-y-4">
               <div class="form-control">
-                <div class="label">
+                <label class="label" [for]="uid + '-series-name'">
                   <span class="label-text font-medium">Series Name</span>
-                </div>
+                </label>
                 <input
                   type="text"
+                  [id]="uid + '-series-name'"
                   class="input input-bordered w-full"
                   formControlName="display_name"
                   placeholder="e.g., Weekly Yoga Class"
@@ -135,11 +136,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               </div>
 
               <div class="form-control">
-                <div class="label">
+                <label class="label" [for]="uid + '-description'">
                   <span class="label-text">Description (optional)</span>
-                </div>
+                </label>
                 <textarea
                   class="textarea textarea-bordered w-full"
+                  [id]="uid + '-description'"
                   rows="3"
                   formControlName="description"
                   placeholder="Brief description of this recurring schedule"
@@ -147,17 +149,19 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               </div>
 
               <div class="form-control">
-                <div class="label">
+                <label class="label" [for]="uid + '-color'">
                   <span class="label-text">Color</span>
-                </div>
+                </label>
                 <div class="flex items-center gap-3">
                   <input
                     type="color"
                     class="w-12 h-10 cursor-pointer rounded border border-base-300"
                     formControlName="color"
+                    [attr.aria-label]="'a11y.color_swatch' | translate"
                   />
                   <input
                     type="text"
+                    [id]="uid + '-color'"
                     class="input input-bordered flex-1"
                     formControlName="color"
                     placeholder="#3B82F6"
@@ -234,6 +238,10 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   `
 })
 export class SeriesEditorModalComponent implements OnChanges {
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `series-editor-modal-${SeriesEditorModalComponent.nextInstanceId++}`;
+
   private fb = inject(FormBuilder);
   private schemaService = inject(SchemaService);
   private recurringService = inject(RecurringService);

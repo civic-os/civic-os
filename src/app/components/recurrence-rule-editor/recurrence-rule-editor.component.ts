@@ -59,11 +59,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     <div class="recurrence-editor space-y-4">
       <!-- Frequency -->
       <div class="form-control">
-        <div class="label">
+        <label class="label" [for]="uid + '-repeat'">
           <span class="label-text font-medium">Repeat</span>
-        </div>
+        </label>
         <select
           class="select select-bordered w-full"
+          [id]="uid + '-repeat'"
           [ngModel]="frequency()"
           (ngModelChange)="onFrequencyChange($event)"
           [disabled]="disabled()"
@@ -77,12 +78,13 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- Interval -->
       <div class="form-control">
-        <div class="label">
+        <label class="label" [for]="uid + '-interval'">
           <span class="label-text">Every</span>
-        </div>
+        </label>
         <div class="flex items-center gap-2">
           <input
             type="number"
+            [id]="uid + '-interval'"
             class="input input-bordered w-24"
             min="1"
             max="99"
@@ -262,6 +264,10 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 })
 export class RecurrenceRuleEditorComponent implements ControlValueAccessor {
   private recurringService = inject(RecurringService);
+
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `recurrence-rule-editor-${RecurrenceRuleEditorComponent.nextInstanceId++}`;
 
   /**
    * Optional start date to help pre-populate BYSETPOS fields.

@@ -109,11 +109,12 @@ export interface RecurringTimeSlotValue {
       <!-- Time Slot Inputs -->
       <div class="grid grid-cols-2 gap-4">
         <div class="form-control">
-          <div class="label">
+          <label class="label" [for]="uid + '-start'">
             <span class="label-text">Start</span>
-          </div>
+          </label>
           <input
             type="datetime-local"
+            [id]="uid + '-start'"
             class="input input-bordered w-full"
             [ngModel]="startDateTime()"
             (ngModelChange)="onStartChange($event)"
@@ -121,11 +122,12 @@ export interface RecurringTimeSlotValue {
           />
         </div>
         <div class="form-control">
-          <div class="label">
+          <label class="label" [for]="uid + '-end'">
             <span class="label-text">End</span>
-          </div>
+          </label>
           <input
             type="datetime-local"
+            [id]="uid + '-end'"
             class="input input-bordered w-full"
             [ngModel]="endDateTime()"
             (ngModelChange)="onEndChange($event)"
@@ -249,6 +251,10 @@ export interface RecurringTimeSlotValue {
 })
 export class EditRecurringTimeSlotComponent implements ControlValueAccessor, Validator {
   private recurringService = inject(RecurringService);
+
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `edit-recurring-time-slot-${EditRecurringTimeSlotComponent.nextInstanceId++}`;
 
   // Inputs for conflict preview
   @Input() entityTable?: string;

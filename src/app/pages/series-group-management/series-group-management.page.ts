@@ -86,6 +86,7 @@ import { catchError, map } from 'rxjs/operators';
                   type="text"
                   class="grow"
                   placeholder="Search by name..."
+                  [attr.aria-label]="'a11y.search' | translate"
                   [ngModel]="searchQuery()"
                   (ngModelChange)="onSearchChange($event)"
                 />
@@ -96,6 +97,7 @@ import { catchError, map } from 'rxjs/operators';
             <div class="form-control w-48">
               <select
                 class="select select-bordered w-full"
+                [attr.aria-label]="'a11y.filter_by_entity_type' | translate"
                 [ngModel]="entityTypeFilter()"
                 (ngModelChange)="onEntityTypeChange($event)"
               >
@@ -110,6 +112,7 @@ import { catchError, map } from 'rxjs/operators';
             <div class="form-control w-40">
               <select
                 class="select select-bordered w-full"
+                [attr.aria-label]="'a11y.filter_by_status' | translate"
                 [ngModel]="statusFilter()"
                 (ngModelChange)="onStatusChange($event)"
               >

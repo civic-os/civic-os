@@ -130,6 +130,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.view_occurrence': 'View occurrence',
   'a11y.select_version': 'Select this version',
   'a11y.select_series_group': 'Select series group',
+  'a11y.filter_by_entity_type': 'Filter by entity type',
+  'a11y.filter_by_status': 'Filter by status',
   'a11y.close_dialog': 'Close dialog',
 
   'sidebar.database_schema': 'Database Schema',
