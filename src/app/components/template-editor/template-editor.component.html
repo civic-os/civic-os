@@ -4,11 +4,12 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <!-- Template Name -->
       <div class="form-control">
-        <div class="label">
+        <label class="label" for="template-name">
           <span class="label-text font-semibold">Template Name *</span>
-        </div>
+        </label>
         <input
           type="text"
+          id="template-name"
           formControlName="name"
           class="input input-bordered input-sm"
           placeholder="e.g., issue_created"
@@ -22,11 +23,12 @@
 
       <!-- Description -->
       <div class="form-control">
-        <div class="label">
+        <label class="label" for="template-description">
           <span class="label-text font-semibold">Description</span>
-        </div>
+        </label>
         <input
           type="text"
+          id="template-description"
           formControlName="description"
           class="input input-bordered input-sm"
           placeholder="Brief description" />
@@ -34,18 +36,18 @@
 
       <!-- Entity Type -->
       <div class="form-control">
-        <div class="label">
+        <label class="label" for="template-entity-type">
           <span class="label-text font-semibold">Entity Type</span>
-        </div>
+        </label>
         @if (entities$ | async; as entities) {
-          <select formControlName="entity_type" class="select select-bordered select-sm">
+          <select id="template-entity-type" formControlName="entity_type" class="select select-bordered select-sm">
             <option value="">-- Select --</option>
             @for (entity of entities; track entity.table_name) {
               <option [value]="entity.table_name">{{ entity.display_name || entity.table_name }}</option>
             }
           </select>
         } @else {
-          <select class="select select-bordered select-sm" disabled>
+          <select id="template-entity-type" class="select select-bordered select-sm" disabled>
             <option>Loading...</option>
           </select>
         }
@@ -77,11 +79,12 @@
       <!-- Collapsible Sample Data Editor (spans 2 columns, full width on mobile) -->
       @if (showSampleData() && templateForm.get('entity_type')?.value) {
         <div class="form-control col-span-full lg:col-span-2">
-          <div class="label">
+          <label class="label" for="template-sample-data">
             <span class="label-text font-semibold">Sample Entity Data (JSON)</span>
             <span class="label-text-alt">Edit to customize preview data</span>
-          </div>
+          </label>
           <textarea
+            id="template-sample-data"
             [(ngModel)]="sampleData"
             [ngModelOptions]="{standalone: true}"
             class="textarea textarea-bordered h-32 font-mono text-sm w-full"
@@ -163,6 +166,7 @@
                 type="text"
                 formControlName="subject_template"
                 class="input input-bordered w-full font-mono text-sm"
+                [attr.aria-label]="'a11y.subject_template' | translate"
                 [attr.placeholder]="subjectPlaceholder"
                 [class.input-error]="templateForm.get('subject_template')?.invalid && templateForm.get('subject_template')?.touched" />
               @if (getValidationResult('subject')?.error_message) {
@@ -210,6 +214,7 @@
               <textarea
                 formControlName="html_template"
                 class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+                [attr.aria-label]="'a11y.html_template' | translate"
                 [attr.placeholder]="htmlPlaceholder"
                 [class.textarea-error]="templateForm.get('html_template')?.invalid && templateForm.get('html_template')?.touched"></textarea>
               @if (getValidationResult('html')?.error_message) {
@@ -257,6 +262,7 @@
               <textarea
                 formControlName="text_template"
                 class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+                [attr.aria-label]="'a11y.text_template' | translate"
                 [attr.placeholder]="textPlaceholder"
                 [class.textarea-error]="templateForm.get('text_template')?.invalid && templateForm.get('text_template')?.touched"></textarea>
               @if (getValidationResult('text')?.error_message) {

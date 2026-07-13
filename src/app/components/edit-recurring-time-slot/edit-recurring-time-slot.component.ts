@@ -39,6 +39,7 @@ import { RecurringService } from '../../services/recurring.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 import { RecurrenceRuleEditorComponent } from '../recurrence-rule-editor/recurrence-rule-editor.component';
 import { ConflictPreviewComponent, ConflictPreviewResult } from '../conflict-preview/conflict-preview.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RRule } from 'rrule';
 
 /**
@@ -80,7 +81,8 @@ export interface RecurringTimeSlotValue {
     CommonModule,
     FormsModule,
     RecurrenceRuleEditorComponent,
-    ConflictPreviewComponent
+    ConflictPreviewComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -161,11 +163,12 @@ export interface RecurringTimeSlotValue {
         <div class="border rounded-lg p-4 bg-base-200/50 space-y-4">
           <!-- Series Name -->
           <div class="form-control">
-            <div class="label">
+            <label class="label" for="recurring-series-name">
               <span class="label-text font-medium">Series Name</span>
-            </div>
+            </label>
             <input
               type="text"
+              id="recurring-series-name"
               class="input input-bordered w-full"
               placeholder="e.g., Weekly Team Meeting"
               [ngModel]="seriesName()"
@@ -176,10 +179,11 @@ export interface RecurringTimeSlotValue {
 
           <!-- Series Description (optional) -->
           <div class="form-control">
-            <div class="label">
+            <label class="label" for="recurring-series-description">
               <span class="label-text">Description (optional)</span>
-            </div>
+            </label>
             <textarea
+              id="recurring-series-description"
               class="textarea textarea-bordered"
               rows="2"
               placeholder="Brief description of this recurring schedule"
@@ -191,12 +195,13 @@ export interface RecurringTimeSlotValue {
 
           <!-- Series Color (optional) -->
           <div class="form-control">
-            <div class="label">
+            <label class="label" for="recurring-series-color">
               <span class="label-text">Color (optional)</span>
-            </div>
+            </label>
             <div class="flex items-center gap-2">
               <input
                 type="color"
+                id="recurring-series-color"
                 class="w-10 h-10 rounded cursor-pointer"
                 [ngModel]="seriesColor()"
                 (ngModelChange)="onSeriesColorChange($event)"
@@ -205,6 +210,7 @@ export interface RecurringTimeSlotValue {
               <input
                 type="text"
                 class="input input-bordered input-sm w-28 font-mono"
+                [attr.aria-label]="'a11y.color_swatch' | translate"
                 placeholder="#3B82F6"
                 [ngModel]="seriesColor()"
                 (ngModelChange)="onSeriesColorChange($event)"

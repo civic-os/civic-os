@@ -143,21 +143,21 @@
     <h3 class="font-bold text-lg mb-4">Upload Image</h3>
 
     <div class="form-control mb-4">
-      <div class="label"><span class="label-text">Image File</span></div>
-      <input type="file" class="file-input file-input-bordered w-full"
+      <label class="label" for="asset-image-file"><span class="label-text">Image File</span></label>
+      <input type="file" id="asset-image-file" class="file-input file-input-bordered w-full"
              accept="image/*" (change)="onFileSelected($event)" />
     </div>
 
     <div class="form-control mb-4">
-      <div class="label"><span class="label-text">Name</span></div>
-      <input type="text" class="input input-bordered w-full"
+      <label class="label" for="asset-name-upload"><span class="label-text">Name</span></label>
+      <input type="text" id="asset-name-upload" class="input input-bordered w-full"
              [ngModel]="assetName()" (ngModelChange)="assetName.set($event)"
              placeholder="e.g., Homepage Hero Banner" />
     </div>
 
     <div class="form-control mb-4">
-      <div class="label"><span class="label-text">Alt Text (accessibility)</span></div>
-      <input type="text" class="input input-bordered w-full"
+      <label class="label" for="asset-alt-text-upload"><span class="label-text">Alt Text (accessibility)</span></label>
+      <input type="text" id="asset-alt-text-upload" class="input input-bordered w-full"
              [ngModel]="assetAltText()" (ngModelChange)="assetAltText.set($event)"
              placeholder="Describe the image for screen readers" />
     </div>
@@ -202,13 +202,13 @@
 
     @if (isEditing()) {
       <div class="form-control mb-4">
-        <div class="label"><span class="label-text">Name</span></div>
-        <input type="text" class="input input-bordered w-full"
+        <label class="label" for="asset-name-edit"><span class="label-text">Name</span></label>
+        <input type="text" id="asset-name-edit" class="input input-bordered w-full"
                [ngModel]="assetName()" (ngModelChange)="assetName.set($event)" />
       </div>
       <div class="form-control mb-4">
-        <div class="label"><span class="label-text">Alt Text</span></div>
-        <input type="text" class="input input-bordered w-full"
+        <label class="label" for="asset-alt-text-edit"><span class="label-text">Alt Text</span></label>
+        <input type="text" id="asset-alt-text-edit" class="input input-bordered w-full"
                [ngModel]="assetAltText()" (ngModelChange)="assetAltText.set($event)" />
       </div>
     }

@@ -33,8 +33,9 @@
     <!-- Entity Type Selector + Actions -->
     <div class="flex flex-wrap gap-3 items-end mb-6">
       <div class="form-control flex-1 min-w-[200px]">
-        <div class="label"><span class="font-semibold">Status Type</span></div>
+        <label class="label" for="status-entity-select"><span class="font-semibold">Status Type</span></label>
         <select #entitySelect
+                id="status-entity-select"
                 class="select select-bordered w-full"
                 (change)="onEntityTypeChange(entitySelect.value)">
           @if (!selectedEntityType()) {
@@ -98,15 +99,16 @@
         } @else {
           <div class="overflow-x-auto">
             <table class="table table-zebra">
+              <caption class="sr-only">Statuses</caption>
               <thead>
                 <tr>
-                  <th>Color</th>
-                  <th>Display Name</th>
-                  <th>Key</th>
-                  <th>Initial</th>
-                  <th>Terminal</th>
-                  <th>Sort</th>
-                  <th>Actions</th>
+                  <th scope="col">Color</th>
+                  <th scope="col">Display Name</th>
+                  <th scope="col">Key</th>
+                  <th scope="col">Initial</th>
+                  <th scope="col">Terminal</th>
+                  <th scope="col">Sort</th>
+                  <th scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,7 +116,9 @@
                   <tr>
                     <td>
                       <div class="w-6 h-6 rounded-full border border-base-300"
-                           [style.backgroundColor]="status.color || '#3B82F6'"></div>
+                           [style.backgroundColor]="status.color || '#3B82F6'"
+                           [attr.aria-label]="('a11y.color_value' | translate:{ value: status.color || '#3B82F6' })"
+                           role="img"></div>
                     </td>
                     <td class="font-medium">{{ status.display_name }}</td>
                     <td><code class="bg-base-200 px-1 rounded text-sm">{{ status.status_key }}</code></td>
@@ -170,15 +174,16 @@
         } @else {
           <div class="overflow-x-auto">
             <table class="table table-zebra">
+              <caption class="sr-only">Transitions</caption>
               <thead>
                 <tr>
-                  <th>From</th>
-                  <th></th>
-                  <th>To</th>
-                  <th>Label</th>
-                  <th>RPC</th>
-                  <th>Enabled</th>
-                  <th>Actions</th>
+                  <th scope="col">From</th>
+                  <th scope="col"></th>
+                  <th scope="col">To</th>
+                  <th scope="col">Label</th>
+                  <th scope="col">RPC</th>
+                  <th scope="col">Enabled</th>
+                  <th scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -247,8 +252,9 @@
   }
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Entity Type</span></div>
+    <label class="label" for="status-type-entity-type"><span class="font-semibold">Entity Type</span></label>
     <input type="text"
+           id="status-type-entity-type"
            class="input input-bordered w-full"
            [value]="typeForm().entityType"
            (input)="updateTypeFormField('entityType', $any($event.target).value)"
@@ -260,8 +266,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Display Name</span></div>
+    <label class="label" for="status-type-display-name"><span class="font-semibold">Display Name</span></label>
     <input type="text"
+           id="status-type-display-name"
            class="input input-bordered w-full"
            [value]="typeForm().displayName"
            (input)="updateTypeFormField('displayName', $any($event.target).value)"
@@ -270,8 +277,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Description</span></div>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="status-type-description"><span class="font-semibold">Description</span></label>
+    <textarea id="status-type-description"
+              class="textarea textarea-bordered w-full"
               [value]="typeForm().description"
               (input)="updateTypeFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
@@ -306,8 +314,9 @@
   <!-- Key (read-only, edit only) -->
   @if (editingStatus()) {
     <div class="form-control mb-4">
-      <div class="label"><span class="font-semibold">Key</span></div>
+      <label class="label" for="status-key"><span class="font-semibold">Key</span></label>
       <input type="text"
+             id="status-key"
              class="input input-bordered w-full"
              [value]="editingStatus()?.status_key"
              disabled>
@@ -316,8 +325,9 @@
   }
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Display Name</span></div>
+    <label class="label" for="status-display-name"><span class="font-semibold">Display Name</span></label>
     <input type="text"
+           id="status-display-name"
            class="input input-bordered w-full"
            [value]="statusForm().displayName"
            (input)="updateStatusFormField('displayName', $any($event.target).value)"
@@ -325,8 +335,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Description</span></div>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="status-description"><span class="font-semibold">Description</span></label>
+    <textarea id="status-description"
+              class="textarea textarea-bordered w-full"
               [value]="statusForm().description"
               (input)="updateStatusFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
@@ -334,22 +345,25 @@
 
   <div class="flex gap-4 mb-4">
     <div class="form-control flex-1">
-      <div class="label"><span class="font-semibold">Color</span></div>
+      <label class="label" for="status-color"><span class="font-semibold">Color</span></label>
       <div class="flex items-center gap-2">
         <input type="color"
+               id="status-color"
                class="w-10 h-10 rounded cursor-pointer border border-base-300"
                [value]="statusForm().color"
                (input)="updateStatusFormField('color', $any($event.target).value)">
         <input type="text"
                class="input input-bordered w-28"
+               [attr.aria-label]="'a11y.color_swatch' | translate"
                [value]="statusForm().color"
                (input)="updateStatusFormField('color', $any($event.target).value)"
                placeholder="#3B82F6">
       </div>
     </div>
     <div class="form-control w-24">
-      <div class="label"><span class="font-semibold">Sort Order</span></div>
+      <label class="label" for="status-sort-order"><span class="font-semibold">Sort Order</span></label>
       <input type="number"
+             id="status-sort-order"
              class="input input-bordered w-full"
              [value]="statusForm().sortOrder"
              (input)="updateStatusSortOrder(+$any($event.target).value)">
@@ -402,8 +416,9 @@
 
   <div class="flex gap-4 mb-4">
     <div class="form-control flex-1">
-      <div class="label"><span class="font-semibold">From Status</span></div>
-      <select class="select select-bordered w-full"
+      <label class="label" for="transition-from-status"><span class="font-semibold">From Status</span></label>
+      <select id="transition-from-status"
+              class="select select-bordered w-full"
               [value]="transitionForm().fromStatusId"
               (change)="updateTransitionStatusId('fromStatusId', +$any($event.target).value)">
         @for (status of nonTerminalStatuses(); track status.id) {
@@ -417,8 +432,9 @@
       <span class="material-symbols-outlined text-base-content/40" aria-hidden="true">arrow_forward</span>
     </div>
     <div class="form-control flex-1">
-      <div class="label"><span class="font-semibold">To Status</span></div>
-      <select class="select select-bordered w-full"
+      <label class="label" for="transition-to-status"><span class="font-semibold">To Status</span></label>
+      <select id="transition-to-status"
+              class="select select-bordered w-full"
               [value]="transitionForm().toStatusId"
               (change)="updateTransitionStatusId('toStatusId', +$any($event.target).value)">
         @for (status of statuses(); track status.id) {
@@ -431,8 +447,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Label</span></div>
+    <label class="label" for="transition-label"><span class="font-semibold">Label</span></label>
     <input type="text"
+           id="transition-label"
            class="input input-bordered w-full"
            [value]="transitionForm().displayName"
            (input)="updateTransitionFormField('displayName', $any($event.target).value)"
@@ -440,16 +457,18 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Description</span></div>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="transition-description"><span class="font-semibold">Description</span></label>
+    <textarea id="transition-description"
+              class="textarea textarea-bordered w-full"
               [value]="transitionForm().description"
               (input)="updateTransitionFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">On Transition RPC</span></div>
+    <label class="label" for="transition-rpc"><span class="font-semibold">On Transition RPC</span></label>
     <input type="text"
+           id="transition-rpc"
            class="input input-bordered w-full"
            [value]="transitionForm().onTransitionRpc"
            (input)="updateTransitionFormField('onTransitionRpc', $any($event.target).value)"
@@ -459,8 +478,9 @@
 
   <div class="flex gap-4 mb-4">
     <div class="form-control w-24">
-      <div class="label"><span class="font-semibold">Sort Order</span></div>
+      <label class="label" for="transition-sort-order"><span class="font-semibold">Sort Order</span></label>
       <input type="number"
+             id="transition-sort-order"
              class="input input-bordered w-full"
              [value]="transitionForm().sortOrder"
              (input)="updateTransitionSortOrder(+$any($event.target).value)">

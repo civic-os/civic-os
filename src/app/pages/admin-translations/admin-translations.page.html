@@ -47,8 +47,9 @@
   <div class="flex flex-wrap gap-3 items-end mb-4">
     <!-- Locale Selector -->
     <div class="form-control min-w-[160px]">
-      <div class="label"><span class="font-semibold">Language</span></div>
+      <label class="label" for="translation-locale-select"><span class="font-semibold">Language</span></label>
       <select #localeSelect
+              id="translation-locale-select"
               class="select select-bordered w-full"
               (change)="onLocaleChange(localeSelect.value)">
         @for (locale of targetLocales; track locale.code) {
@@ -61,8 +62,9 @@
 
     <!-- Source Type Filter -->
     <div class="form-control min-w-[160px]">
-      <div class="label"><span class="font-semibold">Source Type</span></div>
+      <label class="label" for="translation-source-type-select"><span class="font-semibold">Source Type</span></label>
       <select #sourceTypeSelect
+              id="translation-source-type-select"
               class="select select-bordered w-full"
               (change)="onSourceTypeChange(sourceTypeSelect.value)">
         <option value="" [selected]="selectedSourceType() === ''">All</option>
@@ -76,8 +78,9 @@
 
     <!-- Search -->
     <div class="form-control flex-1 min-w-[200px]">
-      <div class="label"><span class="font-semibold">Search</span></div>
+      <label class="label" for="translation-search"><span class="font-semibold">Search</span></label>
       <input type="text"
+             id="translation-search"
              class="input input-bordered w-full"
              placeholder="Search by key or text..."
              [value]="searchQuery()"
@@ -253,8 +256,9 @@
 
   <!-- Source Type (read-only) -->
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Source Type</span></div>
+    <label class="label" for="translation-edit-source-type"><span class="font-semibold">Source Type</span></label>
     <input type="text"
+           id="translation-edit-source-type"
            class="input input-bordered w-full"
            [value]="sourceTypeLabel(editForm().sourceType)"
            disabled>
@@ -262,8 +266,9 @@
 
   <!-- Source Key (read-only) -->
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Source Key</span></div>
+    <label class="label" for="translation-source-key"><span class="font-semibold">Source Key</span></label>
     <input type="text"
+           id="translation-source-key"
            class="input input-bordered w-full font-mono text-sm"
            [value]="editForm().sourceKey"
            disabled>
@@ -281,8 +286,9 @@
 
   <!-- Translated Text (editable) -->
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Translation</span></div>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="translation-text"><span class="font-semibold">Translation</span></label>
+    <textarea id="translation-text"
+              class="textarea textarea-bordered w-full"
               rows="3"
               [value]="editForm().translatedText"
               (input)="updateTranslatedText($any($event.target).value)"

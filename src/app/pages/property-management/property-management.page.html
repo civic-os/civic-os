@@ -145,8 +145,9 @@
 
                         <!-- Column Width -->
                         <div>
-                          <div class="label label-text text-xs">Grid Width (columns)</div>
+                          <label class="label label-text text-xs" [for]="'static-text-width-' + item.id">Grid Width (columns)</label>
                           <input
+                            [id]="'static-text-width-' + item.id"
                             type="number"
                             class="input input-sm input-bordered w-full max-w-xs"
                             [(ngModel)]="item.column_width"
@@ -335,8 +336,9 @@
 
                         <!-- Column Width -->
                         <div>
-                          <div class="label label-text text-xs">Grid Width (columns)</div>
+                          <label class="label label-text text-xs" [for]="'prop-width-' + item.column_name">Grid Width (columns)</label>
                           <input
+                            [id]="'prop-width-' + item.column_name"
                             type="number"
                             class="input input-sm input-bordered w-full max-w-xs"
                             [(ngModel)]="item.customColumnWidth"

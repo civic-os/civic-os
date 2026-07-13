@@ -88,12 +88,12 @@
             <form (ngSubmit)="saveCoreInfo()" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                 <div class="form-control w-full">
-                  <div class="label"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></div>
-                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" autocomplete="given-name" required />
+                  <label class="label" for="profile-first-name"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></label>
+                  <input type="text" id="profile-first-name" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" autocomplete="given-name" required />
                 </div>
                 <div class="form-control w-full">
-                  <div class="label"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></div>
-                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" autocomplete="family-name" required />
+                  <label class="label" for="profile-last-name"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></label>
+                  <input type="text" id="profile-last-name" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" autocomplete="family-name" required />
                 </div>
                 <div class="form-control w-full">
                   <div class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></div>
@@ -103,8 +103,9 @@
                   <span class="text-xs opacity-60 mt-1">{{ 'profile.email_readonly' | translate }}</span>
                 </div>
                 <div class="form-control w-full">
-                  <div class="label"><span class="label-text">{{ 'profile.phone' | translate }}</span></div>
+                  <label class="label" for="profile-phone"><span class="label-text">{{ 'profile.phone' | translate }}</span></label>
                   <input type="tel"
+                    id="profile-phone"
                     class="input input-bordered w-full"
                     [value]="getFormattedPhone(editPhone)"
                     (input)="onPhoneInput($event)"

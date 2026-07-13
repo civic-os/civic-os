@@ -221,29 +221,29 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <div class="label"><span class="label-text">First Name *</span></div>
-              <input type="text" class="input input-bordered w-full"
+              <label class="label" for="new-user-first-name"><span class="label-text">First Name *</span></label>
+              <input type="text" id="new-user-first-name" class="input input-bordered w-full"
                      [ngModel]="newUser.first_name"
                      (ngModelChange)="newUser.first_name = $event" />
             </div>
             <div>
-              <div class="label"><span class="label-text">Last Name *</span></div>
-              <input type="text" class="input input-bordered w-full"
+              <label class="label" for="new-user-last-name"><span class="label-text">Last Name *</span></label>
+              <input type="text" id="new-user-last-name" class="input input-bordered w-full"
                      [ngModel]="newUser.last_name"
                      (ngModelChange)="newUser.last_name = $event" />
             </div>
           </div>
 
           <div class="mt-3">
-            <div class="label"><span class="label-text">Email *</span></div>
-            <input type="email" class="input input-bordered w-full"
+            <label class="label" for="new-user-email"><span class="label-text">Email *</span></label>
+            <input type="email" id="new-user-email" class="input input-bordered w-full"
                    [ngModel]="newUser.email"
                    (ngModelChange)="newUser.email = $event" />
           </div>
 
           <div class="mt-3">
-            <div class="label"><span class="label-text">Phone</span></div>
-            <input type="tel" class="input input-bordered w-full" placeholder="5551234567"
+            <label class="label" for="new-user-phone"><span class="label-text">Phone</span></label>
+            <input type="tel" id="new-user-phone" class="input input-bordered w-full" placeholder="5551234567"
                    [ngModel]="newUser.phone"
                    (ngModelChange)="newUser.phone = $event" />
           </div>

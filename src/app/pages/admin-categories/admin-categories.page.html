@@ -33,8 +33,9 @@
     <!-- Entity Type Selector + Actions -->
     <div class="flex flex-wrap gap-3 items-end mb-6">
       <div class="form-control flex-1 min-w-[200px]">
-        <div class="label"><span class="font-semibold">Category Group</span></div>
+        <label class="label" for="cat-entity-select"><span class="font-semibold">Category Group</span></label>
         <select #entitySelect
+                id="cat-entity-select"
                 class="select select-bordered w-full"
                 (change)="onEntityTypeChange(entitySelect.value)">
           @if (!selectedEntityType()) {
@@ -87,13 +88,14 @@
       } @else {
         <div class="overflow-x-auto">
           <table class="table table-zebra">
+            <caption class="sr-only">Categories</caption>
             <thead>
               <tr>
-                <th>Color</th>
-                <th>Display Name</th>
-                <th>Key</th>
-                <th>Sort Order</th>
-                <th>Actions</th>
+                <th scope="col">Color</th>
+                <th scope="col">Display Name</th>
+                <th scope="col">Key</th>
+                <th scope="col">Sort Order</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -101,7 +103,9 @@
                 <tr>
                   <td>
                     <div class="w-6 h-6 rounded-full border border-base-300"
-                         [style.backgroundColor]="cat.color || '#3B82F6'"></div>
+                         [style.backgroundColor]="cat.color || '#3B82F6'"
+                         [attr.aria-label]="('a11y.color_value' | translate:{ value: cat.color || '#3B82F6' })"
+                         role="img"></div>
                   </td>
                   <td class="font-medium">{{ cat.display_name }}</td>
                   <td><code class="bg-base-200 px-1 rounded text-sm">{{ cat.category_key }}</code></td>
@@ -145,8 +149,9 @@
   }
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Entity Type</span></div>
+    <label class="label" for="cat-group-entity-type"><span class="font-semibold">Entity Type</span></label>
     <input type="text"
+           id="cat-group-entity-type"
            class="input input-bordered w-full"
            [value]="groupForm().entityType"
            (input)="updateGroupFormField('entityType', $any($event.target).value)"
@@ -158,8 +163,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Display Name</span></div>
+    <label class="label" for="cat-group-display-name"><span class="font-semibold">Display Name</span></label>
     <input type="text"
+           id="cat-group-display-name"
            class="input input-bordered w-full"
            [value]="groupForm().displayName"
            (input)="updateGroupFormField('displayName', $any($event.target).value)"
@@ -168,8 +174,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Description</span></div>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="cat-group-description"><span class="font-semibold">Description</span></label>
+    <textarea id="cat-group-description"
+              class="textarea textarea-bordered w-full"
               [value]="groupForm().description"
               (input)="updateGroupFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
@@ -204,8 +211,9 @@
   <!-- Key (read-only, edit only) -->
   @if (editingCategory()) {
     <div class="form-control mb-4">
-      <div class="label"><span class="font-semibold">Key</span></div>
+      <label class="label" for="cat-key"><span class="font-semibold">Key</span></label>
       <input type="text"
+             id="cat-key"
              class="input input-bordered w-full"
              [value]="editingCategory()?.category_key"
              disabled>
@@ -214,8 +222,9 @@
   }
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Display Name</span></div>
+    <label class="label" for="cat-display-name"><span class="font-semibold">Display Name</span></label>
     <input type="text"
+           id="cat-display-name"
            class="input input-bordered w-full"
            [value]="categoryForm().displayName"
            (input)="updateCategoryFormField('displayName', $any($event.target).value)"
@@ -223,8 +232,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <div class="label"><span class="font-semibold">Description</span></div>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="cat-description"><span class="font-semibold">Description</span></label>
+    <textarea id="cat-description"
+              class="textarea textarea-bordered w-full"
               [value]="categoryForm().description"
               (input)="updateCategoryFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
@@ -232,22 +242,25 @@
 
   <div class="flex gap-4 mb-4">
     <div class="form-control flex-1">
-      <div class="label"><span class="font-semibold">Color</span></div>
+      <label class="label" for="cat-color"><span class="font-semibold">Color</span></label>
       <div class="flex items-center gap-2">
         <input type="color"
+               id="cat-color"
                class="w-10 h-10 rounded cursor-pointer border border-base-300"
                [value]="categoryForm().color"
                (input)="updateCategoryFormField('color', $any($event.target).value)">
         <input type="text"
                class="input input-bordered w-28"
+               [attr.aria-label]="'a11y.color_swatch' | translate"
                [value]="categoryForm().color"
                (input)="updateCategoryFormField('color', $any($event.target).value)"
                placeholder="#3B82F6">
       </div>
     </div>
     <div class="form-control w-24">
-      <div class="label"><span class="font-semibold">Sort Order</span></div>
+      <label class="label" for="cat-sort-order"><span class="font-semibold">Sort Order</span></label>
       <input type="number"
+             id="cat-sort-order"
              class="input input-bordered w-full"
              [value]="categoryForm().sortOrder"
              (input)="updateCategorySortOrder(+$any($event.target).value)">

@@ -436,11 +436,12 @@ type EditTab = 'info' | 'schedule' | 'template';
           @if (editTab() === 'info') {
             <div class="space-y-4">
               <div class="form-control">
-                <div class="label">
+                <label class="label" for="series-display-name">
                   <span class="label-text">Display Name</span>
-                </div>
+                </label>
                 <input
                   type="text"
+                  id="series-display-name"
                   class="input input-bordered w-full"
                   [(ngModel)]="editForm.display_name"
                   placeholder="Series name"
@@ -448,10 +449,11 @@ type EditTab = 'info' | 'schedule' | 'template';
               </div>
 
               <div class="form-control">
-                <div class="label">
+                <label class="label" for="series-description">
                   <span class="label-text">Description</span>
-                </div>
+                </label>
                 <textarea
+                  id="series-description"
                   class="textarea textarea-bordered w-full"
                   rows="3"
                   [(ngModel)]="editForm.description"
@@ -460,18 +462,20 @@ type EditTab = 'info' | 'schedule' | 'template';
               </div>
 
               <div class="form-control">
-                <div class="label">
+                <label class="label" for="series-color">
                   <span class="label-text">Color</span>
-                </div>
+                </label>
                 <div class="flex items-center gap-3">
                   <input
                     type="color"
+                    id="series-color"
                     class="w-12 h-10 cursor-pointer rounded border border-base-300"
                     [(ngModel)]="editForm.color"
                   />
                   <input
                     type="text"
                     class="input input-bordered flex-1"
+                    [attr.aria-label]="'a11y.color_swatch' | translate"
                     [(ngModel)]="editForm.color"
                     placeholder="#3B82F6"
                     pattern="^#[0-9A-Fa-f]{6}$"

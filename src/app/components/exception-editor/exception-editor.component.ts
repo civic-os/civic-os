@@ -165,10 +165,11 @@ export interface ExceptionEditorResult {
       <!-- Reason (for delete) -->
       @if (operation === 'delete' && selectedScope() === 'this_only') {
         <div class="form-control mt-4">
-          <div class="label">
+          <label class="label" for="exception-reason">
             <span class="label-text">Reason (optional)</span>
-          </div>
+          </label>
           <textarea
+            id="exception-reason"
             class="textarea textarea-bordered"
             rows="2"
             placeholder="Why is this occurrence being cancelled?"
