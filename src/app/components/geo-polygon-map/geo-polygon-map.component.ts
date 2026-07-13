@@ -286,6 +286,7 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
       removalMode: !!this.drawnPolygon,
       rotateMode: false,
     });
+    this.labelGeomanButtons();
 
     // Set draw style
     map.pm.setPathOptions({
@@ -331,6 +332,25 @@ export class GeoPolygonMapComponent implements AfterViewInit, OnDestroy {
         editMode: false,
         removalMode: false,
       });
+      this.labelGeomanButtons();
+    });
+  }
+
+  /**
+   * leaflet-geoman renders its toolbar actions as focusable <a role="button">
+   * elements whose accessible name lives only in the title of a NON-focusable
+   * parent div — screen readers announce them as just "button". Copy each
+   * block's title onto the focusable button as aria-label (WCAG 4.1.2).
+   */
+  private labelGeomanButtons() {
+    const container = this.map?.getContainer();
+    if (!container) return;
+    container.querySelectorAll('.leaflet-pm-toolbar .button-container').forEach(block => {
+      const title = block.getAttribute('title');
+      const btn = block.querySelector('a.leaflet-buttons-control-button');
+      if (title && btn && !btn.getAttribute('aria-label')) {
+        btn.setAttribute('aria-label', title);
+      }
     });
   }
 

@@ -18,16 +18,16 @@ INSERT INTO "metadata"."civic_os_users" ("id", "display_name") VALUES
 
 -- Insert mock data for civic_os_users_private
 INSERT INTO "metadata"."civic_os_users_private" ("id", "display_name", "email", "phone") VALUES
-  ('daa01e24-d0b7-47e5-a1d8-b7ea1e6203b8', 'Aubrey Herman', 'aubrey_herman@example.com', '742-965-0756'),
-  ('a47f48e1-10cd-4086-8101-05d60a9724d5', 'Marian Huels', 'marian_huels@example.com', '753-296-6736'),
-  ('08b07067-6955-4adc-9f64-ca8dbdded3fc', 'Sheri Osinski', 'sheri_osinski@example.com', '259-676-2406'),
-  ('5492cd4e-3b99-4475-b0c6-9a23b0ab95fc', 'Jon D''Amore', 'jon.damore81@example.com', '978-669-4121'),
-  ('282579f8-7801-46fc-8e63-92cf64843a3e', 'Natalie Medhurst', 'natalie_medhurst@example.com', '157-165-0624'),
-  ('3dff7723-7d36-4d37-a0cb-6bbd703dec6f', 'Mr. Cameron Windler', 'mr._windler36@example.com', '532-364-4132'),
-  ('d327d56a-528d-42ee-8ad5-95d463c28063', 'Justin Heathcote DVM', 'justin_dvm@example.com', '331-342-3305'),
-  ('fe395923-cc9b-401d-94df-98d8ca2855f3', 'Elbert King', 'elbert.king82@example.com', '680-247-6271'),
-  ('2b1deb8f-bd09-417d-a7b8-7871bfdd7f1a', 'Erma Veum-Terry', 'erma.veum-terry5@example.com', '971-309-7538'),
-  ('1c0962fc-9661-4eec-9d39-1486871617a1', 'Bennie Osinski', 'bennie.osinski31@example.com', '679-289-6899');
+  ('daa01e24-d0b7-47e5-a1d8-b7ea1e6203b8', 'Aubrey Herman', 'aubrey_herman@example.com', '7429650756'),
+  ('a47f48e1-10cd-4086-8101-05d60a9724d5', 'Marian Huels', 'marian_huels@example.com', '7532966736'),
+  ('08b07067-6955-4adc-9f64-ca8dbdded3fc', 'Sheri Osinski', 'sheri_osinski@example.com', '2596762406'),
+  ('5492cd4e-3b99-4475-b0c6-9a23b0ab95fc', 'Jon D''Amore', 'jon.damore81@example.com', '9786694121'),
+  ('282579f8-7801-46fc-8e63-92cf64843a3e', 'Natalie Medhurst', 'natalie_medhurst@example.com', '1571650624'),
+  ('3dff7723-7d36-4d37-a0cb-6bbd703dec6f', 'Mr. Cameron Windler', 'mr._windler36@example.com', '5323644132'),
+  ('d327d56a-528d-42ee-8ad5-95d463c28063', 'Justin Heathcote DVM', 'justin_dvm@example.com', '3313423305'),
+  ('fe395923-cc9b-401d-94df-98d8ca2855f3', 'Elbert King', 'elbert.king82@example.com', '6802476271'),
+  ('2b1deb8f-bd09-417d-a7b8-7871bfdd7f1a', 'Erma Veum-Terry', 'erma.veum-terry5@example.com', '9713097538'),
+  ('1c0962fc-9661-4eec-9d39-1486871617a1', 'Bennie Osinski', 'bennie.osinski31@example.com', '6792896899');
 
 -- Insert mock data for participants
 INSERT INTO "public"."participants" ("id", "display_name", "birth_date", "home_location", "enrolled_date", "status", "parent_phone") VALUES
