@@ -14,11 +14,13 @@ import { DataService } from '../../services/data.service';
 import { SchemaEntityProperty, EntityPropertyType } from '../../interfaces/entity';
 import { GuidedFormContext, EffectiveGuidedFormStep } from '../../interfaces/guided-form';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-guided-form-review-section',
   standalone: true,
-  imports: [CommonModule, RouterModule, DisplayPropertyComponent],
+  imports: [CommonModule, RouterModule, DisplayPropertyComponent, LoadingIndicatorComponent, TranslatePipe],
   templateUrl: './guided-form-review-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

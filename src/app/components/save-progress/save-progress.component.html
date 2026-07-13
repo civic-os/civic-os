@@ -1,4 +1,9 @@
 <div class="bg-base-200 rounded-lg p-4 my-2">
+  <!-- Single polite live region announcing overall save progress to screen readers -->
+  <span class="sr-only" role="status" aria-live="polite">{{ liveStatus() }}</span>
+  @if (liveError(); as err) {
+    <span class="sr-only" role="alert">{{ err }}</span>
+  }
   <ul class="space-y-3">
     @for (step of stepStates(); track step.label; let i = $index) {
       <li>

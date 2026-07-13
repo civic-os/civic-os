@@ -144,7 +144,7 @@
                   }
                 }
                 @if (isGuidedFormMode() && isGuidedFormDraft() && autoSaveStatus() !== 'idle') {
-                  <span class="text-sm opacity-60 flex items-center gap-1">
+                  <span class="text-sm opacity-60 flex items-center gap-1" role="status" aria-live="polite">
                     @if (autoSaveStatus() === 'saving') {
                       <span class="loading loading-spinner loading-xs" aria-hidden="true"></span> {{ 'state.saving' | translate }}
                     } @else if (autoSaveStatus() === 'saved') {

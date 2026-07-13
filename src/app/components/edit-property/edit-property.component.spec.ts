@@ -170,6 +170,32 @@ describe('EditPropertyComponent', () => {
       expect(input.getAttribute('aria-describedby')).toBe('name-desc');
     });
 
+    it('should append an sr-only "(required)" marker in the label when required', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'name', display_name: 'Name', is_nullable: false,
+        type: EntityPropertyType.TextShort
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const srOnly = fixture.debugElement.query(By.css('label .sr-only'));
+      expect(srOnly).toBeTruthy();
+      expect(srOnly.nativeElement.textContent.trim()).toBe('(required)');
+    });
+
+    it('should not render the sr-only required marker for a non-required property', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.textShort);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const srOnly = fixture.debugElement.query(By.css('label .sr-only'));
+      expect(srOnly).toBeNull();
+    });
+
     it('should drop the dangling label[for] and wrap custom widgets in a labelled group', () => {
       const formGroup = new FormGroup({ location: new FormControl('') });
       fixture.componentRef.setInput('property', createMockProperty({

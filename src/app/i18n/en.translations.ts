@@ -133,6 +133,12 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.filter_by_entity_type': 'Filter by entity type',
   'a11y.filter_by_status': 'Filter by status',
   'a11y.close_dialog': 'Close dialog',
+  'a11y.required': '(required)',
+  'a11y.toggle_section': 'Toggle {{name}} section',
+  'a11y.edit_step': 'Edit {{name}}',
+  'a11y.fill_in_step': 'Fill in {{name}}',
+  'a11y.saving_step': 'Saving: {{name}}',
+  'a11y.save_complete': 'Save complete',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',
