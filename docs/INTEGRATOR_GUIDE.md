@@ -648,7 +648,7 @@ BEGIN
     'markdown',
     NULL,  -- No title for header-only markdown
     jsonb_build_object(
-      'content', E'# Operations Dashboard\n\nMonitor system health and metrics below.',
+      'content', E'## Operations Overview\n\nMonitor system health and metrics below.',
       'enableHtml', false
     ),
     1, 2, 1  -- Full-width, single height unit
@@ -742,10 +742,12 @@ END $$;
 Markdown widget (`enableHtml` allows sanitized HTML via DOMPurify):
 ```json
 {
-  "content": "# Hello World\n\nMarkdown **formatting** supported.",
+  "content": "## Hello World\n\nMarkdown **formatting** supported.",
   "enableHtml": false
 }
 ```
+
+**Heading levels (required convention)**: Start markdown widget headings at `##` (h2), never `#` (h1). The dashboard page already renders the dashboard's `display_name` as the page's only `<h1>`; a `#` in widget content produces a second h1, breaking the page's heading hierarchy (WCAG 1.3.1). Nest deeper sections at `###` and below. The same rule applies to raw `<h1>` tags when `enableHtml` is true.
 
 Filtered List widget:
 ```json

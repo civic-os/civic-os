@@ -559,7 +559,7 @@ INSERT INTO metadata.dashboards (display_name, description)
 VALUES ('Neighborhood Revitalization - Before', 'Conditions in 2020 before project started');
 
 INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width) VALUES
-  (1, 'markdown', 'The Challenge', '{"content": "# The Challenge\n\nIn 2020, our neighborhood faced..."}', 1, 2),
+  (1, 'markdown', 'The Challenge', '{"content": "## The Challenge\n\nIn 2020, our neighborhood faced..."}', 1, 2),
   (1, 'map', 'Infrastructure Issues (2020)', '{
     "entityKey": "issues",
     "mapPropertyName": "location",
@@ -576,7 +576,7 @@ INSERT INTO metadata.dashboards (display_name, description)
 VALUES ('Neighborhood Revitalization - Progress', 'Improvements made 2021-2023');
 
 INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width) VALUES
-  (2, 'markdown', 'Taking Action', '{"content": "# Taking Action\n\nBetween 2021-2023..."}', 1, 2),
+  (2, 'markdown', 'Taking Action', '{"content": "## Taking Action\n\nBetween 2021-2023..."}', 1, 2),
   (2, 'map', 'Resolved Issues', '{
     "entityKey": "issues",
     "mapPropertyName": "location",
@@ -594,7 +594,7 @@ INSERT INTO metadata.dashboards (display_name, description)
 VALUES ('Neighborhood Revitalization - Today', 'Current state and ongoing work');
 
 INSERT INTO metadata.dashboard_widgets (dashboard_id, widget_type, title, config, sort_order, width) VALUES
-  (3, 'markdown', 'Looking Forward', '{"content": "# Looking Forward\n\nToday our neighborhood..."}', 1, 2),
+  (3, 'markdown', 'Looking Forward', '{"content": "## Looking Forward\n\nToday our neighborhood..."}', 1, 2),
   (3, 'map', 'Active Projects', '{
     "entityKey": "projects",
     "mapPropertyName": "location",
