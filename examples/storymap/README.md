@@ -191,7 +191,9 @@ examples/storymap/
     ├── 01_storymap_schema.sql         # Table definitions
     ├── 02_storymap_permissions.sql    # Grants, RLS policies, indexes
     ├── 03_storymap_metadata.sql       # Entity/property customization
-    └── 04_storymap_dashboards.sql     # Dashboard & widget configuration
+    ├── 04_storymap_dashboards.sql     # Dashboard & widget configuration
+    ├── 05_mock_data.sql               # Generated mock data
+    └── 06_storymap_rbac.sql           # RBAC permissions (create/update/delete per role)
 ```
 
 ## Use Cases
