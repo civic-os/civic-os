@@ -25,14 +25,15 @@ BEGIN;
 -- 2. REGISTER clients AS PROFILE EXTENSION
 -- ============================================================================
 
-INSERT INTO metadata.user_profile_extensions (table_name, sort_order, is_required, display_name, description, user_fk_column)
+INSERT INTO metadata.user_profile_extensions (table_name, sort_order, is_required, display_name, description, user_fk_column, exempt_roles)
 VALUES (
   'clients',
   1,
   true,
   'Client Profile',
   'Your client information for intake services',
-  'user_id'
+  'user_id',
+  '{admin,manager}'  -- Staff roles skip the completion guard (v0.66.1+)
 )
 ON CONFLICT (table_name) DO NOTHING;
 

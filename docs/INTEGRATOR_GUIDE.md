@@ -5761,6 +5761,27 @@ VALUES
 | `description` | `TEXT` | Help text shown in the section header. Translatable via `metadata.t()` (optional) |
 | `user_fk_column` | `NAME` | FK column name pointing to `civic_os_users(id)` (required) |
 | `user_fk_constraint` | `NAME` | FK constraint name for PostgREST embedding hints. Defaults to `{table_name}_{user_fk_column}_fkey` if NULL (optional) |
+| `exempt_roles` | `NAME[]` | Roles exempt from `is_required` enforcement. When the current user holds any listed role, the VIEW returns `is_required=false`. Default `'{}'` (no exemptions). (v0.66.1+) |
+
+#### Exempting Roles from Profile Completion (v0.66.1+)
+
+Admins and staff who configure the system may not need to complete user-facing profile extensions. Use `exempt_roles` to skip the completion guard for specific roles:
+
+```sql
+-- Exempt admins and managers from the borrower profile requirement
+INSERT INTO metadata.user_profile_extensions
+  (table_name, sort_order, is_required, display_name, description, user_fk_column, exempt_roles)
+VALUES
+  ('borrower_profiles', 1, true, 'Borrower Profile', 'Your library borrowing information',
+   'user_id', '{admin,manager}');
+
+-- Or update an existing extension
+UPDATE metadata.user_profile_extensions
+SET exempt_roles = '{admin,manager}'
+WHERE table_name = 'borrower_profiles';
+```
+
+The resolution happens server-side in the VIEW: `is_required AND NOT (exempt_roles && get_user_roles())`. The frontend guard consumes the resolved boolean unchanged — no frontend changes needed.
 
 ### How It Works (v0.65.2+)
 
