@@ -5,7 +5,7 @@
 -- Intake Pending, Open Referrals, Pending Surveys, Partner Map.
 --
 -- created_by is NULL (system-seeded, no human owner).
--- Role defaults assign this dashboard to ic_staff and admin
+-- Role defaults assign this dashboard to ecs_staff and admin
 -- so staff see it automatically on login.
 
 BEGIN;
@@ -27,7 +27,7 @@ BEGIN
   -- Upsert the dashboard (created_by NULL = system-seeded)
   SELECT id INTO v_dashboard_id
   FROM metadata.dashboards
-  WHERE display_name = 'IC Intake Dashboard';
+  WHERE display_name = 'ECS Intake Dashboard';
 
   IF v_dashboard_id IS NOT NULL THEN
     UPDATE metadata.dashboards
@@ -40,7 +40,7 @@ BEGIN
     INSERT INTO metadata.dashboards (
       display_name, description, is_public, created_by, sort_order
     ) VALUES (
-      'IC Intake Dashboard',
+      'ECS Intake Dashboard',
       'Client intake, referrals, and survey tracking',
       TRUE, NULL, 1
     )
@@ -65,7 +65,7 @@ BEGIN
       'orderBy', 'created_at',
       'orderDirection', 'desc',
       'limit', 10,
-      'showColumns', jsonb_build_array('display_name', 'country_of_origin', 'primary_language', 'status_id')
+      'showColumns', jsonb_build_array('display_name', 'status_id')
     ),
     1, 1, 1
   );
@@ -135,11 +135,11 @@ BEGIN
     4, 2, 2
   );
 
-  -- Assign this dashboard as the default for ic_staff and admin roles
+  -- Assign this dashboard as the default for ecs_staff and admin roles
   INSERT INTO metadata.dashboard_role_defaults (role_id, dashboard_id, priority)
   SELECT r.id, v_dashboard_id, CASE r.role_key WHEN 'admin' THEN 10 ELSE 0 END
   FROM metadata.roles r
-  WHERE r.role_key IN ('ic_staff', 'admin')
+  WHERE r.role_key IN ('ecs_staff', 'admin')
   ON CONFLICT (role_id) DO UPDATE
     SET dashboard_id = EXCLUDED.dashboard_id,
         priority = EXCLUDED.priority;

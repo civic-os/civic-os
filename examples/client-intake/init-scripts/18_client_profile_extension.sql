@@ -4,22 +4,21 @@
 -- ============================================================================
 -- The clients table already has a UUID FK to civic_os_users via user_id.
 -- This script:
---   1. Adds a UNIQUE constraint on clients.user_id (0-or-1 record per user)
---   2. Registers clients as a required profile extension
---   3. Documents the decision via create_schema_decision()
+--   1. Registers clients as a required profile extension
+--   2. Documents the decision via create_schema_decision()
+-- Note: UNIQUE constraint on user_id is applied in script 20
+-- (client_identity_consolidation) alongside NOT NULL.
 -- ============================================================================
 
 BEGIN;
 
 -- ============================================================================
--- 1. ADD UNIQUE CONSTRAINT ON clients.user_id
+-- 1. (DEFERRED) UNIQUE CONSTRAINT ON clients.user_id
 -- ============================================================================
 -- Profile extensions require a 1:1 relationship (at most one record per user).
--- The existing index idx_clients_user_id covers query performance;
--- this constraint enforces the cardinality rule.
-
-ALTER TABLE public.clients
-  ADD CONSTRAINT unique_client_per_user UNIQUE (user_id);
+-- The UNIQUE constraint is applied in script 20 (client_identity_consolidation)
+-- as part of the identity consolidation that also makes user_id NOT NULL.
+-- The existing index idx_clients_user_id covers query performance until then.
 
 
 -- ============================================================================

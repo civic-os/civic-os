@@ -1,5 +1,5 @@
--- ICGF German (de) Translations
--- Instance-specific metadata translations for the International Center of Greater Flint.
+-- ECS German (de) Translations
+-- Instance-specific metadata translations for Exemplary Community Services.
 -- Framework UI strings are handled by the core v0-64-1 migration.
 -- This script covers: entities, properties, statuses, categories, actions, dashboards, widgets.
 --
@@ -29,13 +29,13 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ENTITIES — descriptions
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('entity', 'clients.description', 'de', 'Mitglieder der Einwanderer- und Fluechtlingsgemeinschaft, die Dienstleistungen suchen'),
+  ('entity', 'clients.description', 'de', 'Gemeindemitglieder, die Dienstleistungen und Unterstuetzungsprogramme suchen'),
   ('entity', 'partners.description', 'de', 'Dienstleistungsanbieter-Organisationen und Einzelpersonen'),
   ('entity', 'referrals.description', 'de', 'Vermittlungsdatensaetze von Klienten an Partner'),
   ('entity', 'follow_up_surveys.description', 'de', 'Feedback-Umfragen nach der Vermittlung'),
   ('entity', 'service_categories.description', 'de', 'Verfuegbare Dienstleistungsarten fuer Klienten und Partner'),
   ('entity', 'monthly_referral_summary.description', 'de', 'Vermittlungsvolumen, -arten und Abschlussraten pro Monat'),
-  ('entity', 'client_contact_summary.description', 'de', 'Neue Klientenregistrierungen nach Monat, Land und Sprache'),
+  ('entity', 'client_contact_summary.description', 'de', 'Neue Klientenregistrierungen und Aufnahmestatus nach Monat'),
   ('entity', 'top_needs_report.description', 'de', 'Nachfrage nach Dienstleistungskategorien unter aktiven Klienten'),
   ('entity', 'partner_utilization_report.description', 'de', 'Vermittlungsvolumen und Abschlussraten pro Partner'),
   ('entity', 'time_lag_report.description', 'de', 'Aufschluesselung der Kontaktzeit nach Vermittlungsart und Partner')
@@ -53,11 +53,7 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'clients.phone.display_name', 'de', 'Telefon'),
   ('property', 'clients.date_of_birth.display_name', 'de', 'Geburtsdatum'),
   ('property', 'clients.gender_id.display_name', 'de', 'Geschlecht'),
-  ('property', 'clients.country_of_origin.display_name', 'de', 'Herkunftsland'),
-  ('property', 'clients.primary_language.display_name', 'de', 'Hauptsprache'),
   ('property', 'clients.preferred_comm_language.display_name', 'de', 'Bevorzugte Kommunikationssprache'),
-  ('property', 'clients.date_of_arrival.display_name', 'de', 'Ankunftsdatum in den USA'),
-  ('property', 'clients.immigration_status_id.display_name', 'de', 'Einwanderungsstatus'),
   ('property', 'clients.household_size.display_name', 'de', 'Haushaltsgroesse'),
   ('property', 'clients.status_id.display_name', 'de', 'Status'),
   ('property', 'clients.user_id.display_name', 'de', 'Verknuepftes Benutzerkonto'),
@@ -147,8 +143,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'client_contact_summary.new_clients.display_name', 'de', 'Neue Klienten'),
   ('property', 'client_contact_summary.intake_pending.display_name', 'de', 'Aufnahme ausstehend'),
   ('property', 'client_contact_summary.active_clients.display_name', 'de', 'Aktive'),
-  ('property', 'client_contact_summary.country_of_origin.display_name', 'de', 'Herkunftsland'),
-  ('property', 'client_contact_summary.primary_language.display_name', 'de', 'Hauptsprache'),
   ('property', 'monthly_referral_summary.month.display_name', 'de', 'Monat'),
   ('property', 'monthly_referral_summary.total_referrals.display_name', 'de', 'Gesamt'),
   ('property', 'monthly_referral_summary.warm_referrals.display_name', 'de', 'Direkte'),
@@ -234,12 +228,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('category', 'helpfulness.somewhat_helpful.display_name', 'de', 'Etwas hilfreich'),
   ('category', 'helpfulness.not_helpful.display_name', 'de', 'Nicht hilfreich'),
   ('category', 'helpfulness.could_not_contact.display_name', 'de', 'Kontakt nicht moeglich'),
-  ('category', 'immigration_status.refugee.display_name', 'de', 'Fluechtling'),
-  ('category', 'immigration_status.asylee.display_name', 'de', 'Asylberechtigte(r)'),
-  ('category', 'immigration_status.siv.display_name', 'de', 'Spezialvisum fuer Einwanderer'),
-  ('category', 'immigration_status.permanent_resident.display_name', 'de', 'Dauerhaft Aufenthaltsberechtigte(r)'),
-  ('category', 'immigration_status.citizen.display_name', 'de', 'Staatsbuerger(in)'),
-  ('category', 'immigration_status.other.display_name', 'de', 'Sonstiges/Unbekannt'),
   ('category', 'outcome.enrolled.display_name', 'de', 'In Dienstleistungen eingeschrieben'),
   ('category', 'outcome.received_info.display_name', 'de', 'Informationen erhalten'),
   ('category', 'outcome.referred_elsewhere.display_name', 'de', 'Anderweitig vermittelt'),
@@ -261,7 +249,7 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('action', 'clients.activate.display_name', 'de', 'Klient aktivieren'),
-  ('action', 'clients.activate.description', 'de', 'Bewertung abgeschlossen — Wechsel zu Aktiv'),
+  ('action', 'clients.activate.description', 'de', 'Bewertung abgeschlossen; Wechsel zu Aktiv'),
   ('action', 'clients.activate.confirmation_message', 'de', 'Diesen Klienten aktivieren? Dies bestaetigt, dass die Aufnahmebewertung abgeschlossen ist.'),
   ('action', 'clients.activate.success_message', 'de', 'Klient erfolgreich aktiviert.'),
   ('action', 'clients.reactivate.display_name', 'de', 'Klient reaktivieren'),
@@ -305,9 +293,9 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- DASHBOARDS
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('dashboard', 'dashboard.1.display_name', 'de', 'Willkommen beim ICGF'),
-  ('dashboard', 'dashboard.1.description', 'de', 'Oeffentliche Seite des Internationalen Zentrums von Greater Flint'),
-  ('dashboard', 'dashboard.2.display_name', 'de', 'ICGF Aufnahme-Dashboard'),
+  ('dashboard', 'dashboard.1.display_name', 'de', 'Willkommen bei ECS'),
+  ('dashboard', 'dashboard.1.description', 'de', 'Oeffentliche Seite der Exemplarischen Gemeinschaftsdienste'),
+  ('dashboard', 'dashboard.2.display_name', 'de', 'ECS Aufnahme-Dashboard'),
   ('dashboard', 'dashboard.2.description', 'de', 'Klientenaufnahme, Vermittlungen und Umfrageverfolgung')
 ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
@@ -327,37 +315,36 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('widget_config', 'dashboard.1.widget.1.content', 'de',
-'# Internationales Zentrum von Greater Flint
+'# Exemplarische Gemeinschaftsdienste
 
-Das Internationale Zentrum von Greater Flint (ICGF) verbindet Einwanderer, Fluechtlinge und Gemeindemitglieder mit wesentlichen Dienstleistungen im Genesee County.
+Die Exemplarischen Gemeinschaftsdienste (ECS) verbinden Gemeindemitglieder mit wesentlichen Dienstleistungen und Unterstuetzungsprogrammen.
 
 ## Unsere Dienstleistungen
 
-- **Klientenaufnahme und Bewertung** — Umfassende Bedarfsermittlung fuer Neuankoemmlinge und Gemeindemitglieder
-- **Vermittlungen** — Personalisierte und informative Vermittlungen an ueberprueefte lokale Dienstleistungspartner
-- **Nachverfolgung** — Umfragebasierte Ergebnisverfolgung zur Sicherstellung erfolgreicher Verbindungen
+- **Klientenaufnahme und Bewertung**: Umfassende Bedarfsermittlung fuer Gemeindemitglieder
+- **Vermittlungen**: Personalisierte und informative Vermittlungen an ueberprueefte lokale Dienstleistungspartner
+- **Nachverfolgung**: Umfragebasierte Ergebnisverfolgung zur Sicherstellung erfolgreicher Verbindungen
 
 ## Partnernetzwerk
 
 Wir koordinieren mit einem Netzwerk lokaler Organisationen, die Folgendes anbieten:
 
-- Englisch als Zweitsprache (ESL) Kurse
-- Rechts- und Einwanderungshilfe
 - Beschaeftigung und Stellenvermittlung
 - Bildung und Berufsausbildung
 - Gesundheits- und medizinische Dienste
 - Wohnungshilfe
 - Transport
-- Uebersetzung und Dolmetschen
 - Kinderbetreuung und Jugendprogramme
 - Finanzbildung und Leistungsberatung
+- Rechtshilfe
+- Uebersetzung und Dolmetschen
 
 ## Kontakt
 
-**Internationales Zentrum von Greater Flint**
-519 S. Saginaw St., Suite 104, Flint, MI 48502
-Telefon: (810) 235-2596
-Web: [icgflint.org](https://icgflint.org)
+**Exemplarische Gemeinschaftsdienste**
+123 Main St., Suite 100, Anytown, US 00000
+Telefon: (555) 555-0100
+Web: [example.org](https://example.org)
 
 ---
 

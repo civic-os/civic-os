@@ -1,9 +1,9 @@
 {
   "tables": {
     "service_categories": { "count": 0 },
-    "clients": { "count": 30 },
-    "partners": { "count": 15 },
-    "referrals": { "count": 40 },
+    "clients": { "count": 250 },
+    "partners": { "count": 25 },
+    "referrals": { "count": 0 },
     "follow_up_surveys": { "count": 0 }
   },
   "geoBounds": {

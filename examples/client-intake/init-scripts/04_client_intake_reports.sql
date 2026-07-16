@@ -36,7 +36,7 @@ ORDER BY month DESC;
 GRANT SELECT ON monthly_referral_summary TO authenticated;
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('monthly_referral_summary', 'Monthly Referral Summary', 'Referral volume, types, and completion rates by month', 10, FALSE)
+VALUES ('monthly_referral_summary', 'Monthly Referral Summary', 'Referral volume, types, and completion rates by month', 10, TRUE)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
@@ -70,18 +70,16 @@ SELECT
   to_char(c.created_at, 'YYYY-MM') AS month,
   COUNT(*) AS new_clients,
   COUNT(*) FILTER (WHERE cs.status_key = 'intake_pending') AS intake_pending,
-  COUNT(*) FILTER (WHERE cs.status_key = 'active') AS active_clients,
-  c.country_of_origin,
-  c.primary_language
+  COUNT(*) FILTER (WHERE cs.status_key = 'active') AS active_clients
 FROM clients c
 LEFT JOIN metadata.statuses cs ON c.status_id = cs.id
-GROUP BY to_char(c.created_at, 'YYYY-MM'), c.country_of_origin, c.primary_language
+GROUP BY to_char(c.created_at, 'YYYY-MM')
 ORDER BY month DESC, new_clients DESC;
 
 GRANT SELECT ON client_contact_summary TO authenticated;
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('client_contact_summary', 'Client Contact Summary', 'New client registrations by month, country, and language', 11, FALSE)
+VALUES ('client_contact_summary', 'Client Contact Summary', 'New client registrations by month', 11, TRUE)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
@@ -93,9 +91,7 @@ VALUES
   ('client_contact_summary', 'month', 'Month', 1, TRUE, FALSE, FALSE),
   ('client_contact_summary', 'new_clients', 'New Clients', 2, TRUE, FALSE, FALSE),
   ('client_contact_summary', 'intake_pending', 'Intake Pending', 3, TRUE, FALSE, FALSE),
-  ('client_contact_summary', 'active_clients', 'Active', 4, TRUE, FALSE, FALSE),
-  ('client_contact_summary', 'country_of_origin', 'Country of Origin', 5, TRUE, FALSE, FALSE),
-  ('client_contact_summary', 'primary_language', 'Primary Language', 6, TRUE, FALSE, FALSE)
+  ('client_contact_summary', 'active_clients', 'Active', 4, TRUE, FALSE, FALSE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   sort_order = EXCLUDED.sort_order,
@@ -131,7 +127,7 @@ ORDER BY client_count DESC;
 GRANT SELECT ON top_needs_report TO authenticated;
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('top_needs_report', 'Top Needs Report', 'Service category demand across active client population', 12, FALSE)
+VALUES ('top_needs_report', 'Top Needs Report', 'Service category demand across active client population', 12, TRUE)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
@@ -182,7 +178,7 @@ ORDER BY referral_count DESC;
 GRANT SELECT ON partner_utilization_report TO authenticated;
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('partner_utilization_report', 'Partner Utilization', 'Referral volume and completion rates by partner', 13, FALSE)
+VALUES ('partner_utilization_report', 'Partner Utilization', 'Referral volume and completion rates by partner', 13, TRUE)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
@@ -228,7 +224,7 @@ ORDER BY referral_type, partner_name, response_count DESC;
 GRANT SELECT ON time_lag_report TO authenticated;
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, show_in_sidebar)
-VALUES ('time_lag_report', 'Time Lag Report', 'Time-to-contact breakdown by referral type and partner', 14, FALSE)
+VALUES ('time_lag_report', 'Time Lag Report', 'Time-to-contact breakdown by referral type and partner', 14, TRUE)
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,

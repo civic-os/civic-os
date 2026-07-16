@@ -8,16 +8,16 @@
 BEGIN;
 
 -- =====================================================
--- 2026-06-05: Rename "IC" → "ICGF" in display labels
+-- 2026-06-05: Rename display labels to ECS branding
 -- =====================================================
 
 UPDATE metadata.roles
-SET display_name = 'ICGF Staff'
-WHERE role_key = 'ic_staff' AND display_name = 'IC Staff';
+SET display_name = 'ECS Staff'
+WHERE role_key = 'ecs_staff' AND display_name = 'ECS Staff';
 
 UPDATE metadata.dashboards
-SET display_name = 'ICGF Intake Dashboard'
-WHERE display_name = 'IC Intake Dashboard';
+SET display_name = 'ECS Intake Dashboard'
+WHERE display_name = 'ECS Intake Dashboard';
 
 
 -- =====================================================
@@ -466,15 +466,21 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
+  v_client_name TEXT;
   v_partner_name TEXT;
   v_display TEXT;
 BEGIN
+  SELECT c.first_name || ' ' || c.last_name
+  INTO v_client_name
+  FROM clients c
+  WHERE c.id = NEW.client_id;
+
   SELECT p.display_name
   INTO v_partner_name
   FROM partners p
   WHERE p.id = NEW.partner_id;
 
-  v_display := COALESCE(v_partner_name, 'Unknown') || ', ' || to_char(NEW.referral_date, 'YYYY-MM-DD');
+  v_display := COALESCE(v_client_name, 'Unknown') || ' → ' || COALESCE(v_partner_name, 'Unknown') || ', ' || to_char(NEW.referral_date, 'YYYY-MM-DD');
 
   INSERT INTO follow_up_surveys (referral_id, display_name)
   VALUES (NEW.id, v_display);
@@ -485,8 +491,9 @@ $$;
 
 -- Backfill any existing surveys that still have "Survey #N" display names
 UPDATE follow_up_surveys s
-SET display_name = p.display_name || ', ' || to_char(r.referral_date, 'YYYY-MM-DD')
+SET display_name = c.first_name || ' ' || c.last_name || ' → ' || p.display_name || ', ' || to_char(r.referral_date, 'YYYY-MM-DD')
 FROM referrals r
+JOIN clients c ON r.client_id = c.id
 JOIN partners p ON r.partner_id = p.id
 WHERE s.referral_id = r.id
   AND s.display_name LIKE 'Survey #%';
@@ -496,7 +503,7 @@ WHERE s.referral_id = r.id
 -- 2026-06-05: Ensure Activate Client action role grants
 -- =====================================================
 -- Idempotent: re-assert that client actions are granted
--- only to ic_staff and admin. The framework defaults to
+-- only to ecs_staff and admin. The framework defaults to
 -- admin-only when no grants exist, but explicit grants
 -- make the intent visible in the Permissions UI.
 
@@ -506,7 +513,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'clients'
   AND ea.action_name IN ('activate', 'refer', 'deactivate', 'reactivate')
-  AND r.role_key IN ('ic_staff', 'admin')
+  AND r.role_key IN ('ecs_staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 

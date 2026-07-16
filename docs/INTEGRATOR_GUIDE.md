@@ -4486,6 +4486,8 @@ Provide subscribable calendar feeds for any entity with time-based data. Users c
 - UTC timestamp conversion for universal compatibility
 - Special character escaping per iCal spec
 - RLS-enforced data access (SECURITY INVOKER)
+- `LAST-MODIFIED` / `SEQUENCE` change-detection properties (v0.66.0+)
+- HTTP `Last-Modified` response header for cache validation (v0.66.0+)
 
 **Requirements**:
 - Civic OS v0.27.0+ (iCal helper migrations)
@@ -4501,8 +4503,8 @@ Civic OS provides three helper functions in the `metadata` schema:
 | Function | Purpose |
 |----------|---------|
 | `escape_ical_text(text)` | Escape special characters (commas, semicolons, backslashes, newlines) |
-| `format_ical_event(uid, summary, dtstart, dtend, description, location)` | Generate a single VEVENT block |
-| `wrap_ical_feed(events, calendar_name)` | Wrap VEVENT blocks in a VCALENDAR container |
+| `format_ical_event(uid, summary, dtstart, dtend, description, location, last_modified, sequence)` | Generate a single VEVENT block. `last_modified` (TIMESTAMPTZ, optional) emits `LAST-MODIFIED`; `sequence` (INTEGER, default 0) emits `SEQUENCE`. |
+| `wrap_ical_feed(events, calendar_name, feed_updated_at)` | Wrap VEVENT blocks in a VCALENDAR container. `feed_updated_at` (TIMESTAMPTZ, optional) adds an HTTP `Last-Modified` response header. |
 
 #### Creating a Calendar Feed RPC
 
@@ -4519,6 +4521,7 @@ AS $$
 DECLARE
   v_events TEXT := '';
   v_event RECORD;
+  v_max_updated_at TIMESTAMPTZ := NULL;
 BEGIN
   FOR v_event IN
     SELECT
@@ -4527,22 +4530,30 @@ BEGIN
       lower(time_slot) as start_time,  -- Extract start from tstzrange
       upper(time_slot) as end_time,    -- Extract end from tstzrange
       description,
-      location
+      location,
+      updated_at                       -- For LAST-MODIFIED (v0.66.0+)
     FROM my_events
     WHERE time_slot && tstzrange(p_start_date::timestamptz, p_end_date::timestamptz)
     ORDER BY lower(time_slot)
   LOOP
+    -- Track most recent modification for HTTP Last-Modified header
+    IF v_max_updated_at IS NULL OR v_event.updated_at > v_max_updated_at THEN
+      v_max_updated_at := v_event.updated_at;
+    END IF;
+
     v_events := v_events || metadata.format_ical_event(
       p_uid := 'my-event-' || v_event.id || '@my-domain.org',
       p_summary := v_event.title,
       p_dtstart := v_event.start_time,
       p_dtend := v_event.end_time,
       p_description := v_event.description,
-      p_location := v_event.location
+      p_location := v_event.location,
+      p_last_modified := v_event.updated_at  -- Change-detection signal (v0.66.0+)
     ) || chr(13) || chr(10);
   END LOOP;
 
-  RETURN metadata.wrap_ical_feed(v_events, 'My Calendar');
+  -- feed_updated_at sets HTTP Last-Modified header for cache validation
+  RETURN metadata.wrap_ical_feed(v_events, 'My Calendar', v_max_updated_at);
 END;
 $$;
 
@@ -4571,13 +4582,15 @@ Users subscribe via the PostgREST RPC endpoint:
 1. **UID Format**: Use globally unique identifiers like `entity-type-id@your-domain.org`
 2. **Date Range**: Default to 30 days past through 1 year future for reasonable data volume
 3. **Security**: Use `SECURITY INVOKER` to respect RLS policies; grant to `web_anon` only for public data
-4. **Caching**: Calendar apps typically refresh every 15-60 minutes; stale data is expected
+4. **Caching & Change Detection** (v0.66.0+): Calendar apps typically refresh every 15-60 minutes. Pass `p_last_modified` (from your `updated_at` column) to `format_ical_event()` and `p_feed_updated_at` (max `updated_at`) to `wrap_ical_feed()` to give clients change-detection signals. Google Calendar in particular uses `LAST-MODIFIED` and `SEQUENCE` to prioritize refresh scheduling. The HTTP `Last-Modified` header enables conditional requests that reduce bandwidth
 5. **Optional Filters**: Add parameters like `p_resource_id` or `p_category` for filtered feeds
 
 #### Complete Example
 
 See `examples/community-center/init-scripts/18_ical_feed_example.sql` for a complete implementation with:
 - Public events feed for community center reservations
+- `LAST-MODIFIED` and `SEQUENCE` change-detection fields (v0.66.0+)
+- HTTP `Last-Modified` header for cache validation
 - Resource filtering parameter
 - Date range parameters
 - Usage examples with curl and calendar apps

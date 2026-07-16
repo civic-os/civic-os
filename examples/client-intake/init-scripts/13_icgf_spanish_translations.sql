@@ -1,5 +1,5 @@
--- ICGF Spanish Translations
--- Comprehensive Spanish (es) translations for all ICGF instance metadata.
+-- ECS Spanish Translations
+-- Comprehensive Spanish (es) translations for all ECS instance metadata.
 -- Framework UI strings (279 keys) are already translated via the v0.57.0 migration.
 -- This script covers instance-specific: entities, properties, statuses, categories,
 -- entity actions, dashboards, dashboard widgets, and widget content.
@@ -10,7 +10,7 @@
 -- ============================================================================
 -- CLEANUP — Remove stale pothole example translations from v0.57.0 migration
 -- These were seeded by the core i18n migration but reference entities that
--- don't exist in the ICGF schema (Issue, Bid, Inspector, Tag, WorkPackage, Pot_Hole).
+-- don't exist in the ECS schema (Issue, Bid, Inspector, Tag, WorkPackage, Pot_Hole).
 -- ============================================================================
 DELETE FROM metadata.translations
 WHERE locale = 'es'
@@ -58,13 +58,13 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ENTITIES — descriptions
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('entity', 'clients.description', 'es', 'Miembros de la comunidad inmigrante y refugiada que buscan servicios'),
+  ('entity', 'clients.description', 'es', 'Miembros de la comunidad que buscan servicios y programas de apoyo'),
   ('entity', 'partners.description', 'es', 'Organizaciones e individuos proveedores de servicios'),
   ('entity', 'referrals.description', 'es', 'Registros de referencias de clientes a socios'),
   ('entity', 'follow_up_surveys.description', 'es', 'Encuestas de retroalimentación post-referencia'),
   ('entity', 'service_categories.description', 'es', 'Tipos de servicios disponibles para clientes y socios'),
   ('entity', 'monthly_referral_summary.description', 'es', 'Volumen de referencias, tipos y tasas de finalización por mes'),
-  ('entity', 'client_contact_summary.description', 'es', 'Nuevos registros de clientes por mes, país e idioma'),
+  ('entity', 'client_contact_summary.description', 'es', 'Nuevos registros de clientes y estado de ingreso por mes'),
   ('entity', 'top_needs_report.description', 'es', 'Demanda de categorías de servicio entre la población activa de clientes'),
   ('entity', 'partner_utilization_report.description', 'es', 'Volumen de referencias y tasas de finalización por socio'),
   ('entity', 'time_lag_report.description', 'es', 'Desglose del tiempo de contacto por tipo de referencia y socio')
@@ -82,11 +82,7 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'clients.phone.display_name', 'es', 'Teléfono'),
   ('property', 'clients.date_of_birth.display_name', 'es', 'Fecha de Nacimiento'),
   ('property', 'clients.gender_id.display_name', 'es', 'Género'),
-  ('property', 'clients.country_of_origin.display_name', 'es', 'País de Origen'),
-  ('property', 'clients.primary_language.display_name', 'es', 'Idioma Principal'),
   ('property', 'clients.preferred_comm_language.display_name', 'es', 'Idioma Preferido de Comunicación'),
-  ('property', 'clients.date_of_arrival.display_name', 'es', 'Fecha de Llegada a EE.UU.'),
-  ('property', 'clients.immigration_status_id.display_name', 'es', 'Estatus Migratorio'),
   ('property', 'clients.household_size.display_name', 'es', 'Tamaño del Hogar'),
   ('property', 'clients.status_id.display_name', 'es', 'Estado'),
   ('property', 'clients.user_id.display_name', 'es', 'Cuenta de Usuario Vinculada'),
@@ -177,8 +173,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'client_contact_summary.new_clients.display_name', 'es', 'Nuevos Clientes'),
   ('property', 'client_contact_summary.intake_pending.display_name', 'es', 'Ingreso Pendiente'),
   ('property', 'client_contact_summary.active_clients.display_name', 'es', 'Activos'),
-  ('property', 'client_contact_summary.country_of_origin.display_name', 'es', 'País de Origen'),
-  ('property', 'client_contact_summary.primary_language.display_name', 'es', 'Idioma Principal'),
   -- monthly_referral_summary
   ('property', 'monthly_referral_summary.month.display_name', 'es', 'Mes'),
   ('property', 'monthly_referral_summary.total_referrals.display_name', 'es', 'Total'),
@@ -278,13 +272,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('category', 'helpfulness.somewhat_helpful.display_name', 'es', 'Algo Útil'),
   ('category', 'helpfulness.not_helpful.display_name', 'es', 'No Fue Útil'),
   ('category', 'helpfulness.could_not_contact.display_name', 'es', 'No Se Pudo Contactar'),
-  -- immigration_status
-  ('category', 'immigration_status.refugee.display_name', 'es', 'Refugiado/a'),
-  ('category', 'immigration_status.asylee.display_name', 'es', 'Asilado/a'),
-  ('category', 'immigration_status.siv.display_name', 'es', 'VIE (Visa Especial de Inmigrante)'),
-  ('category', 'immigration_status.permanent_resident.display_name', 'es', 'Residente Permanente'),
-  ('category', 'immigration_status.citizen.display_name', 'es', 'Ciudadano/a'),
-  ('category', 'immigration_status.other.display_name', 'es', 'Otro/Desconocido'),
   -- outcome
   ('category', 'outcome.enrolled.display_name', 'es', 'Inscrito en Servicios'),
   ('category', 'outcome.received_info.display_name', 'es', 'Recibió Información'),
@@ -311,7 +298,7 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   -- activate
   ('action', 'clients.activate.display_name', 'es', 'Activar Cliente'),
-  ('action', 'clients.activate.description', 'es', 'Evaluación completa — transición a Activo'),
+  ('action', 'clients.activate.description', 'es', 'Evaluación completa; transición a Activo'),
   ('action', 'clients.activate.confirmation_message', 'es', '¿Activar este cliente? Esto confirma que su evaluación de ingreso está completa.'),
   ('action', 'clients.activate.success_message', 'es', 'Cliente activado exitosamente.'),
   -- reactivate
@@ -362,9 +349,9 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- DASHBOARDS
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('dashboard', 'dashboard.1.display_name', 'es', 'Bienvenida ICGF'),
-  ('dashboard', 'dashboard.1.description', 'es', 'Página pública del Centro Internacional de Greater Flint'),
-  ('dashboard', 'dashboard.2.display_name', 'es', 'Panel de Ingreso ICGF'),
+  ('dashboard', 'dashboard.1.display_name', 'es', 'Bienvenida ECS'),
+  ('dashboard', 'dashboard.1.description', 'es', 'Página pública de Servicios Comunitarios Ejemplares'),
+  ('dashboard', 'dashboard.2.display_name', 'es', 'Panel de Ingreso ECS'),
   ('dashboard', 'dashboard.2.description', 'es', 'Ingreso de clientes, referencias y seguimiento de encuestas')
 ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
@@ -384,37 +371,36 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('widget_config', 'dashboard.1.widget.1.content', 'es',
-'# Centro Internacional de Greater Flint
+'# Servicios Comunitarios Ejemplares
 
-El Centro Internacional de Greater Flint (ICGF) conecta a inmigrantes, refugiados y miembros de la comunidad con servicios esenciales en el Condado de Genesee.
+Servicios Comunitarios Ejemplares (ECS) conecta a miembros de la comunidad con servicios esenciales y programas de apoyo.
 
 ## Nuestros Servicios
 
-- **Ingreso y Evaluación de Clientes** — Identificación integral de necesidades para recién llegados y miembros de la comunidad
-- **Referencias** — Referencias personalizadas e informativas a socios de servicios locales verificados
-- **Seguimiento** — Seguimiento de resultados basado en encuestas para asegurar conexiones exitosas
+- **Ingreso y Evaluación de Clientes**: Identificación integral de necesidades para miembros de la comunidad
+- **Referencias**: Referencias personalizadas e informativas a socios de servicios locales verificados
+- **Seguimiento**: Seguimiento de resultados basado en encuestas para asegurar conexiones exitosas
 
 ## Red de Socios
 
 Coordinamos con una red de organizaciones locales que proveen:
 
-- Clases de ESL e Inglés
-- Asistencia Legal e Inmigración
 - Empleo y Colocación Laboral
 - Educación y Capacitación Laboral
 - Servicios de Salud y Médicos
 - Asistencia de Vivienda
 - Transporte
-- Traducción e Interpretación
 - Cuidado Infantil y Programas Juveniles
 - Educación Financiera y Navegación de Beneficios
+- Asistencia Legal
+- Traducción e Interpretación
 
 ## Contacto
 
-**Centro Internacional de Greater Flint**
-519 S. Saginaw St., Suite 104, Flint, MI 48502
-Teléfono: (810) 235-2596
-Web: [icgflint.org](https://icgflint.org)
+**Servicios Comunitarios Ejemplares**
+123 Main St., Suite 100, Anytown, US 00000
+Teléfono: (555) 555-0100
+Web: [example.org](https://example.org)
 
 ---
 

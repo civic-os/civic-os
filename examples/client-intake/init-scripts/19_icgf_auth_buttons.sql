@@ -1,5 +1,5 @@
 -- =====================================================
--- ICGF Auth Buttons - Login/Register on Welcome Dashboard
+-- ECS Auth Buttons - Login/Register on Welcome Dashboard
 -- =====================================================
 -- Adds auth action buttons to the Welcome dashboard
 -- markdown widget so visitors can sign in or register
@@ -11,47 +11,53 @@ BEGIN;
 
 UPDATE metadata.dashboard_widgets
 SET config = jsonb_build_object(
-      'content', '# International Center of Greater Flint
+      'content', '# Exemplary Community Services
 
-The International Center of Greater Flint (ICGF) connects immigrants, refugees, and community members with essential services across Genesee County.
+Exemplary Community Services (ECS) connects community members with essential services and support programs.
 
 ## Our Services
 
-- **Client Intake & Assessment** — Comprehensive needs identification for new arrivals and community members
-- **Referrals** — Warm and informational referrals to vetted local service partners
-- **Follow-Up** — Survey-based outcome tracking to ensure successful connections
+- **Client Intake & Assessment**: Comprehensive needs identification for community members
+- **Referrals**: Warm and informational referrals to vetted local service partners
+- **Follow-Up**: Survey-based outcome tracking to ensure successful connections
 
 ## Partner Network
 
 We coordinate with a network of local organizations providing:
 
-- ESL & English Classes
-- Legal Aid & Immigration Assistance
+- ESL / English Classes
 - Employment & Job Placement
-- Education & Workforce Training
-- Healthcare & Medical Services
 - Housing Assistance
+- Healthcare & Medical Services
 - Transportation
-- Translation & Interpretation
-- Childcare & Youth Programs
+- Food & Nutrition
+- Education & Workforce Training
 - Financial Literacy & Benefits Navigation
+- Mental Health & Counseling
+- Childcare & Youth Programs
 
 ## Contact
 
-**International Center of Greater Flint**
-519 S. Saginaw St., Suite 104, Flint, MI 48502
-Phone: (810) 235-2596
-Web: [icgflint.org](https://icgflint.org)
+**Exemplary Community Services**
+123 Main St., Suite 100, Anytown, US 00000
+Phone: (555) 555-0100
+Web: [example.org](https://example.org)
 
 ## Get Started
 
-Sign in to access the Intake Dashboard and client management tools. New to ICGF? Create an account to get started.
+New to ECS services? Here''s how to get started:
+
+1. **Create an account**; click the button below to sign in or register
+2. **Complete your Client Profile**; you''ll be guided to fill in your information after signing in
+3. **Connect with a staff member**; ECS staff will review your intake and connect you with services
+
+Already have an account? Sign in to check your referral status and complete follow-up surveys.
 
 @[login-button](Sign In or Register)',
       'enableHtml', false
     ),
     updated_at = NOW()
-WHERE dashboard_id = (SELECT id FROM metadata.dashboards WHERE display_name = 'ICGF Welcome')
+WHERE dashboard_id = (SELECT id FROM metadata.dashboards WHERE display_name = 'ECS Welcome')
   AND widget_type = 'markdown';
 
 COMMIT;

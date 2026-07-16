@@ -1,5 +1,5 @@
--- ICGF Pashto (ps) Translations
--- Instance-specific metadata translations for the International Center of Greater Flint.
+-- ECS Pashto (ps) Translations
+-- Instance-specific metadata translations for Exemplary Community Services.
 -- Framework UI strings are handled by the core v0-64-1 migration.
 -- This script covers: entities, properties, statuses, categories, actions, dashboards, widgets.
 --
@@ -29,13 +29,13 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ENTITIES — descriptions
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('entity', 'clients.description', 'ps', 'د مهاجرو او کډوالو ټولنې غړي چې خدمتونه لټوي'),
+  ('entity', 'clients.description', 'ps', 'د ټولنې غړي چې خدمتونه او د ملاتړ پروګرامونه لټوي'),
   ('entity', 'partners.description', 'ps', 'د خدمتونو وړاندې کوونکي سازمانونه او اشخاص'),
   ('entity', 'referrals.description', 'ps', 'د مراجعینو شریکانو ته د لیږدنو سوابق'),
   ('entity', 'follow_up_surveys.description', 'ps', 'د لیږدنې وروسته د نظرونو سروېګانې'),
   ('entity', 'service_categories.description', 'ps', 'د مراجعینو او شریکانو لپاره شته خدمتونه'),
   ('entity', 'monthly_referral_summary.description', 'ps', 'د لیږدنو مقدار، ډولونه او د بشپړیدو کچه په میاشت'),
-  ('entity', 'client_contact_summary.description', 'ps', 'د نوو مراجعینو ثبت په میاشت، هیواد او ژبه'),
+  ('entity', 'client_contact_summary.description', 'ps', 'د نوو مراجعینو ثبت او د استقبال حالت په میاشت'),
   ('entity', 'top_needs_report.description', 'ps', 'د فعالو مراجعینو ترمنځ د خدمتي کټګوریو غوښتنه'),
   ('entity', 'partner_utilization_report.description', 'ps', 'د لیږدنو مقدار او د بشپړیدو کچه د هر شریک لپاره'),
   ('entity', 'time_lag_report.description', 'ps', 'د اړیکې وخت توضیح د لیږدنې ډول او شریک له مخې')
@@ -53,11 +53,7 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'clients.phone.display_name', 'ps', 'تلیفون'),
   ('property', 'clients.date_of_birth.display_name', 'ps', 'د زیږیدنې نېټه'),
   ('property', 'clients.gender_id.display_name', 'ps', 'جنسیت'),
-  ('property', 'clients.country_of_origin.display_name', 'ps', 'اصلي هیواد'),
-  ('property', 'clients.primary_language.display_name', 'ps', 'لومړنۍ ژبه'),
   ('property', 'clients.preferred_comm_language.display_name', 'ps', 'غوره اړیکې ژبه'),
-  ('property', 'clients.date_of_arrival.display_name', 'ps', 'امریکا ته د رسیدو نېټه'),
-  ('property', 'clients.immigration_status_id.display_name', 'ps', 'د مهاجرت وضعیت'),
   ('property', 'clients.household_size.display_name', 'ps', 'د کورنۍ اندازه'),
   ('property', 'clients.status_id.display_name', 'ps', 'حالت'),
   ('property', 'clients.user_id.display_name', 'ps', 'تړلی کارونکي حساب'),
@@ -147,8 +143,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'client_contact_summary.new_clients.display_name', 'ps', 'نوي مراجعین'),
   ('property', 'client_contact_summary.intake_pending.display_name', 'ps', 'استقبال پاتې'),
   ('property', 'client_contact_summary.active_clients.display_name', 'ps', 'فعال'),
-  ('property', 'client_contact_summary.country_of_origin.display_name', 'ps', 'اصلي هیواد'),
-  ('property', 'client_contact_summary.primary_language.display_name', 'ps', 'لومړنۍ ژبه'),
   ('property', 'monthly_referral_summary.month.display_name', 'ps', 'میاشت'),
   ('property', 'monthly_referral_summary.total_referrals.display_name', 'ps', 'ټول'),
   ('property', 'monthly_referral_summary.warm_referrals.display_name', 'ps', 'مستقیمې'),
@@ -234,12 +228,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('category', 'helpfulness.somewhat_helpful.display_name', 'ps', 'یو څه ګټور'),
   ('category', 'helpfulness.not_helpful.display_name', 'ps', 'ګټور نه وو'),
   ('category', 'helpfulness.could_not_contact.display_name', 'ps', 'اړیکه نیول ممکنه نه وه'),
-  ('category', 'immigration_status.refugee.display_name', 'ps', 'کډوال'),
-  ('category', 'immigration_status.asylee.display_name', 'ps', 'سیاسي پناه غوښتونکی'),
-  ('category', 'immigration_status.siv.display_name', 'ps', 'ځانګړې مهاجرت ویزه'),
-  ('category', 'immigration_status.permanent_resident.display_name', 'ps', 'دایمي اوسیدونکی'),
-  ('category', 'immigration_status.citizen.display_name', 'ps', 'تبعه'),
-  ('category', 'immigration_status.other.display_name', 'ps', 'نور/نامعلوم'),
   ('category', 'outcome.enrolled.display_name', 'ps', 'په خدمتونو کې شامل شو'),
   ('category', 'outcome.received_info.display_name', 'ps', 'معلومات ترلاسه کړل'),
   ('category', 'outcome.referred_elsewhere.display_name', 'ps', 'بل ځای ته لیږل شو'),
@@ -261,7 +249,7 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('action', 'clients.activate.display_name', 'ps', 'مراجع فعال کړئ'),
-  ('action', 'clients.activate.description', 'ps', 'ارزونه بشپړه شوه — فعال حالت ته لیږد'),
+  ('action', 'clients.activate.description', 'ps', 'ارزونه بشپړه شوه؛ فعال حالت ته لیږد'),
   ('action', 'clients.activate.confirmation_message', 'ps', 'دا مراجع فعال کړئ؟ دا تایید کوي چې د استقبال ارزونه بشپړه شوې.'),
   ('action', 'clients.activate.success_message', 'ps', 'مراجع په بریالیتوب سره فعال شو.'),
   ('action', 'clients.reactivate.display_name', 'ps', 'مراجع بیا فعال کړئ'),
@@ -305,9 +293,9 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- DASHBOARDS
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('dashboard', 'dashboard.1.display_name', 'ps', 'د ICGF ښه راغلاست'),
-  ('dashboard', 'dashboard.1.description', 'ps', 'د لوی فلینت نړیوال مرکز عامه پاڼه'),
-  ('dashboard', 'dashboard.2.display_name', 'ps', 'د ICGF استقبال ډشبورډ'),
+  ('dashboard', 'dashboard.1.display_name', 'ps', 'د ECS ښه راغلاست'),
+  ('dashboard', 'dashboard.1.description', 'ps', 'د نمونوي ټولنیزو خدمتونو عامه پاڼه'),
+  ('dashboard', 'dashboard.2.display_name', 'ps', 'د ECS استقبال ډشبورډ'),
   ('dashboard', 'dashboard.2.description', 'ps', 'د مراجعینو استقبال، لیږدنې او د سروېو تعقیب')
 ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
@@ -327,37 +315,36 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('widget_config', 'dashboard.1.widget.1.content', 'ps',
-'# د لوی فلینت نړیوال مرکز
+'# نمونوي ټولنیز خدمتونه
 
-د لوی فلینت نړیوال مرکز (ICGF) مهاجرین، کډوالان او د ټولنې غړي د جینیسي ولسوالۍ کې له اساسي خدمتونو سره وصلوي.
+نمونوي ټولنیز خدمتونه (ECS) د ټولنې غړي له اساسي خدمتونو او د ملاتړ پروګرامونو سره وصلوي.
 
 ## زموږ خدمتونه
 
-- **د مراجعینو استقبال او ارزونه** — د نوو راغلو او د ټولنې غړو لپاره هراړخیزه اړتیاوو پیژندنه
-- **لیږدنې** — مستقیمې او معلوماتي لیږدنې تصدیق شوو محلي خدمتي شریکانو ته
-- **تعقیب** — د بریالي وصلونو ډاډ ترلاسه کولو لپاره د سروې پر بنسټ پایلو تعقیب
+- **د مراجعینو استقبال او ارزونه**: د ټولنې غړو لپاره هراړخیزه اړتیاوو پیژندنه
+- **لیږدنې**: مستقیمې او معلوماتي لیږدنې تصدیق شوو محلي خدمتي شریکانو ته
+- **تعقیب**: د بریالي وصلونو ډاډ ترلاسه کولو لپاره د سروې پر بنسټ پایلو تعقیب
 
 ## د شریکانو شبکه
 
 موږ د محلي سازمانونو شبکې سره همکاري کوو چې وړاندې کوي:
 
-- د انګلیسي ژبې ټولګي
-- حقوقي او مهاجرتي مرسته
 - کار موندنه او ځای پر ځای کول
 - تعلیم او مسلکي روزنه
 - روغتیایي او طبي خدمتونه
 - د کور مرسته
 - ترانسپورت
-- ژباړه
 - د ماشومانو پالنه او ځوانانو پروګرامونه
 - مالي سواد او د ګټو لارښودنه
+- حقوقي مرسته
+- ژباړه
 
 ## موږ سره اړیکه ونیسئ
 
-**د لوی فلینت نړیوال مرکز**
-519 S. Saginaw St., Suite 104, Flint, MI 48502
-تلیفون: (810) 235-2596
-ویب: [icgflint.org](https://icgflint.org)
+**نمونوي ټولنیز خدمتونه**
+123 Main St., Suite 100, Anytown, US 00000
+تلیفون: (555) 555-0100
+ویب: [example.org](https://example.org)
 
 ---
 

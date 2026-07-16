@@ -18,7 +18,7 @@ ON CONFLICT (table_name) DO UPDATE SET
   sort_order = EXCLUDED.sort_order;
 
 INSERT INTO metadata.entities (table_name, display_name, description, sort_order, fulltext_search_column, substring_search_column)
-VALUES ('clients', 'Client', 'Immigrant and refugee community members seeking services', 2, 'search_vector', 'display_name')
+VALUES ('clients', 'Client', 'Community members seeking services', 2, 'search_vector', 'display_name')
 ON CONFLICT (table_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   description = EXCLUDED.description,
@@ -85,15 +85,11 @@ VALUES
   -- Demographics
   ('clients', 'date_of_birth', 'Date of Birth', 6, 1, FALSE, TRUE, TRUE, TRUE),
   ('clients', 'gender_id', 'Gender', 7, 1, FALSE, TRUE, TRUE, TRUE),
-  ('clients', 'country_of_origin', 'Country of Origin', 8, 1, TRUE, TRUE, TRUE, TRUE),
-  ('clients', 'primary_language', 'Primary Language', 9, 1, TRUE, TRUE, TRUE, TRUE),
-  ('clients', 'preferred_comm_language', 'Preferred Communication Language', 10, 2, FALSE, TRUE, TRUE, TRUE),
-  ('clients', 'date_of_arrival', 'Date of Arrival in US', 11, 1, FALSE, TRUE, TRUE, TRUE),
-  ('clients', 'immigration_status_id', 'Immigration Status', 12, 1, FALSE, TRUE, TRUE, TRUE),
-  ('clients', 'household_size', 'Household Size', 13, 1, FALSE, TRUE, TRUE, TRUE),
+  ('clients', 'preferred_comm_language', 'Preferred Communication Language', 8, 2, FALSE, TRUE, TRUE, TRUE),
+  ('clients', 'household_size', 'Household Size', 9, 1, FALSE, TRUE, TRUE, TRUE),
   -- Status & ownership
-  ('clients', 'status_id', 'Status', 14, 1, TRUE, FALSE, FALSE, TRUE),
-  ('clients', 'user_id', 'Linked User Account', 15, 1, FALSE, FALSE, TRUE, TRUE),
+  ('clients', 'status_id', 'Status', 10, 1, TRUE, FALSE, FALSE, TRUE),
+  ('clients', 'user_id', 'Linked User Account', 11, 1, FALSE, FALSE, TRUE, TRUE),
   ('clients', 'created_at', 'Registered', 20, 1, FALSE, FALSE, FALSE, TRUE),
   -- Hidden internal fields (framework defaults would show these)
   ('clients', 'search_vector', 'Search Index', 99, 1, FALSE, FALSE, FALSE, FALSE),
@@ -128,6 +124,7 @@ VALUES
   ('partners', 'active', 'Active', 12, 1, TRUE, TRUE, TRUE, TRUE),
   ('partners', 'created_at', 'Added', 20, 1, FALSE, FALSE, FALSE, TRUE),
   -- Hidden internal fields
+  ('partners', 'location_text', 'Location Text', 98, 1, FALSE, FALSE, FALSE, FALSE),
   ('partners', 'search_vector', 'Search Index', 99, 1, FALSE, FALSE, FALSE, FALSE)
 ON CONFLICT (table_name, column_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
@@ -207,9 +204,6 @@ WHERE table_name = 'follow_up_surveys' AND column_name = 'status_id';
 UPDATE metadata.properties SET category_entity_type = 'gender'
 WHERE table_name = 'clients' AND column_name = 'gender_id';
 
-UPDATE metadata.properties SET category_entity_type = 'immigration_status'
-WHERE table_name = 'clients' AND column_name = 'immigration_status_id';
-
 UPDATE metadata.properties SET category_entity_type = 'partner_type'
 WHERE table_name = 'partners' AND column_name = 'partner_type_id';
 
@@ -269,10 +263,10 @@ WHERE table_name = 'referrals' AND column_name = 'partner_id';
 
 -- clients
 UPDATE metadata.properties SET filterable = TRUE
-WHERE table_name = 'clients' AND column_name IN ('status_id', 'country_of_origin', 'primary_language', 'gender_id', 'immigration_status_id');
+WHERE table_name = 'clients' AND column_name IN ('status_id', 'gender_id');
 
 UPDATE metadata.properties SET sortable = TRUE
-WHERE table_name = 'clients' AND column_name IN ('display_name', 'country_of_origin', 'created_at');
+WHERE table_name = 'clients' AND column_name IN ('display_name', 'created_at');
 
 -- partners
 UPDATE metadata.properties SET filterable = TRUE

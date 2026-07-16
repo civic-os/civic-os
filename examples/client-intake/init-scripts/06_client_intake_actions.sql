@@ -327,7 +327,7 @@ INSERT INTO metadata.entity_actions (
   requires_confirmation, confirmation_message, default_success_message,
   visibility_condition, refresh_after_action
 ) VALUES
-  ('clients', 'activate', 'Activate Client', 'Assessment complete — transition to Active',
+  ('clients', 'activate', 'Activate Client', 'Assessment complete; transition to Active',
    'activate_client', 'check_circle', 'success', 10,
    TRUE, 'Activate this client? This confirms their intake assessment is complete.',
    'Client activated successfully.',
@@ -383,24 +383,24 @@ ON CONFLICT DO NOTHING;
 -- 4. ENTITY ACTION ROLE GRANTS
 -- ============================================================================
 
--- Grant all client actions to ic_staff and admin
+-- Grant all client actions to ecs_staff and admin
 INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
 SELECT ea.id, r.id
 FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'clients'
   AND ea.action_name IN ('activate', 'refer', 'deactivate', 'reactivate')
-  AND r.role_key IN ('ic_staff', 'admin')
+  AND r.role_key IN ('ecs_staff', 'admin')
 ON CONFLICT DO NOTHING;
 
--- Grant all referral actions to ic_staff and admin
+-- Grant all referral actions to ecs_staff and admin
 INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
 SELECT ea.id, r.id
 FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'referrals'
   AND ea.action_name IN ('complete', 'not_completed')
-  AND r.role_key IN ('ic_staff', 'admin')
+  AND r.role_key IN ('ecs_staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 
@@ -572,7 +572,7 @@ INSERT INTO metadata.notification_templates (
     </div>
 
     <p style="color: #6b7280; font-size: 14px;">
-      Referred by {{.Entity.staff_name}} at the International Center of Greater Flint.
+      Referred by {{.Entity.staff_name}} at the Exemplary Community Services.
     </p>
   </div>',
 
@@ -592,7 +592,7 @@ Partner Contact:
 {{if .Metadata.partner_address}}Address: {{.Entity.partner_address}}{{end}}
 {{if .Metadata.partner_website}}Website: {{.Entity.partner_website}}{{end}}
 
-Referred by {{.Entity.staff_name}}, International Center of Greater Flint.'
+Referred by {{.Entity.staff_name}}, Exemplary Community Services.'
 )
 ON CONFLICT (name) DO NOTHING;
 
@@ -758,7 +758,7 @@ INSERT INTO metadata.notification_templates (
       </a>
     </div>
     <p style="color: #6b7280; font-size: 14px;">
-      International Center of Greater Flint
+      Exemplary Community Services
     </p>
   </div>',
 
@@ -775,7 +775,7 @@ Services: {{.Entity.service_categories}}
 
 Complete your survey here: {{.Metadata.site_url}}/edit/follow_up_surveys/{{.Entity.survey_id}}
 
-International Center of Greater Flint'
+Exemplary Community Services'
 )
 ON CONFLICT (name) DO NOTHING;
 
