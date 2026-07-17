@@ -232,7 +232,7 @@ describe('FkSearchModalComponent', () => {
       fixture.detectChanges();
       await waitForData();
 
-      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search..."]'));
+      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search"]'));
       expect(searchInput).toBeTruthy();
     });
   });
@@ -1008,7 +1008,7 @@ describe('FkSearchModalComponent', () => {
       fixture.detectChanges();
       await waitForData();
 
-      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search..."]'));
+      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search"]'));
       expect(searchInput).toBeTruthy();
     });
 

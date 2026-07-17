@@ -94,7 +94,7 @@
                   <input
                     type="text"
                     class="input input-bordered w-full ps-10"
-                    placeholder="Search..."
+                    [placeholder]="'a11y.search' | translate"
                     [attr.aria-label]="'a11y.search' | translate"
                     [ngModel]="searchQuery()"
                     (ngModelChange)="onSearchInput($event)"
@@ -263,7 +263,7 @@
             <input
               type="text"
               class="input input-bordered w-full ps-10"
-              placeholder="Search..."
+              [placeholder]="'a11y.search' | translate"
               [attr.aria-label]="'a11y.search' | translate"
               [ngModel]="searchQuery()"
               (ngModelChange)="onSearchInput($event)"

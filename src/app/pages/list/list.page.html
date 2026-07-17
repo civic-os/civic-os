@@ -23,7 +23,7 @@
                 [formControl]="searchControl"
                 [placeholder]="'list.search_placeholder' | translate:{ entity: entity.display_name }"
                 class="grow"
-                [attr.aria-label]="('action.search' | translate) + ' ' + entity.display_name" />
+                [attr.aria-label]="'list.search_placeholder' | translate:{ entity: entity.display_name }" />
               @if (searchControl.value && isLoading()) {
                 <span class="loading loading-spinner loading-sm" role="status" [attr.aria-label]="'action.search' | translate"></span>
               } @else if (searchControl.value && !isLoading()) {

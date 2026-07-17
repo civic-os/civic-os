@@ -12,7 +12,7 @@
       <input
         type="search"
         class="input input-sm input-bordered w-full"
-        placeholder="Search..."
+        [placeholder]="'a11y.search' | translate"
         [attr.aria-label]="'a11y.search' | translate"
         [value]="searchTerm()"
         (input)="updateSearchTerm($any($event.target).value)" />
