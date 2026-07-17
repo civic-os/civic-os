@@ -122,7 +122,7 @@
               <table class="table table-zebra table-sm w-full">
                 <thead class="sticky top-0 bg-base-200 z-10">
                   <tr>
-                    <th class="w-8" scope="col"></th>
+                    <th class="w-8" scope="col"><span class="sr-only">{{ 'action.select' | translate }}</span></th>
                     @for (prop of listProperties(); track prop.column_name) {
                       <th
                         scope="col"
@@ -291,7 +291,7 @@
         <table class="table table-zebra table-sm w-full">
           <thead class="sticky top-0 bg-base-200 z-10">
             <tr>
-              <th class="w-8" scope="col"></th>
+              <th class="w-8" scope="col"><span class="sr-only">{{ 'action.select' | translate }}</span></th>
               @for (prop of listProperties(); track prop.column_name) {
                 <th
                   scope="col"

@@ -109,6 +109,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.view_error': 'View error',
   'a11y.retry': 'Retry',
   'a11y.loading': 'Loading',
+  'a11y.direction': 'Direction',
   'a11y.write_note': 'Write a note',
   'a11y.edit_note': 'Edit note',
   'a11y.insert_link': 'Insert link',

@@ -100,7 +100,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
                 <th class="w-16">Notif</th>
                 <th>Roles</th>
                 <th>Status</th>
-                <th></th>
+                <th><span class="sr-only">{{ 'detail.actions' | translate }}</span></th>
               </tr>
             </thead>
             <tbody>
