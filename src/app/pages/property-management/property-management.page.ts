@@ -23,7 +23,7 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
 import { PropertyManagementService } from '../../services/property-management.service';
-import { SchemaEntityTable, SchemaEntityProperty, StaticText } from '../../interfaces/entity';
+import { SchemaEntityTable, SchemaEntityProperty, StaticText, EntityPropertyType } from '../../interfaces/entity';
 import { ApiResponse } from '../../interfaces/api';
 import { debounceTime, Subject, switchMap, of, map, catchError, Observable, combineLatest } from 'rxjs';
 
@@ -413,30 +413,34 @@ export class PropertyManagementPage {
   }
 
   getPropertyTypeLabel(property: PropertyRow): string {
-    const typeLabels: { [key: number]: string } = {
-      0: 'Unknown',
-      1: 'Text (Short)',
-      2: 'Text (Long)',
-      3: 'Boolean',
-      4: 'Date',
-      5: 'Date Time',
-      6: 'Date Time (Local)',
-      7: 'Money',
-      8: 'Integer',
-      9: 'Decimal',
-      10: 'Foreign Key',
-      11: 'User',
-      12: 'Geo Point',
-      13: 'Color',
-      14: 'Email',
-      15: 'Telephone',
-      16: 'Time Slot',
-      17: 'Many-to-Many',
-      18: 'File',
-      19: 'Image',
-      20: 'PDF',
-      21: 'Payment',
-      22: 'Status'
+    const typeLabels: Record<EntityPropertyType, string> = {
+      [EntityPropertyType.Unknown]: 'Unknown',
+      [EntityPropertyType.TextShort]: 'Text (Short)',
+      [EntityPropertyType.TextLong]: 'Text (Long)',
+      [EntityPropertyType.Boolean]: 'Boolean',
+      [EntityPropertyType.Date]: 'Date',
+      [EntityPropertyType.DateTime]: 'Date Time',
+      [EntityPropertyType.DateTimeLocal]: 'Date Time (Local)',
+      [EntityPropertyType.Money]: 'Money',
+      [EntityPropertyType.IntegerNumber]: 'Integer',
+      [EntityPropertyType.DecimalNumber]: 'Decimal',
+      [EntityPropertyType.ForeignKeyName]: 'Foreign Key',
+      [EntityPropertyType.User]: 'User',
+      [EntityPropertyType.GeoPoint]: 'Geo Point',
+      [EntityPropertyType.Color]: 'Color',
+      [EntityPropertyType.Email]: 'Email',
+      [EntityPropertyType.Telephone]: 'Telephone',
+      [EntityPropertyType.TimeSlot]: 'Time Slot',
+      [EntityPropertyType.ManyToMany]: 'Many-to-Many',
+      [EntityPropertyType.File]: 'File',
+      [EntityPropertyType.FileImage]: 'Image',
+      [EntityPropertyType.FilePDF]: 'PDF',
+      [EntityPropertyType.Payment]: 'Payment',
+      [EntityPropertyType.Status]: 'Status',
+      [EntityPropertyType.Category]: 'Category',
+      [EntityPropertyType.RecurringTimeSlot]: 'Recurring Time Slot',
+      [EntityPropertyType.PhotoGallery]: 'Photo Gallery',
+      [EntityPropertyType.GeoPolygon]: 'Geo Polygon',
     };
     return typeLabels[property.type] || 'Unknown';
   }
@@ -466,7 +470,8 @@ export class PropertyManagementPage {
       8,  // IntegerNumber
       7,  // Money
       11, // User
-      22  // Status
+      22, // Status
+      23  // Category
     ];
     return filterableTypes.includes(property.type);
   }
