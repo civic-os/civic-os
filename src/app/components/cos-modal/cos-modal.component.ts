@@ -128,6 +128,16 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
     this.lockBodyScroll();
     // Delay animation ready for entrance animation
     requestAnimationFrame(() => this.animationReady.set(true));
+    // Focus fallback: cdkTrapFocusAutoCapture grabs the first tabbable child,
+    // but modals whose content loads asynchronously may have none at open time,
+    // leaving focus (and the screen reader) on the page behind the dialog.
+    // If nothing inside the dialog took focus, focus the dialog itself.
+    setTimeout(() => {
+      const el = this.modalContainer?.nativeElement;
+      if (el && this.isOpen() && !el.contains(document.activeElement)) {
+        el.focus();
+      }
+    }, 50);
   }
 
   /** Handle modal closing */

@@ -4,7 +4,7 @@
     <!-- Results summary (always shown to prevent layout shift) -->
     <div class="text-sm flex items-center gap-2" [attr.aria-live]="announceResults ? 'polite' : null">
       @if (totalCountSignal() > 0) {
-        <span class="font-medium">{{ 'pagination.showing' | translate }} {{ startItem() }}-{{ endItem() }} {{ 'pagination.of' | translate }} {{ totalCountSignal() }} results</span>
+        <span class="font-medium">{{ 'pagination.showing' | translate }} {{ startItem() }} {{ 'pagination.to' | translate }} {{ endItem() }} {{ 'pagination.of' | translate }} {{ totalCountSignal() }} results</span>
       } @else {
         <span class="font-medium">0 results</span>
       }

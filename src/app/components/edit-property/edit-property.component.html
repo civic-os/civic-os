@@ -83,9 +83,11 @@
       <button type="button" class="btn btn-outline w-full justify-between"
               [id]="prop().column_name"
               [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
-              [attr.aria-describedby]="describedBy()"
+              [attr.aria-describedby]="describedBy(prop().column_name + '-value')"
               (click)="showFkSearchModal.set(true)">
-        <span [class.text-base-content/50]="!selectedDisplayName()">
+        <!-- The label[for] supersedes button text as the accessible NAME, so the
+             selected value is exposed as the accessible DESCRIPTION instead. -->
+        <span [id]="prop().column_name + '-value'" [class.text-base-content/50]="!selectedDisplayName()">
           {{ selectedDisplayName() || ('form.select_option' | translate) }}
         </span>
         <span class="material-symbols-outlined" aria-hidden="true">search</span>

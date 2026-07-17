@@ -1,14 +1,15 @@
 @if (isOpen()) {
   <div
     #modalContainer
-    class="cos-modal-container"
+    class="cos-modal-container outline-none"
     [class.cos-modal-open]="animationReady()"
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="label() || null"
     (keydown)="onKeydown($event)"
     cdkTrapFocus
-    [cdkTrapFocusAutoCapture]="true">
+    [cdkTrapFocusAutoCapture]="true"
+    tabindex="-1">
 
     <!-- Backdrop overlay -->
     <div
