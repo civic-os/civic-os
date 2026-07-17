@@ -10,6 +10,10 @@
       }
     </h1>
 
+    <!-- Sort/filter-change announcements: aria-sort changes and same-count filter
+         updates are not otherwise spoken by screen readers. -->
+    <div class="sr-only" aria-live="polite">{{ listAnnouncement() }}</div>
+
   <!-- Sticky controls wrapper -->
   <div class="sticky-controls-wrapper">
     <!-- Search bar, Filter button, and Add button -->
@@ -279,6 +283,7 @@
   <!-- Pagination controls (bottom) -->
   <div class="not-prose mt-6">
     <app-pagination
+      [announceResults]="false"
       [currentPage]="currentPage()"
       [pageSize]="pageSize()"
       [totalCount]="totalCount()"

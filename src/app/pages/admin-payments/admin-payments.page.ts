@@ -27,6 +27,7 @@ import { AuthService } from '../../services/auth.service';
 import { getPostgrestUrl } from '../../config/runtime';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 /**
  * Payment transaction from the payment_transactions view
@@ -131,6 +132,9 @@ export class AdminPaymentsPage {
   totalCount = signal(0);
 
   // Sorting
+  private sortTranslation = inject(TranslationService);
+  /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
+  sortAnnouncement = signal('');
   sortColumn = signal<string>('created_at');
   sortDirection = signal<'asc' | 'desc'>('desc');
 

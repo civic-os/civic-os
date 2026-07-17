@@ -34,6 +34,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, merge, switchMap, of, combineLatest, debounceTime, catchError } from 'rxjs';
 
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslationService } from '../../services/translation.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FilterBarComponent } from '../filter-bar/filter-bar.component';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
@@ -81,6 +82,7 @@ export interface RichM2mDiff {
 })
 export class FkSearchModalComponent implements OnDestroy {
   private data = inject(DataService);
+  private translationSvc = inject(TranslationService);
   private schema = inject(SchemaService);
   private destroyRef = inject(DestroyRef);
   private destroyed = false;
@@ -124,6 +126,9 @@ export class FkSearchModalComponent implements OnDestroy {
   // State — shared
   loading = signal(false);
   listProperties = signal<SchemaEntityProperty[]>([]);
+
+  /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
+  sortAnnouncement = signal('');
   filterProperties = signal<SchemaEntityProperty[]>([]);
   rows = signal<EntityData[]>([]);
   totalCount = signal(0);
@@ -491,6 +496,11 @@ export class FkSearchModalComponent implements OnDestroy {
       this.orderDirection.set('asc');
     }
     this.currentPage.set(1);
+    const prop = this.listProperties().find(p => p.column_name === columnName);
+    this.sortAnnouncement.set(this.translationSvc.get('a11y.sorted_by', {
+      column: prop?.display_name || columnName,
+      direction: this.translationSvc.get(this.orderDirection() === 'asc' ? 'a11y.ascending' : 'a11y.descending')
+    }));
     this.saveState();
     this.reload$.next();
   }

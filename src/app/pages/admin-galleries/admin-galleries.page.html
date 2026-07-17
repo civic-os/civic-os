@@ -2,6 +2,7 @@
   <!-- Title + Stats Badges -->
   <div class="flex items-center gap-3 mb-4">
     <h1 class="text-3xl font-bold">Gallery Administration</h1>
+  <div class="sr-only" aria-live="polite">{{ sortAnnouncement() }}</div>
     @if (canView()) {
       <div class="badge badge-ghost gap-1">
         <span class="material-symbols-outlined text-sm" aria-hidden="true">photo_library</span>

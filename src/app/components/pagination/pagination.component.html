@@ -2,7 +2,7 @@
   <!-- Single compact row with all pagination controls -->
   <nav class="flex flex-col md:flex-row justify-between items-center gap-4" [attr.aria-label]="'a11y.pagination' | translate">
     <!-- Results summary (always shown to prevent layout shift) -->
-    <div class="text-sm flex items-center gap-2" aria-live="polite">
+    <div class="text-sm flex items-center gap-2" [attr.aria-live]="announceResults ? 'polite' : null">
       @if (totalCountSignal() > 0) {
         <span class="font-medium">{{ 'pagination.showing' | translate }} {{ startItem() }}-{{ endItem() }} {{ 'pagination.of' | translate }} {{ totalCountSignal() }} results</span>
       } @else {

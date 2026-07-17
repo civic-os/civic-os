@@ -1,5 +1,7 @@
 <cos-modal [isOpen]="isOpen()" (closed)="onCancel()" [size]="multiSelect() ? 'full' : 'xl'" [label]="title()">
   <div class="flex flex-col max-h-[calc(100dvh-5rem)]">
+    <!-- Sort-change announcements (aria-sort changes alone are not reliably spoken) -->
+    <div class="sr-only" aria-live="polite">{{ sortAnnouncement() }}</div>
     <!-- Header -->
     <h3 class="font-bold text-lg mb-4 shrink-0">{{ title() }}</h3>
 

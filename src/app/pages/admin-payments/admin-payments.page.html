@@ -1,5 +1,6 @@
 <div class="container mx-auto p-6">
   <h1 class="text-3xl font-bold mb-6">Payment Management</h1>
+  <div class="sr-only" aria-live="polite">{{ sortAnnouncement() }}</div>
 
   <!-- Success Message -->
   @if (successMessage()) {

@@ -55,6 +55,7 @@ interface EntityOption {
  * v0.39.0
  */
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 @Component({
   selector: 'app-admin-files',
   standalone: true,
@@ -105,6 +106,9 @@ export class AdminFilesPage implements OnInit, OnDestroy {
   currentSearch = signal<string>('');
   currentPage = signal(1);
   currentPageSize = signal(25);
+  private sortTranslation = inject(TranslationService);
+  /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
+  sortAnnouncement = signal('');
   sortColumn = signal<string>('created_at');
   sortDirection = signal<'asc' | 'desc'>('desc');
   entityFilters = signal<FilterCriteria[]>([]);
@@ -569,6 +573,10 @@ export class AdminFilesPage implements OnInit, OnDestroy {
     if (this.sortColumn() === column) {
       dir = this.sortDirection() === 'asc' ? 'desc' : 'asc';
     }
+    this.sortAnnouncement.set(this.sortTranslation.get('a11y.sorted_by', {
+      column: column.replace(/_/g, ' '),
+      direction: this.sortTranslation.get(dir === 'asc' ? 'a11y.ascending' : 'a11y.descending')
+    }));
     this.router.navigate([], {
       queryParams: { sort: column, dir },
       queryParamsHandling: 'merge',

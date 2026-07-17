@@ -28,6 +28,7 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { TranslationService } from '../../services/translation.service';
 import { EntityPropertyType, MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
 import { DisplayPropertyComponent } from '../../components/display-property/display-property.component';
 import { FilterBarComponent } from '../../components/filter-bar/filter-bar.component';
@@ -80,6 +81,10 @@ export class ListPage implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef);
   private guidedForm = inject(GuidedFormService);
   private titleService = inject(Title);
+  private translation = inject(TranslationService);
+
+  /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
+  public listAnnouncement = signal('');
   public auth = inject(AuthService);
 
   // Set the document title once entity metadata resolves (e.g. "Issues – Civic OS").
@@ -735,6 +740,12 @@ export class ListPage implements OnInit, OnDestroy {
       allFilters = [...preservedFilters, ...filters];
     }
 
+    // Announce: a filter change that yields the same result count would
+    // otherwise be silent (the results-count live region only fires on change).
+    this.listAnnouncement.set(this.translation.get(
+      allFilters.length > 0 ? 'a11y.filters_applied' : 'a11y.filters_cleared'
+    ));
+
     // Build filter query params
     const filterParams: any = {};
 
@@ -805,6 +816,7 @@ export class ListPage implements OnInit, OnDestroy {
   public removeFilter(columnToRemove: string) {
     const currentFilters = this.filtersSignal();
     const newFilters = currentFilters.filter(f => f.column !== columnToRemove);
+    this.listAnnouncement.set(this.translation.get('a11y.filter_removed'));
 
     // Build filter query params directly (bypass onFiltersChange preservation logic)
     const filterParams: any = {};
@@ -910,6 +922,17 @@ export class ListPage implements OnInit, OnDestroy {
         newSort = null;
         newDir = null;
       }
+    }
+
+    // Announce the sort change: aria-sort alone is not reliably spoken by
+    // screen readers when the attribute changes (observed with VoiceOver).
+    if (newSort && newDir) {
+      this.listAnnouncement.set(this.translation.get('a11y.sorted_by', {
+        column: property.display_name,
+        direction: this.translation.get(newDir === 'asc' ? 'a11y.ascending' : 'a11y.descending')
+      }));
+    } else {
+      this.listAnnouncement.set(this.translation.get('a11y.sort_cleared'));
     }
 
     // Navigate with new sort params (reset to page 1)
