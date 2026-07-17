@@ -40,7 +40,7 @@
           </button>
         }
 
-        <details id="profile-dropdown" class="dropdown dropdown-end">
+        <details id="profile-dropdown" class="dropdown dropdown-end" (toggle)="onProfileDropdownToggle()">
           <summary class="btn m-1" [class.btn-ghost]="!impersonation.isActive()" [class.btn-warning]="impersonation.isActive()" [attr.aria-label]="'a11y.user_menu' | translate">
             @if (this.auth.authenticated()) {
               @if (impersonation.isActive()) {

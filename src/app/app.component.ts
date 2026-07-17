@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, ElementRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
@@ -239,16 +239,30 @@ export class AppComponent {
   }
 
   /**
-   * Close profile dropdown when clicking outside of it
+   * Close profile dropdown when clicking outside of it.
+   *
+   * The document listener is attached ONLY while the dropdown is open: a
+   * permanent document-level click handler makes VoiceOver announce
+   * "clickable" on every element of every page (WebKit surfaces the ancestor
+   * listener as a press hint on all content). Wired via (toggle) on the
+   * <details> element in the template.
    */
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
+  private readonly onDocumentClick = (event: MouseEvent): void => {
     const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
     if (profileDropdown) {
       const clickedInside = profileDropdown.contains(event.target as Node);
       if (!clickedInside && profileDropdown.open) {
         profileDropdown.open = false;
       }
+    }
+  };
+
+  public onProfileDropdownToggle(): void {
+    const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
+    if (profileDropdown?.open) {
+      document.addEventListener('click', this.onDocumentClick);
+    } else {
+      document.removeEventListener('click', this.onDocumentClick);
     }
   }
 
