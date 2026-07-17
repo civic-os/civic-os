@@ -3,7 +3,11 @@
     <label class="label" [attr.for]="isCustomWidget() ? null : prop().column_name">
       <span class="font-semibold flex items-center min-w-0 max-w-full">
         <span class="truncate" [title]="prop().display_name">
-          {{ prop().display_name }}{{ isRequired() ? '*' : '' }}@if (isRequired()) {<span class="sr-only">{{ 'a11y.required' | translate }}</span>}
+          <!-- The asterisk is a visual convention (aria-hidden: VO would read "star").
+               Native inputs announce required via aria-required; the sr-only marker is
+               only for branches whose control can't carry aria-required (custom
+               widgets, the FK/User search-modal button) so required isn't tripled. -->
+          {{ prop().display_name }}@if (isRequired()) {<span aria-hidden="true">*</span>}@if (isRequired() && (isCustomWidget() || useFkSearchModal())) {<span class="sr-only">{{ 'a11y.required' | translate }}</span>}
         </span>
         @if (prop().description) {
           <div class="tooltip tooltip-bottom sm:tooltip-right flex-shrink-0" [attr.data-tip]="prop().description">

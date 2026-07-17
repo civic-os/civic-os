@@ -170,11 +170,29 @@ describe('EditPropertyComponent', () => {
       expect(input.getAttribute('aria-describedby')).toBe('name-desc');
     });
 
-    it('should append an sr-only "(required)" marker in the label when required', () => {
+    it('should convey required on native inputs via aria-required with an aria-hidden asterisk and NO sr-only marker (avoids VO triple-announcing)', () => {
       const formGroup = new FormGroup({ name: new FormControl('') });
       fixture.componentRef.setInput('property', createMockProperty({
         column_name: 'name', display_name: 'Name', is_nullable: false,
         type: EntityPropertyType.TextShort
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const input = fixture.debugElement.query(By.css('input#name'));
+      expect(input.nativeElement.getAttribute('aria-required')).toBe('true');
+      const asterisk = fixture.debugElement.query(By.css('label span[aria-hidden="true"]'));
+      expect(asterisk?.nativeElement.textContent.trim()).toBe('*');
+      const srOnly = fixture.debugElement.query(By.css('label .sr-only'));
+      expect(srOnly).toBeNull();
+    });
+
+    it('should append the sr-only "(required)" marker for custom widgets whose control cannot carry aria-required', () => {
+      const formGroup = new FormGroup({ location: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'location', display_name: 'Location', is_nullable: false,
+        type: EntityPropertyType.GeoPoint
       }));
       fixture.componentRef.setInput('formGroup', formGroup);
       component.ngOnInit();
