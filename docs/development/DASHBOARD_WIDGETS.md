@@ -63,6 +63,23 @@ jsonb_build_object(
 )
 ```
 
+## MarkdownWidgetConfig
+
+Displays static markdown content.
+
+```typescript
+interface MarkdownWidgetConfig {
+  content: string;      // Markdown source
+  enableHtml?: boolean; // Allow sanitized HTML (DOMPurify), default false
+}
+```
+
+### Heading Levels (Required Convention)
+
+The dashboard page renders the dashboard's `display_name` as the page `<h1>`. Markdown widget content must therefore start its headings at `##` (h2) — a `#` heading renders a second `<h1>` on the page, breaking the heading hierarchy (WCAG 1.3.1). Nest deeper sections at `###` and below. Raw `<h1>` tags (with `enableHtml: true`) are equally disallowed.
+
+The widget renders content as-is (no automatic demotion), so this convention is enforced by authoring discipline: check heading levels when writing dashboard SQL, and when generating dashboards via the LLM Schema Assistant.
+
 ## FilteredListWidgetConfig
 
 Displays entity records in a compact table format.

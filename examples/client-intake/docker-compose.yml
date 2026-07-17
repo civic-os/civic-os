@@ -91,11 +91,14 @@ services:
     depends_on:
       minio:
         condition: service_healthy
+    volumes:
+      - ./assets:/seed-assets:ro
     entrypoint: >
       /bin/sh -c "
       mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin};
       mc mb --ignore-existing local/${S3_BUCKET:-civic-os-files};
       mc anonymous set download local/${S3_BUCKET:-civic-os-files};
+      mc cp /seed-assets/ecs-logo.png local/${S3_BUCKET:-civic-os-files}/seed-assets/ecs-logo.png 2>/dev/null || true;
       echo '✅ MinIO bucket initialized with public read access: ${S3_BUCKET:-civic-os-files}';
       exit 0;
       "
@@ -150,7 +153,7 @@ services:
       - SMTP_USERNAME=${SMTP_USERNAME:-}   # Empty for Inbucket (no auth required)
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}   # Empty for Inbucket
       # v0.25.0+: Display name support in SMTP_FROM, optional SMTP_REPLY_TO
-      - SMTP_FROM=${SMTP_FROM:-"IC Greater Flint" <noreply@icgflint.org>}
+      - SMTP_FROM=${SMTP_FROM:-"Exemplary Community Services" <noreply@example.org>}
       - SMTP_REPLY_TO=${SMTP_REPLY_TO:-}   # Optional: where replies should go
       - SKIP_TEST_EMAILS=${SKIP_TEST_EMAILS:-false}  # Set to true in production to prevent sending to @example.com/@example.org/@example.net
 

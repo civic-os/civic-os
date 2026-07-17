@@ -739,6 +739,22 @@ describe('PropertyManagementPage', () => {
       expect(component.getPropertyTypeLabel(property)).toBe('Foreign Key');
     });
 
+    it('should have labels for all EntityPropertyType values', () => {
+      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
+      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
+
+      fixture = TestBed.createComponent(PropertyManagementPage);
+      component = fixture.componentInstance;
+
+      const enumValues = Object.values(EntityPropertyType).filter(v => typeof v === 'number') as number[];
+      for (const val of enumValues) {
+        if (val === EntityPropertyType.Unknown) continue; // Unknown is the fallback label
+        const label = component.getPropertyTypeLabel({ type: val } as any);
+        expect(label).not.toBe('Unknown',
+          `Missing label for EntityPropertyType value ${val} (${EntityPropertyType[val]})`);
+      }
+    });
+
     it('should get correct display name placeholder', () => {
       mockPropertyManagementService.isAdmin.and.returnValue(of(true));
       mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));

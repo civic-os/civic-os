@@ -295,5 +295,11 @@ INSERT INTO "public"."sponsors" ("id", "display_name", "sponsor_type", "total_co
   (7, 'Mills, Marks and Predovic', NULL, '69739.69', '2020-08-22', 'Natasha.Satterfield11@example.com', 'SRID=4326;POINT(-83.668591 43.007673)'),
   (8, 'Lindgren - Ernser', NULL, '29287.55', '2024-08-24', 'Anna0@example.com', 'SRID=4326;POINT(-83.692214 42.972745)');
 
+-- Refresh sequences to be higher than max IDs
+SELECT setval('"public"."participants_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "public"."participants"));
+SELECT setval('"public"."teams_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "public"."teams"));
+SELECT setval('"public"."team_rosters_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "public"."team_rosters"));
+SELECT setval('"public"."sponsors_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "public"."sponsors"));
+
 -- Notify PostgREST to reload schema cache
 NOTIFY pgrst, 'reload schema';

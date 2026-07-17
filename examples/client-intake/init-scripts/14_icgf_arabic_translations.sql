@@ -1,5 +1,5 @@
--- ICGF Arabic (ar) Translations
--- Instance-specific metadata translations for the International Center of Greater Flint.
+-- ECS Arabic (ar) Translations
+-- Instance-specific metadata translations for Exemplary Community Services.
 -- Framework UI strings are handled by the core v0-64-0 migration.
 -- This script covers: entities, properties, statuses, categories, actions, dashboards, widgets.
 --
@@ -29,13 +29,13 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ENTITIES — descriptions
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('entity', 'clients.description', 'ar', 'أفراد المجتمع من المهاجرين واللاجئين الذين يبحثون عن خدمات'),
+  ('entity', 'clients.description', 'ar', 'أفراد المجتمع الذين يبحثون عن خدمات وبرامج دعم'),
   ('entity', 'partners.description', 'ar', 'المنظمات والأفراد مقدمو الخدمات'),
   ('entity', 'referrals.description', 'ar', 'سجلات إحالة العملاء إلى الشركاء'),
   ('entity', 'follow_up_surveys.description', 'ar', 'استبيانات التغذية الراجعة بعد الإحالة'),
   ('entity', 'service_categories.description', 'ar', 'أنواع الخدمات المتاحة للعملاء والشركاء'),
   ('entity', 'monthly_referral_summary.description', 'ar', 'حجم الإحالات وأنواعها ومعدلات إتمامها شهرياً'),
-  ('entity', 'client_contact_summary.description', 'ar', 'تسجيلات العملاء الجدد حسب الشهر والبلد واللغة'),
+  ('entity', 'client_contact_summary.description', 'ar', 'تسجيلات العملاء الجدد وحالة الاستقبال حسب الشهر'),
   ('entity', 'top_needs_report.description', 'ar', 'الطلب على فئات الخدمة بين العملاء النشطين'),
   ('entity', 'partner_utilization_report.description', 'ar', 'حجم الإحالات ومعدلات الإتمام لكل شريك'),
   ('entity', 'time_lag_report.description', 'ar', 'تفصيل وقت التواصل حسب نوع الإحالة والشريك')
@@ -53,11 +53,7 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'clients.phone.display_name', 'ar', 'الهاتف'),
   ('property', 'clients.date_of_birth.display_name', 'ar', 'تاريخ الميلاد'),
   ('property', 'clients.gender_id.display_name', 'ar', 'الجنس'),
-  ('property', 'clients.country_of_origin.display_name', 'ar', 'بلد المنشأ'),
-  ('property', 'clients.primary_language.display_name', 'ar', 'اللغة الأساسية'),
   ('property', 'clients.preferred_comm_language.display_name', 'ar', 'لغة التواصل المفضلة'),
-  ('property', 'clients.date_of_arrival.display_name', 'ar', 'تاريخ الوصول إلى الولايات المتحدة'),
-  ('property', 'clients.immigration_status_id.display_name', 'ar', 'الوضع الهجري'),
   ('property', 'clients.household_size.display_name', 'ar', 'حجم الأسرة'),
   ('property', 'clients.status_id.display_name', 'ar', 'الحالة'),
   ('property', 'clients.user_id.display_name', 'ar', 'حساب المستخدم المرتبط'),
@@ -147,8 +143,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('property', 'client_contact_summary.new_clients.display_name', 'ar', 'عملاء جدد'),
   ('property', 'client_contact_summary.intake_pending.display_name', 'ar', 'قيد الاستقبال'),
   ('property', 'client_contact_summary.active_clients.display_name', 'ar', 'نشطون'),
-  ('property', 'client_contact_summary.country_of_origin.display_name', 'ar', 'بلد المنشأ'),
-  ('property', 'client_contact_summary.primary_language.display_name', 'ar', 'اللغة الأساسية'),
   ('property', 'monthly_referral_summary.month.display_name', 'ar', 'الشهر'),
   ('property', 'monthly_referral_summary.total_referrals.display_name', 'ar', 'الإجمالي'),
   ('property', 'monthly_referral_summary.warm_referrals.display_name', 'ar', 'إحالات مباشرة'),
@@ -234,12 +228,6 @@ INSERT INTO metadata.translations (source_type, source_key, locale, translated_t
   ('category', 'helpfulness.somewhat_helpful.display_name', 'ar', 'مفيد نوعاً ما'),
   ('category', 'helpfulness.not_helpful.display_name', 'ar', 'غير مفيد'),
   ('category', 'helpfulness.could_not_contact.display_name', 'ar', 'تعذّر الاتصال'),
-  ('category', 'immigration_status.refugee.display_name', 'ar', 'لاجئ/ة'),
-  ('category', 'immigration_status.asylee.display_name', 'ar', 'لاجئ/ة سياسي/ة'),
-  ('category', 'immigration_status.siv.display_name', 'ar', 'تأشيرة هجرة خاصة'),
-  ('category', 'immigration_status.permanent_resident.display_name', 'ar', 'مقيم/ة دائم/ة'),
-  ('category', 'immigration_status.citizen.display_name', 'ar', 'مواطن/ة'),
-  ('category', 'immigration_status.other.display_name', 'ar', 'آخر/غير معروف'),
   ('category', 'outcome.enrolled.display_name', 'ar', 'مسجّل في الخدمات'),
   ('category', 'outcome.received_info.display_name', 'ar', 'تلقّى معلومات'),
   ('category', 'outcome.referred_elsewhere.display_name', 'ar', 'أُحيل لجهة أخرى'),
@@ -261,7 +249,7 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('action', 'clients.activate.display_name', 'ar', 'تفعيل العميل'),
-  ('action', 'clients.activate.description', 'ar', 'اكتمل التقييم — الانتقال إلى نشط'),
+  ('action', 'clients.activate.description', 'ar', 'اكتمل التقييم؛ الانتقال إلى نشط'),
   ('action', 'clients.activate.confirmation_message', 'ar', 'هل تريد تفعيل هذا العميل؟ هذا يؤكد اكتمال تقييم الاستقبال.'),
   ('action', 'clients.activate.success_message', 'ar', 'تم تفعيل العميل بنجاح.'),
   ('action', 'clients.reactivate.display_name', 'ar', 'إعادة تفعيل العميل'),
@@ -305,9 +293,9 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- DASHBOARDS
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
-  ('dashboard', 'dashboard.1.display_name', 'ar', 'مرحباً بكم في ICGF'),
-  ('dashboard', 'dashboard.1.description', 'ar', 'الصفحة العامة للمركز الدولي لمنطقة فلينت الكبرى'),
-  ('dashboard', 'dashboard.2.display_name', 'ar', 'لوحة الاستقبال في ICGF'),
+  ('dashboard', 'dashboard.1.display_name', 'ar', 'مرحباً بكم في ECS'),
+  ('dashboard', 'dashboard.1.description', 'ar', 'الصفحة العامة لخدمات المجتمع النموذجية'),
+  ('dashboard', 'dashboard.2.display_name', 'ar', 'لوحة الاستقبال في ECS'),
   ('dashboard', 'dashboard.2.description', 'ar', 'استقبال العملاء والإحالات ومتابعة الاستبيانات')
 ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 
@@ -327,37 +315,36 @@ ON CONFLICT (source_type, source_key, locale) DO NOTHING;
 -- ============================================================================
 INSERT INTO metadata.translations (source_type, source_key, locale, translated_text) VALUES
   ('widget_config', 'dashboard.1.widget.1.content', 'ar',
-'# المركز الدولي لمنطقة فلينت الكبرى
+'# خدمات المجتمع النموذجية
 
-يربط المركز الدولي لمنطقة فلينت الكبرى (ICGF) المهاجرين واللاجئين وأفراد المجتمع بالخدمات الأساسية في مقاطعة جينيسي.
+تربط خدمات المجتمع النموذجية (ECS) أفراد المجتمع بالخدمات الأساسية وبرامج الدعم.
 
 ## خدماتنا
 
-- **استقبال وتقييم العملاء** — تحديد شامل لاحتياجات الوافدين الجدد وأفراد المجتمع
-- **الإحالات** — إحالات مخصصة ومعلوماتية إلى شركاء خدمات محليين موثوقين
-- **المتابعة** — تتبع النتائج عبر الاستبيانات لضمان نجاح الربط
+- **استقبال وتقييم العملاء**: تحديد شامل لاحتياجات أفراد المجتمع
+- **الإحالات**: إحالات مخصصة ومعلوماتية إلى شركاء خدمات محليين موثوقين
+- **المتابعة**: تتبع النتائج عبر الاستبيانات لضمان نجاح الربط
 
 ## شبكة الشركاء
 
 ننسق مع شبكة من المنظمات المحلية التي تقدم:
 
-- دروس اللغة الإنجليزية كلغة ثانية
-- المساعدة القانونية والهجرة
 - التوظيف وإيجاد العمل
 - التعليم والتدريب المهني
 - الخدمات الصحية والطبية
 - المساعدة في الإسكان
 - النقل
-- الترجمة التحريرية والفورية
 - رعاية الأطفال وبرامج الشباب
 - محو الأمية المالية والتوجيه في المزايا
+- المساعدة القانونية
+- الترجمة التحريرية والفورية
 
 ## اتصل بنا
 
-**المركز الدولي لمنطقة فلينت الكبرى**
-519 S. Saginaw St., Suite 104, Flint, MI 48502
-الهاتف: (810) 235-2596
-الموقع: [icgflint.org](https://icgflint.org)
+**خدمات المجتمع النموذجية**
+123 Main St., Suite 100, Anytown, US 00000
+الهاتف: (555) 555-0100
+الموقع: [example.org](https://example.org)
 
 ---
 

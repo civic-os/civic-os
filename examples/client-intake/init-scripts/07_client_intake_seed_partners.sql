@@ -1,9 +1,9 @@
 -- ============================================================================
 -- Client Intake & Referral - Partner Directory Seed Data
 -- ============================================================================
--- Source: ICGF partner list at icgflint.org/services, filtered to actual
+-- Source: Genesee County community partner directory, filtered to actual
 -- service agencies. Contact info researched from each organization's website.
--- Fields left NULL where not publicly verified — ICGF staff should complete
+-- Fields left NULL where not publicly verified — ECS staff should complete
 -- these via the UI after launch.
 --
 -- NOTE: Locations (GeoPoint) are omitted — geocode from addresses post-seed.
@@ -108,8 +108,8 @@ INSERT INTO partners (
     '416 N. Saginaw St., Suite 220, Flint, MI 48502',
     'https://aahcflint.org',
     'Arabic, English',
-    'Mon-Fri 9am-5pm; immigration application help, citizenship tutoring, translation/interpretation, English conversation hours; free; open to all nationalities.',
-    'Nonprofit serving Arab Americans and the broader Flint community with immigration, language, and cultural services.',
+    'Mon-Fri 9am-5pm; ESL classes, cultural navigation, employment assistance, English conversation hours; free; open to all.',
+    'Nonprofit serving Arab Americans and the broader Flint community with language, employment, and cultural services.',
     TRUE
   ),
 
@@ -187,7 +187,7 @@ SELECT p.id, sc.id
 FROM partners p, service_categories sc
 WHERE (p.display_name, sc.display_name) IN (
   -- Legal Services of Eastern Michigan
-  ('Legal Services of Eastern Michigan',           'Legal Aid / Immigration Legal'),
+  ('Legal Services of Eastern Michigan',           'Financial Literacy / Benefits'),
 
   -- Mott Community College
   ('Mott Community College',                       'Education (non-ESL)'),
@@ -205,8 +205,7 @@ WHERE (p.display_name, sc.display_name) IN (
 
   -- Arab American Heritage Council
   ('Arab American Heritage Council',               'ESL / English Classes'),
-  ('Arab American Heritage Council',               'Legal Aid / Immigration Legal'),
-  ('Arab American Heritage Council',               'Translation / Interpretation'),
+  ('Arab American Heritage Council',               'Employment / Job Placement'),
 
   -- Sylvester Broome Empowerment Village
   ('Sylvester Broome Empowerment Village',         'Education (non-ESL)'),

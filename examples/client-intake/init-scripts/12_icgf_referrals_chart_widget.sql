@@ -36,7 +36,7 @@ INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar)
 VALUES ('referrals_per_week', 'Referrals Per Week', FALSE)
 ON CONFLICT (table_name) DO UPDATE SET show_in_sidebar = FALSE;
 
--- 2. Add chart widget to the ICGF Intake Dashboard
+-- 2. Add chart widget to the ECS Intake Dashboard
 INSERT INTO metadata.dashboard_widgets (
   dashboard_id, widget_type, entity_key, title,
   config, sort_order, width, height
@@ -59,7 +59,7 @@ SELECT
   ),
   5, 2, 2
 FROM metadata.dashboards d
-WHERE d.display_name = 'ICGF Intake Dashboard';
+WHERE d.display_name = 'ECS Intake Dashboard';
 
 -- Notify PostgREST to reload schema cache
 NOTIFY pgrst, 'reload schema';

@@ -237,7 +237,9 @@ export class SchemaEditorPage implements OnDestroy {
   private async initializeCanvas(container: HTMLElement): Promise<void> {
     try {
       // Dynamically import JointJS to enable lazy loading
-      const { dia, shapes } = await import('@joint/core');
+      const jointModule = await import('@joint/core') as any;
+      const joint = jointModule.default || jointModule;
+      const { dia, shapes } = joint;
 
       // Wait for CSS to settle after theme application
       // This ensures getComputedStyle() returns fresh values, not stale ones from previous theme
@@ -719,7 +721,9 @@ export class SchemaEditorPage implements OnDestroy {
    * Based on JointJS tutorial: https://resources.jointjs.com/tutorials/joint/tutorials/multiple-links-between-elements.html
    */
   private async adjustVertices(graph: dia.Graph, cell: dia.Cell): Promise<void> {
-    const { g } = await import('@joint/core');
+    const jointModule = await import('@joint/core') as any;
+    const joint = jointModule.default || jointModule;
+    const { g } = joint;
     const GAP = 35; // Increased from 20 for better separation
 
     if (cell.isElement()) {

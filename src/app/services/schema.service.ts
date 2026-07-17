@@ -679,6 +679,7 @@ export class SchemaService {
       ['bool'].includes(val.udt_name) ? EntityPropertyType.Boolean :
       ['int4', 'int8'].includes(val.udt_name) ? EntityPropertyType.IntegerNumber :
       ['money'].includes(val.udt_name) ? EntityPropertyType.Money :
+      ['numeric', 'float4', 'float8'].includes(val.udt_name) ? EntityPropertyType.DecimalNumber :
       ['hex_color'].includes(val.udt_name) ? EntityPropertyType.Color :
       ['email_address'].includes(val.udt_name) ? EntityPropertyType.Email :
       ['phone_number'].includes(val.udt_name) ? EntityPropertyType.Telephone :

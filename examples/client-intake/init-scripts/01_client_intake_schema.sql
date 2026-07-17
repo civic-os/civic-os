@@ -1,7 +1,7 @@
 -- ============================================================================
 -- CLIENT INTAKE & REFERRAL SYSTEM
--- International Center of Greater Flint (ICGF)
--- Tracks immigrant/refugee client intake, partner agencies, referrals,
+-- Exemplary Community Services (ECS)
+-- Tracks community member client intake, partner agencies, referrals,
 -- and follow-up surveys with automated reminders and reporting.
 -- Demonstrates: Status types, Category system, M:M junctions (x3),
 --   GeoPoint maps, Entity Notes, Virtual Entity reports, full-text search,
@@ -78,12 +78,11 @@ ON CONFLICT DO NOTHING;
 
 -- ============================================================================
 -- CATEGORY SYSTEM CONFIGURATION
--- 7 category groups for non-workflow categorization
+-- 6 category groups for non-workflow categorization
 -- ============================================================================
 
 INSERT INTO metadata.category_groups (entity_type, display_name, description) VALUES
   ('gender', 'Gender', 'Client gender identity'),
-  ('immigration_status', 'Immigration Status', 'Client immigration status category'),
   ('partner_type', 'Partner Type', 'Organization or Individual partner'),
   ('referral_type', 'Referral Type', 'Warm or Info referral'),
   ('helpfulness', 'Helpfulness', 'Survey: how helpful was the referral'),
@@ -97,16 +96,6 @@ INSERT INTO metadata.categories (entity_type, display_name, color, sort_order, c
   ('gender', 'Female', '#EC4899', 2, 'female'),
   ('gender', 'Non-Binary', '#8B5CF6', 3, 'non_binary'),
   ('gender', 'Prefer Not to Say', '#6B7280', 4, 'prefer_not_to_say')
-ON CONFLICT DO NOTHING;
-
--- Immigration status categories
-INSERT INTO metadata.categories (entity_type, display_name, color, sort_order, category_key) VALUES
-  ('immigration_status', 'Refugee', '#3B82F6', 1, 'refugee'),
-  ('immigration_status', 'Asylee', '#8B5CF6', 2, 'asylee'),
-  ('immigration_status', 'SIV (Special Immigrant Visa)', '#22C55E', 3, 'siv'),
-  ('immigration_status', 'Permanent Resident', '#10B981', 4, 'permanent_resident'),
-  ('immigration_status', 'Citizen', '#06B6D4', 5, 'citizen'),
-  ('immigration_status', 'Other/Unknown', '#6B7280', 6, 'other')
 ON CONFLICT DO NOTHING;
 
 -- Partner type categories
@@ -164,7 +153,7 @@ CREATE TABLE service_categories (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. clients: Immigrant/refugee community members seeking services
+-- 2. clients: Community members seeking services
 CREATE TABLE clients (
   id BIGSERIAL PRIMARY KEY,
   first_name VARCHAR(255) NOT NULL,
@@ -174,11 +163,7 @@ CREATE TABLE clients (
   phone phone_number,
   date_of_birth DATE,
   gender_id INT REFERENCES metadata.categories(id),
-  country_of_origin VARCHAR(255),
-  primary_language VARCHAR(255),
   preferred_comm_language VARCHAR(255),
-  date_of_arrival DATE,
-  immigration_status_id INT REFERENCES metadata.categories(id),
   household_size INT,
   status_id INT NOT NULL DEFAULT get_initial_status('client') REFERENCES metadata.statuses(id),
   user_id UUID REFERENCES metadata.civic_os_users(id),
@@ -269,14 +254,13 @@ CREATE TABLE referral_service_categories (
 -- FULL-TEXT SEARCH
 -- ============================================================================
 
--- Clients: search on name, country, language
+-- Clients: search on name, preferred language
 ALTER TABLE clients ADD COLUMN search_vector tsvector
   GENERATED ALWAYS AS (
     to_tsvector('simple',
       coalesce(first_name, '') || ' ' ||
       coalesce(last_name, '') || ' ' ||
-      coalesce(country_of_origin, '') || ' ' ||
-      coalesce(primary_language, '')
+      coalesce(preferred_comm_language, '')
     )
   ) STORED;
 
@@ -307,7 +291,6 @@ CREATE INDEX idx_clients_display_name_trgm ON clients USING GIN(display_name gin
 -- clients
 CREATE INDEX idx_clients_status_id ON clients(status_id);
 CREATE INDEX idx_clients_gender_id ON clients(gender_id);
-CREATE INDEX idx_clients_immigration_status_id ON clients(immigration_status_id);
 CREATE INDEX idx_clients_created_by ON clients(created_by);
 CREATE INDEX idx_clients_user_id ON clients(user_id);
 
@@ -356,7 +339,7 @@ CREATE TRIGGER set_created_at_trigger BEFORE INSERT ON follow_up_surveys FOR EAC
 CREATE TRIGGER set_updated_at_trigger BEFORE INSERT OR UPDATE ON follow_up_surveys FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Auto-link client to current user for self-service intake.
--- Staff (ic_staff) create records on behalf of clients, so user_id stays NULL.
+-- Staff (ecs_staff) create records on behalf of clients, so user_id stays NULL.
 CREATE OR REPLACE FUNCTION auto_set_client_user_id()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -511,16 +494,14 @@ SELECT enable_entity_notes('clients');
 INSERT INTO service_categories (display_name, description, color, sort_order) VALUES
   ('ESL / English Classes', 'English as a Second Language instruction', '#3B82F6', 1),
   ('Employment / Job Placement', 'Job search assistance, resume help, placement services', '#22C55E', 2),
-  ('Legal Aid / Immigration Legal', 'Immigration legal services, document assistance', '#8B5CF6', 3),
-  ('Housing Assistance', 'Housing search, rental assistance, emergency shelter', '#F59E0B', 4),
-  ('Healthcare / Medical', 'Medical care, health screenings, insurance enrollment', '#EF4444', 5),
-  ('Translation / Interpretation', 'Language interpretation and document translation', '#06B6D4', 6),
-  ('Transportation', 'Transit assistance, ride services, bus passes', '#F97316', 7),
-  ('Food / Nutrition', 'Food pantries, SNAP benefits, nutrition programs', '#84CC16', 8),
-  ('Education (non-ESL)', 'GED, vocational training, higher education', '#EC4899', 9),
-  ('Financial Literacy / Benefits', 'Banking, budgeting, benefits enrollment', '#10B981', 10),
-  ('Mental Health / Counseling', 'Counseling, trauma support, mental health services', '#A855F7', 11),
-  ('Childcare', 'Daycare, after-school programs, childcare subsidies', '#FB923C', 12)
+  ('Housing Assistance', 'Housing search, rental assistance, emergency shelter', '#F59E0B', 3),
+  ('Healthcare / Medical', 'Medical care, health screenings, insurance enrollment', '#EF4444', 4),
+  ('Transportation', 'Transit assistance, ride services, bus passes', '#F97316', 5),
+  ('Food / Nutrition', 'Food pantries, SNAP benefits, nutrition programs', '#84CC16', 6),
+  ('Education (non-ESL)', 'GED, vocational training, higher education', '#EC4899', 7),
+  ('Financial Literacy / Benefits', 'Banking, budgeting, benefits enrollment', '#10B981', 8),
+  ('Mental Health / Counseling', 'Counseling, trauma support, mental health services', '#A855F7', 9),
+  ('Childcare', 'Daycare, after-school programs, childcare subsidies', '#FB923C', 10)
 ON CONFLICT (display_name) DO NOTHING;
 
 

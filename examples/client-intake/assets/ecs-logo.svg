@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
+
+  <!-- ═══ TREE (shifted up 50px to nestle inside the arc) ═══ -->
+
+  <!-- Canopy: overlapping ellipses for organic tree-crown feel -->
+  <ellipse cx="250" cy="222" rx="105" ry="92" fill="#2d6a4f"/>
+  <ellipse cx="218" cy="206" rx="74" ry="66" fill="#40916c"/>
+  <ellipse cx="286" cy="211" rx="70" ry="63" fill="#358f63"/>
+  <ellipse cx="250" cy="188" rx="64" ry="54" fill="#52b788"/>
+  <ellipse cx="234" cy="230" rx="50" ry="44" fill="#358f63" opacity="0.8"/>
+  <ellipse cx="270" cy="228" rx="54" ry="46" fill="#40916c" opacity="0.7"/>
+
+  <!-- Canopy highlights -->
+  <ellipse cx="240" cy="182" rx="34" ry="28" fill="#74c69d" opacity="0.55"/>
+  <ellipse cx="264" cy="198" rx="22" ry="19" fill="#95d5b2" opacity="0.35"/>
+
+  <!-- Trunk -->
+  <rect x="239" y="288" width="22" height="62" rx="4" fill="#6d4c41"/>
+  <line x1="250" y1="293" x2="250" y2="345" stroke="#5d4037" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- ═══ ARCING TEXT (proportionally spaced) ═══ -->
+  <!-- "EXEMPLARY COMMUNITY SERVICES" on arc: center=(250,310), r=220, span=136° -->
+  <text x="0" y="0" transform="translate(49.5,219.5) rotate(-65.7)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">E</text>
+  <text x="0" y="0" transform="translate(57.7,203.1) rotate(-60.9)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">X</text>
+  <text x="0" y="0" transform="translate(67.4,187.3) rotate(-56.1)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">E</text>
+  <text x="0" y="0" transform="translate(80.7,169.5) rotate(-50.3)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">M</text>
+  <text x="0" y="0" transform="translate(96.2,152.7) rotate(-44.4)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">P</text>
+  <text x="0" y="0" transform="translate(109.4,140.8) rotate(-39.7)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">L</text>
+  <text x="0" y="0" transform="translate(124.1,129.6) rotate(-34.9)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">A</text>
+  <text x="0" y="0" transform="translate(141.0,118.9) rotate(-29.7)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">R</text>
+  <text x="0" y="0" transform="translate(157.4,110.4) rotate(-24.9)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">Y</text>
+  <!-- space -->
+  <text x="0" y="0" transform="translate(185.9,99.5) rotate(-16.9)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">C</text>
+  <text x="0" y="0" transform="translate(205.7,94.5) rotate(-11.6)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">O</text>
+  <text x="0" y="0" transform="translate(229.7,90.9) rotate(-5.3)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">M</text>
+  <text x="0" y="0" transform="translate(256.6,90.1) rotate(1.7)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">M</text>
+  <text x="0" y="0" transform="translate(280.2,92.1) rotate(7.9)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">U</text>
+  <text x="0" y="0" transform="translate(300.3,95.8) rotate(13.2)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">N</text>
+  <text x="0" y="0" transform="translate(315.4,99.9) rotate(17.3)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">I</text>
+  <text x="0" y="0" transform="translate(328.7,104.6) rotate(21.0)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">T</text>
+  <text x="0" y="0" transform="translate(344.8,111.5) rotate(25.5)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">Y</text>
+  <!-- space -->
+  <text x="0" y="0" transform="translate(371.2,126.4) rotate(33.4)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">S</text>
+  <text x="0" y="0" transform="translate(385.9,137.0) rotate(38.2)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">E</text>
+  <text x="0" y="0" transform="translate(399.9,149.0) rotate(43.0)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">R</text>
+  <text x="0" y="0" transform="translate(413.7,163.0) rotate(48.1)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">V</text>
+  <text x="0" y="0" transform="translate(423.5,174.8) rotate(52.1)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">I</text>
+  <text x="0" y="0" transform="translate(432.4,187.0) rotate(56.0)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">C</text>
+  <text x="0" y="0" transform="translate(442.1,202.7) rotate(60.8)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">E</text>
+  <text x="0" y="0" transform="translate(450.3,218.9) rotate(65.5)" text-anchor="middle" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="700" fill="#1b4332">S</text>
+
+  <!-- Decorative ground line -->
+  <line x1="178" y1="375" x2="322" y2="375" stroke="#2d6a4f" stroke-width="1.5" opacity="0.25"/>
+</svg>
