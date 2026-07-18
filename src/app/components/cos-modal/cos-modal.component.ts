@@ -18,6 +18,7 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
+import { inertSiblingsOutside } from '../../utils/inert.utils';
 
 /**
  * Custom modal component that reliably centers on mobile devices.
@@ -84,6 +85,9 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
   /** Reference to the modal container for focus management */
   @ViewChild('modalContainer') modalContainer?: ElementRef<HTMLElement>;
 
+  /** Restore function for the inert attributes applied to background content while open. */
+  private restoreInert?: () => void;
+
   /** Internal animation state (delayed for entrance animation) */
   animationReady = signal(false);
 
@@ -117,6 +121,8 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.restoreInert?.();
+    this.restoreInert = undefined;
     // Ensure body scroll is unlocked if component is destroyed while open
     if (this.isOpen()) {
       this.unlockBodyScroll();
@@ -134,7 +140,12 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
     // If nothing inside the dialog took focus, focus the dialog itself.
     setTimeout(() => {
       const el = this.modalContainer?.nativeElement;
-      if (el && this.isOpen() && !el.contains(document.activeElement)) {
+      if (!el || !this.isOpen()) return;
+      // Remove the background from the accessibility tree and tab order while
+      // the dialog is open (aria-modal alone is unevenly honored — VoiceOver's
+      // cursor can recover to background elements after in-dialog re-renders).
+      this.restoreInert ??= inertSiblingsOutside(el);
+      if (!el.contains(document.activeElement)) {
         el.focus();
       }
     }, 50);
@@ -144,6 +155,8 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
   private onClose(): void {
     this.animationReady.set(false);
     this.unlockBodyScroll();
+    this.restoreInert?.();
+    this.restoreInert = undefined;
   }
 
   /** Close the modal by emitting the closed event */

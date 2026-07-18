@@ -7,11 +7,12 @@
  * (at your option) any later version.
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject, ElementRef } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
 import { GalleryImage } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
 import { LocaleService } from '../../services/locale.service';
+import { inertSiblingsOutside } from '../../utils/inert.utils';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
@@ -45,6 +46,9 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class GalleryLightboxComponent {
   private localeService = inject(LocaleService);
+  private hostEl = inject(ElementRef<HTMLElement>);
+  /** Restore function for the inert attributes applied to background content while open. */
+  private restoreInert?: () => void;
   readonly isRtl = this.localeService.isRtl;
 
   images = input.required<GalleryImage[]>();
@@ -58,8 +62,22 @@ export class GalleryLightboxComponent {
   private syncIndex = effect(() => {
     if (this.isOpen()) {
       this.currentIndex.set(this.startIndex());
+      // Remove the background from the accessibility tree while open
+      // (same rationale as cos-modal: aria-modal alone is unevenly honored).
+      setTimeout(() => {
+        const dialog = (this.hostEl.nativeElement as HTMLElement).querySelector<HTMLElement>('[role="dialog"]');
+        if (dialog && this.isOpen()) this.restoreInert ??= inertSiblingsOutside(dialog);
+      }, 50);
+    } else {
+      this.restoreInert?.();
+      this.restoreInert = undefined;
     }
   });
+
+  ngOnDestroy(): void {
+    this.restoreInert?.();
+    this.restoreInert = undefined;
+  }
 
   currentImage = computed(() => {
     const imgs = this.images();
