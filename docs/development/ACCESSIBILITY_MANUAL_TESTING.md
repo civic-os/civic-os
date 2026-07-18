@@ -222,6 +222,11 @@ control with no name, an error that's never announced), that's a finding.
   (move VoiceOver cursor to keyboard focus) snaps the cursor back to the real
   focus position. The app keeps DOM focus inside the dialog and announces the new
   result count; the cursor jump itself is VO recovery behavior.
+- **Dialogs announce as a group requiring `VO+Shift+Down` to enter** — standard
+  VO container navigation (background is inert, so the cursor lands on the
+  dialog itself). Keyboard focus is already inside (the first field), so you can
+  type immediately or `VO+Cmd+F4` to sync the cursor; drilling in is only needed
+  to read the dialog contents linearly.
 - **Linear reading (`VO+→`) stops at the end of the page** rather than wrapping —
   standard VO behavior on all sites. Use the rotor or `VO+Home` to jump back.
 - **VoiceOver + Firefox** under-reports live regions and some rotor content;
