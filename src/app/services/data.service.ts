@@ -691,14 +691,24 @@ export class DataService {
    * Get both preview records and total count in a single optimized request.
    * Uses PostgREST's Prefer: count=exact header to get total count in Content-Range
    * while fetching limited preview records - reduces HTTP requests from 2N to N.
+   *
+   * The select list adapts to the source table's columns (previewMode): tables
+   * without display_name select only id, and tables without either (composite-PK
+   * junctions) fetch a count-only response via limit=0 - selecting a column the
+   * table does not have would 400 the whole request.
    */
   public getInverseRelationshipPreview(
     sourceTable: string,
     filterColumn: string,
     filterValue: any,
-    limit: number = 5
+    limit: number = 5,
+    previewMode: 'display_name' | 'id' | 'count' = 'display_name'
   ): Observable<{ records: EntityData[], totalCount: number }> {
-    const url = `${sourceTable}?${filterColumn}=eq.${filterValue}&select=id,display_name&limit=${limit}`;
+    const select = previewMode === 'display_name' ? 'id,display_name'
+      : previewMode === 'id' ? 'id'
+      : filterColumn;
+    const effectiveLimit = previewMode === 'count' ? 0 : limit;
+    const url = `${sourceTable}?${filterColumn}=eq.${filterValue}&select=${select}&limit=${effectiveLimit}`;
 
     return this.http.get<EntityData[]>(getPostgrestUrl() + url, {
       observe: 'response',
@@ -737,7 +747,8 @@ export class DataService {
       meta.sourceTable,
       meta.sourceColumn,
       targetId,
-      meta.previewLimit
+      meta.previewLimit,
+      meta.previewMode
     ).pipe(
       map(({ records, totalCount }) => ({
         meta,

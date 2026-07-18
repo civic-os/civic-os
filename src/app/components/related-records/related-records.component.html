@@ -37,8 +37,10 @@
             </div>
           }
 
-          <!-- "View all" link if count exceeds preview limit -->
-          @if (relationship.totalCount > relationship.meta.previewLimit) {
+          <!-- "View all" link if count exceeds preview limit, or when there is
+               no per-record preview at all (count-only tables without id/display_name) -->
+          @if (relationship.totalCount > relationship.meta.previewLimit ||
+               (relationship.previewRecords.length === 0 && relationship.totalCount > 0)) {
             <div class="card-actions justify-end mt-2">
               <a
                 [routerLink]="'/view/' + relationship.meta.sourceTable"
