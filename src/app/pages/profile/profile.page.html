@@ -45,15 +45,15 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
                   <div class="text-sm opacity-60">{{ 'profile.first_name' | translate }}</div>
-                  <div class="font-medium">{{ user.first_name || '—' }}</div>
+                  <div class="font-medium">{{ user.first_name || '-' }}</div>
                 </div>
                 <div>
                   <div class="text-sm opacity-60">{{ 'profile.last_name' | translate }}</div>
-                  <div class="font-medium">{{ user.last_name || '—' }}</div>
+                  <div class="font-medium">{{ user.last_name || '-' }}</div>
                 </div>
                 <div>
                   <div class="text-sm opacity-60">{{ 'profile.email' | translate }}</div>
-                  <div class="font-medium">{{ user.email || '—' }}</div>
+                  <div class="font-medium">{{ user.email || '-' }}</div>
                   @if (isOwnProfile()) {
                     <div class="text-xs opacity-50 mt-0.5">{{ 'profile.email_readonly' | translate }}</div>
                   }
@@ -98,7 +98,7 @@
                 <div class="form-control w-full">
                   <div class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></div>
                   <div class="input input-bordered w-full flex items-center bg-base-200 cursor-not-allowed opacity-70">
-                    {{ userRecord()?.email || '—' }}
+                    {{ userRecord()?.email || '-' }}
                   </div>
                   <span class="text-xs opacity-60 mt-1">{{ 'profile.email_readonly' | translate }}</span>
                 </div>

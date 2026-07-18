@@ -148,6 +148,29 @@ Dashboard map markers announce as "Marker"; clusters announce a bare count.
 
 ## Task 4 — Promote the pa11y CI job to an authenticated gate
 
+> ✅ **DONE** (2026-07-18, branch `task/pa11y-authenticated-ci`).
+> `continue-on-error` removed; the pa11y job now boots a slim stack
+> (`docker/ci-a11y/docker-compose.yml`: postgres + PostgREST + Keycloak with
+> the pothole schema), injects runtime config into the built bundle, applies
+> the JWKS dance, seeds the detail-page record (including the
+> `metadata.civic_os_users` row - it is empty before first login), serves the
+> bundle with `serve -s` (http-server 404s SPA deep links - the old
+> best-effort job was scanning 404 pages for guarded routes), and
+> authenticates via pa11y actions driving the real Keycloak login form
+> (`useIncognitoBrowserContext` so every URL gets a fresh login). Stale
+> `/detail/:id`-style URLs in `.pa11yci.json` corrected to real routes. The
+> first authenticated scans surfaced real defects, all fixed: ~100 unlabeled
+> permission-matrix checkboxes, unlabeled user-management search/filter
+> controls, unlabeled entity-management inline edit inputs, and a prohibited
+> `aria-label` on the gallery dropzone (now `role="group"`). axe
+> `color-contrast` is the one documented exclusion (theme-wide Phase 4 work,
+> see `docs/development/ACCESSIBILITY_WCAG.md`). Verified locally end-to-end:
+> 8/8 URLs pass against the exact CI configuration. Residual risk for the
+> first real CI run: runner timing (Keycloak boot, amd64 image pulls) - the
+> wait loops allow 5 min each.
+
+Original task description:
+
 `.github/workflows/accessibility.yml`'s pa11y job is `continue-on-error`
 because it cannot log into Keycloak in CI — it only scans anonymous pages.
 
@@ -187,6 +210,19 @@ The JointJS ERD canvas (`src/app/pages/schema-editor/`, see
   editable through accessible pages — do not over-engineer.
 
 ## Task 7 — CI guard banning typographic dashes in visible strings
+
+> ✅ **DONE** (2026-07-18, branch `task/dash-guard`, stacked on
+> `task/pa11y-authenticated-ci` since both edit accessibility.yml).
+> `scripts/check-typographic-dashes.cjs` (npm run lint:dashes) scans template
+> HTML minus HTML comments, inline `template:` strings in TS (nothing else in
+> TS can trip it, so code comments are structurally exempt), and translation
+> string VALUES in en.translations.ts. Runs as a step in the a11y-lint CI job.
+> Verified: fails on a seeded violation, passes clean. The first run found and
+> fixed 10 pre-existing violations: '—' empty-value placeholders (profile,
+> admin-translations), an em dash in static-assets delete-confirm prose, and
+> en-dash date ranges (series-version-timeline, series-group-management).
+
+Original task description:
 
 Convention (see ground rule 3) currently unenforced.
 

@@ -1,0 +1,81 @@
+# Minimal Civic OS stack for the authenticated pa11y accessibility gate in CI
+# (.github/workflows/accessibility.yml). Postgres (with Sqitch migrations +
+# the pothole example schema), PostgREST, and Keycloak only - no minio,
+# inbucket, worker, or swagger. No persistent volumes: every CI run starts
+# from a clean database.
+#
+# The jwt-secret.jwks file next to this compose file is (re)written by the
+# workflow after Keycloak boots (Keycloak generates fresh signing keys on
+# every startup), then PostgREST is force-recreated to pick it up.
+#
+# Local rehearsal from the repo root:
+#   touch docker/ci-a11y/jwt-secret.jwks
+#   docker compose -f docker/ci-a11y/docker-compose.yml up -d
+#   (wait for Keycloak) curl -s http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/certs > docker/ci-a11y/jwt-secret.jwks
+#   docker compose -f docker/ci-a11y/docker-compose.yml up -d --force-recreate postgrest
+
+services:
+  postgres:
+    build:
+      context: ../..
+      dockerfile: docker/dev-postgres/Dockerfile
+    # postgis/postgis has no arm64 manifest; amd64 matches CI runners and
+    # runs under emulation on Apple Silicon (same as the example composes).
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: civic_os_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: civic_os_ci
+    volumes:
+      - ../../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
+      - ../../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
+      - ../../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
+      - ../../examples/pothole/init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ci-a11y
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d civic_os_db"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: postgres://authenticator:civic_os_ci@postgres:5432/civic_os_db
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_DB_PRE_REQUEST: "metadata.check_jwt"
+      PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
+      PGRST_JWT_AUD: "account"
+      PGRST_LOG_LEVEL: "info"
+    volumes:
+      - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ci-a11y
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8082:8080"
+    command: start-dev --import-realm
+    volumes:
+      - ../../examples/keycloak:/opt/keycloak/data/import:ro
+    networks:
+      - ci-a11y
+
+networks:
+  ci-a11y:
+    driver: bridge

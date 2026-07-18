@@ -198,7 +198,7 @@ import { catchError, map } from 'rxjs/operators';
                             </span>
                             <span class="flex items-center gap-1">
                               <span class="material-symbols-outlined text-sm" aria-hidden="true">date_range</span>
-                              {{ getFirstInstanceDate(group) }} – {{ getEndDateDisplay(group) }}
+                              {{ getFirstInstanceDate(group) }} - {{ getEndDateDisplay(group) }}
                             </span>
                           </div>
                         </div>

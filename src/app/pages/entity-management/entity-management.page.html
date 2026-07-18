@@ -73,6 +73,7 @@
                       [(ngModel)]="entity.customDisplayName"
                       (ngModelChange)="onDisplayNameChange(entity)"
                       (blur)="onFieldBlur(entity)"
+                      [attr.aria-label]="'a11y.display_name_for' | translate:{ entity: entity.table_name }"
                       [placeholder]="getDisplayNamePlaceholder(entity)" />
                   </div>
 
@@ -85,6 +86,7 @@
                       [(ngModel)]="entity.customDescription"
                       (ngModelChange)="onDescriptionChange(entity)"
                       (blur)="onFieldBlur(entity)"
+                      [attr.aria-label]="'a11y.description_for' | translate:{ entity: entity.table_name }"
                       placeholder="Optional description" />
                   </div>
                 </div>
