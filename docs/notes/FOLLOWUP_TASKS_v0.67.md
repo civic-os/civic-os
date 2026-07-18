@@ -216,6 +216,21 @@ differently in the modal than on list pages (observed live on client-intake).
 
 ## Task 9 — Inverse-relationship previews 400 on tables without display_name (non-a11y)
 
+> ✅ **DONE** (2026-07-18, branch `task/inverse-relationship-preview`). Fixed in
+> the frontend metadata layer: `InverseRelationshipMeta` gains a `previewMode`
+> (`display_name` | `id` | `count`) derived in
+> `SchemaService.getInverseRelationships()` from the source table's actual
+> columns (schema_properties exposes id/display_name rows, verified live);
+> `DataService.getInverseRelationshipPreview()` builds the select accordingly
+> (count mode = `select=<fk_column>&limit=0` + `Prefer: count=exact`, count
+> parsed from `Content-Range: */N`). Count-only cards show badge + "View all"
+> (new template condition in related-records). Regression tests added in
+> schema.service.spec and data.service.spec. Live-verified on pothole against
+> throwaway repro tables: old query shape 400s, new shapes 200/206 with correct
+> rendering (#id links; count + View all).
+
+Original task description:
+
 Detail pages' related-records preview always selects `id,display_name` from
 child/junction tables; tables lacking a `display_name` column (composite-PK
 junctions like `team_rosters`, guided-form step tables like

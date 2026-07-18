@@ -330,6 +330,15 @@ export interface InverseRelationshipMeta {
     showOnDetail: boolean;
     sortOrder: number;
     previewLimit: number;
+    /**
+     * How preview records can be fetched and rendered, based on which columns
+     * the source table actually has (from schema_properties):
+     * - 'display_name': select id,display_name (linked names)
+     * - 'id': select id only (linked "#id" entries; no display_name column)
+     * - 'count': no per-record select (composite-PK tables with no id column);
+     *   only the total count is fetched
+     */
+    previewMode: 'display_name' | 'id' | 'count';
 }
 
 /**

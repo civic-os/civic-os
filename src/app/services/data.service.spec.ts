@@ -86,6 +86,53 @@ describe('DataService', () => {
     });
   });
 
+  describe('getInverseRelationshipPreview() - Preview Modes', () => {
+    it('should select id,display_name in display_name mode (default)', (done) => {
+      service.getInverseRelationshipPreview('WorkPackage', 'issue_id', 7, 5).subscribe(result => {
+        expect(result.records.length).toBe(1);
+        expect(result.totalCount).toBe(12);
+        done();
+      });
+
+      const req = httpMock.expectOne(
+        `${testPostgrestUrl}WorkPackage?issue_id=eq.7&select=id,display_name&limit=5`
+      );
+      expect(req.request.headers.get('Prefer')).toBe('count=exact');
+      req.flush([{ id: 1, display_name: 'WP 1' }], {
+        headers: { 'Content-Range': '0-0/12' }
+      });
+    });
+
+    it('should select only id in id mode (table without display_name)', (done) => {
+      service.getInverseRelationshipPreview('step_records', 'parent_id', 7, 5, 'id').subscribe(result => {
+        expect(result.records).toEqual([{ id: 3 } as any]);
+        expect(result.totalCount).toBe(1);
+        done();
+      });
+
+      const req = httpMock.expectOne(
+        `${testPostgrestUrl}step_records?parent_id=eq.7&select=id&limit=5`
+      );
+      req.flush([{ id: 3 }], { headers: { 'Content-Range': '0-0/1' } });
+    });
+
+    it('should fetch count only in count mode (composite-PK table without id/display_name)', (done) => {
+      service.getInverseRelationshipPreview('team_rosters', 'team_id', 7, 5, 'count').subscribe(result => {
+        expect(result.records).toEqual([]);
+        expect(result.totalCount).toBe(9);
+        done();
+      });
+
+      // Selects the (known to exist) filter column with limit=0 so no row data
+      // is transferred; the count arrives via the Content-Range header.
+      const req = httpMock.expectOne(
+        `${testPostgrestUrl}team_rosters?team_id=eq.7&select=team_id&limit=0`
+      );
+      expect(req.request.headers.get('Prefer')).toBe('count=exact');
+      req.flush([], { headers: { 'Content-Range': '*/9' } });
+    });
+  });
+
   describe('getData() - Query Building', () => {
     it('should construct basic GET request', (done) => {
       const mockData = [{ id: 1, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }];

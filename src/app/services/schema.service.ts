@@ -1059,7 +1059,8 @@ export class SchemaService {
           sourceColumnDisplayName: g.display_name,
           showOnDetail: this.shouldShowOnDetail(g),
           sortOrder: g.sort_order || 0,
-          previewLimit: this.getPreviewLimit(g)
+          previewLimit: this.getPreviewLimit(g),
+          previewMode: this.getPreviewMode(g.table_name, props)
         }));
       })
     );
@@ -1081,6 +1082,23 @@ export class SchemaService {
     });
 
     return junctionNames;
+  }
+
+  /**
+   * Determine how a source table's preview records can be fetched, based on
+   * which columns it actually has. Not every FK-bearing table has
+   * id/display_name: composite-PK junctions (e.g. 3-way junctions) and guided
+   * form step tables lack display_name and sometimes id, and selecting a
+   * missing column makes PostgREST return 400 for the whole preview query.
+   */
+  private getPreviewMode(tableName: string, props: SchemaEntityProperty[]): 'display_name' | 'id' | 'count' {
+    const columns = new Set(
+      props.filter(p => p.table_name === tableName).map(p => p.column_name)
+    );
+    if (columns.has('display_name')) {
+      return 'display_name';
+    }
+    return columns.has('id') ? 'id' : 'count';
   }
 
   /**

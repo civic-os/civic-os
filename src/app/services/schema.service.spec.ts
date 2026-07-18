@@ -155,6 +155,46 @@ describe('SchemaService', () => {
     });
   });
 
+  describe('getInverseRelationships() - previewMode derivation', () => {
+    /** Build the schema_properties rows for three FK-bearing source tables
+     *  with different column shapes, all pointing at target table 'Issue'. */
+    const fkTo = (table: string) => createMockProperty({
+      table_name: table,
+      column_name: 'issue_id',
+      udt_name: 'int8',
+      join_schema: 'public',
+      join_table: 'Issue',
+      join_column: 'id'
+    });
+    const col = (table: string, column: string) => createMockProperty({
+      table_name: table,
+      column_name: column
+    });
+
+    it('should derive previewMode from the source table columns', (done) => {
+      const mockProps: SchemaEntityProperty[] = [
+        // work_details: has id + display_name
+        col('work_details', 'id'), col('work_details', 'display_name'), fkTo('work_details'),
+        // step_records: has id, no display_name
+        col('step_records', 'id'), fkTo('step_records'),
+        // team_rosters: composite PK, neither id nor display_name
+        fkTo('team_rosters'), col('team_rosters', 'member_id')
+      ];
+
+      service.getInverseRelationships('Issue').subscribe(rels => {
+        const byTable = new Map(rels.map(r => [r.sourceTable, r]));
+        expect(byTable.get('work_details')?.previewMode).toBe('display_name');
+        expect(byTable.get('step_records')?.previewMode).toBe('id');
+        expect(byTable.get('team_rosters')?.previewMode).toBe('count');
+        done();
+      });
+
+      expectPostgrestRequest(httpMock, 'schema_entities', []);
+      expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+      flushM2mMetadata(httpMock);
+    });
+  });
+
   describe('getPropertyType() - Type Detection Logic', () => {
     it('should detect TextShort for varchar', () => {
       const prop = createMockProperty({ udt_name: 'varchar' });
