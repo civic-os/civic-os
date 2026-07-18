@@ -268,4 +268,54 @@ Remove `tabindex="-1"` from the row checkboxes/radios so the native control is t
 
 ---
 
-*Audit performed 2026-07-10; handover section added same day. Companion doc: `docs/development/ACCESSIBILITY_WCAG.md` (status section now superseded by this audit).*
+## Future accessibility work (post-remediation backlog)
+
+Durable record of a11y improvements identified during remediation and the live
+VoiceOver pass (July 2026) that were deliberately deferred. Each is
+self-contained enough to pick up cold.
+
+1. **Migrate `cos-modal` to the native `<dialog>` element (`showModal()`).**
+   The highest-value item. Today's modal is div-based: `role="dialog"` +
+   `aria-modal` + CDK `cdkTrapFocus` + a manual sibling-walk that sets `inert`
+   on background content (`src/app/utils/inert.utils.ts`) + body scroll lock.
+   Native `<dialog>`+`showModal()` replaces all of that with browser-managed
+   top-layer rendering, true background inerting, Escape handling, and focus
+   management — the long-term ideal per TPGi's modal-accessibility survey and
+   W3C ARIA practices. Scope: internal to `cos-modal` (all ~29 consumers use the
+   same `[label]`/`[isOpen]`/`(closed)` API); preserve size variants, entrance
+   animation (`::backdrop` + `@starting-style`), `closeOnEscape`/`closeOnBackdrop`,
+   and scroll behavior; update specs asserting `role`/`aria-modal`/ESC to native
+   semantics; delete `inert.utils.ts` usage from cos-modal (gallery-lightbox
+   keeps it unless migrated too); live-verify settings modal, FK search modal
+   (nested in forms), delete confirmation, and lightbox interplay.
+2. **Translate the `a11y.*` keys for non-English locales.** The ~90 keys added
+   during remediation ship with bundled English only; instances with other
+   locales (e.g. the ECS demo's 6 languages) fall back to English for all
+   screen-reader strings. The `/admin/translations` missing-coverage report
+   enumerates them. Belongs on the pre-release checklist of any multi-locale
+   instance.
+3. **Dashboard map markers/clusters: descriptive accessible names.** Markers
+   announce as "Marker" and clusters as a bare count; carry the record's
+   display name ("15 participants"). Components: dashboard map widget /
+   `geo-point-map` marker rendering.
+4. **Authenticated pa11y in CI.** The pa11y job is best-effort because it cannot
+   log in to Keycloak in CI; giving it a test-user token (password grant against
+   the CI stack) would let it scan authenticated pages and become a real gate.
+5. **Visible data-table toggle for chart widgets.** Charts have sr-only data
+   tables; a visible toggle would serve low-vision and cognitive-load users too.
+   Visual-design decision.
+6. **Schema editor (JointJS) keyboard node manipulation.** Canvas drag is
+   mouse-only; underlying data remains editable through accessible pages, so
+   low priority.
+7. **Custom lint/CI guard for typographic dashes.** Project convention bans
+   en/em dashes in visible strings (titles, table placeholders, translations);
+   currently enforced only by convention — a small ESLint rule or CI grep over
+   templates and `en.translations.ts` would make it stick.
+
+---
+
+*Audit performed 2026-07-10; handover section added same day; future-work
+backlog recorded 2026-07-18 after the live VoiceOver pass. Companion docs:
+`docs/development/ACCESSIBILITY_WCAG.md` (status section superseded by this
+audit) and `docs/development/ACCESSIBILITY_MANUAL_TESTING.md` (the human
+testing procedure and known screen-reader quirks).*

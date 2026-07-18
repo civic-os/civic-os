@@ -302,6 +302,11 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 - [ ] **E-Signatures** - Electronic document signing capabilities
 
+- [ ] **Accessibility follow-ups** (WCAG remediation completed July 2026; see `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md` "Future accessibility work" for the full backlog)
+  - [ ] Migrate `cos-modal` to native `<dialog>`/`showModal()` (browser-managed focus + background inerting)
+  - [ ] Translate `a11y.*` screen-reader strings for non-English locales
+  - [ ] Authenticated pa11y in CI (promote from best-effort to gate)
+
 ---
 
 For more details on the vision behind these phases, see the [Civic OS Vision repository](https://github.com/civic-os/vision).
