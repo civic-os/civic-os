@@ -1,26 +1,17 @@
 @if (isOpen()) {
-  <div
-    #modalContainer
-    class="cos-modal-container outline-none"
-    [class.cos-modal-open]="animationReady()"
-    role="dialog"
-    aria-modal="true"
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- backdrop click-to-dismiss is a mouse convenience; keyboard close is the native dialog's Escape handling (cancel event), and showModal() manages focus without a tabindex -->
+  <dialog
+    #dialog
+    class="cos-modal-container"
     [attr.aria-label]="label() || null"
+    (cancel)="onCancel($event)"
     (keydown)="onKeydown($event)"
-    cdkTrapFocus
-    [cdkTrapFocusAutoCapture]="true"
-    tabindex="-1">
-
-    <!-- Backdrop overlay -->
-    <div
-      class="cos-modal-backdrop"
-      (click)="onBackdropClick()"
-      aria-hidden="true">
-    </div>
+    (pointerdown)="onPointerDown($event)"
+    (click)="onDialogClick($event)">
 
     <!-- Modal content box -->
     <div class="cos-modal-box not-prose" [ngClass]="sizeClass()">
       <ng-content></ng-content>
     </div>
-  </div>
+  </dialog>
 }

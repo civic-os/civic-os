@@ -7,16 +7,19 @@
  * (at your option) any later version.
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject, ElementRef } from '@angular/core';
-import { A11yModule } from '@angular/cdk/a11y';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, HostListener, inject, ElementRef, viewChild } from '@angular/core';
 import { GalleryImage } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
 import { LocaleService } from '../../services/locale.service';
-import { inertSiblingsOutside } from '../../utils/inert.utils';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Full-screen lightbox for gallery image viewing with keyboard navigation.
+ *
+ * Rendered as a native `<dialog>` via showModal(): the browser handles
+ * top-layer stacking (above any open cos-modal), background inerting, and
+ * initial focus. Focus restoration on close is handled here because the
+ * dialog leaves the DOM via @if instead of dialog.close().
  *
  * Features:
  * - Large image display (800px thumbnail or original fallback)
@@ -40,15 +43,12 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-gallery-lightbox',
   standalone: true,
-  imports: [A11yModule, TranslatePipe],
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gallery-lightbox.component.html'
 })
 export class GalleryLightboxComponent {
   private localeService = inject(LocaleService);
-  private hostEl = inject(ElementRef<HTMLElement>);
-  /** Restore function for the inert attributes applied to background content while open. */
-  private restoreInert?: () => void;
   readonly isRtl = this.localeService.isRtl;
 
   images = input.required<GalleryImage[]>();
@@ -58,25 +58,58 @@ export class GalleryLightboxComponent {
 
   currentIndex = signal(0);
 
+  /** The native dialog element (present only while isOpen is true) */
+  private dialogRef = viewChild<ElementRef<HTMLDialogElement>>('dialog');
+
+  /** Element focused before the lightbox opened, restored on close */
+  private previouslyFocused: HTMLElement | null = null;
+
+  /** Show the native dialog whenever it enters the DOM (isOpen drives the @if) */
+  private showDialog = effect(() => {
+    const dialog = this.dialogRef()?.nativeElement;
+    if (dialog && !dialog.open) {
+      this.previouslyFocused =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      dialog.showModal();
+    }
+  });
+
   /** Sync currentIndex when the lightbox opens (or startIndex changes while open) */
   private syncIndex = effect(() => {
     if (this.isOpen()) {
       this.currentIndex.set(this.startIndex());
-      // Remove the background from the accessibility tree while open
-      // (same rationale as cos-modal: aria-modal alone is unevenly honored).
-      setTimeout(() => {
-        const dialog = (this.hostEl.nativeElement as HTMLElement).querySelector<HTMLElement>('[role="dialog"]');
-        if (dialog && this.isOpen()) this.restoreInert ??= inertSiblingsOutside(dialog);
-      }, 50);
     } else {
-      this.restoreInert?.();
-      this.restoreInert = undefined;
+      this.restoreFocus();
     }
   });
 
   ngOnDestroy(): void {
-    this.restoreInert?.();
-    this.restoreInert = undefined;
+    this.restoreFocus();
+  }
+
+  /** Return focus to the element that opened the lightbox (no-op if never opened) */
+  private restoreFocus(): void {
+    const el = this.previouslyFocused;
+    this.previouslyFocused = null;
+    if (el) {
+      // Wait a tick so the dialog has left the DOM (and the top layer) -
+      // while it is still modal, focus cannot move outside it.
+      setTimeout(() => {
+        if (document.contains(el)) {
+          el.focus();
+        }
+      });
+    }
+  }
+
+  /**
+   * Handle the native close request (Escape via close watcher). Prevented so
+   * the dialog only closes via the isOpen input; the closed event asks the
+   * parent to flip that state.
+   */
+  onCancel(event: Event): void {
+    event.preventDefault();
+    this.close();
   }
 
   currentImage = computed(() => {

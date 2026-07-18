@@ -303,7 +303,16 @@ VoiceOver pass (July 2026) that were deliberately deferred. Each is
 self-contained enough to pick up cold.
 
 1. **Migrate `cos-modal` to the native `<dialog>` element (`showModal()`).**
-   The highest-value item. Today's modal is div-based: `role="dialog"` +
+   ✅ **Done (post-v0.67.0, branch `task/native-dialog-modal`).** Both `cos-modal`
+   and `gallery-lightbox` now render native `<dialog>` elements via `showModal()`;
+   `inert.utils.ts` is deleted. The lightbox migration was required (not optional)
+   because a `z-index` lightbox opened from inside a modal (photo gallery params
+   in the entity action panel) would paint *under* a top-layer dialog. Escape is
+   handled on both the native `cancel` event and a direct `keydown` fallback
+   (some environments deliver Escape as a plain keydown without a close request).
+   Focus restoration on close is explicit, since the dialog leaves the DOM via
+   `@if` rather than `dialog.close()`. Original item follows for context.
+   The pre-migration modal was div-based: `role="dialog"` +
    `aria-modal` + CDK `cdkTrapFocus` + a manual sibling-walk that sets `inert`
    on background content (`src/app/utils/inert.utils.ts`) + body scroll lock.
    Native `<dialog>`+`showModal()` replaces all of that with browser-managed

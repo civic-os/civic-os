@@ -123,7 +123,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [x] Table semantics (caption, scope, aria-sort)
   - [x] ARIA live regions for loading/errors
   - [x] Keyboard navigation for table rows
-  - [x] Modal focus management (Angular CDK `cdkTrapFocus`)
+  - [x] Modal focus management (native `<dialog>` + `showModal()`)
   - [ ] Color contrast fixes (3 issues)
   - [ ] Focus indicators and Phase 4 polish items
   - See `docs/development/ACCESSIBILITY_WCAG.md` for details

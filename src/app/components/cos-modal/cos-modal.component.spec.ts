@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
@@ -15,15 +15,18 @@ import { CosModalComponent } from './cos-modal.component';
   standalone: true,
   imports: [CosModalComponent],
   template: `
+    <button id="opener" type="button">Open</button>
     <cos-modal
       [isOpen]="isOpen()"
       [size]="size()"
       [closeOnBackdrop]="closeOnBackdrop()"
       [closeOnEscape]="closeOnEscape()"
+      [label]="label()"
       (closed)="onClosed()"
     >
       <h3 id="test-title">Test Modal</h3>
       <p>Test content</p>
+      <button id="inner-button" type="button">Inner</button>
     </cos-modal>
   `
 })
@@ -32,6 +35,7 @@ class TestHostComponent {
   size = signal<'sm' | 'md' | 'lg' | 'xl' | 'full'>('md');
   closeOnBackdrop = signal(true);
   closeOnEscape = signal(true);
+  label = signal<string | undefined>(undefined);
   closedCount = 0;
 
   onClosed(): void {
@@ -42,6 +46,11 @@ class TestHostComponent {
 describe('CosModalComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
+
+  /** The native <dialog> element rendered by cos-modal (null when closed) */
+  function dialogEl(): HTMLDialogElement | null {
+    return fixture.debugElement.query(By.css('dialog.cos-modal-container'))?.nativeElement ?? null;
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -63,20 +72,20 @@ describe('CosModalComponent', () => {
   });
 
   describe('rendering', () => {
-    it('should not render modal when isOpen is false', () => {
+    it('should not render dialog when isOpen is false', () => {
       host.isOpen.set(false);
       fixture.detectChanges();
 
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      expect(container).toBeNull();
+      expect(dialogEl()).toBeNull();
     });
 
-    it('should render modal when isOpen is true', () => {
+    it('should render an open dialog when isOpen is true', () => {
       host.isOpen.set(true);
       fixture.detectChanges();
 
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      expect(container).not.toBeNull();
+      const dialog = dialogEl();
+      expect(dialog).not.toBeNull();
+      expect(dialog!.open).toBeTrue();
     });
 
     it('should render projected content', () => {
@@ -142,56 +151,98 @@ describe('CosModalComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should emit closed when backdrop is clicked and closeOnBackdrop is true', () => {
+    it('should emit closed when the dialog surface (backdrop) is clicked and closeOnBackdrop is true', () => {
       host.closeOnBackdrop.set(true);
       fixture.detectChanges();
 
-      const backdrop = fixture.debugElement.query(By.css('.cos-modal-backdrop'));
-      backdrop.nativeElement.click();
+      dialogEl()!.click();
 
       expect(host.closedCount).toBe(1);
     });
 
-    it('should not emit closed when backdrop is clicked and closeOnBackdrop is false', () => {
+    it('should not emit closed when the dialog surface is clicked and closeOnBackdrop is false', () => {
       host.closeOnBackdrop.set(false);
       fixture.detectChanges();
 
-      const backdrop = fixture.debugElement.query(By.css('.cos-modal-backdrop'));
-      backdrop.nativeElement.click();
+      dialogEl()!.click();
+
+      expect(host.closedCount).toBe(0);
+    });
+
+    it('should not emit closed when clicking inside the modal box', () => {
+      const box = fixture.debugElement.query(By.css('.cos-modal-box'));
+      box.nativeElement.click();
+
+      expect(host.closedCount).toBe(0);
+    });
+
+    it('should not emit closed when a drag starts on content and ends on the backdrop', () => {
+      const dialog = dialogEl()!;
+      const box = fixture.debugElement.query(By.css('.cos-modal-box')).nativeElement;
+
+      // Pointer down on content (e.g. starting a text selection)...
+      box.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      // ...released over the backdrop: the browser dispatches click at the
+      // nearest common ancestor, which is the dialog itself.
+      dialog.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
       expect(host.closedCount).toBe(0);
     });
   });
 
-  describe('keyboard interaction', () => {
+  describe('escape key (native cancel event)', () => {
     beforeEach(() => {
       host.isOpen.set(true);
       fixture.detectChanges();
     });
 
-    it('should emit closed when ESC is pressed and closeOnEscape is true', () => {
+    it('should emit closed on cancel when closeOnEscape is true', () => {
       host.closeOnEscape.set(true);
       fixture.detectChanges();
 
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      container.triggerEventHandler('keydown', { key: 'Escape', preventDefault: () => {} });
+      dialogEl()!.dispatchEvent(new Event('cancel', { cancelable: true }));
 
       expect(host.closedCount).toBe(1);
     });
 
-    it('should not emit closed when ESC is pressed and closeOnEscape is false', () => {
+    it('should not emit closed on cancel when closeOnEscape is false', () => {
       host.closeOnEscape.set(false);
       fixture.detectChanges();
 
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      container.triggerEventHandler('keydown', { key: 'Escape', preventDefault: () => {} });
+      dialogEl()!.dispatchEvent(new Event('cancel', { cancelable: true }));
 
       expect(host.closedCount).toBe(0);
     });
 
-    it('should not emit closed for other keys', () => {
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      container.triggerEventHandler('keydown', { key: 'Enter', preventDefault: () => {} });
+    it('should always prevent the native close so state stays driven by isOpen', () => {
+      const event = new Event('cancel', { cancelable: true });
+      dialogEl()!.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBeTrue();
+      expect(dialogEl()!.open).toBeTrue();
+    });
+
+    it('should emit closed on an Escape keydown (environments without close requests)', () => {
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+      dialogEl()!.dispatchEvent(event);
+
+      expect(host.closedCount).toBe(1);
+      // preventDefault suppresses the native close request so the cancel
+      // path cannot double-fire
+      expect(event.defaultPrevented).toBeTrue();
+    });
+
+    it('should ignore Escape keydown when closeOnEscape is false', () => {
+      host.closeOnEscape.set(false);
+      fixture.detectChanges();
+
+      dialogEl()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+
+      expect(host.closedCount).toBe(0);
+    });
+
+    it('should ignore other keys', () => {
+      dialogEl()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
 
       expect(host.closedCount).toBe(0);
     });
@@ -218,6 +269,16 @@ describe('CosModalComponent', () => {
       expect(document.body.style.overflow).toBe('');
       expect(document.body.style.position).toBe('');
     });
+
+    it('should not touch body styles while the modal has never opened', () => {
+      document.body.style.overflow = 'scroll';
+
+      host.isOpen.set(false);
+      fixture.detectChanges();
+
+      expect(document.body.style.overflow).toBe('scroll');
+      document.body.style.overflow = '';
+    });
   });
 
   describe('accessibility', () => {
@@ -226,19 +287,48 @@ describe('CosModalComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should have role="dialog"', () => {
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      expect(container.attributes['role']).toBe('dialog');
+    it('should render a native dialog element', () => {
+      const dialog = dialogEl();
+      expect(dialog).not.toBeNull();
+      expect(dialog!.tagName).toBe('DIALOG');
     });
 
-    it('should have aria-modal="true"', () => {
-      const container = fixture.debugElement.query(By.css('.cos-modal-container'));
-      expect(container.attributes['aria-modal']).toBe('true');
+    it('should be shown modally (top layer, background inert)', () => {
+      expect(dialogEl()!.matches(':modal')).toBeTrue();
     });
 
-    it('should have focus trap directive', () => {
-      const container = fixture.debugElement.query(By.css('[cdkTrapFocus]'));
-      expect(container).not.toBeNull();
+    it('should apply the label input as aria-label', () => {
+      host.label.set('Settings');
+      fixture.detectChanges();
+
+      expect(dialogEl()!.getAttribute('aria-label')).toBe('Settings');
+    });
+
+    it('should not set aria-label when no label is provided', () => {
+      expect(dialogEl()!.hasAttribute('aria-label')).toBeFalse();
+    });
+
+    it('should contain focus within the dialog while open', () => {
+      expect(dialogEl()!.contains(document.activeElement)).toBeTrue();
+    });
+  });
+
+  describe('focus restoration', () => {
+    it('should restore focus to the previously focused element on close', async () => {
+      const opener = fixture.debugElement.query(By.css('#opener')).nativeElement as HTMLButtonElement;
+      opener.focus();
+      expect(document.activeElement).toBe(opener);
+
+      host.isOpen.set(true);
+      fixture.detectChanges();
+      expect(document.activeElement).not.toBe(opener);
+
+      host.isOpen.set(false);
+      fixture.detectChanges();
+      // Restoration happens on a macrotask after the dialog leaves the DOM
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(document.activeElement).toBe(opener);
     });
   });
 });

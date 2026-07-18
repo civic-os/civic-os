@@ -105,7 +105,7 @@ All zero-visual-impact improvements:
 3. **Form validation announcements** ✅
    - Error messages have `role="alert"` and `aria-live="polite"`
 
-4. **Modal focus management** ✅ Complete (`cdkTrapFocus` in `cos-modal.component.html` with `A11yModule`)
+4. **Modal focus management** ✅ Complete (native `<dialog>` + `showModal()` in `cos-modal` and `gallery-lightbox`; the browser manages the top layer, background inerting, and initial focus, with explicit focus restoration on close)
 
 ### Pa11y Audit Results (2025-11-05)
 
@@ -151,7 +151,7 @@ All zero-visual-impact improvements:
 - [ ] Fix 3 color contrast issues (30-60 minutes)
 
 #### Phase 3 - Remaining Item ✅ Complete
-- [x] Modal focus management with Angular CDK — implemented via `cdkTrapFocus` directive in `cos-modal.component.html` with `A11yModule` import. Covers all modals that use the shared `cos-modal` component.
+- [x] Modal focus management — originally Angular CDK `cdkTrapFocus`; superseded post-v0.67.0 by migrating `cos-modal` and `gallery-lightbox` to the native `<dialog>` element with `showModal()` (browser-managed top layer, background inerting, and initial focus; component-managed focus restoration and body scroll lock). Covers all modals that use the shared `cos-modal` component.
 
 #### Phase 4 - Polish & Advanced Features (4-6 hours)
 - [ ] Focus indicators (`:focus-visible` styles)

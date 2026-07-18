@@ -1,14 +1,12 @@
 @if (isOpen()) {
-  <!-- Full-screen overlay -->
-  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -- backdrop click-to-dismiss is a mouse convenience; keyboard close is handled by the Escape key (document:keydown HostListener) and the visible close button -->
-  <div
-    class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+  <!-- Full-screen native dialog (top layer, so it stacks above any open cos-modal) -->
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- backdrop click-to-dismiss is a mouse convenience; keyboard close is handled by the Escape key (native cancel event + document:keydown HostListener) and the visible close button, and showModal() manages focus without a tabindex -->
+  <dialog
+    #dialog
+    class="fixed inset-0 m-0 border-0 p-0 w-screen h-dvh max-w-none max-h-none bg-black/90 open:flex items-center justify-center backdrop:bg-transparent"
+    (cancel)="onCancel($event)"
     (click)="close()"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-label]="'a11y.image_gallery_viewer' | translate"
-    cdkTrapFocus
-    [cdkTrapFocusAutoCapture]="true">
+    [attr.aria-label]="'a11y.image_gallery_viewer' | translate">
 
     <!-- Close button -->
     <button type="button"
@@ -67,5 +65,5 @@
         </div>
       </div>
     }
-  </div>
+  </dialog>
 }

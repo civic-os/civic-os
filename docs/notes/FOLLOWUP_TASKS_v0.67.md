@@ -91,6 +91,19 @@ own worktree until the others land.
 
 ## Task 1 — Migrate cos-modal to the native `<dialog>` element (highest value)
 
+> ✅ **DONE** (2026-07-18, branch `task/native-dialog-modal`). Also migrated
+> `gallery-lightbox` to native `<dialog>` (required: a z-index lightbox opened
+> from a photo-gallery action param inside a modal would paint under the top
+> layer) and deleted `inert.utils.ts`. Escape works via both the native `cancel`
+> event and a keydown fallback. Live-verified on pothole: settings modal, FK
+> search modal in create form (selection + focus restore), delete confirmation
+> (Escape cancel). Residual: dialog-over-dialog nesting (entity action modal →
+> FK modal) and lightbox-over-modal are covered by unit tests and top-layer
+> stacking guarantees but were not exercised live (pothole has no entity
+> actions); spot-check when a stack with actions is next up.
+
+Original task description:
+
 Migrate `src/app/components/cos-modal/` from its div-based implementation
 (`role="dialog"` + `aria-modal` + CDK `cdkTrapFocus` + sibling-walk `inert` via
 `src/app/utils/inert.utils.ts` + manual body scroll lock) to native `<dialog>`
