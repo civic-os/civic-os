@@ -21,6 +21,7 @@ import { SchemaEditorPage } from './schema-editor.page';
 import { SchemaService } from '../../services/schema.service';
 import { ThemeService } from '../../services/theme.service';
 import { GeometricPortCalculatorService } from '../../services/schema-diagram/geometric-port-calculator.service';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { of } from 'rxjs';
 
 /**
@@ -59,6 +60,7 @@ describe('SchemaEditorPage - System Type Filtering', () => {
       imports: [SchemaEditorPage],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: ThemeService, useValue: mockThemeService }
       ]
@@ -235,6 +237,7 @@ describe('SchemaEditorPage - Port Reconnection Logic', () => {
       imports: [SchemaEditorPage],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: ThemeService, useValue: mockThemeService }
       ]
@@ -405,6 +408,176 @@ describe('SchemaEditorPage - Port Reconnection Logic', () => {
 
       expect(mockLink.get).toHaveBeenCalledWith('router');
       expect(mockLink.router).toHaveBeenCalledWith(router);
+    });
+  });
+});
+
+/**
+ * Unit tests for Task 6: keyboard node manipulation in the schema editor.
+ *
+ * The JointJS canvas itself requires a real browser to render (Karma's headless
+ * Chrome can construct the graph but full SVG layout/interaction is limited), so
+ * these tests isolate the pure logic: nudge-delta math and announcement
+ * formatting. `handleNodeKeydown` is exercised against a minimal mock `dia.Element`
+ * to verify it updates position and calls `adjustVertices` without needing a real
+ * paper. Focus management (tabindex/aria-label wiring, visible focus outline) and
+ * full drag-vs-keyboard-nudge canvas interaction need manual/browser verification.
+ */
+describe('SchemaEditorPage - Keyboard Node Nudging (Task 6)', () => {
+  let component: SchemaEditorPage;
+  let fixture: ComponentFixture<SchemaEditorPage>;
+  let mockSchemaService: jasmine.SpyObj<SchemaService>;
+  let mockThemeService: jasmine.SpyObj<ThemeService>;
+
+  beforeEach(async () => {
+    mockSchemaService = jasmine.createSpyObj('SchemaService', [
+      'getEntities',
+      'getProperties',
+      'getDetectedJunctionTables'
+    ]);
+    mockThemeService = jasmine.createSpyObj('ThemeService', ['isDark']);
+
+    mockSchemaService.getEntities.and.returnValue(of([]));
+    mockSchemaService.getProperties.and.returnValue(of([]));
+    mockSchemaService.getDetectedJunctionTables.and.returnValue(of(new Set<string>()));
+    mockThemeService.isDark.and.returnValue(false);
+
+    await TestBed.configureTestingModule({
+      imports: [SchemaEditorPage],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideTranslationTesting(),
+        { provide: SchemaService, useValue: mockSchemaService },
+        { provide: ThemeService, useValue: mockThemeService }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(SchemaEditorPage);
+    component = fixture.componentInstance;
+  });
+
+  function computeNudgeDelta(key: string, large: boolean): { dx: number; dy: number } | null {
+    return (component as any).computeNudgeDelta(key, large);
+  }
+
+  describe('computeNudgeDelta()', () => {
+    it('moves up by the small step for ArrowUp', () => {
+      expect(computeNudgeDelta('ArrowUp', false)).toEqual({ dx: 0, dy: -10 });
+    });
+
+    it('moves down by the small step for ArrowDown', () => {
+      expect(computeNudgeDelta('ArrowDown', false)).toEqual({ dx: 0, dy: 10 });
+    });
+
+    it('moves left by the small step for ArrowLeft', () => {
+      expect(computeNudgeDelta('ArrowLeft', false)).toEqual({ dx: -10, dy: 0 });
+    });
+
+    it('moves right by the small step for ArrowRight', () => {
+      expect(computeNudgeDelta('ArrowRight', false)).toEqual({ dx: 10, dy: 0 });
+    });
+
+    it('uses the large step when Shift is held', () => {
+      expect(computeNudgeDelta('ArrowUp', true)).toEqual({ dx: 0, dy: -50 });
+      expect(computeNudgeDelta('ArrowRight', true)).toEqual({ dx: 50, dy: 0 });
+    });
+
+    it('returns null for non-arrow keys so other shortcuts are unaffected', () => {
+      expect(computeNudgeDelta('Enter', false)).toBeNull();
+      expect(computeNudgeDelta('Tab', false)).toBeNull();
+      expect(computeNudgeDelta('a', false)).toBeNull();
+      expect(computeNudgeDelta(' ', false)).toBeNull();
+    });
+  });
+
+  describe('formatNodeMovedAnnouncement()', () => {
+    it('rounds coordinates and includes the entity name', () => {
+      const text = (component as any).formatNodeMovedAnnouncement('Issues', 123.6, 45.2);
+      expect(text).toBe('Issues moved to x 124, y 45');
+    });
+
+    it('produces a distinct message for a different position', () => {
+      const text = (component as any).formatNodeMovedAnnouncement('Tags', 0, 0);
+      expect(text).toBe('Tags moved to x 0, y 0');
+    });
+  });
+
+  describe('handleNodeKeydown()', () => {
+    function createMockElement(x: number, y: number) {
+      return {
+        position: jasmine.createSpy('position').and.callFake((newX?: number, newY?: number) => {
+          if (newX === undefined) {
+            return { x, y };
+          }
+          x = newX;
+          y = newY!;
+          return undefined;
+        })
+      };
+    }
+
+    const mockEntity = {
+      table_name: 'issues',
+      display_name: 'Issues',
+      description: null,
+      sort_order: 1,
+      search_fields: null,
+      show_map: false,
+      map_property_name: null,
+      show_calendar: false,
+      calendar_property_name: null,
+      calendar_color_property: null,
+      insert: true,
+      select: true,
+      update: true,
+      delete: true
+    };
+
+    function makeKeydownEvent(key: string, shiftKey = false): KeyboardEvent {
+      return new KeyboardEvent('keydown', { key, shiftKey });
+    }
+
+    beforeEach(() => {
+      // Stub out graph/adjustVertices so handleNodeKeydown can run without a real paper
+      (component as any).graph = {};
+      spyOn(component as any, 'adjustVertices').and.returnValue(Promise.resolve());
+    });
+
+    it('moves the element position by the nudge delta and announces it', () => {
+      const element = createMockElement(100, 200);
+      const evt = makeKeydownEvent('ArrowRight');
+      spyOn(evt, 'preventDefault');
+      spyOn(evt, 'stopPropagation');
+
+      (component as any).handleNodeKeydown(evt, element, mockEntity);
+
+      expect(element.position).toHaveBeenCalledWith(110, 200);
+      expect(evt.preventDefault).toHaveBeenCalled();
+      expect(evt.stopPropagation).toHaveBeenCalled();
+      expect(component.nodeMoveAnnouncement()).toBe('Issues moved to x 110, y 200');
+      expect((component as any).adjustVertices).toHaveBeenCalledWith((component as any).graph, element);
+    });
+
+    it('uses the large step with Shift held', () => {
+      const element = createMockElement(100, 200);
+      const evt = makeKeydownEvent('ArrowDown', true);
+
+      (component as any).handleNodeKeydown(evt, element, mockEntity);
+
+      expect(element.position).toHaveBeenCalledWith(100, 250);
+      expect(component.nodeMoveAnnouncement()).toBe('Issues moved to x 100, y 250');
+    });
+
+    it('ignores non-arrow keys and does not move the element or announce', () => {
+      const element = createMockElement(100, 200);
+      const evt = makeKeydownEvent('Enter');
+      spyOn(evt, 'preventDefault');
+
+      (component as any).handleNodeKeydown(evt, element, mockEntity);
+
+      expect(element.position).not.toHaveBeenCalledWith(jasmine.anything(), jasmine.anything());
+      expect(evt.preventDefault).not.toHaveBeenCalled();
+      expect(component.nodeMoveAnnouncement()).toBe('');
     });
   });
 });

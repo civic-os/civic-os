@@ -195,3 +195,15 @@
 :host ::ng-deep .joint-paper {
   background-color: var(--base-200);
 }
+
+/* Keyboard focus indicator for entity nodes (Task 6: keyboard node nudging).
+   :focus-visible only matches keyboard/AT focus, not mouse clicks. Outline has
+   no inline/block direction, so no logical-property equivalent is needed. */
+:host ::ng-deep .canvas-container .schema-node-focusable:focus-visible {
+  outline: 3px solid var(--color-primary, var(--primary));
+  outline-offset: 2px;
+}
+
+:host ::ng-deep .canvas-container .schema-node-focusable:focus:not(:focus-visible) {
+  outline: none;
+}
