@@ -213,6 +213,21 @@ control with no name, an error that's never announced), that's a finding.
 | 11 | Open the **dashboard with a chart widget**. | The chart has an equivalent — arrow into the adjacent `sr-only` data table and hear the category/series values. | 1.1.1 |
 | 12 | Trigger an **error** (e.g. delete something that fails, or a bad save). | The error alert is spoken when it appears (it's a live region / `role="alert"`). | 4.1.3 |
 
+### Known VoiceOver quirks (not app bugs)
+
+- **Cursor stranded after dynamic content replaces itself** (e.g. searching inside
+  a modal re-renders the result rows the cursor was on): VoiceOver relocates its
+  cursor by its own heuristics and can land *outside* an `aria-modal` dialog even
+  though DOM keyboard focus correctly stays inside. Recovery: **`VO+Cmd+F4`**
+  (move VoiceOver cursor to keyboard focus) snaps the cursor back to the real
+  focus position. The app keeps DOM focus inside the dialog and announces the new
+  result count; the cursor jump itself is VO recovery behavior.
+- **Linear reading (`VO+→`) stops at the end of the page** rather than wrapping —
+  standard VO behavior on all sites. Use the rotor or `VO+Home` to jump back.
+- **VoiceOver + Firefox** under-reports live regions and some rotor content;
+  treat silent announcements there as inconclusive and re-test in Safari before
+  filing a bug.
+
 If you only have five minutes, do rows **4, 6, 7, and 9** — booleans, required
 state, error association, and dialog naming are the highest-signal checks and the
 ones automated tools miss most often.
