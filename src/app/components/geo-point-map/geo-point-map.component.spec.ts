@@ -886,4 +886,95 @@ describe('GeoPointMapComponent', () => {
       document.body.removeChild(mapDiv);
     });
   });
+
+  describe('Marker and Cluster Accessible Names', () => {
+    function markerAlt(id: number): string | undefined {
+      return (component['markerMap'].get(id) as any)?.options?.alt;
+    }
+
+    function markerTitle(id: number): string | undefined {
+      return (component['markerMap'].get(id) as any)?.options?.title;
+    }
+
+    beforeEach(() => {
+      // updateMultiMarkers() only needs a map to add markers to; the real
+      // L.marker()/L.markerClusterGroup() objects are exercised for real.
+      component['map'] = createMockMap();
+    });
+
+    it('should set the marker alt (accessible name) to the record display name', () => {
+      component['updateMultiMarkers']([
+        { id: 1, name: 'Community Center', wkt: 'POINT(-83.5 43.0)' }
+      ]);
+
+      expect(markerAlt(1)).toBe('Community Center');
+    });
+
+    it('should also set the marker title (native tooltip) to the record display name', () => {
+      component['updateMultiMarkers']([
+        { id: 1, name: 'Community Center', wkt: 'POINT(-83.5 43.0)' }
+      ]);
+
+      expect(markerTitle(1)).toBe('Community Center');
+    });
+
+    it('should fall back to a translated label when the record has no display name', () => {
+      component['updateMultiMarkers']([
+        { id: 1, name: '', wkt: 'POINT(-83.5 43.0)' }
+      ]);
+
+      expect(markerAlt(1)).toBe('Unnamed location');
+    });
+
+    it('should never leave the marker alt as Leaflet default bare "Marker"', () => {
+      component['updateMultiMarkers']([
+        { id: 1, name: 'Community Center', wkt: 'POINT(-83.5 43.0)' }
+      ]);
+
+      expect(markerAlt(1)).not.toBe('Marker');
+    });
+
+    describe('buildClusterIcon()', () => {
+      it('should combine the count and entity display name into the aria-label', () => {
+        fixture.componentRef.setInput('entityDisplayName', 'Participants');
+
+        const icon = component['buildClusterIcon']({ getChildCount: () => 15 } as any);
+        const wrapper = icon.options.html as HTMLElement;
+
+        expect(wrapper.getAttribute('role')).toBe('img');
+        expect(wrapper.getAttribute('aria-label')).toBe('15 Participants');
+        expect(wrapper.textContent).toBe('15');
+      });
+
+      it('should fall back to a generic label when no entity display name is provided', () => {
+        const icon = component['buildClusterIcon']({ getChildCount: () => 7 } as any);
+        const wrapper = icon.options.html as HTMLElement;
+
+        expect(wrapper.getAttribute('aria-label')).toBe('7 locations');
+      });
+
+      it('should use the small size class under 10', () => {
+        const icon = component['buildClusterIcon']({ getChildCount: () => 5 } as any);
+        expect(icon.options.className).toBe('marker-cluster marker-cluster-small');
+      });
+
+      it('should use the medium size class between 10 and 99', () => {
+        const icon = component['buildClusterIcon']({ getChildCount: () => 42 } as any);
+        expect(icon.options.className).toBe('marker-cluster marker-cluster-medium');
+      });
+
+      it('should use the large size class at 100 or more', () => {
+        const icon = component['buildClusterIcon']({ getChildCount: () => 150 } as any);
+        expect(icon.options.className).toBe('marker-cluster marker-cluster-large');
+      });
+
+      it('should keep the same 40x40 icon size as the default cluster icon', () => {
+        const icon = component['buildClusterIcon']({ getChildCount: () => 15 } as any);
+        const size = icon.options.iconSize as any;
+
+        expect(size.x).toBe(40);
+        expect(size.y).toBe(40);
+      });
+    });
+  });
 });

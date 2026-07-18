@@ -47,6 +47,7 @@
       [height]="'400px'"
       [enableClustering]="config().enableClustering ?? false"
       [clusterRadius]="config().clusterRadius ?? 50"
+      [entityDisplayName]="entityDisplayName()"
       (markerClick)="onMarkerClick($event)"
     />
   } @else {

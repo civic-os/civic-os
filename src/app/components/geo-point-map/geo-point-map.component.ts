@@ -20,6 +20,7 @@ import { Component, input, output, AfterViewInit, OnDestroy, ChangeDetectionStra
 import L from 'leaflet';
 // Note: leaflet.markercluster is loaded dynamically in ngAfterViewInit to avoid race conditions
 import { ThemeService } from '../../services/theme.service';
+import { TranslationService } from '../../services/translation.service';
 import { getMapConfig } from '../../config/runtime';
 
 export interface MapMarker {
@@ -48,6 +49,11 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   // Clustering inputs (multi-marker mode)
   enableClustering = input<boolean>(false);
   clusterRadius = input<number>(50);
+
+  // Plural/display name of the entity the markers represent (e.g. "Participants"),
+  // used to build a descriptive cluster accessible name (e.g. "15 Participants").
+  // Falls back to a generic translated label when not provided.
+  entityDisplayName = input<string>('');
 
   // Common inputs
   width = input<string>('100%');
@@ -85,6 +91,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
   private syncingFromInputs = false;
 
   private themeService = inject(ThemeService);
+  private translationService = inject(TranslationService);
 
   constructor() {
     // Watch for markers array changes
@@ -445,7 +452,10 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
           spiderfyOnMaxZoom: true, // Spread markers at max zoom
           removeOutsideVisibleBounds: true, // Performance optimization
           animate: true,
-          animateAddingMarkers: false // Disable for better performance with many markers
+          animateAddingMarkers: false, // Disable for better performance with many markers
+          // Give clusters a descriptive accessible name ("15 Participants") instead
+          // of the default bare count (a11y).
+          iconCreateFunction: (cluster) => this.buildClusterIcon(cluster)
         });
       }
     }
@@ -464,9 +474,14 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       const latLng: L.LatLng = L.latLng(lat, lng);
       latLngs.push(latLng);
 
+      // `alt` drives the marker icon's accessible name (Leaflet defaults it to the bare
+      // word "Marker"); `title` supplies the native hover tooltip. Both carry the
+      // record's display name so screen readers announce something descriptive (a11y).
+      const markerName = markerData.name || this.translationService.get('a11y.unnamed_map_marker');
       const marker = L.marker(latLng, {
         icon: this.getLeafletIcon(),
-        title: markerData.name
+        title: markerName,
+        alt: markerName
       });
 
       // Add click handler
@@ -475,7 +490,7 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       });
 
       // Add tooltip
-      marker.bindTooltip(markerData.name, {
+      marker.bindTooltip(markerName, {
         direction: 'top',
         offset: [0, -20]
       });
@@ -626,6 +641,47 @@ export class GeoPointMapComponent implements AfterViewInit, OnDestroy {
       iconAnchor: [16, 52],
       popupAnchor: [1, -34],
       shadowSize: [50, 50]
+    });
+  }
+
+  /**
+   * Builds a cluster icon with a descriptive accessible name (a11y).
+   *
+   * Mirrors leaflet.markercluster's default `_defaultIconCreateFunction` (same
+   * size thresholds, same CSS classes, same visual output) but replaces the
+   * bare count text with a `role="img"` wrapper carrying an `aria-label` like
+   * "15 Participants" so screen readers announce something descriptive instead
+   * of a bare number.
+   */
+  private buildClusterIcon(cluster: L.MarkerCluster): L.DivIcon {
+    const childCount = cluster.getChildCount();
+
+    let sizeClass = 'marker-cluster-small';
+    if (childCount >= 100) {
+      sizeClass = 'marker-cluster-large';
+    } else if (childCount >= 10) {
+      sizeClass = 'marker-cluster-medium';
+    }
+
+    const entityLabel = this.entityDisplayName();
+    const label = entityLabel
+      ? this.translationService.get('a11y.map_cluster_count', { count: childCount, entity: entityLabel })
+      : this.translationService.get('a11y.map_cluster_count_generic', { count: childCount });
+
+    // Built with DOM APIs (not an HTML string) so the label is never subject to
+    // markup injection and so tests can inspect the element directly.
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('role', 'img');
+    wrapper.setAttribute('aria-label', label);
+
+    const countSpan = document.createElement('span');
+    countSpan.textContent = String(childCount);
+    wrapper.appendChild(countSpan);
+
+    return L.divIcon({
+      html: wrapper,
+      className: 'marker-cluster ' + sizeClass,
+      iconSize: L.point(40, 40)
     });
   }
 
