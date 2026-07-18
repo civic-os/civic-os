@@ -60,6 +60,33 @@ Condensed from seven example sweeps — every item below was hit in practice:
   delivery. Evaluate is for read-only inspection. FullCalendar and some
   signal-toggled modals ignore synthetic clicks; verify those statically and say so.
 
+## Parallelization notes (for a session running multiple tasks)
+
+The tasks are largely disjoint and suit worktree-isolated parallel agents, with
+three contention points:
+
+- **`en.translations.ts`**: tasks 3, 5, and 6 each append `a11y.*` keys
+  (trivial append conflicts), and **task 2 should run LAST** — it translates the
+  full key set, so running it before the key-adding tasks leaves their new keys
+  untranslated.
+- **`.github/workflows/accessibility.yml`**: tasks 4 and 7 both edit it —
+  serialize those two relative to each other.
+- **Live verification serializes on ports** even when implementation
+  parallelizes: only one example stack (5432/3000/8082) and one dev server
+  (4200) at a time. Implement in parallel worktrees; run the browser/stack
+  verification steps one at a time.
+
+Suggested waves:
+1. **Wave 1 (parallel):** 1 (cos-modal), 4 (pa11y CI), 6 (schema editor),
+   8 (FK search), 9 (inverse-relationship) — fully disjoint file sets.
+2. **Wave 2 (parallel):** 3 (map markers), 5 (chart toggle), 7 (dash guard —
+   after 4's workflow edit lands).
+3. **Last:** 2 (translations), once all new keys exist.
+
+Task 1 has the largest blast radius (cos-modal + consumer specs); merge it
+before starting anything that touches modal specs, or keep it isolated in its
+own worktree until the others land.
+
 ---
 
 ## Task 1 — Migrate cos-modal to the native `<dialog>` element (highest value)
