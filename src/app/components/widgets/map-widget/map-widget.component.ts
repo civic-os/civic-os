@@ -90,8 +90,28 @@ export class MapWidgetComponent {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
+  // Entity display name (e.g. "Participants"), used to give clustered markers a
+  // descriptive accessible name like "15 Participants" instead of a bare count (a11y).
+  entityDisplayName = signal<string>('');
+
   // Effect to fetch data when query params change
   constructor() {
+    // Independent of the data-fetching effect below: resolves the entity's
+    // display name whenever the widget's entity changes.
+    effect(() => {
+      const entityKey = this.widget().entity_key;
+
+      if (!entityKey) {
+        this.entityDisplayName.set('');
+        return;
+      }
+
+      this.schemaService.getEntity(entityKey).subscribe({
+        next: (entity) => this.entityDisplayName.set(entity?.display_name ?? ''),
+        error: () => this.entityDisplayName.set('')
+      });
+    });
+
     effect(() => {
       const params = this.queryParams();
       const cfg = this.config();

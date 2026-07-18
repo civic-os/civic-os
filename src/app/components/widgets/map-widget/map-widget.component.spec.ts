@@ -23,6 +23,7 @@ import { MapWidgetComponent } from './map-widget.component';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
+import { provideTranslationTesting } from '../../../testing/translation-testing';
 
 describe('MapWidgetComponent', () => {
   let component: MapWidgetComponent;
@@ -107,17 +108,19 @@ describe('MapWidgetComponent', () => {
 
   beforeEach(async () => {
     mockDataService = jasmine.createSpyObj('DataService', ['getData']);
-    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getProperties']);
+    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getProperties', 'getEntity']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     // Default mock responses
     mockDataService.getData.and.returnValue(of(mockRecords as any));
     mockSchemaService.getProperties.and.returnValue(of(mockProperties as any));
+    mockSchemaService.getEntity.and.returnValue(of({ display_name: 'Participants' } as any));
 
     await TestBed.configureTestingModule({
       imports: [MapWidgetComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: Router, useValue: mockRouter }
@@ -310,6 +313,46 @@ describe('MapWidgetComponent', () => {
 
     setTimeout(() => {
       expect(component.markers()[0].name).toBe('Test Participant');
+      done();
+    }, 10);
+  });
+
+  it('should resolve the entity display name for cluster accessible names', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      expect(mockSchemaService.getEntity).toHaveBeenCalledWith('participants');
+      expect(component.entityDisplayName()).toBe('Participants');
+      done();
+    }, 10);
+  });
+
+  it('should clear the entity display name when the widget has no entity_key', (done) => {
+    const widgetNoEntity: DashboardWidget = {
+      ...mockWidget,
+      entity_key: null
+    };
+
+    fixture.componentRef.setInput('widget', widgetNoEntity);
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      expect(component.entityDisplayName()).toBe('');
+      done();
+    }, 10);
+  });
+
+  it('should fall back to an empty entity display name on lookup error', (done) => {
+    mockSchemaService.getEntity.and.returnValue(throwError(() => new Error('Entity lookup failed')));
+
+    // Re-create component to pick up new mock
+    fixture = TestBed.createComponent(MapWidgetComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('widget', mockWidget);
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      expect(component.entityDisplayName()).toBe('');
       done();
     }, 10);
   });
