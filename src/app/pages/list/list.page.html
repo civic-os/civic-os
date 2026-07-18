@@ -3,8 +3,8 @@
     <h1>
       {{ entity.display_name }} {{ 'list.title_suffix' | translate }}
       @if (entity.description) {
-        <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description">
-          <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle" aria-hidden="true">help_outline</span>
+        <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description" aria-hidden="true">
+          <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle">help_outline</span>
         </div>
         <span class="sr-only">{{ entity.description }}</span>
       }

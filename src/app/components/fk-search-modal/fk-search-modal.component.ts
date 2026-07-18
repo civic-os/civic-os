@@ -26,7 +26,8 @@ import {
   effect,
   DestroyRef,
   OnDestroy,
-  Type
+  Type,
+  ElementRef
 } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { FormsModule, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -83,6 +84,7 @@ export interface RichM2mDiff {
 export class FkSearchModalComponent implements OnDestroy {
   private data = inject(DataService);
   private translationSvc = inject(TranslationService);
+  private hostEl = inject(ElementRef<HTMLElement>);
   private schema = inject(SchemaService);
   private destroyRef = inject(DestroyRef);
   private destroyed = false;
@@ -238,6 +240,22 @@ export class FkSearchModalComponent implements OnDestroy {
   private lastOpenTable: string | null = null;  // Guard against effect re-triggering
 
   constructor() {
+    // Focus retention: when a search/filter/sort re-renders the results while
+    // the modal is open, the previously-focused element (a result row control)
+    // may be destroyed, dropping DOM focus to <body> — which strands screen
+    // readers on the page BEHIND the dialog. Pull focus back into the modal.
+    effect(() => {
+      this.rows();
+      if (!this.isOpen()) return;
+      setTimeout(() => {
+        const host = this.hostEl.nativeElement as HTMLElement;
+        if (!this.isOpen() || host.contains(document.activeElement)) return;
+        const target = host.querySelector<HTMLElement>('input[type="text"], input[type="search"]')
+          || host.closest<HTMLElement>('[role="dialog"]');
+        target?.focus();
+      }, 60);
+    });
+
     // When modal opens, load properties and data.
     // Guard: only initialize once per open (isOpen transitions false→true).
     // Without this guard, signal writes (chipCache.set, workingSelection.set)

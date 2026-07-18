@@ -10,8 +10,8 @@
           {{ prop().display_name }}@if (isRequired()) {<span aria-hidden="true">*</span>}@if (isRequired() && (isCustomWidget() || useFkSearchModal())) {<span class="sr-only">{{ 'a11y.required' | translate }}</span>}
         </span>
         @if (prop().description) {
-          <div class="tooltip tooltip-bottom sm:tooltip-right flex-shrink-0" [attr.data-tip]="prop().description">
-            <span class="material-symbols-outlined text-info cursor-help ms-1 text-base" aria-hidden="true">help_outline</span>
+          <div class="tooltip tooltip-bottom sm:tooltip-right flex-shrink-0" [attr.data-tip]="prop().description" aria-hidden="true">
+            <span class="material-symbols-outlined text-info cursor-help ms-1 text-base">help_outline</span>
           </div>
         }
       </span>
