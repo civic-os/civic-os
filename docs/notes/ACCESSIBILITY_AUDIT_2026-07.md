@@ -268,6 +268,34 @@ Remove `tabindex="-1"` from the row checkboxes/radios so the native control is t
 
 ---
 
+## Live screen-reader pass results (2026-07-17/18)
+
+A human VoiceOver pass (Firefox primary, Safari continuation) was performed by
+the project owner against the ECS demo instance, per the manual testing guide.
+**13 announcement-quality defects were found and fixed** — none detectable by
+the automated layers:
+
+| Finding | Resolution |
+|---|---|
+| Every element announced "clickable" (permanent document-level click listener) | Listener now attached only while the profile dropdown is open |
+| Search fields announced twice (aria-label ≠ placeholder by an ellipsis) | Names and placeholders harmonized to identical strings (4 components) |
+| Required fields triple-announced ("star" + sr-only marker + aria-required) | Asterisk aria-hidden; sr-only marker scoped to non-native-input branches only |
+| Selection columns in search modals had empty headers | sr-only "Select" headers; same fix for user-management Actions and statuses Direction columns |
+| Sorting produced no announcement (aria-sort changes are not spoken) | Polite live-region announcements on all 5 sortable surfaces |
+| Same-count filter changes were silent | Explicit "Filters applied/removed/cleared" announcements |
+| Results count announced twice (doubled pagination bars) | Bottom pagination instance's live region suppressed |
+| Results range read as "one ten" (hyphen unspoken) | Translated "to" between range bounds |
+| FK modal button never announced its selected value (label[for] supersedes button text as name) | Selection exposed as the button's accessible description |
+| Modal focus not captured when async content had no tabbable elements at open | Dialog itself focusable with a capture fallback |
+| Entity descriptions read twice (DaisyUI tooltip CSS pseudo-content is AT-exposed) | Tooltip wrappers aria-hidden; sr-only spans are the single source |
+| Focus/VO cursor escaped the dialog after search results re-rendered | DOM focus retention on re-render + background made `inert` while modals are open (the CDK-dialog pattern; closes finding S3) |
+| En/em dashes in titles and placeholder cells (unspoken/awkward + project style) | All visible typographic dashes replaced with hyphens |
+
+Three behaviors were investigated and documented as expected platform behavior
+(not app defects) in the manual guide's "Known VoiceOver quirks" section:
+dialog group-entry (`VO+Shift+Down`), end-of-page reading stop, and VO-cursor
+recovery after node destruction (`VO+Cmd+F4` recovers).
+
 ## Future accessibility work (post-remediation backlog)
 
 Durable record of a11y improvements identified during remediation and the live

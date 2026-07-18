@@ -4,10 +4,13 @@
 **Report date:** 2026-07-11
 **Evaluation methods:** Full static code audit (July 2026, all templates), automated
 linting (`@angular-eslint/template` accessibility rules, enforced in CI), axe-core
-via pa11y, and machine-driven keyboard/DOM verification against a live instance
-(pothole example schema) using real key-event injection. A human screen-reader
-pass (VoiceOver/NVDA) per `docs/development/ACCESSIBILITY_MANUAL_TESTING.md` is
-the remaining validation step and is noted where it is the source of confidence.
+via pa11y, machine-driven keyboard/DOM verification against live instances of all
+seven example schemas using real key-event injection, and a **completed human
+screen-reader pass** (July 2026: VoiceOver + Firefox as primary, continued in
+VoiceOver + Safari) per `docs/development/ACCESSIBILITY_MANUAL_TESTING.md`. The
+human pass surfaced 13 announcement-quality defects — all fixed on this branch —
+plus three documented platform behaviors (see the guide's "Known VoiceOver
+quirks" section).
 **Remediation record:** `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md` (audit +
 14 remediation batches, all landed).
 
@@ -73,13 +76,14 @@ the remaining validation step and is noted where it is the source of confidence.
 | 3.2.3 Consistent Navigation / 3.2.4 Consistent Identification | AA | Supports | Schema-driven generation yields uniform navigation and control identity across all entities. |
 | 3.3.3 Error Suggestion | AA | Supports | Validation messages state the requirement (required, min/max, pattern) from metadata; server constraint errors translated to human messages. |
 | 3.3.4 Error Prevention (Legal/Financial) | AA | Supports | Destructive actions require confirmation dialogs; payments flow through Stripe's own accessible UI. |
-| 4.1.3 Status Messages | AA | Supports | Live regions for loading, result counts, import steps, reorder announcements, and error alerts (`role="alert"`/`role="status"`). Announcement *quality* pending the human screen-reader pass. |
+| 4.1.3 Status Messages | AA | Supports | Live regions for loading, result counts, import steps, reorder announcements, and error alerts (`role="alert"`/`role="status"`). Announcement quality human-verified with VoiceOver (July 2026); sort, filter, results-count, save-progress, and import-step announcements confirmed spoken. |
 
 ## Known limitations
 
-1. **Human screen-reader validation pending.** All structural/behavioral criteria
-   above were machine-verified; announcement quality in VoiceOver/NVDA has not yet
-   had a human pass (procedure: `docs/development/ACCESSIBILITY_MANUAL_TESTING.md`).
+1. **Screen-reader strings are English-only pending translation.** The `a11y.*`
+   translation keys ship with bundled English; locales without DB translations
+   fall back to English for announcements and labels. The `/admin/translations`
+   coverage report enumerates them (see the audit doc's future-work backlog).
 2. **User-selected low-contrast themes** (1.4.3/1.4.11): deployment defaults are
    vetted; the full 35-theme list remains user-selectable by design, with reduced-
    contrast options labeled.
@@ -92,6 +96,6 @@ the remaining validation step and is noted where it is the source of confidence.
    responsibilities.
 
 *Maintained alongside `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md`. Update this
-report when the human screen-reader pass completes and at each substantial UI
-feature release; the ESLint accessibility gate (CI) guards the structural claims
-between updates.*
+report at each substantial UI feature release; the ESLint accessibility gate
+(CI) guards the structural claims between updates, and the manual testing guide
+is the recurring human verification procedure.*
