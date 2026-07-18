@@ -1,4 +1,4 @@
--- Revert civic_os:v0-67-1-a11y-translations
+-- Revert civic_os:v0-68-0-a11y-translations
 
 BEGIN;
 

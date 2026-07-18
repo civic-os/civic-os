@@ -1,7 +1,7 @@
--- Deploy civic_os:v0-67-1-a11y-translations
+-- Deploy civic_os:v0-68-0-a11y-translations
 -- Requires: v0-66-1-profile-exempt-roles
 --
--- v0.67.1 -- Translate all a11y.* screen-reader/aria-label strings
+-- v0.68.0 -- Translate all a11y.* screen-reader/aria-label strings
 -- (137 keys) into the five demo locales: es, ar, fr, de, ps.
 -- See docs/notes/ACCESSIBILITY_AUDIT_2026-07.md and
 -- docs/notes/FOLLOWUP_TASKS_v0.67.md (Task 2) for background.

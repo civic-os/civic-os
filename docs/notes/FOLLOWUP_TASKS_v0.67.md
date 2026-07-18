@@ -127,7 +127,7 @@ modal-accessibility survey and W3C ARIA practices.
 > `a11y.*` keys (source of truth: `src/app/i18n/en.translations.ts`) into
 > es/ar/fr/de/ps (685 rows). Architectural deviation from the description
 > below: shipped as a **core Sqitch migration**
-> (`v0-67-1-a11y-translations`, deploy/revert/verify), not example
+> (`v0-68-0-a11y-translations`, deploy/revert/verify), not example
 > init-scripts — per `docs/notes/I18N_DESIGN.md`, `source_type = 'ui'`
 > translations are framework strings seeded identically for every
 > deployment, and example init-scripts are reserved for instance metadata

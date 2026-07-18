@@ -1,4 +1,4 @@
--- Verify v0-67-1-a11y-translations
+-- Verify v0-68-0-a11y-translations
 
 DO $$
 BEGIN
