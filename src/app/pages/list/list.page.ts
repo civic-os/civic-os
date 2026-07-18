@@ -42,6 +42,7 @@ import { CosModalComponent } from '../../components/cos-modal/cos-modal.componen
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FilterCriteria } from '../../interfaces/query';
 import { getAppTitle } from '../../config/runtime';
+import { buildHybridSearchParams } from '../../utils/search.utils';
 
 interface FilterChip {
   column: string;
@@ -876,21 +877,13 @@ export class ListPage implements OnInit, OnDestroy {
    * Returns empty array when entity uses legacy search_fields-only path.
    */
   private buildSearchParams(query: string, entity: SchemaEntityTable): string[] {
-    const safe = query.replace(/[(),]/g, '').trim();
-    if (!safe) return [];
-    const encoded = encodeURIComponent(safe);
-    const fts = entity.fulltext_search_column;
-    const sub = entity.substring_search_column;
-
-    if (fts && sub) {
-      return [`or=(${fts}.wfts.${encoded},${sub}.ilike.*${encoded}*)`];
-    } else if (fts) {
-      return [`${fts}=wfts.${encoded}`];
-    } else if (sub) {
-      return [`${sub}=ilike.*${encoded}*`];
-    }
-    // No new columns set — fall back to legacy searchQuery path
-    return [];
+    // Shared with the FK search modal so both surfaces search identically.
+    // Returns [] when neither column is set — legacy searchQuery path.
+    return buildHybridSearchParams(
+      query,
+      entity.fulltext_search_column,
+      entity.substring_search_column ? [entity.substring_search_column] : []
+    );
   }
 
   /**

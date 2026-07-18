@@ -187,6 +187,25 @@ Convention (see ground rule 3) currently unenforced.
 
 ## Task 8 — Align FK modal user search with hybrid/trigram search (non-a11y)
 
+> ✅ **DONE** (2026-07-18, branch `task/fk-modal-hybrid-search`). Frontend-side
+> fix (the metadata question resolved: `civic_os_users` is not in
+> `schema_entities` at all - the modal uses `SYSTEM_TYPE_MODAL_CONFIGS`, so no
+> migration needed). The list page's hybrid builder is extracted to
+> `src/app/utils/search.utils.ts` (`buildHybridSearchParams`) and shared by
+> both surfaces. The modal now: (a) for `civic_os_users`, combines wfts on
+> `civic_os_text_search` (phone tokens) with ILIKE on display_name/email via
+> or=(); (b) for schema entities, honors
+> `fulltext_search_column`/`substring_search_column` exactly like list pages
+> (this misalignment existed for regular entities too, not just users);
+> (c) falls back to the legacy wfts path when no hybrid columns exist. Search
+> box now also shows for entities with hybrid columns but no legacy
+> search_fields. Tests: util spec + 3 modal specs (the old wfts-only users
+> assertion was updated to hybrid). Live-verified on pothole: "Smi" finds
+> "Jane Smith" in the Created User modal with
+> or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*,email.ilike.*Smi*).
+
+Original task description:
+
 The FK search modal's search for User-type fields appears to use full-text
 search (whole-word lexeme matching) while list-page search uses the
 hybrid/substring (ILIKE trigram) path — partial-name queries like "Smi" behave
