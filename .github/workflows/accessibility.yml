@@ -51,6 +51,11 @@ jobs:
       - name: Run ESLint accessibility gate
         run: npm run lint
 
+      - name: Ban typographic dashes in user-visible strings
+        # Convention: plain hyphens only in templates and translation values
+        # (code comments exempt). See scripts/check-typographic-dashes.cjs.
+        run: npm run lint:dashes
+
   # ENFORCED: authenticated pa11y-ci against a live stack. Fails the build on
   # WCAG 2 AA findings (minus the documented color-contrast exclusion).
   pa11y:

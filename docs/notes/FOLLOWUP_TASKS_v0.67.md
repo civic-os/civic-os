@@ -198,6 +198,19 @@ The JointJS ERD canvas (`src/app/pages/schema-editor/`, see
 
 ## Task 7 — CI guard banning typographic dashes in visible strings
 
+> ✅ **DONE** (2026-07-18, branch `task/dash-guard`, stacked on
+> `task/pa11y-authenticated-ci` since both edit accessibility.yml).
+> `scripts/check-typographic-dashes.cjs` (npm run lint:dashes) scans template
+> HTML minus HTML comments, inline `template:` strings in TS (nothing else in
+> TS can trip it, so code comments are structurally exempt), and translation
+> string VALUES in en.translations.ts. Runs as a step in the a11y-lint CI job.
+> Verified: fails on a seeded violation, passes clean. The first run found and
+> fixed 10 pre-existing violations: '—' empty-value placeholders (profile,
+> admin-translations), an em dash in static-assets delete-confirm prose, and
+> en-dash date ranges (series-version-timeline, series-group-management).
+
+Original task description:
+
 Convention (see ground rule 3) currently unenforced.
 
 - Add a check in `.github/workflows/accessibility.yml` (or a package.json

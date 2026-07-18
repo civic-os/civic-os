@@ -110,11 +110,11 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
                 <p class="text-xs text-base-content/50 mt-1">
                   {{ formatDate(version.dtstart) }}
                   @if (version.terminated_at) {
-                    – {{ formatDate(version.terminated_at) }}
+                    - {{ formatDate(version.terminated_at) }}
                   } @else if (version.expanded_until) {
-                    – present (through {{ formatDate(version.expanded_until) }})
+                    - present (through {{ formatDate(version.expanded_until) }})
                   } @else {
-                    – present
+                    - present
                   }
                 </p>
 

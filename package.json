@@ -6,6 +6,7 @@
   "scripts": {
     "ng": "ng",
     "lint": "ng lint",
+    "lint:dashes": "node scripts/check-typographic-dashes.cjs",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
