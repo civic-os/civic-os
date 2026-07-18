@@ -185,6 +185,20 @@ because it cannot log into Keycloak in CI — it only scans anonymous pages.
 
 ## Task 5 — Visible data-table toggle for chart widgets
 
+> ✅ **DONE** (2026-07-18, branch `task/chart-table-toggle`, merged to main).
+> Icon-only toggle button (aria-pressed state, constant "View as table"
+> accessible name via `a11y.chart_view_as_table`) in the widget header next to
+> the export control; the existing sr-only table markup is reused and swaps to
+> visible `table table-zebra table-sm` when toggled - no markup duplication,
+> no persistence. 4 new unit tests. Live-verified on a pothole dashboard with
+> a seeded chart widget: default chart view, toggle renders the zebra table
+> with caption and correct data, chart container hidden, toggle back restores
+> the chart. Note: browser-pane real-click delivery was flaky during
+> verification (playbook caveat); state changes confirmed via handler
+> invocation + async CD settle.
+
+Original task description:
+
 `src/app/components/widgets/chart-widget/` renders an sr-only data table as the
 chart's text alternative. Add a visible "View as table" toggle (real labeled
 button in the widget header next to the export control) that swaps the chart
