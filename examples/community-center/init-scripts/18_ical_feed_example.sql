@@ -26,6 +26,7 @@ AS $$
 DECLARE
   v_events TEXT := '';
   v_event RECORD;
+  v_max_updated_at TIMESTAMPTZ := NULL;
 BEGIN
   -- Loop through approved reservations within the date range
   FOR v_event IN
@@ -35,7 +36,8 @@ BEGIN
       lower(r.time_slot) as start_time,    -- Extract start from range
       upper(r.time_slot) as end_time,      -- Extract end from range
       r.notes as description,
-      res.display_name as location         -- Resource name as location
+      res.display_name as location,        -- Resource name as location
+      r.updated_at                         -- For LAST-MODIFIED change detection
     FROM reservations r
     LEFT JOIN resources res ON r.resource_id = res.id
     WHERE r.time_slot && tstzrange(
@@ -45,6 +47,11 @@ BEGIN
       AND (p_resource_id IS NULL OR r.resource_id = p_resource_id)
     ORDER BY lower(r.time_slot)
   LOOP
+    -- Track most recent modification for HTTP Last-Modified header
+    IF v_max_updated_at IS NULL OR v_event.updated_at > v_max_updated_at THEN
+      v_max_updated_at := v_event.updated_at;
+    END IF;
+
     -- Build VEVENT for each reservation using core helper
     v_events := v_events || metadata.format_ical_event(
       p_uid := 'reservation-' || v_event.id || '@civic-os.org',
@@ -52,12 +59,13 @@ BEGIN
       p_dtstart := v_event.start_time,
       p_dtend := v_event.end_time,
       p_description := v_event.description,
-      p_location := v_event.location
+      p_location := v_event.location,
+      p_last_modified := v_event.updated_at
     ) || chr(13) || chr(10);
   END LOOP;
 
-  -- Wrap events in VCALENDAR container
-  RETURN metadata.wrap_ical_feed(v_events, 'Community Center Events');
+  -- Wrap events in VCALENDAR container with HTTP Last-Modified header
+  RETURN metadata.wrap_ical_feed(v_events, 'Community Center Events', v_max_updated_at);
 END;
 $$;
 

@@ -437,7 +437,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'clients'
   AND ea.action_name IN ('record_consent', 'request_consent')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- =====================================================
@@ -632,18 +632,18 @@ INSERT INTO metadata.permissions (table_name, permission) VALUES
   ('client_consents', 'update')
 ON CONFLICT (table_name, permission) DO NOTHING;
 
--- Grant client_consents permissions to ecs_staff and admin
+-- Grant client_consents permissions to staff and admin
 INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'client_consents'
   AND p.permission IN ('read', 'create', 'update')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- Entity notes permissions: remove default user/editor grants,
--- keep only ecs_staff and admin
+-- keep only staff and admin
 DELETE FROM metadata.permission_roles
 WHERE permission_id IN (
   SELECT p.id FROM metadata.permissions p
@@ -660,10 +660,14 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'client_consents:notes'
   AND p.permission IN ('read', 'create')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 -- consent_reminder_log stays internal: no grants beyond definer functions.
+-- Hide from sidebar (auto-discovered by schema_entities VIEW otherwise).
+INSERT INTO metadata.entities (table_name, display_name, show_in_sidebar)
+VALUES ('consent_reminder_log', 'Consent Reminder Log', FALSE)
+ON CONFLICT (table_name) DO UPDATE SET show_in_sidebar = FALSE;
 
 -- =====================================================
 -- 13. SCHEMA DECISIONS

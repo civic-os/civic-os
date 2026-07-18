@@ -152,7 +152,7 @@ VALUES
 
 
 -- =============================================================================
--- D. ROLE PERMISSIONS (ecs_staff + admin, same as client actions)
+-- D. ROLE PERMISSIONS (staff + admin, same as client actions)
 -- =============================================================================
 
 INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
@@ -161,7 +161,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'civic_os_users'
   AND ea.action_name IN ('activate_client', 'reactivate_client', 'refer_client', 'deactivate_client')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 

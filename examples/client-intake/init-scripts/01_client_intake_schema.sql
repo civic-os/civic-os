@@ -339,7 +339,7 @@ CREATE TRIGGER set_created_at_trigger BEFORE INSERT ON follow_up_surveys FOR EAC
 CREATE TRIGGER set_updated_at_trigger BEFORE INSERT OR UPDATE ON follow_up_surveys FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Auto-link client to current user for self-service intake.
--- Staff (ecs_staff) create records on behalf of clients, so user_id stays NULL.
+-- Staff (staff) create records on behalf of clients, so user_id stays NULL.
 CREATE OR REPLACE FUNCTION auto_set_client_user_id()
 RETURNS TRIGGER
 LANGUAGE plpgsql

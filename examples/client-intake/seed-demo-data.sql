@@ -326,7 +326,7 @@ BEGIN
   RAISE NOTICE '── Generating referrals...';
 
   -- Disable the notification trigger during bulk insert (no emails for seed data)
-  ALTER TABLE referrals DISABLE TRIGGER ALL;
+  ALTER TABLE referrals DISABLE TRIGGER USER;
 
   v_referral_count := 0;
 
@@ -442,7 +442,7 @@ BEGIN
   END LOOP;
 
   -- Re-enable triggers
-  ALTER TABLE referrals ENABLE TRIGGER ALL;
+  ALTER TABLE referrals ENABLE TRIGGER USER;
 
   RAISE NOTICE '  Created % referrals.', v_referral_count;
 

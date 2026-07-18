@@ -1,9 +1,9 @@
 -- =============================================================================
--- Script 23: ECS Staff Permissions — User Management + Reports
+-- Script 23: Staff Permissions — User Management + Reports
 -- =============================================================================
--- Grants ecs_staff the permissions needed for day-to-day operations:
+-- Grants staff the permissions needed for day-to-day operations:
 --   A. User Management access (CUP create + update)
---   B. Role delegation (ecs_staff can assign ecs_staff and user roles)
+--   B. Role delegation (staff can assign staff and user roles)
 --   C. Report VIEW access (database GRANTs + metadata permissions)
 -- =============================================================================
 
@@ -21,20 +21,20 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'civic_os_users_private'
   AND p.permission IN ('create', 'update')
-  AND r.role_key = 'ecs_staff'
+  AND r.role_key = 'staff'
 ON CONFLICT DO NOTHING;
 
 
 -- =============================================================================
 -- B. ROLE DELEGATION
 -- =============================================================================
--- ecs_staff can already delegate 'user'. Add ecs_staff so senior staff
+-- staff can already delegate 'user'. Add staff so senior staff
 -- can onboard new staff members without needing an admin.
 
 INSERT INTO metadata.role_can_manage (manager_role_id, managed_role_id)
 SELECT
-  (SELECT id FROM metadata.roles WHERE role_key = 'ecs_staff'),
-  (SELECT id FROM metadata.roles WHERE role_key = 'ecs_staff')
+  (SELECT id FROM metadata.roles WHERE role_key = 'staff'),
+  (SELECT id FROM metadata.roles WHERE role_key = 'staff')
 ON CONFLICT DO NOTHING;
 
 
@@ -64,7 +64,7 @@ VALUES
   ('referrals_per_week', 'read')
 ON CONFLICT DO NOTHING;
 
--- Grant read permission to ecs_staff and admin
+-- Grant read permission to staff and admin
 INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, r.id
 FROM metadata.permissions p
@@ -75,7 +75,7 @@ WHERE p.table_name IN (
     'time_lag_report', 'referrals_per_week'
   )
   AND p.permission = 'read'
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 

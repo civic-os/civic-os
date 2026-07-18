@@ -5,7 +5,7 @@
 -- Intake Pending, Open Referrals, Pending Surveys, Partner Map.
 --
 -- created_by is NULL (system-seeded, no human owner).
--- Role defaults assign this dashboard to ecs_staff and admin
+-- Role defaults assign this dashboard to staff and admin
 -- so staff see it automatically on login.
 
 BEGIN;
@@ -135,11 +135,11 @@ BEGIN
     4, 2, 2
   );
 
-  -- Assign this dashboard as the default for ecs_staff and admin roles
+  -- Assign this dashboard as the default for staff and admin roles
   INSERT INTO metadata.dashboard_role_defaults (role_id, dashboard_id, priority)
   SELECT r.id, v_dashboard_id, CASE r.role_key WHEN 'admin' THEN 10 ELSE 0 END
   FROM metadata.roles r
-  WHERE r.role_key IN ('ecs_staff', 'admin')
+  WHERE r.role_key IN ('staff', 'admin')
   ON CONFLICT (role_id) DO UPDATE
     SET dashboard_id = EXCLUDED.dashboard_id,
         priority = EXCLUDED.priority;

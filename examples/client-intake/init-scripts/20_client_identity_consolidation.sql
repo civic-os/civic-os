@@ -28,7 +28,7 @@ FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'civic_os_users_private'
   AND p.permission = 'read'
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 

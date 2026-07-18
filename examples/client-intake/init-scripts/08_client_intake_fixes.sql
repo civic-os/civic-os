@@ -12,8 +12,8 @@ BEGIN;
 -- =====================================================
 
 UPDATE metadata.roles
-SET display_name = 'ECS Staff'
-WHERE role_key = 'ecs_staff' AND display_name = 'ECS Staff';
+SET display_name = 'Staff'
+WHERE role_key = 'staff' AND display_name = 'Staff';
 
 UPDATE metadata.dashboards
 SET display_name = 'ECS Intake Dashboard'
@@ -503,7 +503,7 @@ WHERE s.referral_id = r.id
 -- 2026-06-05: Ensure Activate Client action role grants
 -- =====================================================
 -- Idempotent: re-assert that client actions are granted
--- only to ecs_staff and admin. The framework defaults to
+-- only to staff and admin. The framework defaults to
 -- admin-only when no grants exist, but explicit grants
 -- make the intent visible in the Permissions UI.
 
@@ -513,7 +513,7 @@ FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'clients'
   AND ea.action_name IN ('activate', 'refer', 'deactivate', 'reactivate')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 

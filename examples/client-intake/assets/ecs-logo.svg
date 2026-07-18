@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
 
+  <!-- White background -->
+  <rect width="500" height="400" fill="#ffffff"/>
+
   <!-- ═══ TREE (shifted up 50px to nestle inside the arc) ═══ -->
 
   <!-- Canopy: overlapping ellipses for organic tree-crown feel -->

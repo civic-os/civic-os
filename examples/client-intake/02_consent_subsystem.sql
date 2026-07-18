@@ -494,7 +494,7 @@ SELECT enable_entity_notes('client_consents');
 -- =====================================================
 -- 12. PERMISSIONS AND RLS
 -- =====================================================
--- VERIFY: role keys (ecs_staff, ecs_client) and the base
+-- VERIFY: role keys (staff, ecs_client) and the base
 -- script's has_permission()/permission insert patterns; mirror
 -- the hybrid RLS proven on ICGF client-facing entities.
 
@@ -517,7 +517,7 @@ CREATE POLICY client_consents_update ON public.client_consents FOR UPDATE TO aut
 -- No delete policy; consent history is never deleted.
 
 -- Permission grants (mirror base script pattern):
---   ecs_staff: read, create, update on client_consents
+--   staff: read, create, update on client_consents
 --   ecs_client: (row-scoped read via policy above; DS-09 portal
 --   confirm path can add a scoped update if built)
 

@@ -29,7 +29,7 @@ Apply to a copy of the ICGF init script. Everything not listed carries over unch
 | `country_of_origin`, `date_of_arrival` | **Drop** |
 | `primary_language` | Keep as `preferred_comm_language` (needed for RTL beat) |
 | `household_size` | Keep as scalar |
-| Roles `ic_staff` / `ic_client` | `ecs_staff` / `ecs_client` |
+| Roles `ic_staff` / `ic_client` | `staff` / `ecs_client` |
 | Locales (six) | en, ar, es |
 | Refer Client entity action | Modified by consent gate; see §5 |
 | Dashboard | Add Consents Expiring filtered list; see §7 |

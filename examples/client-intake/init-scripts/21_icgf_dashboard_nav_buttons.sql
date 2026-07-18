@@ -1,5 +1,5 @@
 -- =====================================================
--- ECS Staff Dashboard — Quick Actions Nav Buttons
+-- Staff Dashboard — Quick Actions Nav Buttons
 -- =====================================================
 -- Adds a nav_buttons widget at the top of the ECS Intake
 -- Dashboard with shortcuts for common staff workflows.

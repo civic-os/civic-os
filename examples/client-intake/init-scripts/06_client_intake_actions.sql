@@ -383,24 +383,24 @@ ON CONFLICT DO NOTHING;
 -- 4. ENTITY ACTION ROLE GRANTS
 -- ============================================================================
 
--- Grant all client actions to ecs_staff and admin
+-- Grant all client actions to staff and admin
 INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
 SELECT ea.id, r.id
 FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'clients'
   AND ea.action_name IN ('activate', 'refer', 'deactivate', 'reactivate')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
--- Grant all referral actions to ecs_staff and admin
+-- Grant all referral actions to staff and admin
 INSERT INTO metadata.entity_action_roles (entity_action_id, role_id)
 SELECT ea.id, r.id
 FROM metadata.entity_actions ea
 CROSS JOIN metadata.roles r
 WHERE ea.table_name = 'referrals'
   AND ea.action_name IN ('complete', 'not_completed')
-  AND r.role_key IN ('ecs_staff', 'admin')
+  AND r.role_key IN ('staff', 'admin')
 ON CONFLICT DO NOTHING;
 
 
