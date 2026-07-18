@@ -36,6 +36,7 @@ import { Subject, Subscription, merge, switchMap, of, combineLatest, debounceTim
 
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslationService } from '../../services/translation.service';
+import { buildHybridSearchParams } from '../../utils/search.utils';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FilterBarComponent } from '../filter-bar/filter-bar.component';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
@@ -142,6 +143,9 @@ export class FkSearchModalComponent implements OnDestroy {
   filters = signal<FilterCriteria[]>([]);
   hasSearchFields = signal(false);
   private ilikeSearchColumns = signal<string[]>([]);
+
+  /** tsvector column for wfts search, combined with ilikeSearchColumns via or=() */
+  private fulltextSearchColumn = signal<string | null>(null);
 
   // State — single-select
   pendingSelection = signal<{id: number | string, displayName: string} | null>(null);
@@ -339,8 +343,16 @@ export class FkSearchModalComponent implements OnDestroy {
     this.schema.getEntity(tableName).pipe(
       switchMap(entity => {
         if (entity) {
-          this.hasSearchFields.set(!!(entity.search_fields && entity.search_fields.length > 0));
-          this.ilikeSearchColumns.set([]);
+          this.hasSearchFields.set(!!(
+            (entity.search_fields && entity.search_fields.length > 0) ||
+            entity.fulltext_search_column ||
+            entity.substring_search_column
+          ));
+          // Hybrid search columns (v0.55.2) so the modal matches list-page search
+          this.fulltextSearchColumn.set(entity.fulltext_search_column ?? null);
+          this.ilikeSearchColumns.set(
+            entity.substring_search_column ? [entity.substring_search_column] : []
+          );
           return combineLatest({
             listProps: this.schema.getPropsForList(entity),
             filterProps: this.schema.getPropsForFilter(entity)
@@ -351,11 +363,10 @@ export class FkSearchModalComponent implements OnDestroy {
         const systemConfig = SYSTEM_TYPE_MODAL_CONFIGS[tableName];
         if (systemConfig) {
           this.hasSearchFields.set(
-            systemConfig.searchFields.length > 0 || !!systemConfig.hasTextSearch
+            systemConfig.searchFields.length > 0 || !!systemConfig.fulltextColumn
           );
-          this.ilikeSearchColumns.set(
-            systemConfig.hasTextSearch ? [] : systemConfig.searchFields
-          );
+          this.fulltextSearchColumn.set(systemConfig.fulltextColumn ?? null);
+          this.ilikeSearchColumns.set(systemConfig.searchFields);
           return of({
             listProps: systemConfig.listProperties as SchemaEntityProperty[],
             filterProps: [] as SchemaEntityProperty[]
@@ -364,11 +375,14 @@ export class FkSearchModalComponent implements OnDestroy {
 
         // Fallback: entity not registered in schema_entities
         this.hasSearchFields.set(false);
+        this.fulltextSearchColumn.set(null);
         this.ilikeSearchColumns.set([]);
         return of({ listProps: [] as SchemaEntityProperty[], filterProps: [] as SchemaEntityProperty[] });
       }),
       catchError(() => {
         this.hasSearchFields.set(false);
+        this.fulltextSearchColumn.set(null);
+        this.ilikeSearchColumns.set([]);
         return of({ listProps: [] as SchemaEntityProperty[], filterProps: [] as SchemaEntityProperty[] });
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -409,20 +423,25 @@ export class FkSearchModalComponent implements OnDestroy {
       }
     }
 
-    // Build search: ILIKE substring matching for system types (phone, email),
-    // or standard FTS (wfts) for schema entities with tsvector columns
-    const ilikeColumns = this.ilikeSearchColumns();
+    // Build search with the same hybrid semantics as the List page: wfts on
+    // the fulltext column combined with ILIKE substring matching via or=().
+    // Entities with neither column fall back to the legacy searchQuery path
+    // (civic_os_text_search wfts in DataService).
     const searchTerm = this.searchQuery()?.trim();
     let searchQuery: string | undefined;
     let rawQueryParams: string[] | undefined;
 
-    if (searchTerm && ilikeColumns.length > 0) {
-      // System type: use PostgREST or() with ILIKE for true substring matching
-      const safeQuery = searchTerm.replace(/[(),]/g, '');
-      const orClauses = ilikeColumns.map(col => `${col}.ilike.*${safeQuery}*`).join(',');
-      rawQueryParams = [`or=(${orClauses})`];
-    } else {
-      searchQuery = searchTerm || undefined;
+    if (searchTerm) {
+      const params = buildHybridSearchParams(
+        searchTerm,
+        this.fulltextSearchColumn(),
+        this.ilikeSearchColumns()
+      );
+      if (params.length > 0) {
+        rawQueryParams = params;
+      } else {
+        searchQuery = searchTerm;
+      }
     }
 
     this.data.getDataPaginated({

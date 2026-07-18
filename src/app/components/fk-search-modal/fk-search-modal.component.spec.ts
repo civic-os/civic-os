@@ -961,16 +961,17 @@ describe('FkSearchModalComponent', () => {
       expect(component.listProperties()[1].column_name).toBe('email');
       expect(component.listProperties()[2].column_name).toBe('phone');
 
-      // Should have search enabled (via hasTextSearch flag, not searchFields)
+      // Should have search enabled (via fulltextColumn + searchFields)
       expect(component.hasSearchFields()).toBe(true);
 
       // Should NOT have called getPropsForList (not a registered entity)
       expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
     });
 
-    it('should use tsvector search (wfts) for civic_os_users, not ILIKE', async () => {
-      // v0.50.1: civic_os_users has hasTextSearch=true and searchFields=[]
-      // so search should use the standard wfts path, not ILIKE substring matching
+    it('should use hybrid search (wfts + ILIKE via or=()) for civic_os_users', async () => {
+      // Hybrid semantics matching the List page: partial names ("Smi") match
+      // via ILIKE on display_name/email, whole words and tokenized phone
+      // fragments match via wfts on civic_os_text_search.
       mockSchemaService.getEntity.and.returnValue(of(undefined));
       mockDataService.getDataPaginated.and.returnValue(of({
         data: [
@@ -986,12 +987,70 @@ describe('FkSearchModalComponent', () => {
       await waitForData();
 
       // Perform a search
-      component.onSearchInput('555');
+      component.onSearchInput('Smi');
       await waitForData();
 
       const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      // Should use searchQuery (wfts path), NOT rawQueryParams (ILIKE path)
-      expect(callArgs.searchQuery).toBe('555');
+      // Should use rawQueryParams with the combined or=() clause, not the legacy wfts path
+      expect(callArgs.searchQuery).toBeUndefined();
+      expect(callArgs.rawQueryParams).toEqual([
+        'or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*,email.ilike.*Smi*)'
+      ]);
+    });
+
+    it('should use hybrid search for schema entities with fulltext and substring columns', async () => {
+      mockSchemaService.getEntity.and.returnValue(of({
+        table_name: 'contacts',
+        display_name: 'Contacts',
+        search_fields: null,
+        fulltext_search_column: 'civic_os_text_search',
+        substring_search_column: 'display_name'
+      } as any));
+      mockSchemaService.getPropsForList.and.returnValue(of([]));
+      mockSchemaService.getPropsForFilter.and.returnValue(of([]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+
+      fixture.componentRef.setInput('joinTable', 'contacts');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      expect(component.hasSearchFields()).toBe(true);
+
+      component.onSearchInput('Smi');
+      await waitForData();
+
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      expect(callArgs.searchQuery).toBeUndefined();
+      expect(callArgs.rawQueryParams).toEqual([
+        'or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*)'
+      ]);
+    });
+
+    it('should fall back to the legacy wfts path for entities without hybrid columns', async () => {
+      mockSchemaService.getEntity.and.returnValue(of({
+        table_name: 'legacy_things',
+        display_name: 'Legacy',
+        search_fields: ['display_name'],
+        fulltext_search_column: null,
+        substring_search_column: null
+      } as any));
+      mockSchemaService.getPropsForList.and.returnValue(of([]));
+      mockSchemaService.getPropsForFilter.and.returnValue(of([]));
+      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
+
+      fixture.componentRef.setInput('joinTable', 'legacy_things');
+      fixture.componentRef.setInput('rpcOptions', null);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await waitForData();
+
+      component.onSearchInput('term');
+      await waitForData();
+
+      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
+      expect(callArgs.searchQuery).toBe('term');
       expect(callArgs.rawQueryParams).toBeUndefined();
     });
 

@@ -44,16 +44,21 @@ export const METADATA_SYSTEM_TABLES = ['files', 'civic_os_users', 'payment_trans
  */
 export interface SystemTypeModalConfig {
   displayName: string;
+  /** Columns substring-matched with ILIKE (hybrid search, combined with fulltextColumn via or=()) */
   searchFields: string[];
-  hasTextSearch?: boolean;
+  /** tsvector column searched with wfts (covers tokenized phone fragments etc.) */
+  fulltextColumn?: string;
   listProperties: Partial<SchemaEntityProperty>[];
 }
 
 export const SYSTEM_TYPE_MODAL_CONFIGS: Record<string, SystemTypeModalConfig> = {
   civic_os_users: {
     displayName: 'Users',
-    searchFields: [],
-    hasTextSearch: true,
+    // Hybrid search to match list-page behavior: partial names ("Smi") hit the
+    // ILIKE columns, whole words and phone fragments hit the tsvector column
+    // (which includes phone_search_tokens).
+    searchFields: ['display_name', 'email'],
+    fulltextColumn: 'civic_os_text_search',
     listProperties: [
       { column_name: 'display_name', display_name: 'Name', data_type: 'character varying', udt_name: 'varchar', type: EntityPropertyType.TextShort, sortable: true, table_name: 'civic_os_users' },
       { column_name: 'email', display_name: 'Email', data_type: 'USER-DEFINED', udt_name: 'email_address', type: EntityPropertyType.Email, sortable: true, table_name: 'civic_os_users' },
