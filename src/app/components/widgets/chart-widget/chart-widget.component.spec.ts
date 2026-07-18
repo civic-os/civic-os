@@ -425,6 +425,95 @@ describe('ChartWidgetComponent', () => {
     }, 10);
   });
 
+  it('should default to chart view: chart visible and data table sr-only', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(component.showTable()).toBe(false);
+
+      const chartContainer = el.querySelector('div[aria-hidden="true"]');
+      expect(chartContainer).toBeTruthy();
+      expect(chartContainer!.classList.contains('hidden')).toBe(false);
+
+      const table = el.querySelector('table');
+      expect(table).toBeTruthy();
+      expect(table!.classList.contains('sr-only')).toBe(true);
+      expect(table!.classList.contains('table')).toBe(false);
+      done();
+    }, 10);
+  });
+
+  it('should swap chart for a visible table when the toggle is clicked, and back', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const toggleBtn = el.querySelector('button[aria-pressed]') as HTMLButtonElement;
+      expect(toggleBtn).toBeTruthy();
+
+      toggleBtn.click();
+      fixture.detectChanges();
+
+      const chartContainer = el.querySelector('div[aria-hidden="true"]');
+      expect(chartContainer!.classList.contains('hidden')).toBe(true);
+
+      const table = el.querySelector('table')!;
+      expect(table.classList.contains('sr-only')).toBe(false);
+      expect(table.classList.contains('table')).toBe(true);
+      expect(table.classList.contains('table-zebra')).toBe(true);
+      expect(table.classList.contains('table-sm')).toBe(true);
+
+      // Table keeps the same structure when visible
+      expect(table.querySelector('caption')?.textContent?.trim()).toBe('Referrals Per Week');
+      const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent?.trim());
+      expect(headers).toEqual(['Week', 'Total Referrals', 'Poor Outcome']);
+
+      // Toggle back off restores the default state
+      toggleBtn.click();
+      fixture.detectChanges();
+      expect(chartContainer!.classList.contains('hidden')).toBe(false);
+      expect(table.classList.contains('sr-only')).toBe(true);
+      done();
+    }, 10);
+  });
+
+  it('should expose pressed state on the table toggle button', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const toggleBtn = el.querySelector('button[aria-pressed]') as HTMLButtonElement;
+
+      expect(toggleBtn.getAttribute('type')).toBe('button');
+      expect(toggleBtn.getAttribute('aria-pressed')).toBe('false');
+
+      toggleBtn.click();
+      fixture.detectChanges();
+      expect(toggleBtn.getAttribute('aria-pressed')).toBe('true');
+      done();
+    }, 10);
+  });
+
+  it('should label the table toggle via the a11y translation key', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const toggleBtn = el.querySelector('button[aria-pressed]') as HTMLButtonElement;
+
+      // Mock TranslationService echoes keys, so the rendered label is the key itself
+      expect(toggleBtn.getAttribute('aria-label')).toBe('a11y.chart_view_as_table');
+      expect(mockTranslationService.get).toHaveBeenCalledWith('a11y.chart_view_as_table', undefined);
+      done();
+    }, 10);
+  });
+
   it('should fall back to valueColumn names when seriesLabels are absent', (done) => {
     const widgetNoLabels: DashboardWidget = {
       ...mockWidget,
