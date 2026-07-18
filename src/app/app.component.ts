@@ -190,7 +190,7 @@ export class AppComponent {
       // Runs on the initial navigation too, so direct loads get a page title (WCAG 2.4.2).
       const titleKey = this.getDeepestRouteData()['titleKey'] as string | undefined;
       if (titleKey) {
-        this.titleService.setTitle(`${this.translation.get(titleKey)} – ${this.appTitle}`);
+        this.titleService.setTitle(`${this.translation.get(titleKey)} - ${this.appTitle}`);
       }
 
       // Skip focus management on the initial navigation: stealing focus on

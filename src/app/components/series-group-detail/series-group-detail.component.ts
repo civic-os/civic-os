@@ -205,7 +205,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                       </td>
                       <td class="text-right py-1">
                         @if (!resolved || !resolved.display) {
-                          <span class="text-base-content/40">—</span>
+                          <span class="text-base-content/40">-</span>
                         } @else if (resolved.type === EntityPropertyType.Status || resolved.type === EntityPropertyType.Category) {
                           <span
                             class="badge badge-sm text-white"

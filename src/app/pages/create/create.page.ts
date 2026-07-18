@@ -102,7 +102,7 @@ export class CreatePage {
     // Set the document title once entity metadata resolves (e.g. "Create Issue – Civic OS").
     if (entity?.display_name) {
       const name = this.translation.get('form.create_title', { entity: entity.display_name });
-      this.titleService.setTitle(`${name} – ${getAppTitle()}`);
+      this.titleService.setTitle(`${name} - ${getAppTitle()}`);
     }
   }));
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {

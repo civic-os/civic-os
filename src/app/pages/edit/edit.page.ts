@@ -114,7 +114,7 @@ export class EditPage implements OnDestroy {
     // Set the document title once entity metadata resolves (e.g. "Edit Issue – Civic OS").
     if (entity?.display_name) {
       const name = this.translation.get('form.edit_title', { entity: entity.display_name });
-      this.titleService.setTitle(`${name} – ${getAppTitle()}`);
+      this.titleService.setTitle(`${name} - ${getAppTitle()}`);
     }
   }));
 

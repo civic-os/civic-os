@@ -106,7 +106,7 @@
                         [checked]="row.create"
                         (change)="togglePermission(row.tableName, 'create', row.create)" />
                     } @else {
-                      <span class="text-base-content/30">—</span>
+                      <span class="text-base-content/30">-</span>
                     }
                   </td>
                   <td class="text-center">
@@ -117,7 +117,7 @@
                         [checked]="row.read"
                         (change)="togglePermission(row.tableName, 'read', row.read)" />
                     } @else {
-                      <span class="text-base-content/30">—</span>
+                      <span class="text-base-content/30">-</span>
                     }
                   </td>
                   <td class="text-center">
@@ -128,7 +128,7 @@
                         [checked]="row.update"
                         (change)="togglePermission(row.tableName, 'update', row.update)" />
                     } @else {
-                      <span class="text-base-content/30">—</span>
+                      <span class="text-base-content/30">-</span>
                     }
                   </td>
                   <td class="text-center">
@@ -139,7 +139,7 @@
                         [checked]="row.delete"
                         (change)="togglePermission(row.tableName, 'delete', row.delete)" />
                     } @else {
-                      <span class="text-base-content/30">—</span>
+                      <span class="text-base-content/30">-</span>
                     }
                   </td>
                 </tr>
@@ -227,7 +227,7 @@
                     </td>
                     <td class="text-center">
                       @if (role.id === selectedRoleId()) {
-                        <span class="text-base-content/30">—</span>
+                        <span class="text-base-content/30">-</span>
                       } @else {
                         <input
                           type="checkbox"

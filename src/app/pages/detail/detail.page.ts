@@ -349,7 +349,7 @@ export class DetailPage {
             // (e.g. "Issue: #42 – Civic OS"), mirroring the on-page heading.
             if (entity?.display_name && data) {
               const record = data.display_name || ('#' + data.id);
-              this.titleService.setTitle(`${entity.display_name}: ${record} – ${getAppTitle()}`);
+              this.titleService.setTitle(`${entity.display_name}: ${record} - ${getAppTitle()}`);
             }
 
             if (entity?.guided_form_key && data?.id) {

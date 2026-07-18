@@ -223,7 +223,7 @@
   @if (propType() == EntityPropertyType.Color) {
     <div class="flex items-center gap-4">
       <input type="color" class="w-24 h-12 cursor-pointer" [formControlName]="prop().column_name"
-        [attr.aria-label]="prop().display_name + ' — ' + ('a11y.color_swatch' | translate)" />
+        [attr.aria-label]="prop().display_name + ', ' + ('a11y.color_swatch' | translate)" />
       <input type="text" placeholder="#3B82F6" class="input w-full font-mono" [id]="prop().column_name" [formControlName]="prop().column_name"
         [attr.aria-required]="isRequired() || null"
         [attr.aria-invalid]="isErrorShown(prop().column_name) || null"

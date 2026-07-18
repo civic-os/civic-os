@@ -91,7 +91,7 @@ export class ListPage implements OnInit, OnDestroy {
   private _titleEffect = effect(() => {
     const entity = this.entitySignal();
     if (entity?.display_name) {
-      this.titleService.setTitle(`${entity.display_name} – ${getAppTitle()}`);
+      this.titleService.setTitle(`${entity.display_name} - ${getAppTitle()}`);
     }
   });
 

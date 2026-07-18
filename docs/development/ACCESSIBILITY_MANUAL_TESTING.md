@@ -201,7 +201,7 @@ control with no name, an error that's never announced), that's a finding.
 | # | Do this | Should hear (pass condition) | Guards |
 |---|---------|------------------------------|--------|
 | 1 | Load `/view/Issue`. Pull up the **headings** list (`VO+U` / `H`). | A single, sensible page `<h1>` ("Issues"), not a pile of same-level headings. | 1.3.1 |
-| 2 | Check the **browser tab title** on a few pages (Home, `/permissions`, `/view/Issue`). | Distinct titles per page: "Issues – Civic OS", "Permissions – Civic OS" — not "Civic OS" everywhere. | 2.4.2 |
+| 2 | Check the **browser tab title** on a few pages (Home, `/permissions`, `/view/Issue`). | Distinct titles per page: "Issues - Civic OS", "Permissions - Civic OS" — not "Civic OS" everywhere. | 2.4.2 |
 | 3 | Navigate a sidebar link, then listen. | The new page's main region / heading gets focus and is announced — you're not left silently on the old link. | 2.4.3 |
 | 4 | Arrow through a **table row**'s cells. | Real data ("Pothole on Saginaw St", a status), **not** icon ligature names like "check_box" for booleans — you should hear "Yes"/"No". | 1.1.1, 1.3.1 |
 | 5 | Focus a **sort header**. | "…, column header, button" and the current sort state (ascending/descending) when set. | 4.1.2 |
