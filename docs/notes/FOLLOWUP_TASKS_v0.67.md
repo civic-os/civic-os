@@ -110,6 +110,21 @@ modal-accessibility survey and W3C ARIA practices.
 
 ## Task 2 — Translate `a11y.*` screen-reader strings for all locales
 
+> ✅ **DONE** (2026-07-18, branch `task/a11y-translations`): Translated all 137
+> `a11y.*` keys (source of truth: `src/app/i18n/en.translations.ts`) into
+> es/ar/fr/de/ps (685 rows). Architectural deviation from the description
+> below: shipped as a **core Sqitch migration**
+> (`v0-67-1-a11y-translations`, deploy/revert/verify), not example
+> init-scripts — per `docs/notes/I18N_DESIGN.md`, `source_type = 'ui'`
+> translations are framework strings seeded identically for every
+> deployment, and example init-scripts are reserved for instance metadata
+> translations. Applied to the local dev DB (`metadata.translations`, 137
+> rows per locale, 685 total). Added a pre-release checklist item to
+> `docs/INTEGRATOR_GUIDE.md` (Multi-Language section). No `src/` changes,
+> so this did not touch frontend code or tests.
+>
+> Original task description:
+
 The ~90 `a11y.*` keys in `src/app/i18n/en.translations.ts` ship English-only;
 other locales fall back to English for every announcement/aria-label.
 Translations are DB-driven per instance (`metadata.translations`, managed at

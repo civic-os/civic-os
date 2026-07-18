@@ -5530,11 +5530,20 @@ Translation keys follow a `namespace.key_name` convention:
 | `settings.*` | `settings.title`, `settings.privacy` | 12 |
 | `guided_form.*` | `guided_form.draft`, `guided_form.submit` | 20 |
 | `gallery.*` | `gallery.upload`, `gallery.counter` | 10 |
+| `a11y.*` | `a11y.close_dialog`, `a11y.filters_applied` | 137 |
 | Other | `map.*`, `file.*`, `calendar.*`, `import_export.*`, etc. | ~40 |
 
 The complete key list is in `src/app/i18n/en.translations.ts`.
 
 See `docs/notes/I18N_DESIGN.md` for full architecture details.
+
+### Pre-Release Checklist for Integrators
+
+Before shipping a multi-language instance, verify screen-reader string coverage per locale:
+
+1. Open `/admin/translations` and use the missing-translation coverage report to check each `supportedLocales` entry.
+2. Framework `a11y.*` strings (aria-labels and screen-reader announcements) ship translated for **es, ar, fr, de, ps** as of v0.67.1 (`postgres/migrations/deploy/v0-67-1-a11y-translations.sql`). Any other locale falls back to English for these strings until translated.
+3. Untranslated `a11y.*` keys are not a hard failure (English fallback keeps the app usable), but they degrade the screen-reader experience for users in that locale — treat gaps here as a release blocker for locales your instance officially supports.
 
 ### Metadata Translations (Phase 2)
 

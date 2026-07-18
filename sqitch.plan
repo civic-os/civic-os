@@ -99,3 +99,4 @@ v0-65-2-profile-i18n-fixes [v0-65-1-auth-route-translations] 2026-07-03T12:00:00
 v0-65-6-fix-entity-action-role-key [v0-65-2-profile-i18n-fixes] 2026-07-06T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix has_entity_action_permission to use role_key instead of display_name
 v0-66-0-ical-change-detection [v0-65-6-fix-entity-action-role-key] 2026-07-07T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add LAST-MODIFIED and SEQUENCE to iCal VEVENT output for change detection
 v0-66-1-profile-exempt-roles [v0-66-0-ical-change-detection] 2026-07-16T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add exempt_roles to profile extensions for role-based guard bypass
+v0-67-1-a11y-translations [v0-66-1-profile-exempt-roles] 2026-07-18T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Translate a11y.* screen-reader strings into es/ar/fr/de/ps demo locales
