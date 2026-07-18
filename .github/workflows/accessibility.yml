@@ -56,11 +56,49 @@ jobs:
         # (code comments exempt). See scripts/check-typographic-dashes.cjs.
         run: npm run lint:dashes
 
+  # Path filter for the expensive pa11y job: docs-only / example-only changes
+  # skip it. Implemented as a job-level `if:` (not workflow-level `paths`) so a
+  # skipped run still reports a check and satisfies branch protection if pa11y
+  # is ever made a required check.
+  changes:
+    name: Detect app-affecting changes
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Filter paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            app:
+              - 'src/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'angular.json'
+              - 'tsconfig*.json'
+              - '.pa11yci.json'
+              - '.github/workflows/accessibility.yml'
+              - 'docker/ci-a11y/**'
+              - 'docker/dev-postgres/**'
+              - 'postgres/migrations/**'
+              - 'sqitch.plan'
+              - 'examples/pothole/init-scripts/**'
+              - 'examples/keycloak/**'
+
   # ENFORCED: authenticated pa11y-ci against a live stack. Fails the build on
   # WCAG 2 AA findings (minus the documented color-contrast exclusion).
+  # Skipped for changes that cannot affect rendered pages or the CI stack
+  # (see the `changes` job) - note schema/migration changes DO run it, since
+  # the UI is generated from schema metadata.
   pa11y:
     name: pa11y (authenticated, enforced)
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
 
     steps:
       - name: Checkout code
