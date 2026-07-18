@@ -151,6 +151,7 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.fill_in_step': 'Fill in {{name}}',
   'a11y.saving_step': 'Saving: {{name}}',
   'a11y.save_complete': 'Save complete',
+  'a11y.chart_view_as_table': 'View as table',
 
   'sidebar.database_schema': 'Database Schema',
   'sidebar.entities': 'Entities',

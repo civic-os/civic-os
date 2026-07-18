@@ -79,6 +79,13 @@ export class ChartWidgetComponent {
   error = signal<string | null>(null);
   chartData = signal<EntityData[]>([]);
 
+  // Toggle between the visual chart (default) and the visible data table. Not persisted.
+  showTable = signal(false);
+
+  toggleTableView(): void {
+    this.showTable.update(v => !v);
+  }
+
   // Colors derived from the current DaisyUI theme
   private chartColors = signal<string[]>([]);
 

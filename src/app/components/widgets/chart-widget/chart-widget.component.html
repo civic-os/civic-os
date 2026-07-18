@@ -27,17 +27,29 @@
     </div>
   } @else if (chartData().length > 0) {
     <!-- Positioned relative to widget-container (ancestor with position:relative) -->
-    <details class="dropdown dropdown-end absolute top-2 end-2 z-10">
-      <summary class="btn btn-ghost btn-xs btn-square opacity-50 hover:opacity-100" [attr.aria-label]="'action.export' | translate">
-        <span class="material-symbols-outlined text-base" aria-hidden="true">download</span>
-      </summary>
-      <ul class="menu dropdown-content bg-base-100 rounded-box z-20 w-48 p-2 shadow">
-        <li><button type="button" class="w-full text-start" (click)="downloadPng()">{{ 'chart.download_png' | translate }}</button></li>
-        <li><button type="button" class="w-full text-start" (click)="downloadCsv()">{{ 'chart.download_csv' | translate }}</button></li>
-      </ul>
-    </details>
-    <!-- Visual chart is decorative for AT; the sr-only table below is the text alternative -->
-    <div aria-hidden="true">
+    <div class="absolute top-2 end-2 z-10 flex items-center gap-1">
+      <button
+        type="button"
+        class="btn btn-ghost btn-xs btn-square opacity-50 hover:opacity-100"
+        [class.btn-active]="showTable()"
+        [attr.aria-label]="'a11y.chart_view_as_table' | translate"
+        [attr.aria-pressed]="showTable()"
+        (click)="toggleTableView()"
+      >
+        <span class="material-symbols-outlined text-base" aria-hidden="true">table</span>
+      </button>
+      <details class="dropdown dropdown-end">
+        <summary class="btn btn-ghost btn-xs btn-square opacity-50 hover:opacity-100" [attr.aria-label]="'action.export' | translate">
+          <span class="material-symbols-outlined text-base" aria-hidden="true">download</span>
+        </summary>
+        <ul class="menu dropdown-content bg-base-100 rounded-box z-20 w-48 p-2 shadow">
+          <li><button type="button" class="w-full text-start" (click)="downloadPng()">{{ 'chart.download_png' | translate }}</button></li>
+          <li><button type="button" class="w-full text-start" (click)="downloadCsv()">{{ 'chart.download_csv' | translate }}</button></li>
+        </ul>
+      </details>
+    </div>
+    <!-- Visual chart is decorative for AT; the data table below is the text alternative -->
+    <div aria-hidden="true" [class.hidden]="showTable()">
       @if (legendItems().length > 0) {
         <vis-bullet-legend [items]="legendItems()" />
       }
@@ -61,8 +73,9 @@
         />
       </vis-xy-container>
     </div>
-    <!-- Screen-reader data table: same data as the chart (WCAG 1.1.1) -->
-    <table class="sr-only">
+    <!-- Data table: same data as the chart (WCAG 1.1.1).
+         sr-only by default; rendered visibly when the table toggle is on. -->
+    <table [class]="showTable() ? 'table table-zebra table-sm' : 'sr-only'">
       <caption>{{ widget().title }}</caption>
       <thead>
         <tr>
