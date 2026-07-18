@@ -26,11 +26,12 @@ import {
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { SchemaEntityTable } from '../../interfaces/entity';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-template-editor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './template-editor.component.html',
   styleUrl: './template-editor.component.css'

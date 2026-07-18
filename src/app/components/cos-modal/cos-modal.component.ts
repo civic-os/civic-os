@@ -18,6 +18,7 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
+import { inertSiblingsOutside } from '../../utils/inert.utils';
 
 /**
  * Custom modal component that reliably centers on mobile devices.
@@ -72,20 +73,26 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
   /** Whether pressing ESC closes the modal */
   closeOnEscape = input<boolean>(true);
 
+  /**
+   * Accessible name for the dialog. Should match the modal's visible heading.
+   * Applied as `aria-label` so screen readers announce a name for the dialog.
+   */
+  label = input<string>();
+
   /** Emitted when the modal should be closed */
   closed = output<void>();
 
   /** Reference to the modal container for focus management */
   @ViewChild('modalContainer') modalContainer?: ElementRef<HTMLElement>;
 
+  /** Restore function for the inert attributes applied to background content while open. */
+  private restoreInert?: () => void;
+
   /** Internal animation state (delayed for entrance animation) */
   animationReady = signal(false);
 
   /** Stored scroll position for restoration after close */
   private scrollY = 0;
-
-  /** Unique ID for ARIA labelling */
-  readonly titleId = `cos-modal-title-${Math.random().toString(36).slice(2)}`;
 
   /** Computed CSS class for size variant */
   sizeClass = computed(() => {
@@ -114,6 +121,8 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.restoreInert?.();
+    this.restoreInert = undefined;
     // Ensure body scroll is unlocked if component is destroyed while open
     if (this.isOpen()) {
       this.unlockBodyScroll();
@@ -125,12 +134,29 @@ export class CosModalComponent implements AfterViewInit, OnDestroy {
     this.lockBodyScroll();
     // Delay animation ready for entrance animation
     requestAnimationFrame(() => this.animationReady.set(true));
+    // Focus fallback: cdkTrapFocusAutoCapture grabs the first tabbable child,
+    // but modals whose content loads asynchronously may have none at open time,
+    // leaving focus (and the screen reader) on the page behind the dialog.
+    // If nothing inside the dialog took focus, focus the dialog itself.
+    setTimeout(() => {
+      const el = this.modalContainer?.nativeElement;
+      if (!el || !this.isOpen()) return;
+      // Remove the background from the accessibility tree and tab order while
+      // the dialog is open (aria-modal alone is unevenly honored — VoiceOver's
+      // cursor can recover to background elements after in-dialog re-renders).
+      this.restoreInert ??= inertSiblingsOutside(el);
+      if (!el.contains(document.activeElement)) {
+        el.focus();
+      }
+    }, 50);
   }
 
   /** Handle modal closing */
   private onClose(): void {
     this.animationReady.set(false);
     this.unlockBodyScroll();
+    this.restoreInert?.();
+    this.restoreInert = undefined;
   }
 
   /** Close the modal by emitting the closed event */

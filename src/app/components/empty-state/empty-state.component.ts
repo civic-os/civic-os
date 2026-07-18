@@ -33,19 +33,19 @@ import { AuthService } from '../../services/auth.service';
   imports: [],
   template: `
     <div role="alert" class="alert justify-start" [class]="'alert-' + alertType()">
-      <span class="material-symbols-outlined">{{ icon() }}</span>
+      <span class="material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>
       <div>
         <h3 class="font-bold">{{ title() }}</h3>
         <p class="text-sm">{{ message() }}</p>
       </div>
       @if (showLoginButton() && !auth.authenticated()) {
-        <button class="btn btn-primary btn-sm" (click)="onLogin()">
-          <span class="material-symbols-outlined text-lg">login</span>
+        <button type="button" class="btn btn-primary btn-sm" (click)="onLogin()">
+          <span class="material-symbols-outlined text-lg" aria-hidden="true">login</span>
           Log In
         </button>
       }
       @if (showClearFiltersButton()) {
-        <button class="btn btn-outline btn-sm" (click)="clearFilters.emit()">
+        <button type="button" class="btn btn-outline btn-sm" (click)="clearFilters.emit()">
           Clear Filters
         </button>
       }

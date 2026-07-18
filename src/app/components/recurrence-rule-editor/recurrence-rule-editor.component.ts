@@ -18,6 +18,7 @@
 import { Component, forwardRef, signal, computed, effect, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RRuleFrequency, RRuleDayOfWeek, RRuleConfig } from '../../interfaces/entity';
 import { RecurringService } from '../../services/recurring.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -45,7 +46,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 @Component({
   selector: 'app-recurrence-rule-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -58,11 +59,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     <div class="recurrence-editor space-y-4">
       <!-- Frequency -->
       <div class="form-control">
-        <label class="label">
+        <label class="label" [for]="uid + '-repeat'">
           <span class="label-text font-medium">Repeat</span>
         </label>
         <select
           class="select select-bordered w-full"
+          [id]="uid + '-repeat'"
           [ngModel]="frequency()"
           (ngModelChange)="onFrequencyChange($event)"
           [disabled]="disabled()"
@@ -76,12 +78,13 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- Interval -->
       <div class="form-control">
-        <label class="label">
+        <label class="label" [for]="uid + '-interval'">
           <span class="label-text">Every</span>
         </label>
         <div class="flex items-center gap-2">
           <input
             type="number"
+            [id]="uid + '-interval'"
             class="input input-bordered w-24"
             min="1"
             max="99"
@@ -96,20 +99,21 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       <!-- Day of Week (for WEEKLY) -->
       @if (frequency() === 'WEEKLY') {
         <div class="form-control">
-          <label class="label">
+          <div class="label">
             <span class="label-text">On these days</span>
-          </label>
+          </div>
           <div class="flex flex-wrap gap-2">
             @for (day of daysOfWeek; track day.code) {
               <label class="cursor-pointer">
                 <input
                   type="checkbox"
-                  class="checkbox checkbox-sm hidden peer"
+                  class="checkbox checkbox-sm sr-only peer"
+                  [attr.aria-label]="('a11y.weekday_' + day.code) | translate"
                   [checked]="isDaySelected(day.code)"
                   (change)="toggleDay(day.code)"
                   [disabled]="disabled()"
                 />
-                <span class="btn btn-sm peer-checked:btn-primary">
+                <span class="btn btn-sm peer-checked:btn-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1">
                   {{ day.short }}
                 </span>
               </label>
@@ -121,9 +125,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       <!-- Monthly Type Selector (for MONTHLY) -->
       @if (frequency() === 'MONTHLY') {
         <div class="form-control mb-2">
-          <label class="label">
+          <div class="label">
             <span class="label-text">Repeat by</span>
-          </label>
+          </div>
           <div class="space-y-2">
             <!-- Day of Month option -->
             <label class="flex items-center gap-2 cursor-pointer">
@@ -187,9 +191,9 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- End Condition -->
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text font-medium">Ends</span>
-        </label>
+        </div>
         <div class="space-y-2">
           <label class="flex items-center gap-2 cursor-pointer">
             <input
@@ -260,6 +264,10 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 })
 export class RecurrenceRuleEditorComponent implements ControlValueAccessor {
   private recurringService = inject(RecurringService);
+
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `recurrence-rule-editor-${RecurrenceRuleEditorComponent.nextInstanceId++}`;
 
   /**
    * Optional start date to help pre-populate BYSETPOS fields.

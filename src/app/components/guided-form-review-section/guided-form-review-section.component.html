@@ -15,7 +15,7 @@
 
   @if (loading()) {
     <div class="flex justify-center py-8">
-      <span class="loading loading-spinner loading-md"></span>
+      <app-loading-indicator size="md" />
     </div>
   }
 
@@ -24,7 +24,7 @@
       <!-- Parent step card -->
       @if (definition()) {
         <div class="collapse collapse-arrow bg-base-200">
-          <input type="checkbox" checked />
+          <input type="checkbox" checked [attr.aria-label]="'a11y.toggle_section' | translate:{ name: entityDisplayName() || '' }" />
           <div class="collapse-title font-medium">
             {{ entityDisplayName() }}
             <span class="badge badge-success badge-sm ms-2">Complete</span>
@@ -43,8 +43,9 @@
               </div>
             }
             @if (!readOnly()) {
-              <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep('__parent__')">
-                <span class="material-symbols-outlined text-sm">edit</span>
+              <button type="button" class="btn btn-sm btn-outline mt-4" (click)="onEditStep('__parent__')"
+                      [attr.aria-label]="'a11y.edit_step' | translate:{ name: entityDisplayName() || '' }">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                 Edit
               </button>
             }
@@ -55,7 +56,7 @@
       <!-- Step cards -->
       @for (step of dataSteps(); track step.step_key) {
         <div class="collapse collapse-arrow bg-base-200">
-          <input type="checkbox" [checked]="step.isCompleted" />
+          <input type="checkbox" [checked]="step.isCompleted" [attr.aria-label]="'a11y.toggle_section' | translate:{ name: step.display_name }" />
           <div class="collapse-title font-medium">
             {{ step.display_name }}
             @if (step.isCompleted) {
@@ -85,16 +86,18 @@
                 </div>
               }
               @if (!readOnly()) {
-                <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                <button type="button" class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)"
+                        [attr.aria-label]="'a11y.edit_step' | translate:{ name: step.display_name }">
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   Edit
                 </button>
               }
             } @else {
               <p class="text-sm opacity-60">This optional step was skipped.</p>
               @if (!readOnly()) {
-                <button class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)">
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                <button type="button" class="btn btn-sm btn-outline mt-4" (click)="onEditStep(step.step_key)"
+                        [attr.aria-label]="'a11y.fill_in_step' | translate:{ name: step.display_name }">
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   Fill In
                 </button>
               }
@@ -107,9 +110,9 @@
 
   @if (!submitted()) {
     <div class="mt-6 flex justify-end">
-      <button class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting()">
+      <button type="button" class="btn btn-primary" (click)="onSubmit()" [disabled]="submitting()">
         @if (submitting()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Submitting...
         } @else {
           Submit {{ entityDisplayName() || '' }}

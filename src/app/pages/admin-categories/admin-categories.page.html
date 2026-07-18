@@ -5,10 +5,10 @@
   <!-- Success Alert -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -16,10 +16,10 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4 relative">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissError()">
-        <span class="material-symbols-outlined">close</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="dismissError()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -27,14 +27,15 @@
   <!-- Loading -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   } @else {
     <!-- Entity Type Selector + Actions -->
     <div class="flex flex-wrap gap-3 items-end mb-6">
       <div class="form-control flex-1 min-w-[200px]">
-        <label class="label"><span class="font-semibold">Category Group</span></label>
+        <label class="label" for="cat-entity-select"><span class="font-semibold">Category Group</span></label>
         <select #entitySelect
+                id="cat-entity-select"
                 class="select select-bordered w-full"
                 (change)="onEntityTypeChange(entitySelect.value)">
           @if (!selectedEntityType()) {
@@ -49,16 +50,16 @@
       </div>
 
       <div class="flex gap-2">
-        <button class="btn btn-primary btn-sm" (click)="openCreateGroupModal()">
-          <span class="material-symbols-outlined text-sm">add</span>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openCreateGroupModal()">
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
           Add Group
         </button>
         @if (selectedEntityType()) {
-          <button class="btn btn-sm" (click)="openEditGroupModal()">
-            <span class="material-symbols-outlined text-sm">edit</span>
+          <button type="button" class="btn btn-sm" (click)="openEditGroupModal()" [attr.aria-label]="'action.edit' | translate">
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
           </button>
-          <button class="btn btn-error btn-sm" (click)="openDeleteGroupModal()">
-            <span class="material-symbols-outlined text-sm">delete</span>
+          <button type="button" class="btn btn-error btn-sm" (click)="openDeleteGroupModal()" [attr.aria-label]="'action.delete' | translate">
+            <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
           </button>
         }
       </div>
@@ -73,27 +74,28 @@
     @if (selectedEntityType()) {
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Categories</h2>
-        <button class="btn btn-primary btn-sm" (click)="openCreateCategoryModal()">
-          <span class="material-symbols-outlined text-sm">add</span>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openCreateCategoryModal()">
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
           Add Category
         </button>
       </div>
 
       @if (categories().length === 0) {
         <div class="alert alert-info">
-          <span class="material-symbols-outlined">info</span>
+          <span class="material-symbols-outlined" aria-hidden="true">info</span>
           <span>No categories defined for this group yet. Click "Add Category" to create one.</span>
         </div>
       } @else {
         <div class="overflow-x-auto">
           <table class="table table-zebra">
+            <caption class="sr-only">Categories</caption>
             <thead>
               <tr>
-                <th>Color</th>
-                <th>Display Name</th>
-                <th>Key</th>
-                <th>Sort Order</th>
-                <th>Actions</th>
+                <th scope="col">Color</th>
+                <th scope="col">Display Name</th>
+                <th scope="col">Key</th>
+                <th scope="col">Sort Order</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -101,18 +103,20 @@
                 <tr>
                   <td>
                     <div class="w-6 h-6 rounded-full border border-base-300"
-                         [style.backgroundColor]="cat.color || '#3B82F6'"></div>
+                         [style.backgroundColor]="cat.color || '#3B82F6'"
+                         [attr.aria-label]="('a11y.color_value' | translate:{ value: cat.color || '#3B82F6' })"
+                         role="img"></div>
                   </td>
                   <td class="font-medium">{{ cat.display_name }}</td>
                   <td><code class="bg-base-200 px-1 rounded text-sm">{{ cat.category_key }}</code></td>
                   <td>{{ cat.sort_order }}</td>
                   <td>
                     <div class="flex gap-1">
-                      <button class="btn btn-ghost btn-sm" (click)="openEditCategoryModal(cat)" title="Edit">
-                        <span class="material-symbols-outlined text-sm">edit</span>
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="openEditCategoryModal(cat)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       </button>
-                      <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteCategoryModal(cat)" title="Delete">
-                        <span class="material-symbols-outlined text-sm">delete</span>
+                      <button type="button" class="btn btn-ghost btn-sm text-error" (click)="openDeleteCategoryModal(cat)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   </td>
@@ -124,7 +128,7 @@
       }
     } @else if (categoryGroups().length === 0) {
       <div class="alert alert-info">
-        <span class="material-symbols-outlined">info</span>
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
         <span>No category groups defined yet. Click "Add Group" to create one.</span>
       </div>
     }
@@ -132,54 +136,57 @@
 </div>
 
 <!-- Group Create/Edit Modal -->
-<cos-modal [isOpen]="showGroupModal()" (closed)="closeGroupModal()">
+<cos-modal [isOpen]="showGroupModal()" (closed)="closeGroupModal()" [label]="(editingGroup() ? 'a11y.edit_category_group' : 'a11y.create_category_group') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingGroup() ? 'Edit Category Group' : 'Create Category Group' }}
   </h3>
 
   @if (groupError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ groupError() }}</span>
     </div>
   }
 
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Entity Type</span></label>
+    <label class="label" for="cat-group-entity-type"><span class="font-semibold">Entity Type</span></label>
     <input type="text"
+           id="cat-group-entity-type"
            class="input input-bordered w-full"
            [value]="groupForm().entityType"
            (input)="updateGroupFormField('entityType', $any($event.target).value)"
            [disabled]="!!editingGroup()"
            placeholder="e.g. building_type">
     @if (!editingGroup()) {
-      <label class="label"><span class="text-base-content/60 text-xs">Lowercase letters, numbers, underscores. Cannot be changed after creation.</span></label>
+      <div class="label"><span class="text-base-content/60 text-xs">Lowercase letters, numbers, underscores. Cannot be changed after creation.</span></div>
     }
   </div>
 
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Display Name</span></label>
+    <label class="label" for="cat-group-display-name"><span class="font-semibold">Display Name</span></label>
     <input type="text"
+           id="cat-group-display-name"
            class="input input-bordered w-full"
            [value]="groupForm().displayName"
            (input)="updateGroupFormField('displayName', $any($event.target).value)"
            placeholder="e.g. Building Type">
-    <label class="label"><span class="text-base-content/60 text-xs">Human-readable label shown in the dropdown. Defaults to entity type if empty.</span></label>
+    <div class="label"><span class="text-base-content/60 text-xs">Human-readable label shown in the dropdown. Defaults to entity type if empty.</span></div>
   </div>
 
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Description</span></label>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="cat-group-description"><span class="font-semibold">Description</span></label>
+    <textarea id="cat-group-description"
+              class="textarea textarea-bordered w-full"
               [value]="groupForm().description"
               (input)="updateGroupFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
   </div>
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="closeGroupModal()" [disabled]="groupSaving()">Cancel</button>
-    <button class="btn btn-primary" (click)="submitGroup()" [disabled]="groupSaving()">
+    <button type="button" class="btn" (click)="closeGroupModal()" [disabled]="groupSaving()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="submitGroup()" [disabled]="groupSaving()">
       @if (groupSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingGroup() ? 'Update' : 'Create' }}
@@ -189,14 +196,14 @@
 </cos-modal>
 
 <!-- Category Create/Edit Modal -->
-<cos-modal [isOpen]="showCategoryModal()" (closed)="closeCategoryModal()">
+<cos-modal [isOpen]="showCategoryModal()" (closed)="closeCategoryModal()" [label]="(editingCategory() ? 'a11y.edit_category' : 'a11y.create_category') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingCategory() ? 'Edit Category' : 'Create Category' }}
   </h3>
 
   @if (categoryError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ categoryError() }}</span>
     </div>
   }
@@ -204,18 +211,20 @@
   <!-- Key (read-only, edit only) -->
   @if (editingCategory()) {
     <div class="form-control mb-4">
-      <label class="label"><span class="font-semibold">Key</span></label>
+      <label class="label" for="cat-key"><span class="font-semibold">Key</span></label>
       <input type="text"
+             id="cat-key"
              class="input input-bordered w-full"
              [value]="editingCategory()?.category_key"
              disabled>
-      <label class="label"><span class="text-base-content/60 text-xs">Auto-generated. Cannot be changed.</span></label>
+      <div class="label"><span class="text-base-content/60 text-xs">Auto-generated. Cannot be changed.</span></div>
     </div>
   }
 
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Display Name</span></label>
+    <label class="label" for="cat-display-name"><span class="font-semibold">Display Name</span></label>
     <input type="text"
+           id="cat-display-name"
            class="input input-bordered w-full"
            [value]="categoryForm().displayName"
            (input)="updateCategoryFormField('displayName', $any($event.target).value)"
@@ -223,8 +232,9 @@
   </div>
 
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Description</span></label>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="cat-description"><span class="font-semibold">Description</span></label>
+    <textarea id="cat-description"
+              class="textarea textarea-bordered w-full"
               [value]="categoryForm().description"
               (input)="updateCategoryFormField('description', $any($event.target).value)"
               placeholder="Optional description"></textarea>
@@ -232,22 +242,25 @@
 
   <div class="flex gap-4 mb-4">
     <div class="form-control flex-1">
-      <label class="label"><span class="font-semibold">Color</span></label>
+      <label class="label" for="cat-color"><span class="font-semibold">Color</span></label>
       <div class="flex items-center gap-2">
         <input type="color"
+               id="cat-color"
                class="w-10 h-10 rounded cursor-pointer border border-base-300"
                [value]="categoryForm().color"
                (input)="updateCategoryFormField('color', $any($event.target).value)">
         <input type="text"
                class="input input-bordered w-28"
+               [attr.aria-label]="'a11y.color_swatch' | translate"
                [value]="categoryForm().color"
                (input)="updateCategoryFormField('color', $any($event.target).value)"
                placeholder="#3B82F6">
       </div>
     </div>
     <div class="form-control w-24">
-      <label class="label"><span class="font-semibold">Sort Order</span></label>
+      <label class="label" for="cat-sort-order"><span class="font-semibold">Sort Order</span></label>
       <input type="number"
+             id="cat-sort-order"
              class="input input-bordered w-full"
              [value]="categoryForm().sortOrder"
              (input)="updateCategorySortOrder(+$any($event.target).value)">
@@ -255,10 +268,10 @@
   </div>
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="closeCategoryModal()" [disabled]="categorySaving()">Cancel</button>
-    <button class="btn btn-primary" (click)="submitCategory()" [disabled]="categorySaving()">
+    <button type="button" class="btn" (click)="closeCategoryModal()" [disabled]="categorySaving()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="submitCategory()" [disabled]="categorySaving()">
       @if (categorySaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingCategory() ? 'Update' : 'Create' }}
@@ -268,16 +281,16 @@
 </cos-modal>
 
 <!-- Delete Group Confirmation -->
-<cos-modal [isOpen]="showDeleteGroupModal()" (closed)="closeDeleteGroupModal()" size="sm">
+<cos-modal [isOpen]="showDeleteGroupModal()" (closed)="closeDeleteGroupModal()" size="sm" [label]="'a11y.delete_category_group' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Category Group</h3>
   <p>Are you sure you want to delete the category group <strong>{{ selectedEntityType() }}</strong>?</p>
   <p class="text-sm text-base-content/60 mt-2">This will also delete all categories in this group. This action cannot be undone.</p>
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="closeDeleteGroupModal()" [disabled]="deleteLoading()">Cancel</button>
-    <button class="btn btn-error" (click)="submitDeleteGroup()" [disabled]="deleteLoading()">
+    <button type="button" class="btn" (click)="closeDeleteGroupModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button type="button" class="btn btn-error" (click)="submitDeleteGroup()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Group
@@ -287,16 +300,16 @@
 </cos-modal>
 
 <!-- Delete Category Confirmation -->
-<cos-modal [isOpen]="showDeleteCategoryModal()" (closed)="closeDeleteCategoryModal()" size="sm">
+<cos-modal [isOpen]="showDeleteCategoryModal()" (closed)="closeDeleteCategoryModal()" size="sm" [label]="'a11y.delete_category' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Category</h3>
   <p>Are you sure you want to delete the category <strong>{{ deletingCategory()?.display_name }}</strong>?</p>
   <p class="text-sm text-base-content/60 mt-2">Records referencing this category may be affected.</p>
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="closeDeleteCategoryModal()" [disabled]="deleteLoading()">Cancel</button>
-    <button class="btn btn-error" (click)="submitDeleteCategory()" [disabled]="deleteLoading()">
+    <button type="button" class="btn" (click)="closeDeleteCategoryModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button type="button" class="btn btn-error" (click)="submitDeleteCategory()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete Category

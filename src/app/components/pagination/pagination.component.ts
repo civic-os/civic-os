@@ -40,9 +40,17 @@ export class PaginationComponent {
   }
 
   @Input() loading = false;
+  /** Only one pagination instance per page should announce results (pages render top+bottom copies). */
+  @Input() announceResults = true;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() pageSizeChange = new EventEmitter<number>();
+
+  // Incrementing counter → unique DOM id per component instance. The list page
+  // renders two paginators (top + bottom); a shared static `id` would produce
+  // duplicate ids and break the page-size <label for>/select association.
+  private static nextInstanceId = 0;
+  public readonly uid = `pagination-${PaginationComponent.nextInstanceId++}`;
 
   public currentPageSignal = signal(1);
   public pageSizeSignal = signal(25);

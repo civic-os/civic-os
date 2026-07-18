@@ -39,6 +39,7 @@ import { RecurringService } from '../../services/recurring.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 import { RecurrenceRuleEditorComponent } from '../recurrence-rule-editor/recurrence-rule-editor.component';
 import { ConflictPreviewComponent, ConflictPreviewResult } from '../conflict-preview/conflict-preview.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RRule } from 'rrule';
 
 /**
@@ -80,7 +81,8 @@ export interface RecurringTimeSlotValue {
     CommonModule,
     FormsModule,
     RecurrenceRuleEditorComponent,
-    ConflictPreviewComponent
+    ConflictPreviewComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -109,11 +111,12 @@ export interface RecurringTimeSlotValue {
       <!-- Time Slot Inputs -->
       <div class="grid grid-cols-2 gap-4">
         <div class="form-control">
-          <label class="label">
+          <label class="label" [for]="uid + '-start'">
             <span class="label-text">Start</span>
           </label>
           <input
             type="datetime-local"
+            [id]="uid + '-start'"
             class="input input-bordered w-full"
             [ngModel]="startDateTime()"
             (ngModelChange)="onStartChange($event)"
@@ -121,11 +124,12 @@ export interface RecurringTimeSlotValue {
           />
         </div>
         <div class="form-control">
-          <label class="label">
+          <label class="label" [for]="uid + '-end'">
             <span class="label-text">End</span>
           </label>
           <input
             type="datetime-local"
+            [id]="uid + '-end'"
             class="input input-bordered w-full"
             [ngModel]="endDateTime()"
             (ngModelChange)="onEndChange($event)"
@@ -159,11 +163,12 @@ export interface RecurringTimeSlotValue {
         <div class="border rounded-lg p-4 bg-base-200/50 space-y-4">
           <!-- Series Name -->
           <div class="form-control">
-            <label class="label">
+            <label class="label" for="recurring-series-name">
               <span class="label-text font-medium">Series Name</span>
             </label>
             <input
               type="text"
+              id="recurring-series-name"
               class="input input-bordered w-full"
               placeholder="e.g., Weekly Team Meeting"
               [ngModel]="seriesName()"
@@ -174,10 +179,11 @@ export interface RecurringTimeSlotValue {
 
           <!-- Series Description (optional) -->
           <div class="form-control">
-            <label class="label">
+            <label class="label" for="recurring-series-description">
               <span class="label-text">Description (optional)</span>
             </label>
             <textarea
+              id="recurring-series-description"
               class="textarea textarea-bordered"
               rows="2"
               placeholder="Brief description of this recurring schedule"
@@ -189,12 +195,13 @@ export interface RecurringTimeSlotValue {
 
           <!-- Series Color (optional) -->
           <div class="form-control">
-            <label class="label">
+            <label class="label" for="recurring-series-color">
               <span class="label-text">Color (optional)</span>
             </label>
             <div class="flex items-center gap-2">
               <input
                 type="color"
+                id="recurring-series-color"
                 class="w-10 h-10 rounded cursor-pointer"
                 [ngModel]="seriesColor()"
                 (ngModelChange)="onSeriesColorChange($event)"
@@ -203,6 +210,7 @@ export interface RecurringTimeSlotValue {
               <input
                 type="text"
                 class="input input-bordered input-sm w-28 font-mono"
+                [attr.aria-label]="'a11y.color_swatch' | translate"
                 placeholder="#3B82F6"
                 [ngModel]="seriesColor()"
                 (ngModelChange)="onSeriesColorChange($event)"
@@ -228,7 +236,7 @@ export interface RecurringTimeSlotValue {
                 (click)="previewConflicts()"
                 [disabled]="disabled() || !canPreview()"
               >
-                <span class="material-symbols-outlined text-base">preview</span>
+                <span class="material-symbols-outlined text-base" aria-hidden="true">preview</span>
                 Preview Schedule
               </button>
             </div>
@@ -249,6 +257,10 @@ export interface RecurringTimeSlotValue {
 })
 export class EditRecurringTimeSlotComponent implements ControlValueAccessor, Validator {
   private recurringService = inject(RecurringService);
+
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `edit-recurring-time-slot-${EditRecurringTimeSlotComponent.nextInstanceId++}`;
 
   // Inputs for conflict preview
   @Input() entityTable?: string;

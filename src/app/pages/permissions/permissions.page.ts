@@ -25,6 +25,7 @@ import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 type PermissionTab = 'tables' | 'actions' | 'delegation';
 
@@ -46,7 +47,7 @@ interface PermissionsData {
 @Component({
   selector: 'app-permissions',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, CosModalComponent],
+  imports: [CommonModule, FormsModule, CosModalComponent, TranslatePipe],
   templateUrl: './permissions.page.html',
   styleUrl: './permissions.page.css'
 })

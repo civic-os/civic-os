@@ -4,29 +4,31 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <!-- Template Name -->
       <div class="form-control">
-        <label class="label">
+        <label class="label" for="template-name">
           <span class="label-text font-semibold">Template Name *</span>
         </label>
         <input
           type="text"
+          id="template-name"
           formControlName="name"
           class="input input-bordered input-sm"
           placeholder="e.g., issue_created"
           [class.input-error]="templateForm.get('name')?.invalid && templateForm.get('name')?.touched" />
         @if (templateForm.get('name')?.invalid && templateForm.get('name')?.touched) {
-          <label class="label">
+          <div class="label">
             <span class="label-text-alt text-error">Required</span>
-          </label>
+          </div>
         }
       </div>
 
       <!-- Description -->
       <div class="form-control">
-        <label class="label">
+        <label class="label" for="template-description">
           <span class="label-text font-semibold">Description</span>
         </label>
         <input
           type="text"
+          id="template-description"
           formControlName="description"
           class="input input-bordered input-sm"
           placeholder="Brief description" />
@@ -34,18 +36,18 @@
 
       <!-- Entity Type -->
       <div class="form-control">
-        <label class="label">
+        <label class="label" for="template-entity-type">
           <span class="label-text font-semibold">Entity Type</span>
         </label>
         @if (entities$ | async; as entities) {
-          <select formControlName="entity_type" class="select select-bordered select-sm">
+          <select id="template-entity-type" formControlName="entity_type" class="select select-bordered select-sm">
             <option value="">-- Select --</option>
             @for (entity of entities; track entity.table_name) {
               <option [value]="entity.table_name">{{ entity.display_name || entity.table_name }}</option>
             }
           </select>
         } @else {
-          <select class="select select-bordered select-sm" disabled>
+          <select id="template-entity-type" class="select select-bordered select-sm" disabled>
             <option>Loading...</option>
           </select>
         }
@@ -53,12 +55,12 @@
 
       <!-- Sample Data Indicator -->
       <div class="form-control">
-        <label class="label">
+        <div class="label">
           <span class="label-text font-semibold">Sample Data</span>
-        </label>
+        </div>
         <div class="flex items-center gap-2 h-10">
           @if (loadingSampleData()) {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
             <span class="text-sm text-base-content/60">Loading...</span>
           } @else if (templateForm.get('entity_type')?.value) {
             <button type="button" class="btn btn-xs btn-ghost" (click)="toggleSampleData()">
@@ -77,11 +79,12 @@
       <!-- Collapsible Sample Data Editor (spans 2 columns, full width on mobile) -->
       @if (showSampleData() && templateForm.get('entity_type')?.value) {
         <div class="form-control col-span-full lg:col-span-2">
-          <label class="label">
+          <label class="label" for="template-sample-data">
             <span class="label-text font-semibold">Sample Entity Data (JSON)</span>
             <span class="label-text-alt">Edit to customize preview data</span>
           </label>
           <textarea
+            id="template-sample-data"
             [(ngModel)]="sampleData"
             [ngModelOptions]="{standalone: true}"
             class="textarea textarea-bordered h-32 font-mono text-sm w-full"
@@ -94,58 +97,62 @@
     <div class="form-control">
       <!-- DaisyUI Tabs -->
       <div role="tablist" class="tabs tabs-border">
-        <a
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'subject'"
           (click)="setActiveTab('subject')">
           Subject
           @if (isValidating('subject')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('subject') && getValidationResult('subject')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
-        <a
+        </button>
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'html'"
           (click)="setActiveTab('html')">
           HTML
           @if (isValidating('html')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('html') && getValidationResult('html')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
-        <a
+        </button>
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'text'"
           (click)="setActiveTab('text')">
           Text
           @if (isValidating('text')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('text') && getValidationResult('text')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
-        <a
+        </button>
+        <button
+          type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'sms'"
           (click)="setActiveTab('sms')">
           SMS (Optional)
           @if (isValidating('sms')) {
-            <span class="loading loading-spinner loading-xs ms-2"></span>
+            <span class="loading loading-spinner loading-xs ms-2" aria-hidden="true"></span>
           }
           @if (!isValidating('sms') && getValidationResult('sms')?.valid) {
             <span class="text-success ms-2">✓</span>
           }
-        </a>
+        </button>
       </div>
 
       <!-- Tab Content -->
@@ -159,6 +166,7 @@
                 type="text"
                 formControlName="subject_template"
                 class="input input-bordered w-full font-mono text-sm"
+                [attr.aria-label]="'a11y.subject_template' | translate"
                 [attr.placeholder]="subjectPlaceholder"
                 [class.input-error]="templateForm.get('subject_template')?.invalid && templateForm.get('subject_template')?.touched" />
               @if (getValidationResult('subject')?.error_message) {
@@ -167,9 +175,9 @@
                 </div>
               }
               @if (templateForm.get('subject_template')?.invalid && templateForm.get('subject_template')?.touched) {
-                <label class="label">
+                <div class="label">
                   <span class="label-text-alt text-error">Subject template is required</span>
-                </label>
+                </div>
               }
               <button
                 type="button"
@@ -177,7 +185,7 @@
                 (click)="previewSingleTemplate('subject')"
                 [disabled]="previewing() || !templateForm.get('subject_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview Subject
               </button>
@@ -206,6 +214,7 @@
               <textarea
                 formControlName="html_template"
                 class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+                [attr.aria-label]="'a11y.html_template' | translate"
                 [attr.placeholder]="htmlPlaceholder"
                 [class.textarea-error]="templateForm.get('html_template')?.invalid && templateForm.get('html_template')?.touched"></textarea>
               @if (getValidationResult('html')?.error_message) {
@@ -214,9 +223,9 @@
                 </div>
               }
               @if (templateForm.get('html_template')?.invalid && templateForm.get('html_template')?.touched) {
-                <label class="label">
+                <div class="label">
                   <span class="label-text-alt text-error">HTML template is required</span>
-                </label>
+                </div>
               }
               <button
                 type="button"
@@ -224,7 +233,7 @@
                 (click)="previewSingleTemplate('html')"
                 [disabled]="previewing() || !templateForm.get('html_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview HTML
               </button>
@@ -253,6 +262,7 @@
               <textarea
                 formControlName="text_template"
                 class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+                [attr.aria-label]="'a11y.text_template' | translate"
                 [attr.placeholder]="textPlaceholder"
                 [class.textarea-error]="templateForm.get('text_template')?.invalid && templateForm.get('text_template')?.touched"></textarea>
               @if (getValidationResult('text')?.error_message) {
@@ -261,9 +271,9 @@
                 </div>
               }
               @if (templateForm.get('text_template')?.invalid && templateForm.get('text_template')?.touched) {
-                <label class="label">
+                <div class="label">
                   <span class="label-text-alt text-error">Text template is required</span>
-                </label>
+                </div>
               }
               <button
                 type="button"
@@ -271,7 +281,7 @@
                 (click)="previewSingleTemplate('text')"
                 [disabled]="previewing() || !templateForm.get('text_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview Text
               </button>
@@ -304,16 +314,16 @@
                   <span>{{ getValidationResult('sms')?.error_message }}</span>
                 </div>
               }
-              <label class="label">
+              <div class="label">
                 <span class="label-text-alt">160 character limit (Phase 2)</span>
-              </label>
+              </div>
               <button
                 type="button"
                 class="btn btn-secondary btn-sm mt-3 w-full"
                 (click)="previewSingleTemplate('sms')"
                 [disabled]="previewing() || !templateForm.get('sms_template')?.value">
                 @if (previewing()) {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 }
                 Preview SMS
               </button>
@@ -337,7 +347,7 @@
 
       <!-- Template Syntax Help -->
       <div class="alert alert-info text-xs mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div>
@@ -352,7 +362,7 @@
     <!-- Error Alert -->
     @if (saveError()) {
       <div class="alert alert-error mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>{{ saveError() }}</span>
@@ -369,7 +379,7 @@
         class="btn btn-primary"
         [disabled]="saving() || templateForm.invalid">
         @if (saving()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         }
         {{ template ? 'Update Template' : 'Create Template' }}
       </button>

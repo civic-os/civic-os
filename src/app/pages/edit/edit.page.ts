@@ -17,6 +17,7 @@
 
 
 import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { SchemaService } from '../../services/schema.service';
 import { Observable, forkJoin, from, map, mergeMap, of, tap, take, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -53,6 +54,8 @@ import { RichM2mDiff } from '../../components/fk-search-modal/fk-search-modal.co
 import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { AnalyticsService } from '../../services/analytics.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
+import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
@@ -87,6 +90,8 @@ export class EditPage implements OnDestroy {
   private recurringService = inject(RecurringService);
   private navigation = inject(NavigationService);
   private profileService = inject(ProfileService);
+  private titleService = inject(Title);
+  private translation = inject(TranslationService);
   public auth = inject(AuthService);
 
   // Expose Math and SchemaService to template
@@ -106,7 +111,13 @@ export class EditPage implements OnDestroy {
     }
   }), tap(entity => {
     this.currentEntity = entity;
+    // Set the document title once entity metadata resolves (e.g. "Edit Issue – Civic OS").
+    if (entity?.display_name) {
+      const name = this.translation.get('form.edit_title', { entity: entity.display_name });
+      this.titleService.setTitle(`${name} - ${getAppTitle()}`);
+    }
   }));
+
   public properties$: Observable<SchemaEntityProperty[]> = this.entity$.pipe(mergeMap(e => {
     if(e) {
       // Filter OUT M:M properties UNLESS they are inline (show_inline=true, v0.46.0)

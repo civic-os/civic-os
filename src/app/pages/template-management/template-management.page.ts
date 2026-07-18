@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { NotificationService, NotificationTemplate } from '../../services/notification.service';
 import { TemplateEditorComponent } from '../../components/template-editor/template-editor.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-template-management',
   standalone: true,
-  imports: [CommonModule, TemplateEditorComponent, CosModalComponent],
+  imports: [CommonModule, TemplateEditorComponent, CosModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './template-management.page.html',
   styleUrl: './template-management.page.css'

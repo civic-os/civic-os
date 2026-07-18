@@ -3,9 +3,10 @@
   [isOpen]="isOpen()"
   (closed)="handleClose()"
   size="md"
-  [closeOnBackdrop]="!processing() && !loading()">
+  [closeOnBackdrop]="!processing() && !loading()"
+  [label]="'a11y.complete_payment' | translate">
   <h3 class="font-bold text-lg mb-4">
-    <span class="material-symbols-outlined align-middle me-2">payment</span>
+    <span class="material-symbols-outlined align-middle me-2" aria-hidden="true">payment</span>
     Complete Payment
   </h3>
 
@@ -37,7 +38,7 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
@@ -45,7 +46,7 @@
   <!-- Loading State -->
   @if (loading()) {
     <div class="flex flex-col items-center justify-center py-8">
-      <span class="loading loading-spinner loading-lg mb-4"></span>
+      <span class="loading loading-spinner loading-lg mb-4" aria-hidden="true"></span>
       <p class="text-base-content/60">Initializing payment...</p>
       <p class="text-xs text-base-content/40 mt-2">This usually takes a few seconds</p>
     </div>
@@ -60,21 +61,21 @@
 
     <!-- Submit Button -->
     <div class="flex gap-2 justify-end">
-      <button
+      <button type="button"
         class="btn"
         (click)="handleClose()"
         [disabled]="processing()">
         Cancel
       </button>
-      <button
+      <button type="button"
         class="btn btn-primary"
         (click)="handleSubmit()"
         [disabled]="processing()">
         @if (processing()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Processing...
         } @else {
-          <span class="material-symbols-outlined">credit_card</span>
+          <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
           Pay ${{ totalAmount()?.toFixed(2) }}
         }
       </button>
@@ -84,13 +85,13 @@
   <!-- Error State Actions -->
   @if (error() && !loading()) {
     <div class="flex justify-end">
-      <button class="btn" (click)="handleClose()">Close</button>
+      <button type="button" class="btn" (click)="handleClose()">Close</button>
     </div>
   }
 
   <!-- Security Notice -->
   <div class="mt-4 text-xs text-base-content/60 text-center">
-    <span class="material-symbols-outlined text-sm align-middle">lock</span>
+    <span class="material-symbols-outlined text-sm align-middle" aria-hidden="true">lock</span>
     Payments processed securely by Stripe
   </div>
 </cos-modal>

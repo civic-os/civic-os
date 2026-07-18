@@ -40,9 +40,10 @@ import {
  *
  * Uses Unovis (F5) for SVG rendering with DaisyUI theme-aware colors.
  */
+import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-chart-widget',
-  imports: [
+  imports: [LoadingIndicatorComponent, 
     VisXYContainerModule,
     VisGroupedBarModule,
     VisAxisModule,
@@ -141,6 +142,19 @@ export class ChartWidgetComponent {
       name: label,
       color: palette[i % palette.length] || '#6366f1',
     }));
+  });
+
+  // Computed: column headers for the screen-reader data table.
+  // Prefers human-readable seriesLabels, falls back to raw valueColumn names.
+  srSeriesHeaders = computed<string[]>(() => {
+    const cfg = this.config();
+    return cfg.seriesLabels?.length ? cfg.seriesLabels : cfg.valueColumns;
+  });
+
+  // Computed: header for the category/x column of the SR data table.
+  srCategoryHeader = computed<string>(() => {
+    const cfg = this.config();
+    return cfg.xAxisLabel || cfg.labelColumn;
   });
 
   private chartContainerRef = viewChild<ElementRef<HTMLDivElement>>('chartContainer');

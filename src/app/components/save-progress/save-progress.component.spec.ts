@@ -17,6 +17,8 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { SaveProgressComponent, SaveStep } from './save-progress.component';
 
@@ -27,7 +29,7 @@ describe('SaveProgressComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SaveProgressComponent],
-      providers: [provideZonelessChangeDetection()]
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SaveProgressComponent);

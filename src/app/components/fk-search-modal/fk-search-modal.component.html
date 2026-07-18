@@ -1,5 +1,7 @@
-<cos-modal [isOpen]="isOpen()" (closed)="onCancel()" [size]="multiSelect() ? 'full' : 'xl'">
+<cos-modal [isOpen]="isOpen()" (closed)="onCancel()" [size]="multiSelect() ? 'full' : 'xl'" [label]="title()">
   <div class="flex flex-col max-h-[calc(100dvh-5rem)]">
+    <!-- Sort-change announcements (aria-sort changes alone are not reliably spoken) -->
+    <div class="sr-only" aria-live="polite">{{ sortAnnouncement() }}</div>
     <!-- Header -->
     <h3 class="font-bold text-lg mb-4 shrink-0">{{ title() }}</h3>
 
@@ -66,7 +68,7 @@
           <!-- Footer: Back / Apply -->
           <div class="cos-modal-action shrink-0">
             <button type="button" class="btn btn-ghost" (click)="goToPage1()">
-              <span class="material-symbols-outlined text-base">arrow_back</span>
+              <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
               Back
             </button>
             <div class="flex-1"></div>
@@ -90,11 +92,12 @@
             @if (hasSearchFields()) {
               <div class="mb-3 shrink-0">
                 <div class="relative">
-                  <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+                  <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg" aria-hidden="true">search</span>
                   <input
                     type="text"
                     class="input input-bordered w-full ps-10"
-                    placeholder="Search..."
+                    [placeholder]="'a11y.search' | translate"
+                    [attr.aria-label]="'a11y.search' | translate"
                     [ngModel]="searchQuery()"
                     (ngModelChange)="onSearchInput($event)"
                     (keydown.enter)="$event.preventDefault()"
@@ -121,19 +124,20 @@
               <table class="table table-zebra table-sm w-full">
                 <thead class="sticky top-0 bg-base-200 z-10">
                   <tr>
-                    <th class="w-8"></th>
+                    <th class="w-8" scope="col"><span class="sr-only">{{ 'action.select' | translate }}</span></th>
                     @for (prop of listProperties(); track prop.column_name) {
                       <th
+                        scope="col"
                         class="cursor-pointer select-none"
                         [class.font-bold]="orderField() === prop.column_name"
-                        (click)="onSort(prop.column_name)"
+                        [attr.aria-sort]="orderField() === prop.column_name ? (orderDirection() === 'asc' ? 'ascending' : 'descending') : 'none'"
                       >
-                        <span class="flex items-center gap-1">
+                        <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort(prop.column_name)">
                           {{ prop.display_name }}
                           @if (getSortIcon(prop.column_name)) {
-                            <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon(prop.column_name) }}</span>
                           }
-                        </span>
+                        </button>
                       </th>
                     }
                   </tr>
@@ -148,7 +152,7 @@
                       <td>
                         <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                [checked]="isInWorkingSelection(row.id)"
-                               tabindex="-1"
+                               [attr.aria-label]="row.display_name"
                                (click)="$event.stopPropagation(); toggleSelection(row.id!, row.display_name, $any(row).color)" />
                       </td>
                       @for (prop of listProperties(); track prop.column_name) {
@@ -167,7 +171,7 @@
                     <tr>
                       <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
                         @if (loading()) {
-                          <span class="loading loading-spinner loading-sm"></span>
+                          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                         } @else {
                           No results found
                         }
@@ -205,8 +209,9 @@
                     type="button"
                     class="btn btn-ghost btn-xs opacity-50 group-hover:opacity-100"
                     (click)="removeChip(chip.id)"
+                    [attr.aria-label]="('action.remove' | translate) + ' ' + chip.display_name"
                   >
-                    <span class="material-symbols-outlined text-sm">close</span>
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </div>
               } @empty {
@@ -229,7 +234,7 @@
               (click)="goToPage2()"
             >
               Next
-              <span class="material-symbols-outlined text-base">arrow_forward</span>
+              <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
             </button>
           } @else {
             <!-- Pure junction: direct "Apply" -->
@@ -256,11 +261,12 @@
       @if (hasSearchFields()) {
         <div class="mb-3 shrink-0">
           <div class="relative">
-            <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">search</span>
+            <span class="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg" aria-hidden="true">search</span>
             <input
               type="text"
               class="input input-bordered w-full ps-10"
-              placeholder="Search..."
+              [placeholder]="'a11y.search' | translate"
+              [attr.aria-label]="'a11y.search' | translate"
               [ngModel]="searchQuery()"
               (ngModelChange)="onSearchInput($event)"
               (keydown.enter)="$event.preventDefault()"
@@ -287,19 +293,20 @@
         <table class="table table-zebra table-sm w-full">
           <thead class="sticky top-0 bg-base-200 z-10">
             <tr>
-              <th class="w-8"></th>
+              <th class="w-8" scope="col"><span class="sr-only">{{ 'action.select' | translate }}</span></th>
               @for (prop of listProperties(); track prop.column_name) {
                 <th
+                  scope="col"
                   class="cursor-pointer select-none"
                   [class.font-bold]="orderField() === prop.column_name"
-                  (click)="onSort(prop.column_name)"
+                  [attr.aria-sort]="orderField() === prop.column_name ? (orderDirection() === 'asc' ? 'ascending' : 'descending') : 'none'"
                 >
-                  <span class="flex items-center gap-1">
+                  <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort(prop.column_name)">
                     {{ prop.display_name }}
                     @if (getSortIcon(prop.column_name)) {
-                      <span class="material-symbols-outlined text-sm">{{ getSortIcon(prop.column_name) }}</span>
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon(prop.column_name) }}</span>
                     }
-                  </span>
+                  </button>
                 </th>
               }
             </tr>
@@ -312,7 +319,7 @@
                 (click)="onRowClick(row)"
               >
                 <td>
-                  <input type="radio" class="radio radio-primary radio-sm" [checked]="isSelected(row.id)" tabindex="-1" />
+                  <input type="radio" class="radio radio-primary radio-sm" [checked]="isSelected(row.id)" [attr.aria-label]="row.display_name" />
                 </td>
                 @for (prop of listProperties(); track prop.column_name) {
                   <td>
@@ -330,7 +337,7 @@
               <tr>
                 <td [attr.colspan]="listProperties().length + 1" class="text-center text-base-content/50 py-8">
                   @if (loading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                   } @else {
                     No results found
                   }
@@ -359,7 +366,7 @@
         <button type="button" class="btn" (click)="onCancel()">Cancel</button>
         @if (isNullable()) {
           <button type="button" class="btn btn-warning btn-outline" (click)="onClear()">
-            <span class="material-symbols-outlined text-base">close</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
             Clear
           </button>
         }

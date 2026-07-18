@@ -20,6 +20,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SeriesEditScope, SeriesMembership } from '../../interfaces/entity';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Result of the exception editor modal.
@@ -51,10 +52,10 @@ export interface ExceptionEditorResult {
 @Component({
   selector: 'app-exception-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, CosModalComponent],
+  imports: [CommonModule, FormsModule, CosModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="sm">
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="sm" [label]="'a11y.recurring_event' | translate">
       <h3 class="font-bold text-lg mb-4">
         @if (operation === 'edit') {
           Edit Recurring Event
@@ -68,7 +69,7 @@ export interface ExceptionEditorResult {
       @if (membership) {
         <div class="mb-4 p-3 bg-base-200 rounded-lg">
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-info">repeat</span>
+            <span class="material-symbols-outlined text-info" aria-hidden="true">repeat</span>
             <span class="font-medium">{{ membership.group_name }}</span>
           </div>
           @if (membership.occurrence_date) {
@@ -164,10 +165,11 @@ export interface ExceptionEditorResult {
       <!-- Reason (for delete) -->
       @if (operation === 'delete' && selectedScope() === 'this_only') {
         <div class="form-control mt-4">
-          <label class="label">
+          <label class="label" for="exception-reason">
             <span class="label-text">Reason (optional)</span>
           </label>
           <textarea
+            id="exception-reason"
             class="textarea textarea-bordered"
             rows="2"
             placeholder="Why is this occurrence being cancelled?"
@@ -178,8 +180,9 @@ export interface ExceptionEditorResult {
       }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn btn-ghost" (click)="onCancel()">Cancel</button>
         <button
+          type="button"
           class="btn"
           [class.btn-error]="operation === 'delete'"
           [class.btn-primary]="operation !== 'delete'"

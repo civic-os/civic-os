@@ -7,11 +7,12 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileReference } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-pdf-viewer',
   standalone: true,
-  imports: [CosModalComponent],
+  imports: [CosModalComponent, TranslatePipe],
   templateUrl: './pdf-viewer.component.html',
   styleUrl: './pdf-viewer.component.css'
 })

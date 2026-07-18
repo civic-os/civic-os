@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, ChangeDetectionStrategy, input, output, signal, effect, inject, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed, effect, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { TranslationService } from '../../services/translation.service';
 
 /**
  * Result from executing a save step.
@@ -77,6 +78,7 @@ interface StepState {
 })
 export class SaveProgressComponent {
   private destroyRef = inject(DestroyRef);
+  private translationService = inject(TranslationService);
 
   steps = input.required<SaveStep[]>();
   completed = output<void>();
@@ -89,6 +91,30 @@ export class SaveProgressComponent {
     const states = this.stepStates();
     return states.length > 0 && states.every(s => s.status === 'success' || s.status === 'skipped');
   };
+
+  /**
+   * Single polite live-region message reflecting overall progress, so screen
+   * readers hear one status line ("Saving: <step>" / "Save complete") instead
+   * of silent icon/text swaps per item. Errors are announced separately via
+   * {@link liveError} in an assertive `role="alert"` region.
+   */
+  liveStatus = computed(() => {
+    this.translationService.version();
+    const states = this.stepStates();
+    if (states.length === 0) return '';
+    const running = states.find(s => s.status === 'running');
+    if (running) return this.translationService.get('a11y.saving_step', { name: running.label });
+    if (states.every(s => s.status === 'success' || s.status === 'skipped')) {
+      return this.translationService.get('a11y.save_complete');
+    }
+    return '';
+  });
+
+  /** Error message for the assertive alert region, empty when no step failed. */
+  liveError = computed(() => {
+    const errored = this.stepStates().find(s => s.status === 'error');
+    return errored?.errorMessage ?? '';
+  });
 
   constructor() {
     // Auto-start when steps input is provided

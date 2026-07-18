@@ -9,7 +9,7 @@
 
   @if (adminLoading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -22,9 +22,9 @@
   @if (!adminLoading() && isAdmin()) {
     <!-- Entity Selector -->
     <div class="mb-6">
-      <label class="label me-2">
+      <div class="label me-2">
         <span class="label-text font-semibold">Select Entity</span>
-      </label>
+      </div>
       <select
         class="select select-bordered w-full max-w-md"
         [(ngModel)]="selectedEntity"
@@ -39,7 +39,7 @@
     @if (selectedEntity()) {
       @if (loading()) {
         <div class="flex justify-center items-center min-h-[400px]">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
         </div>
       }
 
@@ -54,7 +54,7 @@
           class="space-y-2"
           cdkDropList
           (cdkDropListDropped)="onDrop($event)">
-          @for (item of items(); track isStaticTextRow(item) ? 'st_' + item.id : item.column_name) {
+          @for (item of items(); track isStaticTextRow(item) ? 'st_' + item.id : item.column_name; let i = $index) {
             <!-- Static Text Row -->
             @if (isStaticTextRow(item)) {
               <div
@@ -62,25 +62,45 @@
                 cdkDrag>
                 <div class="card-body p-4">
                   <div class="flex items-center gap-4">
-                    <!-- Drag Handle -->
-                    <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                      <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
+                    <!-- Drag Handle + keyboard move buttons -->
+                    <div class="flex-shrink-0 flex items-center gap-1">
+                      <div class="cursor-move" cdkDragHandle>
+                        <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === 0"
+                          (click)="moveUp(i)"
+                          [attr.aria-label]="'a11y.move_up' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === items().length - 1"
+                          (click)="moveDown(i)"
+                          [attr.aria-label]="'a11y.move_down' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Static Text Info -->
                     <div class="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                       <!-- Type indicator -->
                       <div>
-                        <label class="label label-text text-xs">Type</label>
+                        <div class="label label-text text-xs">Type</div>
                         <div class="flex items-center gap-2">
-                          <span class="material-symbols-outlined text-info">description</span>
+                          <span class="material-symbols-outlined text-info" aria-hidden="true">description</span>
                           <span class="text-sm font-semibold text-info">Static Text</span>
                         </div>
                       </div>
 
                       <!-- Content preview -->
                       <div class="md:col-span-2">
-                        <label class="label label-text text-xs">Content Preview</label>
+                        <div class="label label-text text-xs">Content Preview</div>
                         <div class="text-sm text-base-content/70 line-clamp-1">
                           {{ item.content.substring(0, 100) }}{{ item.content.length > 100 ? '...' : '' }}
                         </div>
@@ -88,10 +108,11 @@
 
                       <!-- Expand Button -->
                       <div class="flex items-center gap-2 justify-end">
-                        <button
+                        <button type="button"
                           class="btn btn-sm btn-ghost"
-                          (click)="toggleExpanded(item)">
-                          <span class="material-symbols-outlined">
+                          (click)="toggleExpanded(item)"
+                          [attr.aria-label]="item.expanded ? ('a11y.collapse_row' | translate) : ('a11y.expand_row' | translate)">
+                          <span class="material-symbols-outlined" aria-hidden="true">
                             {{ item.expanded ? 'expand_less' : 'expand_more' }}
                           </span>
                         </button>
@@ -101,9 +122,9 @@
                     <!-- Status Indicator -->
                     <div class="flex-shrink-0 w-6 flex items-center justify-center">
                       @if (isSaving(item)) {
-                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                       } @else if (isSaved(item)) {
-                        <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
+                        <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000" aria-hidden="true"
                               [class.opacity-0]="isFading(item)"
                               [class.opacity-100]="!isFading(item)">check_circle</span>
                       }
@@ -116,7 +137,7 @@
                       <div class="grid grid-cols-1 gap-4">
                         <!-- Full Content Preview -->
                         <div>
-                          <label class="label label-text text-xs">Full Content</label>
+                          <div class="label label-text text-xs">Full Content</div>
                           <div class="prose prose-sm max-w-none bg-base-100 p-4 rounded-lg">
                             {{ item.content }}
                           </div>
@@ -124,8 +145,9 @@
 
                         <!-- Column Width -->
                         <div>
-                          <label class="label label-text text-xs">Grid Width (columns)</label>
+                          <label class="label label-text text-xs" [for]="'static-text-width-' + item.id">Grid Width (columns)</label>
                           <input
+                            [id]="'static-text-width-' + item.id"
                             type="number"
                             class="input input-sm input-bordered w-full max-w-xs"
                             [(ngModel)]="item.column_width"
@@ -134,14 +156,14 @@
                             placeholder="8 (full width)"
                             min="1"
                             max="8" />
-                          <label class="label">
+                          <div class="label">
                             <span class="label-text-alt text-xs text-base-content/60">1-8 columns (8 = full width on large screens)</span>
-                          </label>
+                          </div>
                         </div>
 
                         <!-- Visibility Toggles -->
                         <div>
-                          <label class="label label-text text-xs font-semibold">Visibility</label>
+                          <div class="label label-text text-xs font-semibold">Visibility</div>
                           <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div class="form-control">
                               <label class="label cursor-pointer justify-start gap-2">
@@ -190,28 +212,48 @@
                 <!-- Main Row -->
                 <div class="card-body p-4">
                   <div class="flex items-center gap-4">
-                    <!-- Drag Handle -->
-                    <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                      <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
+                    <!-- Drag Handle + keyboard move buttons -->
+                    <div class="flex-shrink-0 flex items-center gap-1">
+                      <div class="cursor-move" cdkDragHandle>
+                        <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                      </div>
+                      <div class="flex flex-col">
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === 0"
+                          (click)="moveUp(i)"
+                          [attr.aria-label]="'a11y.move_up' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs px-1"
+                          [disabled]="i === items().length - 1"
+                          (click)="moveDown(i)"
+                          [attr.aria-label]="'a11y.move_down' | translate:{ name: getItemName(item) }">
+                          <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                        </button>
+                      </div>
                     </div>
 
                     <!-- Property Info (condensed) -->
                     <div class="flex-grow grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
                       <!-- Column Name (read-only) -->
                       <div>
-                        <label class="label label-text text-xs">Column Name</label>
+                        <div class="label label-text text-xs">Column Name</div>
                         <div class="font-mono text-sm font-semibold">{{ item.column_name }}</div>
                       </div>
 
                       <!-- Type (read-only) -->
                       <div>
-                        <label class="label label-text text-xs">Type</label>
+                        <div class="label label-text text-xs">Type</div>
                         <div class="text-sm">{{ getPropertyTypeLabel(item) }}</div>
                       </div>
 
                       <!-- Default Value (read-only) -->
                       <div>
-                        <label class="label label-text text-xs">Default</label>
+                        <div class="label label-text text-xs">Default</div>
                         <div class="text-sm text-base-content/60">
                           {{ item.column_default || '-' }}
                         </div>
@@ -219,7 +261,7 @@
 
                       <!-- Display Name (editable) -->
                       <div>
-                        <label class="label label-text text-xs">Display Name</label>
+                        <div class="label label-text text-xs">Display Name</div>
                         <input
                           type="text"
                           class="input input-sm input-bordered w-full"
@@ -253,10 +295,11 @@
 
                       <!-- Expand Button -->
                       <div class="flex items-center gap-2 justify-end">
-                        <button
+                        <button type="button"
                           class="btn btn-sm btn-ghost"
-                          (click)="toggleExpanded(item)">
-                          <span class="material-symbols-outlined">
+                          (click)="toggleExpanded(item)"
+                          [attr.aria-label]="item.expanded ? ('a11y.collapse_row' | translate) : ('a11y.expand_row' | translate)">
+                          <span class="material-symbols-outlined" aria-hidden="true">
                             {{ item.expanded ? 'expand_less' : 'expand_more' }}
                           </span>
                         </button>
@@ -266,9 +309,9 @@
                     <!-- Status Indicator -->
                     <div class="flex-shrink-0 w-6 flex items-center justify-center">
                       @if (isSaving(item)) {
-                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                       } @else if (isSaved(item)) {
-                        <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
+                        <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000" aria-hidden="true"
                               [class.opacity-0]="isFading(item)"
                               [class.opacity-100]="!isFading(item)">check_circle</span>
                       }
@@ -281,7 +324,7 @@
                       <div class="grid grid-cols-1 gap-4">
                         <!-- Description -->
                         <div>
-                          <label class="label label-text text-xs">Description</label>
+                          <div class="label label-text text-xs">Description</div>
                           <textarea
                             class="textarea textarea-bordered w-full"
                             rows="3"
@@ -293,8 +336,9 @@
 
                         <!-- Column Width -->
                         <div>
-                          <label class="label label-text text-xs">Grid Width (columns)</label>
+                          <label class="label label-text text-xs" [for]="'prop-width-' + item.column_name">Grid Width (columns)</label>
                           <input
+                            [id]="'prop-width-' + item.column_name"
                             type="number"
                             class="input input-sm input-bordered w-full max-w-xs"
                             [(ngModel)]="item.customColumnWidth"
@@ -303,14 +347,14 @@
                             placeholder="Auto (1 or 2 based on type)"
                             min="1"
                             max="8" />
-                          <label class="label">
+                          <div class="label">
                             <span class="label-text-alt text-xs text-base-content/60">1-8 columns (8 = full width on large screens)</span>
-                          </label>
+                          </div>
                         </div>
 
                         <!-- Visibility Toggles -->
                         <div>
-                          <label class="label label-text text-xs font-semibold">Visibility</label>
+                          <div class="label label-text text-xs font-semibold">Visibility</div>
                           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="form-control">
                               <label class="label cursor-pointer justify-start gap-2">
@@ -377,5 +421,8 @@
         </div>
       }
     }
+
+    <!-- Shared reorder announcement for screen readers (D3) -->
+    <div class="sr-only" aria-live="polite">{{ reorderAnnouncement() }}</div>
   }
 </div>

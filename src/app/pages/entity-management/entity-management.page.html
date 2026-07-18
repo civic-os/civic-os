@@ -9,7 +9,7 @@
 
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -24,15 +24,35 @@
       class="space-y-2"
       cdkDropList
       (cdkDropListDropped)="onDrop($event)">
-      @for (entity of entities(); track entity.table_name) {
+      @for (entity of entities(); track entity.table_name; let i = $index) {
         <div
           class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
           cdkDrag>
           <div class="card-body p-4">
             <div class="flex items-center gap-4">
-              <!-- Drag Handle -->
-              <div class="cursor-move flex-shrink-0" cdkDragHandle>
-                <span class="material-symbols-outlined text-base-content/50">drag_indicator</span>
+              <!-- Drag Handle + keyboard move buttons -->
+              <div class="flex-shrink-0 flex items-center gap-1">
+                <div class="cursor-move" cdkDragHandle>
+                  <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">drag_indicator</span>
+                </div>
+                <div class="flex flex-col">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs px-1"
+                    [disabled]="i === 0"
+                    (click)="moveUp(i)"
+                    [attr.aria-label]="'a11y.move_up' | translate:{ name: getEntityName(entity) }">
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_upward</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs px-1"
+                    [disabled]="i === entities().length - 1"
+                    (click)="moveDown(i)"
+                    [attr.aria-label]="'a11y.move_down' | translate:{ name: getEntityName(entity) }">
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_downward</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Entity Info -->
@@ -40,13 +60,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <!-- Table Name (read-only) -->
                   <div>
-                    <label class="label label-text text-xs">Table Name</label>
+                    <div class="label label-text text-xs">Table Name</div>
                     <div class="font-mono text-sm font-semibold">{{ entity.table_name }}</div>
                   </div>
 
                   <!-- Display Name (editable) -->
                   <div>
-                    <label class="label label-text text-xs">Display Name</label>
+                    <div class="label label-text text-xs">Display Name</div>
                     <input
                       type="text"
                       class="input input-sm input-bordered w-full"
@@ -58,7 +78,7 @@
 
                   <!-- Description (editable) -->
                   <div>
-                    <label class="label label-text text-xs">Description</label>
+                    <div class="label label-text text-xs">Description</div>
                     <input
                       type="text"
                       class="input input-sm input-bordered w-full"
@@ -198,9 +218,9 @@
               <!-- Status Indicator (aligned with input fields) -->
               <div class="flex-shrink-0 w-6 flex items-center justify-center self-center">
                 @if (isSaving(entity.table_name)) {
-                  <span class="loading loading-spinner loading-sm"></span>
+                  <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                 } @else if (isSaved(entity.table_name)) {
-                  <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000"
+                  <span class="material-symbols-outlined text-success text-lg transition-opacity duration-1000" aria-hidden="true"
                         [class.opacity-0]="isFading(entity.table_name)"
                         [class.opacity-100]="!isFading(entity.table_name)">check_circle</span>
                 }
@@ -210,5 +230,8 @@
         </div>
       }
     </div>
+
+    <!-- Shared reorder announcement for screen readers (D3) -->
+    <div class="sr-only" aria-live="polite">{{ reorderAnnouncement() }}</div>
   }
 </div>

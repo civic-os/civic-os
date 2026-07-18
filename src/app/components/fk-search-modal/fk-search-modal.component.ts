@@ -26,7 +26,8 @@ import {
   effect,
   DestroyRef,
   OnDestroy,
-  Type
+  Type,
+  ElementRef
 } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { FormsModule, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -34,9 +35,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, merge, switchMap, of, combineLatest, debounceTime, catchError } from 'rxjs';
 
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslationService } from '../../services/translation.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FilterBarComponent } from '../filter-bar/filter-bar.component';
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
 import { SchemaEntityProperty, EntityData, EntityPropertyType } from '../../interfaces/entity';
@@ -72,13 +75,16 @@ export interface RichM2mDiff {
     CosModalComponent,
     PaginationComponent,
     FilterBarComponent,
-    DisplayPropertyComponent
+    DisplayPropertyComponent,
+    TranslatePipe
   ],
   templateUrl: './fk-search-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FkSearchModalComponent implements OnDestroy {
   private data = inject(DataService);
+  private translationSvc = inject(TranslationService);
+  private hostEl = inject(ElementRef<HTMLElement>);
   private schema = inject(SchemaService);
   private destroyRef = inject(DestroyRef);
   private destroyed = false;
@@ -122,6 +128,9 @@ export class FkSearchModalComponent implements OnDestroy {
   // State — shared
   loading = signal(false);
   listProperties = signal<SchemaEntityProperty[]>([]);
+
+  /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
+  sortAnnouncement = signal('');
   filterProperties = signal<SchemaEntityProperty[]>([]);
   rows = signal<EntityData[]>([]);
   totalCount = signal(0);
@@ -231,6 +240,22 @@ export class FkSearchModalComponent implements OnDestroy {
   private lastOpenTable: string | null = null;  // Guard against effect re-triggering
 
   constructor() {
+    // Focus retention: when a search/filter/sort re-renders the results while
+    // the modal is open, the previously-focused element (a result row control)
+    // may be destroyed, dropping DOM focus to <body> — which strands screen
+    // readers on the page BEHIND the dialog. Pull focus back into the modal.
+    effect(() => {
+      this.rows();
+      if (!this.isOpen()) return;
+      setTimeout(() => {
+        const host = this.hostEl.nativeElement as HTMLElement;
+        if (!this.isOpen() || host.contains(document.activeElement)) return;
+        const target = host.querySelector<HTMLElement>('input[type="text"], input[type="search"]')
+          || host.closest<HTMLElement>('[role="dialog"]');
+        target?.focus();
+      }, 60);
+    });
+
     // When modal opens, load properties and data.
     // Guard: only initialize once per open (isOpen transitions false→true).
     // Without this guard, signal writes (chipCache.set, workingSelection.set)
@@ -489,6 +514,11 @@ export class FkSearchModalComponent implements OnDestroy {
       this.orderDirection.set('asc');
     }
     this.currentPage.set(1);
+    const prop = this.listProperties().find(p => p.column_name === columnName);
+    this.sortAnnouncement.set(this.translationSvc.get('a11y.sorted_by', {
+      column: prop?.display_name || columnName,
+      direction: this.translationSvc.get(this.orderDirection() === 'asc' ? 'a11y.ascending' : 'a11y.descending')
+    }));
     this.saveState();
     this.reload$.next();
   }

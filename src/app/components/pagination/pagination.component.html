@@ -1,15 +1,15 @@
 <div class="pagination-container">
   <!-- Single compact row with all pagination controls -->
-  <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+  <nav class="flex flex-col md:flex-row justify-between items-center gap-4" [attr.aria-label]="'a11y.pagination' | translate">
     <!-- Results summary (always shown to prevent layout shift) -->
-    <div class="text-sm flex items-center gap-2">
+    <div class="text-sm flex items-center gap-2" [attr.aria-live]="announceResults ? 'polite' : null">
       @if (totalCountSignal() > 0) {
-        <span class="font-medium">{{ 'pagination.showing' | translate }} {{ startItem() }}-{{ endItem() }} {{ 'pagination.of' | translate }} {{ totalCountSignal() }} results</span>
+        <span class="font-medium">{{ 'pagination.showing' | translate }} {{ startItem() }} {{ 'pagination.to' | translate }} {{ endItem() }} {{ 'pagination.of' | translate }} {{ totalCountSignal() }} results</span>
       } @else {
         <span class="font-medium">0 results</span>
       }
       @if (loading) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
       }
     </div>
 
@@ -23,7 +23,7 @@
             (click)="goToPrevious()"
             type="button"
             [attr.aria-label]="'pagination.previous' | translate">
-            <span class="material-symbols-outlined text-base">chevron_left</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">chevron_left</span>
             <span class="hidden sm:inline">{{ 'pagination.previous' | translate }}</span>
           </button>
 
@@ -53,7 +53,7 @@
             type="button"
             [attr.aria-label]="'pagination.next' | translate">
             <span class="hidden sm:inline">{{ 'pagination.next' | translate }}</span>
-            <span class="material-symbols-outlined text-base">chevron_right</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">chevron_right</span>
           </button>
         </div>
       }
@@ -61,9 +61,9 @@
       <!-- Page size selector (only shown when > 10 results) -->
       @if (showPageSizeSelector()) {
         <div class="flex items-center gap-2">
-          <label for="pageSize" class="text-sm font-medium whitespace-nowrap">{{ 'pagination.items' | translate }} {{ 'pagination.per_page' | translate }}:</label>
+          <label [attr.for]="uid + '-pageSize'" class="text-sm font-medium whitespace-nowrap">{{ 'pagination.items' | translate }} {{ 'pagination.per_page' | translate }}:</label>
           <select
-            id="pageSize"
+            [id]="uid + '-pageSize'"
             class="select select-bordered select-sm"
             [ngModel]="pageSizeSignal()"
             (ngModelChange)="onPageSizeChange($event)"
@@ -74,6 +74,6 @@
           </select>
         </div>
       }
-    </div>
+    </nav>
   </div>
 

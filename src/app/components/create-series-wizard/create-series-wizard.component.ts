@@ -37,6 +37,7 @@ import { SchemaEntityTable, SchemaEntityProperty, CreateSeriesResult } from '../
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { catchError, of, forkJoin, map } from 'rxjs';
 import { RRule } from 'rrule';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -72,16 +73,17 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="xl" [closeOnBackdrop]="!creating()">
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="xl" [closeOnBackdrop]="!creating()" [label]="'a11y.create_recurring_series' | translate">
       <!-- Header with Steps -->
       <div class="flex items-center justify-between mb-6">
         <h3 class="font-bold text-lg">Create Recurring Series</h3>
-        <button class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()">
-          <span class="material-symbols-outlined">close</span>
+        <button type="button" class="btn btn-ghost btn-sm btn-circle" (click)="onCancel()" [disabled]="creating()" [attr.aria-label]="'action.close' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
@@ -104,11 +106,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             @if (currentStep() === 1) {
               <form [formGroup]="infoForm" class="space-y-4">
                 <div class="form-control">
-                  <label class="label">
+                  <label class="label" [for]="uid + '-entity-type'">
                     <span class="label-text font-medium">Entity Type *</span>
                   </label>
                   <select
                     class="select select-bordered w-full"
+                    [id]="uid + '-entity-type'"
                     formControlName="entity_table"
                     (change)="onEntityTypeChange()"
                   >
@@ -125,11 +128,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                 </div>
 
                 <div class="form-control">
-                  <label class="label">
+                  <label class="label" [for]="uid + '-series-name'">
                     <span class="label-text font-medium">Series Name *</span>
                   </label>
                   <input
                     type="text"
+                    [id]="uid + '-series-name'"
                     class="input input-bordered w-full"
                     formControlName="display_name"
                     placeholder="e.g., Weekly Yoga Class"
@@ -137,11 +141,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                 </div>
 
                 <div class="form-control">
-                  <label class="label">
+                  <label class="label" [for]="uid + '-description'">
                     <span class="label-text">Description</span>
                   </label>
                   <textarea
                     class="textarea textarea-bordered w-full"
+                    [id]="uid + '-description'"
                     rows="3"
                     formControlName="description"
                     placeholder="Brief description of this recurring schedule"
@@ -149,7 +154,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                 </div>
 
                 <div class="form-control">
-                  <label class="label">
+                  <label class="label" [for]="uid + '-color'">
                     <span class="label-text">Color</span>
                   </label>
                   <div class="flex items-center gap-3">
@@ -157,9 +162,11 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                       type="color"
                       class="w-12 h-10 cursor-pointer rounded border border-base-300"
                       formControlName="color"
+                      [attr.aria-label]="'a11y.color_swatch' | translate"
                     />
                     <input
                       type="text"
+                      [id]="uid + '-color'"
                       class="input input-bordered flex-1"
                       formControlName="color"
                       placeholder="#3B82F6"
@@ -174,11 +181,11 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               <div class="space-y-4">
                 @if (loadingSchema()) {
                   <div class="flex items-center justify-center py-12">
-                    <span class="loading loading-spinner loading-lg"></span>
+                    <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
                   </div>
                 } @else if (templateProperties().length === 0) {
                   <div class="alert alert-info">
-                    <span class="material-symbols-outlined">info</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">info</span>
                     <span>No configurable template fields found for this entity.</span>
                   </div>
                 } @else {
@@ -218,12 +225,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               <div class="space-y-4">
                 @if (loadingPreview()) {
                   <div class="flex items-center justify-center py-12">
-                    <span class="loading loading-spinner loading-lg"></span>
+                    <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
                     <span class="ml-3">Generating preview...</span>
                   </div>
                 } @else if (previewError()) {
                   <div class="alert alert-error">
-                    <span class="material-symbols-outlined">error</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">error</span>
                     <span>{{ previewError() }}</span>
                   </div>
                 } @else {
@@ -280,7 +287,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                     <div class="max-h-48 overflow-y-auto">
                       @for (occ of previewOccurrences().slice(0, 20); track occ.start) {
                         <div class="flex items-center gap-3 p-3 border-b last:border-b-0">
-                          <span class="material-symbols-outlined text-base-content/40 text-sm">event</span>
+                          <span class="material-symbols-outlined text-base-content/40 text-sm" aria-hidden="true">event</span>
                           <span class="text-sm flex-1">{{ formatDateTime(occ.start) }}</span>
                         </div>
                       }
@@ -294,7 +301,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
                   @if (createError()) {
                     <div class="alert alert-error">
-                      <span class="material-symbols-outlined">error</span>
+                      <span class="material-symbols-outlined" aria-hidden="true">error</span>
                       <span>{{ createError() }}</span>
                     </div>
                   }
@@ -305,36 +312,38 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
       <!-- Footer with Navigation -->
       <div class="cos-modal-action border-t pt-4 mt-4">
-        <button class="btn btn-ghost" (click)="onCancel()" [disabled]="creating()">
+        <button type="button" class="btn btn-ghost" (click)="onCancel()" [disabled]="creating()">
           Cancel
         </button>
 
         <div class="flex-1"></div>
 
         @if (currentStep() > 1) {
-          <button class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
-            <span class="material-symbols-outlined">chevron_left</span>
+          <button type="button" class="btn btn-outline" (click)="prevStep()" [disabled]="creating()">
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
             Back
           </button>
         }
 
         @if (currentStep() < 4) {
           <button
+            type="button"
             class="btn btn-primary"
             (click)="nextStep()"
             [disabled]="!canProceed()"
           >
             Next
-            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
           </button>
         } @else {
           <button
+            type="button"
             class="btn btn-primary"
             (click)="createSeries()"
             [disabled]="creating() || loadingPreview() || previewOccurrences().length === 0"
           >
             @if (creating()) {
-              <span class="loading loading-spinner loading-sm"></span>
+              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
             }
             Create Series
           </button>
@@ -344,6 +353,10 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   `
 })
 export class CreateSeriesWizardComponent implements OnChanges {
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `create-series-wizard-${CreateSeriesWizardComponent.nextInstanceId++}`;
+
   private fb = inject(FormBuilder);
   private schemaService = inject(SchemaService);
   private recurringService = inject(RecurringService);

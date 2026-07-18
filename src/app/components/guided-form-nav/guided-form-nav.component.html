@@ -8,13 +8,19 @@
       @for (step of effectiveSteps(); track step.step_key) {
         <li
           class="step"
-          [class.step-primary]="step.isCompleted"
-          [class.step-neutral]="!step.isCompleted && !step.isSkipped"
+          [class.step-primary]="step.isCompleted || isCurrent(step)"
+          [class.step-neutral]="!step.isCompleted && !isCurrent(step) && !step.isSkipped"
           [class.opacity-50]="step.isSkipped"
           [class.cursor-pointer]="isStepClickable(step)"
           [class.cursor-not-allowed]="!isStepClickable(step)"
           [attr.data-content]="stepContent(step)"
-          (click)="isStepClickable(step) && onStepClick(step)">
+          [attr.aria-current]="isCurrent(step) ? 'step' : null"
+          [attr.role]="isStepClickable(step) ? 'button' : null"
+          [attr.tabindex]="isStepClickable(step) ? 0 : null"
+          [attr.aria-label]="isStepClickable(step) ? ('a11y.go_to_step' | translate:{ name: step.display_name }) : null"
+          (click)="isStepClickable(step) && onStepClick(step)"
+          (keydown.enter)="isStepClickable(step) && onStepClick(step)"
+          (keydown.space)="$event.preventDefault(); isStepClickable(step) && onStepClick(step)">
           {{ step.display_name }}
         </li>
       }

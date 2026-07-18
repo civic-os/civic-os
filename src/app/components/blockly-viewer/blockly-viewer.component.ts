@@ -46,12 +46,12 @@ import { CodeObjectType } from '../../interfaces/introspection';
     <div class="blockly-container rounded-lg border border-base-300 overflow-hidden">
       @if (loading()) {
         <div class="flex items-center justify-center h-64">
-          <span class="loading loading-spinner loading-md"></span>
+          <span class="loading loading-spinner loading-md" aria-hidden="true"></span>
         </div>
       }
       @if (error()) {
         <div class="p-4 text-sm text-warning">
-          <span class="material-symbols-outlined text-sm align-middle mr-1">warning</span>
+          <span class="material-symbols-outlined text-sm align-middle mr-1" aria-hidden="true">warning</span>
           Could not visualize this code as blocks. Try the Source view.
         </div>
       }

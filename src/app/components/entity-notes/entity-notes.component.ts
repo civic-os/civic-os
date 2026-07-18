@@ -24,6 +24,7 @@ import { NotesService } from '../../services/notes.service';
 import { AuthService } from '../../services/auth.service';
 import { ImportExportService } from '../../services/import-export.service';
 import { SimpleMarkdownPipe } from '../../pipes/simple-markdown.pipe';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 
 /**
@@ -43,7 +44,7 @@ import { SimpleMarkdownPipe } from '../../pipes/simple-markdown.pipe';
   selector: 'app-entity-notes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, SimpleMarkdownPipe],
+  imports: [CommonModule, FormsModule, SimpleMarkdownPipe, TranslatePipe],
   templateUrl: './entity-notes.component.html'
 })
 export class EntityNotesComponent {

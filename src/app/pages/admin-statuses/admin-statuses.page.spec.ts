@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { AdminStatusesPage } from './admin-statuses.page';
@@ -64,6 +65,7 @@ describe('AdminStatusesPage', () => {
     await TestBed.configureTestingModule({
       imports: [AdminStatusesPage],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         { provide: StatusAdminService, useValue: mockStatusAdmin },
         { provide: SchemaService, useValue: mockSchema }

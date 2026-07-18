@@ -6,11 +6,12 @@ import { Component, signal } from '@angular/core';
 import { FileReference } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-image-viewer',
   standalone: true,
-  imports: [CosModalComponent],
+  imports: [CosModalComponent, TranslatePipe],
   templateUrl: './image-viewer.component.html',
   styleUrl: './image-viewer.component.css'
 })

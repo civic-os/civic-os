@@ -24,10 +24,10 @@
   <!-- Success Alert -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -35,10 +35,10 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4 relative">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissError()">
-        <span class="material-symbols-outlined">close</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="dismissError()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -47,8 +47,9 @@
   <div class="flex flex-wrap gap-3 items-end mb-4">
     <!-- Locale Selector -->
     <div class="form-control min-w-[160px]">
-      <label class="label"><span class="font-semibold">Language</span></label>
+      <label class="label" for="translation-locale-select"><span class="font-semibold">Language</span></label>
       <select #localeSelect
+              id="translation-locale-select"
               class="select select-bordered w-full"
               (change)="onLocaleChange(localeSelect.value)">
         @for (locale of targetLocales; track locale.code) {
@@ -61,8 +62,9 @@
 
     <!-- Source Type Filter -->
     <div class="form-control min-w-[160px]">
-      <label class="label"><span class="font-semibold">Source Type</span></label>
+      <label class="label" for="translation-source-type-select"><span class="font-semibold">Source Type</span></label>
       <select #sourceTypeSelect
+              id="translation-source-type-select"
               class="select select-bordered w-full"
               (change)="onSourceTypeChange(sourceTypeSelect.value)">
         <option value="" [selected]="selectedSourceType() === ''">All</option>
@@ -76,8 +78,9 @@
 
     <!-- Search -->
     <div class="form-control flex-1 min-w-[200px]">
-      <label class="label"><span class="font-semibold">Search</span></label>
+      <label class="label" for="translation-search"><span class="font-semibold">Search</span></label>
       <input type="text"
+             id="translation-search"
              class="input input-bordered w-full"
              placeholder="Search by key or text..."
              [value]="searchQuery()"
@@ -86,18 +89,18 @@
 
     <!-- Export / Import buttons -->
     <div class="flex gap-2 items-end">
-      <button class="btn btn-outline btn-sm"
+      <button type="button" class="btn btn-outline btn-sm"
               (click)="exportTranslations()"
               [disabled]="loading() || filteredTranslations().length === 0"
               title="Export translations to Excel">
-        <span class="material-symbols-outlined text-sm">download</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">download</span>
         Export
       </button>
-      <button class="btn btn-outline btn-sm"
+      <button type="button" class="btn btn-outline btn-sm"
               (click)="openImportModal()"
               [disabled]="loading()"
               title="Import translations from Excel">
-        <span class="material-symbols-outlined text-sm">upload</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">upload</span>
         Import
       </button>
     </div>
@@ -105,13 +108,13 @@
 
   <!-- Tabs -->
   <div role="tablist" class="tabs tabs-lift tabs-lg mb-6">
-    <button role="tab"
+    <button type="button" role="tab"
             class="tab"
             [class.tab-active]="activeTab() === 'translations'"
             (click)="switchTab('translations')">
       Translations
     </button>
-    <button role="tab"
+    <button type="button" role="tab"
             class="tab"
             [class.tab-active]="activeTab() === 'missing'"
             (click)="switchTab('missing')">
@@ -125,14 +128,14 @@
   <!-- Loading -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[300px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   } @else {
     <!-- Translations Tab -->
     @if (activeTab() === 'translations') {
       @if (filteredTranslations().length === 0) {
         <div class="alert alert-info">
-          <span class="material-symbols-outlined">info</span>
+          <span class="material-symbols-outlined" aria-hidden="true">info</span>
           <span>No translations found for the selected filters.</span>
         </div>
       } @else {
@@ -167,11 +170,11 @@
                   </td>
                   <td>
                     <div class="flex gap-1">
-                      <button class="btn btn-ghost btn-sm" (click)="openEditModal(t)" title="Edit">
-                        <span class="material-symbols-outlined text-sm">edit</span>
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="openEditModal(t)" title="Edit" [attr.aria-label]="'action.edit' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       </button>
-                      <button class="btn btn-ghost btn-sm text-error" (click)="openDeleteModal(t)" title="Delete">
-                        <span class="material-symbols-outlined text-sm">delete</span>
+                      <button type="button" class="btn btn-ghost btn-sm text-error" (click)="openDeleteModal(t)" title="Delete" [attr.aria-label]="'action.delete' | translate">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   </td>
@@ -188,12 +191,12 @@
       @if (filteredMissing().length === 0) {
         @if (searchQuery() || selectedSourceType()) {
           <div class="alert alert-info">
-            <span class="material-symbols-outlined">info</span>
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
             <span>No missing translations found for the selected filters.</span>
           </div>
         } @else {
           <div class="alert alert-success">
-            <span class="material-symbols-outlined">check_circle</span>
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
             <span>All translations are complete for this language!</span>
           </div>
         }
@@ -224,8 +227,8 @@
                     <div class="whitespace-pre-line line-clamp-3">{{ m.default_text }}</div>
                   </td>
                   <td>
-                    <button class="btn btn-primary btn-sm" (click)="openCreateFromMissing(m)" title="Add Translation">
-                      <span class="material-symbols-outlined text-sm">add</span>
+                    <button type="button" class="btn btn-primary btn-sm" (click)="openCreateFromMissing(m)" title="Add Translation" [attr.aria-label]="'a11y.add_translation' | translate">
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
                     </button>
                   </td>
                 </tr>
@@ -239,22 +242,23 @@
 </div>
 
 <!-- Edit/Create Translation Modal -->
-<cos-modal [isOpen]="showEditModal()" (closed)="closeEditModal()">
+<cos-modal [isOpen]="showEditModal()" (closed)="closeEditModal()" [label]="(editingTranslation() ? 'a11y.edit_translation' : 'a11y.add_translation') | translate">
   <h3 class="font-bold text-lg mb-4">
     {{ editingTranslation() ? 'Edit Translation' : 'Add Translation' }}
   </h3>
 
   @if (editError()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ editError() }}</span>
     </div>
   }
 
   <!-- Source Type (read-only) -->
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Source Type</span></label>
+    <label class="label" for="translation-edit-source-type"><span class="font-semibold">Source Type</span></label>
     <input type="text"
+           id="translation-edit-source-type"
            class="input input-bordered w-full"
            [value]="sourceTypeLabel(editForm().sourceType)"
            disabled>
@@ -262,8 +266,9 @@
 
   <!-- Source Key (read-only) -->
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Source Key</span></label>
+    <label class="label" for="translation-source-key"><span class="font-semibold">Source Key</span></label>
     <input type="text"
+           id="translation-source-key"
            class="input input-bordered w-full font-mono text-sm"
            [value]="editForm().sourceKey"
            disabled>
@@ -271,7 +276,7 @@
 
   <!-- English Default -->
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">English Default</span></label>
+    <div class="label"><span class="font-semibold">English Default</span></div>
     @if (editForm().defaultText) {
       <div class="bg-base-200 rounded-lg p-3 text-sm whitespace-pre-line max-h-48 overflow-y-auto">{{ editForm().defaultText }}</div>
     } @else {
@@ -281,8 +286,9 @@
 
   <!-- Translated Text (editable) -->
   <div class="form-control mb-4">
-    <label class="label"><span class="font-semibold">Translation</span></label>
-    <textarea class="textarea textarea-bordered w-full"
+    <label class="label" for="translation-text"><span class="font-semibold">Translation</span></label>
+    <textarea id="translation-text"
+              class="textarea textarea-bordered w-full"
               rows="3"
               [value]="editForm().translatedText"
               (input)="updateTranslatedText($any($event.target).value)"
@@ -290,10 +296,10 @@
   </div>
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="closeEditModal()" [disabled]="editSaving()">Cancel</button>
-    <button class="btn btn-primary" (click)="submitEdit()" [disabled]="editSaving()">
+    <button type="button" class="btn" (click)="closeEditModal()" [disabled]="editSaving()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="submitEdit()" [disabled]="editSaving()">
       @if (editSaving()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Saving...
       } @else {
         {{ editingTranslation() ? 'Update' : 'Create' }}
@@ -303,17 +309,17 @@
 </cos-modal>
 
 <!-- Delete Confirmation Modal -->
-<cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteModal()" size="sm">
+<cos-modal [isOpen]="showDeleteModal()" (closed)="closeDeleteModal()" size="sm" [label]="'a11y.delete_translation' | translate">
   <h3 class="font-bold text-lg mb-4">Delete Translation</h3>
   <p>Are you sure you want to delete the translation for:</p>
   <p class="mt-2"><code class="bg-base-200 px-1 rounded text-sm">{{ deletingTranslation()?.source_key }}</code></p>
   <p class="text-sm text-base-content/60 mt-2">This will revert to the English default for this key.</p>
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="closeDeleteModal()" [disabled]="deleteLoading()">Cancel</button>
-    <button class="btn btn-error" (click)="submitDelete()" [disabled]="deleteLoading()">
+    <button type="button" class="btn" (click)="closeDeleteModal()" [disabled]="deleteLoading()">Cancel</button>
+    <button type="button" class="btn btn-error" (click)="submitDelete()" [disabled]="deleteLoading()">
       @if (deleteLoading()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         Deleting...
       } @else {
         Delete

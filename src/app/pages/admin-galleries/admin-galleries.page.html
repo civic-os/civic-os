@@ -2,17 +2,18 @@
   <!-- Title + Stats Badges -->
   <div class="flex items-center gap-3 mb-4">
     <h1 class="text-3xl font-bold">Gallery Administration</h1>
+  <div class="sr-only" aria-live="polite">{{ sortAnnouncement() }}</div>
     @if (canView()) {
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">photo_library</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">photo_library</span>
         {{ totalGalleries() | number }} {{ totalGalleries() === 1 ? 'gallery' : 'galleries' }}
       </div>
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">image</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">image</span>
         {{ totalImages() | number }} {{ totalImages() === 1 ? 'image' : 'images' }}
       </div>
       <div class="badge badge-ghost gap-1">
-        <span class="material-symbols-outlined text-sm">hard_drive</span>
+        <span class="material-symbols-outlined text-sm" aria-hidden="true">hard_drive</span>
         {{ formatFileSize(totalStorageBytes()) }}
       </div>
     }
@@ -21,7 +22,7 @@
   <!-- Error Message -->
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
@@ -29,7 +30,7 @@
   <!-- Permission Check -->
   @if (!canView()) {
     <div class="alert alert-warning">
-      <span class="material-symbols-outlined">lock</span>
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span>
       <span>You do not have permission to view galleries. Administrator access required.</span>
     </div>
   } @else {
@@ -38,9 +39,9 @@
     <div class="flex flex-wrap items-end gap-4 mb-6">
       <!-- Entity Type Filter (dropdown populated from schema) -->
       <div class="form-control">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">View</span>
-        </label>
+        </div>
         <select
           class="select select-bordered select-sm"
           [ngModel]="filterEntityType()"
@@ -54,9 +55,9 @@
 
       <!-- Status Filter -->
       <div class="form-control">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">Status</span>
-        </label>
+        </div>
         <select
           class="select select-bordered select-sm"
           [ngModel]="filterStatus()"
@@ -69,9 +70,9 @@
 
       <!-- Date Range -->
       <div class="form-control">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">Date Range</span>
-        </label>
+        </div>
         <div class="flex items-center gap-2">
           <input
             type="date"
@@ -79,7 +80,7 @@
             [ngModel]="filterDateFrom()"
             (ngModelChange)="onDateFromChange($event)"
             title="From date" />
-          <span class="text-base-content/50">—</span>
+          <span class="text-base-content/50">-</span>
           <input
             type="date"
             class="input input-bordered input-sm w-36"
@@ -91,11 +92,11 @@
 
       <!-- Search -->
       <div class="form-control w-64">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">&nbsp;</span>
-        </label>
+        </div>
         <label class="input input-bordered input-sm flex items-center gap-2">
-          <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+          <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
           <input
             type="text"
             placeholder="Search entity ID..."
@@ -110,15 +111,16 @@
 
       <!-- Refresh -->
       <div class="form-control">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">&nbsp;</span>
-        </label>
-        <button
+        </div>
+        <button type="button"
           class="btn btn-sm btn-square btn-ghost"
           (click)="refresh()"
           [disabled]="loading()"
-          title="Refresh">
-          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+          title="Refresh"
+          [attr.aria-label]="'action.refresh' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true" [class.animate-spin]="loading()">refresh</span>
         </button>
       </div>
     </div>
@@ -127,13 +129,13 @@
     @if (loading()) {
       <div class="flex justify-center items-center min-h-[400px]">
         <div class="flex items-center gap-2">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           <span class="text-base-content/60">Loading galleries...</span>
         </div>
       </div>
     } @else if (galleries().length === 0) {
       <div class="text-center py-8 text-base-content/60">
-        <span class="material-symbols-outlined text-4xl mb-2">photo_library</span>
+        <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">photo_library</span>
         <p>No galleries found matching your filters.</p>
       </div>
     } @else {
@@ -142,38 +144,43 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('entity_type')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'entity_type' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('entity_type')">
                   Entity Type
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('entity_type') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('entity_type') }}</span>
+                </button>
               </th>
-              <th>Entity ID</th>
-              <th>Property</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('image_count')">
-                <div class="flex items-center gap-1">
+              <th scope="col">Entity ID</th>
+              <th scope="col">Property</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'image_count' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('image_count')">
                   Images
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('image_count') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('image_count') }}</span>
+                </button>
               </th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('total_size')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'total_size' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('total_size')">
                   Size
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('total_size') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('total_size') }}</span>
+                </button>
               </th>
-              <th>Status</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
-                <div class="flex items-center gap-1">
+              <th scope="col">Status</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'created_at' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('created_at')">
                   Created
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('created_at') }}</span>
+                </button>
               </th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('updated_at')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'updated_at' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('updated_at')">
                   Updated
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('updated_at') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('updated_at') }}</span>
+                </button>
               </th>
             </tr>
           </thead>
@@ -187,13 +194,13 @@
                       {{ gallery.entity_id }}
                     </a>
                   } @else {
-                    <span class="text-base-content/40 text-sm">—</span>
+                    <span class="text-base-content/40 text-sm">-</span>
                   }
                 </td>
                 <td class="font-mono text-sm">{{ gallery.property_name }}</td>
                 <td>
                   <div class="badge badge-ghost gap-1">
-                    <span class="material-symbols-outlined text-sm">image</span>
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">image</span>
                     {{ gallery.image_count }}
                   </div>
                 </td>

@@ -6,9 +6,10 @@
     [disabled]="isExporting()"
     (click)="onExport()"
     type="button"
-    [title]="'import_export.export_excel' | translate">
+    [title]="'import_export.export_excel' | translate"
+    [attr.aria-label]="'action.export' | translate">
     @if (!isExporting()) {
-      <span class="material-symbols-outlined">download</span>
+      <span class="material-symbols-outlined" aria-hidden="true">download</span>
     }
     <span class="hidden sm:inline">{{ 'action.export' | translate }}</span>
   </button>
@@ -19,8 +20,9 @@
       class="btn btn-outline btn-sm"
       (click)="onImport()"
       type="button"
-      [title]="'import_export.import_excel' | translate">
-      <span class="material-symbols-outlined">upload</span>
+      [title]="'import_export.import_excel' | translate"
+      [attr.aria-label]="'action.import' | translate">
+      <span class="material-symbols-outlined" aria-hidden="true">upload</span>
       <span class="hidden sm:inline">{{ 'action.import' | translate }}</span>
     </button>
   }
@@ -37,7 +39,7 @@
 }
 
 <!-- Export Options Modal (shown when entity has notes enabled) -->
-<cos-modal [isOpen]="showExportModal()" (closed)="closeExportModal()" size="sm">
+<cos-modal [isOpen]="showExportModal()" (closed)="closeExportModal()" size="sm" [label]="('action.export' | translate) + ' ' + entity.display_name">
   <h3 class="font-bold text-lg mb-4">{{ 'action.export' | translate }} {{ entity.display_name }}</h3>
 
   <div class="form-control mb-4">
@@ -57,21 +59,21 @@
   </div>
 
   <div class="cos-modal-action">
-    <button
+    <button type="button"
       class="btn btn-ghost"
       (click)="closeExportModal()"
       [disabled]="isExporting()">
       {{ 'action.cancel' | translate }}
     </button>
-    <button
+    <button type="button"
       class="btn btn-primary"
       (click)="confirmExport()"
       [disabled]="isExporting()">
       @if (isExporting()) {
-        <span class="loading loading-spinner loading-sm"></span>
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         {{ 'import_export.exporting' | translate }}
       } @else {
-        <span class="material-symbols-outlined">download</span>
+        <span class="material-symbols-outlined" aria-hidden="true">download</span>
         {{ 'action.export' | translate }}
       }
     </button>

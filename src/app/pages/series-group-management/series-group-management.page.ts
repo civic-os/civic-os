@@ -26,6 +26,7 @@ import { AuthService } from '../../services/auth.service';
 import { SeriesGroupDetailComponent } from '../../components/series-group-detail/series-group-detail.component';
 import { CreateSeriesWizardComponent } from '../../components/create-series-wizard/create-series-wizard.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -48,7 +49,8 @@ import { catchError, map } from 'rxjs/operators';
     FormsModule,
     SeriesGroupDetailComponent,
     CreateSeriesWizardComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -60,8 +62,8 @@ import { catchError, map } from 'rxjs/operators';
           <p class="text-base-content/70">Manage recurring time slot series</p>
         </div>
         @if (hasPermission() && hasCreatePermission()) {
-          <button class="btn btn-primary" (click)="openCreateWizard()">
-            <span class="material-symbols-outlined">add</span>
+          <button type="button" class="btn btn-primary" (click)="openCreateWizard()">
+            <span class="material-symbols-outlined" aria-hidden="true">add</span>
             Create Series
           </button>
         }
@@ -69,7 +71,7 @@ import { catchError, map } from 'rxjs/operators';
 
       @if (!hasPermission()) {
         <div class="alert alert-warning">
-          <span class="material-symbols-outlined">lock</span>
+          <span class="material-symbols-outlined" aria-hidden="true">lock</span>
           <span>You don't have permission to view recurring schedules.</span>
         </div>
       } @else {
@@ -79,11 +81,12 @@ import { catchError, map } from 'rxjs/operators';
             <!-- Search -->
             <div class="form-control flex-1 min-w-[200px]">
               <label class="input input-bordered flex items-center gap-2 w-full">
-                <span class="material-symbols-outlined text-base-content/50">search</span>
+                <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">search</span>
                 <input
                   type="text"
                   class="grow"
                   placeholder="Search by name..."
+                  [attr.aria-label]="'a11y.search' | translate"
                   [ngModel]="searchQuery()"
                   (ngModelChange)="onSearchChange($event)"
                 />
@@ -94,6 +97,7 @@ import { catchError, map } from 'rxjs/operators';
             <div class="form-control w-48">
               <select
                 class="select select-bordered w-full"
+                [attr.aria-label]="'a11y.filter_by_entity_type' | translate"
                 [ngModel]="entityTypeFilter()"
                 (ngModelChange)="onEntityTypeChange($event)"
               >
@@ -108,6 +112,7 @@ import { catchError, map } from 'rxjs/operators';
             <div class="form-control w-40">
               <select
                 class="select select-bordered w-full"
+                [attr.aria-label]="'a11y.filter_by_status' | translate"
                 [ngModel]="statusFilter()"
                 (ngModelChange)="onStatusChange($event)"
               >
@@ -125,19 +130,19 @@ import { catchError, map } from 'rxjs/operators';
           <div class="flex-1">
             @if (loading()) {
               <div class="flex items-center justify-center py-12">
-                <span class="loading loading-spinner loading-lg"></span>
+                <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
               </div>
             } @else if (filteredGroups().length === 0) {
               <div class="text-center py-12">
-                <span class="material-symbols-outlined text-6xl text-base-content/30 mb-4">event_repeat</span>
+                <span class="material-symbols-outlined text-6xl text-base-content/30 mb-4" aria-hidden="true">event_repeat</span>
                 <p class="text-lg text-base-content/70">No recurring schedules found</p>
                 @if (searchQuery() || entityTypeFilter() || statusFilter()) {
-                  <button class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
+                  <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="clearFilters()">
                     Clear Filters
                   </button>
                 } @else if (hasCreatePermission()) {
-                  <button class="btn btn-primary btn-sm mt-4" (click)="openCreateWizard()">
-                    <span class="material-symbols-outlined">add</span>
+                  <button type="button" class="btn btn-primary btn-sm mt-4" (click)="openCreateWizard()">
+                    <span class="material-symbols-outlined" aria-hidden="true">add</span>
                     Create your first series
                   </button>
                 }
@@ -149,7 +154,13 @@ import { catchError, map } from 'rxjs/operators';
                     class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                     [class.ring-2]="selectedGroupId() === group.id"
                     [class.ring-primary]="selectedGroupId() === group.id"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-pressed]="selectedGroupId() === group.id"
+                    [attr.aria-label]="('a11y.select_series_group' | translate) + ': ' + group.display_name"
                     (click)="selectGroup(group)"
+                    (keydown.enter)="selectGroup(group)"
+                    (keydown.space)="$event.preventDefault(); selectGroup(group)"
                   >
                     <div class="card-body p-4">
                       <div class="flex items-start gap-3">
@@ -178,21 +189,21 @@ import { catchError, map } from 'rxjs/operators';
 
                           <div class="flex items-center gap-4 mt-2 text-sm text-base-content/60">
                             <span class="flex items-center gap-1">
-                              <span class="material-symbols-outlined text-sm">schedule</span>
+                              <span class="material-symbols-outlined text-sm" aria-hidden="true">schedule</span>
                               {{ group.version_count || 1 }} version(s)
                             </span>
                             <span class="flex items-center gap-1">
-                              <span class="material-symbols-outlined text-sm">event</span>
+                              <span class="material-symbols-outlined text-sm" aria-hidden="true">event</span>
                               {{ group.active_instance_count || 0 }} occurrences
                             </span>
                             <span class="flex items-center gap-1">
-                              <span class="material-symbols-outlined text-sm">date_range</span>
+                              <span class="material-symbols-outlined text-sm" aria-hidden="true">date_range</span>
                               {{ getFirstInstanceDate(group) }} – {{ getEndDateDisplay(group) }}
                             </span>
                           </div>
                         </div>
 
-                        <span class="material-symbols-outlined text-base-content/30">chevron_right</span>
+                        <span class="material-symbols-outlined text-base-content/30" aria-hidden="true">chevron_right</span>
                       </div>
                     </div>
                   </div>
@@ -222,7 +233,7 @@ import { catchError, map } from 'rxjs/operators';
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <cos-modal [isOpen]="showDeleteModal()" (closed)="cancelDelete()" size="sm">
+    <cos-modal [isOpen]="showDeleteModal()" (closed)="cancelDelete()" size="sm" [label]="'a11y.delete_recurring_series' | translate">
       <h3 class="font-bold text-lg">Delete Recurring Series?</h3>
       <p class="py-4">
         This will permanently delete the series "{{ groupToDelete()?.display_name }}"
@@ -230,10 +241,10 @@ import { catchError, map } from 'rxjs/operators';
         This action cannot be undone.
       </p>
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
+        <button type="button" class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn btn-error" (click)="confirmDelete()" [disabled]="deleting()">
           @if (deleting()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           Delete Series
         </button>

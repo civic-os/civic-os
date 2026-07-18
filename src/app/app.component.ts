@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, computed, ElementRef, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, ElementRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
 import { filter } from 'rxjs';
 import { SchemaService } from './services/schema.service';
 import { VersionService } from './services/version.service';
@@ -39,11 +40,13 @@ import { LocaleService } from './services/locale.service';
 import { ProfileService } from './services/profile.service';
 import { CosModalComponent } from './components/cos-modal/cos-modal.component';
 import { TranslatePipe } from './pipes/translate.pipe';
+import { TranslationService } from './services/translation.service';
 
 @Component({
     selector: 'app-root',
     imports: [
     RouterOutlet,
+    RouterLink,
     CommonModule,
     FormsModule,
     DashboardSelectorComponent,
@@ -60,6 +63,8 @@ export class AppComponent {
   private version = inject(VersionService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
+  private titleService = inject(Title);
+  private translation = inject(TranslationService);
   public auth = inject(AuthService);
   public themeService = inject(ThemeService);
   private localeService = inject(LocaleService);
@@ -70,6 +75,10 @@ export class AppComponent {
 
   public drawerOpen: boolean = false;
   appTitle = getAppTitle();
+
+  // Track the first NavigationEnd so we don't steal focus / re-set the title on initial load
+  private firstNavigation = true;
+  private lastNavigationPath = '';
 
   // Track if current route is a dashboard page (home or /dashboard/:id)
   isDashboardRoute = signal(false);
@@ -169,12 +178,55 @@ export class AppComponent {
     // Check initial route
     this.checkIfDashboardRoute(this.router.url);
 
-    // Listen for navigation events to update dashboard route status
+    // Listen for navigation events to update dashboard route status,
+    // set the per-route page title, and move focus to the main content region.
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.checkIfDashboardRoute(event.urlAfterRedirects);
+
+      // Static routes carry a `titleKey` in their route data. Dynamic pages
+      // (list/detail/create/edit) set their own title once entity metadata resolves.
+      // Runs on the initial navigation too, so direct loads get a page title (WCAG 2.4.2).
+      const titleKey = this.getDeepestRouteData()['titleKey'] as string | undefined;
+      if (titleKey) {
+        this.titleService.setTitle(`${this.translation.get(titleKey)} - ${this.appTitle}`);
+      }
+
+      // Skip focus management on the initial navigation: stealing focus on
+      // first paint would be disorienting.
+      if (this.firstNavigation) {
+        this.firstNavigation = false;
+        this.lastNavigationPath = event.urlAfterRedirects.split('?')[0];
+        return;
+      }
+
+      // Only move focus when the route PATH changes. Same-page query-param
+      // navigations (sorting, pagination, filters on list pages) must not
+      // steal focus from the control the user just activated.
+      const currentPath = event.urlAfterRedirects.split('?')[0];
+      if (currentPath === this.lastNavigationPath) {
+        return;
+      }
+      this.lastNavigationPath = currentPath;
+
+      // Move focus to the main landmark so screen-reader/keyboard users land on the
+      // freshly rendered content instead of silently swapped page content.
+      const main = this.elementRef.nativeElement.querySelector('#main-content') as HTMLElement | null;
+      main?.focus();
     });
+  }
+
+  /**
+   * Walk the activated route snapshot tree to the deepest child and return its
+   * merged route `data`. Used to read the static `titleKey` for the current page.
+   */
+  private getDeepestRouteData(): Record<string, unknown> {
+    let route: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
+    while (route.firstChild) {
+      route = route.firstChild;
+    }
+    return route.data;
   }
 
   /**
@@ -187,10 +239,15 @@ export class AppComponent {
   }
 
   /**
-   * Close profile dropdown when clicking outside of it
+   * Close profile dropdown when clicking outside of it.
+   *
+   * The document listener is attached ONLY while the dropdown is open: a
+   * permanent document-level click handler makes VoiceOver announce
+   * "clickable" on every element of every page (WebKit surfaces the ancestor
+   * listener as a press hint on all content). Wired via (toggle) on the
+   * <details> element in the template.
    */
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
+  private readonly onDocumentClick = (event: MouseEvent): void => {
     const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
     if (profileDropdown) {
       const clickedInside = profileDropdown.contains(event.target as Node);
@@ -198,103 +255,23 @@ export class AppComponent {
         profileDropdown.open = false;
       }
     }
+  };
+
+  public onProfileDropdownToggle(): void {
+    const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
+    if (profileDropdown?.open) {
+      document.addEventListener('click', this.onDocumentClick);
+    } else {
+      document.removeEventListener('click', this.onDocumentClick);
+    }
   }
 
-  public navigateToHome() {
-    this.router.navigate(['/']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToProfile() {
-    this.router.navigate(['profile']);
-    // Close the profile dropdown
+  /**
+   * Close the profile dropdown (used when a menu item navigates via routerLink).
+   */
+  public closeProfileDropdown() {
     const profileDropdown = this.elementRef.nativeElement.querySelector('#profile-dropdown');
     if (profileDropdown) profileDropdown.open = false;
-  }
-
-  public navigate(key: string) {
-    this.router.navigate(['view', key]);
-    this.drawerOpen = false;
-  }
-
-  public navigateToPermissions() {
-    this.router.navigate(['permissions']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToEntityManagement() {
-    this.router.navigate(['entity-management']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToPropertyManagement() {
-    this.router.navigate(['property-management']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToSchemaEditor() {
-    this.router.navigate(['schema-editor']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToNotificationTemplates() {
-    this.router.navigate(['notifications', 'templates']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToPaymentsAdmin() {
-    this.router.navigate(['admin', 'payments']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToRecurringSchedules() {
-    this.router.navigate(['admin', 'recurring-schedules']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToUserManagement() {
-    this.router.navigate(['admin', 'users']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToStaticAssets() {
-    this.router.navigate(['admin', 'static-assets']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToFilesAdmin() {
-    this.router.navigate(['admin', 'files']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToGalleryAdmin() {
-    this.router.navigate(['admin', 'galleries']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToStatusAdmin() {
-    this.router.navigate(['admin', 'statuses']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToCategoryAdmin() {
-    this.router.navigate(['admin', 'categories']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToTranslationAdmin() {
-    this.router.navigate(['admin', 'translations']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToSystemFunctions() {
-    this.router.navigate(['system', 'functions']);
-    this.drawerOpen = false;
-  }
-
-  public navigateToSystemPolicies() {
-    this.router.navigate(['system', 'policies']);
-    this.drawerOpen = false;
   }
 
   /**

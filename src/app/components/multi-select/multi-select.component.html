@@ -1,10 +1,10 @@
 <div class="multi-select">
   <!-- Label -->
-  <label class="label">
+  <div class="label">
     <span class="font-semibold">
       {{ label() }}@if (required()) {<span class="text-error">*</span>}
     </span>
-  </label>
+  </div>
 
   <!-- Search box (conditionally shown) -->
   @if (showSearch()) {
@@ -12,7 +12,8 @@
       <input
         type="search"
         class="input input-sm input-bordered w-full"
-        placeholder="Search..."
+        [placeholder]="'a11y.search' | translate"
+        [attr.aria-label]="'a11y.search' | translate"
         [value]="searchTerm()"
         (input)="updateSearchTerm($any($event.target).value)" />
     </div>

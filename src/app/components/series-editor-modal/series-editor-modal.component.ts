@@ -33,6 +33,7 @@ import { SeriesGroup, Series, SchemaEntityProperty, EntityPropertyType } from '.
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { SchemaService } from '../../services/schema.service';
 import { RecurringService } from '../../services/recurring.service';
 import { forkJoin, of } from 'rxjs';
@@ -69,19 +70,20 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg">
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg" [label]="'a11y.edit_recurring_series' | translate">
       <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-        <span class="material-symbols-outlined">edit</span>
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
         Edit Recurring Series
       </h3>
 
       @if (loading()) {
         <div class="flex items-center justify-center py-12">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
         </div>
       } @else if (error()) {
         <div class="alert alert-error mb-4">
@@ -91,6 +93,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
         <!-- Tabs -->
         <div class="tabs tabs-box mb-4">
           <button
+            type="button"
             class="tab"
             [class.tab-active]="activeTab() === 'info'"
             (click)="activeTab.set('info')"
@@ -98,6 +101,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             Series Info
           </button>
           <button
+            type="button"
             class="tab"
             [class.tab-active]="activeTab() === 'template'"
             (click)="activeTab.set('template')"
@@ -105,6 +109,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             {{ group?.entity_table || 'Entity' }} Fields
           </button>
           <button
+            type="button"
             class="tab"
             [class.tab-active]="activeTab() === 'schedule'"
             (click)="activeTab.set('schedule')"
@@ -118,11 +123,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
           @if (activeTab() === 'info') {
             <div class="space-y-4">
               <div class="form-control">
-                <label class="label">
+                <label class="label" [for]="uid + '-series-name'">
                   <span class="label-text font-medium">Series Name</span>
                 </label>
                 <input
                   type="text"
+                  [id]="uid + '-series-name'"
                   class="input input-bordered w-full"
                   formControlName="display_name"
                   placeholder="e.g., Weekly Yoga Class"
@@ -130,11 +136,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <label class="label" [for]="uid + '-description'">
                   <span class="label-text">Description (optional)</span>
                 </label>
                 <textarea
                   class="textarea textarea-bordered w-full"
+                  [id]="uid + '-description'"
                   rows="3"
                   formControlName="description"
                   placeholder="Brief description of this recurring schedule"
@@ -142,7 +149,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <label class="label" [for]="uid + '-color'">
                   <span class="label-text">Color</span>
                 </label>
                 <div class="flex items-center gap-3">
@@ -150,9 +157,11 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
                     type="color"
                     class="w-12 h-10 cursor-pointer rounded border border-base-300"
                     formControlName="color"
+                    [attr.aria-label]="'a11y.color_swatch' | translate"
                   />
                   <input
                     type="text"
+                    [id]="uid + '-color'"
                     class="input input-bordered flex-1"
                     formControlName="color"
                     placeholder="#3B82F6"
@@ -167,7 +176,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
             <div class="space-y-4">
               @if (templateProperties().length === 0) {
                 <div class="alert">
-                  <span class="material-symbols-outlined">info</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">info</span>
                   <span>No editable template fields found.</span>
                 </div>
               } @else {
@@ -200,7 +209,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 
               @if (series?.expanded_until) {
                 <div class="alert alert-info">
-                  <span class="material-symbols-outlined">info</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">info</span>
                   <span>Series expanded until {{ formatDateTime(series!.expanded_until!) }}</span>
                 </div>
               }
@@ -210,16 +219,17 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="onCancel()" [disabled]="saving()">
+        <button type="button" class="btn btn-ghost" (click)="onCancel()" [disabled]="saving()">
           Cancel
         </button>
         <button
+          type="button"
           class="btn btn-primary"
           (click)="onSave()"
           [disabled]="saving() || loading() || !form.valid || !scheduleValue().isValid"
         >
           @if (saving()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           Save Changes
         </button>
@@ -228,6 +238,10 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   `
 })
 export class SeriesEditorModalComponent implements OnChanges {
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `series-editor-modal-${SeriesEditorModalComponent.nextInstanceId++}`;
+
   private fb = inject(FormBuilder);
   private schemaService = inject(SchemaService);
   private recurringService = inject(RecurringService);

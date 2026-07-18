@@ -35,6 +35,7 @@ import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 /**
  * Import workflow steps:
@@ -85,6 +86,7 @@ export class ImportModalComponent implements OnDestroy {
   private importExportService = inject(ImportExportService);
   private schemaService = inject(SchemaService);
   private dataService = inject(DataService);
+  private translation = inject(TranslationService);
 
   @Input() entity?: SchemaEntityTable;
   @Input() entityKey?: string;
@@ -105,6 +107,18 @@ export class ImportModalComponent implements OnDestroy {
   public validRowCount = signal<number>(0);
   public importedCount = signal<number>(0);
   public partialSuccessCount = signal<number>(0);
+
+  // Screen-reader announcement for step transitions (aria-live region).
+  // Returns '' on the initial 'choose' step (the modal's own name is announced on open).
+  public stepAnnouncement = computed(() => {
+    switch (this.currentStep()) {
+      case 'validating': return this.translation.get('import_modal.step_validating');
+      case 'results': return this.translation.get('import_modal.step_results');
+      case 'importing': return this.translation.get('import_modal.step_importing');
+      case 'success': return this.translation.get('import_modal.step_complete');
+      default: return '';
+    }
+  });
 
   // Computed properties
   public hasErrors = computed(() => {

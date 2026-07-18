@@ -7,13 +7,13 @@
 
   @if (loading()) {
     <div class="flex justify-center py-8">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
   @if (!loading() && notFound()) {
     <div class="not-prose text-center py-12">
-      <span class="material-symbols-outlined text-4xl opacity-40">person_off</span>
+      <span class="material-symbols-outlined text-4xl opacity-40" aria-hidden="true">person_off</span>
       <p class="mt-2 opacity-60">{{ 'profile.user_not_found' | translate }}</p>
     </div>
   }
@@ -63,7 +63,7 @@
                   @if (user.phone) {
                     <a class="font-medium link link-primary" [href]="'tel:' + user.phone">{{ getFormattedPhone(user.phone) }}</a>
                   } @else {
-                    <div class="font-medium">—</div>
+                    <div class="font-medium">-</div>
                   }
                 </div>
               </div>
@@ -77,8 +77,8 @@
               }
 
               @if (canEditCoreInfo()) {
-                <button class="btn btn-sm btn-outline mt-4 w-fit" (click)="startEditCoreInfo()">
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                <button type="button" class="btn btn-sm btn-outline mt-4 w-fit" (click)="startEditCoreInfo()">
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                   {{ 'action.edit' | translate }}
                 </button>
               }
@@ -88,29 +88,31 @@
             <form (ngSubmit)="saveCoreInfo()" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></label>
-                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" required />
+                  <label class="label" for="profile-first-name"><span class="label-text">{{ 'profile.first_name' | translate }} *</span></label>
+                  <input type="text" id="profile-first-name" class="input input-bordered w-full" [(ngModel)]="editFirstName" name="firstName" autocomplete="given-name" required />
                 </div>
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></label>
-                  <input type="text" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" required />
+                  <label class="label" for="profile-last-name"><span class="label-text">{{ 'profile.last_name' | translate }} *</span></label>
+                  <input type="text" id="profile-last-name" class="input input-bordered w-full" [(ngModel)]="editLastName" name="lastName" autocomplete="family-name" required />
                 </div>
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></label>
+                  <div class="label"><span class="label-text">{{ 'profile.email' | translate }}</span></div>
                   <div class="input input-bordered w-full flex items-center bg-base-200 cursor-not-allowed opacity-70">
                     {{ userRecord()?.email || '—' }}
                   </div>
                   <span class="text-xs opacity-60 mt-1">{{ 'profile.email_readonly' | translate }}</span>
                 </div>
                 <div class="form-control w-full">
-                  <label class="label"><span class="label-text">{{ 'profile.phone' | translate }}</span></label>
+                  <label class="label" for="profile-phone"><span class="label-text">{{ 'profile.phone' | translate }}</span></label>
                   <input type="tel"
+                    id="profile-phone"
                     class="input input-bordered w-full"
                     [value]="getFormattedPhone(editPhone)"
                     (input)="onPhoneInput($event)"
                     placeholder="(555) 123-4567"
                     maxlength="14"
-                    name="phone" />
+                    name="phone"
+                    autocomplete="tel" />
                   @if (isPhoneInvalid()) {
                     <span class="text-error text-xs mt-1">{{ 'profile.phone_invalid' | translate }}</span>
                   }
@@ -127,12 +129,12 @@
                         <input
                           type="radio"
                           name="profile-locale-edit"
-                          class="radio hidden"
+                          class="radio sr-only peer"
                           [checked]="editLocale === loc.code"
                           (change)="editLocale = loc.code"
                         />
                         <span
-                          class="badge badge-lg cursor-pointer transition-colors"
+                          class="badge badge-lg cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"
                           [class.badge-primary]="editLocale === loc.code"
                           [class.badge-outline]="editLocale !== loc.code"
                         >
@@ -147,7 +149,7 @@
               <div class="flex gap-2 mt-4">
                 <button type="submit" class="btn btn-primary btn-sm" [disabled]="saving() || isPhoneInvalid()">
                   @if (saving()) {
-                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                   }
                   {{ 'action.save' | translate }}
                 </button>
@@ -258,15 +260,15 @@
                     }
                   </div>
                   @if (isOwnProfile() || auth.hasPermission(ext.table_name, 'update')) {
-                    <button class="btn btn-sm btn-outline mt-4" (click)="navigateToEditExtension(ext.table_name, record['id'])">
-                      <span class="material-symbols-outlined text-sm">edit</span>
+                    <button type="button" class="btn btn-sm btn-outline mt-4" (click)="navigateToEditExtension(ext.table_name, record['id'])">
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                       {{ 'action.edit' | translate }}
                     </button>
                   }
                 }
               } @else {
                 <div class="flex justify-center py-4">
-                  <span class="loading loading-spinner loading-sm"></span>
+                  <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                 </div>
               }
             } @else {
@@ -275,8 +277,8 @@
                 <p class="text-sm opacity-70 mb-3">{{ ext.description }}</p>
               }
               @if (isOwnProfile() || auth.hasPermission(ext.table_name, 'create')) {
-                <button class="btn btn-primary btn-sm" (click)="navigateToCreateExtension(ext.table_name, ext.user_fk_column)">
-                  <span class="material-symbols-outlined text-sm">add</span>
+                <button type="button" class="btn btn-primary btn-sm" (click)="navigateToCreateExtension(ext.table_name, ext.user_fk_column)">
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
                   {{ 'action.add' | translate }}
                 </button>
               }

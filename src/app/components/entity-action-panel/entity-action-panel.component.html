@@ -11,7 +11,7 @@
 <!-- Action Error Alert (for non-modal actions) -->
 @if (actionError() && !showActionModal()) {
   <div class="alert alert-error mb-4">
-    <span class="material-symbols-outlined">error</span>
+    <span class="material-symbols-outlined" aria-hidden="true">error</span>
     <span>{{ actionError() }}</span>
   </div>
 }
@@ -21,14 +21,15 @@
   [isOpen]="showActionModal()"
   (closed)="closeActionModal()"
   [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
-  [closeOnBackdrop]="!actionLoading()">
+  [closeOnBackdrop]="!actionLoading()"
+  [label]="currentAction()?.display_name">
   @if (currentAction(); as action) {
     <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
 
     <!-- Error Alert -->
     @if (actionError()) {
       <div class="alert alert-error mb-4">
-        <span class="material-symbols-outlined">error</span>
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
         <span>{{ actionError() }}</span>
       </div>
     }
@@ -36,7 +37,7 @@
     <!-- Success Alert -->
     @if (actionSuccess()) {
       <div class="alert alert-success mb-4">
-        <span class="material-symbols-outlined">check_circle</span>
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
         <span>{{ actionSuccess() }}</span>
       </div>
     } @else {
@@ -47,10 +48,10 @@
         <div [formGroup]="form" class="space-y-4 mb-6">
           @for (param of action.parameters; track param.param_name) {
             <fieldset>
-              <label class="label font-semibold">
+              <div class="label font-semibold">
                 {{ param.display_name }}
                 @if (param.required) { <span class="text-error">*</span> }
-              </label>
+              </div>
 
               @switch (param.param_type) {
                 @case ('text') {
@@ -181,7 +182,7 @@
 
                   @if (actionFileUploading()) {
                     <div class="flex items-center gap-2 text-sm mt-1">
-                      <span class="loading loading-spinner loading-sm"></span>
+                      <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                       <span>{{ 'file.uploading' | translate }}</span>
                     </div>
                   }
@@ -226,18 +227,18 @@
 
       <!-- Actions -->
       <div class="cos-modal-action">
-        <button
+        <button type="button"
           class="btn"
           (click)="closeActionModal()"
           [disabled]="actionLoading()">
           {{ 'action.cancel' | translate }}
         </button>
-        <button
+        <button type="button"
           [class]="'btn btn-' + action.button_style"
           (click)="confirmEntityAction()"
           [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">
           @if (actionLoading()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           {{ 'action.confirm' | translate }}
         </button>
@@ -250,7 +251,7 @@
 @if (actionOverlayLoading()) {
   <div class="fixed inset-0 bg-base-100/50 flex items-center justify-center z-50">
     <div class="flex flex-col items-center gap-2">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
       <span class="text-sm opacity-70">{{ 'detail.processing' | translate }}</span>
     </div>
   </div>

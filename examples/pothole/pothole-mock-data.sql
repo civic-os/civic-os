@@ -4,7 +4,7 @@
 -- =====================================================
 
 -- Insert mock data for civic_os_users
-INSERT INTO "public"."civic_os_users" ("id", "display_name") VALUES
+INSERT INTO "metadata"."civic_os_users" ("id", "display_name") VALUES
   ('ff1f8c76-0c89-4722-bb3c-7a2f56cdcac1', 'Bryan P.'),
   ('296ee3d9-b70c-472a-b17a-9072734d51f0', 'Robin W.'),
   ('9d2f7bc6-fc3e-462a-829e-ceb3c9e65213', 'Doreen S.'),
@@ -22,26 +22,26 @@ INSERT INTO "public"."civic_os_users" ("id", "display_name") VALUES
   ('97c821f6-4f41-4129-b915-ae213a0eed5a', 'Freda I.');
 
 -- Insert mock data for civic_os_users_private
-INSERT INTO "public"."civic_os_users_private" ("id", "display_name", "email", "phone") VALUES
-  ('ff1f8c76-0c89-4722-bb3c-7a2f56cdcac1', 'Bryan Pacocha', 'bryan.pacocha@hotmail.com', '769-170-4990'),
-  ('296ee3d9-b70c-472a-b17a-9072734d51f0', 'Robin Wolf', 'robin_wolf16@gmail.com', '750-693-6106'),
-  ('9d2f7bc6-fc3e-462a-829e-ceb3c9e65213', 'Doreen Schmitt', 'doreen_schmitt52@hotmail.com', '032-109-6604'),
-  ('93c78a1b-3002-4dca-bb40-807b1c4abefb', 'Simon Davis', 'simon_davis@yahoo.com', '730-185-3746'),
-  ('37686a6a-a799-40f0-8332-33b852b9673a', 'Byron McDermott', 'byron_mcdermott38@yahoo.com', '881-454-2675'),
-  ('d5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'Randolph Monahan', 'randolph.monahan@gmail.com', '778-350-8784'),
-  ('d5dbfa03-5d4f-4835-8b85-e6d549070eec', 'Melissa Bosco', 'melissa_bosco12@gmail.com', '829-527-2061'),
-  ('932aff65-aaa3-4f25-89cb-558966efd8be', 'Noel Predovic', 'noel_predovic84@yahoo.com', '900-764-2550'),
-  ('558bab27-d9dd-46f3-a155-31f0f2a47d27', 'Ruben Littel I', 'ruben.i@gmail.com', '882-994-8642'),
-  ('afe55b7a-231b-4c92-a887-c9fb8406dae4', 'Mrs. Kari Johnson-Haley', 'mrs._johnson-haley19@yahoo.com', '826-103-7456'),
-  ('d8426af0-280d-409f-a5e5-462f3b26d897', 'Ivan Hyatt-West', 'ivan_hyatt-west66@gmail.com', '818-521-6835'),
-  ('2d64ebbc-08e5-4993-b9e1-b870a8c75393', 'Ms. Shelley Greenfelder', 'ms._greenfelder35@hotmail.com', '611-345-4568'),
-  ('c63e0f9d-bc41-4017-9dec-84d76a24b6b8', 'Pete Brown', 'pete_brown@yahoo.com', '119-602-8468'),
-  ('d359cd0b-7e9c-4b3e-9362-a4a9f9135820', 'Dr. Orlando Hilpert', 'dr.hilpert97@hotmail.com', '480-082-8846'),
-  ('97c821f6-4f41-4129-b915-ae213a0eed5a', 'Freda Schowalter I', 'freda_i@gmail.com', '787-661-0683');
+INSERT INTO "metadata"."civic_os_users_private" ("id", "display_name", "email", "phone") VALUES
+  ('ff1f8c76-0c89-4722-bb3c-7a2f56cdcac1', 'Bryan Pacocha', 'bryan.pacocha@hotmail.com', '7691704990'),
+  ('296ee3d9-b70c-472a-b17a-9072734d51f0', 'Robin Wolf', 'robin_wolf16@gmail.com', '7506936106'),
+  ('9d2f7bc6-fc3e-462a-829e-ceb3c9e65213', 'Doreen Schmitt', 'doreen_schmitt52@hotmail.com', '0321096604'),
+  ('93c78a1b-3002-4dca-bb40-807b1c4abefb', 'Simon Davis', 'simon_davis@yahoo.com', '7301853746'),
+  ('37686a6a-a799-40f0-8332-33b852b9673a', 'Byron McDermott', 'byron_mcdermott38@yahoo.com', '8814542675'),
+  ('d5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'Randolph Monahan', 'randolph.monahan@gmail.com', '7783508784'),
+  ('d5dbfa03-5d4f-4835-8b85-e6d549070eec', 'Melissa Bosco', 'melissa_bosco12@gmail.com', '8295272061'),
+  ('932aff65-aaa3-4f25-89cb-558966efd8be', 'Noel Predovic', 'noel_predovic84@yahoo.com', '9007642550'),
+  ('558bab27-d9dd-46f3-a155-31f0f2a47d27', 'Ruben Littel I', 'ruben.i@gmail.com', '8829948642'),
+  ('afe55b7a-231b-4c92-a887-c9fb8406dae4', 'Mrs. Kari Johnson-Haley', 'mrs._johnson-haley19@yahoo.com', '8261037456'),
+  ('d8426af0-280d-409f-a5e5-462f3b26d897', 'Ivan Hyatt-West', 'ivan_hyatt-west66@gmail.com', '8185216835'),
+  ('2d64ebbc-08e5-4993-b9e1-b870a8c75393', 'Ms. Shelley Greenfelder', 'ms._greenfelder35@hotmail.com', '6113454568'),
+  ('c63e0f9d-bc41-4017-9dec-84d76a24b6b8', 'Pete Brown', 'pete_brown@yahoo.com', '1196028468'),
+  ('d359cd0b-7e9c-4b3e-9362-a4a9f9135820', 'Dr. Orlando Hilpert', 'dr.hilpert97@hotmail.com', '4800828846'),
+  ('97c821f6-4f41-4129-b915-ae213a0eed5a', 'Freda Schowalter I', 'freda_i@gmail.com', '7876610683');
 
 -- Insert mock data for WorkPackage
 INSERT INTO "public"."WorkPackage" ("display_name", "quote_due_date", "status", "cost") VALUES
-  ('Q4 2025 road repairs - West Katelyn', '2025-09-20T00:28:24.710Z', '5', '21884.75'),
+  ('Q4 2025 road repairs - West Katelyn', '2025-09-20T00:28:24.710Z', '13', '21884.75'),
   ('Q1 2024 road repairs - East Houstonburgh', '2025-09-30T11:03:20.007Z', NULL, '56722.79');
 
 -- Insert mock data for Bid
@@ -59,31 +59,31 @@ INSERT INTO "public"."Bid" ("display_name", "company_email", "owner", "work_star
 
 -- Insert mock data for Issue
 INSERT INTO "public"."Issue" ("description", "contact_email", "display_name", "contact_phone", "severity_level", "status", "created_user", "location") VALUES
-  ('Victoria aetas terreo ultio acervus. Autus reiciendis unde demo. Atqui sum spectaculum colo provident candidus ceno tego.', 'Bernadine_Batz93@gmail.com', 'Large road damage on Ledner Cliffs', '1974046847', 2, '7', 'd5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'SRID=4326;POINT(-83.705566 43.051872)'),
-  ('Asporto vito perspiciatis candidus textor dolorum. Vulgivagus delego architecto vestigium suffoco soleo harum eos. Tondeo spero asper.', NULL, 'Large pavement damage on Hillside Close', '2700601686', 2, '5', 'd5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'SRID=4326;POINT(-83.659987 43.002968)'),
+  ('Victoria aetas terreo ultio acervus. Autus reiciendis unde demo. Atqui sum spectaculum colo provident candidus ceno tego.', 'Bernadine_Batz93@gmail.com', 'Large road damage on Ledner Cliffs', '1974046847', 2, '11', 'd5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'SRID=4326;POINT(-83.705566 43.051872)'),
+  ('Asporto vito perspiciatis candidus textor dolorum. Vulgivagus delego architecto vestigium suffoco soleo harum eos. Tondeo spero asper.', NULL, 'Large pavement damage on Hillside Close', '2700601686', 2, '9', 'd5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'SRID=4326;POINT(-83.659987 43.002968)'),
   ('Cupiditas ustulo universe est ventosus recusandae deprimo est spectaculum uberrime. Cattus quisquam totam molestias amplexus in texo. Deficio ubi appositus arma thorax.', 'Maryam_Spencer19@hotmail.com', 'Severe pothole on Commerce Street', '8261426300', NULL, '8', 'd5dbfa03-5d4f-4835-8b85-e6d549070eec', 'SRID=4326;POINT(-83.683836 43.013136)'),
   ('Careo caelum torqueo summa. Summopere denique vereor delinquo candidus decerno. Capillus virtus quidem comburo.', NULL, 'Medium pothole on W 7th Street', '1274261073', NULL, '4', 'c63e0f9d-bc41-4017-9dec-84d76a24b6b8', 'SRID=4326;POINT(-83.755015 43.038804)'),
-  ('Beneficium harum quaerat. Sublime dignissimos ademptio bos sufficio defessus caries ipsa aliquid demitto. Candidus cur testimonium universe caritas conqueror rerum argentum sollicito.', 'Kameron64@yahoo.com', 'Small pavement damage on Wehner Lane', NULL, 3, '2', '2d64ebbc-08e5-4993-b9e1-b870a8c75393', 'SRID=4326;POINT(-83.72552 43.068176)'),
-  (NULL, 'Kacey0@yahoo.com', 'Medium broken asphalt on E 11th Street', '8813086768', 1, '6', '97c821f6-4f41-4129-b915-ae213a0eed5a', 'SRID=4326;POINT(-83.707445 42.99517)'),
+  ('Beneficium harum quaerat. Sublime dignissimos ademptio bos sufficio defessus caries ipsa aliquid demitto. Candidus cur testimonium universe caritas conqueror rerum argentum sollicito.', 'Kameron64@yahoo.com', 'Small pavement damage on Wehner Lane', NULL, 3, '6', '2d64ebbc-08e5-4993-b9e1-b870a8c75393', 'SRID=4326;POINT(-83.72552 43.068176)'),
+  (NULL, 'Kacey0@yahoo.com', 'Medium broken asphalt on E 11th Street', '8813086768', 1, '10', '97c821f6-4f41-4129-b915-ae213a0eed5a', 'SRID=4326;POINT(-83.707445 42.99517)'),
   ('Congregatio cohaero crustulum somniculosus triumphus balbus terreo. Usus cruentus adeo crux tempus color spero alii attollo. Debilito demum tergo ad.', 'Armando_Streich31@gmail.com', 'Large road damage on The Grove', '3513228090', NULL, '8', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.690391 43.062899)'),
-  ('Spes tabgo video quibusdam minima coniuratio stultus apto concido dolores. Sumo curatio quibusdam curiositas vel conforto deorsum taedium sint. Et accedo surgo.', NULL, 'Small pothole on Kobe Glen', '2198785056', 5, '4', 'c63e0f9d-bc41-4017-9dec-84d76a24b6b8', 'SRID=4326;POINT(-83.669051 43.052695)'),
-  ('Libero vulticulus neque clarus. Tum vesper abduco cogito ipsum abeo crapula bos centum taceo. Rerum consequuntur acer carbo vesco supplanto placeat.', 'Davon_Ullrich26@gmail.com', 'Large crack on W Washington Avenue', '2242287249', 4, '3', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.685067 42.997373)'),
-  ('Anser desino tempus spero ullam amoveo atrox templum ultio cometes. Nihil peior amo capio. Corporis tergum vae aliquid necessitatibus usque alienus.', NULL, 'Large broken asphalt on West Road', '4403917382', 4, '6', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.712973 42.985699)'),
-  ('Spiculum solvo volup. Socius accommodo coerceo et nemo defleo. Copiose antepono attollo defluo nemo.', NULL, 'Small pothole on Treutel Green', '1442176787', 1, '1', '93c78a1b-3002-4dca-bb40-807b1c4abefb', 'SRID=4326;POINT(-83.714291 42.983088)'),
-  (NULL, 'Alexanne.Ullrich34@yahoo.com', 'Medium crack on 15th Street', '5826108898', 5, '6', '37686a6a-a799-40f0-8332-33b852b9673a', 'SRID=4326;POINT(-83.735017 43.048686)'),
+  ('Spes tabgo video quibusdam minima coniuratio stultus apto concido dolores. Sumo curatio quibusdam curiositas vel conforto deorsum taedium sint. Et accedo surgo.', NULL, 'Small pothole on Kobe Glen', '2198785056', 5, '8', 'c63e0f9d-bc41-4017-9dec-84d76a24b6b8', 'SRID=4326;POINT(-83.669051 43.052695)'),
+  ('Libero vulticulus neque clarus. Tum vesper abduco cogito ipsum abeo crapula bos centum taceo. Rerum consequuntur acer carbo vesco supplanto placeat.', 'Davon_Ullrich26@gmail.com', 'Large crack on W Washington Avenue', '2242287249', 4, '7', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.685067 42.997373)'),
+  ('Anser desino tempus spero ullam amoveo atrox templum ultio cometes. Nihil peior amo capio. Corporis tergum vae aliquid necessitatibus usque alienus.', NULL, 'Large broken asphalt on West Road', '4403917382', 4, '10', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.712973 42.985699)'),
+  ('Spiculum solvo volup. Socius accommodo coerceo et nemo defleo. Copiose antepono attollo defluo nemo.', NULL, 'Small pothole on Treutel Green', '1442176787', 1, '5', '93c78a1b-3002-4dca-bb40-807b1c4abefb', 'SRID=4326;POINT(-83.714291 42.983088)'),
+  (NULL, 'Alexanne.Ullrich34@yahoo.com', 'Medium crack on 15th Street', '5826108898', 5, '10', '37686a6a-a799-40f0-8332-33b852b9673a', 'SRID=4326;POINT(-83.735017 43.048686)'),
   (NULL, NULL, 'Medium pothole on Park View', NULL, NULL, '5', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.756563 43.002024)'),
   ('Terminatio clibanus brevis abduco creber appello tyrannus. Tempora votum demens provident synagoga tametsi. Utique perferendis expedita deripio animi calco.', 'Hortense_Roberts@hotmail.com', 'Severe pavement damage on Mill Lane', NULL, NULL, '5', '296ee3d9-b70c-472a-b17a-9072734d51f0', 'SRID=4326;POINT(-83.663597 42.985944)'),
-  ('Coaegresco tergiversatio tener. Unde adhaero temptatio virgo. Constans ceno fugiat tendo carbo sint alienus.', NULL, 'Large road damage on Howe Crossroad', '4810664122', 1, '5', '296ee3d9-b70c-472a-b17a-9072734d51f0', 'SRID=4326;POINT(-83.694145 42.984698)'),
-  ('Amitto vitae tamen aspernatur usque. Distinctio spiculum audentia caute assentator alienus thymbra calcar. Vilitas damno voluptate.', 'Lois_Quitzon72@yahoo.com', 'Medium broken asphalt on Broad Lane', '0619217168', 4, '2', 'afe55b7a-231b-4c92-a887-c9fb8406dae4', 'SRID=4326;POINT(-83.668115 42.998387)'),
-  ('Dedecor auxilium utilis. Commodo quia deputo cedo spargo. Aiunt unde quibusdam theca turba baiulus solium.', NULL, 'Medium road damage on Wintheiser Hill', '6882110861', 2, '3', '37686a6a-a799-40f0-8332-33b852b9673a', 'SRID=4326;POINT(-83.748037 43.095222)'),
+  ('Coaegresco tergiversatio tener. Unde adhaero temptatio virgo. Constans ceno fugiat tendo carbo sint alienus.', NULL, 'Large road damage on Howe Crossroad', '4810664122', 1, '9', '296ee3d9-b70c-472a-b17a-9072734d51f0', 'SRID=4326;POINT(-83.694145 42.984698)'),
+  ('Amitto vitae tamen aspernatur usque. Distinctio spiculum audentia caute assentator alienus thymbra calcar. Vilitas damno voluptate.', 'Lois_Quitzon72@yahoo.com', 'Medium broken asphalt on Broad Lane', '0619217168', 4, '6', 'afe55b7a-231b-4c92-a887-c9fb8406dae4', 'SRID=4326;POINT(-83.668115 42.998387)'),
+  ('Dedecor auxilium utilis. Commodo quia deputo cedo spargo. Aiunt unde quibusdam theca turba baiulus solium.', NULL, 'Medium road damage on Wintheiser Hill', '6882110861', 2, '7', '37686a6a-a799-40f0-8332-33b852b9673a', 'SRID=4326;POINT(-83.748037 43.095222)'),
   ('Adsum arto combibo caterva aspernatur delego victoria circumvenio urbanus quod. Subvenio aiunt creptio ascit. Causa tardus asper denuo taceo auditor pecus.', NULL, 'Large road damage on Bradtke Glens', '0422480748', NULL, '2', '296ee3d9-b70c-472a-b17a-9072734d51f0', 'SRID=4326;POINT(-83.714959 42.986528)'),
-  (NULL, 'Abigail_Cole80@yahoo.com', 'Large broken asphalt on The Poplars', '3056925414', 3, '3', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.746059 43.070072)'),
+  (NULL, 'Abigail_Cole80@yahoo.com', 'Large broken asphalt on The Poplars', '3056925414', 3, '7', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.746059 43.070072)'),
   ('Similique in subnecto creator sui certe bellum excepturi. Cervus tutamen spargo ullam subito corona depono. Recusandae theologus culpo abscido balbus adeo hic volva adsuesco somniculosus.', NULL, 'Severe crack on Clare Glen', '6303702104', NULL, '3', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.747227 43.002812)'),
   ('Aveho tero adeptio adduco cibo sol aqua creptio bardus aeneus. Cibus cerno est combibo. Vulnus timidus cunae stella tabgo viduo comburo aufero ambulo.', NULL, 'Small crack on Smitham Shoals', '6566416564', NULL, '6', '2d64ebbc-08e5-4993-b9e1-b870a8c75393', 'SRID=4326;POINT(-83.686899 43.084179)'),
-  ('Valde tametsi timidus cuppedia catena ea alo comparo occaecati. Bellum cognatus benevolentia terreo. Vetus cogito articulus aperio aegre deleo sono adopto ait sustineo.', 'Rolando.Haag65@hotmail.com', 'Small pothole on College Street', NULL, 1, '8', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.657521 43.064431)'),
+  ('Valde tametsi timidus cuppedia catena ea alo comparo occaecati. Bellum cognatus benevolentia terreo. Vetus cogito articulus aperio aegre deleo sono adopto ait sustineo.', 'Rolando.Haag65@hotmail.com', 'Small pothole on College Street', NULL, 1, '12', '558bab27-d9dd-46f3-a155-31f0f2a47d27', 'SRID=4326;POINT(-83.657521 43.064431)'),
   (NULL, 'Manuela19@yahoo.com', 'Small pothole on S Washington Street', '3665419544', NULL, '3', '97c821f6-4f41-4129-b915-ae213a0eed5a', 'SRID=4326;POINT(-83.749211 43.050961)'),
   ('Ducimus virtus tepidus attollo. Bellum comburo odit canis. Vetus vestrum attero turba.', 'Maxine_Willms@gmail.com', 'Severe pavement damage on Eliza Shores', '6835906847', NULL, '8', 'afe55b7a-231b-4c92-a887-c9fb8406dae4', 'SRID=4326;POINT(-83.746862 43.023726)'),
-  (NULL, 'Mayra.Rath27@hotmail.com', 'Small crack on Johns Island', '8385294286', 4, '4', 'd5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'SRID=4326;POINT(-83.7126 43.077128)');
+  (NULL, 'Mayra.Rath27@hotmail.com', 'Small crack on Johns Island', '8385294286', 4, '8', 'd5cf1beb-779b-4e41-87d7-9c6c41377c9e', 'SRID=4326;POINT(-83.7126 43.077128)');
 
 -- Insert mock data for WorkDetail
 INSERT INTO "public"."WorkDetail" ("display_name", "issue", "added_by") VALUES
@@ -137,6 +137,17 @@ INSERT INTO "public"."WorkDetail" ("display_name", "issue", "added_by") VALUES
   ('Measured surface condition and preparation needs', 18, 'ff1f8c76-0c89-4722-bb3c-7a2f56cdcac1'),
   ('Inspected surface condition and preparation needs', 15, 'd5dbfa03-5d4f-4835-8b85-e6d549070eec'),
   ('Reviewed surface condition and preparation needs', 25, 'd5dbfa03-5d4f-4835-8b85-e6d549070eec');
+
+-- Insert mock data for Tag (referenced by issue_tags below; created_at defaults to now())
+INSERT INTO "public"."Tag" ("id", "display_name", "color") VALUES
+  (1, 'Pothole', '#EF4444'),
+  (2, 'Cracking', '#F59E0B'),
+  (3, 'Drainage', '#3B82F6'),
+  (4, 'Signage', '#8B5CF6'),
+  (5, 'Sidewalk', '#10B981'),
+  (6, 'Safety Hazard', '#DC2626'),
+  (7, 'Repaved', '#6B7280'),
+  (8, 'Utility Cut', '#0EA5E9');
 
 -- Insert mock data for issue_tags
 INSERT INTO "public"."issue_tags" ("issue_id", "tag_id") VALUES

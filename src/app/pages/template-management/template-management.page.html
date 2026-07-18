@@ -6,8 +6,8 @@
       <p class="text-base-content/60 mt-1">Manage email and SMS notification templates</p>
     </div>
     @if (isAdmin() && !loading()) {
-      <button class="btn btn-primary" (click)="openCreateModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         Create Template
@@ -18,7 +18,7 @@
   <!-- Error Alert -->
   @if (error()) {
     <div class="alert alert-error mb-4" role="alert">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       <span>{{ error() }}</span>
@@ -28,7 +28,7 @@
   <!-- Loading State -->
   @if (loading()) {
     <div class="flex justify-center items-center min-h-[400px]">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -62,7 +62,7 @@
                   @if (template.entity_type) {
                     <div class="badge badge-ghost">{{ template.entity_type }}</div>
                   } @else {
-                    <span class="text-base-content/40">—</span>
+                    <span class="text-base-content/40">-</span>
                   }
                 </td>
                 <td>
@@ -80,19 +80,19 @@
                 </td>
                 <td class="text-end">
                   <div class="flex gap-2 justify-end">
-                    <button
+                    <button type="button"
                       class="btn btn-sm btn-ghost"
                       (click)="openEditModal(template)"
                       title="Edit template">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button
+                    <button type="button"
                       class="btn btn-sm btn-ghost text-error"
                       (click)="confirmDelete(template)"
                       title="Delete template">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -106,12 +106,12 @@
     } @else {
       <!-- Empty State -->
       <div class="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
         <h3 class="text-xl font-semibold mb-2">No templates yet</h3>
         <p class="text-base-content/60 mb-4">Create your first notification template to get started.</p>
-        <button class="btn btn-primary" (click)="openCreateModal()">
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
           Create Template
         </button>
       </div>
@@ -119,7 +119,7 @@
   }
 
   <!-- Delete Confirmation Modal -->
-  <cos-modal [isOpen]="!!deletingTemplate()" (closed)="closeModals()" size="sm">
+  <cos-modal [isOpen]="!!deletingTemplate()" (closed)="closeModals()" size="sm" [label]="'a11y.delete_template' | translate">
     @if (deletingTemplate()) {
       <h3 class="font-bold text-lg mb-4">Delete Template?</h3>
       <p class="mb-4">
@@ -127,14 +127,14 @@
         This action cannot be undone.
       </p>
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="closeModals()">Cancel</button>
-        <button class="btn btn-error" (click)="deleteTemplate()">Delete</button>
+        <button type="button" class="btn btn-ghost" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-error" (click)="deleteTemplate()">Delete</button>
       </div>
     }
   </cos-modal>
 
   <!-- Create/Edit Template Modal -->
-  <cos-modal [isOpen]="showCreateModal() || !!editingTemplate()" (closed)="closeModals()" size="xl">
+  <cos-modal [isOpen]="showCreateModal() || !!editingTemplate()" (closed)="closeModals()" size="xl" [label]="(editingTemplate() ? 'a11y.edit_template' : 'a11y.create_template') | translate">
     <h3 class="font-bold text-lg mb-4">
       {{ editingTemplate() ? 'Edit Template' : 'Create Template' }}
     </h3>

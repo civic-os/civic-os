@@ -18,6 +18,7 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeriesVersionSummary } from '../../interfaces/entity';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Series Version Timeline Component
@@ -39,7 +40,7 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
 @Component({
   selector: 'app-series-version-timeline',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="series-timeline">
@@ -48,7 +49,7 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
       } @else if (versions.length === 1) {
         <!-- Single version - simplified display -->
         <div class="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
-          <span class="material-symbols-outlined text-primary">schedule</span>
+          <span class="material-symbols-outlined text-primary" aria-hidden="true">schedule</span>
           <div>
             <p class="font-medium">{{ versions[0].rrule_description || 'Recurring Schedule' }}</p>
             <p class="text-sm text-base-content/70">
@@ -69,18 +70,24 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
             <div
               class="relative flex items-start gap-4 pb-4 cursor-pointer hover:bg-base-200/50 rounded-lg p-2 -ml-2 transition-colors"
               [class.bg-primary/10]="version.series_id === currentVersionId"
+              role="button"
+              tabindex="0"
+              [attr.aria-pressed]="version.series_id === currentVersionId"
+              [attr.aria-label]="'a11y.select_version' | translate"
               (click)="selectVersion(version)"
+              (keydown.enter)="selectVersion(version)"
+              (keydown.space)="$event.preventDefault(); selectVersion(version)"
             >
               <!-- Timeline dot -->
               <div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
                    [class.bg-primary]="version.series_id === currentVersionId || isCurrentVersion(version)"
                    [class.bg-base-300]="version.series_id !== currentVersionId && !isCurrentVersion(version)">
                 @if (isCurrentVersion(version)) {
-                  <span class="material-symbols-outlined text-primary-content text-sm">radio_button_checked</span>
+                  <span class="material-symbols-outlined text-primary-content text-sm" aria-hidden="true">radio_button_checked</span>
                 } @else if (version.terminated_at) {
-                  <span class="material-symbols-outlined text-base-content/50 text-sm">history</span>
+                  <span class="material-symbols-outlined text-base-content/50 text-sm" aria-hidden="true">history</span>
                 } @else {
-                  <span class="material-symbols-outlined text-base-content/70 text-sm">schedule</span>
+                  <span class="material-symbols-outlined text-base-content/70 text-sm" aria-hidden="true">schedule</span>
                 }
               </div>
 
@@ -120,7 +127,7 @@ import { SeriesVersionSummary } from '../../interfaces/entity';
 
               <!-- Selection indicator -->
               @if (version.series_id === currentVersionId) {
-                <span class="material-symbols-outlined text-primary">chevron_right</span>
+                <span class="material-symbols-outlined text-primary" aria-hidden="true">chevron_right</span>
               }
             </div>
           }

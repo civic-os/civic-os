@@ -5,7 +5,7 @@
       {{ currentCount() }} / {{ maxImages() }} images
     </span>
     @if (uploading()) {
-      <span class="loading loading-spinner loading-sm"></span>
+      <app-loading-indicator size="sm" />
     }
   </div>
 
@@ -14,20 +14,29 @@
        on file inputs inside CDK focus traps even when called from a user gesture. -->
   @if (!atMax()) {
     <div
-      class="relative border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors"
+      class="relative border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1"
       (dragover)="onDragOver($event)"
-      [attr.aria-label]="'Upload images. ' + (maxImages() - currentCount()) + ' slots remaining'">
-      <span class="material-symbols-outlined text-3xl text-base-content/40 mb-1 pointer-events-none">add_photo_alternate</span>
+      [attr.aria-label]="'gallery.upload_zone' | translate:{ remaining: maxImages() - currentCount() }">
+      <span class="material-symbols-outlined text-3xl text-base-content/40 mb-1 pointer-events-none" aria-hidden="true">add_photo_alternate</span>
       <div class="text-sm text-base-content/60 pointer-events-none">
-        Drop images here or click to browse
+        {{ 'gallery.drop_hint' | translate }}
       </div>
       <div class="text-xs text-base-content/40 mt-1 pointer-events-none">
         {{ acceptTypes() }}
       </div>
+      <!-- Visible, keyboard-focusable trigger for the file picker (C5). The
+           overlay input below remains natively keyboard-focusable too, so upload
+           works even inside CDK focus traps where programmatic .click() is blocked. -->
+      <button
+        type="button"
+        class="btn btn-sm btn-primary mt-3 relative z-10"
+        (click)="fileInput.click()"
+      >{{ 'a11y.add_photos' | translate }}</button>
       <input
+        #fileInput
         type="file"
         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        tabindex="-1"
+        [attr.aria-label]="'a11y.add_photos' | translate"
         [accept]="acceptTypes()"
         multiple
         (change)="onFilesSelected($event)"
@@ -60,18 +69,44 @@
             [file]="image.file ?? null"
             [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
             [poll]="true"
-            (clicked)="openLightbox(i)"
             (fileUpdated)="onThumbnailReady(image.file_id, $event)"
           />
+
+          <!-- Keyboard-accessible overlay to open the lightbox (thumbnail img is not interactive) -->
+          <button
+            type="button"
+            class="absolute inset-0 z-0 focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+            (click)="openLightbox(i)"
+            [attr.aria-label]="'a11y.view_image' | translate"></button>
 
           <!-- Remove button overlay -->
           <button
             type="button"
-            class="absolute top-1 end-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 transition-opacity"
+            class="absolute top-1 end-1 btn btn-circle btn-xs btn-error opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
             (click)="removeImage(image); $event.stopPropagation()"
-            aria-label="Remove image">
-            <span class="material-symbols-outlined text-xs">close</span>
+            [attr.aria-label]="('action.remove' | translate) + ' ' + getImageName(image, i)">
+            <span class="material-symbols-outlined text-xs" aria-hidden="true">close</span>
           </button>
+
+          <!-- Keyboard reorder buttons (D3) — always visible for keyboard/SR users -->
+          <div class="absolute top-1 start-1 flex flex-col gap-0.5">
+            <button
+              type="button"
+              class="btn btn-circle btn-ghost btn-xs bg-base-100/80"
+              [disabled]="i === 0"
+              (click)="moveEarlier(i); $event.stopPropagation()"
+              [attr.aria-label]="'a11y.move_earlier' | translate:{ name: getImageName(image, i) }">
+              <span class="material-symbols-outlined text-xs" aria-hidden="true">arrow_upward</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-circle btn-ghost btn-xs bg-base-100/80"
+              [disabled]="i === images().length - 1"
+              (click)="moveLater(i); $event.stopPropagation()"
+              [attr.aria-label]="'a11y.move_later' | translate:{ name: getImageName(image, i) }">
+              <span class="material-symbols-outlined text-xs" aria-hidden="true">arrow_downward</span>
+            </button>
+          </div>
 
           <!-- Sort order badge -->
           <div class="absolute bottom-1 start-1 badge badge-sm badge-ghost opacity-0 group-hover:opacity-80 transition-opacity">
@@ -84,6 +119,9 @@
       }
     </div>
   }
+
+  <!-- Shared reorder announcement for screen readers (D3) -->
+  <div class="sr-only" aria-live="polite">{{ reorderAnnouncement() }}</div>
 
   <!-- Lightbox -->
   <app-gallery-lightbox

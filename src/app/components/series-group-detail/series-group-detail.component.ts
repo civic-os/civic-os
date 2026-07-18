@@ -37,6 +37,7 @@ import { SeriesVersionTimelineComponent } from '../series-version-timeline/serie
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
 import { EditPropertyComponent } from '../edit-property/edit-property.component';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RecurringService } from '../../services/recurring.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
@@ -86,13 +87,14 @@ type EditTab = 'info' | 'schedule' | 'template';
     SeriesVersionTimelineComponent,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
-    CosModalComponent
+    CosModalComponent,
+    TranslatePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loading) {
       <div class="flex items-center justify-center py-12">
-        <span class="loading loading-spinner loading-lg"></span>
+        <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
       </div>
     } @else if (group) {
       <div class="space-y-6">
@@ -113,8 +115,8 @@ type EditTab = 'info' | 'schedule' | 'template';
             </div>
           </div>
 
-          <button class="btn btn-ghost btn-sm btn-circle" (click)="onClose()">
-            <span class="material-symbols-outlined">close</span>
+          <button type="button" class="btn btn-ghost btn-sm btn-circle" (click)="onClose()" [attr.aria-label]="'action.close' | translate">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
 
@@ -139,11 +141,11 @@ type EditTab = 'info' | 'schedule' | 'template';
           <div class="bg-base-200 rounded-lg p-4">
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">schedule</span>
+                <span class="material-symbols-outlined text-base" aria-hidden="true">schedule</span>
                 Schedule
               </h3>
-              <button class="btn btn-ghost btn-xs" (click)="openEditModal('schedule')">
-                <span class="material-symbols-outlined text-sm">edit</span>
+              <button type="button" class="btn btn-ghost btn-xs" (click)="openEditModal('schedule')" [attr.aria-label]="'action.edit' | translate">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
               </button>
             </div>
             <table class="table table-xs w-full">
@@ -180,16 +182,16 @@ type EditTab = 'info' | 'schedule' | 'template';
           <div class="bg-base-200 rounded-lg p-4">
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">description</span>
+                <span class="material-symbols-outlined text-base" aria-hidden="true">description</span>
                 Template
               </h3>
-              <button class="btn btn-ghost btn-xs" (click)="openEditModal('template')">
-                <span class="material-symbols-outlined text-sm">edit</span>
+              <button type="button" class="btn btn-ghost btn-xs" (click)="openEditModal('template')" [attr.aria-label]="'action.edit' | translate">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
               </button>
             </div>
             @if (loadingTemplate()) {
               <div class="flex items-center gap-2 text-sm text-base-content/60">
-                <span class="loading loading-spinner loading-xs"></span>
+                <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
                 Loading template values...
               </div>
             } @else {
@@ -203,7 +205,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                       </td>
                       <td class="text-right py-1">
                         @if (!resolved || !resolved.display) {
-                          <span class="text-base-content/40">—</span>
+                          <span class="text-base-content/40">-</span>
                         } @else if (resolved.type === EntityPropertyType.Status || resolved.type === EntityPropertyType.Category) {
                           <span
                             class="badge badge-sm text-white"
@@ -212,16 +214,16 @@ type EditTab = 'info' | 'schedule' | 'template';
                           </span>
                         } @else if (resolved.type === EntityPropertyType.User) {
                           <span class="inline-flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm">person</span>
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">person</span>
                             {{ resolved.display }}
                           </span>
                         } @else if (resolved.type === EntityPropertyType.ForeignKeyName) {
                           <span class="link link-hover text-primary">{{ resolved.display }}</span>
                         } @else if (resolved.type === EntityPropertyType.Boolean) {
                           @if (resolved.raw) {
-                            <span class="material-symbols-outlined text-success text-base">check_circle</span>
+                            <span class="material-symbols-outlined text-success text-base" aria-hidden="true">check_circle</span>
                           } @else {
-                            <span class="material-symbols-outlined text-base-content/40 text-base">cancel</span>
+                            <span class="material-symbols-outlined text-base-content/40 text-base" aria-hidden="true">cancel</span>
                           }
                         } @else if (resolved.type === EntityPropertyType.Color) {
                           <span class="badge badge-sm gap-1 font-mono">
@@ -249,7 +251,7 @@ type EditTab = 'info' | 'schedule' | 'template';
         @if (group.versions && group.versions.length > 0) {
           <div>
             <h3 class="font-semibold mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-base">timeline</span>
+              <span class="material-symbols-outlined text-base" aria-hidden="true">timeline</span>
               Version History
             </h3>
             <app-series-version-timeline
@@ -263,13 +265,14 @@ type EditTab = 'info' | 'schedule' | 'template';
         <!-- Instances Section with Tabs -->
         <div>
           <h3 class="font-semibold mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-base">event</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">event</span>
             Occurrences
           </h3>
 
           <!-- Instance Filter Tabs -->
           <div class="tabs tabs-box mb-3 text-sm">
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'upcoming'"
               (click)="setInstanceFilter('upcoming')"
@@ -277,6 +280,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Upcoming
             </button>
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'past'"
               (click)="setInstanceFilter('past')"
@@ -284,6 +288,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Past
             </button>
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'exceptions'"
               (click)="setInstanceFilter('exceptions')"
@@ -291,6 +296,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Exceptions
             </button>
             <button
+              type="button"
               class="tab tab-sm"
               [class.tab-active]="instanceFilter() === 'all'"
               (click)="setInstanceFilter('all')"
@@ -302,11 +308,11 @@ type EditTab = 'info' | 'schedule' | 'template';
           <!-- Instance List -->
           @if (loadingInstances()) {
             <div class="flex items-center justify-center py-6">
-              <span class="loading loading-spinner loading-sm"></span>
+              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
             </div>
           } @else if (instances().length === 0) {
             <div class="text-center py-6 text-base-content/50">
-              <span class="material-symbols-outlined text-2xl mb-2">event_busy</span>
+              <span class="material-symbols-outlined text-2xl mb-2" aria-hidden="true">event_busy</span>
               <p class="text-sm">No {{ instanceFilter() }} occurrences found</p>
             </div>
           } @else {
@@ -314,10 +320,15 @@ type EditTab = 'info' | 'schedule' | 'template';
               @for (instance of instances(); track instance.id) {
                 <div
                   class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 cursor-pointer transition-colors"
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-label]="'a11y.view_occurrence' | translate"
                   (click)="navigateToInstance(instance)"
+                  (keydown.enter)="navigateToInstance(instance)"
+                  (keydown.space)="$event.preventDefault(); navigateToInstance(instance)"
                 >
                   <span
-                    class="material-symbols-outlined text-base"
+                    class="material-symbols-outlined text-base" aria-hidden="true"
                     [class.text-error]="instance.exception_type === 'insert_failed'"
                     [class.text-warning]="instance.is_exception && instance.exception_type !== 'insert_failed'"
                     [class.text-base-content/50]="!instance.is_exception"
@@ -338,7 +349,7 @@ type EditTab = 'info' | 'schedule' | 'template';
                     </div>
                   </div>
                   @if (instance.entity_id) {
-                    <span class="material-symbols-outlined text-base-content/30 text-sm">chevron_right</span>
+                    <span class="material-symbols-outlined text-base-content/30 text-sm" aria-hidden="true">chevron_right</span>
                   }
                 </div>
               }
@@ -353,12 +364,12 @@ type EditTab = 'info' | 'schedule' | 'template';
 
         <!-- Actions -->
         <div class="flex gap-2 pt-4 border-t">
-          <button class="btn btn-outline btn-primary flex-1" (click)="openEditModal('info')">
-            <span class="material-symbols-outlined">edit</span>
+          <button type="button" class="btn btn-outline btn-primary flex-1" (click)="openEditModal('info')">
+            <span class="material-symbols-outlined" aria-hidden="true">edit</span>
             Edit
           </button>
-          <button class="btn btn-outline btn-error flex-1" (click)="onDeleteClick()">
-            <span class="material-symbols-outlined">delete</span>
+          <button type="button" class="btn btn-outline btn-error flex-1" (click)="onDeleteClick()">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
             Delete
           </button>
         </div>
@@ -366,32 +377,33 @@ type EditTab = 'info' | 'schedule' | 'template';
         <!-- Delete Confirmation -->
         @if (showDeleteConfirm()) {
           <div class="alert alert-warning">
-            <span class="material-symbols-outlined">warning</span>
+            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
             <div>
               <p class="font-medium">Delete this entire series?</p>
               <p class="text-sm">This will delete all {{ group.active_instance_count || 0 }} occurrences. This cannot be undone.</p>
             </div>
             <div class="flex gap-2">
-              <button class="btn btn-sm btn-ghost" (click)="showDeleteConfirm.set(false)">Cancel</button>
-              <button class="btn btn-sm btn-error" (click)="confirmDelete()">Delete</button>
+              <button type="button" class="btn btn-sm btn-ghost" (click)="showDeleteConfirm.set(false)">Cancel</button>
+              <button type="button" class="btn btn-sm btn-error" (click)="confirmDelete()">Delete</button>
             </div>
           </div>
         }
       </div>
     } @else {
       <div class="text-center py-12 text-base-content/50">
-        <span class="material-symbols-outlined text-4xl mb-2">select</span>
+        <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">select</span>
         <p>Select a series to view details</p>
       </div>
     }
 
     <!-- Unified Edit Modal -->
-    <cos-modal [isOpen]="showEditModal()" (closed)="cancelEdit()" size="lg">
+    <cos-modal [isOpen]="showEditModal()" (closed)="cancelEdit()" size="lg" [label]="'a11y.edit_series' | translate">
       <h3 class="font-bold text-lg mb-4">Edit Series</h3>
 
           <!-- Tab Navigation (DaisyUI 5 lift style) -->
           <div role="tablist" class="tabs tabs-lift mb-4">
             <button
+              type="button"
               role="tab"
               class="tab"
               [class.tab-active]="editTab() === 'info'"
@@ -400,6 +412,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Info
             </button>
             <button
+              type="button"
               role="tab"
               class="tab"
               [class.tab-active]="editTab() === 'schedule'"
@@ -408,6 +421,7 @@ type EditTab = 'info' | 'schedule' | 'template';
               Schedule
             </button>
             <button
+              type="button"
               role="tab"
               class="tab"
               [class.tab-active]="editTab() === 'template'"
@@ -422,11 +436,12 @@ type EditTab = 'info' | 'schedule' | 'template';
           @if (editTab() === 'info') {
             <div class="space-y-4">
               <div class="form-control">
-                <label class="label">
+                <label class="label" for="series-display-name">
                   <span class="label-text">Display Name</span>
                 </label>
                 <input
                   type="text"
+                  id="series-display-name"
                   class="input input-bordered w-full"
                   [(ngModel)]="editForm.display_name"
                   placeholder="Series name"
@@ -434,10 +449,11 @@ type EditTab = 'info' | 'schedule' | 'template';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <label class="label" for="series-description">
                   <span class="label-text">Description</span>
                 </label>
                 <textarea
+                  id="series-description"
                   class="textarea textarea-bordered w-full"
                   rows="3"
                   [(ngModel)]="editForm.description"
@@ -446,18 +462,20 @@ type EditTab = 'info' | 'schedule' | 'template';
               </div>
 
               <div class="form-control">
-                <label class="label">
+                <label class="label" for="series-color">
                   <span class="label-text">Color</span>
                 </label>
                 <div class="flex items-center gap-3">
                   <input
                     type="color"
+                    id="series-color"
                     class="w-12 h-10 cursor-pointer rounded border border-base-300"
                     [(ngModel)]="editForm.color"
                   />
                   <input
                     type="text"
                     class="input input-bordered flex-1"
+                    [attr.aria-label]="'a11y.color_swatch' | translate"
                     [(ngModel)]="editForm.color"
                     placeholder="#3B82F6"
                     pattern="^#[0-9A-Fa-f]{6}$"
@@ -548,16 +566,16 @@ type EditTab = 'info' | 'schedule' | 'template';
           <!-- Error Display -->
           @if (editError()) {
             <div class="alert alert-error mt-4">
-              <span class="material-symbols-outlined">error</span>
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
               <span>{{ editError() }}</span>
             </div>
           }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
-        <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving()">
+        <button type="button" class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveEdit()" [disabled]="saving()">
           @if (saving()) {
-            <span class="loading loading-spinner loading-sm"></span>
+            <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           }
           Save Changes
         </button>

@@ -5,6 +5,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { GuidedFormNavComponent } from './guided-form-nav.component';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { GuidedFormDefinition, GuidedFormStep, GuidedFormProgressEntry, GuidedFormContext } from '../../interfaces/guided-form';
@@ -70,6 +72,8 @@ describe('GuidedFormNavComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GuidedFormService, useValue: mockGuidedFormService }
       ]
     }).compileComponents();
@@ -248,6 +252,48 @@ describe('GuidedFormNavComponent', () => {
       expect(step).toBeTruthy();
       component.onStepClick(step!);
       expect(component.stepClick.emit).toHaveBeenCalledWith('step1');
+    });
+  });
+
+  describe('isCurrent (active step for AT)', () => {
+    it('should mark the parent step current when context.step_key is null', () => {
+      // mockContext.step_key is null → editing the parent record
+      fixture.componentRef.setInput('context', mockContext);
+      fixture.detectChanges();
+      const parentStep = component.effectiveSteps().find(s => s.step_key === '__parent__');
+      const step1 = component.effectiveSteps().find(s => s.step_key === 'step1');
+      expect(component.isCurrent(parentStep!)).toBe(true);
+      expect(component.isCurrent(step1!)).toBe(false);
+    });
+
+    it('should mark the matching data step current when context.step_key is set', () => {
+      const childContext = { ...mockContext, step_key: 'step1', is_child_step: true };
+      fixture.componentRef.setInput('context', childContext);
+      fixture.detectChanges();
+      const step1 = component.effectiveSteps().find(s => s.step_key === 'step1');
+      const parentStep = component.effectiveSteps().find(s => s.step_key === '__parent__');
+      expect(component.isCurrent(step1!)).toBe(true);
+      expect(component.isCurrent(parentStep!)).toBe(false);
+    });
+
+    it('should never mark the synthetic review step current', () => {
+      const reviewContext = { ...mockContext, step_key: '__review__' };
+      fixture.componentRef.setInput('context', reviewContext);
+      fixture.detectChanges();
+      const review = component.effectiveSteps().find(s => s.step_key === '__review__');
+      expect(component.isCurrent(review!)).toBe(false);
+    });
+
+    it('should render aria-current="step" on exactly the current step in the DOM', () => {
+      fixture.componentRef.setInput('context', mockContext);
+      fixture.detectChanges();
+      const items: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('li.step')
+      );
+      const currentItems = items.filter(li => li.getAttribute('aria-current') === 'step');
+      expect(currentItems.length).toBe(1);
+      // First step in the nav is the parent step, which is current here
+      expect(items[0].getAttribute('aria-current')).toBe('step');
     });
   });
 });

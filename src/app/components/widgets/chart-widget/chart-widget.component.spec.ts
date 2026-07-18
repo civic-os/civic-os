@@ -387,4 +387,59 @@ describe('ChartWidgetComponent', () => {
       done();
     }, 10);
   });
+
+  it('should render an sr-only data table with a caption and one column per series', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const table = el.querySelector('table.sr-only');
+      expect(table).toBeTruthy();
+
+      // Caption is the widget title
+      expect(table!.querySelector('caption')?.textContent?.trim()).toBe('Referrals Per Week');
+
+      // Header row: category header (xAxisLabel) + one per series label
+      const headers = Array.from(table!.querySelectorAll('thead th')).map(th => th.textContent?.trim());
+      expect(headers).toEqual(['Week', 'Total Referrals', 'Poor Outcome']);
+
+      // One body row per datum, first cell is the label value
+      const bodyRows = table!.querySelectorAll('tbody tr');
+      expect(bodyRows.length).toBe(3);
+      const firstRowCells = Array.from(bodyRows[0].querySelectorAll('th, td')).map(c => c.textContent?.trim());
+      expect(firstRowCells).toEqual(['01/06', '12', '3']);
+      done();
+    }, 10);
+  });
+
+  it('should mark the visual chart container aria-hidden', (done) => {
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+      const hidden = el.querySelector('[aria-hidden="true"] vis-xy-container');
+      expect(hidden).toBeTruthy();
+      done();
+    }, 10);
+  });
+
+  it('should fall back to valueColumn names when seriesLabels are absent', (done) => {
+    const widgetNoLabels: DashboardWidget = {
+      ...mockWidget,
+      config: {
+        labelColumn: 'week_label',
+        valueColumns: ['total_referrals'],
+      }
+    };
+    fixture.componentRef.setInput('widget', widgetNoLabels);
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      expect(component.srSeriesHeaders()).toEqual(['total_referrals']);
+      expect(component.srCategoryHeader()).toBe('week_label');
+      done();
+    }, 10);
+  });
 });

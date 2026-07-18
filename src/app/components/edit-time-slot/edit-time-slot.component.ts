@@ -44,11 +44,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   template: `
     <div class="time-slot-editor grid grid-cols-1 gap-4">
       <div class="form-control">
-        <label class="label">
+        <label class="label" [for]="uid + '-start'">
           <span class="label-text">Start</span>
         </label>
         <input
           type="datetime-local"
+          [id]="uid + '-start'"
           class="input input-bordered w-full"
           [value]="startLocal()"
           (input)="onStartChange($event)"
@@ -57,11 +58,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
       </div>
 
       <div class="form-control">
-        <label class="label">
+        <label class="label" [for]="uid + '-end'">
           <span class="label-text">End</span>
         </label>
         <input
           type="datetime-local"
+          [id]="uid + '-end'"
           class="input input-bordered w-full"
           [value]="endLocal()"
           (focus)="onEndFocus()"
@@ -79,6 +81,12 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   `
 })
 export class EditTimeSlotComponent implements ControlValueAccessor {
+  // Incrementing counter → unique DOM id prefix per component instance,
+  // so label[for]/input[id] associations stay unique when multiple editors
+  // render on one page.
+  private static nextInstanceId = 0;
+  public readonly uid = `edit-time-slot-${EditTimeSlotComponent.nextInstanceId++}`;
+
   startLocal = signal<string>('');
   endLocal = signal<string>('');
   disabled = signal(false);

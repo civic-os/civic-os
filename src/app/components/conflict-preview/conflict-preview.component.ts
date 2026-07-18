@@ -19,6 +19,7 @@ import { Component, Input, Output, EventEmitter, computed, signal, ChangeDetecti
 import { CommonModule } from '@angular/common';
 import { ConflictInfo } from '../../interfaces/entity';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Result of the conflict preview modal.
@@ -49,15 +50,15 @@ export interface ConflictPreviewResult {
 @Component({
   selector: 'app-conflict-preview',
   standalone: true,
-  imports: [CommonModule, CosModalComponent],
+  imports: [CommonModule, CosModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg">
+    <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg" [label]="'a11y.schedule_preview' | translate">
       <h3 class="font-bold text-lg mb-4">Schedule Preview</h3>
 
       @if (loading) {
         <div class="flex items-center justify-center py-8">
-          <span class="loading loading-spinner loading-lg"></span>
+          <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
           <span class="ml-3">Checking for conflicts...</span>
         </div>
       } @else {
@@ -77,7 +78,7 @@ export interface ConflictPreviewResult {
 
         @if (conflictCount() > 0) {
           <div class="alert alert-warning mb-4">
-            <span class="material-symbols-outlined">warning</span>
+            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
             <span>{{ conflictCount() }} occurrence(s) conflict with existing schedules.</span>
           </div>
         }
@@ -90,9 +91,9 @@ export interface ConflictPreviewResult {
                  [class.bg-error/5]="item.has_conflict">
               <!-- Status Icon -->
               @if (item.has_conflict) {
-                <span class="material-symbols-outlined text-error">cancel</span>
+                <span class="material-symbols-outlined text-error" aria-hidden="true">cancel</span>
               } @else {
-                <span class="material-symbols-outlined text-success">check_circle</span>
+                <span class="material-symbols-outlined text-success" aria-hidden="true">check_circle</span>
               }
 
               <!-- Time Slot -->
@@ -121,10 +122,10 @@ export interface ConflictPreviewResult {
       }
 
       <div class="cos-modal-action">
-        <button class="btn btn-ghost" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn btn-ghost" (click)="onCancel()">Cancel</button>
 
         @if (!loading && conflictCount() > 0) {
-          <button
+          <button type="button"
             class="btn btn-outline btn-primary"
             (click)="onAction('create_available')"
             [disabled]="availableCount() === 0"
@@ -134,7 +135,7 @@ export interface ConflictPreviewResult {
         }
 
         @if (!loading) {
-          <button
+          <button type="button"
             class="btn btn-primary"
             (click)="onAction('create_all')"
             [disabled]="conflicts.length === 0"

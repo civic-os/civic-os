@@ -25,12 +25,13 @@ import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { ApiResponse } from '../../interfaces/api';
 import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-many-to-many-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RouterLink, FkSearchModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, FkSearchModalComponent, TranslatePipe],
   templateUrl: './many-to-many-editor.component.html',
   styleUrl: './many-to-many-editor.component.css'
 })

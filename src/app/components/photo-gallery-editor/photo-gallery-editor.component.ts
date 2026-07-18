@@ -16,6 +16,8 @@ import { GalleryService } from '../../services/gallery.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.component';
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 import { getS3Config } from '../../config/runtime';
 
 /**
@@ -46,16 +48,21 @@ import { getS3Config } from '../../config/runtime';
  *
  * Added in v0.47.0.
  */
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-photo-gallery-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DragDropModule, GalleryLightboxComponent, FileThumbnailComponent],
+  imports: [LoadingIndicatorComponent, DragDropModule, GalleryLightboxComponent, FileThumbnailComponent, TranslatePipe],
   templateUrl: './photo-gallery-editor.component.html'
 })
 export class PhotoGalleryEditorComponent {
   private galleryService = inject(GalleryService);
   private fileUpload = inject(FileUploadService);
+  private translation = inject(TranslationService);
+
+  /** Shared aria-live announcement for keyboard reorder (D3) */
+  reorderAnnouncement = signal('');
 
   // Inputs
   galleryId = input<string | null>(null);
@@ -242,6 +249,42 @@ export class PhotoGalleryEditorComponent {
     moveItemInArray(imgs, event.previousIndex, event.currentIndex);
     this.images.set(imgs);
     this.reorderDirty.set(true);
+  }
+
+  /**
+   * Keyboard-accessible reorder (D3). Moves the image at `index` by `delta`
+   * (-1 = earlier, +1 = later), reusing the same buffered reorder path as
+   * drag-drop (persisted on saveChanges), and announces the new position.
+   */
+  moveEarlier(index: number): void {
+    this.moveImage(index, -1);
+  }
+
+  moveLater(index: number): void {
+    this.moveImage(index, 1);
+  }
+
+  private moveImage(index: number, delta: number): void {
+    const imgs = [...this.images()];
+    const target = index + delta;
+    if (target < 0 || target >= imgs.length) return;
+    moveItemInArray(imgs, index, target);
+    this.images.set(imgs);
+    this.reorderDirty.set(true);
+
+    const name = this.getImageName(imgs[target], target);
+    this.reorderAnnouncement.set(
+      this.translation.get('a11y.moved_to_position', {
+        name,
+        i: target + 1,
+        n: imgs.length
+      })
+    );
+  }
+
+  /** Identifying name for an image, used in reorder aria-labels/announcements. */
+  getImageName(image: GalleryImage, index: number): string {
+    return image.alt_text || image.file?.file_name || `Image ${index + 1}`;
   }
 
   /** Whether there are any unsaved gallery changes */

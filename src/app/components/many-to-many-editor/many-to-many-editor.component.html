@@ -1,13 +1,13 @@
 <div class="many-to-many-editor py-4">
-  <label class="label">
+  <div class="label">
     <span class="font-semibold text-base">{{ property().display_name }}</span>
-  </label>
+  </div>
 
   <!-- Error message -->
   @if (error()) {
     <div class="alert alert-error mb-3">
       <span>{{ error() }}</span>
-      <button class="btn btn-sm btn-ghost" (click)="error.set(undefined)">×</button>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="error.set(undefined)" [attr.aria-label]="'action.dismiss' | translate"><span aria-hidden="true">×</span></button>
     </div>
   }
 
@@ -36,7 +36,7 @@
           type="button"
           class="btn btn-sm btn-outline"
           (click)="showSearchModal.set(true)">
-          <span class="material-symbols-outlined text-base">search</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">search</span>
           Browse &amp; Select
         </button>
         <app-fk-search-modal
@@ -73,7 +73,7 @@
     <!-- Pending changes preview -->
     @if (pendingChanges().toAdd.length > 0 || pendingChanges().toRemove.length > 0) {
       <div class="alert alert-info mb-3 text-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span>
           Pending changes:
           @if (pendingChanges().toAdd.length > 0) {
@@ -95,7 +95,8 @@
         <input
           type="search"
           class="input input-sm input-bordered w-full mb-2"
-          placeholder="Search..."
+          [placeholder]="'a11y.search' | translate"
+          [attr.aria-label]="'a11y.search' | translate"
           [value]="searchTerm()"
           (input)="searchTerm.set($any($event.target).value)"
         />
@@ -141,7 +142,7 @@
         (click)="save()"
         [disabled]="loading()">
         @if (loading()) {
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
         }
         Save Changes
       </button>

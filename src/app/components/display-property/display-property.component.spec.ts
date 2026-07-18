@@ -501,7 +501,7 @@ describe('DisplayPropertyComponent', () => {
       fixture.componentRef.setInput('datum', 'test value');
       fixture.detectChanges();
 
-      const label = fixture.nativeElement.querySelector('label span');
+      const label = fixture.nativeElement.querySelector('.label span');
       expect(label.textContent).toContain('Field Name');
     });
 

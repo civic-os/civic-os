@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -98,6 +98,137 @@ describe('EditPropertyComponent', () => {
 
       const input = fixture.debugElement.query(By.css('input[type="text"]')).nativeElement;
       expect(input.value).toBe('Initial Value');
+    });
+  });
+
+  describe('Accessibility (WCAG plumbing — Batch 4)', () => {
+    it('should set aria-required when the property is required', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'name', display_name: 'Name', is_nullable: false,
+        type: EntityPropertyType.TextShort
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const input = fixture.debugElement.query(By.css('input[type="text"]')).nativeElement;
+      expect(input.getAttribute('aria-required')).toBe('true');
+    });
+
+    it('should not set aria-required for a nullable, non-validated property', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.textShort);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const input = fixture.debugElement.query(By.css('input[type="text"]')).nativeElement;
+      expect(input.getAttribute('aria-required')).toBeNull();
+    });
+
+    it('should set aria-invalid and associate the error block only once the control is invalid and touched', () => {
+      const formGroup = new FormGroup({ name: new FormControl('', Validators.required) });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'name', display_name: 'Name', is_nullable: false,
+        type: EntityPropertyType.TextShort
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const input = fixture.debugElement.query(By.css('input[type="text"]')).nativeElement;
+      // Pristine/untouched: no invalid noise, no error association
+      expect(input.getAttribute('aria-invalid')).toBeNull();
+      expect(input.getAttribute('aria-describedby')).toBeNull();
+
+      formGroup.get('name')!.markAsTouched();
+      fixture.detectChanges();
+
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      expect(input.getAttribute('aria-describedby')).toBe('name-error');
+      const errorBlock = fixture.debugElement.query(By.css('#name-error'));
+      expect(errorBlock).toBeTruthy();
+    });
+
+    it('should render an sr-only description and reference it via aria-describedby', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'name', display_name: 'Name', description: 'Enter the full name',
+        type: EntityPropertyType.TextShort
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const desc = fixture.debugElement.query(By.css('#name-desc'));
+      expect(desc).toBeTruthy();
+      expect(desc.nativeElement.classList.contains('sr-only')).toBe(true);
+      expect(desc.nativeElement.textContent.trim()).toBe('Enter the full name');
+
+      const input = fixture.debugElement.query(By.css('input[type="text"]')).nativeElement;
+      expect(input.getAttribute('aria-describedby')).toBe('name-desc');
+    });
+
+    it('should convey required on native inputs via aria-required with an aria-hidden asterisk and NO sr-only marker (avoids VO triple-announcing)', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'name', display_name: 'Name', is_nullable: false,
+        type: EntityPropertyType.TextShort
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const input = fixture.debugElement.query(By.css('input#name'));
+      expect(input.nativeElement.getAttribute('aria-required')).toBe('true');
+      const asterisk = fixture.debugElement.query(By.css('label span[aria-hidden="true"]'));
+      expect(asterisk?.nativeElement.textContent.trim()).toBe('*');
+      const srOnly = fixture.debugElement.query(By.css('label .sr-only'));
+      expect(srOnly).toBeNull();
+    });
+
+    it('should append the sr-only "(required)" marker for custom widgets whose control cannot carry aria-required', () => {
+      const formGroup = new FormGroup({ location: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'location', display_name: 'Location', is_nullable: false,
+        type: EntityPropertyType.GeoPoint
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const srOnly = fixture.debugElement.query(By.css('label .sr-only'));
+      expect(srOnly).toBeTruthy();
+      expect(srOnly.nativeElement.textContent.trim()).toBe('(required)');
+    });
+
+    it('should not render the sr-only required marker for a non-required property', () => {
+      const formGroup = new FormGroup({ name: new FormControl('') });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.textShort);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const srOnly = fixture.debugElement.query(By.css('label .sr-only'));
+      expect(srOnly).toBeNull();
+    });
+
+    it('should drop the dangling label[for] and wrap custom widgets in a labelled group', () => {
+      const formGroup = new FormGroup({ location: new FormControl('') });
+      fixture.componentRef.setInput('property', createMockProperty({
+        column_name: 'location', display_name: 'Location',
+        type: EntityPropertyType.GeoPoint
+      }));
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const label = fixture.debugElement.query(By.css('label'));
+      expect(label.nativeElement.getAttribute('for')).toBeNull();
+      const group = fixture.debugElement.query(By.css('[role="group"]'));
+      expect(group).toBeTruthy();
+      expect(group.nativeElement.getAttribute('aria-label')).toBe('Location');
     });
   });
 

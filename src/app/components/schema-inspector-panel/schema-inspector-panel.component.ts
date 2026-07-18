@@ -22,6 +22,7 @@ import { SchemaService } from '../../services/schema.service';
 import { PermissionsService, Role, RolePermission } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
 import { isSystemType } from '../../constants/system-types';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 type TabType = 'properties' | 'relations' | 'validations' | 'permissions';
 
@@ -39,7 +40,7 @@ type TabType = 'properties' | 'relations' | 'validations' | 'permissions';
 @Component({
   selector: 'app-schema-inspector-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './schema-inspector-panel.component.html',
   styleUrl: './schema-inspector-panel.component.css'
 })

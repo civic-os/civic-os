@@ -12,12 +12,12 @@
       </div>
 
       <!-- Close Button -->
-      <button
+      <button type="button"
         class="btn btn-sm btn-circle btn-ghost ms-2"
         (click)="onClose()"
         aria-label="Close inspector panel"
         title="Close (ESC)">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
@@ -26,7 +26,7 @@
     <!-- Tabs Navigation -->
     <div role="tablist" class="tabs tabs-border px-4 pt-2">
       @if (!isMetadataTable()) {
-        <button
+        <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'properties'"
@@ -34,7 +34,7 @@
           Properties
         </button>
       }
-      <button
+      <button type="button"
         role="tab"
         class="tab"
         [class.tab-active]="activeTab() === 'relations'"
@@ -42,7 +42,7 @@
         Relations
       </button>
       @if (!isMetadataTable()) {
-        <button
+        <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'validations'"
@@ -51,7 +51,7 @@
         </button>
       }
       @if (isAdmin()) {
-        <button
+        <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'permissions'"
@@ -80,7 +80,7 @@
           <!-- Error State -->
           @else if (propertiesError()) {
             <div class="alert alert-error">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <span>{{ propertiesError() }}</span>
@@ -93,13 +93,18 @@
               @for (property of properties(); track property.column_name) {
                 <div
                   class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                  (click)="togglePropertyExpansion(property.column_name)">
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-expanded]="isPropertyExpanded(property.column_name)"
+                  (click)="togglePropertyExpansion(property.column_name)"
+                  (keydown.enter)="togglePropertyExpansion(property.column_name)"
+                  (keydown.space)="$event.preventDefault(); togglePropertyExpansion(property.column_name)">
 
                   <!-- Property Name & Badges (Always Visible) -->
                   <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0 flex items-center gap-2">
                       <!-- Expand/Collapse Chevron -->
-                      <svg
+                      <svg aria-hidden="true"
                         class="w-4 h-4 flex-shrink-0 transition-transform"
                         [class.rotate-90]="isPropertyExpanded(property.column_name)"
                         fill="none"
@@ -145,7 +150,7 @@
                     <div class="text-sm mb-1 flex items-center gap-2">
                       <span class="text-base-content/60">Property Type:</span>
                       <div class="flex items-center gap-1 {{ typeInfo.color }}">
-                        <span class="material-symbols-outlined text-sm">{{ typeInfo.icon }}</span>
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ typeInfo.icon }}</span>
                         <span class="font-medium">{{ typeInfo.name }}</span>
                       </div>
                     </div>
@@ -193,7 +198,7 @@
           <!-- Empty State -->
           @else {
             <div class="text-center py-8 text-base-content/60">
-              <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               <p>No properties found</p>
@@ -217,14 +222,19 @@
                 @for (relation of belongsToRelationships(); track relation.column_name) {
                   <div
                     class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                    (click)="onNavigateToEntity(relation.join_table)">
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'a11y.navigate_to_entity' | translate:{ name: relation.join_table }"
+                    (click)="onNavigateToEntity(relation.join_table)"
+                    (keydown.enter)="onNavigateToEntity(relation.join_table)"
+                    (keydown.space)="$event.preventDefault(); onNavigateToEntity(relation.join_table)">
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <h4 class="font-semibold text-base">{{ relation.display_name }}</h4>
                         <code class="text-xs text-base-content/60">{{ relation.column_name }} → {{ relation.join_table }}.{{ relation.join_column || 'id' }}</code>
                       </div>
                       <!-- Target/Crosshair Icon -->
-                      <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg aria-hidden="true" class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="9" stroke-width="2"/>
                         <circle cx="12" cy="12" r="3" fill="currentColor"/>
                         <line x1="12" y1="3" x2="12" y2="6" stroke-width="2"/>
@@ -250,14 +260,19 @@
                 @for (relation of hasManyRelationships(); track relation.table_name + relation.column_name) {
                   <div
                     class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                    (click)="onNavigateToEntity(relation.table_name)">
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'a11y.navigate_to_entity' | translate:{ name: relation.table_name }"
+                    (click)="onNavigateToEntity(relation.table_name)"
+                    (keydown.enter)="onNavigateToEntity(relation.table_name)"
+                    (keydown.space)="$event.preventDefault(); onNavigateToEntity(relation.table_name)">
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <h4 class="font-semibold text-base">{{ relation.table_name }}</h4>
                         <code class="text-xs text-base-content/60">via {{ relation.column_name }}</code>
                       </div>
                       <!-- Target/Crosshair Icon -->
-                      <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg aria-hidden="true" class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="9" stroke-width="2"/>
                         <circle cx="12" cy="12" r="3" fill="currentColor"/>
                         <line x1="12" y1="3" x2="12" y2="6" stroke-width="2"/>
@@ -283,14 +298,19 @@
                 @for (relation of manyToManyRelationships(); track relation.column_name) {
                   <div
                     class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                    (click)="onNavigateToEntity(relation.many_to_many_meta!.relatedTable)">
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'a11y.navigate_to_entity' | translate:{ name: relation.many_to_many_meta!.relatedTable }"
+                    (click)="onNavigateToEntity(relation.many_to_many_meta!.relatedTable)"
+                    (keydown.enter)="onNavigateToEntity(relation.many_to_many_meta!.relatedTable)"
+                    (keydown.space)="$event.preventDefault(); onNavigateToEntity(relation.many_to_many_meta!.relatedTable)">
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
                         <h4 class="font-semibold text-base">{{ relation.display_name }}</h4>
                         <code class="text-xs text-base-content/60">via {{ relation.many_to_many_meta?.junctionTable }}</code>
                       </div>
                       <!-- Target/Crosshair Icon -->
-                      <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg aria-hidden="true" class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="9" stroke-width="2"/>
                         <circle cx="12" cy="12" r="3" fill="currentColor"/>
                         <line x1="12" y1="3" x2="12" y2="6" stroke-width="2"/>
@@ -308,7 +328,7 @@
           <!-- Empty State -->
           @if (belongsToRelationships().length === 0 && hasManyRelationships().length === 0 && manyToManyRelationships().length === 0) {
             <div class="text-center py-8 text-base-content/60">
-              <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
               <p class="font-semibold mb-2">No Relationships</p>
@@ -335,7 +355,7 @@
           <!-- Error State -->
           @else if (propertiesError()) {
             <div class="alert alert-error">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <span>{{ propertiesError() }}</span>
@@ -348,13 +368,18 @@
               @for (property of propertiesWithValidations(); track property.column_name) {
                 <div
                   class="card bg-base-200 p-3 cursor-pointer hover:bg-base-300 transition-colors"
-                  (click)="togglePropertyExpansion(property.column_name)">
+                  role="button"
+                  tabindex="0"
+                  [attr.aria-expanded]="isPropertyExpanded(property.column_name)"
+                  (click)="togglePropertyExpansion(property.column_name)"
+                  (keydown.enter)="togglePropertyExpansion(property.column_name)"
+                  (keydown.space)="$event.preventDefault(); togglePropertyExpansion(property.column_name)">
 
                   <!-- Property Name & Summary (Always Visible) -->
                   <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0 flex items-center gap-2">
                       <!-- Expand/Collapse Chevron -->
-                      <svg
+                      <svg aria-hidden="true"
                         class="w-4 h-4 flex-shrink-0 transition-transform"
                         [class.rotate-90]="isPropertyExpanded(property.column_name)"
                         fill="none"
@@ -440,7 +465,7 @@
           <!-- Empty State -->
           @else {
             <div class="text-center py-8 text-base-content/60">
-              <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <p class="font-semibold mb-2">No Validations</p>
@@ -466,7 +491,7 @@
           <!-- Error State -->
           @else if (permissionsError()) {
             <div class="alert alert-error">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <span>{{ permissionsError() }}</span>
@@ -553,7 +578,7 @@
 
             <!-- Future Note -->
             <div class="alert alert-info mt-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <div class="text-sm">
@@ -566,7 +591,7 @@
           <!-- Empty State -->
           @else {
             <div class="text-center py-8 text-base-content/60">
-              <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
               </svg>
               <p class="font-semibold mb-2">No Permissions</p>

@@ -213,6 +213,14 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     weekends: true,
     fixedWeekCount: false, // Show only the weeks needed (4-6), not always 6
 
+    // Accessibility (WCAG 2.1.1): make every event focusable and keyboard-activatable
+    // (Tab to reach, Enter/Space to fire eventClick), not just those with an event.url.
+    // FullCalendar has no built-in keyboard path for drag-select slot CREATION
+    // (upstream fullcalendar#6528 / #2535 are long-open with no plugin), so keyboard
+    // users create/edit time slots via the datetime-local inputs in edit-time-slot —
+    // the calendar is an equivalent visualization of records reachable elsewhere.
+    eventInteractive: true,
+
     // Month view readability improvements
     displayEventEnd: true, // Show end time in month view (e.g., "4p - 7p")
     eventTimeFormat: {

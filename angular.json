@@ -151,6 +151,15 @@
               "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.min.js"
             ]
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }

@@ -6,19 +6,19 @@
       @if (data$ | async; as data) {
           <!-- Header row (clean, just back button + title) -->
         <div class="flex items-center gap-4 mb-2 mt-4">
-          <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button">
-            <span class="material-symbols-outlined">arrow_back</span>
+          <button class="btn btn-ghost btn-circle" (click)="goBack()" type="button" [attr.aria-label]="'action.back' | translate">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
           <h1 class="mb-0 flex-1">{{ entity.display_name }}: {{ data.display_name || '#' + data.id }}</h1>
           @if (auth.isAdmin()) {
             <a class="btn btn-ghost btn-xs gap-1" [routerLink]="'/system/entity-code/' + entity.table_name">
-              <span class="material-symbols-outlined text-sm">code</span>
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">code</span>
               {{ 'detail.view_source' | translate }}
             </a>
           }
           @if (seriesMembership()?.is_member) {
             <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
-              <span class="material-symbols-outlined text-sm">repeat</span>
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">repeat</span>
               {{ seriesMembership()?.group_name || 'Recurring' }}
             </a>
           }
@@ -37,8 +37,8 @@
           <!-- Continue button for in-progress draft guided forms -->
           @if (guidedFormStatusKey() === 'draft' && !showReviewSection()) {
             <div class="flex justify-center my-4">
-              <button class="btn btn-primary btn-lg gap-2" (click)="continueGuidedForm()">
-                <span class="material-symbols-outlined">arrow_forward</span>
+              <button type="button" class="btn btn-primary btn-lg gap-2" (click)="continueGuidedForm()">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
                 {{ 'guided_form.continue' | translate }}
               </button>
             </div>
@@ -59,16 +59,16 @@
 
         <!-- Payment Error Alert -->
         @if (paymentError()) {
-          <div class="alert alert-error mb-4">
-            <span class="material-symbols-outlined">error</span>
+          <div role="alert" class="alert alert-error mb-4">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
             <span>{{ paymentError() }}</span>
           </div>
         }
 
         <!-- Action Error Alert (for non-modal actions) -->
         @if (actionError() && !showActionModal()) {
-          <div class="alert alert-error mb-4">
-            <span class="material-symbols-outlined">error</span>
+          <div role="alert" class="alert alert-error mb-4">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
             <span>{{ actionError() }}</span>
           </div>
         }
@@ -76,8 +76,8 @@
         <!-- GuidedForm Review Section (v0-48-0) -->
         @if (showReviewSection()) {
           @if (guidedFormError()) {
-            <div class="alert alert-error mb-4">
-              <span class="material-symbols-outlined">error</span>
+            <div role="alert" class="alert alert-error mb-4">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>
               <span>{{ guidedFormError() }}</span>
             </div>
           }
@@ -98,16 +98,17 @@
           [isOpen]="showGuidedFormSuccessModal()"
           (closed)="onGuidedFormSuccessViewRecord()"
           size="sm"
-          [closeOnBackdrop]="true">
+          [closeOnBackdrop]="true"
+          [label]="'guided_form.submitted' | translate">
           <h3 class="font-bold text-lg mb-4">
-            <span class="material-symbols-outlined text-success align-middle me-2">check_circle</span>
+            <span class="material-symbols-outlined text-success align-middle me-2" aria-hidden="true">check_circle</span>
             {{ 'guided_form.submitted' | translate }}
           </h3>
           <p class="mb-4">{{ 'guided_form.submitted_message' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</p>
           <div class="flex flex-col gap-2 w-full">
-            <button class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">{{ 'detail.view_record' | translate }}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">{{ 'guided_form.submit_another' | translate }}</button>
-            <button class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">{{ 'detail.back_to_list' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</button>
+            <button type="button" class="btn btn-primary whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessViewRecord()">{{ 'detail.view_record' | translate }}</button>
+            <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessCreateAnother()">{{ 'guided_form.submit_another' | translate }}</button>
+            <button type="button" class="btn whitespace-normal h-auto min-h-12" (click)="onGuidedFormSuccessGoToList()">{{ 'detail.back_to_list' | translate:{ entity: currentEntity()?.display_name || 'form' } }}</button>
           </div>
         </cos-modal>
 
@@ -124,7 +125,7 @@
               } @else if (isProperty(item) && item.type === 17 && item.show_inline) {
                 <!-- v0.46.0: Inline M:M — read-only chip display in property grid -->
                 <div class="col-span-full">
-                  <label class="label"><span class="font-semibold">{{ item.display_name }}</span></label>
+                  <div class="label"><span class="font-semibold">{{ item.display_name }}</span></div>
                   <div class="flex flex-wrap gap-1">
                     @let allItems = data[item.column_name] || [];
                     @let isExpanded = isInlineM2mExpanded(item.column_name);
@@ -141,7 +142,7 @@
                       <span class="text-base-content/50 italic text-sm">{{ 'state.none' | translate }}</span>
                     }
                     @if (!isExpanded && allItems.length > INLINE_M2M_CHIP_LIMIT) {
-                      <button
+                      <button type="button"
                         class="badge badge-lg badge-ghost gap-1 py-3 px-3 cursor-pointer hover:bg-base-200 transition-colors"
                         (click)="toggleInlineM2mExpand(item.column_name)">
                         + {{ allItems.length - INLINE_M2M_CHIP_LIMIT }} more
@@ -229,7 +230,7 @@
                       <button
                         class="btn btn-primary btn-sm"
                         (click)="navigateToCreateRelated(section.meta.sourceTable, section.meta.sourceColumn)">
-                        <span class="material-symbols-outlined">add</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">add</span>
                         Add {{ section.meta.sourceEntityDisplayName }}
                       </button>
                     </div>
@@ -254,12 +255,13 @@
           [isOpen]="showDeleteModal()"
           (closed)="closeDeleteModal()"
           size="sm"
-          [closeOnBackdrop]="!deleteLoading()">
+          [closeOnBackdrop]="!deleteLoading()"
+          [label]="('action.delete' | translate) + ' ' + entity.display_name">
           <h3 class="font-bold text-lg mb-4">{{ 'action.delete' | translate }} {{ entity.display_name }}?</h3>
 
           <!-- Error Alert -->
           @if (deleteError()) {
-            <div class="alert alert-error mb-4">
+            <div role="alert" class="alert alert-error mb-4">
               <span>{{ deleteError() }}</span>
             </div>
           }
@@ -270,21 +272,21 @@
 
           <!-- Actions -->
           <div class="cos-modal-action">
-            <button
+            <button type="button"
               class="btn"
               (click)="closeDeleteModal()"
               [disabled]="deleteLoading()">
               {{ 'action.cancel' | translate }}
             </button>
-            <button
+            <button type="button"
               class="btn btn-error"
               (click)="confirmDelete()"
               [disabled]="deleteLoading()">
               @if (deleteLoading()) {
-                <span class="loading loading-spinner loading-sm"></span>
+                <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                 {{ 'state.deleting' | translate }}
               } @else {
-                <span class="material-symbols-outlined">delete</span>
+                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
                 {{ 'action.delete' | translate }}
               }
             </button>
@@ -315,14 +317,15 @@
           [isOpen]="showActionModal()"
           (closed)="closeActionModal()"
           [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
-          [closeOnBackdrop]="!actionLoading()">
+          [closeOnBackdrop]="!actionLoading()"
+          [label]="currentAction()?.display_name">
           @if (currentAction(); as action) {
             <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
 
             <!-- Error Alert -->
             @if (actionError()) {
-              <div class="alert alert-error mb-4">
-                <span class="material-symbols-outlined">error</span>
+              <div role="alert" class="alert alert-error mb-4">
+                <span class="material-symbols-outlined" aria-hidden="true">error</span>
                 <span>{{ actionError() }}</span>
               </div>
             }
@@ -330,7 +333,7 @@
             <!-- Success Alert -->
             @if (actionSuccess()) {
               <div class="alert alert-success mb-4">
-                <span class="material-symbols-outlined">check_circle</span>
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
                 <span>{{ actionSuccess() }}</span>
               </div>
             } @else {
@@ -341,10 +344,10 @@
                 <div [formGroup]="form" class="space-y-4 mb-6">
                   @for (param of action.parameters; track param.param_name) {
                     <fieldset>
-                      <label class="label font-semibold">
+                      <div class="label font-semibold">
                         {{ param.display_name }}
                         @if (param.required) { <span class="text-error">*</span> }
-                      </label>
+                      </div>
 
                       @switch (param.param_type) {
                         @case ('text') {
@@ -475,7 +478,7 @@
 
                           @if (actionFileUploading()) {
                             <div class="flex items-center gap-2 text-sm mt-1">
-                              <span class="loading loading-spinner loading-sm"></span>
+                              <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                               <span>{{ 'file.uploading' | translate }}</span>
                             </div>
                           }
@@ -521,18 +524,18 @@
 
               <!-- Actions -->
               <div class="cos-modal-action">
-                <button
+                <button type="button"
                   class="btn"
                   (click)="closeActionModal()"
                   [disabled]="actionLoading()">
                   {{ 'action.cancel' | translate }}
                 </button>
-                <button
+                <button type="button"
                   [class]="'btn btn-' + action.button_style"
                   (click)="confirmEntityAction()"
                   [disabled]="actionLoading() || actionParamForm()?.invalid || actionFileUploading() || isAnyGalleryUploading()">
                   @if (actionLoading()) {
-                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
                   }
                   {{ 'action.confirm' | translate }}
                 </button>
@@ -545,7 +548,7 @@
         @if (actionOverlayLoading()) {
           <div class="fixed inset-0 bg-base-100/50 flex items-center justify-center z-50">
             <div class="flex flex-col items-center gap-2">
-              <span class="loading loading-spinner loading-lg"></span>
+              <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
               <span class="text-sm opacity-70">{{ 'detail.processing' | translate }}</span>
             </div>
           </div>
@@ -556,7 +559,7 @@
           @if (dataLoading()) {
             <!-- Loading state -->
             <div class="flex flex-col items-center justify-center gap-4 py-12">
-              <span class="loading loading-spinner loading-lg"></span>
+              <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
               <p class="text-base-content/60">{{ 'state.loading' | translate }}</p>
             </div>
           } @else if (!auth.authenticated()) {

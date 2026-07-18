@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, BehaviorSubject } from 'rxjs';
 import { AdminTranslationsPage } from './admin-translations.page';
@@ -65,10 +65,11 @@ describe('AdminTranslationsPage', () => {
     mockTranslationAdmin = jasmine.createSpyObj('TranslationAdminService', [
       'getTranslations', 'getMissingTranslations', 'getDefaults', 'upsertTranslations', 'deleteTranslation'
     ]);
-    mockTranslation = jasmine.createSpyObj('TranslationService', ['clearCache'], {
-      version: { value: 1 },
-      loading: { value: false }
+    mockTranslation = jasmine.createSpyObj('TranslationService', ['clearCache', 'get'], {
+      version: signal(1),
+      loading: signal(false)
     });
+    mockTranslation.get.and.callFake((key: string) => key);
     mockSchema = jasmine.createSpyObj('SchemaService', ['refreshCache']);
     mockDashboard = jasmine.createSpyObj('DashboardService', ['refreshCache']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);

@@ -10,6 +10,7 @@ import { PhotoGalleryEditorComponent } from './photo-gallery-editor.component';
 import { GalleryService } from '../../services/gallery.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryImage, PhotoGalleryConfig } from '../../interfaces/entity';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('PhotoGalleryEditorComponent', () => {
   let component: PhotoGalleryEditorComponent;
@@ -55,6 +56,7 @@ describe('PhotoGalleryEditorComponent', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslationTesting(),
         GalleryService,
         { provide: FileUploadService, useValue: {} }
       ]
@@ -120,5 +122,32 @@ describe('PhotoGalleryEditorComponent', () => {
   it('should get thumbnail URL from file', () => {
     const url = component.getThumbUrl(mockImages[0]);
     expect(url).toContain('thumb_400.jpg');
+  });
+
+  describe('Keyboard Reorder (move buttons)', () => {
+    it('moveLater should reorder images, flag reorder dirty, and announce position', () => {
+      component.moveLater(0); // Move first image later
+
+      expect(component.images()[0].file_id).toBe('file-2');
+      expect(component.images()[1].file_id).toBe('file-1');
+      expect(component.hasPendingChanges()).toBe(true);
+      // Announcement references the new position (2 of 2)
+      expect(component.reorderAnnouncement()).toContain('2');
+    });
+
+    it('moveEarlier should reorder images back to original order', () => {
+      component.moveLater(0);
+      component.moveEarlier(1); // Move it back
+
+      expect(component.images()[0].file_id).toBe('file-1');
+      expect(component.images()[1].file_id).toBe('file-2');
+    });
+
+    it('should not reorder past a boundary', () => {
+      component.moveEarlier(0); // First image cannot move earlier
+
+      expect(component.images()[0].file_id).toBe('file-1');
+      expect(component.images()[1].file_id).toBe('file-2');
+    });
   });
 });

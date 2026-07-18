@@ -9,6 +9,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideRouter } from '@angular/router';
 import { provideMarkdown } from 'ngx-markdown';
 import { ActivatedRoute } from '@angular/router';
@@ -71,6 +72,7 @@ describe('EntityCodePage', () => {
       imports: [EntityCodePage],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         provideMarkdown(),
         {
           provide: ActivatedRoute,

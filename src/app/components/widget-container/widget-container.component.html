@@ -13,14 +13,14 @@
     @if (hasError()) {
       <div class="error-state p-6 text-center">
         <div class="alert alert-error">
-          <span class="material-symbols-outlined">error</span>
+          <span class="material-symbols-outlined" aria-hidden="true">error</span>
           <div>
             <h4 class="font-bold">Widget Failed to Load</h4>
             <p class="text-sm">Unknown widget type: {{ widget().widget_type }}</p>
           </div>
         </div>
-        <button class="btn btn-sm btn-outline mt-4" (click)="retry()">
-          <span class="material-symbols-outlined">refresh</span>
+        <button type="button" class="btn btn-sm btn-outline mt-4" (click)="retry()">
+          <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
           Retry
         </button>
       </div>

@@ -38,16 +38,17 @@ import { getS3Config } from '../../config/runtime';
  *     [file]="fileRef"
  *     [poll]="true"
  *     (fileUpdated)="onFileUpdated($event)"
- *     (clicked)="openViewer()"
  *   />
  * </div>
  * ```
  *
  * Added in v0.47.0.
  */
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-file-thumbnail',
   standalone: true,
+  imports: [LoadingIndicatorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (thumbnailUrl()) {
@@ -57,19 +58,18 @@ import { getS3Config } from '../../config/runtime';
         class="not-prose w-full h-full"
         [class.object-cover]="objectFit() === 'cover'"
         [class.object-contain]="objectFit() === 'contain'"
-        (click)="clicked.emit()"
       />
     } @else if (isLoading()) {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
-        <span class="loading loading-spinner"></span>
+        <app-loading-indicator />
       </div>
     } @else if (isFailed()) {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
-        <span class="material-symbols-outlined text-2xl text-warning">broken_image</span>
+        <span class="material-symbols-outlined text-2xl text-warning" aria-hidden="true">broken_image</span>
       </div>
     } @else {
       <div class="w-full h-full flex items-center justify-center bg-base-200">
-        <span class="material-symbols-outlined text-2xl text-base-content/40">image</span>
+        <span class="material-symbols-outlined text-2xl text-base-content/40" aria-hidden="true">image</span>
       </div>
     }
   `
@@ -92,9 +92,6 @@ export class FileThumbnailComponent {
 
   /** Whether to poll for thumbnail completion when status is pending/processing */
   poll = input(false);
-
-  /** Emitted when the image is clicked */
-  clicked = output<void>();
 
   /** Emits the updated FileReference when polling detects thumbnail completion */
   fileUpdated = output<FileReference>();

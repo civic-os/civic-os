@@ -92,6 +92,16 @@ export class MyComponent {
 - Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
 - Use the async pipe to handle observables
 
+### Accessibility: icons, spinners, and control names
+
+Material Symbols render their ligature text (e.g. `chevron_right`) into the DOM, so screen readers read it aloud unless hidden. Follow these conventions (from the July 2026 accessibility audit, decisions D10/D11):
+
+- **Every `material-symbols-outlined` span and every inline `<svg>` gets `aria-hidden="true"`.** They are decorative — the meaning comes from adjacent text or the control's label. No exceptions in normal UI code.
+- **Icon-only controls** (a `<button>`/`<a>`/`<summary>` whose only content is an icon) must carry a translated `[attr.aria-label]` in addition to the hidden icon. A bare `title` is not a sufficient accessible name. Reuse existing `action.*` keys (`action.back`, `action.close`, `action.edit`, `action.refresh`, …) before adding new `a11y.*` keys.
+- **Icons next to visible text** need only `aria-hidden="true"` — the text is the accessible name.
+- **Loading spinners:** use `<app-loading-indicator>` (`LoadingIndicatorComponent`) for page/section-level loading. It wraps the DaisyUI spinner in `role="status"` with translated sr-only text so the state is announced. Button-internal spinners inside an already-labeled button may stay a plain `<span class="loading loading-spinner" aria-hidden="true">`.
+- Data conveyed by an icon alone (e.g. a boolean check/X glyph) needs an adjacent `<span class="sr-only">` with the translated value.
+
 ## Services
 
 - Design services around a single responsibility

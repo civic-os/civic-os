@@ -3,11 +3,16 @@
     <h1>
       {{ entity.display_name }} {{ 'list.title_suffix' | translate }}
       @if (entity.description) {
-        <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description">
+        <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="entity.description" aria-hidden="true">
           <span class="material-symbols-outlined text-info cursor-help ms-2 text-2xl align-middle">help_outline</span>
         </div>
+        <span class="sr-only">{{ entity.description }}</span>
       }
     </h1>
+
+    <!-- Sort/filter-change announcements: aria-sort changes and same-count filter
+         updates are not otherwise spoken by screen readers. -->
+    <div class="sr-only" aria-live="polite">{{ listAnnouncement() }}</div>
 
   <!-- Sticky controls wrapper -->
   <div class="sticky-controls-wrapper">
@@ -22,7 +27,7 @@
                 [formControl]="searchControl"
                 [placeholder]="'list.search_placeholder' | translate:{ entity: entity.display_name }"
                 class="grow"
-                [attr.aria-label]="('action.search' | translate) + ' ' + entity.display_name" />
+                [attr.aria-label]="'list.search_placeholder' | translate:{ entity: entity.display_name }" />
               @if (searchControl.value && isLoading()) {
                 <span class="loading loading-spinner loading-sm" role="status" [attr.aria-label]="'action.search' | translate"></span>
               } @else if (searchControl.value && !isLoading()) {
@@ -63,12 +68,12 @@
         <!-- Add Button -->
         @if (entity.insert) {
           @if (entity.guided_form_key) {
-            <button class="btn btn-primary btn-sm" (click)="startGuidedForm(entity)" [attr.aria-label]="('guided_form.start_new' | translate) + ' ' + entity.display_name">
+            <button type="button" class="btn btn-primary btn-sm" (click)="startGuidedForm(entity)" [attr.aria-label]="('guided_form.start_new' | translate) + ' ' + entity.display_name">
               <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
               <span class="hidden sm:inline">{{ 'guided_form.start_new' | translate }} {{ entity.display_name }}</span>
             </button>
           } @else {
-            <button class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="('list.add_new' | translate) + ' ' + entity.display_name">
+            <button type="button" class="btn btn-primary btn-sm" [routerLink]="'/create/' + entityKey" [attr.aria-label]="('list.add_new' | translate) + ' ' + entity.display_name">
               <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
               <span class="hidden sm:inline">{{ 'action.add' | translate }} {{ entity.display_name }}</span>
             </button>
@@ -124,7 +129,7 @@
     <!-- Grid container for table and map -->
     <div class="list-content-grid" [class.with-map]="showMap()">
       <div class="overflow-x-auto">
-        <table class="table table-zebra">
+        <table class="table table-zebra" [attr.aria-busy]="isLoading()">
         @if (displayProperties$ | async; as props) {
           <caption class="sr-only">{{ entity.display_name }} {{ 'list.title_suffix' | translate }}</caption>
           <!-- head -->
@@ -134,23 +139,34 @@
                 <th
                   scope="col"
                   [class.sortable]="prop.sortable !== false"
-                  (click)="onHeaderClick(prop)"
                   [attr.aria-sort]="
                     sortStateSignal().column === prop.column_name
                       ? (sortStateSignal().direction === 'asc' ? 'ascending' : 'descending')
                       : (prop.sortable !== false ? 'none' : null)
                   ">
-                  <span class="header-content">
-                    {{ prop.display_name }}
-                    @if (sortStateSignal().column === prop.column_name && sortStateSignal().direction === 'asc') {
-                      <span class="material-symbols-outlined sort-icon sort-icon-flipped" aria-hidden="true">sort</span>
-                    } @else if (sortStateSignal().column === prop.column_name && sortStateSignal().direction === 'desc') {
-                      <span class="material-symbols-outlined sort-icon" aria-hidden="true">sort</span>
-                    }
-                    @if (isColumnFiltered(prop.column_name)) {
-                      <span class="material-symbols-outlined text-base-content/50 text-sm ms-1" aria-hidden="true">filter_alt</span>
-                    }
-                  </span>
+                  @if (prop.sortable !== false) {
+                    <button
+                      type="button"
+                      class="header-content w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]"
+                      (click)="onHeaderClick(prop)">
+                      {{ prop.display_name }}
+                      @if (sortStateSignal().column === prop.column_name && sortStateSignal().direction === 'asc') {
+                        <span class="material-symbols-outlined sort-icon sort-icon-flipped" aria-hidden="true">sort</span>
+                      } @else if (sortStateSignal().column === prop.column_name && sortStateSignal().direction === 'desc') {
+                        <span class="material-symbols-outlined sort-icon" aria-hidden="true">sort</span>
+                      }
+                      @if (isColumnFiltered(prop.column_name)) {
+                        <span class="material-symbols-outlined text-base-content/50 text-sm ms-1" aria-hidden="true">filter_alt</span>
+                      }
+                    </button>
+                  } @else {
+                    <span class="header-content">
+                      {{ prop.display_name }}
+                      @if (isColumnFiltered(prop.column_name)) {
+                        <span class="material-symbols-outlined text-base-content/50 text-sm ms-1" aria-hidden="true">filter_alt</span>
+                      }
+                    </span>
+                  }
                 </th>
               }
             </tr>
@@ -160,36 +176,48 @@
               @if (data?.length) {
                 @for (row of data; track row) {
                   <tr
-                    [routerLink]="isSummaryView() ? null : '/view/'+entityKey+'/'+row.id"
                     [class.pointer]="!isSummaryView()"
                     [class.highlighted-row]="!isSummaryView() && showMap() && highlightedRecordId() === row.id"
                     [attr.data-record-id]="isSummaryView() ? null : row.id"
                     (mouseenter)="onRowHover(row.id)"
                     (mouseleave)="onRowHover(null)"
-                    [attr.tabindex]="isSummaryView() ? null : 0"
-                    [attr.role]="isSummaryView() ? null : 'link'"
-                    [attr.aria-label]="isSummaryView() ? null : ('detail.view_entity' | translate:{ entity: entity.display_name })"
-                    (keydown.enter)="onRowKeyPress($any($event), row.id)"
-                    (keydown.space)="onRowKeyPress($any($event), row.id)">
-                    @for (prop of props; track prop) {
+                    (click)="onRowClick(row.id)">
+                    @for (prop of props; track prop; let first = $first) {
                       <td>
-                        <app-display-property
-                          [datum]="row[prop.column_name]"
-                          [property]="prop"
-                          [linkRelated]="false"
-                          [showLabel]="false"
-                          [highlightTerms]="searchTerms()"></app-display-property>
+                        @if (first && !isSummaryView()) {
+                          <a
+                            [routerLink]="'/view/'+entityKey+'/'+row.id"
+                            class="link link-hover"
+                            (click)="$event.stopPropagation()">
+                            <app-display-property
+                              [datum]="row[prop.column_name]"
+                              [property]="prop"
+                              [linkRelated]="false"
+                              [showLabel]="false"
+                              [highlightTerms]="searchTerms()"></app-display-property>
+                            @if (row[prop.column_name] === null || row[prop.column_name] === undefined || row[prop.column_name] === '') {
+                              <span class="sr-only">{{ 'a11y.view_record' | translate:{ id: row.id } }}</span>
+                            }
+                          </a>
+                        } @else {
+                          <app-display-property
+                            [datum]="row[prop.column_name]"
+                            [property]="prop"
+                            [linkRelated]="false"
+                            [showLabel]="false"
+                            [highlightTerms]="searchTerms()"></app-display-property>
+                        }
                       </td>
                     }
                   </tr>
                 }
               } @else {
                 <tr>
-                  <td colspan="100%" class="p-8">
+                  <td [attr.colspan]="props.length" class="p-8">
                     @if (isLoading()) {
                       <!-- Loading state - show spinner while data is being fetched -->
-                      <div class="flex flex-col items-center justify-center gap-4 py-12">
-                        <span class="loading loading-spinner loading-lg"></span>
+                      <div class="flex flex-col items-center justify-center gap-4 py-12" role="status">
+                        <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
                         <p class="text-base-content/60">{{ 'state.loading' | translate }}</p>
                       </div>
                     } @else if (!auth.authenticated() && dataSignal().length === 0) {
@@ -255,6 +283,7 @@
   <!-- Pagination controls (bottom) -->
   <div class="not-prose mt-6">
     <app-pagination
+      [announceResults]="false"
       [currentPage]="currentPage()"
       [pageSize]="pageSize()"
       [totalCount]="totalCount()"
@@ -268,14 +297,15 @@
   <cos-modal
     [isOpen]="showGuidedFormError()"
     (closed)="closeGuidedFormError()"
-    size="sm">
+    size="sm"
+    [label]="('guided_form.unable_to_start' | translate) + ' ' + entity.display_name">
     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-      <span class="material-symbols-outlined text-error">error</span>
+      <span class="material-symbols-outlined text-error" aria-hidden="true">error</span>
       {{ 'guided_form.unable_to_start' | translate }} {{ entity.display_name }}
     </h3>
     <p class="mb-6">{{ guidedFormErrorMessage() }}</p>
     <div class="cos-modal-action">
-      <button class="btn" (click)="closeGuidedFormError()">{{ 'action.close' | translate }}</button>
+      <button type="button" class="btn" (click)="closeGuidedFormError()">{{ 'action.close' | translate }}</button>
     </div>
   </cos-modal>
   </div>

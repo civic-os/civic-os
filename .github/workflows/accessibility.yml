@@ -1,0 +1,83 @@
+name: Accessibility
+
+# Accessibility guardrail for the Angular frontend.
+#
+# The ENFORCED gate is the ESLint `@angular-eslint/template` accessibility rules
+# (see eslint.config.js). These catch the keyboard/screen-reader blockers the
+# July 2026 remediation addressed (docs/notes/ACCESSIBILITY_AUDIT_2026-07.md) and
+# fail the build on regressions such as a bare `(click)` handler on a
+# non-interactive element.
+#
+# pa11y is included as a BEST-EFFORT informational job. It cannot easily
+# authenticate against Keycloak in CI, so it can only meaningfully test routes
+# that render without auth (home, /view/Issue, /create/Issue). Admin routes in
+# .pa11yci.json will redirect to the login page when unauthenticated. The pa11y
+# job therefore does not fail the build; treat its output as a report. Full
+# authenticated pa11y/Lighthouse coverage is future work.
+
+on:
+  workflow_call:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # ENFORCED: ESLint accessibility rules. This job fails the build on a11y
+  # rule violations (errors). Warnings (e.g. the legacy button-has-type /
+  # label-has-associated-control backlog) do not fail the build.
+  a11y-lint:
+    name: ESLint Accessibility Rules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+
+      - name: Run ESLint accessibility gate
+        run: npm run lint
+
+  # BEST-EFFORT: pa11y-ci against unauthenticated routes. Informational only.
+  pa11y:
+    name: pa11y (best-effort, informational)
+    runs-on: ubuntu-latest
+    # Do not block the build on pa11y — auth/data limitations make it flaky.
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+
+      - name: Build application
+        run: npm run build
+
+      - name: Serve build and run pa11y
+        run: |
+          npx --yes http-server dist/frontend/browser -p 4200 -s &
+          SERVER_PID=$!
+          npx --yes wait-on http://localhost:4200 --timeout 60000 || true
+          # pa11y is informational; never fail the job on findings.
+          npm run a11y:pa11y || true
+          kill $SERVER_PID || true

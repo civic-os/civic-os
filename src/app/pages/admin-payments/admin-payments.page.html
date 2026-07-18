@@ -1,13 +1,14 @@
 <div class="container mx-auto p-6">
   <h1 class="text-3xl font-bold mb-6">Payment Management</h1>
+  <div class="sr-only" aria-live="polite">{{ sortAnnouncement() }}</div>
 
   <!-- Success Message -->
   @if (successMessage()) {
     <div class="alert alert-success mb-4 relative">
-      <span class="material-symbols-outlined">check_circle</span>
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
       <span>{{ successMessage() }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="dismissSuccess()">
-        <span class="material-symbols-outlined">close</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="dismissSuccess()" [attr.aria-label]="'action.close' | translate">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
   }
@@ -15,7 +16,7 @@
   <!-- Error Message -->
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
@@ -23,7 +24,7 @@
   <!-- Permission Check -->
   @if (!canViewPayments()) {
     <div class="alert alert-warning">
-      <span class="material-symbols-outlined">lock</span>
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span>
       <span>You do not have permission to view payments. Contact an administrator to request access.</span>
     </div>
   } @else {
@@ -31,9 +32,9 @@
     <div class="flex flex-wrap items-end gap-4 mb-6">
       <!-- Status Filter -->
       <div class="form-control">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">Status</span>
-        </label>
+        </div>
         <select
           class="select select-bordered select-sm"
           [ngModel]="statusFilter()"
@@ -46,9 +47,9 @@
 
       <!-- Date Range Filter -->
       <div class="form-control">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">Date Range</span>
-        </label>
+        </div>
         <div class="flex items-center gap-2">
           <input
             type="date"
@@ -56,7 +57,7 @@
             [ngModel]="dateFrom()"
             (ngModelChange)="onDateFromChange($event)"
             title="From date" />
-          <span class="text-base-content/50">—</span>
+          <span class="text-base-content/50">-</span>
           <input
             type="date"
             class="input input-bordered input-sm w-36"
@@ -69,11 +70,11 @@
       <!-- Search + Refresh -->
       <div class="flex items-end gap-1">
         <div class="form-control w-72">
-          <label class="label py-1">
+          <div class="label py-1">
             <span class="label-text font-semibold">&nbsp;</span>
-          </label>
+          </div>
           <label class="input input-bordered input-sm flex items-center gap-2">
-            <span class="material-symbols-outlined text-base text-base-content/50">search</span>
+            <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
             <input
               type="text"
               placeholder="Search description or email..."
@@ -82,12 +83,13 @@
               (ngModelChange)="onSearchChange($event)" />
           </label>
         </div>
-        <button
+        <button type="button"
           class="btn btn-sm btn-square btn-ghost"
           (click)="refresh()"
           [disabled]="loading()"
-          title="Refresh">
-          <span class="material-symbols-outlined" [class.animate-spin]="loading()">refresh</span>
+          title="Refresh"
+          [attr.aria-label]="'action.refresh' | translate">
+          <span class="material-symbols-outlined" aria-hidden="true" [class.animate-spin]="loading()">refresh</span>
         </button>
       </div>
     </div>
@@ -95,7 +97,7 @@
     <!-- Loading Spinner -->
     @if (loading()) {
       <div class="flex justify-center items-center min-h-[400px]">
-        <span class="loading loading-spinner loading-lg"></span>
+        <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
       </div>
     } @else {
       <!-- Payments Table -->
@@ -103,34 +105,38 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('created_at')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'created_at' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('created_at')">
                   Date
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('created_at') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('created_at') }}</span>
+                </button>
               </th>
-              <th>User</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('description')">
-                <div class="flex items-center gap-1">
+              <th scope="col">User</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'description' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('description')">
                   Description
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('description') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('description') }}</span>
+                </button>
               </th>
-              <th>Entity</th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('effective_status')">
-                <div class="flex items-center gap-1">
+              <th scope="col">Entity</th>
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'effective_status' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('effective_status')">
                   Status
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('effective_status') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('effective_status') }}</span>
+                </button>
               </th>
-              <th class="cursor-pointer hover:bg-base-200" (click)="onSort('amount')">
-                <div class="flex items-center gap-1">
+              <th scope="col" class="cursor-pointer hover:bg-base-200"
+                [attr.aria-sort]="sortColumn() === 'amount' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <button type="button" class="w-full text-start bg-transparent border-0 p-0 cursor-pointer flex items-center gap-1 font-[inherit] text-[inherit]" (click)="onSort('amount')">
                   Amount
-                  <span class="material-symbols-outlined text-sm">{{ getSortIcon('amount') }}</span>
-                </div>
+                  <span class="material-symbols-outlined text-sm" aria-hidden="true">{{ getSortIcon('amount') }}</span>
+                </button>
               </th>
-              <th>Refund</th>
-              <th>Actions</th>
+              <th scope="col">Refund</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -161,7 +167,7 @@
                     <a
                       [routerLink]="getEntityRoute(payment)"
                       class="link link-primary text-sm flex items-center gap-1">
-                      <span class="material-symbols-outlined text-xs">open_in_new</span>
+                      <span class="material-symbols-outlined text-xs" aria-hidden="true">open_in_new</span>
                       {{ payment.entity_display_name }}
                     </a>
                   } @else {
@@ -171,7 +177,7 @@
                 <!-- Status -->
                 <td>
                   <div class="badge gap-1 whitespace-normal h-auto min-h-[1.5rem] text-center" [ngClass]="getStatusBadgeClass(payment.effective_status)">
-                    <span class="material-symbols-outlined text-xs shrink-0">{{ getStatusIcon(payment.effective_status) }}</span>
+                    <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">{{ getStatusIcon(payment.effective_status) }}</span>
                     {{ getStatusLabel(payment.effective_status) }}
                   </div>
                 </td>
@@ -191,7 +197,7 @@
                           Net: {{ payment.amount - payment.total_refunded | currency:payment.currency:'symbol':'1.2-2' }}
                         </span>
                       }
-                      <button
+                      <button type="button"
                         class="link link-primary text-xs mt-1 text-start"
                         (click)="openRefundHistoryModal(payment)">
                         {{ payment.refund_count }} refund{{ payment.refund_count !== 1 ? 's' : '' }}
@@ -207,10 +213,10 @@
                 <!-- Actions -->
                 <td>
                   @if (canRefund(payment)) {
-                    <button
+                    <button type="button"
                       class="btn btn-sm btn-outline btn-error"
                       (click)="openRefundModal(payment)">
-                      <span class="material-symbols-outlined text-sm">undo</span>
+                      <span class="material-symbols-outlined text-sm" aria-hidden="true">undo</span>
                       Refund
                     </button>
                   }
@@ -234,20 +240,20 @@
             Showing {{ paginationStart() }} - {{ paginationEnd() }} of {{ totalCount() }}
           </div>
           <div class="join">
-            <button
+            <button type="button"
               class="join-item btn btn-sm"
               [disabled]="!hasPrevPage()"
-              (click)="prevPage()">
-              <span class="material-symbols-outlined">chevron_left</span>
+              (click)="prevPage()" [attr.aria-label]="'a11y.previous_page' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
             </button>
-            <button class="join-item btn btn-sm">
+            <button type="button" class="join-item btn btn-sm">
               Page {{ currentPage() }} of {{ totalPages() }}
             </button>
-            <button
+            <button type="button"
               class="join-item btn btn-sm"
               [disabled]="!hasNextPage()"
-              (click)="nextPage()">
-              <span class="material-symbols-outlined">chevron_right</span>
+              (click)="nextPage()" [attr.aria-label]="'a11y.next_page' | translate">
+              <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
             </button>
           </div>
         </div>
@@ -256,7 +262,7 @@
   }
 
   <!-- Refund Modal -->
-  <cos-modal [isOpen]="showRefundModal() && !!refundForm()" (closed)="closeRefundModal()" size="sm">
+  <cos-modal [isOpen]="showRefundModal() && !!refundForm()" (closed)="closeRefundModal()" size="sm" [label]="'a11y.initiate_refund' | translate">
     @if (refundForm()) {
       <h3 class="font-bold text-lg mb-4">Initiate Refund</h3>
 
@@ -286,19 +292,19 @@
       <!-- Error Alert -->
       @if (refundError()) {
         <div class="alert alert-error mb-4 text-sm">
-          <span class="material-symbols-outlined text-base">error</span>
+          <span class="material-symbols-outlined text-base" aria-hidden="true">error</span>
           <span>{{ refundError() }}</span>
         </div>
       }
 
       <!-- Refund Form -->
       <div class="form-control mb-3">
-        <label class="label py-1">
+        <div class="label py-1">
           <span class="label-text font-semibold">Refund Amount</span>
           <span class="label-text-alt text-base-content/60">
             Max: {{ refundForm()!.payment.amount - refundForm()!.payment.total_refunded | currency:refundForm()!.payment.currency:'symbol':'1.2-2' }}
           </span>
-        </label>
+        </div>
         <input
           type="text"
           currencyMask
@@ -323,21 +329,21 @@
 
       <!-- Actions -->
       <div class="cos-modal-action">
-        <button
+        <button type="button"
           class="btn btn-sm"
           (click)="closeRefundModal()"
           [disabled]="refundLoading()">
           Cancel
         </button>
-        <button
+        <button type="button"
           class="btn btn-sm btn-error"
           (click)="submitRefund()"
           [disabled]="refundLoading()">
           @if (refundLoading()) {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
             Processing...
           } @else {
-            <span class="material-symbols-outlined text-base">undo</span>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">undo</span>
             Issue Refund
           }
         </button>
@@ -346,7 +352,7 @@
   </cos-modal>
 
   <!-- Refund History Modal -->
-  <cos-modal [isOpen]="showRefundHistoryModal() && !!refundHistoryPayment()" (closed)="closeRefundHistoryModal()" size="lg">
+  <cos-modal [isOpen]="showRefundHistoryModal() && !!refundHistoryPayment()" (closed)="closeRefundHistoryModal()" size="lg" [label]="'a11y.refund_history' | translate">
     @if (refundHistoryPayment()) {
       <h3 class="font-bold text-lg mb-2">Refund History</h3>
       <p class="text-sm text-base-content/60 mb-4">{{ refundHistoryPayment()!.description }}</p>
@@ -376,7 +382,7 @@
       <!-- Refunds List -->
       @if (refundHistoryLoading()) {
         <div class="flex justify-center py-8">
-          <span class="loading loading-spinner loading-md"></span>
+          <span class="loading loading-spinner loading-md" aria-hidden="true"></span>
         </div>
       } @else if (refundHistory().length === 0) {
         <div class="text-center py-8 text-base-content/60">
@@ -408,11 +414,11 @@
                       'badge-error': refund.status === 'failed'
                     }">
                       @if (refund.status === 'succeeded') {
-                        <span class="material-symbols-outlined text-xs">check_circle</span>
+                        <span class="material-symbols-outlined text-xs" aria-hidden="true">check_circle</span>
                       } @else if (refund.status === 'pending') {
-                        <span class="material-symbols-outlined text-xs">schedule</span>
+                        <span class="material-symbols-outlined text-xs" aria-hidden="true">schedule</span>
                       } @else {
-                        <span class="material-symbols-outlined text-xs">error</span>
+                        <span class="material-symbols-outlined text-xs" aria-hidden="true">error</span>
                       }
                       {{ refund.status }}
                     </div>
@@ -436,7 +442,7 @@
                 @if (refund.error_message) {
                   <tr class="bg-error/10">
                     <td colspan="5" class="text-xs text-error">
-                      <span class="material-symbols-outlined text-xs align-middle me-1">error</span>
+                      <span class="material-symbols-outlined text-xs align-middle me-1" aria-hidden="true">error</span>
                       {{ refund.error_message }}
                     </td>
                   </tr>
@@ -449,7 +455,7 @@
 
       <!-- Actions -->
       <div class="cos-modal-action">
-        <button class="btn btn-sm" (click)="closeRefundHistoryModal()">Close</button>
+        <button type="button" class="btn btn-sm" (click)="closeRefundHistoryModal()">Close</button>
       </div>
     }
   </cos-modal>

@@ -1,22 +1,22 @@
-<cos-modal [isOpen]="showModal()" (closed)="close()" size="lg">
+<cos-modal [isOpen]="showModal()" (closed)="close()" size="lg" [label]="'settings.title' | translate">
   <h3 class="font-bold text-lg mb-4">{{ 'settings.title' | translate }}</h3>
 
   <!-- Tabs -->
   <div class="tabs tabs-lift mb-4" role="tablist">
-    <button
+    <button type="button"
       class="tab"
       [class.tab-active]="selectedTab() === 'preferences'"
       (click)="selectedTab.set('preferences')"
       role="tab"
     >{{ 'settings.preferences' | translate }}</button>
-    <button
+    <button type="button"
       class="tab"
       [class.tab-active]="selectedTab() === 'colors'"
       (click)="selectedTab.set('colors')"
       role="tab"
     >{{ 'settings.colors' | translate }}</button>
     @if (localeService.supportedLocales.length > 1) {
-      <button
+      <button type="button"
         class="tab"
         [class.tab-active]="selectedTab() === 'language'"
         (click)="selectedTab.set('language')"
@@ -112,7 +112,7 @@
           <!-- Currently impersonating -->
           <div class="p-3 rounded-lg bg-warning/10 border border-warning mb-3">
             <div class="flex items-center gap-2 text-warning mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
               <span class="font-medium">{{ 'impersonation.active' | translate }}</span>
@@ -120,13 +120,13 @@
             <p class="text-sm mb-2">
               {{ 'impersonation.viewing_as' | translate }} <strong>{{ impersonation.impersonatedRoles().join(', ') }}</strong>
             </p>
-            <button
+            <button type="button"
               class="btn btn-warning btn-sm"
               (click)="stopImpersonation()"
               [disabled]="impersonationLoading()"
             >
               @if (impersonationLoading()) {
-                <span class="loading loading-spinner loading-xs"></span>
+                <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
               }
               {{ 'impersonation.stop' | translate }}
             </button>
@@ -140,12 +140,12 @@
                 <label class="cursor-pointer">
                   <input
                     type="checkbox"
-                    class="checkbox checkbox-sm hidden"
+                    class="checkbox checkbox-sm sr-only peer"
                     [checked]="isRoleSelected(role.role_key)"
                     (change)="toggleRole(role.role_key)"
                   />
                   <span
-                    class="badge badge-lg cursor-pointer transition-colors"
+                    class="badge badge-lg cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"
                     [class.badge-primary]="isRoleSelected(role.role_key)"
                     [class.badge-outline]="!isRoleSelected(role.role_key)"
                   >
@@ -156,13 +156,13 @@
             </div>
           </div>
 
-          <button
+          <button type="button"
             class="btn btn-primary btn-sm"
             (click)="startImpersonation()"
             [disabled]="selectedRoles().length === 0 || impersonationLoading()"
           >
             @if (impersonationLoading()) {
-              <span class="loading loading-spinner loading-xs"></span>
+              <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
             }
             {{ 'impersonation.start' | translate }}
           </button>
@@ -186,12 +186,12 @@
             <input
               type="radio"
               name="locale"
-              class="radio hidden"
+              class="radio sr-only peer"
               [checked]="localeService.locale() === loc.code"
               (change)="localeService.setLocale(loc.code)"
             />
             <span
-              class="badge badge-lg cursor-pointer transition-colors"
+              class="badge badge-lg cursor-pointer transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"
               [class.badge-primary]="localeService.locale() === loc.code"
               [class.badge-outline]="localeService.locale() !== loc.code"
             >
@@ -204,6 +204,6 @@
   }
 
   <div class="cos-modal-action">
-    <button class="btn" (click)="close()">{{ 'action.close' | translate }}</button>
+    <button type="button" class="btn" (click)="close()">{{ 'action.close' | translate }}</button>
   </div>
 </cos-modal>

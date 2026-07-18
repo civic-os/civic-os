@@ -16,6 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
 import { ThemeService } from '../../services/theme.service';
@@ -70,7 +71,7 @@ describe('GeoPointMapComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GeoPointMapComponent],
-      providers: [provideZonelessChangeDetection()]
+      providers: [provideZonelessChangeDetection(), provideTranslationTesting()]
     })
     .compileComponents();
 
@@ -444,6 +445,64 @@ describe('GeoPointMapComponent', () => {
       component['setLocation'](42.5, -84.5);
 
       expect(emitted).toBe(false);
+    });
+  });
+
+  describe('Coordinate Fallback Inputs', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('mode', 'edit');
+      component['map'] = createMockMap();
+    });
+
+    it('should emit EWKT valueChange when both inputs hold valid coordinates', (done) => {
+      component.valueChange.subscribe(value => {
+        expect(value).toBe('SRID=4326;POINT(-83.5 43.2)');
+        done();
+      });
+
+      component.onCoordinateInput('lat', '43.2');
+      component.onCoordinateInput('lng', '-83.5');
+    });
+
+    it('should not emit when only one coordinate is provided', () => {
+      let emitted = false;
+      component.valueChange.subscribe(() => emitted = true);
+
+      component.onCoordinateInput('lat', '43.2');
+
+      expect(emitted).toBe(false);
+    });
+
+    it('should not emit for out-of-range coordinates', () => {
+      let emitted = false;
+      component.valueChange.subscribe(() => emitted = true);
+
+      component.onCoordinateInput('lat', '95');
+      component.onCoordinateInput('lng', '-83.5');
+
+      expect(emitted).toBe(false);
+    });
+
+    it('should populate the inputs when setLocation is called from the map path', () => {
+      component['setLocation'](43.2, -83.5);
+
+      expect(component.latValue()).toBe('43.2');
+      expect(component.lngValue()).toBe('-83.5');
+    });
+
+    it('should not reformat the typed text while syncing from the inputs', () => {
+      component.onCoordinateInput('lat', '43.200000');
+      component.onCoordinateInput('lng', '-83.5');
+
+      // Raw typed string retained (setLocation must not clobber it)
+      expect(component.latValue()).toBe('43.200000');
+    });
+
+    it('should round reflected coordinates to 6 decimals', () => {
+      component['updateCoordinateInputs'](43.123456789, -83.987654321);
+
+      expect(component.latValue()).toBe('43.123457');
+      expect(component.lngValue()).toBe('-83.987654');
     });
   });
 

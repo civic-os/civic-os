@@ -1,11 +1,11 @@
 <!-- Dashboard Selector Dropdown (DaisyUI) -->
 <div class="dropdown dropdown-end">
   <!-- Dropdown Button -->
-  <div tabindex="0" role="button" class="btn btn-ghost">
-    <span class="material-symbols-outlined">dashboard</span>
+  <button type="button" class="btn btn-ghost" [attr.aria-label]="'a11y.select_dashboard' | translate">
+    <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
     <span class="hidden sm:inline ms-2">{{ getCurrentDashboardName() }}</span>
-    <span class="material-symbols-outlined ms-1">expand_more</span>
-  </div>
+    <span class="material-symbols-outlined ms-1" aria-hidden="true">expand_more</span>
+  </button>
 
   <!-- Dropdown Menu -->
   @if (!loading() && dashboards().length > 0) {
@@ -15,17 +15,18 @@
     >
       <!-- Default Dashboard -->
       <li>
-        <a
+        <button
+          type="button"
           (click)="selectDefaultDashboard()"
           [class.menu-active]="currentDashboardId() === undefined"
           class="flex items-center"
         >
-          <span class="material-symbols-outlined">home</span>
+          <span class="material-symbols-outlined" aria-hidden="true">home</span>
           <span>Default Dashboard</span>
           @if (currentDashboardId() === undefined) {
-            <span class="material-symbols-outlined ms-auto text-primary">check</span>
+            <span class="material-symbols-outlined ms-auto text-primary" aria-hidden="true">check</span>
           }
-        </a>
+        </button>
       </li>
 
       <li class="menu-title">
@@ -35,12 +36,13 @@
       <!-- Dashboard List -->
       @for (dashboard of dashboards(); track dashboard.id) {
         <li>
-          <a
+          <button
+            type="button"
             (click)="selectDashboard(dashboard.id)"
             [class.menu-active]="currentDashboardId() === dashboard.id"
             class="flex items-center"
           >
-            <span class="material-symbols-outlined">
+            <span class="material-symbols-outlined" aria-hidden="true">
               {{ dashboard.is_public ? 'public' : 'lock' }}
             </span>
             <div class="flex flex-col flex-1">
@@ -50,9 +52,9 @@
               }
             </div>
             @if (currentDashboardId() === dashboard.id) {
-              <span class="material-symbols-outlined ms-auto text-primary">check</span>
+              <span class="material-symbols-outlined ms-auto text-primary" aria-hidden="true">check</span>
             }
-          </a>
+          </button>
         </li>
       }
     </ul>
@@ -66,7 +68,7 @@
     >
       <li class="menu-disabled">
         <a class="flex items-center justify-center">
-          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           <span class="ms-2">Loading dashboards...</span>
         </a>
       </li>

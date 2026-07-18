@@ -3,6 +3,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -23,6 +24,7 @@ describe('StaticAssetsPage', () => {
     await TestBed.configureTestingModule({
       imports: [StaticAssetsPage],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),

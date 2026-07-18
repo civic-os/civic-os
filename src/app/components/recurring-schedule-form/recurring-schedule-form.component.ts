@@ -78,11 +78,12 @@ export interface RecurringScheduleValue {
         <h4 class="font-medium mb-4">{{ timeSlotLabel() }}</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="form-control">
-            <label class="label">
+            <label class="label" [for]="uid + '-start'">
               <span class="label-text">Start</span>
             </label>
             <input
               type="datetime-local"
+              [id]="uid + '-start'"
               class="input input-bordered w-full"
               [ngModel]="dtstartInternal()"
               (ngModelChange)="onStartChange($event)"
@@ -90,11 +91,12 @@ export interface RecurringScheduleValue {
             />
           </div>
           <div class="form-control">
-            <label class="label">
+            <label class="label" [for]="uid + '-end'">
               <span class="label-text">End</span>
             </label>
             <input
               type="datetime-local"
+              [id]="uid + '-end'"
               class="input input-bordered w-full"
               [ngModel]="dtendInternal()"
               (ngModelChange)="onEndChange($event)"
@@ -127,6 +129,10 @@ export interface RecurringScheduleValue {
   `
 })
 export class RecurringScheduleFormComponent implements OnInit {
+  // Incrementing counter → unique DOM id prefix per component instance.
+  private static nextInstanceId = 0;
+  public readonly uid = `recurring-schedule-form-${RecurringScheduleFormComponent.nextInstanceId++}`;
+
   // Inputs
   dtstart = input<string>('');
   dtend = input<string>('');

@@ -8,6 +8,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPolygonMapComponent, resolveColor } from './geo-polygon-map.component';
 import { ThemeService } from '../../services/theme.service';
@@ -30,6 +31,7 @@ describe('GeoPolygonMapComponent', () => {
       imports: [GeoPolygonMapComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: ThemeService, useValue: mockThemeService },
       ]
     }).compileComponents();
@@ -101,6 +103,86 @@ describe('GeoPolygonMapComponent', () => {
 
     it('should return fallback for object without color', () => {
       expect(resolveColor({ id: 1, display_name: 'Test' })).toBe('#3388ff');
+    });
+  });
+
+  describe('Coordinate Entry Fallback', () => {
+    it('should parse valid coordinate lines', () => {
+      const result = component.parseCoordinateLines('43.0, -83.7\n43.0, -83.6\n43.1, -83.6');
+      expect(result.error).toBeUndefined();
+      expect(result.coords).toEqual([[43.0, -83.7], [43.0, -83.6], [43.1, -83.6]]);
+    });
+
+    it('should drop an explicit closing point (ring auto-closed)', () => {
+      const result = component.parseCoordinateLines('43.0, -83.7\n43.0, -83.6\n43.1, -83.6\n43.0, -83.7');
+      expect(result.error).toBeUndefined();
+      expect(result.coords!.length).toBe(3);
+    });
+
+    it('should reject fewer than 3 points', () => {
+      const result = component.parseCoordinateLines('43.0, -83.7\n43.0, -83.6');
+      expect(result.coords).toBeUndefined();
+      expect(result.error!.key).toBe('a11y.coords_error_min_points');
+    });
+
+    it('should reject non-numeric and out-of-range lines with the line number', () => {
+      const bad = component.parseCoordinateLines('43.0, -83.7\nfoo, bar\n43.1, -83.6');
+      expect(bad.error!.key).toBe('a11y.coords_error_line');
+      expect(bad.error!.params).toEqual({ line: 2 });
+
+      const outOfRange = component.parseCoordinateLines('95.0, -83.7\n43.0, -83.6\n43.1, -83.6');
+      expect(outOfRange.error!.key).toBe('a11y.coords_error_line');
+      expect(outOfRange.error!.params).toEqual({ line: 1 });
+    });
+
+    it('should skip blank lines', () => {
+      const result = component.parseCoordinateLines('43.0, -83.7\n\n43.0, -83.6\n43.1, -83.6\n');
+      expect(result.error).toBeUndefined();
+      expect(result.coords!.length).toBe(3);
+    });
+
+    it('should emit closed-ring EWKT via applyCoordinates', (done) => {
+      component.coordsText.set('43.0, -83.7\n43.0, -83.6\n43.1, -83.6');
+
+      component.valueChange.subscribe(value => {
+        expect(value).toBe('SRID=4326;POLYGON((-83.7 43, -83.6 43, -83.6 43.1, -83.7 43))');
+        done();
+      });
+
+      component.applyCoordinates();
+
+      expect(component.coordsError()).toBeNull();
+      expect(component['drawnPolygon']).toBeDefined();
+    });
+
+    it('should set an inline error and not emit on invalid apply', () => {
+      let emitted = false;
+      component.valueChange.subscribe(() => emitted = true);
+
+      component.coordsText.set('43.0, -83.7');
+      component.applyCoordinates();
+
+      expect(emitted).toBe(false);
+      expect(component.coordsError()!.key).toBe('a11y.coords_error_min_points');
+    });
+
+    it('should refresh the textarea from the drawn polygon when the panel opens', () => {
+      const mockPolygon = {
+        getLatLngs: () => [[{ lat: 43, lng: -83.7 }, { lat: 43, lng: -83.6 }, { lat: 43.1, lng: -83.6 }]],
+      } as any;
+      component['drawnPolygon'] = mockPolygon;
+
+      component.toggleCoordsPanel();
+
+      expect(component.coordsPanelOpen()).toBe(true);
+      expect(component.coordsText()).toBe('43, -83.7\n43, -83.6\n43.1, -83.6');
+    });
+
+    it('should clear the textarea when opening with no polygon drawn', () => {
+      component.coordsText.set('stale');
+      component.toggleCoordsPanel();
+
+      expect(component.coordsText()).toBe('');
     });
   });
 });

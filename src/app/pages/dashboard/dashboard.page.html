@@ -3,7 +3,7 @@
   <!-- Loading State -->
   @if (loading()) {
     <div class="loading-container">
-      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <span class="loading loading-spinner loading-lg text-primary" aria-hidden="true"></span>
       <p class="text-base-content/70 mt-4">Loading dashboard...</p>
     </div>
   }
@@ -12,14 +12,14 @@
   @if (!loading() && error()) {
     <div class="error-container">
       <div class="alert alert-error max-w-md">
-        <span class="material-symbols-outlined">error</span>
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
         <div>
           <h3 class="font-bold">Failed to Load Dashboard</h3>
           <p class="text-sm">{{ error() }}</p>
         </div>
       </div>
-      <button class="btn btn-primary mt-4" (click)="retry()">
-        <span class="material-symbols-outlined">refresh</span>
+      <button type="button" class="btn btn-primary mt-4" (click)="retry()">
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
         Retry
       </button>
     </div>
@@ -57,7 +57,7 @@
       <!-- Empty State (No Widgets) -->
       @if (widgets().length === 0) {
         <div class="empty-state">
-          <span class="material-symbols-outlined text-6xl text-base-content/30">widgets</span>
+          <span class="material-symbols-outlined text-6xl text-base-content/30" aria-hidden="true">widgets</span>
           <h3 class="text-xl font-semibold text-base-content/70 mt-4">No Widgets</h3>
           <p class="text-base-content/50 mt-2">
             This dashboard doesn't have any widgets yet.

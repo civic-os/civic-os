@@ -3,14 +3,14 @@
 
   @if (error()) {
     <div class="alert alert-error mb-4">
-      <span class="material-symbols-outlined">error</span>
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>
       <span>{{ error() }}</span>
     </div>
   }
 
   @if (loading()) {
     <div class="flex items-center justify-center h-64">
-      <span class="loading loading-spinner loading-lg"></span>
+      <span class="loading loading-spinner loading-lg" aria-hidden="true"></span>
     </div>
   }
 
@@ -42,7 +42,7 @@
     <!-- Function list -->
     @if (filteredFunctions().length === 0) {
       <div class="text-center py-12 text-base-content/50">
-        <span class="material-symbols-outlined text-4xl mb-2">search_off</span>
+        <span class="material-symbols-outlined text-4xl mb-2" aria-hidden="true">search_off</span>
         <p>No functions match your search.</p>
       </div>
     } @else {
@@ -51,7 +51,12 @@
           <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-lg"
                [class.collapse-open]="isExpanded(fn.function_name)">
             <div class="collapse-title cursor-pointer flex items-center gap-3 pe-12"
-                 (click)="toggleFunction(fn.function_name)">
+                 role="button"
+                 tabindex="0"
+                 [attr.aria-expanded]="isExpanded(fn.function_name)"
+                 (click)="toggleFunction(fn.function_name)"
+                 (keydown.enter)="toggleFunction(fn.function_name)"
+                 (keydown.space)="$event.preventDefault(); toggleFunction(fn.function_name)">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <span class="font-mono font-semibold text-sm">{{ fn.display_name || fn.function_name }}</span>

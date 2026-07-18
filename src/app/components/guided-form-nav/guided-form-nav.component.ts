@@ -5,7 +5,9 @@
 import { Component, input, output, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { TranslationService } from '../../services/translation.service';
 import { GuidedFormContext, EffectiveGuidedFormStep } from '../../interfaces/guided-form';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /** Synthetic review step uses negative ID to avoid collision with real database IDs */
 const REVIEW_STEP_ID = -1;
@@ -14,12 +16,13 @@ const REVIEW_STEP_ORDER = Number.MAX_SAFE_INTEGER;
 @Component({
   selector: 'app-guided-form-nav',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './guided-form-nav.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GuidedFormNavComponent {
   private guidedFormService = inject(GuidedFormService);
+  private translationService = inject(TranslationService);
 
   // Inputs — context provides all data; parentRecord for condition evaluation
   context = input.required<GuidedFormContext>();
@@ -65,11 +68,13 @@ export class GuidedFormNavComponent {
 
     // Always append synthetic review step so users see the full journey
     if (!effective.some(s => s.step_key === '__review__')) {
+      // Read version() so the label re-translates when the locale changes
+      this.translationService.version();
       effective.push({
         id: REVIEW_STEP_ID,
         guided_form_key: ctx.definition.guided_form_key,
         step_key: '__review__',
-        display_name: 'Review & Submit',
+        display_name: this.translationService.get('guided_form.review'),
         description: null,
         step_table: ctx.definition.parent_table,
         parent_fk_column: null,
@@ -89,6 +94,21 @@ export class GuidedFormNavComponent {
   onStepClick(step: EffectiveGuidedFormStep): void {
     if (!this.isStepClickable(step)) return;
     this.stepClick.emit(step.step_key);
+  }
+
+  /**
+   * The step whose record is currently being edited/viewed.
+   *
+   * The context's `step_key` identifies which step the current record maps to
+   * (populated by `get_guided_form_context`). When the record is the parent
+   * (`is_child_step === false`), `step_key` is null and the synthetic
+   * `__parent__` step is the active one. The synthetic `__review__` step is
+   * never a real record and so is never current.
+   */
+  isCurrent(step: EffectiveGuidedFormStep): boolean {
+    if (step.step_key === '__review__') return false;
+    const currentKey = this.context().step_key ?? '__parent__';
+    return step.step_key === currentKey;
   }
 
   isStepClickable(step: EffectiveGuidedFormStep): boolean {

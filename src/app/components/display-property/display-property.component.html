@@ -1,15 +1,16 @@
 <div class="mb-4 w-full">
   @if (showLabel()) {
-    <label class="label">
+    <div class="label">
       <span class="font-semibold">
         {{ prop().display_name }}
         @if (prop().description) {
-          <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="prop().description">
+          <div class="tooltip tooltip-bottom sm:tooltip-right inline-block" [attr.data-tip]="prop().description" aria-hidden="true">
             <span class="material-symbols-outlined text-info cursor-help ms-1 text-base align-middle">help_outline</span>
           </div>
+          <span class="sr-only">{{ prop().description }}</span>
         }
       </span>
-    </label>
+    </div>
   }
   <div>
 @if (datum() != null) {
@@ -47,10 +48,12 @@
     }
     @if (propType() == EntityPropertyType.Boolean) {
       @if (datum() == true) {
-        <span class="material-symbols-outlined text-primary bg-base-100">check_box</span>
+        <span class="material-symbols-outlined text-primary bg-base-100" aria-hidden="true">check_box</span>
+        <span class="sr-only">{{ 'form.yes' | translate }}</span>
       }
       @if (datum() == false) {
-        <span class="material-symbols-outlined text-error bg-base-100">disabled_by_default</span>
+        <span class="material-symbols-outlined text-error bg-base-100" aria-hidden="true">disabled_by_default</span>
+        <span class="sr-only">{{ 'form.no' | translate }}</span>
       }
     }
     @if (propType() == EntityPropertyType.ForeignKeyName) {
@@ -111,12 +114,12 @@
       </div>
     }
     @if (propType() == EntityPropertyType.Email) {
-      <a [href]="'mailto:' + datum()" class="link link-primary break-words">
+      <a [href]="'mailto:' + datum()" class="link link-primary break-words" (click)="$event.stopPropagation()">
         {{ datum() }}
       </a>
     }
     @if (propType() == EntityPropertyType.Telephone) {
-      <a [href]="'tel:+1' + datum()" class="link link-primary">
+      <a [href]="'tel:+1' + datum()" class="link link-primary" (click)="$event.stopPropagation()">
         {{ formatPhoneNumber(datum()) }}
       </a>
     }
@@ -152,19 +155,24 @@
       </div>
     }
     @if (propType() == EntityPropertyType.FileImage) {
-      <div class="w-32 h-32 rounded border overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+      <button type="button" class="block w-32 h-32 rounded border overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
            [title]="'Click to view full size: ' + datum()?.file_name"
+           [attr.aria-label]="'a11y.view_full_size' | translate"
            (click)="onImageClick(datum())">
         <app-file-thumbnail
           [file]="datum()"
           [alt]="datum()?.file_name || ''"
         />
-      </div>
+      </button>
     }
     @if (propType() == EntityPropertyType.FilePDF) {
       <div class="flex items-center gap-2">
         @if (datum()?.s3_thumbnail_medium_key) {
-          <div class="cursor-pointer relative" (click)="onPdfClick(datum())">
+          <div class="cursor-pointer relative" role="button" tabindex="0"
+               [attr.aria-label]="'a11y.view_pdf' | translate"
+               (click)="onPdfClick(datum())"
+               (keydown.enter)="onPdfClick(datum())"
+               (keydown.space)="$event.preventDefault(); onPdfClick(datum())">
             <img
               [src]="getS3Url(datum().s3_thumbnail_medium_key)"
               [alt]="'PDF Preview: ' + datum().file_name"
@@ -174,13 +182,13 @@
           </div>
         } @else {
           <div class="w-12 h-12 flex items-center justify-center bg-base-200 rounded">
-            <span class="text-2xl">📄</span>
+            <span class="text-2xl" aria-hidden="true">📄</span>
           </div>
         }
         <div class="flex flex-col">
-          <span class="font-medium cursor-pointer hover:text-primary" (click)="onPdfClick(datum())">
+          <button type="button" class="font-medium cursor-pointer hover:text-primary text-start bg-transparent p-0 border-0" (click)="onPdfClick(datum())">
             {{ datum()?.file_name }}
-          </span>
+          </button>
           <span class="text-sm text-base-content/60">{{ formatFileSize(datum()?.file_size) }}</span>
         </div>
       </div>
@@ -197,7 +205,7 @@
           </div>
         } @else {
           <div class="w-12 h-12 flex items-center justify-center bg-base-200 rounded">
-            <span class="text-2xl">📎</span>
+            <span class="text-2xl" aria-hidden="true">📎</span>
           </div>
         }
         <div class="flex flex-col">
@@ -239,13 +247,14 @@
             <!-- Detail view: full thumbnail grid with lightbox -->
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
               @for (image of galleryImages; track image.file_id; let i = $index) {
-                <div class="aspect-square rounded-lg overflow-hidden border border-base-300 cursor-pointer hover:opacity-80 transition-opacity"
+                <button type="button" class="block w-full aspect-square rounded-lg overflow-hidden border border-base-300 cursor-pointer hover:opacity-80 transition-opacity"
+                     [attr.aria-label]="'a11y.view_image' | translate"
                      (click)="onGalleryImageClick(i)">
                   <app-file-thumbnail
                     [file]="image.file ?? null"
                     [alt]="image.alt_text || image.file?.file_name || 'Gallery image'"
                   />
-                </div>
+                </button>
               }
             </div>
             <div class="text-sm text-base-content/60 mt-1">
@@ -260,7 +269,7 @@
           } @else {
             <!-- List view: compact count badge -->
             <span class="badge badge-ghost gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
               </svg>
               {{ galleryImages.length }}

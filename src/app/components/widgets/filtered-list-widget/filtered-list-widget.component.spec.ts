@@ -17,9 +17,10 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { FilteredListWidgetComponent } from './filtered-list-widget.component';
+import { provideTranslationTesting } from '../../../testing/translation-testing';
 import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
@@ -103,7 +104,6 @@ describe('FilteredListWidgetComponent', () => {
   beforeEach(async () => {
     mockDataService = jasmine.createSpyObj('DataService', ['getData']);
     mockSchemaService = jasmine.createSpyObj('SchemaService', ['getProperties']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     // Default mock responses
     mockDataService.getData.and.returnValue(of(mockRecords as any));
@@ -112,12 +112,17 @@ describe('FilteredListWidgetComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FilteredListWidgetComponent],
       providers: [
+        provideTranslationTesting(),
         provideZonelessChangeDetection(),
+        // Real router provides ActivatedRoute for the first-cell RouterLink; navigate is spied below.
+        provideRouter([]),
         { provide: DataService, useValue: mockDataService },
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: Router, useValue: mockRouter }
+        { provide: SchemaService, useValue: mockSchemaService }
       ]
     }).compileComponents();
+
+    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    spyOn(mockRouter, 'navigate');
 
     fixture = TestBed.createComponent(FilteredListWidgetComponent);
     component = fixture.componentInstance;

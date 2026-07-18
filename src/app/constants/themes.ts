@@ -15,11 +15,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/** Curated themes shown in the "Recommended" row of the theme picker */
+/**
+ * Curated / vetted themes shown in the "Recommended" row of the theme picker.
+ * These are the only themes permitted as a deployment DEFAULT_THEME
+ * (see resolveDefaultTheme). All 35 DaisyUI themes remain user-selectable.
+ */
 export const RECOMMENDED_THEMES: string[] = ['corporate', 'nord', 'emerald', 'dark', 'dim'];
 
 /** Hardcoded fallback default theme (used when no runtime config or localStorage value) */
 export const DEFAULT_THEME = 'corporate';
+
+/** True when a theme is in the vetted/recommended list (contrast-reviewed). */
+export function isVettedTheme(name: string): boolean {
+  return RECOMMENDED_THEMES.includes(name);
+}
+
+/**
+ * Constrain a configured deployment default theme to the vetted list.
+ *
+ * Deployers may set any theme as the instance default, but only vetted themes
+ * (RECOMMENDED_THEMES) have been contrast-reviewed as a baseline experience.
+ * If an unvetted theme is configured, fall back to DEFAULT_THEME and warn.
+ * This does NOT restrict per-user theme selection — all themes stay available
+ * in the theme picker.
+ *
+ * @param configured - The theme name from runtime/environment config
+ * @returns A vetted theme name safe to use as the instance default
+ */
+export function resolveDefaultTheme(configured: string): string {
+  if (isVettedTheme(configured)) {
+    return configured;
+  }
+  console.warn(
+    `[theme] Configured default theme "${configured}" is not in the vetted list ` +
+    `(${RECOMMENDED_THEMES.join(', ')}); falling back to "${DEFAULT_THEME}". ` +
+    `All themes remain selectable by users.`
+  );
+  return DEFAULT_THEME;
+}
 
 /** Special-case display name overrides for theme names */
 const THEME_LABEL_OVERRIDES: Record<string, string> = {
