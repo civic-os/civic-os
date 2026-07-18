@@ -426,6 +426,10 @@ You **MUST** perform comprehensive end-to-end verification after ALL code change
 
 Run all 5 layers proactively without being asked. See `docs/development/E2E_VERIFICATION.md` for detailed commands and verification queries.
 
+## AI Agent Delegation
+
+When delegating subtasks to background agents, **prefer a lower-cost model (e.g. Sonnet) whenever it won't sacrifice real quality**. Well-specified implementation work — tasks with a detailed written spec, mechanical sweeps, translation authoring, test scaffolding — belongs on the cheaper tier. Reserve the top-tier model for ambiguous requirements, architecture decisions, and gnarly debugging. When in doubt, write a more detailed task spec and delegate down rather than delegating up.
+
 ## Git Commit Guidelines
 
 - **ALWAYS run `npm run test:headless` before staging/committing** - failing tests break CI/CD
