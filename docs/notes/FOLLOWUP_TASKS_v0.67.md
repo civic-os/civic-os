@@ -137,6 +137,23 @@ Translations are DB-driven per instance (`metadata.translations`, managed at
 
 ## Task 3 — Descriptive accessible names for dashboard map markers
 
+> ✅ **DONE** (2026-07-18, branch `task/map-marker-names`, merged to main).
+> Root cause: Leaflet defaults the marker icon img's `alt` to the literal
+> word "Marker", which wins accessible-name computation over the already-set
+> `title`. Markers now set both alt and title to the record display name
+> (translated "Unnamed location" fallback); clusters get a custom
+> iconCreateFunction replicating the default visuals exactly but wrapping the
+> count in role="img" with aria-label "{count} {entity}" (generic "{count}
+> locations" fallback). Map widget resolves the entity display name via
+> SchemaService. Keys: a11y.unnamed_map_marker, a11y.map_cluster_count,
+> a11y.map_cluster_count_generic. Live-verified on pothole with a seeded
+> clustered map widget: cluster announced "8 Issues" (visible text still just
+> "8"), individual marker announced "Cluster test 5". Note: browser-pane
+> occlusion suspends requestAnimationFrame; verification used an rAF stub -
+> real visible windows are unaffected.
+
+Original task description:
+
 Dashboard map markers announce as "Marker"; clusters announce a bare count.
 
 - Carry the record's display name onto each marker (aria-label/title on the
@@ -211,6 +228,23 @@ for the rendered table — serving low-vision and cognitive-load users.
 - This task sanctions the visible toggle button as a UI addition.
 
 ## Task 6 — Keyboard node manipulation in the schema editor (low priority)
+
+> ✅ **DONE** (2026-07-18, branch `task/schema-editor-keyboard`, merged to
+> main). Entity node SVG roots get tabindex="0", role="button", and a
+> translated aria-label; arrow keys nudge 10px (Shift: 50px) via the JointJS
+> model with adjustVertices re-routing links; polite live-region announcement
+> follows the entity-management pattern; :focus-visible outline on nodes.
+> Keys: a11y.schema_editor_node, a11y.schema_editor_node_moved. Discovery
+> worth a product decision: `editMode` is hardcoded false in shipped code, so
+> mouse drag never repositioned nodes - keyboard nudge is now the only
+> per-node repositioning path besides Auto-Arrange. Live-verified on pothole
+> /schema-editor: focus lands on nodes, aria-label announces, ArrowRight
+> moved a node exactly 10px, live region read "Bid moved to x 380, y 50".
+> Also observed (pre-existing, not this task): canvas init awaits one
+> requestAnimationFrame with no fallback, so the diagram never renders in a
+> fully occluded window.
+
+Original task description:
 
 The JointJS ERD canvas (`src/app/pages/schema-editor/`, see
 `docs/development/JOINTJS_INTEGRATION.md`) moves nodes by mouse drag only.
