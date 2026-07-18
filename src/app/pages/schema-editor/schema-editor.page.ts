@@ -25,6 +25,7 @@ import { SchemaEntityTable, SchemaEntityProperty, EntityPropertyType } from '../
 import { forkJoin, take } from 'rxjs';
 import { SchemaInspectorPanelComponent } from '../../components/schema-inspector-panel/schema-inspector-panel.component';
 import { METADATA_SYSTEM_TABLES, isSystemType } from '../../constants/system-types';
+import { TranslationService } from '../../services/translation.service';
 
 // JointJS type imports (type-only to avoid runtime overhead)
 import type { dia, shapes } from '@joint/core';
@@ -62,6 +63,7 @@ export class SchemaEditorPage implements OnDestroy {
   private themeService = inject(ThemeService);
   private geometricPortCalculator = inject(GeometricPortCalculatorService);
   private platformId = inject(PLATFORM_ID);
+  private translation = inject(TranslationService);
 
   // ViewChild reference to canvas container
   canvasContainer = viewChild<ElementRef<HTMLDivElement>>('canvasContainer');
@@ -78,6 +80,13 @@ export class SchemaEditorPage implements OnDestroy {
   selectedEntity = signal<SchemaEntityTable | null>(null);
   showInstructions = signal(this.getInstructionsVisibilityFromStorage());
   editMode = signal(false); // Future: enable entity dragging when true
+
+  // Shared aria-live announcement for keyboard node nudging (Task 6)
+  nodeMoveAnnouncement = signal('');
+
+  // Keyboard nudge step sizes (pixels), matches the paper's 10px grid
+  private readonly NUDGE_STEP = 10;
+  private readonly NUDGE_STEP_LARGE = 50;
 
   // System type detection (heuristic-based, not naming convention)
   // System types are filtered from relationships (treated as property types, not entity relationships)
@@ -556,6 +565,96 @@ export class SchemaEditorPage implements OnDestroy {
       }
 
       entityElement.addTo(this.graph);
+
+      // Make the node keyboard-focusable and wire up arrow-key nudging (Task 6)
+      this.makeEntityFocusable(entityElement, entity);
+    });
+  }
+
+  /**
+   * Makes an entity node keyboard-focusable and wires up arrow-key nudging.
+   * Nodes move by mouse drag only by default (drag requires editMode); this gives
+   * keyboard/screen-reader users an equivalent way to reposition a node on the canvas.
+   *
+   * - Tab/Shift+Tab moves focus between nodes using normal DOM tab order.
+   * - Arrow keys nudge the focused node by `NUDGE_STEP` pixels; Shift+arrow uses
+   *   `NUDGE_STEP_LARGE`. Auto-Arrange remains the primary accessible layout path;
+   *   this is a supplementary fine-adjustment tool.
+   * - Moving updates the JointJS model position (so connected links re-route via
+   *   `adjustVertices`) and announces the new position through `nodeMoveAnnouncement`.
+   */
+  private makeEntityFocusable(element: dia.Element, entity: SchemaEntityTable): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const view = this.paper.findViewByModel<dia.ElementView>(element);
+    if (!view) {
+      return;
+    }
+
+    const el = view.el;
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', this.translation.get('a11y.schema_editor_node', { name: entity.display_name }));
+    el.classList.add('schema-node-focusable');
+    el.addEventListener('keydown', (evt: KeyboardEvent) => this.handleNodeKeydown(evt, element, entity));
+  }
+
+  /**
+   * Handles arrow-key nudging for a focused entity node. Ignores all keys other
+   * than the four arrow keys so Tab/Enter/etc. keep their normal behavior.
+   */
+  private handleNodeKeydown(evt: KeyboardEvent, element: dia.Element, entity: SchemaEntityTable): void {
+    const delta = this.computeNudgeDelta(evt.key, evt.shiftKey);
+    if (!delta) {
+      return;
+    }
+
+    // Prevent page scroll and stop the event from also triggering paper panning
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    const position = element.position();
+    const newX = position.x + delta.dx;
+    const newY = position.y + delta.dy;
+    element.position(newX, newY);
+
+    // Recalculate link vertices, matching the mouse drag-end behavior
+    this.adjustVertices(this.graph, element);
+
+    this.nodeMoveAnnouncement.set(this.formatNodeMovedAnnouncement(entity.display_name, newX, newY));
+  }
+
+  /**
+   * Pure nudge-math helper: maps an arrow key (+ Shift modifier) to a position
+   * delta. Returns null for any non-arrow key. Extracted for unit testing.
+   */
+  private computeNudgeDelta(key: string, large: boolean): { dx: number; dy: number } | null {
+    const step = large ? this.NUDGE_STEP_LARGE : this.NUDGE_STEP;
+    switch (key) {
+      case 'ArrowUp':
+        return { dx: 0, dy: -step };
+      case 'ArrowDown':
+        return { dx: 0, dy: step };
+      case 'ArrowLeft':
+        return { dx: -step, dy: 0 };
+      case 'ArrowRight':
+        return { dx: step, dy: 0 };
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Formats the polite live-region announcement for a keyboard nudge.
+   * Extracted for unit testing independent of the JointJS canvas.
+   */
+  private formatNodeMovedAnnouncement(name: string, x: number, y: number): string {
+    return this.translation.get('a11y.schema_editor_node_moved', {
+      name,
+      x: Math.round(x),
+      y: Math.round(y)
     });
   }
 

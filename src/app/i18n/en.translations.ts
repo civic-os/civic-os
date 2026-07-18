@@ -101,6 +101,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.zoom_to_fit': 'Zoom to fit',
   'a11y.minimize': 'Minimize',
   'a11y.show_instructions': 'Show instructions',
+  'a11y.schema_editor_node': '{{name}} entity. Use arrow keys to move, Shift plus arrow to move further.',
+  'a11y.schema_editor_node_moved': '{{name}} moved to x {{x}}, y {{y}}',
   'a11y.reset_map_view': 'Reset view',
   'a11y.recrop': 'Re-crop',
   'a11y.expand_row': 'Expand row',
