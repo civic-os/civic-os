@@ -104,6 +104,7 @@
                         type="checkbox"
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.create"
+                        [attr.aria-label]="'a11y.permission_create_for' | translate:{ table: row.tableName }"
                         (change)="togglePermission(row.tableName, 'create', row.create)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
@@ -115,6 +116,7 @@
                         type="checkbox"
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.read"
+                        [attr.aria-label]="'a11y.permission_read_for' | translate:{ table: row.tableName }"
                         (change)="togglePermission(row.tableName, 'read', row.read)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
@@ -126,6 +128,7 @@
                         type="checkbox"
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.update"
+                        [attr.aria-label]="'a11y.permission_update_for' | translate:{ table: row.tableName }"
                         (change)="togglePermission(row.tableName, 'update', row.update)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
@@ -137,6 +140,7 @@
                         type="checkbox"
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="row.delete"
+                        [attr.aria-label]="'a11y.permission_delete_for' | translate:{ table: row.tableName }"
                         (change)="togglePermission(row.tableName, 'delete', row.delete)" />
                     } @else {
                       <span class="text-base-content/30">-</span>
@@ -185,6 +189,7 @@
                         type="checkbox"
                         class="checkbox checkbox-primary checkbox-sm"
                         [checked]="action.has_permission"
+                        [attr.aria-label]="'a11y.permission_execute_for' | translate:{ action: action.display_name, entity: action.table_name }"
                         (change)="toggleEntityActionPermission(action)" />
                     </td>
                   </tr>
@@ -233,6 +238,7 @@
                           type="checkbox"
                           class="checkbox checkbox-primary checkbox-sm"
                           [checked]="isDelegated(role.id)"
+                          [attr.aria-label]="'a11y.permission_manage_role' | translate:{ role: role.display_name }"
                           (change)="toggleDelegation(role.id)" />
                       }
                     </td>

@@ -57,10 +57,12 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
         <div class="flex-1">
           <input type="text" placeholder="Search by name or email..."
                  class="input input-bordered w-full"
+                 [attr.aria-label]="'a11y.search_users' | translate"
                  [ngModel]="searchTerm()"
                  (ngModelChange)="onSearchChange($event)" />
         </div>
         <select class="select select-bordered"
+                [attr.aria-label]="'a11y.filter_by_role' | translate"
                 [ngModel]="roleFilter()"
                 (ngModelChange)="onRoleFilterChange($event)">
           <option value="all">All roles</option>
@@ -69,6 +71,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           }
         </select>
         <select class="select select-bordered"
+                [attr.aria-label]="'a11y.filter_by_status' | translate"
                 [ngModel]="statusFilter()"
                 (ngModelChange)="onStatusFilterChange($event)">
           <option value="all">All statuses</option>

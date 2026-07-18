@@ -326,9 +326,14 @@ self-contained enough to pick up cold.
    announce as "Marker" and clusters as a bare count; carry the record's
    display name ("15 participants"). Components: dashboard map widget /
    `geo-point-map` marker rendering.
-4. **Authenticated pa11y in CI.** The pa11y job is best-effort because it cannot
-   log in to Keycloak in CI; giving it a test-user token (password grant against
-   the CI stack) would let it scan authenticated pages and become a real gate.
+4. **Authenticated pa11y in CI.** ✅ **Done (post-v0.67.0, branch
+   `task/pa11y-authenticated-ci`).** The pa11y job now boots a slim stack
+   (`docker/ci-a11y/`), authenticates via pa11y actions driving the real
+   Keycloak login form (token injection was rejected: keycloak-angular's init
+   flow ignores externally injected tokens), and gates PRs. First authenticated
+   scans surfaced and fixed ~100 unlabeled permission-matrix checkboxes plus
+   unlabeled admin filter/edit controls. axe `color-contrast` excluded until
+   the theme-wide contrast audit (item 8-adjacent) lands.
 5. **Visible data-table toggle for chart widgets.** Charts have sr-only data
    tables; a visible toggle would serve low-vision and cognitive-load users too.
    Visual-design decision.

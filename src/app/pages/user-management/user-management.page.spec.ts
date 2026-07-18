@@ -21,6 +21,7 @@ import { of, Subject } from 'rxjs';
 import { UserManagementPage } from './user-management.page';
 import { UserManagementService, ManagedUser } from '../../services/user-management.service';
 import { ImportExportService } from '../../services/import-export.service';
+import { provideTranslationTesting } from '../../testing/translation-testing';
 import { ApiResponse } from '../../interfaces/api';
 
 describe('UserManagementPage', () => {
@@ -64,6 +65,7 @@ describe('UserManagementPage', () => {
       imports: [UserManagementPage],
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslationTesting(),
         { provide: UserManagementService, useValue: mockUserService },
         { provide: ImportExportService, useValue: mockImportExportService }
       ]

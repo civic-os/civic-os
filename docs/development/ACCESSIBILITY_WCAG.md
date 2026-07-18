@@ -164,7 +164,7 @@ All zero-visual-impact improvements:
 - [ ] Capture BackstopJS visual regression baseline
 - [ ] Create VPAT document (Voluntary Product Accessibility Template)
 - [ ] Create public accessibility statement
-- [ ] CI/CD integration (GitHub Actions)
+- [x] CI/CD integration (GitHub Actions) — `.github/workflows/accessibility.yml` enforces both the ESLint template a11y rules and an authenticated pa11y-ci gate. The pa11y job boots a real stack (`docker/ci-a11y/docker-compose.yml`), logs in as testadmin through the actual Keycloak form via pa11y actions, and fails PRs on WCAG 2 AA findings. The axe `color-contrast` rule is excluded in `.pa11yci.json` until the Phase 4 theme-wide contrast audit lands; all structural/naming rules are enforced.
 
 ### Files Modified
 

@@ -1,0 +1,2 @@
+# Fetched from the running Keycloak at stack startup; never commit real keys
+jwt-secret.jwks

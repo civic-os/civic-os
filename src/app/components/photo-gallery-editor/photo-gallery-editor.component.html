@@ -16,6 +16,7 @@
     <div
       class="relative border-2 border-dashed border-base-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1"
       (dragover)="onDragOver($event)"
+      role="group"
       [attr.aria-label]="'gallery.upload_zone' | translate:{ remaining: maxImages() - currentCount() }">
       <span class="material-symbols-outlined text-3xl text-base-content/40 mb-1 pointer-events-none" aria-hidden="true">add_photo_alternate</span>
       <div class="text-sm text-base-content/60 pointer-events-none">

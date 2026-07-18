@@ -5,17 +5,66 @@
     "chromeLaunchConfig": {
       "args": ["--no-sandbox", "--disable-setuid-sandbox"]
     },
-    "timeout": 60000,
-    "wait": 1000
+    "timeout": 90000,
+    "wait": 1500,
+    "useIncognitoBrowserContext": true,
+    "concurrency": 1,
+    "ignore": ["color-contrast"]
   },
   "urls": [
     "http://localhost:4200/",
     "http://localhost:4200/view/Issue",
-    "http://localhost:4200/create/Issue",
-    "http://localhost:4200/detail/Issue/1",
-    "http://localhost:4200/edit/Issue/1",
-    "http://localhost:4200/permissions",
-    "http://localhost:4200/entity-management",
-    "http://localhost:4200/admin/users"
+    "http://localhost:4200/view/Issue/1",
+    {
+      "url": "http://localhost:4200/create/Issue",
+      "actions": [
+        "wait for element #username to be visible",
+        "set field #username to testadmin",
+        "set field #password to testadmin",
+        "click element #kc-login",
+        "wait for element form to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:4200/edit/Issue/1",
+      "actions": [
+        "wait for element #username to be visible",
+        "set field #username to testadmin",
+        "set field #password to testadmin",
+        "click element #kc-login",
+        "wait for path to be /edit/Issue/1",
+        "wait for element form to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:4200/permissions",
+      "actions": [
+        "wait for element #username to be visible",
+        "set field #username to testadmin",
+        "set field #password to testadmin",
+        "click element #kc-login",
+        "wait for element table to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:4200/entity-management",
+      "actions": [
+        "wait for element #username to be visible",
+        "set field #username to testadmin",
+        "set field #password to testadmin",
+        "click element #kc-login",
+        "wait for element .card-body to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:4200/admin/users",
+      "actions": [
+        "wait for element #username to be visible",
+        "set field #username to testadmin",
+        "set field #password to testadmin",
+        "click element #kc-login",
+        "wait for element table to be visible"
+      ]
+    }
   ]
 }

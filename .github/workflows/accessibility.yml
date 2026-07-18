@@ -1,19 +1,22 @@
 name: Accessibility
 
-# Accessibility guardrail for the Angular frontend.
+# Accessibility guardrails for the Angular frontend. Two enforced gates:
 #
-# The ENFORCED gate is the ESLint `@angular-eslint/template` accessibility rules
-# (see eslint.config.js). These catch the keyboard/screen-reader blockers the
-# July 2026 remediation addressed (docs/notes/ACCESSIBILITY_AUDIT_2026-07.md) and
-# fail the build on regressions such as a bare `(click)` handler on a
-# non-interactive element.
+# 1. ESLint `@angular-eslint/template` accessibility rules (see eslint.config.js).
+#    These catch the keyboard/screen-reader blockers the July 2026 remediation
+#    addressed (docs/notes/ACCESSIBILITY_AUDIT_2026-07.md) and fail the build on
+#    regressions such as a bare `(click)` handler on a non-interactive element.
 #
-# pa11y is included as a BEST-EFFORT informational job. It cannot easily
-# authenticate against Keycloak in CI, so it can only meaningfully test routes
-# that render without auth (home, /view/Issue, /create/Issue). Admin routes in
-# .pa11yci.json will redirect to the login page when unauthenticated. The pa11y
-# job therefore does not fail the build; treat its output as a report. Full
-# authenticated pa11y/Lighthouse coverage is future work.
+# 2. pa11y-ci (axe + htmlcs, WCAG 2 AA) against a REAL stack: postgres +
+#    PostgREST + Keycloak from docker/ci-a11y/docker-compose.yml (pothole
+#    example schema). Protected URLs authenticate as testadmin through the
+#    actual Keycloak login form via pa11y actions (see .pa11yci.json), so admin
+#    pages are audited in their real, data-bearing state. This job GATES PRs.
+#
+#    Known exclusion: the axe `color-contrast` rule is disabled in .pa11yci.json.
+#    Theme-wide contrast is tracked separately as Phase 4 work in
+#    docs/development/ACCESSIBILITY_WCAG.md; every structural/naming rule is
+#    enforced.
 
 on:
   workflow_call:
@@ -48,12 +51,11 @@ jobs:
       - name: Run ESLint accessibility gate
         run: npm run lint
 
-  # BEST-EFFORT: pa11y-ci against unauthenticated routes. Informational only.
+  # ENFORCED: authenticated pa11y-ci against a live stack. Fails the build on
+  # WCAG 2 AA findings (minus the documented color-contrast exclusion).
   pa11y:
-    name: pa11y (best-effort, informational)
+    name: pa11y (authenticated, enforced)
     runs-on: ubuntu-latest
-    # Do not block the build on pa11y — auth/data limitations make it flaky.
-    continue-on-error: true
 
     steps:
       - name: Checkout code
@@ -73,11 +75,85 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Serve build and run pa11y
+      - name: Point the built app at the CI stack
+        # The production bundle defaults to remote services; inject the runtime
+        # config (same mechanism as docker/frontend/docker-entrypoint.sh) so the
+        # SPA talks to the local PostgREST and Keycloak containers.
         run: |
-          npx --yes http-server dist/frontend/browser -p 4200 -s &
+          node -e "
+            const fs = require('fs');
+            const path = 'dist/frontend/browser/index.html';
+            const config = '<script>window.civicOsConfig = {' +
+              'postgrestUrl: \"http://localhost:3000/\",' +
+              'keycloak: { url: \"http://localhost:8082\", realm: \"civic-os-dev\", clientId: \"civic-os-dev-client\" }' +
+              '};</script>';
+            const html = fs.readFileSync(path, 'utf8').replace('</head>', config + '</head>');
+            fs.writeFileSync(path, html);
+          "
+          grep -q civicOsConfig dist/frontend/browser/index.html
+
+      - name: Start backend stack (postgres + PostgREST + Keycloak)
+        run: |
+          # jwt-secret.jwks must exist as a FILE before the first compose up,
+          # or Docker creates the bind-mount source as a directory and
+          # PostgREST crash-loops.
+          touch docker/ci-a11y/jwt-secret.jwks
+          docker compose -f docker/ci-a11y/docker-compose.yml up -d --build
+
+      - name: Wait for Keycloak and install its signing keys into PostgREST
+        run: |
+          # Keycloak generates fresh signing keys on every startup, so the JWKS
+          # must be fetched from THIS boot and PostgREST recreated (not
+          # restarted - the bind-mount is fixed at container creation).
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/certs -o docker/ci-a11y/jwt-secret.jwks; then
+              break
+            fi
+            sleep 5
+          done
+          grep -q '"keys"' docker/ci-a11y/jwt-secret.jwks
+          docker compose -f docker/ci-a11y/docker-compose.yml stop postgrest
+          docker compose -f docker/ci-a11y/docker-compose.yml up -d --force-recreate postgrest
+
+      - name: Wait for PostgREST to serve the schema
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/Issue?limit=1')
+            [ "$code" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "PostgREST never became ready (last status: $code)"
+          docker compose -f docker/ci-a11y/docker-compose.yml logs postgres postgrest | tail -100
+          exit 1
+
+      - name: Seed the record used by detail/edit URLs
+        # civic_os_users is empty until someone logs in, and the seed runs
+        # before pa11y's first login - so seed the user row too.
+        run: |
+          docker compose -f docker/ci-a11y/docker-compose.yml exec -T postgres \
+            psql -U postgres -d civic_os_db -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO metadata.civic_os_users (id, display_name)
+             VALUES ('00000000-0000-0000-0000-000000000001', 'CI Seed User')
+             ON CONFLICT DO NOTHING;
+             INSERT INTO public.\"Issue\" (id, display_name, description, created_user)
+             VALUES (1, 'CI seed issue', 'Seeded for accessibility scanning',
+                     '00000000-0000-0000-0000-000000000001')
+             ON CONFLICT DO NOTHING;"
+
+      - name: Serve build and run pa11y gate
+        # `serve -s` provides the SPA history-API fallback; http-server would
+        # 404 deep links like /create/Issue and pa11y would scan a 404 page.
+        run: |
+          npx --yes serve -s dist/frontend/browser -l 4200 &
           SERVER_PID=$!
-          npx --yes wait-on http://localhost:4200 --timeout 60000 || true
-          # pa11y is informational; never fail the job on findings.
-          npm run a11y:pa11y || true
+          npx --yes wait-on http://localhost:4200 --timeout 60000
+          npm run a11y:pa11y
           kill $SERVER_PID || true
+
+      - name: Dump stack logs on failure
+        if: failure()
+        run: docker compose -f docker/ci-a11y/docker-compose.yml logs --tail 200
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f docker/ci-a11y/docker-compose.yml down -v
