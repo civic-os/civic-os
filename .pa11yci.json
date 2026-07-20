@@ -6,7 +6,7 @@
       "args": ["--no-sandbox", "--disable-setuid-sandbox"]
     },
     "timeout": 90000,
-    "wait": 1500,
+    "wait": 2500,
     "useIncognitoBrowserContext": true,
     "concurrency": 1,
     "ignore": ["color-contrast"]
@@ -22,6 +22,7 @@
         "set field #username to testadmin",
         "set field #password to testadmin",
         "click element #kc-login",
+        "wait for path to be /create/Issue",
         "wait for element form to be visible"
       ]
     },
