@@ -71,23 +71,20 @@ describe('ThemePickerComponent', () => {
     expect(unpressed.length).toBeGreaterThan(0);
   });
 
-  it('labels unvetted (non-recommended) themes with a reduced-contrast note', () => {
+  it('shows a single reduced-contrast note in the All Colors section header', () => {
     const el = fixture.nativeElement as HTMLElement;
-    const notes = Array.from(el.querySelectorAll('span'))
-      .filter(s => s.textContent?.trim() === 'a11y.reduced_contrast');
-    // otherItems() are the unvetted themes; each gets one note
-    expect(notes.length).toBe(component.otherItems().length);
-    expect(notes.length).toBeGreaterThan(0);
+    const notes = Array.from(el.querySelectorAll('p'))
+      .filter(p => p.textContent?.trim() === 'a11y.reduced_contrast');
+    // One note as a section subtitle, not per-theme
+    expect(notes.length).toBe(1);
   });
 
-  it('does not label recommended themes with a reduced-contrast note', () => {
-    // Recommended themes are vetted — no note in that section.
-    // Count of notes should equal otherItems length, not total buttons.
+  it('does not label individual theme buttons with a reduced-contrast note', () => {
     const el = fixture.nativeElement as HTMLElement;
-    const buttons = el.querySelectorAll('button');
-    const notes = Array.from(el.querySelectorAll('span'))
+    // No note spans inside buttons
+    const buttonNotes = Array.from(el.querySelectorAll('button span'))
       .filter(s => s.textContent?.trim() === 'a11y.reduced_contrast');
-    expect(notes.length).toBeLessThan(buttons.length);
+    expect(buttonNotes.length).toBe(0);
   });
 
   it('calls setTheme when a theme is selected', () => {

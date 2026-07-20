@@ -78,7 +78,8 @@ interface ThemeItem {
     <!-- All themes -->
     @if (otherItems().length > 0) {
       <div>
-        <h4 class="text-sm font-semibold opacity-70 mb-2">All Colors</h4>
+        <h4 class="text-sm font-semibold opacity-70 mb-1">All Colors</h4>
+        <p class="text-[10px] opacity-50 mb-2">{{ 'a11y.reduced_contrast' | translate }}</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           @for (theme of otherItems(); track theme.name) {
             <button type="button"
@@ -97,8 +98,6 @@ interface ThemeItem {
                 </div>
                 <span class="text-xs text-base-content truncate flex-1">{{ theme.label }}</span>
               </div>
-              <!-- Unvetted (not contrast-reviewed) themes are labeled -->
-              <span class="block text-[10px] leading-tight opacity-50 ps-2 pt-0.5 text-start">{{ 'a11y.reduced_contrast' | translate }}</span>
             </button>
           }
         </div>
