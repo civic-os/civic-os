@@ -117,9 +117,11 @@ jobs:
 
       - name: Install Chrome for pa11y
         # pa11y drives puppeteer, which needs a real Chrome. npm ci skips the
-        # puppeteer browser download (fast, and the lint job needs no browser),
-        # so install the pinned Chrome explicitly into puppeteer's cache dir.
-        run: npx puppeteer browsers install chrome
+        # puppeteer browser download (fast, and the lint job needs no browser).
+        # Install via pa11y-ci's OWN nested puppeteer (a different version than
+        # the hoisted one) so the Chrome version matches what pa11y launches -
+        # installing with the wrong puppeteer downloads a Chrome pa11y ignores.
+        run: cd node_modules/pa11y-ci && npx puppeteer browsers install chrome
 
       - name: Build application
         run: npm run build
