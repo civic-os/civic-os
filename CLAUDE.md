@@ -211,7 +211,7 @@ sqitch deploy dev --verify      # Re-deploy
 ./scripts/migrate-production.sh latest $DATABASE_URL
 ```
 
-Use templates in `postgres/migrations/templates/` as starting points for common operations (`add_metadata_table`, `add_rpc_function`, `add_domain`, `modify_metadata_view`). See `postgres/migrations/README.md` for comprehensive documentation.
+Use templates in `postgres/migrations/templates/` as starting points for common operations (`add_metadata_table`, `add_rpc_function`, `add_domain`, `modify_metadata_view`). **Migrations change schema shape, never instance content** — never UPDATE/replace dashboard widgets, display names, translations, or other metadata rows that integrators customize per deployment. See `postgres/migrations/README.md` for comprehensive documentation and the "Instance-Specific Data Is Off-Limits" policy.
 
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 

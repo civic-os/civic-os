@@ -20,6 +20,25 @@ Civic OS uses a **metadata-driven architecture** where the database schema defin
 
 **Critical:** Migrations only manage Civic OS core objects. User applications evolve independently.
 
+### Instance-Specific Data Is Off-Limits
+
+Migrations manage the **shape** of metadata (adding columns, tables, functions, domains) — never the **content**. Dashboard widgets, entity display names, property labels, notification templates, and other metadata rows are instance-specific data that integrators configure per deployment. A migration that overwrites these rows destroys instance customizations.
+
+**What migrations MAY do:**
+- Add/alter/drop metadata tables, columns, and constraints
+- Create or replace functions, views, triggers, and domains
+- INSERT new metadata rows for new framework features (with `ON CONFLICT DO NOTHING`)
+- Backfill a newly added column with computed defaults
+
+**What migrations must NEVER do:**
+- Replace the content of existing metadata rows (dashboard widgets, translations, display names)
+- UPDATE rows that integrators may have customized after initial setup
+- DELETE and re-INSERT metadata rows to "refresh" them
+
+If a migration absolutely must modify existing content (e.g., renaming a metadata column that changes a view's output), it must use a **content-aware guard** such as `WHERE config->>'content' LIKE '%expected_default_text%'` to avoid clobbering instance customizations. Even then, prefer handling the change in the frontend or baseline instead.
+
+> **Incident reference:** The v0-65-1 migration replaced all markdown widgets on the default dashboard to add a login button. This overwrote custom dashboard content on every deployed instance (Mott Park, FFSC, ICGF, Clients Demo), requiring manual restoration on each one.
+
 ## Migration Naming Convention
 
 Migrations use version-based naming: `v<major>-<minor>-<patch>-<note>`
@@ -535,7 +554,12 @@ This catches issues that single-step revert testing (`--to @HEAD^`) misses, part
    - Set `CIVIC_OS_VERIFY_FULL=true` in GitHub Actions
    - Catches schema drift before production
 
-9. **🚨 CRITICAL: Always include NOTIFY at the end of migrations**
+9. **🚨 CRITICAL: Never overwrite instance data in migrations**
+   - Migrations change the **shape** of metadata, not the **content**
+   - Dashboard widgets, display names, and translations are instance-specific — never UPDATE or replace them
+   - See "Instance-Specific Data Is Off-Limits" in the Architecture section above
+
+10. **🚨 CRITICAL: Always include NOTIFY at the end of migrations**
    - PostgREST caches the database schema in memory
    - Schema changes are NOT automatically detected
    - Add `NOTIFY pgrst, 'reload schema';` before `COMMIT;` in deploy scripts
