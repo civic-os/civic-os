@@ -162,7 +162,7 @@ WHERE p.table_name = 'document_requirements'
 ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------
--- staff_documents: user=read/update, editor=read/update, manager=all, admin=all
+-- staff_documents: user=read/create/update, editor=read/update, manager=all, admin=all
 -- -----------------------------------------------
 
 -- Read access for user, editor, manager, admin
@@ -185,13 +185,23 @@ WHERE p.table_name = 'staff_documents'
   AND r.role_key IN ('user', 'editor', 'manager', 'admin')
 ON CONFLICT DO NOTHING;
 
--- Create/delete for manager, admin
+-- Create for user, manager, admin (staff submit their own documents)
 INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, r.id
 FROM metadata.permissions p
 CROSS JOIN metadata.roles r
 WHERE p.table_name = 'staff_documents'
-  AND p.permission IN ('create', 'delete')
+  AND p.permission = 'create'
+  AND r.role_key IN ('user', 'manager', 'admin')
+ON CONFLICT DO NOTHING;
+
+-- Delete for manager, admin
+INSERT INTO metadata.permission_roles (permission_id, role_id)
+SELECT p.id, r.id
+FROM metadata.permissions p
+CROSS JOIN metadata.roles r
+WHERE p.table_name = 'staff_documents'
+  AND p.permission = 'delete'
   AND r.role_key IN ('manager', 'admin')
 ON CONFLICT DO NOTHING;
 
