@@ -1,3 +1,7 @@
+<!-- PWA: Offline banner + Install banner (above all content) -->
+<app-offline-banner />
+<app-pwa-install-banner />
+
 <!-- Skip Navigation Link -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:start-0 focus:z-50 focus:p-4 focus:bg-primary focus:text-primary-content">
   {{ 'nav.skip_to_content' | translate }}
@@ -326,6 +330,9 @@
   [showModal]="showAboutModal()"
   (closeModal)="showAboutModal.set(false)"
 />
+
+<!-- PWA: Update toast (fixed position, bottom-right) -->
+<app-pwa-update-toast />
 
 <!-- Profile Incomplete Prompt (shown globally when guard detects missing required extensions) -->
 @if (profileService.incompleteRequired().length > 0) {

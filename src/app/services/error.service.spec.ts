@@ -122,6 +122,11 @@ describe('ErrorService', () => {
       expect(result).toBe('Your session has expired. Please refresh the page to log in again.');
     });
 
+    it('should return network error message for status 0', () => {
+      const error: ApiError = { httpCode: 0, message: 'Unknown Error', details: '', humanMessage: '' };
+      expect(ErrorService.parseToHuman(error)).toBe('Network error. Please check your connection.');
+    });
+
     it('should return generic error for unknown error codes', () => {
       const error: ApiError = {
         httpCode: 500,

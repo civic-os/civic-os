@@ -92,6 +92,24 @@ export class ThemeService {
       document.documentElement.classList.toggle('theme-light', !dark);
     });
 
+    // Sync <meta name="theme-color"> with the current theme's navbar background color.
+    // In regular browsers this colors the mobile address bar; in installed PWAs it colors the title bar.
+    effect(() => {
+      this.theme(); // track the signal
+      if (typeof document === 'undefined' || typeof requestAnimationFrame === 'undefined') return;
+      requestAnimationFrame(() => {
+        const hex = this.getBaseColorHex();
+        if (!hex) return;
+        let meta = document.querySelector('meta[name="theme-color"]');
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('name', 'theme-color');
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', hex);
+      });
+    });
+
     // Watch for external theme attribute changes on document element
     this.observeThemeChanges();
   }
@@ -247,6 +265,21 @@ export class ThemeService {
     } catch (error) {
       return null;
     }
+  }
+
+  /**
+   * Gets the navbar background color (base-300) as a hex string.
+   * Used by the theme-color meta tag effect for PWA title bar and mobile address bar.
+   */
+  public getBaseColorHex(): string | null {
+    if (typeof document === 'undefined') return null;
+    const computedStyle = getComputedStyle(document.documentElement);
+    const baseColor = computedStyle.getPropertyValue('--color-base-300').trim();
+    if (!baseColor) return null;
+    const rgb = this.parseColorToRGB(baseColor);
+    if (!rgb) return null;
+    const toHex = (n: number) => n.toString(16).padStart(2, '0');
+    return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
   }
 
   /**

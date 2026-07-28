@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ApplicationConfig, provideZonelessChangeDetection, provideAppInitializer, inject } from '@angular/core';
+import { ApplicationConfig, provideZonelessChangeDetection, provideAppInitializer, inject, isDevMode } from '@angular/core';
+import { provideServiceWorker } from '@angular/service-worker';
 import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -38,8 +39,9 @@ import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
 import { videoEmbedExtension } from './markdown/video-embed.extension';
 import { authButtonExtension } from './markdown/auth-button.extension';
 import { markdownSanitize } from './markdown/markdown-sanitize';
-import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig } from './config/runtime';
+import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig, getPwaConfig } from './config/runtime';
 import { TranslationService } from './services/translation.service';
+import { PwaService } from './services/pwa.service';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
 
 export const appConfig: ApplicationConfig = {
@@ -110,9 +112,20 @@ export const appConfig: ApplicationConfig = {
       sanitize: { provide: SANITIZE, useValue: markdownSanitize },
     }),
 
+    // Service worker for PWA support (conditionally enabled via runtime config)
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode() && getPwaConfig().enabled,
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
+
     // Eagerly initialize TranslationService so translations load at startup
     provideAppInitializer(() => {
       inject(TranslationService);
+    }),
+
+    // Eagerly initialize PwaService for install prompt capture and SW update monitoring
+    provideAppInitializer(() => {
+      inject(PwaService);
     }),
 
     // Register widget components at startup (Phase 1 + Phase 2)

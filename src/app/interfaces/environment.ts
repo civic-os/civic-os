@@ -54,5 +54,8 @@ export interface Environment {
     locale?: {
         defaultLocale: string,
         supportedLocales: string[]
+    },
+    pwa?: {
+        enabled: boolean
     }
 }

@@ -29,6 +29,7 @@ echo "  APP_TITLE: $APP_TITLE"
 echo "  FAVICON_URL: $FAVICON_URL"
 echo "  DEFAULT_LOCALE: $DEFAULT_LOCALE"
 echo "  SUPPORTED_LOCALES: $SUPPORTED_LOCALES"
+echo "  PWA_ENABLED: $PWA_ENABLED"
 echo ""
 
 # Generate inline config script
@@ -74,7 +75,10 @@ window.civicOsConfig = {
     supportedLocales: ('${SUPPORTED_LOCALES}' || 'en').split(',').map(function(s) { return s.trim(); })
   },
   appTitle: '$(echo "${APP_TITLE}" | sed "s/'/\\\\'/g")' || 'Civic OS',
-  faviconUrl: '${FAVICON_URL}'
+  faviconUrl: '${FAVICON_URL}',
+  pwa: {
+    enabled: '${PWA_ENABLED}' === 'true'
+  }
 };
 </script>
 EOF
@@ -105,6 +109,13 @@ fi
 if [ -n "$FAVICON_URL" ]; then
   sed -i "s|href=\"favicon.ico\"|href=\"${FAVICON_URL}\"|" /usr/share/nginx/html/index.html
   echo "✓ Favicon URL set to: $FAVICON_URL"
+fi
+
+# PWA: inject manifest link and substitute app title placeholder
+if [ "$PWA_ENABLED" = "true" ]; then
+  sed -i 's|</head>|<link rel="manifest" href="manifest.webmanifest"></head>|' /usr/share/nginx/html/index.html
+  sed -i "s|PWA_APP_TITLE_PLACEHOLDER|$(echo "${APP_TITLE:-Civic OS}" | sed "s|&|\\\\&|g")|g" /usr/share/nginx/html/manifest.webmanifest
+  echo "✓ PWA enabled (manifest injected)"
 fi
 
 echo ""

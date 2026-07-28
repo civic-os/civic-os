@@ -41,6 +41,9 @@ import { ProfileService } from './services/profile.service';
 import { CosModalComponent } from './components/cos-modal/cos-modal.component';
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslationService } from './services/translation.service';
+import { OfflineBannerComponent } from './components/offline-banner/offline-banner.component';
+import { PwaInstallBannerComponent } from './components/pwa-install-banner/pwa-install-banner.component';
+import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-update-toast.component';
 
 @Component({
     selector: 'app-root',
@@ -53,7 +56,10 @@ import { TranslationService } from './services/translation.service';
     SettingsModalComponent,
     AboutModalComponent,
     CosModalComponent,
-    TranslatePipe
+    TranslatePipe,
+    OfflineBannerComponent,
+    PwaInstallBannerComponent,
+    PwaUpdateToastComponent
 ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'

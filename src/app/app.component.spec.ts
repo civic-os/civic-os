@@ -25,7 +25,9 @@ import { AuthService } from './services/auth.service';
 import { ThemeService } from './services/theme.service';
 import { AnalyticsService } from './services/analytics.service';
 import { ImpersonationService } from './services/impersonation.service';
+import { SwUpdate } from '@angular/service-worker';
 import { Location } from '@angular/common';
+import { Subject } from 'rxjs';
 
 describe('AppComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
@@ -71,7 +73,8 @@ describe('AppComponent', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: ThemeService, useValue: mockThemeService },
         { provide: AnalyticsService, useValue: mockAnalyticsService },
-        { provide: ImpersonationService, useValue: mockImpersonationService }
+        { provide: ImpersonationService, useValue: mockImpersonationService },
+        { provide: SwUpdate, useValue: { isEnabled: false, versionUpdates: new Subject() } }
       ]
     }).compileComponents();
 

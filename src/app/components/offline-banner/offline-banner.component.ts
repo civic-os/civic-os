@@ -15,11 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Application version.
- *
- * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
- * This file is generated from package.json by scripts/update-version.js
- * Run 'npm run update-version' to regenerate after version changes.
- */
-export const APP_VERSION = '0.68.1';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { PwaService } from '../../services/pwa.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
+@Component({
+  selector: 'app-offline-banner',
+  imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (!pwa.isOnline()) {
+      <div class="alert alert-warning gap-2 rounded-none" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">wifi_off</span>
+        <span>{{ 'pwa.offline_message' | translate }}</span>
+      </div>
+    }
+  `
+})
+export class OfflineBannerComponent {
+  readonly pwa = inject(PwaService);
+}

@@ -502,5 +502,14 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'nav.redirecting': 'Redirecting...',
 
   'time.start': 'Start',
-  'time.end': 'End'
+  'time.end': 'End',
+
+  'pwa.offline_message': 'You are currently offline. Some features may be unavailable.',
+  'pwa.install_prompt': 'Install this app for a better experience',
+  'pwa.install_action': 'Install',
+  'pwa.install_app': 'Install App',
+  'pwa.install_description': 'Install this application on your device for quick access and an app-like experience.',
+  'pwa.update_available': 'A new version is available',
+  'pwa.update_reload': 'Reload',
+  'a11y.dismiss_install': 'Dismiss install prompt'
 };

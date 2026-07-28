@@ -61,7 +61,8 @@ ENV POSTGREST_URL=http://localhost:3000/ \
     APP_TITLE="Civic OS" \
     FAVICON_URL="" \
     DEFAULT_LOCALE=en \
-    SUPPORTED_LOCALES=en
+    SUPPORTED_LOCALES=en \
+    PWA_ENABLED=false
 
 # Expose port 80
 EXPOSE 80

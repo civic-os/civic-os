@@ -15,11 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Application version.
- *
- * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
- * This file is generated from package.json by scripts/update-version.js
- * Run 'npm run update-version' to regenerate after version changes.
- */
-export const APP_VERSION = '0.68.1';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { PwaService } from '../../services/pwa.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
+@Component({
+  selector: 'app-pwa-install-banner',
+  imports: [TranslatePipe],
+  templateUrl: './pwa-install-banner.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class PwaInstallBannerComponent {
+  readonly pwa = inject(PwaService);
+
+  async install(): Promise<void> {
+    await this.pwa.promptInstall();
+  }
+
+  dismiss(): void {
+    this.pwa.dismissInstallBanner();
+  }
+}

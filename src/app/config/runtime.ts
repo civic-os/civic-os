@@ -70,6 +70,9 @@ declare global {
         defaultLocale: string;
         supportedLocales: string[];
       };
+      pwa?: {
+        enabled: boolean;
+      };
     };
   }
 }
@@ -241,5 +244,19 @@ export function getLocaleConfig(): { defaultLocale: string; supportedLocales: st
   return {
     defaultLocale: config?.defaultLocale || 'en',
     supportedLocales: config?.supportedLocales || ['en']
+  };
+}
+
+/**
+ * Get PWA configuration.
+ * Used by app.config.ts to conditionally enable the service worker,
+ * and by PwaService to control install/update behavior.
+ *
+ * @returns PWA config object with enabled flag. Defaults to false.
+ */
+export function getPwaConfig(): { enabled: boolean } {
+  const config = window.civicOsConfig?.pwa || environment.pwa;
+  return {
+    enabled: config?.enabled ?? false
   };
 }

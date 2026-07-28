@@ -105,7 +105,9 @@ export class ErrorService {
    */
   public static parseToHuman(err: ApiError): string {
     //https://postgrest.org/en/stable/references/errors.html
-    if(err.code == '42501') {
+    if(err.httpCode === 0) {
+      return "Network error. Please check your connection.";
+    } else if(err.code == '42501') {
       return "Permissions error";
     } else if(err.code == '23505') {
       return "Record must be unique";

@@ -105,6 +105,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **User Profile Extensions** (v0.65.0+): Metadata-driven system for registering tables as user profile extensions via `metadata.user_profile_extensions`. Self-service "My Profile" page (`/profile`) with collapsible sections for core info, notification prefs, and extension data. Profile completion guard blocks navigation when required extensions are missing. Admin integration shows extension status in User Management edit modal. See `docs/notes/USER_PROFILE_EXTENSION_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (User Profile Extensions section) for setup.
 
+**PWA Support** (v0.69.0+): Optional thin PWA via `PWA_ENABLED` Docker env var (default: false). App shell caching only (no API data caching). Features offline banner, install prompt (first-visit + Settings), and auto-update toast. Dynamic `<meta name="theme-color">` syncs with DaisyUI theme via ThemeService. See `docs/notes/PWA_DESIGN.md` for architecture.
+
 ## Custom Dashboards
 
 **Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0)

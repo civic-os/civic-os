@@ -27,6 +27,7 @@ import { getMatomoConfig, getSmsConfig, getAppTitle } from '../../config/runtime
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { ThemePickerComponent } from '../theme-picker/theme-picker.component';
 import { LocaleService } from '../../services/locale.service';
+import { PwaService } from '../../services/pwa.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
@@ -56,6 +57,7 @@ export class SettingsModalComponent {
   readonly impersonation = inject(ImpersonationService);
   private readonly permissionsService = inject(PermissionsService);
   readonly localeService = inject(LocaleService);
+  readonly pwa = inject(PwaService);
 
   // Input: Control visibility of modal
   showModal = input.required<boolean>();
@@ -159,6 +161,13 @@ export class SettingsModalComponent {
         }
       }
     });
+  }
+
+  /**
+   * Trigger the PWA install prompt from Settings.
+   */
+  async installApp(): Promise<void> {
+    await this.pwa.promptInstall();
   }
 
   /**

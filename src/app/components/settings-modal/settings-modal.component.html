@@ -100,6 +100,18 @@
       }
     </div>
 
+    <!-- Install App (shown when PWA install is available) -->
+    @if (pwa.showInstallInSettings()) {
+      <div class="py-4 border-t border-base-300">
+        <h4 class="font-semibold mb-3">{{ 'pwa.install_app' | translate }}</h4>
+        <p class="text-xs opacity-70 mb-3">{{ 'pwa.install_description' | translate }}</p>
+        <button type="button" class="btn btn-primary btn-sm" (click)="installApp()">
+          <span class="material-symbols-outlined text-sm" aria-hidden="true">install_mobile</span>
+          {{ 'pwa.install_action' | translate }}
+        </button>
+      </div>
+    }
+
     <!-- Admin Section: Role Impersonation (only for real admins) -->
     @if (auth.isRealAdmin()) {
       <div class="py-4 border-t border-base-300">

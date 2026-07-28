@@ -5990,6 +5990,62 @@ archive_command = 'cp %p /backup/wal/%f'
 
 ---
 
+## PWA Support
+
+> **Version**: v0.69.0+
+
+Civic OS supports optional Progressive Web App (PWA) features — app shell caching for fast repeat loads and "Add to Home Screen" installability. PWA is **off by default** and opt-in per instance.
+
+### Enabling PWA
+
+Set `PWA_ENABLED=true` in your Docker deployment:
+
+```yaml
+# docker-compose.yml
+services:
+  frontend:
+    environment:
+      PWA_ENABLED: "true"
+      APP_TITLE: "My Civic App"  # Used in manifest name
+```
+
+### Icon Requirements
+
+Place PNG icons in the container's `/usr/share/nginx/html/assets/icons/` directory (or mount a volume):
+
+| File | Size | Purpose |
+|------|------|---------|
+| `icon-192x192.png` | 192×192 | Android install icon |
+| `icon-512x512.png` | 512×512 | Splash screen |
+| `icon-maskable-512x512.png` | 512×512 | Adaptive icon (safe zone) |
+
+### HTTPS Requirement
+
+Service workers require HTTPS in production (localhost is exempt for development). Ensure your deployment uses SSL/TLS.
+
+### What Gets Cached
+
+Only the **app shell** (HTML, CSS, JS, static assets) is cached by the service worker. **No API data is cached** — all PostgREST requests always go to the network, ensuring data is always fresh.
+
+### User-Facing Features
+
+When PWA is enabled:
+- **Install banner**: Appears on first visit, dismissable (remembered via localStorage)
+- **Settings install**: "Install App" option in Settings > Preferences (survives banner dismissal)
+- **Update toast**: "A new version is available — Reload" when a new deployment is detected
+- **Offline banner**: Warning bar when the device loses network connection (works regardless of PWA setting)
+- **Theme-color**: Mobile address bar and PWA title bar match the user's selected DaisyUI theme
+
+### Disabling PWA After Enable
+
+When `PWA_ENABLED` is set back to `false`, the frontend automatically unregisters any existing service workers on the next page load, ensuring a clean transition.
+
+### Architecture
+
+See `docs/notes/PWA_DESIGN.md` for detailed architecture, security considerations, and design decisions.
+
+---
+
 ## Additional Resources
 
 - **CLAUDE.md** - Developer quick-reference for building Civic OS apps
@@ -6001,6 +6057,7 @@ archive_command = 'cp %p /backup/wal/%f'
 - **docs/development/IMPORT_EXPORT.md** - Import/Export specification
 - **docs/notes/DASHBOARD_DESIGN.md** - Dashboard system architecture
 - **docs/notes/I18N_DESIGN.md** - Multi-language (i18n) system architecture
+- **docs/notes/PWA_DESIGN.md** - PWA architecture and design decisions
 - **postgres/migrations/README.md** - Sqitch migrations guide
 
 For questions or support, see the project README or file an issue on GitHub.

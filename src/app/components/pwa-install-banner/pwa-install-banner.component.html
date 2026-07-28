@@ -1,0 +1,13 @@
+@if (pwa.showInstallBanner()) {
+  <div class="alert alert-info gap-2 rounded-none" role="status">
+    <span class="material-symbols-outlined" aria-hidden="true">install_mobile</span>
+    <span class="flex-1">{{ 'pwa.install_prompt' | translate }}</span>
+    <button type="button" class="btn btn-primary btn-sm" (click)="install()">
+      {{ 'pwa.install_action' | translate }}
+    </button>
+    <button type="button" class="btn btn-ghost btn-sm btn-square" (click)="dismiss()"
+            [attr.aria-label]="'a11y.dismiss_install' | translate">
+      <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
+    </button>
+  </div>
+}

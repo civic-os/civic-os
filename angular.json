@@ -22,6 +22,7 @@
             "assets": [
               "src/favicon.ico",
               "src/silent-check-sso.html",
+              "src/manifest.webmanifest",
               "src/assets",
               {
                 "glob": "**/*",
@@ -88,7 +89,8 @@
                   "maximumError": "5kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,
@@ -131,6 +133,7 @@
             "assets": [
               "src/favicon.ico",
               "src/silent-check-sso.html",
+              "src/manifest.webmanifest",
               "src/assets",
               {
                 "glob": "**/*",
