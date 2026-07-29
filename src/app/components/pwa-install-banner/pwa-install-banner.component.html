@@ -1,7 +1,7 @@
 @if (pwa.showInstallBanner()) {
   <div class="alert alert-info gap-2 rounded-none" role="status">
     <span class="material-symbols-outlined" aria-hidden="true">install_mobile</span>
-    <span class="flex-1">{{ 'pwa.install_prompt' | translate }}</span>
+    <span class="flex-1">{{ 'pwa.install_prompt' | translate:{ appName: appName } }}</span>
     <button type="button" class="btn btn-primary btn-sm" (click)="install()">
       {{ 'pwa.install_action' | translate }}
     </button>

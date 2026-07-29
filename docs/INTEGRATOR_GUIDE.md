@@ -6006,8 +6006,14 @@ services:
   frontend:
     environment:
       PWA_ENABLED: "true"
-      APP_TITLE: "My Civic App"  # Used in manifest name
+      APP_TITLE: "My Civic App"       # Browser tab title
+      PWA_APP_NAME: "My Civic App"    # Manifest name + install banners (optional, defaults to APP_TITLE)
 ```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PWA_ENABLED` | `false` | Enable/disable PWA features |
+| `PWA_APP_NAME` | `APP_TITLE` | App name shown in manifest and install banners. Falls back to `APP_TITLE`, then `"Civic OS"`. Set this when you want the installed app name to differ from the browser tab title. |
 
 ### Icon Requirements
 

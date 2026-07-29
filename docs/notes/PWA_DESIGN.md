@@ -104,6 +104,21 @@ The `<meta name="theme-color">` is NOT injected statically in `index.html`. Inst
 - **ThemeService** dynamically creates/updates the meta tag at runtime using the current DaisyUI theme's `--color-base-300` (navbar background)
 - This runs for ALL users, not just PWA — it colors the mobile address bar in regular browsers too
 
+## Browser Compatibility
+
+The PWA install experience varies by browser:
+
+| Browser | Install Banner | SW Caching | Install Method |
+|---------|---------------|------------|----------------|
+| Chrome / Edge / Samsung Internet | `beforeinstallprompt` event fires, in-app banner shown | Yes | In-app banner or browser menu |
+| Firefox (Android) | No `beforeinstallprompt` event | Yes | Browser menu > "Add to Home Screen" |
+| Safari / iOS | No `beforeinstallprompt` event | Yes (with limitations) | Share > "Add to Home Screen" |
+
+**Key points:**
+- The `beforeinstallprompt` API is **Chromium-only**. Firefox and Safari users will never see the in-app install banner or the Settings > Install App option.
+- Service worker caching (fast repeat loads, offline app shell) works across all modern browsers.
+- On iOS, Safari is the only browser engine allowed to register service workers (even Chrome on iOS uses WebKit).
+
 ## Docker Integration
 
 ### Environment Variables
@@ -111,6 +126,7 @@ The `<meta name="theme-color">` is NOT injected statically in `index.html`. Inst
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PWA_ENABLED` | `false` | Enable/disable PWA features |
+| `PWA_APP_NAME` | `APP_TITLE` | App name in manifest and install banners. Falls back to `APP_TITLE`, then `"Civic OS"`. |
 
 ### docker-entrypoint.sh Changes
 
@@ -134,6 +150,10 @@ PWA icons go in `src/assets/icons/`:
 
 These must be provided by the deployer. The manifest references them but they are not included in the repo.
 
+### Manifest Name Substitution
+
+The manifest `name` and `short_name` use a placeholder (`PWA_APP_TITLE_PLACEHOLDER`) that the entrypoint substitutes at container start. The substitution cascades: `PWA_APP_NAME` → `APP_TITLE` → `"Civic OS"`.
+
 ## i18n
 
 8 translation keys added to `en.translations.ts`:
@@ -141,4 +161,7 @@ These must be provided by the deployer. The manifest references them but they ar
 - `pwa.install_description`, `pwa.update_available`, `pwa.update_reload`
 - `a11y.dismiss_install`
 
+`pwa.install_prompt` and `pwa.install_description` use `{{appName}}` interpolation so the configured app name appears in install banners and the Settings modal.
+
 Migration `v0-69-0-pwa-translations` provides translations for es, ar, fr, de, ps.
+Migration `v0-69-1-pwa-app-name-translations` updates `install_prompt` and `install_description` to use `{{appName}}`.

@@ -17,6 +17,7 @@
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { PwaService } from '../../services/pwa.service';
+import { getPwaAppName } from '../../config/runtime';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
@@ -27,6 +28,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class PwaInstallBannerComponent {
   readonly pwa = inject(PwaService);
+  readonly appName = getPwaAppName();
 
   async install(): Promise<void> {
     await this.pwa.promptInstall();

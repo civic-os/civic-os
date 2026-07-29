@@ -62,7 +62,8 @@ ENV POSTGREST_URL=http://localhost:3000/ \
     FAVICON_URL="" \
     DEFAULT_LOCALE=en \
     SUPPORTED_LOCALES=en \
-    PWA_ENABLED=false
+    PWA_ENABLED=false \
+    PWA_APP_NAME=""
 
 # Expose port 80
 EXPOSE 80

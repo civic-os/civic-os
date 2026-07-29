@@ -72,6 +72,7 @@ declare global {
       };
       pwa?: {
         enabled: boolean;
+        appName?: string;
       };
     };
   }
@@ -259,4 +260,16 @@ export function getPwaConfig(): { enabled: boolean } {
   return {
     enabled: config?.enabled ?? false
   };
+}
+
+/**
+ * Get the configured PWA app name.
+ * Used in install banners and manifest to display the app name.
+ *
+ * Fallback chain: PWA_APP_NAME → APP_TITLE → "Civic OS"
+ *
+ * @returns PWA app name string
+ */
+export function getPwaAppName(): string {
+  return window.civicOsConfig?.pwa?.appName || getAppTitle();
 }
