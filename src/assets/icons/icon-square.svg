@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="white"/>
+  <g transform="translate(100, 100)">
+    <!-- Circle centered at origin -->
+    <circle fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="1.8" cx="0" cy="0" r="88"/>
+    <!-- Building group: scaled up 80%, centered on building body (not flag) -->
+    <!-- Building body center is approx (76.78, 87.42) in original coords -->
+    <g transform="scale(1.8) translate(-76.78, -87.42)">
+      <path fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" d="M76.73,61.77c8.85,3.81,17.7,7.62,26.55,11.42.02,0,.01.03,0,.03h-51.64s-.02-.02,0-.03l25.1-11.43c-.01-3.81-.03-7.61-.04-11.42,2.03.97,2.95.78,3.43.43.54-.4.38-.94,1.01-1.49,1.13-1.01,3.2-.65,3.25-.36.02.15-.58.12-.99.58-1.05,1.2.96,3.73.06,4.76-.31.36-.78.31-2.78.22-1.73-.08-3.1-.12-3.91-.14"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="48.38" y="73.67" width="56.79" height="3.95" rx="1.98" ry="1.98"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="49.06" y="106.78" width="55.59" height="6.29" rx="3.15" ry="3.15"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="52.33" y="77.98" width="48.97" height="5.08" rx="2.54" ry="2.54"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="54.51" y="83.06" width="4.64" height="23.35"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="67.62" y="83.06" width="4.64" height="23.35"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="82.48" y="83.06" width="4.64" height="23.35"/>
+      <rect fill="none" stroke="#231f20" stroke-miterlimit="10" stroke-width="2" x="95.21" y="83.06" width="4.64" height="23.35"/>
+    </g>
+  </g>
+</svg>
