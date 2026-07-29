@@ -133,6 +133,7 @@ The PWA install experience varies by browser:
 1. Logs `PWA_ENABLED` in configuration echo block
 2. Adds `pwa: { enabled: ... }` to `window.civicOsConfig`
 3. When `PWA_ENABLED=true`: injects `<link rel="manifest">` into index.html and substitutes `PWA_APP_TITLE_PLACEHOLDER` in manifest.webmanifest
+4. **Rehashes `index.html` in `ngsw.json`** (unconditionally) — because the config injection, title replacement, favicon URL, and manifest link all modify `index.html` after the Angular build, the SHA-1 hash in `ngsw.json` becomes stale. The entrypoint recomputes the hash with `sha1sum` and patches `ngsw.json` so the service worker accepts the modified file. This runs even when `PWA_ENABLED=false` because `ngsw.json` always exists in the build output and the SW is never registered when disabled, so there is no downside.
 
 ### nginx.conf Changes
 

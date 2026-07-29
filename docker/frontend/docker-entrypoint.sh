@@ -120,6 +120,11 @@ if [ "$PWA_ENABLED" = "true" ]; then
   echo "✓ PWA enabled (manifest injected)"
 fi
 
+# Rehash index.html in ngsw.json so the service worker accepts the modified file
+INDEX_HASH=$(sha1sum /usr/share/nginx/html/index.html | cut -d' ' -f1)
+sed -i "s|\"\/index.html\": \"[a-f0-9]*\"|\"\/index.html\": \"$INDEX_HASH\"|" /usr/share/nginx/html/ngsw.json
+echo "✓ Updated ngsw.json index.html hash"
+
 echo ""
 
 # Substitute runtime URLs into nginx CSP configuration
