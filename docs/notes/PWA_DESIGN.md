@@ -85,9 +85,16 @@ PwaService constructor: if (!pwaEnabled) → unregisterAllServiceWorkers() and r
 
 2. PwaService sets updateAvailable = true
 
-3. PwaUpdateToastComponent shows fixed-position toast (bottom-right)
+3. showUpdateToast computed signal gates visibility:
+   → Only true when updateAvailable AND installed (standalone display mode)
+   → In browser tabs: SW updates silently, activates on next page load
+   → In standalone PWA: toast shown because user may keep app open indefinitely
+
+4. PwaUpdateToastComponent shows fixed-position toast (bottom-right)
    → User clicks "Reload" → document.location.reload()
 ```
+
+**Why gate on standalone mode?** In a regular browser tab, the SW activates the new version on the next navigation or page load — the user never needs to take action. The toast is only meaningful for standalone PWAs where the app may stay open for hours without a full reload. Without this gate, Firefox and Safari users (who never see an install banner) get a confusing "Update available" toast for an app they never consciously "installed."
 
 ### Security Considerations
 

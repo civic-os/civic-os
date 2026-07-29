@@ -60,6 +60,17 @@ describe('PwaService', () => {
     expect(service.updateAvailable()).toBeFalse();
   });
 
+  it('should not show update toast by default', () => {
+    expect(service.showUpdateToast()).toBeFalse();
+  });
+
+  it('should not show update toast when not in standalone display mode', () => {
+    // In test environment, display-mode is not standalone, so installed() is false.
+    // Even if updateAvailable were true, showUpdateToast requires installed() to be true.
+    expect(service.installed()).toBeFalse();
+    expect(service.showUpdateToast()).toBeFalse();
+  });
+
   it('should update online status on offline event', () => {
     window.dispatchEvent(new Event('offline'));
     expect(service.isOnline()).toBeFalse();

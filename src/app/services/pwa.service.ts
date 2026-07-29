@@ -65,6 +65,11 @@ export class PwaService {
     this.pwaEnabled && this._installable() && !this._installed()
   );
 
+  // Computed: show update toast only in standalone mode (installed PWA)
+  readonly showUpdateToast = computed(() =>
+    this._updateAvailable() && this._installed()
+  );
+
   constructor() {
     // Online/offline tracking works regardless of PWA status
     if (typeof window !== 'undefined') {

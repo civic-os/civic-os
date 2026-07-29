@@ -24,7 +24,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (pwa.updateAvailable()) {
+    @if (pwa.showUpdateToast()) {
       <div class="fixed bottom-4 end-4 z-50 alert alert-info shadow-lg w-auto" role="status">
         <span class="material-symbols-outlined" aria-hidden="true">system_update</span>
         <span>{{ 'pwa.update_available' | translate }}</span>
