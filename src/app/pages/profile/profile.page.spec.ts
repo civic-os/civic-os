@@ -73,7 +73,9 @@ describe('ProfilePage', () => {
     ]);
     mockNotificationService = jasmine.createSpyObj('NotificationService', [
       'getUserPreferences',
-      'updatePreference'
+      'updatePreference',
+      'getBulkEmailSubscriptions',
+      'updateBulkUnsubscribe'
     ]);
     mockSchemaService = jasmine.createSpyObj('SchemaService', [
       'getEntity',
@@ -131,6 +133,8 @@ describe('ProfilePage', () => {
     mockProfileService.getUserProfileRecord.and.returnValue(of(mockUser));
     mockNotificationService.getUserPreferences.and.returnValue(of([mockEmailPref]));
     mockNotificationService.updatePreference.and.returnValue(of({ success: true }));
+    mockNotificationService.getBulkEmailSubscriptions.and.returnValue(of([]));
+    mockNotificationService.updateBulkUnsubscribe.and.returnValue(of({ success: true }));
     mockSchemaService.getEntities.and.returnValue(of([]));
     mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
     mockSchemaService.getInverseRelationships.and.returnValue(of([]));

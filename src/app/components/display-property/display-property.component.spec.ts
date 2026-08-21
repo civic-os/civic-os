@@ -23,6 +23,7 @@ import { DisplayPropertyComponent } from './display-property.component';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { MOCK_PROPERTIES, MOCK_DATA, createMockProperty } from '../../testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
+import { provideMarkdown } from 'ngx-markdown';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { DebugElement } from '@angular/core';
 
@@ -36,7 +37,8 @@ describe('DisplayPropertyComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
-        provideTranslationTesting()
+        provideTranslationTesting(),
+        provideMarkdown()
       ]
     })
     .compileComponents();
@@ -78,6 +80,26 @@ describe('DisplayPropertyComponent', () => {
 
       const textContent = fixture.nativeElement.textContent.trim();
       expect(textContent).toContain('long description');
+    });
+  });
+
+  describe('Markdown Type', () => {
+    it('should render markdown content via ngx-markdown', () => {
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.markdown);
+      fixture.componentRef.setInput('datum', '# Hello\n\nThis is **bold** text.');
+      fixture.detectChanges();
+
+      const markdownEl = fixture.debugElement.query(By.css('markdown'));
+      expect(markdownEl).toBeTruthy();
+    });
+
+    it('should show "Not Set" for null markdown value', () => {
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.markdown);
+      fixture.componentRef.setInput('datum', null);
+      fixture.detectChanges();
+
+      const textContent = fixture.nativeElement.textContent.trim();
+      expect(textContent).toContain('Not Set');
     });
   });
 

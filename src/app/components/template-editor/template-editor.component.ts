@@ -110,6 +110,7 @@ export class TemplateEditorComponent implements OnInit, OnChanges, OnDestroy {
         name: this.template.name || '',
         description: this.template.description || '',
         entity_type: this.template.entity_type || '',
+        is_bulk: this.template.is_bulk ?? false,
         subject_template: this.template.subject_template || '',
         html_template: this.template.html_template || '',
         text_template: this.template.text_template || '',
@@ -138,6 +139,7 @@ export class TemplateEditorComponent implements OnInit, OnChanges, OnDestroy {
       name: [this.template?.name || '', [Validators.required, Validators.maxLength(100)]],
       description: [this.template?.description || ''],
       entity_type: [this.template?.entity_type || ''],
+      is_bulk: [this.template?.is_bulk ?? false],
       subject_template: [this.template?.subject_template || '', Validators.required],
       html_template: [this.template?.html_template || '', Validators.required],
       text_template: [this.template?.text_template || '', Validators.required],
@@ -280,6 +282,7 @@ export class TemplateEditorComponent implements OnInit, OnChanges, OnDestroy {
       this.notificationService.updateTemplate(this.template.id, formValue).subscribe({
         next: (response) => {
           if (response.success) {
+            this.saving.set(false);
             this.save.emit(response.body[0]);
           } else {
             this.saveError.set(response.error?.humanMessage);
@@ -296,6 +299,7 @@ export class TemplateEditorComponent implements OnInit, OnChanges, OnDestroy {
       this.notificationService.createTemplate(formValue).subscribe({
         next: (response) => {
           if (response.success) {
+            this.saving.set(false);
             this.save.emit(response.body[0]);
           } else {
             this.saveError.set(response.error?.humanMessage);

@@ -12,25 +12,28 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/yuin/goldmark"
 )
 
 // Renderer handles template parsing and rendering
 type Renderer struct {
 	siteURL   string
 	siteName  string // e.g., "FFSC Staff Portal" — from APP_TITLE env var
+	apiURL    string // PostgREST base URL — for tracking pixels and API callbacks in emails
 	timezone  *time.Location
 	dbPool    *pgxpool.Pool // For DB-backed template functions (staticAsset)
 	s3BaseURL string        // e.g., "https://s3.us-east-1.amazonaws.com/civic-os-files"
 }
 
 // NewRenderer creates a new Renderer instance
-func NewRenderer(siteURL, siteName string, timezone *time.Location, dbPool *pgxpool.Pool, s3BaseURL string) *Renderer {
+func NewRenderer(siteURL, siteName, apiURL string, timezone *time.Location, dbPool *pgxpool.Pool, s3BaseURL string) *Renderer {
 	if s3BaseURL == "" {
 		log.Println("[Renderer] S3 base URL not configured — staticAsset template function will return empty strings")
 	}
 	return &Renderer{
 		siteURL:   siteURL,
 		siteName:  siteName,
+		apiURL:    apiURL,
 		timezone:  timezone,
 		dbPool:    dbPool,
 		s3BaseURL: s3BaseURL,
@@ -142,7 +145,24 @@ func (r *Renderer) getTemplateFuncs() template.FuncMap {
 		"formatMoney":    r.formatMoney,
 		"formatPhone":    r.formatPhone,
 		"staticAsset":    r.staticAsset,
+		"markdown":       renderMarkdown,
 	}
+}
+
+// renderMarkdown converts a CommonMark markdown string to sanitized HTML.
+// Returns template.HTML so Go's html/template does not escape the rendered tags.
+// Usage in templates: {{ markdown .Entity.body }}
+func renderMarkdown(input interface{}) template.HTML {
+	s, ok := input.(string)
+	if !ok {
+		return template.HTML("")
+	}
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(s), &buf); err != nil {
+		// On parse failure, return HTML-escaped source text
+		return template.HTML(template.HTMLEscapeString(s))
+	}
+	return template.HTML(buf.String())
 }
 
 // staticAsset resolves a static asset slug to a public S3 URL.
@@ -323,6 +343,7 @@ func (r *Renderer) buildContext(entity map[string]interface{}) map[string]interf
 		"Metadata": map[string]string{
 			"site_url":  r.siteURL,
 			"site_name": r.siteName,
+			"api_url":   r.apiURL,
 		},
 	}
 }

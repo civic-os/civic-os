@@ -41,9 +41,10 @@ func (SendEmailArgs) InsertOpts() river.InsertOpts {
 // SendEmailWorker implements the River Worker interface for multi-recipient email
 type SendEmailWorker struct {
 	river.WorkerDefaults[SendEmailArgs]
-	dbPool     *pgxpool.Pool
-	renderer   *Renderer
-	smtpConfig *SMTPConfig
+	dbPool           *pgxpool.Pool
+	renderer         *Renderer
+	smtpConfig       *SMTPConfig
+	trackingInjector *TrackingInjector // nil when tracking is disabled
 }
 
 // Work executes the send_email job
@@ -61,13 +62,20 @@ func (w *SendEmailWorker) Work(ctx context.Context, job *river.Job[SendEmailArgs
 		return nil
 	}
 
-	// 2. Build entity data (default to empty object if not provided)
+	// 2. Handle bulk template constraints
+	if template.IsBulk && (len(job.Args.To)+len(job.Args.CC) > 1) {
+		log.Printf("[Job %d] ERROR: Template '%s' has is_bulk=TRUE but was sent to multiple recipients (%d TO + %d CC). Bulk templates must use single-recipient sends for per-recipient tracking.",
+			job.ID, job.Args.TemplateName, len(job.Args.To), len(job.Args.CC))
+		return nil // Permanent error, don't retry
+	}
+
+	// 3. Build entity data (default to empty object if not provided)
 	entityData := job.Args.EntityData
 	if len(entityData) == 0 {
 		entityData = json.RawMessage(`{}`)
 	}
 
-	// 3. Render template with entity data
+	// 4. Render template with entity data
 	rendered, err := w.renderer.RenderTemplate(template, entityData)
 	if err != nil {
 		// Rendering error is permanent — don't retry
@@ -75,8 +83,28 @@ func (w *SendEmailWorker) Work(ctx context.Context, job *river.Job[SendEmailArgs
 		return nil
 	}
 
-	// 4. Send email via SMTP with multi-recipient support
-	err = sendEmailSMTP(w.smtpConfig, job.Args.To, job.Args.CC, rendered, job.Args.ReplyTo)
+	// 5. Inject tracking for single-recipient bulk emails
+	var extraHeaders map[string]string
+	if template.IsBulk && w.trackingInjector != nil && len(job.Args.To) == 1 {
+		trackingToken, trackErr := w.trackingInjector.InjectTracking(
+			ctx, job.Args.To[0], job.Args.TemplateName,
+			job.Args.EntityType, job.Args.EntityID,
+			entityData, rendered,
+		)
+		if trackErr == ErrRecipientSuppressed {
+			log.Printf("[Job %d] Recipient %s suppressed (unsubscribed from %s), skipping",
+				job.ID, job.Args.To[0], job.Args.TemplateName)
+			return nil
+		}
+		if trackErr != nil {
+			log.Printf("[Job %d] Tracking injection warning: %v (sending without tracking)", job.ID, trackErr)
+		} else if trackingToken != "" {
+			extraHeaders = w.trackingInjector.BuildListUnsubscribeHeaders(trackingToken)
+		}
+	}
+
+	// 6. Send email via SMTP with multi-recipient support
+	err = sendEmailSMTP(w.smtpConfig, job.Args.To, job.Args.CC, rendered, job.Args.ReplyTo, extraHeaders)
 	if err != nil {
 		if isTransientError(err) {
 			log.Printf("[Job %d] Transient error, will retry: %v", job.ID, err)
@@ -101,10 +129,10 @@ func (w *SendEmailWorker) Work(ctx context.Context, job *river.Job[SendEmailArgs
 func loadTemplateFromDB(ctx context.Context, dbPool *pgxpool.Pool, templateName string) (*NotificationTemplate, error) {
 	var tmpl NotificationTemplate
 	err := dbPool.QueryRow(ctx, `
-		SELECT subject_template, html_template, text_template, COALESCE(sms_template, '')
+		SELECT subject_template, html_template, text_template, COALESCE(sms_template, ''), is_bulk
 		FROM metadata.notification_templates
 		WHERE name = $1
-	`, templateName).Scan(&tmpl.Subject, &tmpl.HTML, &tmpl.Text, &tmpl.SMS)
+	`, templateName).Scan(&tmpl.Subject, &tmpl.HTML, &tmpl.Text, &tmpl.SMS, &tmpl.IsBulk)
 
 	if err != nil {
 		return nil, fmt.Errorf("template '%s' not found: %w", templateName, err)
@@ -120,7 +148,7 @@ func loadTemplateFromDB(ctx context.Context, dbPool *pgxpool.Pool, templateName 
 // sendEmailSMTP sends an email via SMTP with support for multiple TO and CC recipients.
 // This is a standalone function (not a method) so it can be used by SendEmailWorker
 // without coupling to NotificationWorker.
-func sendEmailSMTP(smtpConfig *SMTPConfig, to []string, cc []string, rendered *RenderedNotification, replyToOverride string) error {
+func sendEmailSMTP(smtpConfig *SMTPConfig, to []string, cc []string, rendered *RenderedNotification, replyToOverride string, extraHeaders map[string]string) error {
 	// Filter out test emails if configured
 	var realTo []string
 	for _, addr := range to {
@@ -179,6 +207,11 @@ func sendEmailSMTP(smtpConfig *SMTPConfig, to []string, cc []string, rendered *R
 	}
 	if replyTo != "" {
 		headers["Reply-To"] = replyTo
+	}
+
+	// Add extra headers (e.g., List-Unsubscribe for bulk emails)
+	for k, v := range extraHeaders {
+		headers[k] = v
 	}
 
 	// Build email body

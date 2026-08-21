@@ -36,6 +36,7 @@ import { EditTimeSlotComponent } from '../edit-time-slot/edit-time-slot.componen
 import { EditRecurringTimeSlotComponent } from '../edit-recurring-time-slot/edit-recurring-time-slot.component';
 import { PaymentBadgeComponent } from '../payment-badge/payment-badge.component';
 import { FkSearchModalComponent } from '../fk-search-modal/fk-search-modal.component';
+import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor.component';
 import { PhotoGalleryEditorComponent } from '../photo-gallery-editor/photo-gallery-editor.component';
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
@@ -58,6 +59,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
     PaymentBadgeComponent,
     FkSearchModalComponent,
     PhotoGalleryEditorComponent,
+    MarkdownEditorComponent,
     FileThumbnailComponent,
     TranslatePipe
 ],
@@ -151,7 +153,8 @@ export class EditPropertyComponent {
         || t === EntityPropertyType.GeoPoint
         || t === EntityPropertyType.GeoPolygon
         || t === EntityPropertyType.PhotoGallery
-        || t === EntityPropertyType.Payment;
+        || t === EntityPropertyType.Payment
+        || t === EntityPropertyType.Markdown;
   });
 
   // File upload state

@@ -101,3 +101,6 @@ v0-66-0-ical-change-detection [v0-65-6-fix-entity-action-role-key] 2026-07-07T12
 v0-66-1-profile-exempt-roles [v0-66-0-ical-change-detection] 2026-07-16T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add exempt_roles to profile extensions for role-based guard bypass
 v0-68-0-a11y-translations [v0-66-1-profile-exempt-roles] 2026-07-18T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Translate a11y.* screen-reader strings into es/ar/fr/de/ps demo locales
 v0-69-0-pwa-translations [v0-68-0-a11y-translations] 2026-07-28T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add PWA UI string translations for es/ar/fr/de/ps locales
+v0-69-1-pwa-app-name-translations [v0-69-0-pwa-translations] 2026-07-29T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Update PWA translations to use appName interpolation
+v0-70-0-add-markdown-domain [v0-69-1-pwa-app-name-translations] 2026-08-04T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add markdown domain and editor a11y translations for rich-text content columns
+v0-70-0-trackable-notifications [v0-70-0-add-markdown-domain] 2026-08-05T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add trackable notifications with engagement tracking, CAN-SPAM compliance, and RFC 8058 unsubscribe

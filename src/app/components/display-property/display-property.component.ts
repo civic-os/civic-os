@@ -30,6 +30,7 @@ import { GalleryLightboxComponent } from '../gallery-lightbox/gallery-lightbox.c
 import { FileThumbnailComponent } from '../file-thumbnail/file-thumbnail.component';
 import { getS3Config } from '../../config/runtime';
 import { getContrastTextColor } from '../../utils/color.utils';
+import { MarkdownModule } from 'ngx-markdown';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
@@ -47,6 +48,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
         PaymentBadgeComponent,
         GalleryLightboxComponent,
         FileThumbnailComponent,
+        MarkdownModule,
         TranslatePipe,
     ],
     templateUrl: './display-property.component.html',

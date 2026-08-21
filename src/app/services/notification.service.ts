@@ -17,6 +17,7 @@ export interface NotificationTemplate {
   text_template: string;
   sms_template?: string;
   entity_type?: string;
+  is_bulk: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -79,6 +80,13 @@ export interface NotificationPreference {
   phone_number?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface BulkEmailSubscription {
+  template_name: string;
+  template_description: string;
+  unsubscribed: boolean;
+  last_sent_at: string;
 }
 
 // ============================================================================
@@ -451,6 +459,41 @@ export class NotificationService {
       } as ApiResponse)),
       catchError((error) => {
         console.error('Error updating notification preference:', error);
+        return of({
+          success: false,
+          error: {
+            message: error.message,
+            humanMessage: this.getHumanErrorMessage(error)
+          }
+        } as ApiResponse);
+      })
+    );
+  }
+
+  // ==========================================================================
+  // Bulk Email Subscriptions
+  // ==========================================================================
+
+  getBulkEmailSubscriptions(): Observable<BulkEmailSubscription[]> {
+    return this.http.post<BulkEmailSubscription[]>(
+      `${this.baseUrl}rpc/get_user_bulk_subscriptions`,
+      {}
+    ).pipe(
+      catchError((error) => {
+        console.error('Error fetching bulk email subscriptions:', error);
+        return of([]);
+      })
+    );
+  }
+
+  updateBulkUnsubscribe(templateName: string, unsubscribed: boolean): Observable<ApiResponse> {
+    return this.http.post(
+      `${this.baseUrl}rpc/set_bulk_email_unsubscribe`,
+      { p_template_name: templateName, p_unsubscribed: unsubscribed }
+    ).pipe(
+      map(() => ({ success: true } as ApiResponse)),
+      catchError((error) => {
+        console.error('Error updating bulk email subscription:', error);
         return of({
           success: false,
           error: {

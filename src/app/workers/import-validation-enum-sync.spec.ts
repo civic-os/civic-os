@@ -36,8 +36,8 @@ import { EntityPropertyType } from '../interfaces/entity';
  */
 describe('Import Validation Worker - EntityPropertyType Sync', () => {
   // UPDATE THIS when adding new EntityPropertyType members.
-  // Current members: Unknown(0) through GeoPolygon(26) = 27 values
-  const EXPECTED_COUNT = 27;
+  // Current members: Unknown(0) through Markdown(27) = 28 values
+  const EXPECTED_COUNT = 28;
 
   it('should have the expected number of EntityPropertyType enum members', () => {
     // TypeScript numeric enums have reverse mappings (key→value AND value→key),

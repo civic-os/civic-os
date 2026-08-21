@@ -37,6 +37,11 @@
       {{ datum() }}
     }
   } <!-- Add Synopsis/ellipsis-->
+  @if (propType() == EntityPropertyType.Markdown) {
+    <div class="prose max-w-none">
+      <markdown [data]="datum()"></markdown>
+    </div>
+  }
     @if (propType() == EntityPropertyType.Money) {
       {{ datum() }}
     }

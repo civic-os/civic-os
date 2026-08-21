@@ -210,6 +210,22 @@ This document outlines the development roadmap for Civic OS, organized by phases
     - [x] `send_email()` natively supports multi-recipient arrays (`p_to_addresses TEXT[]`, `p_cc_addresses TEXT[]`)
     - [ ] `send_notification()` still accepts single `p_user_id UUID` — needs `p_user_ids UUID[]` overload for system users
 
+  - [~] **Trackable notifications** (v0.70.0) - Framework-level email engagement tracking, CAN-SPAM compliance, and RFC 8058 one-click unsubscribe for bulk emails
+    - [x] Tracking infrastructure: `notification_tracking_tokens`, `notification_events`, `notification_settings` tables
+    - [x] `is_bulk` flag on templates with auto-injection of tracking pixel, CAN-SPAM footer, unsubscribe link
+    - [x] Tracking HTTP server (open/click/unsubscribe endpoints) in consolidated Go worker
+    - [x] Bot detection heuristics (timing threshold, known user-agent matching)
+    - [x] Aggregation VIEW (`notification_tracking_stats`) with raw and bot-filtered metrics
+    - [x] User self-service bulk email management on Profile page
+    - [x] Admin bulk email status in User Management edit modal
+    - [ ] Click tracking link rewriting — automatic `<a href>` rewriting via HTML tokenizer to route clicks through `/t/c` endpoint
+    - [ ] `rawHTML` template function — `{{ rawHTML .Entity.field }}` to bypass Go `html/template` auto-escaping for pre-formatted HTML
+    - [ ] Bounce tracking — auto-insert bounce events from SMTP errors, repeated bounces auto-suppress
+    - [ ] Admin notifications page (`/admin/notifications`) — delivery stats, engagement metrics, unsubscription management
+    - [ ] Send throttling — River per-queue rate limits for bulk sends to avoid ISP throttling
+    - [ ] A/B testing — variant templates to recipient subsets, compare via `notification_tracking_stats`
+    - [ ] Campaign Performance dashboard widget — open/click rates for bulk notifications
+
 - [ ] **Outbound Webhooks** - HTTP callbacks to external systems on entity events
   - [ ] `metadata.webhooks` table (URL, entity_type, event_type, secret, active flag)
   - [ ] Integration with causal bindings (status transitions, property change triggers)
@@ -233,6 +249,12 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] UI component (Activity tab on Detail pages, timeline view)
   - [ ] Filter by user, field, date range
   - [ ] RLS policies (entity-level read permissions)
+
+- [ ] **Read Audit (Access Logging)** - Server-side audit of read operations (who viewed which record) for government/law-enforcement deployments. Pure PostgreSQL + PostgREST configuration establishes the record (no reliance on client behavior); the Go worker post-processes. See `docs/notes/READ_AUDIT_DESIGN.md`.
+  - [ ] Phase 1 (config only): pgAudit object mode with `civic_os_auditor` role, `audit_reads` metadata flag + grant function, `db-pre-request` user attribution via `application_name`, deployment docs (self-hosted, RDS, DigitalOcean)
+  - [ ] Phase 2: Go worker log ingestion (`LogSource` adapters: file tail / CloudWatch / DO logsink syslog), `pg_query_go` statement normalization, append-only partitioned `audit.read_log`, admin page (`/admin/read-audit`)
+  - [ ] Phase 3: bespoke alert RPCs on `metadata.scheduled_jobs` (high-water-mark pattern, delivery via notification pipeline), retention jobs, optional S3/WORM raw log archive
+  - [ ] Phase 4: structured alert rules (`metadata.audit_alert_rules`) with GUI management; optional RPC-gated strict mode for per-row read receipts
 
 - [ ] **Due Date / SLA Property Type** - Time-based prioritization
   - [ ] `due_at` property type with DateTimeLocal handling

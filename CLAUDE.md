@@ -52,6 +52,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `Email`: `email_address` → Clickable mailto: link, HTML5 email input
 - `Telephone`: `phone_number` → Clickable tel: link with formatted display, masked input (XXX) XXX-XXXX
 - `TimeSlot`: `time_slot` (tstzrange) → Formatted date range display, dual datetime-local inputs with validation, optional calendar visualization
+- `Markdown`: `markdown` domain → Rendered HTML display (via `ngx-markdown`), TipTap WYSIWYG editor on forms. Lazy-loaded via `@defer`. See `docs/notes/MARKDOWN_TYPE_DESIGN.md` for architecture.
 
 **Calendar Integration** (v0.9.0+): Enable via `show_calendar=true` and `calendar_property_name` in `metadata.entities`. Supports overlap prevention via GIST exclusion constraints. See `docs/development/CALENDAR_INTEGRATION.md` for details and `examples/community-center/` for working example.
 

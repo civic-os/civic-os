@@ -21,6 +21,7 @@ import { Observable, catchError, map, of } from 'rxjs';
 import { getPostgrestUrl } from '../config/runtime';
 import { AuthService } from './auth.service';
 import { ApiResponse } from '../interfaces/api';
+import { BulkEmailSubscription } from './notification.service';
 
 export interface ManagedUser {
   id: string | null;
@@ -333,6 +334,34 @@ export class UserManagementService {
       }),
       catchError(error => {
         const message = error.error?.message || error.message || 'Failed to update preference';
+        return of(<ApiResponse>{
+          success: false,
+          error: { message, humanMessage: message }
+        });
+      })
+    );
+  }
+
+  getAdminBulkSubscriptions(userId: string): Observable<BulkEmailSubscription[]> {
+    return this.http.post<BulkEmailSubscription[]>(
+      getPostgrestUrl() + 'rpc/admin_get_user_bulk_subscriptions',
+      { p_user_id: userId }
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching admin bulk subscriptions:', error);
+        return of([]);
+      })
+    );
+  }
+
+  adminSetBulkUnsubscribe(userId: string, templateName: string, unsubscribed: boolean): Observable<ApiResponse> {
+    return this.http.post<any>(
+      getPostgrestUrl() + 'rpc/admin_set_bulk_email_unsubscribe',
+      { p_user_id: userId, p_template_name: templateName, p_unsubscribed: unsubscribed }
+    ).pipe(
+      map(() => (<ApiResponse>{ success: true })),
+      catchError(error => {
+        const message = error.error?.message || error.message || 'Failed to update subscription';
         return of(<ApiResponse>{
           success: false,
           error: { message, humanMessage: message }

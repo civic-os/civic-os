@@ -38,6 +38,7 @@ func main() {
 	log.Println("    - Source Code Parser")
 	log.Println("    - User Provisioning Worker (Keycloak)")
 	log.Println("    - Gallery Cleanup Cron")
+	log.Println("    - Tracking HTTP Server")
 	log.Println("========================================")
 
 	ctx := context.Background()
@@ -56,6 +57,7 @@ func main() {
 	// Notification Worker Configuration
 	siteURL := getEnv("SITE_URL", "http://localhost:4200")
 	siteName := getEnv("APP_TITLE", "Civic OS") // Same env var as frontend container
+	apiURL := getEnv("API_URL", "http://localhost:3000") // PostgREST base URL for tracking pixels / API callbacks
 	notificationTimezone := getEnv("NOTIFICATION_TIMEZONE", "America/New_York")
 
 	// SMTP Configuration
@@ -80,6 +82,11 @@ func main() {
 	keycloakServiceClientSecret := getEnv("KEYCLOAK_SERVICE_CLIENT_SECRET", "")
 	// Recurring Series Configuration
 	recurringSeriesHorizonDays := getEnvInt("RECURRING_SERIES_HORIZON_DAYS", 90)
+
+	// Tracking Server Configuration
+	trackingURL := getEnv("TRACKING_URL", "http://localhost:8090")
+	trackingPort := getEnv("TRACKING_PORT", "8090")
+	trackingEnabled := getEnvBool("NOTIFICATION_TRACKING_ENABLED", true)
 
 	// Validate SMTP_FROM at startup (fail-fast)
 	_, envelopeFrom := parseEmailAddress(smtpFrom)
@@ -128,6 +135,11 @@ func main() {
 	log.Printf("[Init]   DB Max Connections: %d", dbMaxConns)
 	log.Printf("[Init]   DB Min Connections: %d", dbMinConns)
 	log.Printf("[Init]   Recurring Series Horizon Days: %d", recurringSeriesHorizonDays)
+	if trackingEnabled {
+		log.Printf("[Init]   Tracking Server: %s (port %s)", trackingURL, trackingPort)
+	} else {
+		log.Printf("[Init]   Tracking Server: disabled")
+	}
 
 	// Load timezone for notification worker
 	timezone, err := time.LoadLocation(notificationTimezone)
@@ -219,7 +231,7 @@ func main() {
 	}
 
 	// Template Renderer
-	renderer := NewRenderer(siteURL, siteName, timezone, dbPool, s3BaseURL)
+	renderer := NewRenderer(siteURL, siteName, apiURL, timezone, dbPool, s3BaseURL)
 	log.Println("[Init] ✓ Template renderer initialized")
 
 	// Telnyx SMS Client (optional)
@@ -241,6 +253,17 @@ func main() {
 		log.Println("[Init] ✓ Keycloak client configured")
 	} else {
 		log.Println("[Init] ⚠ Keycloak client not configured (user provisioning disabled)")
+	}
+
+	// ===========================================================================
+	// 5c. Initialize Tracking Injector (for bulk email tracking)
+	// ===========================================================================
+	var trackingInjector *TrackingInjector
+	if trackingEnabled {
+		trackingInjector = NewTrackingInjector(dbPool, trackingURL)
+		log.Println("[Init] ✓ Tracking injector configured")
+	} else {
+		log.Println("[Init] ⚠ Tracking injector disabled (NOTIFICATION_TRACKING_ENABLED=false)")
 	}
 
 	// ===========================================================================
@@ -266,20 +289,22 @@ func main() {
 
 	// Notification Worker (notifications queue, priority 1)
 	river.AddWorker(workers, &NotificationWorker{
-		dbPool:        dbPool,
-		renderer:      renderer,
-		smtpConfig:    smtpConfig,
-		telnyxClient:  telnyxClient,
-		smsFakeMode:   smsFakeMode,
-		smsFromNumber: telnyxFromNumber, // populated even in fake mode for log display
+		dbPool:           dbPool,
+		renderer:         renderer,
+		smtpConfig:       smtpConfig,
+		trackingInjector: trackingInjector,
+		telnyxClient:     telnyxClient,
+		smsFakeMode:      smsFakeMode,
+		smsFromNumber:    telnyxFromNumber, // populated even in fake mode for log display
 	})
 	log.Println("[Init] ✓ NotificationWorker registered (queue: notifications, priority 1)")
 
 	// Send Email Worker (notifications queue, priority 2 — multi-recipient email)
 	river.AddWorker(workers, &SendEmailWorker{
-		dbPool:     dbPool,
-		renderer:   renderer,
-		smtpConfig: smtpConfig,
+		dbPool:           dbPool,
+		renderer:         renderer,
+		smtpConfig:       smtpConfig,
+		trackingInjector: trackingInjector,
 	})
 	log.Println("[Init] ✓ SendEmailWorker registered (queue: notifications, priority 2)")
 
@@ -413,6 +438,13 @@ func main() {
 	// Start the gallery cleanup cron (daily at ~3 AM)
 	galleryCleanupCron.Start(ctx)
 
+	// Start the tracking HTTP server (for open/click/unsubscribe callbacks)
+	var trackingServer *TrackingServer
+	if trackingEnabled {
+		trackingServer = NewTrackingServer(dbPool, trackingURL, trackingPort)
+		go trackingServer.Start()
+	}
+
 	log.Println("")
 	log.Println("========================================")
 	log.Println("🚀 Consolidated Worker is running!")
@@ -438,6 +470,9 @@ func main() {
 		log.Println("  - update_keycloak_user (queue: user_provisioning)")
 	}
 	log.Println("  - pgrst LISTEN (dedicated connection)")
+	if trackingEnabled {
+		log.Printf("  - tracking_server (HTTP :%s)", trackingPort)
+	}
 	log.Println("")
 	log.Printf("Database connections: %d max, %d min (+1 LISTEN)", dbMaxConns, dbMinConns)
 	log.Println("Press Ctrl+C to shutdown gracefully...")
@@ -453,13 +488,18 @@ func main() {
 	log.Println("")
 	log.Println("[Shutdown] Signal received, stopping gracefully...")
 
-	// Stop cron jobs first
-	galleryCleanupCron.Stop()
-	scheduledJobScheduler.Stop()
-
 	// Use 30 second timeout (thumbnail jobs can be slow)
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	// Stop tracking server first (so no new requests come in)
+	if trackingServer != nil {
+		trackingServer.Shutdown(shutdownCtx)
+	}
+
+	// Stop cron jobs
+	galleryCleanupCron.Stop()
+	scheduledJobScheduler.Stop()
 
 	if err := riverClient.Stop(shutdownCtx); err != nil {
 		log.Printf("[Shutdown] Error stopping River client: %v", err)

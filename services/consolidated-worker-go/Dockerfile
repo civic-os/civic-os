@@ -65,13 +65,12 @@ RUN chown -R appuser:appuser /app
 # Switch to non-root user
 USER appuser
 
-# Expose port (not used, but good practice for documentation)
-# This service doesn't listen on HTTP, it's a worker
-EXPOSE 8080
+# Expose tracking server port
+EXPOSE 8090
 
-# Health check (check if process is running)
+# Health check via tracking server HTTP endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD ps aux | grep -v grep | grep -q consolidated-worker || exit 1
+  CMD wget -q -O- http://localhost:8090/health || exit 1
 
 # Run the service
 CMD ["./consolidated-worker"]

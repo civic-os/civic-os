@@ -53,6 +53,18 @@
       [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
       [attr.aria-describedby]="describedBy()"></textarea>
   }
+  @if (propType() == EntityPropertyType.Markdown) {
+    @defer {
+      <app-markdown-editor
+        [formControlName]="prop().column_name"
+        [attr.aria-required]="isRequired() || null"
+        [attr.aria-invalid]="isErrorShown(prop().column_name) || null"
+        [attr.aria-describedby]="describedBy()">
+      </app-markdown-editor>
+    } @placeholder {
+      <div class="skeleton h-48 w-full" aria-hidden="true"></div>
+    }
+  }
   @if (propType() == EntityPropertyType.Money) {
     <input type="text" currencyMask placeholder="Type here" class="input w-full" [id]="prop().column_name" [formControlName]="prop().column_name"
       [attr.aria-required]="isRequired() || null"

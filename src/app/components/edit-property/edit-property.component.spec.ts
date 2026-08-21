@@ -248,6 +248,34 @@ describe('EditPropertyComponent', () => {
     });
   });
 
+  describe('Markdown Type', () => {
+    it('should render app-markdown-editor inside @defer', async () => {
+      const formGroup = new FormGroup({
+        body: new FormControl('# Hello')
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.markdown);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // @defer renders a skeleton placeholder initially
+      const skeleton = fixture.debugElement.query(By.css('.skeleton'));
+      expect(skeleton).toBeTruthy();
+    });
+
+    it('should treat Markdown as a custom widget (no label[for])', () => {
+      const formGroup = new FormGroup({
+        body: new FormControl('')
+      });
+      fixture.componentRef.setInput('property', MOCK_PROPERTIES.markdown);
+      fixture.componentRef.setInput('formGroup', formGroup);
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      expect(component.isCustomWidget()).toBeTrue();
+    });
+  });
+
   describe('Boolean Type', () => {
     it('should render checkbox', () => {
       const formGroup = new FormGroup({

@@ -53,12 +53,13 @@ type SMTPConfig struct {
 // NotificationWorker implements the River Worker interface
 type NotificationWorker struct {
 	river.WorkerDefaults[NotificationArgs]
-	dbPool        *pgxpool.Pool
-	renderer      *Renderer
-	smtpConfig    *SMTPConfig
-	telnyxClient  *TelnyxClient // nil when SMS_ENABLED=false or SMS_FAKE_MODE=true
-	smsFakeMode   bool          // true = log to stdout instead of calling Telnyx
-	smsFromNumber string        // displayed in fake-mode logs
+	dbPool           *pgxpool.Pool
+	renderer         *Renderer
+	smtpConfig       *SMTPConfig
+	trackingInjector *TrackingInjector // nil when tracking is disabled
+	telnyxClient     *TelnyxClient     // nil when SMS_ENABLED=false or SMS_FAKE_MODE=true
+	smsFakeMode      bool              // true = log to stdout instead of calling Telnyx
+	smsFromNumber    string            // displayed in fake-mode logs
 }
 
 // Work executes the notification job
@@ -92,6 +93,25 @@ func (w *NotificationWorker) Work(ctx context.Context, job *river.Job[Notificati
 		return nil // Don't retry
 	}
 
+	// 3b. Inject tracking for bulk templates
+	var trackingToken string
+	if template.IsBulk && w.trackingInjector != nil {
+		trackingToken, err = w.trackingInjector.InjectTracking(
+			ctx, prefs.Email, job.Args.TemplateName,
+			job.Args.EntityType, job.Args.EntityID,
+			job.Args.EntityData, rendered,
+		)
+		if err == ErrRecipientSuppressed {
+			log.Printf("[Job %d] Recipient %s suppressed (unsubscribed from %s), skipping",
+				job.ID, prefs.Email, job.Args.TemplateName)
+			w.markNotificationSent(ctx, job.Args.NotificationID, []string{}, []string{})
+			return nil
+		}
+		if err != nil {
+			log.Printf("[Job %d] Tracking injection warning: %v (sending without tracking)", job.ID, err)
+		}
+	}
+
 	// 4. Send via requested channels (respecting preferences)
 	var channelsSent []string
 	var channelsFailed []string
@@ -106,7 +126,7 @@ func (w *NotificationWorker) Work(ctx context.Context, job *river.Job[Notificati
 
 		switch channel {
 		case "email":
-			if err := w.sendEmail(ctx, prefs.Email, rendered); err != nil {
+			if err := w.sendEmail(ctx, prefs.Email, rendered, trackingToken); err != nil {
 				log.Printf("[Job %d] Failed to send email: %v", job.ID, err)
 				channelsFailed = append(channelsFailed, "email")
 				lastError = err
@@ -220,6 +240,7 @@ type NotificationTemplate struct {
 	HTML    string
 	Text    string
 	SMS     string
+	IsBulk  bool
 }
 
 // loadTemplate fetches template from database.
@@ -229,7 +250,7 @@ func (w *NotificationWorker) loadTemplate(ctx context.Context, templateName stri
 }
 
 // sendEmail sends email via SMTP with STARTTLS
-func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rendered *RenderedNotification) error {
+func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rendered *RenderedNotification, trackingToken string) error {
 	// Skip test/dummy email addresses if configured
 	if w.smtpConfig.SkipTestEmails && isTestEmail(toEmail) {
 		log.Printf("⚠️  Skipping test email: %s (SkipTestEmails=true)", toEmail)
@@ -263,6 +284,13 @@ func (w *NotificationWorker) sendEmail(ctx context.Context, toEmail string, rend
 	// Add Reply-To header if configured
 	if w.smtpConfig.ReplyTo != "" {
 		headers["Reply-To"] = w.smtpConfig.ReplyTo
+	}
+
+	// Add List-Unsubscribe headers for bulk emails (RFC 8058)
+	if trackingToken != "" && w.trackingInjector != nil {
+		for k, v := range w.trackingInjector.BuildListUnsubscribeHeaders(trackingToken) {
+			headers[k] = v
+		}
 	}
 
 	// Build email body

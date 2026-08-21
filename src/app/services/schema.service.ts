@@ -685,6 +685,7 @@ export class SchemaService {
       ['phone_number'].includes(val.udt_name) ? EntityPropertyType.Telephone :
       (['time_slot'].includes(val.udt_name) && val.is_recurring) ? EntityPropertyType.RecurringTimeSlot :
       ['time_slot'].includes(val.udt_name) ? EntityPropertyType.TimeSlot :
+      ['markdown'].includes(val.udt_name) ? EntityPropertyType.Markdown :
       ['varchar'].includes(val.udt_name) ? EntityPropertyType.TextShort :
       ['text'].includes(val.udt_name) ? EntityPropertyType.TextLong :
       EntityPropertyType.Unknown;
@@ -1013,6 +1014,8 @@ export class SchemaService {
 
     // Default widths based on property type
     switch (property.type) {
+      case EntityPropertyType.Markdown:
+        return 4;
       case EntityPropertyType.TextLong:
       case EntityPropertyType.GeoPoint:
       case EntityPropertyType.GeoPolygon:
@@ -1199,7 +1202,12 @@ export class SchemaService {
       const [fk1, fk2] = fkProps;
 
       // Collect extra columns for rich junctions (typed SchemaEntityProperty[])
-      const extraColumns = isRichJunction ? extraColumnProps : [];
+      // Only include columns visible on create or edit forms — auto-generated
+      // columns hidden from both (e.g. tracking tokens) shouldn't appear in the
+      // M:M editor dialog.
+      const extraColumns = isRichJunction
+        ? extraColumnProps.filter(p => p.show_on_create !== false || p.show_on_edit !== false)
+        : [];
 
       // Check if related tables have 'color' and 'display_name' columns.
       // Tables without display_name (e.g. guided form step tables) can't be rendered

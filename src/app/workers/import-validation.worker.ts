@@ -73,7 +73,8 @@ const EntityPropertyType = {
   Category: 23,
   RecurringTimeSlot: 24,
   PhotoGallery: 25,
-  GeoPolygon: 26
+  GeoPolygon: 26,
+  Markdown: 27
 };
 
 interface ImportError {

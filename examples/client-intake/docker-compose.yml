@@ -128,6 +128,8 @@ services:
       context: ../../services/consolidated-worker-go
       dockerfile: Dockerfile
     container_name: consolidated_worker
+    ports:
+      - "8090:8090"  # Tracking server (open/click/unsubscribe callbacks)
     environment:
       # Database Configuration (shared pool with explicit limits)
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -147,6 +149,7 @@ services:
 
       # Notification Worker Configuration
       - SITE_URL=${SITE_URL:-http://localhost:4200}
+      - API_URL=${API_URL:-http://localhost:3000}
       - NOTIFICATION_TIMEZONE=${NOTIFICATION_TIMEZONE:-America/New_York}
       - SMTP_HOST=${SMTP_HOST:-inbucket}  # Default to Inbucket for local dev
       - SMTP_PORT=${SMTP_PORT:-2500}       # Inbucket SMTP port
@@ -170,6 +173,10 @@ services:
       - KEYCLOAK_SERVICE_CLIENT_SECRET=civic-os-service-secret
       # Recurring Series Configuration
       - RECURRING_SERIES_HORIZON_DAYS=${RECURRING_SERIES_HORIZON_DAYS:-90}
+      # Tracking Server Configuration (engagement tracking for bulk emails)
+      - TRACKING_URL=${TRACKING_URL:-http://localhost:8090}
+      - TRACKING_PORT=${TRACKING_PORT:-8090}
+      - NOTIFICATION_TRACKING_ENABLED=${NOTIFICATION_TRACKING_ENABLED:-true}
     networks:
       - postgrest-network
     depends_on:

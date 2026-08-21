@@ -495,6 +495,7 @@ export class PropertyManagementPage {
       [EntityPropertyType.RecurringTimeSlot]: 'Recurring Time Slot',
       [EntityPropertyType.PhotoGallery]: 'Photo Gallery',
       [EntityPropertyType.GeoPolygon]: 'Geo Polygon',
+      [EntityPropertyType.Markdown]: 'Markdown',
     };
     return typeLabels[property.type] || 'Unknown';
   }

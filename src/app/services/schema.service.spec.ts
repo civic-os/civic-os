@@ -296,6 +296,11 @@ describe('SchemaService', () => {
       expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.Telephone);
     });
 
+    it('should detect Markdown for markdown domain', () => {
+      const prop = createMockProperty({ udt_name: 'markdown' });
+      expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.Markdown);
+    });
+
     it('should return Unknown for unrecognized types', () => {
       const prop = createMockProperty({ udt_name: 'unknown_type' });
       expect(service['getPropertyType'](prop)).toBe(EntityPropertyType.Unknown);

@@ -1787,6 +1787,170 @@ SELECT * FROM metadata.notifications ORDER BY created_at DESC LIMIT 1;
 
 See `docs/development/NOTIFICATIONS.md` for complete architecture, Go worker implementation, SMTP setup, and Telnyx SMS configuration.
 
+#### Bulk Email & Tracking (v0.70.0+)
+
+Send bulk emails (newsletters, announcements) with open/click tracking, CAN-SPAM-compliant unsubscribe, and self-service subscription management. Built on top of the existing notification system — uses the same templates, SMTP config, and River job queue.
+
+**How It Works**:
+1. Mark a notification template as `is_bulk = TRUE`
+2. Send emails using `metadata.send_email()` (not `create_notification()` — bulk sends don't target a single user)
+3. The Go worker automatically injects: tracking pixel, unsubscribe link + footer, `List-Unsubscribe` headers, organization address
+4. Recipients can unsubscribe via email link, Profile page, or admin toggle in User Management
+5. Unsubscribed recipients are silently suppressed on future sends
+
+**Requirements**:
+- Civic OS v0.70.0+ (tracking migration + worker features)
+- Tracking server port exposed (default: 8090) — must be reachable by email recipients
+- `TRACKING_BASE_URL` environment variable on the consolidated worker (e.g., `https://track.example.com`)
+
+**Step 1: Configure notification settings**
+
+```sql
+-- Set organization address (required for CAN-SPAM) and reason text
+UPDATE metadata.notification_settings
+SET organization_address = '123 Main Street, Anytown, MI 48502',
+    unsubscribe_reason_text = 'You received this because you are a registered member.',
+    tracking_enabled = TRUE
+WHERE id = 1;
+```
+
+**Step 2: Create a bulk template**
+
+```sql
+INSERT INTO metadata.notification_templates (
+    name, description, entity_type, is_bulk,
+    subject_template, html_template, text_template
+) VALUES (
+    'newsletter_send',
+    'Monthly newsletter to members',
+    'newsletters',
+    TRUE,  -- enables tracking injection
+    '{{.Entity.subject}}',
+    '<h2>{{.Entity.subject}}</h2>
+     <div>{{ markdown .Entity.body }}</div>',
+    '{{.Entity.body}}'
+);
+```
+
+The `is_bulk` flag tells the worker to:
+- Create a tracking token per recipient per send
+- Inject a 1x1 tracking pixel before `</body>`
+- Append a CAN-SPAM footer with unsubscribe link + organization address
+- Add `List-Unsubscribe` and `List-Unsubscribe-Post` headers (RFC 8058)
+- Check suppression before sending (skip unsubscribed recipients)
+
+**Step 3: Send bulk email**
+
+Use `metadata.send_email()` for multi-recipient sends. Typically called from a `SECURITY DEFINER` RPC:
+
+```sql
+CREATE OR REPLACE FUNCTION send_newsletter(p_newsletter_id BIGINT)
+RETURNS VOID
+SECURITY DEFINER
+SET search_path = metadata, public
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_newsletter RECORD;
+    v_recipient RECORD;
+BEGIN
+    SELECT id, subject, body INTO v_newsletter
+    FROM newsletters WHERE id = p_newsletter_id;
+
+    FOR v_recipient IN
+        SELECT c.email
+        FROM newsletter_recipients nr
+        JOIN clients c ON nr.client_id = c.id
+        WHERE nr.newsletter_id = p_newsletter_id AND c.email IS NOT NULL
+    LOOP
+        PERFORM metadata.send_email(
+            p_template_name := 'newsletter_send',
+            p_to := ARRAY[v_recipient.email],
+            p_entity_type := 'newsletters',
+            p_entity_id := v_newsletter.id::TEXT,
+            p_entity_data := jsonb_build_object(
+                'id', v_newsletter.id,
+                'subject', v_newsletter.subject,
+                'body', v_newsletter.body
+            )
+        );
+    END LOOP;
+
+    UPDATE newsletters SET status_id = (
+        SELECT id FROM metadata.statuses
+        WHERE entity_type = 'newsletter' AND status_key = 'sent'
+    ), sent_at = NOW() WHERE id = p_newsletter_id;
+END;
+$$;
+```
+
+**Step 4: Docker configuration**
+
+Add the tracking server port to your `docker-compose.yml`:
+
+```yaml
+consolidated-worker:
+  environment:
+    TRACKING_BASE_URL: "https://track.yourapp.com"  # Public URL for tracking endpoints
+    TRACKING_PORT: "8090"                             # Default, optional
+  ports:
+    - "8090:8090"  # Tracking server (open pixel, unsubscribe page)
+```
+
+In production, reverse-proxy port 8090 through your web server (Caddy/Nginx) so tracking URLs use HTTPS.
+
+**Tracking Endpoints** (served by the Go worker on the tracking port):
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/t/o?t={token}` | GET | Open tracking pixel (returns 1x1 transparent GIF) |
+| `/t/u?t={token}` | GET | Unsubscribe page (marks token, shows confirmation) |
+| `/t/c?t={token}&url={url}` | GET | Click tracking (records click, redirects to URL) |
+| `/health` | GET | Health check |
+
+**Bot Detection**: Opens within 5 seconds of send are flagged `suspected_bot = TRUE` in `notification_events` (email security scanners pre-fetch images). Bot-flagged events are recorded but not counted in aggregation stats.
+
+**Subscription Management RPCs** (public schema, exposed via PostgREST):
+
+```sql
+-- User self-service (uses current_user_id() from JWT)
+SELECT * FROM get_user_bulk_subscriptions();
+-- Returns: template_name, description, unsubscribed, last_sent
+
+SELECT set_bulk_email_unsubscribe('newsletter_send', TRUE);   -- unsubscribe
+SELECT set_bulk_email_unsubscribe('newsletter_send', FALSE);  -- re-subscribe
+
+-- Admin (requires admin role)
+SELECT * FROM get_admin_bulk_subscriptions('user-uuid-here');
+SELECT admin_set_bulk_email_unsubscribe('user-uuid-here', 'newsletter_send', TRUE);
+```
+
+**Frontend Integration**: The Profile page (`/profile`) and User Management edit modal automatically show bulk email subscription toggles when `get_user_bulk_subscriptions()` returns data. No additional frontend configuration needed.
+
+**Monitoring**:
+
+```sql
+-- Tracking stats per entity
+SELECT * FROM notification_tracking_stats
+WHERE entity_type = 'newsletters';
+-- Returns: entity_type, entity_id, template_name, total_sent,
+--          total_opens, unique_opens, total_clicks, unique_clicks,
+--          total_unsubscribes, open_rate, click_rate
+
+-- Raw events for a specific send
+SELECT ne.event_type, ne.suspected_bot, ne.created_at, ntt.recipient_email
+FROM metadata.notification_events ne
+JOIN metadata.notification_tracking_tokens ntt ON ne.tracking_token = ntt.id
+WHERE ntt.entity_type = 'newsletters' AND ntt.entity_id = '1'
+ORDER BY ne.created_at;
+
+-- Check suppressed sends in worker logs
+-- docker compose logs consolidated-worker | grep "suppressed"
+```
+
+**Working Example**: See `examples/client-intake/init-scripts/29_newsletter_entity.sql` for a complete newsletter implementation with status workflow (Draft → Scheduled → Sent → Archived), M:M recipients, scheduled send via cron job, and "Send Now" entity action button.
+
+See `docs/notes/TRACKABLE_NOTIFICATIONS_DESIGN.md` for architecture decisions, token lifecycle, and bot detection design.
+
 ### Status Type System
 
 **Version**: v0.15.0+
@@ -4908,6 +5072,65 @@ Create custom PostgreSQL domains for property types to enable automatic UI gener
 - `email_address` - Email validation
 - `phone_number` - US phone numbers (10 digits)
 - `time_slot` - Timestamp ranges (wrapper for tstzrange)
+- `markdown` - Rich text with CommonMark formatting (v0.70.0+). See detailed guide below.
+
+#### Markdown Domain (v0.70.0+)
+
+The `markdown` domain stores CommonMark-formatted text and provides automatic WYSIWYG editing and rich rendering across the frontend and email notifications.
+
+**Creating a Markdown Column**:
+
+```sql
+-- Add a rich-text column to any entity
+ALTER TABLE articles ADD COLUMN body markdown;
+
+-- That's it — the frontend auto-detects the domain and renders appropriately
+```
+
+The `markdown` domain is `CREATE DOMAIN markdown AS TEXT` — it's just text with a semantic label that Civic OS's `schema_properties` VIEW resolves via `udt_name`. No special VIEW or metadata configuration is needed.
+
+**Display Behavior**:
+
+On Detail and List pages, markdown content renders as formatted HTML via `ngx-markdown` (the same library used for Static Text Blocks and Entity Notes). Headings, bold, italic, links, code blocks, lists, and tables all render correctly.
+
+**Edit Behavior**:
+
+On Create and Edit pages, markdown columns present a **TipTap WYSIWYG editor** with a toolbar offering:
+- Bold, italic, strikethrough
+- Headings (H1–H3)
+- Bullet and ordered lists
+- Code blocks and blockquotes
+- Links (with auto-detection)
+
+The editor is lazy-loaded via `@defer` — the TipTap bundle (~150KB gzipped) only downloads when a user actually opens a form with a markdown column.
+
+**Email Template Usage**:
+
+In Go notification templates, use the `markdown` template function to render markdown content as HTML:
+
+```
+{{ markdown .Entity.body }}
+```
+
+This converts the stored CommonMark into HTML via `goldmark` in the Go worker, allowing newsletter bodies or notification content to include rich formatting. Without the `markdown` function, the raw markdown source text would appear in emails.
+
+**Import/Export**:
+
+Markdown columns import and export as plain text in Excel files — identical to `TextLong`. The raw markdown string is the stored value.
+
+**Rendering Consistency Note**:
+
+Three different CommonMark parsers are used across contexts:
+
+| Context | Library |
+|---------|---------|
+| Browser display | `ngx-markdown` (marked.js) |
+| Browser edit | `@tiptap/markdown` (markdown-it) |
+| Email (Go worker) | `goldmark` |
+
+All three are CommonMark-compliant. Stick to standard CommonMark syntax to ensure consistent rendering across all contexts. Avoid parser-specific extensions (e.g., GitHub-flavored markdown tables work in most parsers but are not part of the core CommonMark spec).
+
+See `docs/notes/MARKDOWN_TYPE_DESIGN.md` for full architecture details including TipTap library rationale, ControlValueAccessor pattern, and zone isolation.
 
 **Creating Custom Domains**:
 ```sql

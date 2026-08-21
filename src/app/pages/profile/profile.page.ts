@@ -11,7 +11,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { combineLatest, forkJoin, of, take } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { ProfileService, ProfileExtension, UserPrivateRecord } from '../../services/profile.service';
-import { NotificationService, NotificationPreference } from '../../services/notification.service';
+import { NotificationService, NotificationPreference, BulkEmailSubscription } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
@@ -70,6 +70,10 @@ export class ProfilePage {
   preferencesLoading = signal(false);
   emailPreference = signal<NotificationPreference | undefined>(undefined);
   smsPreference = signal<NotificationPreference | undefined>(undefined);
+
+  // ─── Bulk email subscriptions ──────────────────────────────────
+  bulkSubscriptions = signal<BulkEmailSubscription[]>([]);
+  bulkSubscriptionsLoading = signal(false);
 
   // ─── Profile extensions ──────────────────────────────────────────
   extensions = signal<ProfileExtension[]>([]);
@@ -155,7 +159,8 @@ export class ProfilePage {
     forkJoin({
       user: this.profileService.getCurrentUserPrivateRecord(),
       extensions: this.profileService.getProfileExtensions(),
-      prefs: this.notificationService.getUserPreferences()
+      prefs: this.notificationService.getUserPreferences(),
+      bulkSubs: this.notificationService.getBulkEmailSubscriptions()
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(result => {
@@ -164,6 +169,7 @@ export class ProfilePage {
 
       this.emailPreference.set(result.prefs.find(p => p.channel === 'email'));
       this.smsPreference.set(result.prefs.find(p => p.channel === 'sms'));
+      this.bulkSubscriptions.set(result.bulkSubs);
 
       this.loading.set(false);
 
@@ -475,6 +481,24 @@ export class ProfilePage {
         if (current) {
           this.smsPreference.set({ ...current, enabled });
         }
+      }
+    });
+  }
+
+  onBulkEmailToggle(templateName: string, subscribe: boolean): void {
+    this.bulkSubscriptionsLoading.set(true);
+    this.notificationService.updateBulkUnsubscribe(templateName, !subscribe).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(result => {
+      this.bulkSubscriptionsLoading.set(false);
+      if (result.success) {
+        const current = this.bulkSubscriptions();
+        this.bulkSubscriptions.set(
+          current.map(s => s.template_name === templateName
+            ? { ...s, unsubscribed: !subscribe }
+            : s
+          )
+        );
       }
     });
   }

@@ -192,6 +192,15 @@ export const MOCK_PROPERTIES = {
     type: EntityPropertyType.GeoPolygon
   }),
 
+  markdown: createMockProperty({
+    column_name: 'body',
+    display_name: 'Content',
+    data_type: 'text',
+    udt_name: 'markdown',
+    character_maximum_length: 0,
+    type: EntityPropertyType.Markdown
+  }),
+
   unknown: createMockProperty({
     column_name: 'unknown_field',
     display_name: 'Unknown Field',
@@ -271,7 +280,8 @@ export const MOCK_DATA = {
   geoPoint: { location: 'POINT(-83.6875 43.0125)' },
   geoPointNull: { location: null },
   geoPolygon: { boundary: 'POLYGON((-83.749 43.013, -83.748 43.013, -83.748 43.014, -83.749 43.014, -83.749 43.013))' },
-  geoPolygonNull: { boundary: null }
+  geoPolygonNull: { boundary: null },
+  markdown: { body: '# Hello\n\nThis is **bold** text.' }
 };
 
 /**

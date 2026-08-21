@@ -43,7 +43,9 @@ describe('UserManagementPage', () => {
       'hasUserManagementAccess',
       'updateUserInfo',
       'getNotificationPreferences',
-      'updateNotificationPreference'
+      'updateNotificationPreference',
+      'getAdminBulkSubscriptions',
+      'adminSetBulkUnsubscribe'
     ]);
     mockImportExportService = jasmine.createSpyObj('ImportExportService', [
       'validateFileSize',
@@ -60,6 +62,8 @@ describe('UserManagementPage', () => {
     mockUserService.createUser.and.returnValue(of({ success: true }));
     mockUserService.assignUserRole.and.returnValue(of({ success: true }));
     mockUserService.revokeUserRole.and.returnValue(of({ success: true }));
+    mockUserService.getAdminBulkSubscriptions.and.returnValue(of([]));
+    mockUserService.adminSetBulkUnsubscribe.and.returnValue(of({ success: true }));
 
     await TestBed.configureTestingModule({
       imports: [UserManagementPage],

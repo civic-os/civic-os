@@ -866,7 +866,8 @@ describe('ImportExportService', () => {
       Category: 23,
       RecurringTimeSlot: 24,
       PhotoGallery: 25,
-      GeoPolygon: 26
+      GeoPolygon: 26,
+      Markdown: 27
     };
 
     it('should have matching enum keys', () => {
@@ -903,7 +904,7 @@ describe('ImportExportService', () => {
           '  1. import-validation.worker.ts\n' +
           '  2. EXPECTED_WORKER_ENUM_VALUES in this test'
         )
-        .toBe(27); // Unknown(0) through GeoPolygon(26) = 27 types
+        .toBe(28); // Unknown(0) through Markdown(27) = 28 types
     });
   });
 

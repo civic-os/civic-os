@@ -357,6 +357,25 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
             }
           </div>
 
+          <!-- Bulk Email Subscriptions -->
+          @if (editBulkSubs().length > 0) {
+            <div class="divider">{{ 'settings.bulk_email_title' | translate }}</div>
+            <div class="space-y-2">
+              @for (sub of editBulkSubs(); track sub.template_name) {
+                <label class="cursor-pointer flex items-center gap-1.5">
+                  <input type="checkbox" class="checkbox checkbox-sm"
+                         [checked]="!sub.unsubscribed"
+                         [disabled]="editBulkSubsLoading()"
+                         (change)="toggleBulkSub(sub.template_name, $any($event.target).checked)" />
+                  <span class="text-sm">{{ sub.template_description }}</span>
+                  @if (sub.unsubscribed) {
+                    <span class="badge badge-ghost badge-xs">{{ 'settings.bulk_email_unsubscribed' | translate }}</span>
+                  }
+                </label>
+              }
+            </div>
+          }
+
           @if (editError()) {
             <div class="alert alert-error mt-4 text-sm">{{ editError() }}</div>
           }
@@ -415,6 +434,10 @@ export class UserManagementPage {
   editUser = signal<ManagedUser | undefined>(undefined);
   editRoles = signal<Set<string>>(new Set());
   editRolesLoading = signal<Set<string>>(new Set());
+
+  // Bulk email state (edit modal)
+  editBulkSubs = signal<import('../../services/notification.service').BulkEmailSubscription[]>([]);
+  editBulkSubsLoading = signal(false);
 
   // SMS config (used in list table)
   readonly smsConfigured = getSmsConfig().configured;
@@ -545,7 +568,14 @@ export class UserManagementPage {
     this.editRoles.set(new Set(user.roles || []));
     this.editRolesLoading.set(new Set());
     this.editError.set(undefined);
+    this.editBulkSubs.set([]);
+    this.editBulkSubsLoading.set(false);
     this.showEditModal.set(true);
+
+    // Load bulk email subscriptions for this user
+    this.userService.getAdminBulkSubscriptions(user.id).subscribe(subs => {
+      this.editBulkSubs.set(subs);
+    });
   }
 
   closeEditModal(): void {
@@ -591,6 +621,25 @@ export class UserManagementPage {
         this.editError.set(undefined);
       } else {
         this.editError.set(response.error?.humanMessage || 'Failed to update role');
+      }
+    });
+  }
+
+  toggleBulkSub(templateName: string, subscribe: boolean): void {
+    const user = this.editUser();
+    if (!user?.id) return;
+
+    this.editBulkSubsLoading.set(true);
+    this.userService.adminSetBulkUnsubscribe(user.id, templateName, !subscribe).subscribe(response => {
+      this.editBulkSubsLoading.set(false);
+      if (response.success) {
+        this.editBulkSubs.set(
+          this.editBulkSubs().map(s =>
+            s.template_name === templateName ? { ...s, unsubscribed: !subscribe } : s
+          )
+        );
+      } else {
+        this.editError.set(response.error?.humanMessage || 'Failed to update subscription');
       }
     });
   }

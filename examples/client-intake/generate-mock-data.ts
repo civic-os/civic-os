@@ -185,6 +185,7 @@ class MockDataGenerator {
       database: process.env['POSTGRES_DB'] || 'civic_os_db',
       user: process.env['POSTGRES_USER'] || 'postgres',
       password: process.env['POSTGRES_PASSWORD'] || 'postgres',
+      ssl: process.env['POSTGRES_SSL'] === 'true' ? { rejectUnauthorized: false } : undefined,
     });
     await this.client.connect();
   }

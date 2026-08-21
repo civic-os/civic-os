@@ -220,6 +220,33 @@
                 }
               }
 
+              <!-- Bulk Email Subscriptions -->
+              @if (bulkSubscriptions().length > 0) {
+                <div class="mt-4 pt-4 border-t border-base-300">
+                  <div class="text-sm font-medium mb-2">{{ 'settings.bulk_email_title' | translate }}</div>
+                  <p class="text-xs opacity-70 mb-3">{{ 'settings.bulk_email_description' | translate }}</p>
+                  @for (sub of bulkSubscriptions(); track sub.template_name) {
+                    <div class="mb-2">
+                      <label class="flex items-start cursor-pointer gap-3">
+                        <input
+                          type="checkbox"
+                          class="checkbox flex-shrink-0 mt-0.5"
+                          [checked]="!sub.unsubscribed"
+                          [disabled]="bulkSubscriptionsLoading()"
+                          (change)="onBulkEmailToggle(sub.template_name, $any($event.target).checked)"
+                        />
+                        <div>
+                          <span>{{ sub.template_description }}</span>
+                          @if (sub.unsubscribed) {
+                            <span class="badge badge-ghost badge-xs ms-2">{{ 'settings.bulk_email_unsubscribed' | translate }}</span>
+                          }
+                        </div>
+                      </label>
+                    </div>
+                  }
+                </div>
+              }
+
               @if (!emailPreference() && !smsPreference()) {
                 <p class="text-sm opacity-70">{{ 'settings.no_preferences' | translate }}</p>
               }

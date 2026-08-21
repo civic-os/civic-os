@@ -1,7 +1,7 @@
 <div class="modal-box-content">
   <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
     <!-- Metadata Fields Row (spread across top) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
       <!-- Template Name -->
       <div class="form-control">
         <label class="label" for="template-name">
@@ -51,6 +51,17 @@
             <option>Loading...</option>
           </select>
         }
+      </div>
+
+      <!-- Bulk Email Toggle -->
+      <div class="form-control">
+        <div class="label">
+          <span class="label-text font-semibold">{{ 'template.bulk_email_label' | translate }}</span>
+        </div>
+        <label class="cursor-pointer flex items-center gap-2 h-10">
+          <input type="checkbox" formControlName="is_bulk" class="checkbox checkbox-sm checkbox-warning" />
+          <span class="text-sm">{{ 'template.bulk_email_description' | translate }}</span>
+        </label>
       </div>
 
       <!-- Sample Data Indicator -->
