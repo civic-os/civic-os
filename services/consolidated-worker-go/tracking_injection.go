@@ -21,9 +21,9 @@ type TrackingInjector struct {
 	trackingURL string
 
 	// Cached notification_settings (TTL: 5 minutes)
-	settingsMu    sync.Mutex
+	settingsMu     sync.Mutex
 	cachedSettings *notificationSettings
-	settingsTTL   time.Time
+	settingsTTL    time.Time
 }
 
 type notificationSettings struct {

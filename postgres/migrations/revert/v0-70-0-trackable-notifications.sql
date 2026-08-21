@@ -17,14 +17,19 @@ DROP VIEW IF EXISTS public.notification_tracking_tokens;
 -- Drop aggregation VIEW
 DROP VIEW IF EXISTS metadata.notification_tracking_stats;
 
--- Drop altered columns (recreate public VIEWs to reflect removed columns)
+-- Drop public VIEWs that depend on the columns we're about to remove
+DROP VIEW IF EXISTS public.notification_preferences;
+DROP VIEW IF EXISTS public.notification_templates;
+
+-- Drop altered columns
 ALTER TABLE metadata.notification_preferences
     DROP COLUMN IF EXISTS bulk_email_unsubscribed_templates;
-CREATE OR REPLACE VIEW public.notification_preferences AS
-    SELECT * FROM metadata.notification_preferences;
-
 ALTER TABLE metadata.notification_templates
     DROP COLUMN IF EXISTS is_bulk;
+
+-- Recreate public VIEWs without the removed columns
+CREATE OR REPLACE VIEW public.notification_preferences AS
+    SELECT * FROM metadata.notification_preferences;
 CREATE OR REPLACE VIEW public.notification_templates AS
     SELECT * FROM metadata.notification_templates;
 

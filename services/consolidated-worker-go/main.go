@@ -56,7 +56,7 @@ func main() {
 
 	// Notification Worker Configuration
 	siteURL := getEnv("SITE_URL", "http://localhost:4200")
-	siteName := getEnv("APP_TITLE", "Civic OS") // Same env var as frontend container
+	siteName := getEnv("APP_TITLE", "Civic OS")          // Same env var as frontend container
 	apiURL := getEnv("API_URL", "http://localhost:3000") // PostgREST base URL for tracking pixels / API callbacks
 	notificationTimezone := getEnv("NOTIFICATION_TIMEZONE", "America/New_York")
 
