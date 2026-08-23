@@ -4067,7 +4067,7 @@ SELECT * FROM payments.transactions ORDER BY created_at DESC LIMIT 1;
 **Production Deployment**:
 1. Apply v0.13.0 migration: `sqitch deploy v0-13-0-add-payment-metadata`
 2. Configure environment variables (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`)
-3. Deploy consolidated worker service (includes payment workers)
+3. Deploy consolidated worker service AND the separate `payment-worker` service
 4. Configure Stripe webhook endpoint: `https://your-domain.com/rpc/process_payment_webhook`
 5. Test with Stripe test mode before going live
 6. Monitor payment success rate and failed jobs
@@ -4656,6 +4656,10 @@ Provide subscribable calendar feeds for any entity with time-based data. Users c
 - RLS-enforced data access (SECURITY INVOKER)
 - `LAST-MODIFIED` / `SEQUENCE` change-detection properties (v0.66.0+)
 - HTTP `Last-Modified` response header for cache validation (v0.66.0+)
+- Byte-stable output: `DTSTAMP` derives from `last_modified`, so the feed only changes when data changes (v0.71.0+)
+- HTTP `ETag` + `Cache-Control`, and `304 Not Modified` for `If-None-Match` / `If-Modified-Since` (v0.71.0+)
+- RFC 5545 line folding at 75 octets, UTF-8 safe (v0.71.0+)
+- `REFRESH-INTERVAL` / `X-PUBLISHED-TTL` polling hint for clients that honor it (v0.71.0+)
 
 **Requirements**:
 - Civic OS v0.27.0+ (iCal helper migrations)
@@ -4666,13 +4670,15 @@ Provide subscribable calendar feeds for any entity with time-based data. Users c
 
 #### Core Helper Functions
 
-Civic OS provides three helper functions in the `metadata` schema:
+Civic OS provides these helper functions in the `metadata` schema:
 
 | Function | Purpose |
 |----------|---------|
 | `escape_ical_text(text)` | Escape special characters (commas, semicolons, backslashes, newlines) |
-| `format_ical_event(uid, summary, dtstart, dtend, description, location, last_modified, sequence)` | Generate a single VEVENT block. `last_modified` (TIMESTAMPTZ, optional) emits `LAST-MODIFIED`; `sequence` (INTEGER, default 0) emits `SEQUENCE`. |
-| `wrap_ical_feed(events, calendar_name, feed_updated_at)` | Wrap VEVENT blocks in a VCALENDAR container. `feed_updated_at` (TIMESTAMPTZ, optional) adds an HTTP `Last-Modified` response header. |
+| `fold_ical_line(text)` (v0.71.0+) | Fold one content line at 75 octets per RFC 5545 §3.1. Used internally; exposed for custom properties. |
+| `ical_property(name, value)` (v0.71.0+) | Emit a folded `NAME:value` line with CRLF; returns `''` for NULL/empty values. Use it to add custom properties (e.g. `URL`, `CATEGORIES`) to a VEVENT. |
+| `format_ical_event(uid, summary, dtstart, dtend, description, location, last_modified, sequence)` | Generate a single VEVENT block. `last_modified` (TIMESTAMPTZ, optional) emits `LAST-MODIFIED` **and** drives `DTSTAMP` (v0.71.0+); `sequence` (INTEGER, default 0) emits `SEQUENCE`. |
+| `wrap_ical_feed(events, calendar_name, feed_updated_at, refresh_interval)` | Wrap VEVENT blocks in a VCALENDAR container. `feed_updated_at` (TIMESTAMPTZ, optional) drives the HTTP `Last-Modified` and `ETag` headers and 304 handling. `refresh_interval` (INTERVAL, default `'1 hour'`, v0.71.0+) emits `REFRESH-INTERVAL` / `X-PUBLISHED-TTL`; pass `NULL` to omit. |
 
 #### Creating a Calendar Feed RPC
 
@@ -4750,15 +4756,26 @@ Users subscribe via the PostgREST RPC endpoint:
 1. **UID Format**: Use globally unique identifiers like `entity-type-id@your-domain.org`
 2. **Date Range**: Default to 30 days past through 1 year future for reasonable data volume
 3. **Security**: Use `SECURITY INVOKER` to respect RLS policies; grant to `web_anon` only for public data
-4. **Caching & Change Detection** (v0.66.0+): Calendar apps typically refresh every 15-60 minutes. Pass `p_last_modified` (from your `updated_at` column) to `format_ical_event()` and `p_feed_updated_at` (max `updated_at`) to `wrap_ical_feed()` to give clients change-detection signals. Google Calendar in particular uses `LAST-MODIFIED` and `SEQUENCE` to prioritize refresh scheduling. The HTTP `Last-Modified` header enables conditional requests that reduce bandwidth
-5. **Optional Filters**: Add parameters like `p_resource_id` or `p_category` for filtered feeds
+4. **Caching & Change Detection** (v0.66.0+, hardened v0.71.0+): Always pass `p_last_modified` (your `updated_at` column) to `format_ical_event()` and `p_feed_updated_at` (max `updated_at`) to `wrap_ical_feed()`. With both supplied the feed is byte-identical between real changes, carries `ETag` + `Last-Modified` headers, and answers conditional requests with `304 Not Modified`. **This relies on the project convention that every row change bumps `updated_at` via trigger** — if a column affecting the feed can change without touching `updated_at`, clients may be served a stale 304.
+5. **Set expectations on refresh cadence**: Apple Calendar, Outlook and Thunderbird honor `REFRESH-INTERVAL` (default 1 hour). **Google Calendar ignores it** and polls on its own schedule — observed in production at roughly every 4–6 hours per feed, and Google's fetch is shared across every subscriber of the same URL. There is no way to force a Google refresh; unsubscribing and re-adding the URL (optionally with a cache-busting query string such as `?v=2`) is the only reset. Tell subscribers that same-day changes may take several hours to appear in Google Calendar.
+6. **`SEQUENCE` on reschedule**: When an instance allows an event's time to change, pass a monotonically increasing `p_sequence` (e.g. a counter column, or `extract(epoch FROM updated_at)::int`) so clients treat the change as an update to the same event rather than ignoring it.
+7. **Optional Filters**: Add parameters like `p_resource_id` or `p_category` for filtered feeds
+
+#### Diagnosing "my event isn't showing in Google Calendar"
+
+1. `curl -sI <feed-url>` — confirm `200`, `Content-Type: text/calendar`, `ETag`, `Last-Modified`.
+2. `curl -s <feed-url> | grep -A8 'UID:<expected-uid>'` — confirm the VEVENT is in the body.
+3. Check PostgREST access logs for `Google-Calendar-Importer` requests — they show exactly when Google last fetched and the byte count it received.
+4. If the event is in the body and Google has fetched since it appeared, the problem is on Google's side (rendering lag or a stuck import); resubscribe with a new query string.
+
+See `docs/notes/ICAL_FEED_DESIGN.md` for the design rationale behind the caching behavior.
 
 #### Complete Example
 
 See `examples/community-center/init-scripts/18_ical_feed_example.sql` for a complete implementation with:
 - Public events feed for community center reservations
 - `LAST-MODIFIED` and `SEQUENCE` change-detection fields (v0.66.0+)
-- HTTP `Last-Modified` header for cache validation
+- HTTP `Last-Modified` / `ETag` headers and 304 handling (v0.66.0+ / v0.71.0+)
 - Resource filtering parameter
 - Date range parameters
 - Usage examples with curl and calendar apps

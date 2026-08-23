@@ -166,6 +166,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
     - [ ] Minimap for navigation in large schemas
 - [ ] Advanced Form Validation by use of RPCs
 - [x] Add Static Text blocks (v0.17.0 - markdown content via `metadata.static_text`, see `docs/development/STATIC_TEXT_FEATURE.md`)
+- [x] **Markdown PropertyType** (v0.70.0) - `markdown` domain type renders as HTML via `ngx-markdown` on display, TipTap WYSIWYG editor on forms. Lazy-loaded via `@defer`. See `docs/notes/MARKDOWN_TYPE_DESIGN.md`.
 - [ ] Add customizable template pages (primarily for PDF)
 - [ ] Research safe database schema editing, sandboxing
 - [ ] One-to-One relationship created as child record

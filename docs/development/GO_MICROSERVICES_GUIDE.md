@@ -3,7 +3,7 @@
 **Status:** ✅ **CURRENT** - Updated in v0.31.0 for User Provisioning and Role Sync Workers
 **Purpose:** Complete guide for Civic OS microservices using Go + River (PostgreSQL table queue)
 
-> **⚠️ ARCHITECTURAL CHANGE (v0.11.0)**: The three separate Go microservices (S3 Signer, Thumbnail Worker, Notification Worker) have been consolidated into a single `consolidated-worker` service. This reduces database connections from 12 to 4, simplifies deployment from 3 containers to 1, and maintains all functionality with improved resource efficiency. The architecture documented below reflects this consolidated approach, though historical references to separate services remain for context.
+> **⚠️ ARCHITECTURAL CHANGE (v0.11.0)**: The three separate Go microservices (S3 Signer, Thumbnail Worker, Notification Worker) have been consolidated into a single `consolidated-worker` service. This reduces database connections from 12 to 4, simplifies deployment from 3 containers to 1, and maintains all functionality with improved resource efficiency. The architecture documented below reflects this consolidated approach, though historical references to separate services remain for context. The `payment-worker` service (v0.13.0+) remains separate by design — it is optional, uses HTTP webhooks (different transport from River), and constitutes a distinct bounded context.
 
 ---
 

@@ -44,19 +44,11 @@ Civic OS is a meta-application framework that automatically generates CRUD (Crea
 The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 - `ForeignKeyName`: Integer/UUID with `join_column` → Dropdown with related entity's display_name. Supports cascading dropdowns, search modals with state persistence, and server-side filtering. See `docs/INTEGRATOR_GUIDE.md` (FK sections) and `docs/notes/OPTIONS_SOURCE_RPC_DESIGN.md`.
 - `User`: UUID with `join_table = 'civic_os_users'` → User display component with FK search modal. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for architecture details.
-- `Payment`: UUID FK to `payments.transactions` → Payment status badge display, "Pay Now" button on detail pages (v0.13.0+)
-- Simple scalar types (`Boolean`, `Money`, `IntegerNumber`, `TextShort`, `TextLong`, `DateTime`, `DateTimeLocal`, `Date`) map directly to standard HTML inputs
-- `GeoPoint`: `geography(Point, 4326)` → Interactive map (Leaflet) with location picker
-- `GeoPolygon`: `geography(Polygon, 4326)` → Interactive polygon map (Leaflet + leaflet-geoman-free) with draw/edit/delete
-- `Color`: `hex_color` → Color chip display with native HTML5 color picker
-- `Email`: `email_address` → Clickable mailto: link, HTML5 email input
-- `Telephone`: `phone_number` → Clickable tel: link with formatted display, masked input (XXX) XXX-XXXX
-- `TimeSlot`: `time_slot` (tstzrange) → Formatted date range display, dual datetime-local inputs with validation, optional calendar visualization
-- `Markdown`: `markdown` domain → Rendered HTML display (via `ngx-markdown`), TipTap WYSIWYG editor on forms. Lazy-loaded via `@defer`. See `docs/notes/MARKDOWN_TYPE_DESIGN.md` for architecture.
+- Scalar and domain types (`Payment`, `Boolean`, `Money`, `GeoPoint`, `GeoPolygon`, `Color`, `Email`, `Telephone`, `TimeSlot`, `Markdown`, etc.) — see `docs/development/PROPERTY_TYPE_REFERENCE.md` for full mapping and UI details.
 
 **Calendar Integration** (v0.9.0+): Enable via `show_calendar=true` and `calendar_property_name` in `metadata.entities`. Supports overlap prevention via GIST exclusion constraints. See `docs/development/CALENDAR_INTEGRATION.md` for details and `examples/community-center/` for working example.
 
-**iCal Subscription Feeds** (v0.27.0+): Export calendar events as subscribable iCal feeds via PostgREST media type handlers. See `docs/INTEGRATOR_GUIDE.md` (iCal Calendar Feeds section) for implementation guide.
+**iCal Subscription Feeds** (v0.27.0+): Export calendar events as subscribable iCal feeds via PostgREST media type handlers. v0.71.0 adds byte-stable output, `ETag`/`304` conditional responses, RFC 5545 line folding, and `REFRESH-INTERVAL`. Always pass `updated_at` as `p_last_modified` / `p_feed_updated_at`. See `docs/INTEGRATOR_GUIDE.md` (iCal Calendar Feeds section) and `docs/notes/ICAL_FEED_DESIGN.md`.
 
 **Status Type** (`Status`, v0.15.0+): Centralized workflow system using `metadata.statuses` table with `entity_type` discriminator. Features colored badges/dropdowns, `is_initial`/`is_terminal` states, allowed transitions (v0.33.0+), and `status_key` for programmatic references. See `docs/INTEGRATOR_GUIDE.md` (Status Type System section) and `docs/development/STATUS_TYPE_SYSTEM.md` for design.
 
@@ -66,7 +58,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Static Text Blocks** (v0.17.0+): Display-only markdown content blocks interspersed with properties on Detail, Create, and Edit pages. See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section) for usage guide.
 
-**Video Embeds** (v0.50.0+): `@[video](url)` markdown syntax for embedding YouTube videos within Static Text Blocks and notes. Uses DOMPurify sanitization with `privacy-enhanced` nocookie domain for GDPR compliance. Supported in all markdown rendering contexts (Static Text, Entity Notes, Dashboard Markdown widgets).
+**Video Embeds** (v0.50.0+): `@[video](url)` markdown syntax for embedding YouTube videos within Static Text Blocks and notes. Uses DOMPurify sanitization with privacy-enhanced nocookie domain for GDPR compliance. Supported in all markdown rendering contexts. See `docs/INTEGRATOR_GUIDE.md` (Static Text Blocks section).
 
 **Entity Action Buttons** (v0.18.0+): Metadata-driven action buttons on Detail pages that execute PostgreSQL RPC functions. Supports action parameters, filtered FK param dropdowns, photo gallery params, and dot-notation visibility/enabled conditions. **Maintenance note**: When adding a new `EntityPropertyType`, check if it should also be added as an action param type. See `docs/INTEGRATOR_GUIDE.md` (Entity Action Buttons section) and `docs/development/ENTITY_ACTIONS.md` for details.
 
@@ -88,7 +80,7 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **Payment Type** (`Payment`, v0.13.0+): Stripe-based payment processing via UUID FK to `payments.transactions`. Enable on any entity via `payment_initiation_rpc` in `metadata.entities`. Frontend auto-displays payment badges on List pages and "Pay Now" button on Detail pages. See `docs/INTEGRATOR_GUIDE.md` (Payment System section) for complete workflow and `examples/community-center/` for working example.
 
-**Consolidated Worker Architecture**: File storage, thumbnail generation, payment processing, and notification features run in a single Go + River microservice with at-least-once delivery, automatic retries, and zero additional infrastructure beyond PostgreSQL. See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture and `docs/development/FILE_STORAGE.md` for usage guide
+**Consolidated Worker Architecture**: File storage, thumbnail generation, notification delivery, and user/role provisioning run in a single Go + River microservice with at-least-once delivery, automatic retries, and zero additional infrastructure beyond PostgreSQL. **Payment processing** runs in a separate, optional `payment-worker` service (Stripe webhooks, payment state machine). See `docs/development/GO_MICROSERVICES_GUIDE.md` for complete architecture, `docs/development/FILE_STORAGE.md` for usage guide, and `docs/development/PAYMENT_PROCESSING.md` for payment worker details.
 
 **Geography (GeoPoint / GeoPolygon) Types**: Require a paired `<column_name>_text` computed field returning `ST_AsText()`. Maps auto-switch light/dark tiles based on DaisyUI theme. GeoPolygon (v0.49.0+) adds interactive polygon drawing and multi-polygon display. See `docs/development/PROPERTY_TYPE_REFERENCE.md` for computed field pattern and `docs/notes/GEO_POLYGON_DESIGN.md` for polygon architecture.
 
@@ -145,14 +137,7 @@ See `docs/development/TESTING.md` for comprehensive testing guidelines, best pra
 
 **Functional tests** (`tests/functional/`): Bash scripts that test migrations, RLS policies, and PostgREST integration against a live database. Key rules: never modify schema in test scripts (use migrations), create dummy files for uploads, and clean up FK references before deleting records. See `docs/notes/ADMIN_PAGE_PITFALLS.md` (Functional Testing section).
 
-**⚠️ MANDATORY: Run Tests Before Committing**
-
-You **MUST** run the full test suite (`npm run test:headless`) before staging or committing ANY code changes. This is non-negotiable. Failing tests that reach CI/CD waste time and break the build.
-
-- Run `npm run test:headless` after completing your changes
-- If tests fail, fix them before staging
-- Never ignore failing tests or assume they're "unrelated" to your changes
-- Adding new services/dependencies to components often requires updating test mocks
+**⚠️ MANDATORY**: Run `npm run test:headless` before staging/committing — see Git Commit Guidelines below.
 
 **Building:**
 ```bash
@@ -168,20 +153,12 @@ ng generate component pages/page-name --type=page  # Use "page" suffix by conven
 
 **Mock Data Generation:**
 ```bash
-# Using npm wrapper (recommended):
 npm run generate pothole              # Generate for Pot Hole example
 npm run generate pothole -- --sql     # SQL file only
-npm run generate broader-impacts      # Generate for Broader Impacts (UMFlint)
 npm run generate community-center     # Generate for Community Center example
-
-# Using shell wrapper (alternative):
-./examples/generate.sh pothole --sql
-./examples/generate.sh broader-impacts
 ```
 
-The mock data generator is validation-aware (respects `metadata.validations` constraints). Each example has its own `mock-data-config.json`.
-
-**Important**: Generate mock data AFTER `docker-compose up`, not during init scripts. Only run one example at a time. See `docs/EXAMPLES.md` for example comparison and learning paths.
+Validation-aware (respects `metadata.validations`). Each example has its own `mock-data-config.json`. Generate AFTER `docker-compose up`, one example at a time. See `docs/EXAMPLES.md` for example comparison.
 
 ## Database Setup
 
@@ -191,7 +168,7 @@ Docker Compose runs PostgreSQL 17 with PostGIS 3.5 and PostgREST locally with Ke
 
 **Important**: Schema changes should be made via migrations (see Database Migrations section below). To apply new migrations, recreate the database (`docker-compose down -v && docker-compose up -d`) or run migrations manually via the migrations container.
 
-**PostgREST + Keycloak JWK**: After a fresh `docker-compose up -d`, PostgREST will fail to verify JWTs until Keycloak's signing key is fetched. Run `./fetch-keycloak-jwk.sh` from the example directory (e.g., `examples/staff-portal/`) once Keycloak is ready. The script fetches the JWKS, saves it to `jwt-secret.jwks`, and restarts PostgREST automatically. This is required after every `docker-compose down -v` since Keycloak regenerates keys on fresh startup.
+**PostgREST + Keycloak JWK**: After every fresh `docker-compose up -d`, run `./fetch-keycloak-jwk.sh` from the example directory once Keycloak is ready — PostgREST cannot verify JWTs until this script fetches Keycloak's signing key.
 
 **PostGIS**: Installed in dedicated `postgis` schema (not `public`) to keep the public schema clean. Functions accessible via `search_path`. Use schema-qualified references: `postgis.geography(Point, 4326)` and `postgis.ST_AsText()`.
 
@@ -240,36 +217,21 @@ Civic OS provides helper functions for JWT data extraction (`current_user_id()`,
 
 ## Authentication & RBAC
 
-**Keycloak Authentication**: See `docs/AUTHENTICATION.md` for complete setup instructions.
+**Keycloak Authentication**: See `docs/AUTHENTICATION.md` for complete setup instructions. Local dev: `http://localhost:8082` (admin/admin), realm `civic-os-dev`, client `civic-os-dev-client`. Test users: `testuser`, `testeditor`, `testmanager`, `testadmin` (password = username). All example docker-compose files include a pre-configured Keycloak service.
 
-**Quick Reference** (default local instance):
-- Keycloak URL: `http://localhost:8082`
-- Realm: `civic-os-dev`
-- Client ID: `civic-os-dev-client`
-- Admin Console: http://localhost:8082 (admin/admin)
-- Realm config: `examples/keycloak/civic-os-dev.json` (auto-imported on startup)
-- Test users: `testuser`, `testeditor`, `testmanager`, `testadmin` (password = username)
-
-All example docker-compose files include a pre-configured Keycloak service. The shared instance at `auth.civic-os.org` is available as an alternative (see `docs/AUTHENTICATION.md`).
-
-**Permissions Model** (v0.48.0+): Three-layer access control (database GRANTs → RBAC → RLS ownership). Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for complete architecture and anti-patterns.
-
-**RBAC System**: Database-driven permissions via `metadata.roles`, `metadata.permissions`, and `metadata.permission_roles` with `role_key`-based lookups. See `docs/development/PERMISSIONS_MODEL.md` for architecture and anti-patterns.
+**Permissions Model** (v0.48.0+): Three-layer access control (database GRANTs → RBAC → RLS ownership). Database-driven RBAC via `metadata.roles`, `metadata.permissions`, and `metadata.permission_roles` with `role_key`-based lookups. Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for complete architecture and anti-patterns.
 
 **Default Roles** (by `role_key`): `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)
 
 **Admin Features** (require `admin` role):
-- **Permissions Page** (`/permissions`) - Manage role-based table permissions, entity action permissions, and role delegation (v0.31.0+)
-- **User Management Page** (`/admin/users`) - Create, edit, manage users with Keycloak provisioning, role assignment, and bulk import (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section) for details.
-- **Entities Page** (`/entity-management`) - Customize entity display names, descriptions, menu order
-- **Properties Page** (`/property-management`) - Configure column labels, descriptions, sorting, width, visibility
-- **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout, relationship inspection, and geometric port ordering
-- **File Administration** (`/admin/files`) - Browse all uploaded files with All Files (inline filters) and Entity Files (two-phase query) modes. Requires `files:read` permission. (v0.39.0+)
-- **Status Administration** (`/admin/statuses`) - Manage status types, status values (color, sort order, initial/terminal flags), and allowed transitions. Permission-gated via `metadata.statuses` CRUD permissions. (v0.40.0+)
-- **Category Administration** (`/admin/categories`) - Manage category groups and category values (color, sort order). Permission-gated via `metadata.categories` CRUD permissions. (v0.40.0+)
-- **Gallery Administration** (`/admin/galleries`) - Browse all photo galleries with filters (entity type, linked/draft status), stats (total galleries, images, storage), and entity navigation. Admin-only. (v0.47.0+)
-- **Translation Administration** (`/admin/translations`) - Browse, edit, and create translations with locale/source-type filters, search, missing-translation coverage reports, and live preview after save. Visible when `supportedLocales` has 2+ entries. Admin-only. (v0.62.0+)
-- **Role Impersonation** (Settings modal) - Test RLS policies as different roles without logging out. Admins only. `refresh_current_user()` is excluded from impersonation to prevent role sync poisoning (v0.41.2 fix). See `docs/AUTHENTICATION.md` (Role Impersonation section).
+- **Permissions Page** (`/permissions`) - Role-based permissions and role delegation (v0.31.0+)
+- **User Management** (`/admin/users`) - User provisioning, role assignment, bulk import (v0.31.0+). See `docs/INTEGRATOR_GUIDE.md` (User Provisioning section).
+- **Entities** (`/entity-management`) / **Properties** (`/property-management`) - Customize display names, ordering, column config
+- **Schema Editor** (`/schema-editor`) - Visual ERD with auto-layout and relationship inspection
+- **File Admin** (`/admin/files`, v0.39.0+) / **Gallery Admin** (`/admin/galleries`, v0.47.0+)
+- **Status Admin** (`/admin/statuses`, v0.40.0+) / **Category Admin** (`/admin/categories`, v0.40.0+)
+- **Translation Admin** (`/admin/translations`, v0.62.0+) - Visible when `supportedLocales` has 2+ entries
+- **Role Impersonation** (Settings modal) - Test RLS as different roles. `refresh_current_user()` excluded to prevent role sync poisoning (v0.41.2 fix). See `docs/AUTHENTICATION.md` (Role Impersonation section).
 
 **Role Delegation** (v0.31.0+): Admin-configurable matrix controlling which roles can assign/revoke which other roles. Configured via "Role Delegation" tab on Permissions page. Uses `metadata.role_can_manage` table. The `anonymous` role is excluded from delegation (framework-only permission role). See `docs/INTEGRATOR_GUIDE.md` (Role Delegation section) for details.
 
@@ -289,17 +251,10 @@ Two checklists for reviewing new instance designs, derived from NEH post-design 
 - `docs/INSTANCE_DESIGN_SCHEMA_CHECKLIST.md` — Schema/SQL concerns (entity architecture, column design, triggers, scaling, permissions)
 
 ### Adding a New Entity to the UI
-1. Create table in PostgreSQL `public` schema
-2. Grant permissions to database roles:
-   - **Public tables**: Grant SELECT to `web_anon` (anonymous) and all CRUD permissions to `authenticated`
-   - **Sensitive tables** (payments, private data): Grant only to `authenticated`, withhold from `web_anon`
 
-   When `web_anon` has no privileges, anonymous users see a "Sign in to view this record" prompt instead of the data.
-3. **IMPORTANT: Create indexes on all foreign key columns** (PostgreSQL does NOT auto-index FKs). See `docs/INTEGRATOR_GUIDE.md` for index examples.
-4. Navigate to `/view/your_table_name` - UI auto-generates
-5. (Optional) Add entries to `metadata.entities` and `metadata.properties` for custom display names, ordering, etc.
+Create table → grant permissions (`web_anon` for public, `authenticated` for CRUD) → navigate to `/view/your_table_name`. Optionally customize via `metadata.entities`/`metadata.properties`. See `docs/INTEGRATOR_GUIDE.md` for full walkthrough.
 
-**Why FK indexes matter:** The inverse relationships feature (showing related records on Detail pages) requires indexes on foreign key columns to avoid full table scans. Without these indexes, queries like `SELECT * FROM issues WHERE status_id = 1` will be slow on large tables.
+**IMPORTANT: Create indexes on all foreign key columns** — PostgreSQL does NOT auto-index FKs, and inverse relationships on Detail pages require them to avoid full table scans.
 
 ### Custom Property Display
 
@@ -314,15 +269,7 @@ Override property metadata in `metadata.properties` to customize UI: `display_na
 
 ### Metadata Tables Reference
 
-Configure Civic OS behavior via metadata tables:
-- **`metadata.entities`** / **`metadata.properties`** - Entity/property display settings (use Entity/Property Management pages or SQL)
-- **`metadata.validations`** / **`metadata.constraint_messages`** - Validation rules and friendly error messages
-- **`metadata.roles`** / **`metadata.permissions`** - RBAC configuration (use Permissions page or SQL)
-- **`metadata.dashboards`** / **`metadata.dashboard_widgets`** - Dashboard configuration (Preview, SQL only)
-- **`metadata.status_transitions`** - Allowed status transitions with optional RPC binding (v0.33.0+)
-- **`metadata.property_change_triggers`** - Property-level event-to-function bindings (v0.33.0+)
-
-See `docs/INTEGRATOR_GUIDE.md` for complete metadata architecture, field descriptions, and configuration patterns.
+Key tables: `metadata.entities`, `metadata.properties`, `metadata.validations`, `metadata.constraint_messages`, `metadata.roles`, `metadata.permissions`, `metadata.dashboards`, `metadata.dashboard_widgets`, `metadata.status_transitions`, `metadata.property_change_triggers`. See `docs/INTEGRATOR_GUIDE.md` for complete field descriptions and configuration patterns.
 
 **LLM Schema Assistant**: CLI tool that generates Civic OS schema SQL from natural language using LLM providers (Anthropic, OpenAI, OpenRouter). Includes safety validator (whitelist/blacklist/review-tier), context assembly from PostgREST schema state, and cost tracking. See `docs/notes/LLM_SCHEMA_ASSISTANT_DESIGN.md` for full architecture and `tools/schema-assistant/` for implementation. **Maintenance note**: When modifying metadata table structures, the Integrator Guide, or adding new property types, the Schema Assistant's system prompt (`tools/schema-assistant/prompts/system.md`) and few-shot examples (`tools/schema-assistant/prompts/examples/`) must be updated to match.
 
@@ -381,27 +328,10 @@ See `docs/development/ANGULAR.md` for code examples, the OnPush + async pipe pat
 
 When creating new documentation files, follow this structure:
 
-**Root Level (reserved):**
-- `README.md` - Project overview and quick start guide
-- `CLAUDE.md` - AI assistant instructions (this file)
-- `LICENSE` - License file
-
-**Documentation Structure:**
-- `docs/` - User-facing documentation (setup guides, troubleshooting)
-  - `AUTHENTICATION.md` - Authentication and Keycloak setup
-  - `TROUBLESHOOTING.md` - Common issues and solutions
-  - `ROADMAP.md` - Feature roadmap and planning
-- `docs/development/` - Developer-specific guides
-  - `ANGULAR.md` - Angular coding standards and patterns
-  - `TESTING.md` - Testing guidelines and best practices
-- `docs/notes/` - Historical notes, bug documentation, research
-  - `DRAG_DROP_BUG_FIX.md` - Bug fix documentation example
-  - `FILE_STORAGE_OPTIONS.md` - Research document example
-
-**When to create new documentation:**
-- User guides → `docs/`
-- Developer guides → `docs/development/`
-- Bug postmortems, research notes → `docs/notes/`
+- **Root level** (reserved): `README.md`, `CLAUDE.md`, `LICENSE` only
+- **`docs/`** — User-facing documentation (setup guides, troubleshooting)
+- **`docs/development/`** — Developer-specific guides (Angular, testing, etc.)
+- **`docs/notes/`** — Historical notes, bug postmortems, research, design docs
 - **Never** create markdown files in the root directory (except README.md and CLAUDE.md)
 
 **Docs over auto-memory — always.** Auto-memory only lives on one machine and is invisible to contributors. `docs/` files are checked into Git, portable, and permanent. Heavily favor `docs/` for anything of lasting value. Auto-memory is only for quick operational reminders (commands, env quirks).
@@ -419,15 +349,7 @@ Keep all three fresh with every feature. Stale docs are worse than no docs.
 
 **⚠️ MANDATORY: Comprehensive E2E Verification**
 
-You **MUST** perform comprehensive end-to-end verification after ALL code changes, before declaring work complete or committing. This is non-negotiable. Do not skip layers. Do not stop after unit tests.
-
-1. **Unit tests** — `npm run test:headless` — all passing
-2. **Docker** — `docker compose down -v && docker compose up -d` — migrations apply cleanly, check `docker compose logs postgres`
-3. **SQL** — Use MCP postgres tool or `psql` to verify schema changes, VIEWs, RLS policies, and functions
-4. **curl** — Verify PostgREST serves correct data: `curl -s http://localhost:3000/entity?limit=1 | jq .`
-5. **Browser** — Use Playwright MCP to navigate affected pages, interact with UI, and verify rendering/behavior
-
-Run all 5 layers proactively without being asked. See `docs/development/E2E_VERIFICATION.md` for detailed commands and verification queries.
+You **MUST** verify all 5 layers (unit tests → Docker migrations → SQL verification → curl/PostgREST → Playwright browser) after ALL code changes, before declaring work complete. Do not skip layers. Do not stop after unit tests. See `docs/development/E2E_VERIFICATION.md` for detailed commands and verification queries.
 
 ## AI Agent Delegation
 
