@@ -169,7 +169,10 @@ jobs:
       - name: Wait for PostgREST to serve the schema
         run: |
           for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/Issue?limit=1')
+            # "|| echo 000" absorbs connection-level curl failures (e.g. rc 56,
+            # connection reset while PostgREST is still starting); without it,
+            # bash -e aborts the whole retry loop on the first failed probe.
+            code=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/Issue?limit=1' || echo 000)
             [ "$code" = "200" ] && exit 0
             sleep 5
           done
