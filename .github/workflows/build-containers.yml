@@ -397,14 +397,16 @@ jobs:
 
           Rules:
           - Group changes: Features, Improvements, Bug Fixes (omit empty sections)
-          - 1-2 sentences per item, focused on user-facing impact
+          - Per-item length budgets, focused on user-facing impact: Features get a description proportional to the size of the feature (1-2 sentences for a small feature, at most 4-5 for a flagship one); Improvements get 1-3 sentences; Bug Fixes get 1-2 sentences
+          - Select and summarize, do not enumerate: fold related small changes into one entry that names the theme with a few representative examples, instead of a bullet per change
+          - Design documents, research notes, and other docs-only work for unimplemented features get at most one sentence each under Improvements — never a Features entry, no architecture detail
           - Prioritize documentation diffs for understanding features — they explain changes in human terms
           - Use migration SQL comments to understand schema-level changes and their rationale
           - Use source code diffs to identify UI/UX changes not captured in docs
           - No commit hashes, no file paths, no version suffixes like "(v0.65.0)"
           - Combine related commits (e.g., a feature commit and its revert fix = one entry)
           - Present tense ("Adds", "Fixes")
-          - Scale length to match scope: ~100 words for minor releases, up to ~800 words for feature-rich releases. Valid Markdown with ## headers
+          - Total length is a ceiling, not a target: ~80 words for a small patch release, at most ~400 words for a feature-rich release. Valid Markdown with ## headers
           - Start with a 1-2 sentence overview paragraph, no closing remarks' \
             --arg version "$VERSION" \
             --rawfile context release-context.txt \
