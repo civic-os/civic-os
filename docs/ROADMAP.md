@@ -141,6 +141,8 @@ This document outlines the development roadmap for Civic OS, organized by phases
   - [ ] Structured frontend logging service (beyond ad-hoc console.log)
   - [ ] SQL-side logging pattern
 - [x] Application Analytics (external Matomo integration; see Phase 3 for built-in analytics engine)
+- [ ] **Instance Config Store** - Named key:value table (`metadata.instance_config`) for application-level configuration (org name, timezone, branding) with `get_config()` helper for use in RPCs, VIEWs, and notification templates. Admin page at `/admin/config`. See `docs/notes/INSTANCE_SETUP_DESIGN.md`.
+- [ ] **Setup Task Checklist** - Metadata-driven admin page (`/setup`) guiding first admin through required configuration with automatic completion detection, `returnTo`-based walkthrough flow, and regression warnings. Database-driven guard activation. See `docs/notes/INSTANCE_SETUP_DESIGN.md`.
 - [ ] Move api functionality (views, functions, rpcs) into `api` schema that is also accessible via postgrest
 
 ## Phase 2: Introspection Tools

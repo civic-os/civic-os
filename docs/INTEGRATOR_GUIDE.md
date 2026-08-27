@@ -6292,6 +6292,91 @@ See `docs/notes/PWA_DESIGN.md` for detailed architecture, security consideration
 
 ---
 
+## Planned Core Features
+
+The features below have completed design documents but are **not yet implemented**. They are listed here so that instance designers can anticipate core capabilities and avoid building custom workarounds for problems that will have framework-level solutions.
+
+When designing an instance, consider whether any of these planned features would serve your use case. Building a custom version of something the framework will provide natively creates migration friction and duplicated maintenance.
+
+> **Status key**: *Ready* = design finalized, implementation next. *Designed* = design complete, not yet scheduled. *Proposed* = architecture explored, awaiting prioritization. *Research* = solution space mapped, no single design chosen.
+
+### Instance Setup & Configuration — Ready
+
+Two companion features for instance onboarding:
+
+- **Instance Config Store** (`metadata.instance_config`): A named key:value table for application-level configuration (organization name, default timezone, support email, branding). Module builders can depend on named keys via `get_config('agency_name')` in RPCs, VIEWs, and notification templates. Admin page at `/admin/config`.
+- **Setup Task Checklist** (`metadata.setup_tasks`): A metadata-driven admin page at `/setup` that guides the first admin through required configuration. Automatic completion detection via live checks (`record_count`, `config_set`, `rpc_check`, `manual`), `returnTo`-based walkthrough flow, regression warnings when completed data is deleted, and a database-driven guard that activates only when tasks exist.
+
+**Instance design impact**: If your instance needs first-run configuration (naming the org, adding staff, setting up locations), wait for this rather than building a custom onboarding flow. Seed `metadata.setup_tasks` rows in your init script to define the checklist.
+
+See `docs/notes/INSTANCE_SETUP_DESIGN.md` for the full design.
+
+### Custom Pages — Designed
+
+Mixed read/write pages that load from a context RPC and submit to a target RPC. A Custom Page is an entity backed by a VIEW (for shape) with `is_readonly` per-property flags controlling which fields are display vs. input. The submit payload is auto-discovered via RPC parameter introspection.
+
+**Instance design impact**: If you need pages that show read-only context alongside editable inputs (e.g., a check-in tablet showing child info while recording attendance, or a work order form displaying client history), this will handle it natively. Currently requires a standalone Angular component or a Virtual Entity with INSTEAD OF triggers.
+
+See `docs/notes/CUSTOM_PAGES_DESIGN.md` for the full design.
+
+### Soft Delete (Archive) — Designed
+
+Convention-based reversible record archival. Any table with a `deleted_at TIMESTAMPTZ` column automatically gets soft delete behavior: "Delete" becomes "Archive" in the UI, archived records are hidden via RLS (visible only to users with DELETE permission), and an "Archived" toggle on List pages lets authorized users browse and restore records.
+
+**Instance design impact**: If your instance requires audit trails, accidental deletion recovery, or compliance-driven data retention, wait for this rather than building custom `is_active` flags or terminal statuses as a deletion substitute. Enable via `SELECT enable_soft_delete('your_table')`.
+
+See `docs/notes/SOFT_DELETE_DESIGN.md` for the full design.
+
+### Optimistic Concurrency Control (ETag) — Proposed
+
+HTTP ETag-based conflict detection for Edit pages. When two users edit the same record concurrently, the second save receives a 412 error with a "record was modified" message and diff view, instead of silently overwriting the first user's changes. Pure frontend change — no schema modifications required.
+
+**Instance design impact**: Relevant for multi-editor instances (multiple case workers, site leads at different locations). Single-user instances are unaffected. No instance-level configuration needed — this is a framework-wide behavior change.
+
+See `docs/notes/ETAG_CONCURRENCY_DESIGN.md` for the full design.
+
+### System Timezone Unification — Proposed (v1.0)
+
+A single `SYSTEM_TIMEZONE` environment variable (IANA format) that unifies timezone handling across the Angular frontend, PostgREST API (`Prefer: timezone` header), and Go worker. Currently each layer makes its own assumptions — the browser uses local time, PostgREST returns UTC, and the worker uses `NOTIFICATION_TIMEZONE`.
+
+**Instance design impact**: If your instance operates in a single timezone (most municipal/civic deployments), this eliminates timezone inconsistencies between UI display, exported spreadsheets, and notification timestamps. No schema changes — configure via Docker env var.
+
+See `docs/notes/SYSTEM_TIMEZONE_DESIGN.md` for the full design.
+
+### Notification Contacts — Designed
+
+Decouple notification recipients from user accounts. A `notification_contacts` table becomes the canonical recipient identity, enabling email/SMS to non-users (borrowers, applicants, community contacts) without creating Keycloak accounts. Phone-level TCPA opt-out tracking replaces per-user tracking.
+
+**Instance design impact**: If your instance needs to notify people who don't log in (e.g., sending appointment reminders to clients, permit status updates to applicants), this eliminates the need to provision dummy user accounts. Currently, `send_email()` supports arbitrary addresses but SMS requires a `civic_os_users` record.
+
+See `docs/notes/NOTIFICATION_CONTACTS_DESIGN.md` for the full design.
+
+### Read Audit (Access Logging) — Designed
+
+Server-side audit of read operations for government and law-enforcement deployments. Uses pgAudit (object mode) for capture, PostgREST `db-pre-request` for user attribution, and the Go worker for log-to-table transport. The audit record is established entirely by PostgreSQL configuration — no reliance on client behavior.
+
+**Instance design impact**: If your deployment requires CJIS-style access logging ("who viewed which record"), this will be a framework feature. Enable per-entity via a metadata flag. Requires pgAudit extension on the PostgreSQL server.
+
+See `docs/notes/READ_AUDIT_DESIGN.md` for the full design.
+
+### Federation — Research
+
+Cross-instance data sharing protocol for networks of Civic OS instances. Outbound data projections with schema mapping, batch or real-time cadence, and hub-spoke or peer-to-peer topologies. Design space explored; awaiting first real customer requirement to define initial scope.
+
+**Instance design impact**: If you're designing a multi-site deployment where each site runs its own instance but a central office needs aggregated reporting, federation will handle this natively. Currently requires custom ETL or shared database access.
+
+See `docs/notes/FEDERATION_DESIGN.md` for the design exploration.
+
+### Third-Party System Sync — Research
+
+Solution space research covering 16 approaches across 6 categories (pull-based polling, push-based triggers, webhook inbound/outbound, ETL, bidirectional sync, real-time streaming) for synchronizing external SaaS systems with Civic OS. Builds on existing infrastructure (River jobs, scheduled jobs, Stripe webhook handler).
+
+**Instance design impact**: If your instance needs to sync with an external CRM, case management system, or government database, review the research doc to understand what's possible today with existing infrastructure vs. what will require new framework support.
+
+See `docs/notes/THIRD_PARTY_SYNC_DESIGN.md` for the full research.
+
+---
+
 ## Additional Resources
 
 - **CLAUDE.md** - Developer quick-reference for building Civic OS apps
