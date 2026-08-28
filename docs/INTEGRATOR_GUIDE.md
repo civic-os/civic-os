@@ -6343,6 +6343,23 @@ A single `SYSTEM_TIMEZONE` environment variable (IANA format) that unifies timez
 
 See `docs/notes/SYSTEM_TIMEZONE_DESIGN.md` for the full design.
 
+### Document Templates (PDF Generation) — Ready
+
+Fill DOCX/DOTX templates with entity data and convert to PDF via Gotenberg. Mirrors the notification template architecture: integrator writes a `SECURITY INVOKER` RPC that builds JSONB data (with RLS), calls `generate_document()`, and a River worker renders the template and stores the output.
+
+**Key capabilities**:
+- Same `{{.Entity.field}}` / `{{range}}` / `{{if}}` Go template syntax as email templates
+- Same formatters (`formatMoney`, `formatDateTime`, `formatPhone`, etc.)
+- Dynamic images via `{{image .Entity.photo 200 150}}`
+- Template DOCX stored in S3 via the existing file system; generated PDFs stored the same way
+- Trigger via Entity Action buttons, status transitions, or any RPC
+- `metadata.generated_documents` audit table tracks every generation with version history
+- Gotenberg is optional — filled DOCX output works without it
+
+**Instance design impact**: If your instance needs to generate permits, certificates, letters, invoices, contracts, or any other document from entity data, this will handle it natively. Templates are authored in Word/LibreOffice by non-technical users. Currently requires a custom external document generation pipeline.
+
+See `docs/notes/DOCUMENT_TEMPLATE_DESIGN.md` for the full design.
+
 ### Notification Contacts — Designed
 
 Decouple notification recipients from user accounts. A `notification_contacts` table becomes the canonical recipient identity, enabling email/SMS to non-users (borrowers, applicants, community contacts) without creating Keycloak accounts. Phone-level TCPA opt-out tracking replaces per-user tracking.
