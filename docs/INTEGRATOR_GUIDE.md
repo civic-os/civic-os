@@ -26,6 +26,7 @@ This guide is for system administrators and integrators setting up and configuri
 - [Feature Configuration](#feature-configuration)
 - [Database Patterns](#database-patterns)
 - [Production Considerations](#production-considerations)
+- [MCP Server](#mcp-server-v010)
 
 ---
 
@@ -6292,6 +6293,117 @@ See `docs/notes/PWA_DESIGN.md` for detailed architecture, security consideration
 
 ---
 
+## MCP Server
+
+The MCP (Model Context Protocol) server lets LLMs interact with a Civic OS instance through structured tools — browsing entities, querying records, creating/updating data, and executing entity actions. It acts as a semantic API adapter over PostgREST, using the same JWT auth and RLS permissions as the web frontend.
+
+### Setup
+
+**Local development (stdio transport):**
+
+```bash
+cd tools/mcp-server
+npm install && npm run build
+POSTGREST_URL=http://localhost:3000 CIVICOS_TOKEN=<jwt> npm start
+```
+
+**Claude Desktop configuration** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "civic-os": {
+      "command": "npx",
+      "args": ["@civic-os/mcp-server", "--url", "http://localhost:3000", "--token", "<your-jwt>"]
+    }
+  }
+}
+```
+
+**Docker deployment** (add to your instance's docker-compose):
+
+```yaml
+mcp-server:
+  image: ghcr.io/civic-os/mcp-server:latest
+  environment:
+    POSTGREST_URL: http://postgrest:3000
+  deploy:
+    resources:
+      limits:
+        memory: 64M
+        cpus: '0.25'
+```
+
+The container uses Bun runtime (~97 MB image, ~30 MB RAM). Route `/_/mcp/` to the MCP server via your reverse proxy for hosted access.
+
+### Authentication
+
+The MCP server forwards the JWT token to PostgREST as `Authorization: Bearer <jwt>`. It does **not** verify the token — PostgREST + `metadata.check_jwt()` handle verification against Keycloak's JWKS.
+
+**Obtaining a JWT for MCP access:**
+
+1. Use the same Keycloak realm and client as the web frontend
+2. For service accounts or CI, use the Client Credentials grant
+3. For interactive users, use the Direct Access Grant (password flow) or copy the token from browser dev tools
+
+The MCP server respects all RLS policies and permission checks. A user connecting via MCP sees exactly the same data as they would in the web UI.
+
+### Available Tools
+
+| Tool | Type | Description |
+|------|------|-------------|
+| `list_entities` | Read | Browse entities the user has access to |
+| `describe_entity` | Read | Inspect entity structure, properties, types, and available actions |
+| `list_actions` | Read | See available entity actions with parameter requirements |
+| `list_records` | Read | Query/filter/search records with FK embedding and pagination |
+| `get_record` | Read | Full record detail with ETag for optimistic concurrency |
+| `search` | Read | Full-text search across all searchable entities |
+| `create_record` | Write | Create record with FK display name resolution |
+| `update_record` | Write | Update record with ETag-based concurrency control |
+| `execute_action` | Write | Run entity actions (RPCs with business logic) |
+| `add_note` | Write | Add a note to any entity with notes enabled |
+| `get_status_workflow` | Read | View status values and allowed transitions |
+
+### Name Resolution
+
+All tools resolve human-readable names to database identifiers:
+
+- **Entities**: "Time Entry" or "time_entries" → `time_entries`
+- **Columns**: "Client" or "client_id" → `client_id`
+- **FK values**: "Website Redesign" → queries the target table, returns the matching ID
+- **Statuses**: "Active" → looks up `metadata.statuses`, returns the status ID
+- **Actions**: "Approve" → matches by `display_name` or `action_name`
+
+Ambiguous matches return an error with candidate suggestions.
+
+### ETag-Based Optimistic Concurrency
+
+The MCP server uses PostgREST's native ETag support to prevent stale overwrites — critical for LLMs whose context may lag behind real-time state:
+
+1. `get_record` returns the record's ETag (from PostgREST's response header)
+2. `update_record` requires the ETag — sent as `If-Match` header to PostgREST
+3. If the record changed since the read, PostgREST returns 412 Precondition Failed
+4. The LLM must call `get_record` again to get the current state and new ETag
+
+Entity Actions (`execute_action`) do not need ETags — RPCs are atomic server-side transactions.
+
+### Database Role for MCP
+
+For read-only MCP access (e.g., reporting or analytics LLM agents), create a dedicated role:
+
+```sql
+CREATE ROLE civic_os_mcp_readonly WITH LOGIN PASSWORD 'secure-password';
+GRANT web_anon TO civic_os_mcp_readonly;
+GRANT USAGE ON SCHEMA public TO civic_os_mcp_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO civic_os_mcp_readonly;
+```
+
+For full CRUD access, use the same `authenticated` role as the web frontend by authenticating through Keycloak.
+
+See `tools/mcp-server/README.md` for full setup documentation and `docs/notes/MCP_SERVER_DESIGN.md` for architecture details.
+
+---
+
 ## Planned Core Features
 
 The features below have completed design documents but are **not yet implemented**. They are listed here so that instance designers can anticipate core capabilities and avoid building custom workarounds for problems that will have framework-level solutions.
@@ -6406,6 +6518,8 @@ See `docs/notes/THIRD_PARTY_SYNC_DESIGN.md` for the full research.
 - **docs/notes/DASHBOARD_DESIGN.md** - Dashboard system architecture
 - **docs/notes/I18N_DESIGN.md** - Multi-language (i18n) system architecture
 - **docs/notes/PWA_DESIGN.md** - PWA architecture and design decisions
+- **docs/notes/MCP_SERVER_DESIGN.md** - MCP server architecture and design decisions
+- **tools/mcp-server/README.md** - MCP server setup, tools reference, and deployment
 - **postgres/migrations/README.md** - Sqitch migrations guide
 
 For questions or support, see the project README or file an issue on GitHub.

@@ -279,6 +279,34 @@ jobs:
           flags: go-${{ matrix.service }}
           fail_ci_if_error: false
 
+  # MCP Server Tests
+  mcp-server-tests:
+    name: MCP Server Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: tools/mcp-server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tools/mcp-server
+        run: npm ci
+
+      - name: Build TypeScript
+        working-directory: tools/mcp-server
+        run: npm run build
+
+      - name: Run tests
+        working-directory: tools/mcp-server
+        run: npm test
+
   # Docker Build Tests
   docker-build:
     name: Docker Build Tests

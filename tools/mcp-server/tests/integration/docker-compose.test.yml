@@ -1,0 +1,125 @@
+# Copyright (C) 2023-2026 Civic OS, L3C
+# AGPL-3.0-or-later
+#
+# Docker Compose for MCP server full-stack integration tests.
+# Reuses the pothole example schema with PostgreSQL + PostgREST + Keycloak.
+#
+# Startup order (orchestrated via depends_on + healthchecks):
+#   1. postgres + keycloak start in parallel
+#   2. jwks-init waits for keycloak healthy, fetches JWKS, writes to host file
+#   3. PostgREST starts after postgres healthy + jwks-init complete
+#
+# Usage:
+#   cd tools/mcp-server/tests/integration
+#   docker compose -f docker-compose.test.yml up -d
+#   ./run-tests.sh
+#   docker compose -f docker-compose.test.yml down -v
+
+services:
+  postgres:
+    build:
+      context: ../../../..
+      dockerfile: docker/dev-postgres/Dockerfile
+    platform: linux/amd64
+    container_name: mcp_test_postgres
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_DB: civic_os_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: testpassword
+    volumes:
+      - mcp_test_pgdata:/var/lib/postgresql/data
+      # Sqitch migration files
+      - ../../../../sqitch.conf:/civic-os-migrations/sqitch.conf:ro
+      - ../../../../sqitch.plan:/civic-os-migrations/sqitch.plan:ro
+      - ../../../../postgres/migrations:/civic-os-migrations/postgres/migrations:ro
+      # Pothole example init scripts
+      - ../../../../examples/pothole/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - mcp-test-network
+    healthcheck:
+      # pg_isready passes early (before init scripts finish). Verify the pothole
+      # example schema is fully initialized by checking for its last init table.
+      test: ["CMD-SHELL", "psql -U postgres -d civic_os_test -c 'SELECT 1 FROM public.\"Issue\" LIMIT 1' > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: mcp_test_keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "28082:8080"
+    command: start-dev --import-realm
+    volumes:
+      - ../../../../examples/keycloak:/opt/keycloak/data/import:ro
+    networks:
+      - mcp-test-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/civic-os-dev/.well-known/openid-configuration HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # Fetch JWKS from Keycloak and write to host file for PostgREST.
+  # Same logic as fetch-keycloak-jwk.sh but runs inside docker-compose.
+  jwks-init:
+    image: curlimages/curl:latest
+    container_name: mcp_test_jwks_init
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        set -e
+        JWKS_URL="http://keycloak:8080/realms/civic-os-dev/protocol/openid-connect/certs"
+        echo "Fetching JWKS from $$JWKS_URL..."
+        JWKS=$$(curl -sf "$$JWKS_URL")
+        echo "$$JWKS" > /output/jwt-secret.jwks
+        echo "JWKS written to /output/jwt-secret.jwks"
+    volumes:
+      - ./:/output
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - mcp-test-network
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    container_name: mcp_test_postgrest
+    ports:
+      - "23000:3000"
+    environment:
+      PGRST_DB_URI: postgres://authenticator:testpassword@postgres:5432/civic_os_test
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_DB_PRE_REQUEST: "metadata.check_jwt"
+      PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
+      PGRST_JWT_AUD: "account"
+      PGRST_LOG_LEVEL: "info"
+    volumes:
+      - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jwks-init:
+        condition: service_completed_successfully
+    networks:
+      - mcp-test-network
+    restart: unless-stopped
+
+volumes:
+  mcp_test_pgdata:
+
+networks:
+  mcp-test-network:
+    driver: bridge

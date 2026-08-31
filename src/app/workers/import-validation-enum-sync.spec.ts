@@ -33,6 +33,9 @@ import { EntityPropertyType } from '../interfaces/entity';
  * 1. Update EXPECTED_COUNT below to the new enum size
  * 2. Add the new member to the worker's const in import-validation.worker.ts
  * 3. Add the new label to getPropertyTypeLabel() in property-management.page.ts
+ * 4. Add the new member to tools/mcp-server/src/interfaces.ts EntityPropertyType enum
+ * 5. Handle the new type in tools/mcp-server/src/schema-cache.ts detectPropertyType()
+ * 6. Handle the new type in tools/mcp-server/src/formatters/value.ts formatValue()
  */
 describe('Import Validation Worker - EntityPropertyType Sync', () => {
   // UPDATE THIS when adding new EntityPropertyType members.
@@ -47,7 +50,10 @@ describe('Import Validation Worker - EntityPropertyType Sync', () => {
       `EntityPropertyType has ${enumValues.length} members but expected ${EXPECTED_COUNT}. ` +
       `If you added a new type, update: (1) EXPECTED_COUNT in this test, ` +
       `(2) worker copy in import-validation.worker.ts, ` +
-      `(3) type labels in property-management.page.ts getPropertyTypeLabel()`);
+      `(3) type labels in property-management.page.ts getPropertyTypeLabel(), ` +
+      `(4) MCP server enum in tools/mcp-server/src/interfaces.ts, ` +
+      `(5) detectPropertyType() in tools/mcp-server/src/schema-cache.ts, ` +
+      `(6) formatValue() in tools/mcp-server/src/formatters/value.ts`);
   });
 
   it('should have contiguous enum values from 0 to max', () => {
