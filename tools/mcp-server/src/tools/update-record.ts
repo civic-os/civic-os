@@ -19,6 +19,7 @@ export function registerUpdateRecord(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'update_record',
@@ -44,7 +45,7 @@ export function registerUpdateRecord(
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     async ({ entity, id, data, etag }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
 

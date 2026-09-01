@@ -204,6 +204,29 @@ services:
       retries: 5
       start_period: 90s
 
+  # MCP Server — Semantic API for LLM integration (HTTP Streamable transport)
+  mcp-server:
+    build:
+      context: ../..
+      dockerfile: docker/mcp-server/Dockerfile
+    container_name: pothole_mcp_server
+    ports:
+      - "3001:3001"
+    environment:
+      POSTGREST_URL: http://postgrest:3000
+      MCP_TRANSPORT: http
+      MCP_PORT: 3001
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: civic-os-dev
+    depends_on:
+      postgrest:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    networks:
+      - postgrest-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   init-scripts:

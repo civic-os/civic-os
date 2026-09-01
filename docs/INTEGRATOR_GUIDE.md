@@ -6324,9 +6324,24 @@ POSTGREST_URL=http://localhost:3000 CIVICOS_TOKEN=<jwt> npm start
 
 ```yaml
 mcp-server:
-  image: ghcr.io/civic-os/mcp-server:latest
+  image: ghcr.io/civic-os/mcp-server:${VERSION}
   environment:
     POSTGREST_URL: http://postgrest:3000
+    MCP_TRANSPORT: http
+    MCP_PORT: 3001
+    # Optional: enable OAuth discovery for MCP clients
+    KEYCLOAK_URL: http://keycloak:8080
+    KEYCLOAK_REALM: civic-os
+    MCP_PUBLIC_URL: https://your-instance.civic-os.org/_/mcp
+  depends_on:
+    postgrest:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+    interval: 30s
+    timeout: 5s
+    retries: 3
+  restart: unless-stopped
   deploy:
     resources:
       limits:
@@ -6334,19 +6349,36 @@ mcp-server:
         cpus: '0.25'
 ```
 
-The container uses Bun runtime (~97 MB image, ~30 MB RAM). Route `/_/mcp/` to the MCP server via your reverse proxy for hosted access.
+The container uses Bun runtime (~97 MB image, ~30 MB RAM) and defaults to HTTP transport mode. Add a Caddy route to expose it:
+
+```
+handle_path /_/mcp/* {
+    reverse_proxy mcp-server:3001
+}
+```
 
 ### Authentication
 
 The MCP server forwards the JWT token to PostgREST as `Authorization: Bearer <jwt>`. It does **not** verify the token — PostgREST + `metadata.check_jwt()` handle verification against Keycloak's JWKS.
 
-**Obtaining a JWT for MCP access:**
+**Two ways users connect** (both result in Bearer tokens on every request):
 
-1. Use the same Keycloak realm and client as the web frontend
-2. For service accounts or CI, use the Client Credentials grant
-3. For interactive users, use the Direct Access Grant (password flow) or copy the token from browser dev tools
+1. **Pre-configured token**: User obtains a Keycloak JWT (via Direct Access Grant, Client Credentials, or copying from browser dev tools) and pastes it into their MCP client config. Works with any MCP client.
+
+2. **OAuth 2.1 auto-flow** (requires `KEYCLOAK_URL` config): MCP client discovers Keycloak via `/.well-known/oauth-protected-resource`, does Authorization Code + PKCE flow (user logs in via browser), gets a JWT automatically. Works with OAuth-capable MCP clients. See `docs/AUTHENTICATION.md` for Keycloak client setup.
 
 The MCP server respects all RLS policies and permission checks. A user connecting via MCP sees exactly the same data as they would in the web UI.
+
+**Environment variables for HTTP mode:**
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `POSTGREST_URL` | PostgREST base URL | `http://localhost:3000` |
+| `MCP_TRANSPORT` | Transport mode: `stdio` or `http` | `stdio` (CLI), `http` (Docker) |
+| `MCP_PORT` | HTTP server port | `3001` |
+| `KEYCLOAK_URL` | Keycloak base URL (enables OAuth discovery) | — |
+| `KEYCLOAK_REALM` | Keycloak realm name | `civic-os` |
+| `MCP_PUBLIC_URL` | Public URL of MCP server (for OAuth metadata) | `http://localhost:3001` |
 
 ### Available Tools
 

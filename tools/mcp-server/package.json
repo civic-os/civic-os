@@ -1,6 +1,6 @@
 {
   "name": "@civic-os/mcp-server",
-  "version": "0.72.0",
+  "version": "0.72.1",
   "description": "MCP server for Civic OS — semantic API adapter over PostgREST",
   "type": "module",
   "main": "dist/index.js",

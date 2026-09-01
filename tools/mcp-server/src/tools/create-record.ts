@@ -19,6 +19,7 @@ export function registerCreateRecord(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'create_record',
@@ -39,7 +40,7 @@ export function registerCreateRecord(
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
     async ({ entity, data }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
 

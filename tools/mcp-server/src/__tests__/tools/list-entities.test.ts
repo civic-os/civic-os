@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
 import { registerListEntities } from '../../tools/list-entities.js';
+import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { SchemaEntity } from '../../interfaces.js';
 
@@ -49,12 +50,21 @@ function makeEntity(overrides: Partial<SchemaEntity> = {}): SchemaEntity {
   };
 }
 
+function makeMockClient(): PostgRESTClient {
+  return {
+    get: vi.fn().mockResolvedValue({ data: [], status: 200 }),
+  } as unknown as PostgRESTClient;
+}
+
 function makeMockCache(entities: SchemaEntity[]): SchemaCache {
   return {
     ensureFresh: vi.fn().mockResolvedValue(undefined),
+    ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
     entities,
+    getEntitiesForUser: vi.fn().mockReturnValue(entities),
     getProperties: vi.fn().mockReturnValue([]),
     getActions: vi.fn().mockReturnValue([]),
+    getActionsForUser: vi.fn().mockReturnValue([]),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
     getTransitions: vi.fn().mockReturnValue([]),
@@ -75,21 +85,21 @@ describe('list_entities tool', () => {
 
   it('registers the tool without throwing', () => {
     const cache = makeMockCache([]);
-    expect(() => registerListEntities(server, cache)).not.toThrow();
+    expect(() => registerListEntities(server, makeMockClient(), cache)).not.toThrow();
   });
 
   it('calls cache.ensureFresh on invocation', async () => {
     const cache = makeMockCache([]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     await callTool(server, 'list_entities', {});
 
-    expect(cache.ensureFresh).toHaveBeenCalledOnce();
+    expect(cache.ensureFreshForUser).toHaveBeenCalledOnce();
   });
 
   it('returns "no entities" message when cache is empty', async () => {
     const cache = makeMockCache([]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
 
@@ -98,7 +108,7 @@ describe('list_entities tool', () => {
 
   it('returns "no entities matching filter" when filter matches nothing', async () => {
     const cache = makeMockCache([makeEntity()]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', { filter: 'zzz_not_found' });
 
@@ -109,7 +119,7 @@ describe('list_entities tool', () => {
   it('lists entities when select=true', async () => {
     const entity = makeEntity({ display_name: 'Work Orders', table_name: 'work_orders' });
     const cache = makeMockCache([entity]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
 
@@ -121,7 +131,7 @@ describe('list_entities tool', () => {
     const visible = makeEntity({ display_name: 'Clients', table_name: 'clients', select: true });
     const hidden = makeEntity({ display_name: 'Internal Logs', table_name: 'internal_logs', select: false });
     const cache = makeMockCache([visible, hidden]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
 
@@ -137,7 +147,7 @@ describe('list_entities tool', () => {
       delete: false,
     });
     const cache = makeMockCache([entity]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
     const text = result.content[0].text;
@@ -159,7 +169,7 @@ describe('list_entities tool', () => {
       guided_form_key: 'intake_form',
     });
     const cache = makeMockCache([entity]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
     const text = result.content[0].text;
@@ -180,7 +190,7 @@ describe('list_entities tool', () => {
       makeEntity({ display_name: 'Service Requests', table_name: 'service_requests' }),
     ];
     const cache = makeMockCache(entities);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', { filter: 'client' });
     const text = result.content[0].text;
@@ -196,7 +206,7 @@ describe('list_entities tool', () => {
       makeEntity({ display_name: 'Clients', table_name: 'clients' }),
     ];
     const cache = makeMockCache(entities);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', { filter: 'work_orders' });
     const text = result.content[0].text;
@@ -208,7 +218,7 @@ describe('list_entities tool', () => {
   it('includes entity description when present', async () => {
     const entity = makeEntity({ description: 'Tracks all client relationships' });
     const cache = makeMockCache([entity]);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
 
@@ -221,7 +231,7 @@ describe('list_entities tool', () => {
       makeEntity({ display_name: 'Work Orders', table_name: 'work_orders' }),
     ];
     const cache = makeMockCache(entities);
-    registerListEntities(server, cache);
+    registerListEntities(server, makeMockClient(), cache);
 
     const result = await callTool(server, 'list_entities', {});
 

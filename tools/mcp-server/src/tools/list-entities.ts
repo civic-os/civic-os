@@ -8,9 +8,15 @@
 
 import type { McpServer } from '@modelcontextprotocol/server';
 import * as z from 'zod';
+import type { PostgRESTClient } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 
-export function registerListEntities(server: McpServer, cache: SchemaCache): void {
+export function registerListEntities(
+  server: McpServer,
+  client: PostgRESTClient,
+  cache: SchemaCache,
+  cacheKey?: string,
+): void {
   server.registerTool(
     'list_entities',
     {
@@ -27,9 +33,9 @@ export function registerListEntities(server: McpServer, cache: SchemaCache): voi
       annotations: { readOnlyHint: true },
     },
     async ({ filter }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
-      let entities = cache.entities.filter(e => e.select);
+      let entities = cache.getEntitiesForUser(cacheKey).filter(e => e.select);
 
       if (filter) {
         const f = filter.toLowerCase();

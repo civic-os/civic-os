@@ -18,6 +18,7 @@ export function registerAddNote(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'add_note',
@@ -34,7 +35,7 @@ export function registerAddNote(
       annotations: { readOnlyHint: false },
     },
     async ({ entity, id, content }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
 

@@ -3,7 +3,7 @@
 Copyright (C) 2023-2026 Civic OS, L3C
 
 **Created:** 2026-08-31
-**Status:** Initial release -- stdio transport, 11 tools, schema cache, name resolution
+**Status:** v0.72.1 -- stdio + HTTP Streamable transport, per-request auth, OAuth discovery, 11 tools
 
 ## Purpose
 
@@ -66,7 +66,9 @@ tools/mcp-server/
 
 ### Server Factory
 
-`createServer()` is a factory function that takes a `PostgRESTClient`, `SchemaCache`, and `NameResolver`, then registers all 11 tools and 2 MCP resources onto an `McpServer` instance. This factory pattern supports both the stdio transport (current) and future HTTP Streamable transport.
+`createServer(cache, token?)` is a factory function that takes a shared `SchemaCache` and an optional JWT token. It creates a per-session `PostgRESTClient` and `NameResolver`, then registers all 11 tools, 2 MCP resources, and server instructions onto an `McpServer` instance.
+
+In stdio mode, the factory is called once with the static `--token`. In HTTP mode, `createMcpHandler` calls the factory per-request with the token extracted from `McpRequestContext.authInfo`.
 
 ### MCP Resources
 
@@ -155,8 +157,57 @@ PostgREST errors are translated to user-friendly messages:
 
 ## Transport
 
-- **stdio (current)**: Default. For local development and MCP clients like Claude Desktop. Uses `@modelcontextprotocol/server/stdio` with the `serveStdio()` factory pattern.
-- **HTTP Streamable (Phase 3)**: For hosted deployment alongside PostgREST. Planned at `/_/mcp/` via Caddy reverse proxy.
+Two transport modes, selectable via `--transport` flag or `MCP_TRANSPORT` env var:
+
+- **stdio** (default for CLI): For local development and MCP clients like Claude Desktop. Uses `@modelcontextprotocol/server/stdio` with the `serveStdio()` factory pattern. Single-user session with a static token via `--token` or `CIVICOS_TOKEN`.
+- **http** (default in Docker): HTTP Streamable transport for hosted deployment behind a reverse proxy. Uses `createMcpHandler()` from the MCP SDK v2.0.0 with `legacy: 'stateless'` for backward compatibility with 2025-era MCP clients.
+
+### Per-Request Auth Architecture (HTTP mode)
+
+In HTTP mode, each request carries a different user's JWT via `Authorization: Bearer`. The architecture splits into shared and per-session layers:
+
+```
+Shared (process lifetime):
+  SchemaCache ← anonymous PostgRESTClient (schema views are public)
+
+Per-session (per HTTP request):
+  Authorization: Bearer <jwt> → extractBearerToken()
+  → createServer(cache, token)
+    → PostgRESTClient(baseUrl, token)  // per-session, user's JWT
+    → NameResolver(cache, client)       // per-session
+    → McpServer with all tools          // per-session
+```
+
+The MCP server never verifies JWTs. It extracts the Bearer token and passes it through to PostgREST as `AuthInfo.token` via the `createMcpHandler` factory context. PostgREST handles verification against Keycloak's JWKS.
+
+### OAuth Discovery (optional)
+
+When `KEYCLOAK_URL` and `KEYCLOAK_REALM` env vars are set, the HTTP server exposes RFC 9728 protected resource metadata at `/.well-known/oauth-protected-resource`. This enables OAuth-capable MCP clients (like Claude Desktop) to auto-discover Keycloak and perform Authorization Code + PKCE flow.
+
+The `oauthMetadataResponse()` helper from the MCP SDK builds the discovery document. No token verification or Keycloak service account is needed -- it's a static JSON response pointing clients to Keycloak endpoints.
+
+### HTTP Routing
+
+```
+GET  /health                              → 200 { status: ok, version }
+OPTIONS *                                 → 204 with CORS headers
+GET  /.well-known/oauth-protected-resource → RFC 9728 metadata (if Keycloak configured)
+GET  /.well-known/oauth-authorization-server → RFC 8414 metadata (if Keycloak configured)
+POST /mcp                                 → MCP Streamable handler
+GET  /mcp                                 → MCP SSE stream
+```
+
+CORS headers (`Access-Control-Allow-Origin: *`) are added to all responses except health checks.
+
+### Caddy Integration
+
+Route `/_/mcp/*` to the MCP server container:
+
+```
+handle_path /_/mcp/* {
+    reverse_proxy mcp-server:3001
+}
+```
 
 ## Container
 
@@ -164,19 +215,20 @@ Bun-based single-stage image (`oven/bun:1-alpine`). Bun runs TypeScript natively
 
 - Image base: `oven/bun:1-alpine`
 - Non-root user: `civicos` (UID 1001)
-- Default env: `POSTGREST_URL=http://postgrest:3000`
-- Exposed port: 3001 (for HTTP Streamable transport; stdio mode ignores this)
+- Default env: `POSTGREST_URL=http://postgrest:3000`, `MCP_TRANSPORT=http`, `MCP_PORT=3001`
+- Exposed port: 3001
 - Entrypoint: `bun run src/index.ts`
 - Runtime memory: ~30 MB idle
 - CPU: negligible (I/O bound, proxying HTTP)
+- Health check: `wget -qO- http://localhost:3001/health`
 
 ## Testing Strategy
 
 Three layers, from fast to comprehensive:
 
-### Unit Tests (384 tests, vitest)
+### Unit Tests (402 tests, vitest)
 
-Every tool, formatter, and core module tested with mocked PostgREST responses. Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
+Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, OAuth metadata, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
 
 ### Integration Tests (MCP protocol)
 
@@ -195,6 +247,5 @@ Docker Compose with real PostgreSQL + PostgREST + Keycloak (pothole example sche
 
 ## Future Work
 
-- HTTP Streamable transport (Phase 3) with OAuth2/OIDC via Keycloak
-- MCP server instructions (guide LLM on tool usage patterns and best practices)
-- npm publish for local dev use
+- npm publish for local dev use (`npx @civic-os/mcp-server`)
+- MCP Sampling support (LLM-initiated prompts for complex workflows)

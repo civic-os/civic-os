@@ -103,9 +103,12 @@ function makeMockCache(
 ): SchemaCache {
   return {
     ensureFresh: vi.fn().mockResolvedValue(undefined),
+    ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
     entities: [entity],
+    getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue(properties),
     getActions: vi.fn().mockReturnValue([]),
+    getActionsForUser: vi.fn().mockReturnValue([]),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
     constraintMessages: [],
@@ -157,7 +160,7 @@ describe('list_records tool', () => {
 
     await callTool(server, 'list_records', { entity: 'clients' });
 
-    expect(cache.ensureFresh).toHaveBeenCalledOnce();
+    expect(cache.ensureFreshForUser).toHaveBeenCalledOnce();
   });
 
   it('calls resolver.resolveEntity with the entity name', async () => {

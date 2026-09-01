@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/server';
 import { registerDescribeEntity } from '../../tools/describe-entity.js';
+import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaProperty, SchemaEntityAction } from '../../interfaces.js';
@@ -90,6 +91,12 @@ function makeAction(overrides: Partial<SchemaEntityAction> = {}): SchemaEntityAc
   };
 }
 
+function makeMockClient(): PostgRESTClient {
+  return {
+    get: vi.fn().mockResolvedValue({ data: [], status: 200 }),
+  } as unknown as PostgRESTClient;
+}
+
 function makeMockCache(
   entity: SchemaEntity,
   properties: SchemaProperty[] = [],
@@ -97,9 +104,12 @@ function makeMockCache(
 ): SchemaCache {
   return {
     ensureFresh: vi.fn().mockResolvedValue(undefined),
+    ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
     entities: [entity],
+    getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue(properties),
     getActions: vi.fn().mockReturnValue(actions),
+    getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
     getTransitions: vi.fn().mockReturnValue([]),
@@ -134,25 +144,25 @@ describe('describe_entity tool', () => {
     const entity = makeEntity();
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    expect(() => registerDescribeEntity(server, cache, resolver)).not.toThrow();
+    expect(() => registerDescribeEntity(server, makeMockClient(), cache, resolver)).not.toThrow();
   });
 
   it('calls cache.ensureFresh on invocation', async () => {
     const entity = makeEntity();
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     await callTool(server, 'describe_entity', { entity: 'clients' });
 
-    expect(cache.ensureFresh).toHaveBeenCalledOnce();
+    expect(cache.ensureFreshForUser).toHaveBeenCalledOnce();
   });
 
   it('calls resolver.resolveEntity with the entity name', async () => {
     const entity = makeEntity();
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     await callTool(server, 'describe_entity', { entity: 'Clients' });
 
@@ -163,7 +173,7 @@ describe('describe_entity tool', () => {
     const entity = makeEntity({ display_name: 'Work Orders', table_name: 'work_orders' });
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'work_orders' });
     const text = result.content[0].text;
@@ -176,7 +186,7 @@ describe('describe_entity tool', () => {
     const entity = makeEntity({ description: 'Tracks all work order lifecycle' });
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
 
@@ -187,7 +197,7 @@ describe('describe_entity tool', () => {
     const entity = makeEntity({ insert: true, select: true, update: false, delete: false });
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -208,7 +218,7 @@ describe('describe_entity tool', () => {
     ];
     const cache = makeMockCache(entity, props);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -224,7 +234,7 @@ describe('describe_entity tool', () => {
     const action = makeAction({ display_name: 'Approve', action_name: 'approve' });
     const cache = makeMockCache(entity, [], [action]);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -239,7 +249,7 @@ describe('describe_entity tool', () => {
     const action = makeAction({ display_name: 'Delete All', can_execute: false });
     const cache = makeMockCache(entity, [], [action]);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
 
@@ -256,7 +266,7 @@ describe('describe_entity tool', () => {
     });
     const cache = makeMockCache(entity, [], [action]);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -271,7 +281,7 @@ describe('describe_entity tool', () => {
     const entity = makeEntity({ show_calendar: true, calendar_property_name: 'scheduled_at' });
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -285,7 +295,7 @@ describe('describe_entity tool', () => {
     const entity = makeEntity({ enable_notes: true });
     const cache = makeMockCache(entity);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
 
@@ -307,7 +317,7 @@ describe('describe_entity tool', () => {
       { id: 2, display_name: 'Closed', entity_type: 'work_order', color: null, is_initial: false, is_terminal: true },
     ]);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -332,7 +342,7 @@ describe('describe_entity tool', () => {
       { id: 2, display_name: 'Standard', entity_type: 'clients', color: null },
     ]);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
     const text = result.content[0].text;
@@ -345,7 +355,7 @@ describe('describe_entity tool', () => {
     const entity = makeEntity();
     const cache = makeMockCache(entity, [], []);
     const resolver = makeMockResolver(entity);
-    registerDescribeEntity(server, cache, resolver);
+    registerDescribeEntity(server, makeMockClient(), cache, resolver);
 
     const result = await callTool(server, 'describe_entity', { entity: 'clients' });
 

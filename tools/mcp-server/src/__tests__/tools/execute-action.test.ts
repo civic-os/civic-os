@@ -85,9 +85,12 @@ function makeMockClient(rpcResult: unknown = { success: true, message: 'Done' })
 function makeMockCache(entity: SchemaEntity, actions: SchemaEntityAction[] = []): SchemaCache {
   return {
     ensureFresh: vi.fn().mockResolvedValue(undefined),
+    ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
     entities: [entity],
+    getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue([]),
     getActions: vi.fn().mockReturnValue(actions),
+    getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
     constraintMessages: [],
@@ -398,7 +401,7 @@ describe('execute_action tool', () => {
 
     await callTool(server, 'execute_action', { entity: 'clients', id: 1, action: 'approve' });
 
-    expect(cache.ensureFresh).toHaveBeenCalledOnce();
+    expect(cache.ensureFreshForUser).toHaveBeenCalledOnce();
   });
 
   it('returns isError when action has can_execute=false', async () => {

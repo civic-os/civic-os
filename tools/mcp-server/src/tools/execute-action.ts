@@ -19,6 +19,7 @@ export function registerExecuteAction(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'execute_action',
@@ -40,7 +41,7 @@ export function registerExecuteAction(
       annotations: { readOnlyHint: false },
     },
     async ({ entity, id, action, params }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
       const actionConfig = resolver.resolveAction(resolved.table_name, action);

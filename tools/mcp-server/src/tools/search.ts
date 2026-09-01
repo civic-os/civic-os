@@ -18,6 +18,7 @@ export function registerSearch(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'search',
@@ -39,10 +40,10 @@ export function registerSearch(
       annotations: { readOnlyHint: true },
     },
     async ({ query, entity, limit = 5 }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       // Determine which entities to search
-      let searchableEntities = cache.entities.filter(
+      let searchableEntities = cache.getEntitiesForUser(cacheKey).filter(
         e => e.select && (e.fulltext_search_column || e.substring_search_column),
       );
 

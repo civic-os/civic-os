@@ -117,9 +117,12 @@ function makeMockCache(
 ): SchemaCache {
   return {
     ensureFresh: vi.fn().mockResolvedValue(undefined),
+    ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
     entities: [entity],
+    getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue(properties),
     getActions: vi.fn().mockReturnValue(actions),
+    getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),
     getCategories: vi.fn().mockReturnValue([]),
     constraintMessages: [],
@@ -174,7 +177,7 @@ describe('get_record tool', () => {
 
     await callTool(server, 'get_record', { entity: 'clients', id: 1 });
 
-    expect(cache.ensureFresh).toHaveBeenCalledOnce();
+    expect(cache.ensureFreshForUser).toHaveBeenCalledOnce();
   });
 
   it('renders record detail with entity name and id in header', async () => {

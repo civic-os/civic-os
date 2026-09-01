@@ -123,7 +123,7 @@ function makeMockClient(overrides: Partial<Record<string, unknown>> = {}): Postg
 describe('SchemaCache.initialize()', () => {
   it('loads entities, properties, actions, statuses, categories', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
 
     await cache.initialize();
 
@@ -137,7 +137,7 @@ describe('SchemaCache.initialize()', () => {
 
   it('is a no-op on second call without force', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
 
     await cache.initialize();
     await cache.initialize(); // second call
@@ -150,7 +150,7 @@ describe('SchemaCache.initialize()', () => {
 
   it('re-fetches everything when force=true', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
 
     await cache.initialize();
     const callsBefore = (client.get as ReturnType<typeof vi.fn>).mock.calls.length;
@@ -165,7 +165,7 @@ describe('SchemaCache.initialize()', () => {
   it('assigns computed type to each property', async () => {
     const boolProp = makeProperty({ udt_name: 'bool', column_name: 'active', display_name: 'Active' });
     const client = makeMockClient({ schema_properties: [boolProp] });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
 
     await cache.initialize();
 
@@ -188,7 +188,7 @@ describe('SchemaCache.initialize()', () => {
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     });
 
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await expect(cache.initialize()).resolves.not.toThrow();
     expect(cache.transitions).toHaveLength(0);
   });
@@ -209,7 +209,7 @@ describe('SchemaCache.initialize()', () => {
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     });
 
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await expect(cache.initialize()).resolves.not.toThrow();
     expect(cache.constraintMessages).toHaveLength(0);
   });
@@ -222,7 +222,7 @@ describe('SchemaCache.initialize()', () => {
 describe('SchemaCache.ensureFresh()', () => {
   it('calls initialize() when not yet initialized', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
 
     await cache.ensureFresh();
 
@@ -231,10 +231,10 @@ describe('SchemaCache.ensureFresh()', () => {
 
   it('does not re-fetch when versions are unchanged', async () => {
     const versions: SchemaCacheVersion[] = [
-      { view_name: 'entities', max_updated_at: '2024-01-01T00:00:00Z' },
+      { cache_name: 'entities', version: '2024-01-01T00:00:00Z' },
     ];
     const client = makeMockClient({ schema_cache_versions: versions });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
 
     await cache.initialize();
     const callsBefore = (client.get as ReturnType<typeof vi.fn>).mock.calls.length;
@@ -249,7 +249,7 @@ describe('SchemaCache.ensureFresh()', () => {
   it('re-fetches entities when entities version is stale', async () => {
     const entity1 = makeEntity({ display_name: 'Old Entity', table_name: 'old_table' });
     const versions1: SchemaCacheVersion[] = [
-      { view_name: 'entities', max_updated_at: '2024-01-01T00:00:00Z' },
+      { cache_name: 'entities', version: '2024-01-01T00:00:00Z' },
     ];
 
     let versionTimestamp = '2024-01-01T00:00:00Z';
@@ -258,7 +258,7 @@ describe('SchemaCache.ensureFresh()', () => {
     (client.get as ReturnType<typeof vi.fn>).mockImplementation((path: string) => {
       if (path === 'schema_cache_versions') {
         return Promise.resolve({
-          data: [{ view_name: 'entities', max_updated_at: versionTimestamp }],
+          data: [{ cache_name: 'entities', version: versionTimestamp }],
           status: 200,
         });
       }
@@ -274,7 +274,7 @@ describe('SchemaCache.ensureFresh()', () => {
       return Promise.resolve({ data: defaults[path] ?? [], status: 200 });
     });
 
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     // Simulate a schema change
@@ -289,7 +289,7 @@ describe('SchemaCache.ensureFresh()', () => {
 
   it('silently continues when version check throws', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     (client.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('DB down'));
@@ -305,7 +305,7 @@ describe('SchemaCache.ensureFresh()', () => {
 describe('SchemaCache derived lookups', () => {
   it('getEntity() resolves by table name', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     const entity = cache.getEntity('projects');
@@ -314,7 +314,7 @@ describe('SchemaCache derived lookups', () => {
 
   it('getEntity() returns undefined for unknown table', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     expect(cache.getEntity('nonexistent')).toBeUndefined();
@@ -322,7 +322,7 @@ describe('SchemaCache derived lookups', () => {
 
   it('getEntityByDisplayName() resolves case-insensitively', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     const entity = cache.getEntityByDisplayName('PROJECTS');
@@ -333,7 +333,7 @@ describe('SchemaCache derived lookups', () => {
     const prop1 = makeProperty({ column_name: 'name', display_name: 'Name' });
     const prop2 = makeProperty({ column_name: 'budget', display_name: 'Budget', udt_name: 'money' });
     const client = makeMockClient({ schema_properties: [prop1, prop2] });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     const props = cache.getProperties('projects');
@@ -344,7 +344,7 @@ describe('SchemaCache derived lookups', () => {
 
   it('getProperties() returns empty array for unknown table', async () => {
     const client = makeMockClient();
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     expect(cache.getProperties('nonexistent')).toEqual([]);
@@ -354,7 +354,7 @@ describe('SchemaCache derived lookups', () => {
     const action1 = makeAction({ action_name: 'approve', display_name: 'Approve' });
     const action2 = makeAction({ id: 2, action_name: 'reject', display_name: 'Reject' });
     const client = makeMockClient({ schema_entity_actions: [action1, action2] });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     const actions = cache.getActions('projects');
@@ -366,7 +366,7 @@ describe('SchemaCache derived lookups', () => {
     const s2 = makeStatus({ id: 2, display_name: 'Closed', entity_type: 'projects' });
     const s3 = makeStatus({ id: 3, display_name: 'Open', entity_type: 'tickets' });
     const client = makeMockClient({ statuses: [s1, s2, s3] });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     expect(cache.getStatuses('projects')).toHaveLength(2);
@@ -378,7 +378,7 @@ describe('SchemaCache derived lookups', () => {
     const c1 = makeCategory({ id: 1, display_name: 'Internal', entity_type: 'projects' });
     const c2 = makeCategory({ id: 2, display_name: 'External', entity_type: 'tickets' });
     const client = makeMockClient({ categories: [c1, c2] });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     expect(cache.getCategories('projects')).toHaveLength(1);
@@ -389,7 +389,7 @@ describe('SchemaCache derived lookups', () => {
     const t1: StatusTransition = { from_status_id: 1, to_status_id: 2, entity_type: 'projects' };
     const t2: StatusTransition = { from_status_id: 2, to_status_id: 3, entity_type: 'projects' };
     const client = makeMockClient({ status_transitions: [t1, t2] });
-    const cache = new SchemaCache(client);
+    const cache = new SchemaCache(client, 'http://localhost:3000');
     await cache.initialize();
 
     expect(cache.getTransitions('projects')).toHaveLength(2);

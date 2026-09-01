@@ -140,9 +140,9 @@ function buildTestServer(
 ): McpServer {
   const server = new McpServer({ name: 'civic-os-test', version: '0.0.0-test' });
 
-  registerListEntities(server, cache);
-  registerDescribeEntity(server, cache, resolver);
-  registerListActions(server, cache, resolver);
+  registerListEntities(server, client, cache);
+  registerDescribeEntity(server, client, cache, resolver);
+  registerListActions(server, client, cache, resolver);
   registerListRecords(server, client, cache, resolver);
   registerGetRecord(server, client, cache, resolver);
   registerSearch(server, client, cache, resolver);
@@ -150,7 +150,7 @@ function buildTestServer(
   registerUpdateRecord(server, client, cache, resolver);
   registerExecuteAction(server, client, cache, resolver);
   registerAddNote(server, client, cache, resolver);
-  registerGetStatusWorkflow(server, cache, resolver);
+  registerGetStatusWorkflow(server, client, cache, resolver);
 
   return server;
 }
@@ -164,7 +164,7 @@ describe('MCP Protocol Integration', () => {
 
   beforeAll(async () => {
     const postgrestClient = makeMockClient();
-    const cache = new SchemaCache(postgrestClient);
+    const cache = new SchemaCache(postgrestClient, 'http://localhost:3000');
     const resolver = new NameResolver(cache, postgrestClient);
 
     // Pre-load schema cache (no real HTTP — all mocked via PostgRESTClient.get)

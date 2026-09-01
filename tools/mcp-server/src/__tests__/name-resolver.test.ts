@@ -118,6 +118,8 @@ function makeMockCache(entities: SchemaEntity[], properties: SchemaProperty[], a
     categories,
     getEntity: (name: string) => entityByTable.get(name),
     getEntityByDisplayName: (name: string) => entityByDisplay.get(name.toLowerCase()),
+    getEntitiesForUser: () => entities,
+    getActionsForUser: (_cacheKey: string | undefined, table: string) => actionsByTable.get(table) ?? [],
     getProperties: (table: string) => propsByTable.get(table) ?? [],
     getActions: (table: string) => actionsByTable.get(table) ?? [],
     getStatuses: (type: string) => statusesByType.get(type) ?? [],

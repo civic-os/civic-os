@@ -21,6 +21,7 @@ export function registerGetRecord(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'get_record',
@@ -41,7 +42,7 @@ export function registerGetRecord(
       annotations: { readOnlyHint: true },
     },
     async ({ entity, id, columns }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
       const allProperties = cache.getProperties(resolved.table_name);
@@ -90,7 +91,7 @@ export function registerGetRecord(
         }
 
         // Show available actions for current record state
-        const actions = cache.getActions(resolved.table_name);
+        const actions = cache.getActionsForUser(cacheKey, resolved.table_name);
         const availableActions = actions.filter(action => {
           if (!action.can_execute) return false;
           if (!action.show_on_detail) return false;

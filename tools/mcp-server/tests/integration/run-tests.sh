@@ -19,6 +19,7 @@
 #   8. create_record + get_record — create then read back
 #   9. update_record with ETag — optimistic concurrency
 #  10. Anonymous access — web_anon role (no JWT) sees limited entities
+#  11. HTTP transport — health, CORS, OAuth discovery, multi-role tool calls
 #
 # Usage:
 #   ./run-tests.sh           # Run against local docker-compose
@@ -33,9 +34,11 @@ MCP_SERVER_DIR="$REPO_ROOT/tools/mcp-server"
 # Ports from docker-compose.test.yml
 POSTGREST_PORT=23000
 KEYCLOAK_PORT=28082
+MCP_PORT=23001
 
 POSTGREST_URL="http://localhost:$POSTGREST_PORT"
 KEYCLOAK_URL="http://localhost:$KEYCLOAK_PORT"
+MCP_URL="http://localhost:$MCP_PORT"
 
 # Keycloak realm/client from the shared keycloak realm import
 REALM="civic-os-dev"
@@ -107,8 +110,10 @@ echo ""
 echo "=== Phase 1: Service Readiness ==="
 
 wait_for_url "PostgREST" "$POSTGREST_URL/" 60
-
 pass "PostgREST is up (postgres healthy, JWKS loaded from Keycloak)"
+
+wait_for_url "MCP Server" "$MCP_URL/health" 30
+pass "MCP HTTP server is up (health endpoint ready)"
 
 # ============================================================================
 # Phase 2: Get JWT from Keycloak (Direct Access Grant)
@@ -195,6 +200,32 @@ else
   # This is expected if the instance requires authentication
   yellow "  ⚠ Anonymous access returned HTTP $ANON_STATUS (may be expected if auth is required)"
 fi
+
+# ============================================================================
+# Phase 5: HTTP Transport Tests (multi-role via dockerized MCP server)
+# ============================================================================
+
+echo ""
+echo "=== Phase 5: HTTP Transport Integration Tests ==="
+
+# Run the HTTP transport tests against the dockerized MCP server.
+# These test health, CORS, OAuth discovery, and tool calls as different roles.
+while IFS= read -r line; do
+  case "$line" in
+    PASS:*)
+      pass "${line#PASS:}"
+      ;;
+    FAIL:*)
+      msg="${line#FAIL:}"
+      reason="${msg#*|}"
+      test_name="${msg%%|*}"
+      fail "$test_name" "$reason"
+      ;;
+    *)
+      echo "  $line"
+      ;;
+  esac
+done < <(node "$SCRIPT_DIR/mcp-http-tests.mjs" "$MCP_URL" "$KEYCLOAK_URL" 2>&1)
 
 # ============================================================================
 # Summary

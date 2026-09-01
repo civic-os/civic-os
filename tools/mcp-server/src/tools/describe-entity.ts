@@ -8,14 +8,17 @@
 
 import type { McpServer } from '@modelcontextprotocol/server';
 import * as z from 'zod';
+import type { PostgRESTClient } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
 import { getTypeLabel } from '../formatters/value.js';
 
 export function registerDescribeEntity(
   server: McpServer,
+  client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'describe_entity',
@@ -31,11 +34,11 @@ export function registerDescribeEntity(
       annotations: { readOnlyHint: true },
     },
     async ({ entity }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
       const properties = cache.getProperties(resolved.table_name);
-      const actions = cache.getActions(resolved.table_name);
+      const actions = cache.getActionsForUser(cacheKey, resolved.table_name);
 
       const lines: string[] = [];
 

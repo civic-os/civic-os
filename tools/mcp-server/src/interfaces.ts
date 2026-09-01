@@ -277,6 +277,6 @@ export interface FilterInput {
 // ============================================================================
 
 export interface SchemaCacheVersion {
-  view_name: string;
-  max_updated_at: string;
+  cache_name: string;
+  version: string;
 }

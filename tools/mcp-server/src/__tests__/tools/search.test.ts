@@ -63,9 +63,12 @@ function makeMockClient(): PostgRESTClient {
 function makeMockCache(entities: SchemaEntity[]): SchemaCache {
   return {
     ensureFresh: vi.fn().mockResolvedValue(undefined),
+    ensureFreshForUser: vi.fn().mockResolvedValue(undefined),
     entities,
+    getEntitiesForUser: vi.fn().mockReturnValue(entities),
     getProperties: vi.fn().mockReturnValue([]),
     getActions: vi.fn().mockReturnValue([]),
+    getActionsForUser: vi.fn().mockReturnValue([]),
     constraintMessages: [],
   } as unknown as SchemaCache;
 }
@@ -108,7 +111,7 @@ describe('search tool', () => {
 
     await callTool(server, 'search', { query: 'test' });
 
-    expect(cache.ensureFresh).toHaveBeenCalledOnce();
+    expect(cache.ensureFreshForUser).toHaveBeenCalledOnce();
   });
 
   it('returns "no searchable entities" when none have search columns', async () => {

@@ -11,8 +11,8 @@
  *   npx @civic-os/mcp-server --url http://localhost:3000 --token <jwt>
  *
  * Transport:
- *   - stdio (default): for local development and MCP clients like Claude Desktop
- *   - HTTP Streamable: for hosted deployment (Phase 3)
+ *   - stdio (default for CLI): for local development and MCP clients like Claude Desktop
+ *   - http (default in Docker): for hosted deployment behind a reverse proxy
  */
 
 import { createRequire } from 'node:module';
@@ -20,10 +20,11 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/server';
 import { PostgRESTClient } from './postgrest-client.js';
 import { SchemaCache } from './schema-cache.js';
 import { NameResolver } from './name-resolver.js';
+import { extractUserCacheKey } from './jwt-utils.js';
 
 // Read version from package.json so it stays in sync with the root Civic OS version.
 const require = createRequire(import.meta.url);
-const PKG_VERSION: string = (require('../package.json') as { version: string }).version;
+export const PKG_VERSION: string = (require('../package.json') as { version: string }).version;
 
 // Tool registrations
 import { registerListEntities } from './tools/list-entities.js';
@@ -42,15 +43,23 @@ import { registerGetStatusWorkflow } from './tools/get-status-workflow.js';
 // Configuration
 // ============================================================================
 
-interface ServerConfig {
+export interface ServerConfig {
   postgrestUrl: string;
   token?: string;
+  transport: 'stdio' | 'http';
+  port: number;
+  keycloakUrl?: string;
+  keycloakRealm?: string;
+  mcpPublicUrl?: string;
 }
 
 function parseArgs(): ServerConfig {
   const args = process.argv.slice(2);
   let postgrestUrl = process.env['POSTGREST_URL'] ?? 'http://localhost:3000';
   let token = process.env['CIVICOS_TOKEN'];
+  let transport: 'stdio' | 'http' =
+    (process.env['MCP_TRANSPORT'] as 'stdio' | 'http') ?? 'stdio';
+  let port = parseInt(process.env['MCP_PORT'] ?? '3001', 10);
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -62,33 +71,72 @@ function parseArgs(): ServerConfig {
       case '-t':
         token = args[++i];
         break;
+      case '--transport':
+        transport = args[++i] as 'stdio' | 'http';
+        break;
+      case '--port':
+        port = parseInt(args[++i], 10);
+        break;
       case '--help':
       case '-h':
         console.error(`
-Civic OS MCP Server
+Civic OS MCP Server v${PKG_VERSION}
 
 Usage:
   civicos-mcp [options]
 
 Options:
-  --url, -u <url>      PostgREST base URL (default: $POSTGREST_URL or http://localhost:3000)
-  --token, -t <jwt>    JWT token for authentication (default: $CIVICOS_TOKEN)
-  --help, -h           Show this help message
+  --url, -u <url>        PostgREST base URL (default: $POSTGREST_URL or http://localhost:3000)
+  --token, -t <jwt>      JWT token for authentication (default: $CIVICOS_TOKEN, stdio only)
+  --transport <mode>     Transport: stdio (default) or http (default: $MCP_TRANSPORT)
+  --port <port>          HTTP port (default: $MCP_PORT or 3001)
+  --help, -h             Show this help message
 
 Environment Variables:
-  POSTGREST_URL        PostgREST base URL
-  CIVICOS_TOKEN        JWT token for authentication
+  POSTGREST_URL          PostgREST base URL
+  CIVICOS_TOKEN          JWT token for authentication (stdio mode)
+  MCP_TRANSPORT          Transport mode: stdio or http
+  MCP_PORT               HTTP server port (default: 3001)
+  KEYCLOAK_URL           Keycloak base URL (enables OAuth discovery in http mode)
+  KEYCLOAK_REALM         Keycloak realm name (default: civic-os)
+  MCP_PUBLIC_URL         Public URL of the MCP server (for OAuth metadata)
 
 Examples:
   civicos-mcp --url http://localhost:3000 --token eyJ...
-  POSTGREST_URL=http://localhost:3000 CIVICOS_TOKEN=eyJ... civicos-mcp
+  MCP_TRANSPORT=http civicos-mcp --url http://postgrest:3000
 `);
         process.exit(0);
     }
   }
 
-  return { postgrestUrl, token };
+  return {
+    postgrestUrl,
+    token,
+    transport,
+    port,
+    keycloakUrl: process.env['KEYCLOAK_URL'],
+    keycloakRealm: process.env['KEYCLOAK_REALM'] ?? 'civic-os',
+    mcpPublicUrl: process.env['MCP_PUBLIC_URL'],
+  };
 }
+
+// ============================================================================
+// Server Instructions
+// ============================================================================
+
+const SERVER_INSTRUCTIONS = `You are connected to a Civic OS instance — a meta-application framework that dynamically generates CRUD views from PostgreSQL schema metadata.
+
+Getting started:
+- Start with list_entities to discover available data types and your permissions
+- Use describe_entity before querying to understand field types, relationships, and available actions
+- Use list_records to browse data with filters, search, and pagination
+
+Working with data:
+- Always get_record before update_record — ETags are required for optimistic concurrency
+- Prefer execute_action over update_record for status changes and workflows
+- Foreign key fields accept display names (e.g., "Acme Corp") — the server resolves them to IDs
+- Use add_note for comments and audit trails on entities that support notes
+- Use get_status_workflow to understand allowed state transitions before changing statuses`;
 
 // ============================================================================
 // Server Factory
@@ -96,33 +144,38 @@ Examples:
 
 /**
  * Create and configure an MCP server instance with all tools and resources.
- * Used as factory for both stdio and HTTP transports.
+ *
+ * In stdio mode: uses the provided token for a single-user session.
+ * In HTTP mode: called per-request with the token extracted from Authorization header.
+ *
+ * SchemaCache is shared (process-lifetime); PostgRESTClient and NameResolver are per-session.
  */
-export function createServer(
-  client: PostgRESTClient,
-  cache: SchemaCache,
-  resolver: NameResolver,
-): McpServer {
-  const server = new McpServer({
-    name: 'civic-os',
-    version: PKG_VERSION,
-  });
+export function createServer(cache: SchemaCache, token?: string): McpServer {
+  // Per-session client, cache key, and resolver — each request gets its own token
+  const cacheKey = token ? extractUserCacheKey(token) : undefined;
+  const client = new PostgRESTClient({ baseUrl: cache.baseUrl, token });
+  const resolver = new NameResolver(cache, client, cacheKey);
 
-  // Register all tools
-  registerListEntities(server, cache);
-  registerDescribeEntity(server, cache, resolver);
-  registerListActions(server, cache, resolver);
-  registerListRecords(server, client, cache, resolver);
-  registerGetRecord(server, client, cache, resolver);
-  registerSearch(server, client, cache, resolver);
-  registerCreateRecord(server, client, cache, resolver);
-  registerUpdateRecord(server, client, cache, resolver);
-  registerExecuteAction(server, client, cache, resolver);
-  registerAddNote(server, client, cache, resolver);
-  registerGetStatusWorkflow(server, cache, resolver);
+  const server = new McpServer(
+    { name: 'civic-os', version: PKG_VERSION },
+    { instructions: SERVER_INSTRUCTIONS },
+  );
+
+  // Register all tools — pass client + cacheKey for per-user permission caching
+  registerListEntities(server, client, cache, cacheKey);
+  registerDescribeEntity(server, client, cache, resolver, cacheKey);
+  registerListActions(server, client, cache, resolver, cacheKey);
+  registerListRecords(server, client, cache, resolver, cacheKey);
+  registerGetRecord(server, client, cache, resolver, cacheKey);
+  registerSearch(server, client, cache, resolver, cacheKey);
+  registerCreateRecord(server, client, cache, resolver, cacheKey);
+  registerUpdateRecord(server, client, cache, resolver, cacheKey);
+  registerExecuteAction(server, client, cache, resolver, cacheKey);
+  registerAddNote(server, client, cache, resolver, cacheKey);
+  registerGetStatusWorkflow(server, client, cache, resolver, cacheKey);
 
   // Register MCP Resources
-  registerResources(server, cache);
+  registerResources(server, client, cache, cacheKey);
 
   return server;
 }
@@ -134,16 +187,11 @@ export function createServer(
 async function main(): Promise<void> {
   const config = parseArgs();
 
-  // Initialize core services
-  const client = new PostgRESTClient({
-    baseUrl: config.postgrestUrl,
-    token: config.token,
-  });
+  // Initialize shared schema cache with an anonymous client (schema views are public)
+  const anonymousClient = new PostgRESTClient({ baseUrl: config.postgrestUrl });
+  const cache = new SchemaCache(anonymousClient, config.postgrestUrl);
 
-  const cache = new SchemaCache(client);
-  const resolver = new NameResolver(cache, client);
-
-  // Initialize schema cache (best-effort; will load on first tool call if this fails)
+  // Pre-load schema cache (best-effort; will load on first tool call if this fails)
   try {
     await cache.initialize();
     console.error(`Schema cache loaded: ${cache.entities.length} entities, ${cache.properties.length} properties`);
@@ -152,16 +200,27 @@ async function main(): Promise<void> {
     console.error(err instanceof Error ? err.message : err);
   }
 
-  // Start stdio transport with factory (serveStdio creates per-connection instances)
-  const { serveStdio } = await import('@modelcontextprotocol/server/stdio');
-  serveStdio(() => createServer(client, cache, resolver));
+  if (config.transport === 'http') {
+    // HTTP Streamable transport — per-request auth via Bearer token
+    const { startHttpServer } = await import('./http.js');
+    await startHttpServer(cache, config);
+  } else {
+    // stdio transport — single-user session with optional static token
+    const { serveStdio } = await import('@modelcontextprotocol/server/stdio');
+    serveStdio(() => createServer(cache, config.token));
+  }
 }
 
 // ============================================================================
 // MCP Resources
 // ============================================================================
 
-function registerResources(server: McpServer, cache: SchemaCache): void {
+function registerResources(
+  server: McpServer,
+  client: PostgRESTClient,
+  cache: SchemaCache,
+  cacheKey?: string,
+): void {
   // Schema overview resource
   server.registerResource(
     'schema-overview',
@@ -172,13 +231,13 @@ function registerResources(server: McpServer, cache: SchemaCache): void {
       mimeType: 'text/markdown',
     },
     async () => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const lines: string[] = [];
       lines.push('# Civic OS Schema Overview');
       lines.push('');
 
-      for (const entity of cache.entities) {
+      for (const entity of cache.getEntitiesForUser(cacheKey)) {
         if (!entity.select) continue;
         let line = `## ${entity.display_name} (\`${entity.table_name}\`)`;
         if (entity.description) line += `\n${entity.description}`;
@@ -208,7 +267,7 @@ function registerResources(server: McpServer, cache: SchemaCache): void {
     'entity-detail',
     new ResourceTemplate('civicos://entity/{name}', {
       list: async () => ({
-        resources: cache.entities
+        resources: cache.getEntitiesForUser(cacheKey)
           .filter(e => e.select)
           .map(e => ({
             uri: `civicos://entity/${e.table_name}`,
@@ -224,9 +283,9 @@ function registerResources(server: McpServer, cache: SchemaCache): void {
       mimeType: 'text/markdown',
     },
     async (_uri, { name }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
-      const entity = cache.getEntity(name as string);
+      const entity = cache.getEntityForUser(cacheKey, name as string);
       if (!entity) {
         return {
           contents: [{
@@ -238,7 +297,7 @@ function registerResources(server: McpServer, cache: SchemaCache): void {
       }
 
       const properties = cache.getProperties(entity.table_name);
-      const actions = cache.getActions(entity.table_name);
+      const actions = cache.getActionsForUser(cacheKey, entity.table_name);
       const { getTypeLabel } = await import('./formatters/value.js');
 
       const lines: string[] = [];
@@ -271,10 +330,14 @@ function registerResources(server: McpServer, cache: SchemaCache): void {
 }
 
 // ============================================================================
-// Run
+// Run — only when this module is the entry point, not when imported as a library
 // ============================================================================
 
-main().catch(err => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+const isEntryPoint = process.argv[1]
+  && (import.meta.url.endsWith(process.argv[1]) || import.meta.url === `file://${process.argv[1]}`);
+if (isEntryPoint) {
+  main().catch(err => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}

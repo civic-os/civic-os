@@ -20,6 +20,7 @@ export function registerListRecords(
   client: PostgRESTClient,
   cache: SchemaCache,
   resolver: NameResolver,
+  cacheKey?: string,
 ): void {
   server.registerTool(
     'list_records',
@@ -58,7 +59,7 @@ export function registerListRecords(
       annotations: { readOnlyHint: true },
     },
     async ({ entity, filters, search, sort, limit = 25, offset = 0, columns }) => {
-      await cache.ensureFresh();
+      await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
       const allProperties = cache.getProperties(resolved.table_name);

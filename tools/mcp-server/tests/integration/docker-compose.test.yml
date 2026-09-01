@@ -117,6 +117,34 @@ services:
       - mcp-test-network
     restart: unless-stopped
 
+  # MCP server in HTTP transport mode for integration testing.
+  # Proxies tool calls to PostgREST with per-request Bearer token passthrough.
+  mcp-server:
+    build:
+      context: ../../../..
+      dockerfile: docker/mcp-server/Dockerfile
+    container_name: mcp_test_mcp_server
+    ports:
+      - "23001:3001"
+    environment:
+      POSTGREST_URL: http://postgrest:3000
+      MCP_TRANSPORT: http
+      MCP_PORT: "3001"
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: civic-os-dev
+    depends_on:
+      postgrest:
+        condition: service_started
+    networks:
+      - mcp-test-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
 volumes:
   mcp_test_pgdata:
 

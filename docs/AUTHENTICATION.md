@@ -351,6 +351,34 @@ The consolidated worker needs a Keycloak service account to create users and man
 
 **Note**: The pre-configured `examples/keycloak/civic-os-dev.json` realm export already includes this service account client with secret `civic-os-service-secret` for local development. Production deployments must generate a new secret.
 
+### Step 9: Create MCP Server Client (v0.72.1+, Optional — for OAuth Auto-Flow)
+
+If you want OAuth-capable MCP clients (like Claude Desktop) to auto-discover Keycloak and authenticate users via browser login, create a public Keycloak client for the MCP server.
+
+**Note**: This step is optional. MCP clients can always connect using a pre-configured JWT token without this client. This client only enables the OAuth 2.1 auto-discovery flow.
+
+1. **Create client** in Keycloak admin console:
+   - Go to: Clients → Create client
+   - **Client ID**: `civic-os-mcp`
+   - **Client type**: OpenID Connect
+   - **Client authentication**: OFF (public client — no client secret)
+   - **Authentication flow**: Check "Standard flow" (Authorization Code)
+   - Click Save
+
+2. **Configure login settings**:
+   - **Valid redirect URIs**: Configure per MCP client (e.g., Claude Desktop's callback URL, typically `http://localhost:*`)
+   - **Web origins**: `+` (allow all CORS from redirect URIs)
+   - **PKCE Code Challenge Method**: `S256` (required)
+
+3. **Configure MCP server environment variables**:
+   ```bash
+   KEYCLOAK_URL=http://keycloak:8080       # or your public Keycloak URL
+   KEYCLOAK_REALM=civic-os                  # your realm name
+   MCP_PUBLIC_URL=https://your-instance.civic-os.org/_/mcp  # public MCP server URL
+   ```
+
+This mirrors the Angular frontend's Keycloak client pattern. The MCP server does not interact with this client directly — it's between the MCP client (e.g., Claude Desktop) and Keycloak. The MCP server only serves the OAuth discovery document at `/.well-known/oauth-protected-resource` so clients can find Keycloak's authorization and token endpoints.
+
 ---
 
 ## Update Application Configuration

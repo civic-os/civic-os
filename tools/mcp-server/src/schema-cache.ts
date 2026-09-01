@@ -43,9 +43,24 @@ export class SchemaCache {
   // Version tracking for incremental refresh
   private cachedVersions = new Map<string, string>();
 
+  // Per-user permission caches (entities + actions are role-dependent)
+  private perUserCache = new Map<string, {
+    entities: SchemaEntity[];
+    actions: SchemaEntityAction[];
+    entityByTable: Map<string, SchemaEntity>;
+    entityByDisplayName: Map<string, SchemaEntity>;
+    actionsByTable: Map<string, SchemaEntityAction[]>;
+    entitiesVersion: string;
+  }>();
+
   private initialized = false;
 
-  constructor(private client: PostgRESTClient) {}
+  /** PostgREST base URL — exposed so per-session clients can target the same instance. */
+  readonly baseUrl: string;
+
+  constructor(private client: PostgRESTClient, baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
 
   // ---- Public accessors ----
 
@@ -83,6 +98,94 @@ export class SchemaCache {
 
   getTransitions(entityType: string): StatusTransition[] {
     return this._transitionsByEntityType.get(entityType) ?? [];
+  }
+
+  // ---- Per-user accessors (entities + actions are role-dependent) ----
+
+  /** Return entities with user-specific permission flags, or shared data if no cacheKey. */
+  getEntitiesForUser(cacheKey?: string): SchemaEntity[] {
+    if (!cacheKey) return this._entities;
+    return this.perUserCache.get(cacheKey)?.entities ?? this._entities;
+  }
+
+  /** Lookup entity by table name with user-specific permissions. */
+  getEntityForUser(cacheKey: string | undefined, tableName: string): SchemaEntity | undefined {
+    if (!cacheKey) return this._entityByTable.get(tableName);
+    return this.perUserCache.get(cacheKey)?.entityByTable.get(tableName)
+      ?? this._entityByTable.get(tableName);
+  }
+
+  /** Lookup entity by display name with user-specific permissions. */
+  getEntityByDisplayNameForUser(cacheKey: string | undefined, displayName: string): SchemaEntity | undefined {
+    if (!cacheKey) return this._entityByDisplayName.get(displayName.toLowerCase());
+    return this.perUserCache.get(cacheKey)?.entityByDisplayName.get(displayName.toLowerCase())
+      ?? this._entityByDisplayName.get(displayName.toLowerCase());
+  }
+
+  /** Return actions for a table with user-specific can_execute flags. */
+  getActionsForUser(cacheKey: string | undefined, tableName: string): SchemaEntityAction[] {
+    if (!cacheKey) return this._actionsByTable.get(tableName) ?? [];
+    return this.perUserCache.get(cacheKey)?.actionsByTable.get(tableName)
+      ?? this._actionsByTable.get(tableName) ?? [];
+  }
+
+  /**
+   * Ensure shared data is fresh, then ensure per-user permission data is fresh.
+   * Called before each tool execution for authenticated users.
+   */
+  async ensureFreshForUser(userClient: PostgRESTClient, cacheKey?: string): Promise<void> {
+    // Always refresh shared data first
+    await this.ensureFresh();
+
+    // Anonymous callers use shared (anonymous) cache — no per-user fetch needed
+    if (!cacheKey) return;
+
+    const currentVersion = this.cachedVersions.get('entities') ?? '';
+    const cached = this.perUserCache.get(cacheKey);
+
+    // If per-user cache exists and version matches, it's still fresh
+    if (cached && cached.entitiesVersion === currentVersion) return;
+
+    // Fetch entities + actions with the user's JWT
+    try {
+      const [entitiesRes, actionsRes] = await Promise.all([
+        userClient.get<SchemaEntity[]>('schema_entities', {
+          order: 'sort_order.asc,display_name.asc',
+        }),
+        userClient.get<SchemaEntityAction[]>('schema_entity_actions', {
+          order: 'table_name.asc,sort_order.asc',
+        }),
+      ]);
+
+      const entities = entitiesRes.data;
+      const actions = actionsRes.data;
+
+      // Build derived lookups
+      const entityByTable = new Map<string, SchemaEntity>();
+      const entityByDisplayName = new Map<string, SchemaEntity>();
+      for (const e of entities) {
+        entityByTable.set(e.table_name, e);
+        entityByDisplayName.set(e.display_name.toLowerCase(), e);
+      }
+
+      const actionsByTable = new Map<string, SchemaEntityAction[]>();
+      for (const a of actions) {
+        const list = actionsByTable.get(a.table_name) ?? [];
+        list.push(a);
+        actionsByTable.set(a.table_name, list);
+      }
+
+      this.perUserCache.set(cacheKey, {
+        entities,
+        actions,
+        entityByTable,
+        entityByDisplayName,
+        actionsByTable,
+        entitiesVersion: currentVersion,
+      });
+    } catch {
+      // If per-user fetch fails, tools will fall back to shared cache via accessors
+    }
   }
 
   // ---- Initialization ----
@@ -129,11 +232,11 @@ export class SchemaCache {
       let needsRebuild = false;
 
       for (const v of versions) {
-        const cached = this.cachedVersions.get(v.view_name);
-        if (cached !== v.max_updated_at) {
+        const cached = this.cachedVersions.get(v.cache_name);
+        if (cached !== v.version) {
           // This section is stale — re-fetch it
-          await this.refreshSection(v.view_name);
-          this.cachedVersions.set(v.view_name, v.max_updated_at);
+          await this.refreshSection(v.cache_name);
+          this.cachedVersions.set(v.cache_name, v.version);
           needsRebuild = true;
         }
       }
@@ -211,7 +314,7 @@ export class SchemaCache {
     try {
       const response = await this.client.get<SchemaCacheVersion[]>('schema_cache_versions');
       for (const v of response.data) {
-        this.cachedVersions.set(v.view_name, v.max_updated_at);
+        this.cachedVersions.set(v.cache_name, v.version);
       }
     } catch {
       // View may not exist — skip version tracking
@@ -219,7 +322,7 @@ export class SchemaCache {
   }
 
   private async refreshSection(viewName: string): Promise<void> {
-    // Map view_name values to refresh functions
+    // Map cache_name values to refresh functions
     switch (viewName) {
       case 'entities':
         await this.fetchEntities();

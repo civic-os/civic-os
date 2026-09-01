@@ -19,6 +19,7 @@ export class NameResolver {
   constructor(
     private cache: SchemaCache,
     private client: PostgRESTClient,
+    private cacheKey?: string,
   ) {}
 
   // ============================================================================
@@ -31,19 +32,20 @@ export class NameResolver {
    */
   resolveEntity(name: string): SchemaEntity {
     const normalized = name.trim().toLowerCase();
+    const entities = this.cache.getEntitiesForUser(this.cacheKey);
 
     // 1. Exact table_name match
-    const byTable = this.cache.entities.find(e => e.table_name === normalized);
+    const byTable = entities.find(e => e.table_name === normalized);
     if (byTable) return byTable;
 
     // 2. Exact display_name match (case-insensitive)
-    const byDisplay = this.cache.entities.find(
+    const byDisplay = entities.find(
       e => e.display_name.toLowerCase() === normalized,
     );
     if (byDisplay) return byDisplay;
 
     // 3. Substring match
-    const substringMatches = this.cache.entities.filter(
+    const substringMatches = entities.filter(
       e =>
         e.display_name.toLowerCase().includes(normalized) ||
         e.table_name.includes(normalized),
@@ -62,12 +64,12 @@ export class NameResolver {
     }
 
     // 4. No match
-    const allNames = this.cache.entities
+    const allNames = entities
       .slice(0, 10)
       .map(e => `"${e.display_name}"`)
       .join(', ');
     throw new NameResolutionError(
-      `Entity "${name}" not found. Available entities include: ${allNames}${this.cache.entities.length > 10 ? '...' : ''}`,
+      `Entity "${name}" not found. Available entities include: ${allNames}${entities.length > 10 ? '...' : ''}`,
     );
   }
 
@@ -244,7 +246,7 @@ export class NameResolver {
    * Resolve an action by display name or action_name within an entity.
    */
   resolveAction(tableName: string, name: string): SchemaEntityAction {
-    const actions = this.cache.getActions(tableName);
+    const actions = this.cache.getActionsForUser(this.cacheKey, tableName);
     const normalized = name.trim().toLowerCase();
 
     // Exact action_name match

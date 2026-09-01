@@ -26,10 +26,13 @@ COPY --chown=civicos:civicos tools/mcp-server/src/ ./src/
 USER civicos
 
 # Default environment variables (overridden at runtime)
+# Docker defaults to HTTP transport; CLI defaults to stdio
 ENV POSTGREST_URL=http://postgrest:3000 \
+    MCP_TRANSPORT=http \
+    MCP_PORT=3001 \
     NODE_ENV=production
 
-# MCP HTTP Streamable transport port (stdio mode ignores this)
+# HTTP Streamable transport port
 EXPOSE 3001
 
 # Start the MCP server directly from TypeScript source
