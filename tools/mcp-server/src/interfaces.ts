@@ -253,7 +253,6 @@ export interface PostgRESTResponse<T = unknown> {
   data: T;
   status: number;
   contentRange?: ContentRange;
-  etag?: string;
 }
 
 export interface ContentRange {

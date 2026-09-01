@@ -128,24 +128,6 @@ describe('PostgRESTClient', () => {
       expect(result.contentRange).toBeUndefined();
     });
 
-    it('captures ETag from response headers', async () => {
-      fetchMock.mockResolvedValue(
-        mockResponse([], 200, { ETag: '"abc123"' }),
-      );
-
-      const result = await client.get('entities');
-
-      expect(result.etag).toBe('"abc123"');
-    });
-
-    it('returns undefined etag when header is absent', async () => {
-      fetchMock.mockResolvedValue(mockResponse([]));
-
-      const result = await client.get('entities');
-
-      expect(result.etag).toBeUndefined();
-    });
-
     it('returns undefined data for 204 responses', async () => {
       fetchMock.mockResolvedValue({
         ok: true,
@@ -207,7 +189,7 @@ describe('PostgRESTClient', () => {
   // ---- PATCH ----
 
   describe('patch()', () => {
-    it('sends PATCH with body and If-Match header', async () => {
+    it('sends PATCH with body and extra headers', async () => {
       fetchMock.mockResolvedValue(mockResponse({ id: 1, name: 'Updated' }));
 
       await client.patch(
@@ -391,7 +373,7 @@ describe('PostgRESTRequestError.toHumanMessage()', () => {
       'constraint "unknown_constraint"',
       null,
     );
-    expect(err.toHumanMessage([])).toContain('Validation failed');
+    expect(err.toHumanMessage([])).toContain('Invalid unknown constraint');
   });
 
   it('returns exclusion conflict message for code 23P01', () => {

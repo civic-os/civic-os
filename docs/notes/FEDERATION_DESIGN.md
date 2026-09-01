@@ -5,16 +5,18 @@
 > **Author:** Design Discussion with Claude
 
 **Related Documentation:**
-- `docs/notes/ETAG_CONCURRENCY_DESIGN.md` — Optimistic concurrency control (dependency)
+- `docs/notes/ETAG_CONCURRENCY_DESIGN.md` — Optimistic concurrency control (dependency — **invalidated**, see note below)
 - `docs/development/GO_MICROSERVICES_GUIDE.md` — Consolidated worker architecture (delivery mechanism)
 - `docs/AUTHENTICATION.md` — Keycloak service account pattern (auth model)
 - `docs/INTEGRATOR_GUIDE.md` — Metadata table conventions (configuration pattern)
+
+> **Correction (2026-09-01):** This design document references PostgREST ETag-based concurrency in multiple sections (ETag version gating, sync flow, If-Match headers). PostgREST does not support native HTTP ETags ([issue #1176](https://github.com/PostgREST/postgrest/issues/1176), open since 2018). Federation sync conflict detection will need to use a database-level approach (e.g., `updated_at` timestamps or `row_version` columns) instead. The architecture is otherwise unaffected — the sync flow's read-before-write pattern remains valid, only the concurrency enforcement mechanism changes.
 
 ---
 
 ## Overview
 
-Federation enables independent Civic OS instances to share a defined subset of their data with a coordinating hub or peer instances. This document explores how federation *could* work within Civic OS's existing architecture — metadata-driven configuration, PostgREST APIs, ETag concurrency, and the River-based Go worker.
+Federation enables independent Civic OS instances to share a defined subset of their data with a coordinating hub or peer instances. This document explores how federation *could* work within Civic OS's existing architecture — metadata-driven configuration, PostgREST APIs, and the River-based Go worker.
 
 Federation is not replication. A federated instance retains full authority over its own data. The federation layer translates, filters, and transmits a *projection* of local data to external consumers according to a declared standard.
 

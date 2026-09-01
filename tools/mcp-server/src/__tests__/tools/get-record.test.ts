@@ -95,13 +95,11 @@ function makeAction(overrides: Partial<SchemaEntityAction> = {}): SchemaEntityAc
 
 function makeMockClient(
   records: Record<string, unknown>[] = [],
-  etag?: string,
 ): PostgRESTClient {
   return {
     get: vi.fn().mockResolvedValue({
       data: records,
       status: 200,
-      etag,
     }),
     post: vi.fn(),
     patch: vi.fn(),
@@ -121,6 +119,7 @@ function makeMockCache(
     entities: [entity],
     getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue(properties),
+    getPropertiesForUser: vi.fn().mockReturnValue(properties),
     getActions: vi.fn().mockReturnValue(actions),
     getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),
@@ -205,33 +204,6 @@ describe('get_record tool', () => {
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('not found');
-  });
-
-  it('includes ETag in output when returned by client', async () => {
-    const entity = makeEntity();
-    const client = makeMockClient([{ id: 1, name: 'Acme' }], '"abc123"');
-    const props = [makeProperty()];
-    const cache = makeMockCache(entity, props);
-    const resolver = makeMockResolver(entity, props);
-    registerGetRecord(server, client, cache, resolver);
-
-    const result = await callTool(server, 'get_record', { entity: 'clients', id: 1 });
-
-    expect(result.content[0].text).toContain('"abc123"');
-    expect(result.content[0].text).toContain('ETag');
-  });
-
-  it('does not include ETag section when client returns no etag', async () => {
-    const entity = makeEntity();
-    const client = makeMockClient([{ id: 1, name: 'Acme' }]); // no etag
-    const props = [makeProperty()];
-    const cache = makeMockCache(entity, props);
-    const resolver = makeMockResolver(entity, props);
-    registerGetRecord(server, client, cache, resolver);
-
-    const result = await callTool(server, 'get_record', { entity: 'clients', id: 1 });
-
-    expect(result.content[0].text).not.toContain('ETag');
   });
 
   it('shows available actions that pass visibility conditions', async () => {

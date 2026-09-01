@@ -12,6 +12,7 @@ import { PostgRESTRequestError } from '../../postgrest-client.js';
 import type { PostgRESTClient } from '../../postgrest-client.js';
 import type { SchemaCache } from '../../schema-cache.js';
 import type { NameResolver } from '../../name-resolver.js';
+import { NameResolutionError } from '../../name-resolver.js';
 import type { SchemaEntity, SchemaProperty } from '../../interfaces.js';
 import { EntityPropertyType } from '../../interfaces.js';
 
@@ -107,6 +108,7 @@ function makeMockCache(
     entities: [entity],
     getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue(properties),
+    getPropertiesForUser: vi.fn().mockReturnValue(properties),
     getActions: vi.fn().mockReturnValue([]),
     getActionsForUser: vi.fn().mockReturnValue([]),
     getStatuses: vi.fn().mockReturnValue([]),
@@ -260,7 +262,7 @@ describe('list_records tool', () => {
     await callTool(server, 'list_records', { entity: 'clients', search: 'acme' });
 
     const callParams = mockGet.mock.calls[0][1] as Record<string, string>;
-    expect(callParams['search_vector']).toBe('wfts.acme');
+    expect(callParams['search_vector']).toBe('wfts(simple).acme');
   });
 
   it('applies substring search when entity has substring_search_column but no fts column', async () => {
@@ -371,6 +373,23 @@ describe('list_records tool', () => {
     expect(result.content[0].text).toContain('Permission denied');
   });
 
+  it('returns friendly message on 416 Range Not Satisfiable (pagination beyond bounds)', async () => {
+    const entity = makeEntity();
+    const { client } = makeMockClient([]);
+    (client.get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new PostgRESTRequestError('Requested range not satisfiable', 416),
+    );
+    const cache = makeMockCache(entity);
+    const resolver = makeMockResolver(entity);
+    registerListRecords(server, client, cache, resolver);
+
+    const result = await callTool(server, 'list_records', { entity: 'clients', offset: 500 });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('offset 500');
+    expect(result.content[0].text).toContain('beyond the last record');
+  });
+
   it('re-throws non-PostgREST errors', async () => {
     const entity = makeEntity();
     const { client } = makeMockClient([]);
@@ -393,5 +412,151 @@ describe('list_records tool', () => {
     const result = await callTool(server, 'list_records', { entity: 'clients' });
 
     expect(result.content[0].text).toContain('No records found');
+  });
+
+  it('handles same-column multi-condition filters via PostgREST and syntax', async () => {
+    const entity = makeEntity();
+    const dateProp = makeProperty({
+      column_name: 'created_at',
+      display_name: 'Created At',
+      type: EntityPropertyType.DateTime,
+    });
+    const { client, mockGet } = makeMockClient([{ id: 1 }], 1);
+    const cache = makeMockCache(entity, [dateProp]);
+    const resolver = makeMockResolver(entity, [dateProp]);
+    registerListRecords(server, client, cache, resolver);
+
+    await callTool(server, 'list_records', {
+      entity: 'clients',
+      filters: [
+        { field: 'created_at', operator: 'gte', value: '2026-08-15' },
+        { field: 'created_at', operator: 'lt', value: '2026-09-01' },
+      ],
+    });
+
+    const callParams = mockGet.mock.calls[0][1] as Record<string, string>;
+    // Same-column conditions should NOT overwrite each other
+    expect(callParams['and']).toBe('(created_at.gte.2026-08-15,created_at.lt.2026-09-01)');
+    // Should NOT be set as direct param (would only keep the last one)
+    expect(callParams['created_at']).toBeUndefined();
+  });
+
+  it('resolves status names in in-operator filter arrays', async () => {
+    const entity = makeEntity();
+    const statusProp = makeProperty({
+      column_name: 'status_id',
+      display_name: 'Status',
+      type: EntityPropertyType.Status,
+      status_entity_type: 'client',
+    });
+    const { client, mockGet } = makeMockClient([{ id: 1 }], 1);
+    const cache = makeMockCache(entity, [statusProp]);
+    const resolver = makeMockResolver(entity, [statusProp]);
+    // Mock resolveStatus to return IDs for known names
+    (resolver.resolveStatus as ReturnType<typeof vi.fn>).mockImplementation(
+      (_: string, name: string) => {
+        if (name === 'Active') return 1;
+        if (name === 'Intake Pending') return 2;
+        throw new NameResolutionError(`Status "${name}" not found`, []);
+      },
+    );
+    registerListRecords(server, client, cache, resolver);
+
+    await callTool(server, 'list_records', {
+      entity: 'clients',
+      filters: [{ field: 'status_id', operator: 'in', value: ['Active', 'Intake Pending'] }],
+    });
+
+    const callParams = mockGet.mock.calls[0][1] as Record<string, string>;
+    expect(callParams['status_id']).toBe('in.(1,2)');
+  });
+
+  it('returns isError when status name resolution fails in filter', async () => {
+    const entity = makeEntity();
+    const statusProp = makeProperty({
+      column_name: 'status_id',
+      display_name: 'Status',
+      type: EntityPropertyType.Status,
+      status_entity_type: 'client',
+    });
+    const { client } = makeMockClient([]);
+    const cache = makeMockCache(entity, [statusProp]);
+    const resolver = makeMockResolver(entity, [statusProp]);
+    // resolveStatus throws NameResolutionError for unknown status
+    (resolver.resolveStatus as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      throw new NameResolutionError(
+        'Status "Nonexistent" not found for entity type "client". Available: "Active", "Inactive"',
+        ['Active', 'Inactive'],
+      );
+    });
+    registerListRecords(server, client, cache, resolver);
+
+    const result = await callTool(server, 'list_records', {
+      entity: 'clients',
+      filters: [{ field: 'status_id', operator: 'eq', value: 'Nonexistent' }],
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Status "Nonexistent" not found');
+    expect(result.content[0].text).toContain('Available');
+  });
+
+  it('skips id column for junction tables (composite PK, no id)', async () => {
+    const entity = makeEntity({
+      display_name: 'Newsletter Recipients',
+      table_name: 'newsletter_recipients',
+    });
+    const props = [
+      makeProperty({
+        table_name: 'newsletter_recipients',
+        column_name: 'newsletter_id',
+        display_name: 'Newsletter',
+        type: EntityPropertyType.ForeignKeyName,
+        join_table: 'newsletters',
+      }),
+      makeProperty({
+        table_name: 'newsletter_recipients',
+        column_name: 'contact_id',
+        display_name: 'Contact',
+        type: EntityPropertyType.ForeignKeyName,
+        join_table: 'contacts',
+      }),
+    ];
+    const records = [{ newsletter_id: { id: 1, display_name: 'Q3 Update' }, contact_id: { id: 5, display_name: 'Jane' } }];
+    const { client, mockGet } = makeMockClient(records, 1);
+    const cache = makeMockCache(entity, props);
+    const resolver = makeMockResolver(entity, props);
+    registerListRecords(server, client, cache, resolver);
+
+    const result = await callTool(server, 'list_records', { entity: 'newsletter_recipients' });
+
+    // Should NOT include 'id,' prefix in select string
+    const callParams = mockGet.mock.calls[0][1] as Record<string, string>;
+    expect(callParams['select']).not.toMatch(/^id,/);
+    // Should not have an ID column header in the markdown table
+    expect(result.content[0].text).not.toContain('| ID');
+  });
+
+  it('returns error when ilike is used on FK column', async () => {
+    const entity = makeEntity();
+    const fkProp = makeProperty({
+      column_name: 'client_id',
+      display_name: 'Client',
+      type: EntityPropertyType.ForeignKeyName,
+      join_table: 'clients',
+    });
+    const { client } = makeMockClient([]);
+    const cache = makeMockCache(entity, [fkProp]);
+    const resolver = makeMockResolver(entity, [fkProp]);
+    registerListRecords(server, client, cache, resolver);
+
+    const result = await callTool(server, 'list_records', {
+      entity: 'clients',
+      filters: [{ field: 'Client', operator: 'ilike', value: '%stark%' }],
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Cannot use ilike');
+    expect(result.content[0].text).toContain('foreign key column');
   });
 });

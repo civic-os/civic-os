@@ -136,6 +136,40 @@
         "phone",
         "offline_access"
       ]
+    },
+    {
+      "clientId": "civic-os-mcp",
+      "name": "MCP Server OAuth",
+      "description": "Public client for MCP OAuth 2.1 auto-discovery — allows LLM tools (Claude Code, Claude Desktop) to authenticate via Keycloak",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "rootUrl": "",
+      "baseUrl": "",
+      "redirectUris": [
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ]
     }
   ],
 
@@ -177,6 +211,18 @@
   },
 
   "components": {
+    "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
+      {
+        "name": "Trusted Hosts",
+        "providerId": "trusted-hosts",
+        "subType": "anonymous",
+        "config": {
+          "host-sending-registration-request-must-match": ["true"],
+          "trusted-hosts": ["localhost", "127.0.0.1"],
+          "client-uris-must-match": ["true"]
+        }
+      }
+    ],
     "org.keycloak.userprofile.UserProfileProvider": [
       {
         "providerId": "declarative-user-profile",

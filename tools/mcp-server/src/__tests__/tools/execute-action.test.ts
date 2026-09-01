@@ -89,6 +89,7 @@ function makeMockCache(entity: SchemaEntity, actions: SchemaEntityAction[] = [])
     entities: [entity],
     getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue([]),
+    getPropertiesForUser: vi.fn().mockReturnValue([]),
     getActions: vi.fn().mockReturnValue(actions),
     getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),
@@ -583,6 +584,11 @@ describe('execute_action tool', () => {
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('not available');
+    // Should explain why: status_id is 2, expected 1
+    expect(result.content[0].text).toContain('status_id is 2');
+    expect(result.content[0].text).toContain('expected 1');
+    // Should suggest using get_record
+    expect(result.content[0].text).toContain('get_record');
   });
 
   it('checks enabled condition and returns isError with tooltip when condition fails', async () => {
@@ -609,6 +615,35 @@ describe('execute_action tool', () => {
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('Client must be active');
+    // Should suggest using get_record
+    expect(result.content[0].text).toContain('get_record');
+  });
+
+  it('checks enabled condition without tooltip shows condition details', async () => {
+    const entity = makeEntity();
+    const action = makeAction({
+      enabled_condition: { field: 'is_active', operator: 'eq', value: true },
+      // No disabled_tooltip — should fall back to condition description
+    });
+    const client = makeMockClient();
+    (client.get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: [{ id: 1, is_active: false }],
+      status: 200,
+    });
+    const cache = makeMockCache(entity, [action]);
+    const resolver = makeMockResolver(entity, action);
+    registerExecuteAction(server, client, cache, resolver);
+
+    const result = await callTool(server, 'execute_action', {
+      entity: 'clients',
+      id: 1,
+      action: 'approve',
+    });
+
+    expect(result.isError).toBe(true);
+    // Without tooltip, should describe the condition failure
+    expect(result.content[0].text).toContain('is_active is false');
+    expect(result.content[0].text).toContain('expected true');
   });
 
   it('returns isError and human message on PostgRESTRequestError from RPC', async () => {

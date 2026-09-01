@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * update_record tool — "Change client Acme's status to Active"
- * Updates a record with ETag-based optimistic concurrency.
+ * Updates a record by ID.
  */
 
 import type { McpServer } from '@modelcontextprotocol/server';
@@ -26,8 +26,7 @@ export function registerUpdateRecord(
     {
       title: 'Update Record',
       description:
-        'Update fields on an existing record. Requires an ETag from a prior get_record call ' +
-        'to prevent stale-context overwrites. Before using this tool, check if an Entity Action ' +
+        'Update fields on an existing record. Before using this tool, check if an Entity Action ' +
         'exists for the change you want to make (especially status changes, approvals, or ' +
         'workflow transitions) — actions embed business logic that direct updates bypass.',
       inputSchema: z.object({
@@ -37,14 +36,10 @@ export function registerUpdateRecord(
           'Fields to update as key-value pairs. Keys can be display names or column names. ' +
           'FK values can be display names (resolved to IDs automatically).',
         ),
-        etag: z.string().describe(
-          'ETag from a prior get_record call. Required to prevent overwriting changes ' +
-          'made by other users. Get it from the get_record response.',
-        ),
       }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
-    async ({ entity, id, data, etag }) => {
+    async ({ entity, id, data }) => {
       await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
@@ -73,45 +68,54 @@ export function registerUpdateRecord(
         throw err;
       }
 
+      // Convert empty display_name to null so the DB's NOT NULL constraint
+      // catches it with a friendly error instead of silently breaking FK resolution.
+      if ('display_name' in resolvedData) {
+        const dn = resolvedData.display_name;
+        if (dn === '' || (typeof dn === 'string' && dn.trim() === '')) {
+          resolvedData.display_name = null;
+        }
+      }
+
       try {
         const response = await client.patch<Record<string, unknown>[]>(
           resolved.table_name,
           resolvedData,
           { id: `eq.${id}` },
-          {
-            'If-Match': etag,
-            'Prefer': 'return=representation',
-          },
+          { 'Prefer': 'return=representation' },
         );
 
-        const updated = Array.isArray(response.data) ? response.data[0] : response.data;
-        const newEtag = response.etag;
-
-        let text = `Successfully updated ${resolved.display_name} #${id}.`;
-        if (newEtag) {
-          text += `\n\n**New ETag**: \`${newEtag}\``;
-          text += '\n_Use this new ETag for any subsequent updates to this record._';
+        // PostgREST returns empty array when no rows match the filter
+        if (Array.isArray(response.data) && response.data.length === 0) {
+          return {
+            content: [{
+              type: 'text' as const,
+              text: `Record #${id} not found in ${resolved.display_name}.`,
+            }],
+            isError: true,
+          };
         }
 
         return {
-          content: [{ type: 'text' as const, text }],
+          content: [{ type: 'text' as const, text: `Successfully updated ${resolved.display_name} #${id}.` }],
         };
       } catch (err) {
         if (err instanceof PostgRESTRequestError) {
-          const message = err.toHumanMessage(cache.constraintMessages);
-
-          if (err.httpCode === 412) {
-            return {
-              content: [{
-                type: 'text' as const,
-                text: `${message}\n\nCall \`get_record\` for ${resolved.display_name} #${id} to get the current state and a fresh ETag.`,
-              }],
-              isError: true,
-            };
+          // Not-null violation — resolve column name to display name
+          if (err.code === '23502') {
+            const colMatch = err.message.match(/column "([^"]+)"/);
+            if (colMatch?.[1]) {
+              const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
+              const prop = allProperties.find(p => p.column_name === colMatch[1]);
+              const fieldName = prop ? prop.display_name : colMatch[1];
+              return {
+                content: [{ type: 'text' as const, text: `Required field "${fieldName}" cannot be set to null.` }],
+                isError: true,
+              };
+            }
           }
-
           return {
-            content: [{ type: 'text' as const, text: message }],
+            content: [{ type: 'text' as const, text: err.toHumanMessage(cache.constraintMessages) }],
             isError: true,
           };
         }

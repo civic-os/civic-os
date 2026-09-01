@@ -75,9 +75,11 @@ export function registerSearch(
             limit: String(limit),
           };
 
-          // Use FTS if available, otherwise fall back to ILIKE
+          // Use FTS if available, otherwise fall back to ILIKE.
+          // Civic OS tsvectors use the 'simple' config — specify it explicitly
+          // to avoid stemming mismatches with PostgREST's default ('english').
           if (e.fulltext_search_column) {
-            params[e.fulltext_search_column] = `wfts.${query}`;
+            params[e.fulltext_search_column] = `wfts(simple).${query}`;
           } else if (e.substring_search_column) {
             params[e.substring_search_column] = `ilike.*${query}*`;
           } else {

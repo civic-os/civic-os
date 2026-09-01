@@ -153,7 +153,7 @@ describe('search tool', () => {
 
     expect(client.get).toHaveBeenCalledWith(
       'clients',
-      expect.objectContaining({ search_vector: 'wfts.acme' }),
+      expect.objectContaining({ search_vector: 'wfts(simple).acme' }),
       expect.any(Object),
     );
   });

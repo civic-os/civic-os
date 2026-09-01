@@ -59,17 +59,25 @@ export function propertyToSelectString(prop: SchemaProperty): string {
 
 /**
  * Build a complete select string for a set of properties.
- * Always includes 'id' as the first field.
+ * Includes 'id' only when the properties list contains a property with
+ * column_name === 'id' or is_identity === true (report VIEWs without an id
+ * column would get a PostgREST error if 'id' is unconditionally appended).
  */
 export function buildSelectString(
   properties: SchemaProperty[],
   options?: { includeTimestamps?: boolean },
 ): string {
   const fields = new Set<string>();
-  fields.add('id');
+
+  const hasIdColumn = properties.some(
+    p => p.column_name === 'id' || p.is_identity === true,
+  );
+  if (hasIdColumn) {
+    fields.add('id');
+  }
 
   for (const prop of properties) {
-    // Skip identity columns (already have id), generated columns, self-referencing
+    // Skip identity columns (already added above), generated columns, self-referencing
     if (prop.column_name === 'id') continue;
     fields.add(propertyToSelectString(prop));
   }

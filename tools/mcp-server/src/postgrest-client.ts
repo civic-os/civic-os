@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * Typed HTTP client for PostgREST.
- * Wraps native fetch with JWT auth, Content-Range parsing, ETag capture,
+ * Wraps native fetch with JWT auth, Content-Range parsing,
  * and structured error responses.
  */
 
@@ -58,7 +58,6 @@ export class PostgRESTClient {
 
   /**
    * PATCH request — update a record.
-   * Supports If-Match header for ETag-based optimistic concurrency.
    */
   async patch<T = unknown>(
     path: string,
@@ -125,9 +124,6 @@ export class PostgRESTClient {
     // Parse Content-Range header if present
     const contentRange = this.parseContentRange(response.headers.get('Content-Range'));
 
-    // Capture ETag header
-    const etag = response.headers.get('ETag') ?? undefined;
-
     if (!response.ok) {
       let errorBody: PostgRESTError | undefined;
       try {
@@ -153,7 +149,7 @@ export class PostgRESTClient {
       data = (await response.json()) as T;
     }
 
-    return { data, status: response.status, contentRange, etag };
+    return { data, status: response.status, contentRange };
   }
 
   private parseContentRange(header: string | null): ContentRange | undefined {
@@ -191,14 +187,44 @@ export class PostgRESTRequestError extends Error {
         const entry = constraintMessages.find(cm => cm.constraint_name === constraintMatch[1]);
         if (entry) return entry.error_message;
       }
-      return this.code === '23P01'
-        ? 'This conflicts with an existing record. Please check your input and try again.'
-        : `Validation failed: ${constraintMatch?.[1] ?? 'check constraint'}`;
+      if (this.code === '23P01') {
+        return 'This conflicts with an existing record. Please check your input and try again.';
+      }
+      // Humanize constraint name: "email_address_check" → "Invalid email address"
+      const constraintName = constraintMatch?.[1] ?? 'check constraint';
+      const humanized = constraintName
+        .replace(/_check$/, '')
+        .replace(/_/g, ' ');
+      return `Invalid ${humanized}. Check the value and try again.`;
     }
 
     if (this.httpCode === 0) return 'Network error. Please check your connection.';
     if (this.code === '42501') return 'Permission denied. You do not have access to perform this action.';
     if (this.code === '23505') return 'A record with these values already exists (duplicate).';
+    if (this.code === '23502') {
+      // Not-null violation — extract column name from message
+      const colMatch = this.message.match(/column "([^"]+)"/);
+      return colMatch
+        ? `Required field "${colMatch[1]}" is missing.`
+        : 'A required field is missing.';
+    }
+    if (this.code === '22P02') {
+      // Invalid input syntax — make the type error more readable
+      const typeMatch = this.message.match(/invalid input syntax for type (\w+)/);
+      if (typeMatch) {
+        const pgType = typeMatch[1];
+        const friendlyType: Record<string, string> = {
+          integer: 'a whole number', numeric: 'a number', boolean: 'true or false',
+          date: 'a date (YYYY-MM-DD)', timestamp: 'a date/time', uuid: 'a valid UUID',
+        };
+        return `Invalid value — expected ${friendlyType[pgType] ?? `type "${pgType}"`}. Check the value and try again.`;
+      }
+      return `Invalid value format. ${this.message}`;
+    }
+    // Date/time format errors (22007 = invalid format, 22008 = field overflow like month 13)
+    if (this.code === '22007' || this.code === '22008') {
+      return 'Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.';
+    }
     if (this.httpCode === 404) return 'Record not found.';
     if (this.httpCode === 401) return 'Authentication required. Your session may have expired.';
     if (this.httpCode === 412) return 'This record has been modified since you last read it. Please fetch the latest version and try again.';

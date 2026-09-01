@@ -6388,10 +6388,10 @@ The MCP server respects all RLS policies and permission checks. A user connectin
 | `describe_entity` | Read | Inspect entity structure, properties, types, and available actions |
 | `list_actions` | Read | See available entity actions with parameter requirements |
 | `list_records` | Read | Query/filter/search records with FK embedding and pagination |
-| `get_record` | Read | Full record detail with ETag for optimistic concurrency |
+| `get_record` | Read | Full record detail with resolved FK values and available actions |
 | `search` | Read | Full-text search across all searchable entities |
 | `create_record` | Write | Create record with FK display name resolution |
-| `update_record` | Write | Update record with ETag-based concurrency control |
+| `update_record` | Write | Update record with FK display name resolution |
 | `execute_action` | Write | Run entity actions (RPCs with business logic) |
 | `add_note` | Write | Add a note to any entity with notes enabled |
 | `get_status_workflow` | Read | View status values and allowed transitions |
@@ -6403,21 +6403,53 @@ All tools resolve human-readable names to database identifiers:
 - **Entities**: "Time Entry" or "time_entries" → `time_entries`
 - **Columns**: "Client" or "client_id" → `client_id`
 - **FK values**: "Website Redesign" → queries the target table, returns the matching ID
-- **Statuses**: "Active" → looks up `metadata.statuses`, returns the status ID
+- **Statuses**: "Active" → looks up `metadata.statuses` scoped by `entity_type`, returns the status ID
+- **Categories**: "Email" → same entity_type-scoped pattern as statuses
 - **Actions**: "Approve" → matches by `display_name` or `action_name`
 
 Ambiguous matches return an error with candidate suggestions.
 
-### ETag-Based Optimistic Concurrency
+**Important:** Status and Category resolution is entity_type-scoped. The shared `metadata.statuses` table can have "Active" for both clients and projects — these are different status rows with different IDs. The MCP server uses `resolveStatus(entity_type, name)` to match the correct one. Generic FK resolution (`resolveForeignKeyValue`) queries the target table without entity_type scoping and is used only for regular foreign key columns.
 
-The MCP server uses PostgREST's native ETag support to prevent stale overwrites — critical for LLMs whose context may lag behind real-time state:
+### Tool Behaviors
 
-1. `get_record` returns the record's ETag (from PostgREST's response header)
-2. `update_record` requires the ETag — sent as `If-Match` header to PostgREST
-3. If the record changed since the read, PostgREST returns 412 Precondition Failed
-4. The LLM must call `get_record` again to get the current state and new ETag
+#### list_records
 
-Entity Actions (`execute_action`) do not need ETags — RPCs are atomic server-side transactions.
+- **Includes ID when available**: The `id` column is included in the PostgREST select string when the entity has one. Junction tables with composite primary keys (no `id` column) skip this. This gives LLM consumers the record identifiers needed for follow-up calls.
+- **FK embedding**: Foreign key columns are automatically embedded via PostgREST `?select=` syntax, returning display names instead of raw IDs.
+- **Filter resolution**: Filters on Status and Category columns use entity_type-scoped resolution. Filters on FK columns use async PostgREST queries against the target table. The `in` operator supports arrays with mixed name/ID values.
+- **Same-column range filters**: Multiple conditions on the same column (e.g., date ranges) use PostgREST `and=()` syntax to avoid query param key collisions.
+- **Operator guards**: `like`/`ilike` on FK, Status, or Category columns returns an early error explaining the column stores IDs. Suggests using `eq` with exact name or the `search` parameter.
+- **Pagination**: 416 Range Not Satisfiable is caught and returns a friendly message instead of a raw error.
+
+#### get_record
+
+- **Available actions**: Lists actions the user has permission to execute and whose `visibility_condition` passes for the record's current state. Actions with failing `enabled_condition` are shown but marked disabled with the `disabled_tooltip`.
+- **Timestamp formatting**: `created_at` and `updated_at` are appended as formatted timestamps (e.g., "Jan 15, 2024, 05:30 AM") when not already included in detail properties.
+- **Notes teaser**: When `enable_notes = true`, shows note count and most recent note (author, timestamp, content preview) with a pointer to `list_notes` for the full history.
+
+#### create_record / update_record
+
+- **Not-null errors**: Postgres `23502` errors are intercepted and column names resolved to display names (e.g., "Required field 'First Name' is missing").
+- **Empty display_name guard**: Empty or whitespace-only `display_name` values are converted to `null`, triggering the NOT NULL constraint with a friendly error.
+
+#### execute_action
+
+- **Condition evaluation**: Before calling the RPC, the tool fetches the current record with full FK embedding and evaluates `visibility_condition` and `enabled_condition`. Conditions support dot-notation paths like `status_id.status_key` for checking embedded FK fields.
+- **Diagnostic errors**: When a condition fails, the error message explains what went wrong — e.g., `status_id.status_key is "completed", expected "pending"` — and suggests using `get_record` to see available actions. For `enabled_condition` failures, the integrator's `disabled_tooltip` is used when configured.
+- **Parameter resolution**: Action parameters with FK, Status, or Category types are resolved from display names to IDs automatically. Resolution errors are surfaced with available values listed.
+
+#### list_notes
+
+- **Pagination**: Supports `limit` and `offset` for paginating through notes. Returns note count via `count=exact`.
+- **Record validation**: Verifies the target record exists before querying notes, distinguishing "no notes" from "record not found".
+- **Content normalization**: Literal `\n` sequences (common LLM serialization artifact) are converted to actual newlines.
+
+### Concurrency Model
+
+> **Note (2026-09-01):** This section previously described ETag-based optimistic concurrency. PostgREST does not support native HTTP ETags ([issue #1176](https://github.com/PostgREST/postgrest/issues/1176), open since 2018). The MCP server's ETag code was removed in v0.72.3.
+
+The MCP server uses a **last-write-wins** model for `update_record`. Best practice is to always call `get_record` before `update_record` to see current state. Entity Actions (`execute_action`) are atomic RPCs and are preferred for status changes and workflow transitions.
 
 ### Database Role for MCP
 
@@ -6471,13 +6503,15 @@ Convention-based reversible record archival. Any table with a `deleted_at TIMEST
 
 See `docs/notes/SOFT_DELETE_DESIGN.md` for the full design.
 
-### Optimistic Concurrency Control (ETag) — Proposed
+### Optimistic Concurrency Control — Proposed
 
-HTTP ETag-based conflict detection for Edit pages. When two users edit the same record concurrently, the second save receives a 412 error with a "record was modified" message and diff view, instead of silently overwriting the first user's changes. Pure frontend change — no schema modifications required.
+Conflict detection for Edit pages. When two users edit the same record concurrently, the second save receives a 412 error with a "record was modified" message, instead of silently overwriting the first user's changes.
 
-**Instance design impact**: Relevant for multi-editor instances (multiple case workers, site leads at different locations). Single-user instances are unaffected. No instance-level configuration needed — this is a framework-wide behavior change.
+> **Note (2026-09-01):** The original design assumed PostgREST supports native HTTP ETags. This turned out to be incorrect ([PostgREST issue #1176](https://github.com/PostgREST/postgrest/issues/1176)). The implementation will use a database-level approach (e.g., `updated_at` timestamp column or `row_version` integer) instead.
 
-See `docs/notes/ETAG_CONCURRENCY_DESIGN.md` for the full design.
+**Instance design impact**: Relevant for multi-editor instances (multiple case workers, site leads at different locations). Single-user instances are unaffected. Will require a per-table opt-in column.
+
+See `docs/notes/ETAG_CONCURRENCY_DESIGN.md` for the original design and alternative approaches.
 
 ### System Timezone Unification — Proposed (v1.0)
 

@@ -351,13 +351,17 @@ The consolidated worker needs a Keycloak service account to create users and man
 
 **Note**: The pre-configured `examples/keycloak/civic-os-dev.json` realm export already includes this service account client with secret `civic-os-service-secret` for local development. Production deployments must generate a new secret.
 
-### Step 9: Create MCP Server Client (v0.72.1+, Optional — for OAuth Auto-Flow)
+### Step 9: Configure MCP Server OAuth (v0.72.1+ — Recommended)
 
-If you want OAuth-capable MCP clients (like Claude Desktop) to auto-discover Keycloak and authenticate users via browser login, create a public Keycloak client for the MCP server.
+MCP clients (Claude Code, Claude Desktop, claude.ai web) need a Keycloak client to authenticate users via the OAuth 2.1 auto-discovery flow. Two approaches are available:
 
-**Note**: This step is optional. MCP clients can always connect using a pre-configured JWT token without this client. This client only enables the OAuth 2.1 auto-discovery flow.
+#### Approach A: Pre-created Client (Recommended)
 
-1. **Create client** in Keycloak admin console:
+The `civic-os-mcp` public client is **already included** in the realm template (`templates/keycloak/realm-template.json`) and dev realm (`examples/keycloak/civic-os-dev.json`). New deployments get it automatically.
+
+For existing deployments, create the client in Keycloak admin console:
+
+1. **Create client**:
    - Go to: Clients → Create client
    - **Client ID**: `civic-os-mcp`
    - **Client type**: OpenID Connect
@@ -366,18 +370,61 @@ If you want OAuth-capable MCP clients (like Claude Desktop) to auto-discover Key
    - Click Save
 
 2. **Configure login settings**:
-   - **Valid redirect URIs**: Configure per MCP client (e.g., Claude Desktop's callback URL, typically `http://localhost:*`)
-   - **Web origins**: `+` (allow all CORS from redirect URIs)
-   - **PKCE Code Challenge Method**: `S256` (required)
+   - **Valid redirect URIs**: `http://localhost:*` and `http://127.0.0.1:*` (MCP clients use localhost OAuth callbacks)
+   - **Web origins**: `+` (auto-derives CORS from redirect URIs)
+   - **PKCE Code Challenge Method**: `S256` (required by MCP spec's OAuth 2.1)
 
-3. **Configure MCP server environment variables**:
-   ```bash
-   KEYCLOAK_URL=http://keycloak:8080       # or your public Keycloak URL
-   KEYCLOAK_REALM=civic-os                  # your realm name
-   MCP_PUBLIC_URL=https://your-instance.civic-os.org/_/mcp  # public MCP server URL
+3. **Configure MCP client** with `oauthClientId` to bypass DCR:
+
+   **Claude Code** (`.mcp.json`):
+   ```json
+   {
+     "mcpServers": {
+       "my-instance": {
+         "type": "http",
+         "url": "https://your-instance.civic-os.org/_/mcp/",
+         "oauthClientId": "civic-os-mcp"
+       }
+     }
+   }
    ```
 
-This mirrors the Angular frontend's Keycloak client pattern. The MCP server does not interact with this client directly — it's between the MCP client (e.g., Claude Desktop) and Keycloak. The MCP server only serves the OAuth discovery document at `/.well-known/oauth-protected-resource` so clients can find Keycloak's authorization and token endpoints.
+   **Claude Desktop** (`claude_desktop_config.json`):
+   ```json
+   {
+     "mcpServers": {
+       "my-instance": {
+         "type": "http",
+         "url": "https://your-instance.civic-os.org/_/mcp/",
+         "oauthClientId": "civic-os-mcp"
+       }
+     }
+   }
+   ```
+
+#### Approach B: Dynamic Client Registration (DCR)
+
+As an alternative, you can enable DCR so MCP clients self-register at runtime without a pre-created client. This is more flexible but requires Keycloak configuration.
+
+The realm template already includes a trusted-hosts DCR policy for `localhost`/`127.0.0.1`. For production, add your MCP server's host to the trusted hosts list in Keycloak:
+
+1. Go to: Realm Settings → Client Registration → Client Registration Policies
+2. Under "Anonymous Access Policies", find "Trusted Hosts"
+3. Add your server's hostname (e.g., `your-instance.civic-os.org`)
+
+When DCR is available and no `oauthClientId` is specified, MCP clients will dynamically register a client and complete the OAuth flow automatically.
+
+#### MCP Server Environment Variables
+
+Both approaches require the MCP server to serve OAuth discovery metadata:
+
+```bash
+KEYCLOAK_URL=http://keycloak:8080       # or your public Keycloak URL
+KEYCLOAK_REALM=civic-os                  # your realm name
+MCP_PUBLIC_URL=https://your-instance.civic-os.org/_/mcp  # public MCP server URL
+```
+
+**How it works**: The MCP server serves RFC 9728 protected resource metadata at `/.well-known/oauth-protected-resource`, pointing clients to Keycloak's authorization and token endpoints. The MCP server never interacts with the `civic-os-mcp` client directly — it's between the MCP client and Keycloak. The MCP server only forwards Bearer tokens to PostgREST for verification.
 
 ---
 

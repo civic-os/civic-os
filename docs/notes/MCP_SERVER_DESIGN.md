@@ -3,7 +3,7 @@
 Copyright (C) 2023-2026 Civic OS, L3C
 
 **Created:** 2026-08-31
-**Status:** v0.72.1 -- stdio + HTTP Streamable transport, per-request auth, OAuth discovery, 11 tools
+**Status:** v0.72.3 -- stdio + HTTP Streamable transport, per-request auth, OAuth discovery (pre-created client + DCR), 12 tools
 
 ## Purpose
 
@@ -55,9 +55,9 @@ tools/mcp-server/
       describe-entity.ts    # Entity structure, properties, actions
       list-actions.ts       # Available entity actions
       list-records.ts       # Query with filters, FK embedding, pagination
-      get-record.ts         # Single record with ETag capture
+      get-record.ts         # Single record detail with available actions
       create-record.ts      # Create with FK name resolution
-      update-record.ts      # Update with ETag-based concurrency
+      update-record.ts      # Update with FK name resolution
       execute-action.ts     # RPC execution with condition evaluation
       add-note.ts           # Polymorphic entity notes
       search.ts             # Cross-entity full-text search
@@ -104,21 +104,11 @@ The `NameResolver` translates human-readable names to identifiers at every level
 
 Ambiguous matches return an error listing candidates. Unknown names return a clear error message.
 
-## ETag-Based Optimistic Concurrency
+## Concurrency Model
 
-PostgREST natively supports HTTP ETag-based concurrency control.
+> **Note (2026-09-01):** This section previously described ETag-based optimistic concurrency. PostgREST does not support native HTTP ETags ([issue #1176](https://github.com/PostgREST/postgrest/issues/1176), open since 2018). The MCP server's ETag code was removed in v0.72.3 as it was always `undefined`. See `docs/notes/ETAG_CONCURRENCY_DESIGN.md` for the invalidated design and alternative approaches.
 
-Flow:
-
-1. `get_record` -> PostgREST returns `ETag` header (MD5 hash of response body) -> included in tool output
-2. `update_record` -> MCP server sends `If-Match: "{etag}"` header with the PATCH
-3. PostgREST re-reads the row, recomputes hash:
-   - Match -> applies PATCH, returns new ETag
-   - Mismatch -> returns 412 Precondition Failed
-
-Why this matters for LLMs: an LLM's context can be minutes or hours stale. Without ETags, `update_record` is last-write-wins and could silently overwrite changes made via the web UI.
-
-Entity Actions do not need ETags -- RPCs are atomic server-side transactions.
+The MCP server currently uses a **last-write-wins** model for `update_record`. The `get_record` -> `update_record` flow relies on the LLM reading current state before writing, but does not enforce concurrency control. Entity Actions (`execute_action`) are atomic server-side RPCs and do not have this concern.
 
 ## Column Visibility Defaults
 
@@ -143,17 +133,103 @@ Entity Actions often embed business logic that raw PATCH updates bypass (status 
 
 `describe_entity` and `get_record` prominently list available actions so the LLM sees them before deciding to modify a record.
 
+## Action Condition Evaluation
+
+Entity actions have two optional condition checks: `visibility_condition` (should the action appear?) and `enabled_condition` (can it be executed right now?). Both are recursive `ActionCondition` trees supporting `and`/`or` compounds and simple `{field, operator, value}` leaves.
+
+### Dot-Notation and FK Embedding
+
+Conditions frequently reference embedded FK fields via dot-notation (e.g., `status_id.status_key`). This requires the record to be fetched with full FK embedding — a bare `GET /clients?id=eq.42` returns `{status_id: 5}`, but the condition needs `{status_id: {id: 5, status_key: "pending"}}`.
+
+`execute_action` handles this by calling `buildSelectString(allProperties)` before the condition-check fetch, producing select strings like `status_id:statuses!status_id(id,display_name,color,status_key)`. The same `buildSelectString` function is used by `list_records` and `get_record` for consistent FK embedding.
+
+**Bug discovered (v0.72.3):** The original implementation fetched records without a `select` string for condition evaluation. PostgREST returned raw FK IDs, causing all dot-notation conditions to silently resolve to `undefined`. Every visibility condition appeared to fail, making actions like "Activate Client" unavailable.
+
+### Diagnostic Error Messages
+
+When a condition fails, `describeConditionFailure()` introspects both the condition and the current record to produce a message explaining what went wrong:
+
+- **Simple condition:** `status_id.status_key is "completed", expected "pending"`
+- **AND compound:** Lists only the failing sub-conditions: `is_active is false, expected true; balance is 0, must be > 100`
+- **OR compound:** `None of these conditions are met: ...`
+
+All condition failure messages also suggest `Use get_record to see the current state and available actions`, guiding the LLM to discover which actions ARE available for the record's current state.
+
+For `enabled_condition` failures, the `disabled_tooltip` from metadata is used when available (integrator-authored, context-specific). The diagnostic fallback only appears when no tooltip is configured.
+
+### Condition Evaluation in get_record
+
+`get_record` also evaluates conditions, but for display rather than gating:
+
+- Actions where `visibility_condition` fails are **excluded** from the "Available Actions" list entirely
+- Actions where `enabled_condition` fails are **shown but marked disabled** with the `disabled_tooltip`
+
+This means the LLM sees only contextually-appropriate actions and can read why disabled actions can't be used.
+
+## Name Resolution Paths
+
+The `NameResolver` handles three distinct resolution mechanisms, each appropriate for different column types:
+
+### Status Resolution (synchronous, entity_type-scoped)
+
+Statuses live in a shared `metadata.statuses` table with an `entity_type` discriminator. "Active" for clients is a different status row than "Active" for projects. `resolveStatus(entity_type, name)` queries the cached statuses filtered by entity_type.
+
+### Category Resolution (synchronous, entity_type-scoped)
+
+Same pattern as statuses — shared `metadata.categories` table with `entity_type` discriminator. `resolveCategory(entity_type, name)` is the synchronous lookup.
+
+### FK Resolution (async, table-scoped)
+
+Generic foreign keys query the target table via PostgREST: `GET /{join_table}?display_name=eq.{name}&select=id`. This is async (HTTP round-trip) and has no entity_type scoping — FK target tables are standalone.
+
+### Why This Matters
+
+**Bug discovered (v0.72.3):** `list_records` originally used `resolveForeignKeyValue()` for all filterable columns, including Status and Category types. Since statuses use a shared table, filtering "Clients where Status = Active" could match a *different entity's* "Active" status. The fix: check `prop.type` first and use `resolveStatus()`/`resolveCategory()` before falling back to `resolveForeignKeyValue()`.
+
+The resolution order in `list_records` filters:
+1. **Status columns** → `resolveStatus(prop.status_entity_type, value)` (sync, scoped)
+2. **Category columns** → `resolveCategory(prop.category_entity_type, value)` (sync, scoped)
+3. **FK columns** → `resolveForeignKeyValue(prop.join_table, value)` (async, table-wide)
+
+## List View: Always-Include-ID
+
+`list_records` includes the `id` column in the PostgREST select string when the entity has one. The `id` column may be noisy for human users, but for LLM consumers it's essential context — without it, the LLM can't reference records in follow-up calls like `get_record`, `update_record`, or `execute_action`.
+
+If `id` is already in the display properties (via `is_identity` or `column_name === 'id'`), it's not duplicated. Otherwise, `id,` is prepended to the select string. Junction tables with composite primary keys (no `id` column) skip this injection entirely, and the markdown table omits the ID column header.
+
+## Timestamp Formatting
+
+`renderRecordDetail()` (used by `get_record`) appends `created_at` and `updated_at` as fallback lines when they're not already included in the detail properties. These timestamps are formatted via `formatDateTimeLocal()` using `toLocaleString('en-US')` to produce human-readable output like "Jan 15, 2024, 05:30 AM" rather than raw ISO strings like "2024-01-15T10:30:00Z".
+
+Timestamps that ARE included in detail properties (via `show_on_detail = true`) go through the standard `formatValue()` pipeline which applies `DateTime` or `DateTimeLocal` formatting based on the property type.
+
 ## Error Handling
 
-PostgREST errors are translated to user-friendly messages:
+PostgREST errors are translated to user-friendly messages via `PostgRESTRequestError.toHumanMessage()`:
 
-| HTTP Status | Meaning | MCP Error Message |
+| Code | Meaning | MCP Error Message |
 |---|---|---|
-| 412 | Precondition Failed | "This record has been modified since you last read it. Call get_record again." |
-| 403 | Forbidden | Permission denied with role context |
+| 403 / 42501 | Forbidden | Permission denied |
 | 404 | Not Found | Entity or record not found |
-| 409 / 23505 | Conflict / Unique violation | Duplicate record |
-| 23514 | Check constraint violation | Custom message from `metadata.constraint_messages` if available |
+| 401 | Unauthorized | Session expired |
+| 416 | Range Not Satisfiable | Pagination offset beyond bounds (friendly, not `isError`) |
+| 23505 | Unique violation | Duplicate record |
+| 23502 | Not-null violation | "Required field 'Display Name' is missing" (column → display name at tool level) |
+| 23514 | Check constraint | Custom from `metadata.constraint_messages`, else humanized constraint name |
+| 23P01 | Exclusion violation | Conflicts with existing record |
+| 22P02 | Invalid input syntax | "Invalid value — expected a whole number / a date (YYYY-MM-DD) / ..." |
+| 22007/22008 | Invalid date | "Invalid date format. Use YYYY-MM-DD..." |
+| P0001 | Custom PL/pgSQL raise | Message passed through as-is (user-facing by convention) |
+
+**Tool-level error enrichment**: `create_record` and `update_record` intercept `23502` before `toHumanMessage()` to resolve column names to display names using the schema cache. The generic handler falls back to the raw column name.
+
+**Name resolution errors**: `NameResolutionError` is surfaced (not swallowed) for FK, Status, and Category resolution failures in both filters and action params. Error messages always list available values.
+
+**Filter operator guards**: `like`/`ilike` on FK, Status, and Category columns returns an early error explaining the column stores IDs, not text.
+
+**Empty display_name guard**: `create_record` and `update_record` convert empty/whitespace `display_name` values to `null`, letting the DB's NOT NULL constraint produce a friendly error.
+
+Additionally, `execute_action` returns pre-flight errors with diagnostic detail when visibility or enabled conditions fail (see Action Condition Evaluation above).
 
 ## Transport
 
@@ -180,11 +256,23 @@ Per-session (per HTTP request):
 
 The MCP server never verifies JWTs. It extracts the Bearer token and passes it through to PostgREST as `AuthInfo.token` via the `createMcpHandler` factory context. PostgREST handles verification against Keycloak's JWKS.
 
-### OAuth Discovery (optional)
+### OAuth Authentication
 
-When `KEYCLOAK_URL` and `KEYCLOAK_REALM` env vars are set, the HTTP server exposes RFC 9728 protected resource metadata at `/.well-known/oauth-protected-resource`. This enables OAuth-capable MCP clients (like Claude Desktop) to auto-discover Keycloak and perform Authorization Code + PKCE flow.
+MCP clients authenticate users via OAuth 2.1 Authorization Code + PKCE flow against Keycloak. Two client provisioning approaches are supported:
 
-The `oauthMetadataResponse()` helper from the MCP SDK builds the discovery document. No token verification or Keycloak service account is needed -- it's a static JSON response pointing clients to Keycloak endpoints.
+1. **Pre-created client** (recommended): A `civic-os-mcp` public client is included in the Keycloak realm template. MCP clients reference it via `oauthClientId: "civic-os-mcp"` in their config, bypassing dynamic registration entirely.
+
+2. **Dynamic Client Registration (DCR)**: A trusted-hosts policy (also in the realm template) allows MCP clients connecting from localhost to self-register at runtime. More flexible for development but requires Keycloak DCR configuration for production hosts.
+
+See `docs/AUTHENTICATION.md` (Step 9) for setup instructions for both approaches.
+
+### OAuth Discovery (RFC 9728)
+
+When `KEYCLOAK_URL` and `KEYCLOAK_REALM` env vars are set, the HTTP server exposes RFC 9728 protected resource metadata at `/.well-known/oauth-protected-resource`. This enables OAuth-capable MCP clients (Claude Code, Claude Desktop, claude.ai) to auto-discover Keycloak and perform the Authorization Code + PKCE flow.
+
+The `buildProtectedResourceMetadata()` function in `http.ts` generates the discovery document -- a simple JSON response with `resource`, `authorization_servers`, and `bearer_methods_supported` fields. No token verification or Keycloak service account is needed.
+
+**Why only `oauth-protected-resource`**: We serve the protected resource metadata (RFC 9728) but NOT `oauth-authorization-server` (RFC 8414). Clients discover the AS metadata directly from Keycloak via the `authorization_servers` array. This avoids path-prefix conflicts when the MCP server sits behind a reverse proxy (e.g., Caddy `handle_path` strips `/_/mcp` but clients fetch `/.well-known` from the origin).
 
 ### HTTP Routing
 
@@ -192,7 +280,6 @@ The `oauthMetadataResponse()` helper from the MCP SDK builds the discovery docum
 GET  /health                              → 200 { status: ok, version }
 OPTIONS *                                 → 204 with CORS headers
 GET  /.well-known/oauth-protected-resource → RFC 9728 metadata (if Keycloak configured)
-GET  /.well-known/oauth-authorization-server → RFC 8414 metadata (if Keycloak configured)
 POST /mcp                                 → MCP Streamable handler
 GET  /mcp                                 → MCP SSE stream
 ```
@@ -222,13 +309,49 @@ Bun-based single-stage image (`oven/bun:1-alpine`). Bun runs TypeScript natively
 - CPU: negligible (I/O bound, proxying HTTP)
 - Health check: `wget -qO- http://localhost:3001/health`
 
+## Entity Notes Integration
+
+`get_record` uses a teaser pattern for notes: when `entity.enable_notes` is true, it fetches the most recent note with `count=exact` and renders a `## Notes` section showing the count and a preview:
+
+```
+## Notes
+3 notes — most recent:
+> **Jane Smith** — Sep 1, 2026, 10:30 AM
+> Discussed renewal terms with the client...
+
+Use `list_notes` to see all notes.
+```
+
+The dedicated `list_notes` tool provides the full history with pagination, author names, timestamps, and system note tags. It verifies record existence before querying notes to distinguish "no notes" from "record not found".
+
+Both tools normalize literal `\n` sequences in note content (common LLM serialization artifact) to actual newlines.
+
+## Filter Edge Cases
+
+### Same-Column Multi-Condition Filters
+
+PostgREST query params are key-value — setting the same column twice overwrites. For date/numeric ranges (e.g., `created_at >= X AND created_at < Y`), conditions are collected as an array, grouped by column, and same-column groups use PostgREST's `and=()` syntax:
+
+```
+Single condition:  ?status_id=eq.1
+Multi-condition:   ?and=(created_at.gte.2026-08-15,created_at.lt.2026-09-01)
+```
+
+### Pattern Matching on Reference Columns
+
+`like`/`ilike` on FK, Status, or Category columns is rejected early with a helpful error. These columns store integer IDs — pattern matching would match against the raw ID, not the display name. The error suggests using `eq` with an exact name or the `search` parameter instead.
+
+### Entity Name Resolution Filtering
+
+Error messages from `resolveEntity()` only suggest entities the user can read (`e.select === true`), hiding internal junction tables and system views from the suggestion list.
+
 ## Testing Strategy
 
 Three layers, from fast to comprehensive:
 
-### Unit Tests (402 tests, vitest)
+### Unit Tests (424 tests, vitest)
 
-Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, OAuth metadata, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
+Every tool, formatter, and core module tested with mocked PostgREST responses, plus HTTP transport tests (Bearer extraction, health endpoint, CORS, `buildProtectedResourceMetadata`, createMcpHandler integration). Run via `npm test` (vitest). Located in `src/__tests__/` mirroring the source structure.
 
 ### Integration Tests (MCP protocol)
 

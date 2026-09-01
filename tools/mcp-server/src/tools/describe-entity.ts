@@ -37,7 +37,7 @@ export function registerDescribeEntity(
       await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
-      const properties = cache.getProperties(resolved.table_name);
+      const properties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
       const actions = cache.getActionsForUser(cacheKey, resolved.table_name);
 
       const lines: string[] = [];

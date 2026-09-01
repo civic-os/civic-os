@@ -108,6 +108,7 @@ function makeMockCache(
     entities: [entity],
     getEntitiesForUser: vi.fn().mockReturnValue([entity]),
     getProperties: vi.fn().mockReturnValue(properties),
+    getPropertiesForUser: vi.fn().mockReturnValue(properties),
     getActions: vi.fn().mockReturnValue(actions),
     getActionsForUser: vi.fn().mockReturnValue(actions),
     getStatuses: vi.fn().mockReturnValue([]),

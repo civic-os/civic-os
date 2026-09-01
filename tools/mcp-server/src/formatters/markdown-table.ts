@@ -7,7 +7,7 @@
  */
 
 import { type SchemaProperty } from '../interfaces.js';
-import { formatValue } from './value.js';
+import { formatValue, formatDateTimeLocal } from './value.js';
 
 /**
  * Render an array of records as a markdown table.
@@ -127,12 +127,14 @@ export function renderRecordDetail(
     }
   }
 
-  // Show timestamps if present
-  if ('created_at' in record && record.created_at) {
-    lines.push(`**Created**: ${record.created_at}`);
+  // Show timestamps if present (skip if already rendered via properties).
+  // These are always timestamptz columns, so use formatDateTimeLocal for consistent output.
+  const renderedColumns = new Set(properties.map(p => p.column_name));
+  if ('created_at' in record && record.created_at && !renderedColumns.has('created_at')) {
+    lines.push(`**Created**: ${formatDateTimeLocal(record.created_at as string)}`);
   }
-  if ('updated_at' in record && record.updated_at) {
-    lines.push(`**Updated**: ${record.updated_at}`);
+  if ('updated_at' in record && record.updated_at && !renderedColumns.has('updated_at')) {
+    lines.push(`**Updated**: ${formatDateTimeLocal(record.updated_at as string)}`);
   }
 
   return lines.join('\n');

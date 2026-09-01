@@ -43,14 +43,17 @@ export class SchemaCache {
   // Version tracking for incremental refresh
   private cachedVersions = new Map<string, string>();
 
-  // Per-user permission caches (entities + actions are role-dependent)
+  // Per-user permission caches (entities, properties, actions are role-dependent)
   private perUserCache = new Map<string, {
     entities: SchemaEntity[];
+    properties: SchemaProperty[];
     actions: SchemaEntityAction[];
     entityByTable: Map<string, SchemaEntity>;
     entityByDisplayName: Map<string, SchemaEntity>;
+    propertiesByTable: Map<string, SchemaProperty[]>;
     actionsByTable: Map<string, SchemaEntityAction[]>;
     entitiesVersion: string;
+    propertiesVersion: string;
   }>();
 
   private initialized = false;
@@ -122,6 +125,13 @@ export class SchemaCache {
       ?? this._entityByDisplayName.get(displayName.toLowerCase());
   }
 
+  /** Return properties for a table, checking per-user cache first for role-filtered visibility. */
+  getPropertiesForUser(cacheKey: string | undefined, tableName: string): SchemaProperty[] {
+    if (!cacheKey) return this._propertiesByTable.get(tableName) ?? [];
+    return this.perUserCache.get(cacheKey)?.propertiesByTable.get(tableName)
+      ?? this._propertiesByTable.get(tableName) ?? [];
+  }
+
   /** Return actions for a table with user-specific can_execute flags. */
   getActionsForUser(cacheKey: string | undefined, tableName: string): SchemaEntityAction[] {
     if (!cacheKey) return this._actionsByTable.get(tableName) ?? [];
@@ -140,17 +150,21 @@ export class SchemaCache {
     // Anonymous callers use shared (anonymous) cache — no per-user fetch needed
     if (!cacheKey) return;
 
-    const currentVersion = this.cachedVersions.get('entities') ?? '';
+    const entitiesVersion = this.cachedVersions.get('entities') ?? '';
+    const propertiesVersion = this.cachedVersions.get('properties') ?? '';
     const cached = this.perUserCache.get(cacheKey);
 
-    // If per-user cache exists and version matches, it's still fresh
-    if (cached && cached.entitiesVersion === currentVersion) return;
+    // If per-user cache exists and both versions match, it's still fresh
+    if (cached && cached.entitiesVersion === entitiesVersion && cached.propertiesVersion === propertiesVersion) return;
 
-    // Fetch entities + actions with the user's JWT
+    // Fetch entities, properties, and actions with the user's JWT
     try {
-      const [entitiesRes, actionsRes] = await Promise.all([
+      const [entitiesRes, propertiesRes, actionsRes] = await Promise.all([
         userClient.get<SchemaEntity[]>('schema_entities', {
           order: 'sort_order.asc,display_name.asc',
+        }),
+        userClient.get<SchemaProperty[]>('schema_properties', {
+          order: 'table_name.asc,sort_order.asc',
         }),
         userClient.get<SchemaEntityAction[]>('schema_entity_actions', {
           order: 'table_name.asc,sort_order.asc',
@@ -158,7 +172,13 @@ export class SchemaCache {
       ]);
 
       const entities = entitiesRes.data;
+      const properties = propertiesRes.data;
       const actions = actionsRes.data;
+
+      // Compute property types
+      for (const prop of properties) {
+        prop.type = detectPropertyType(prop);
+      }
 
       // Build derived lookups
       const entityByTable = new Map<string, SchemaEntity>();
@@ -166,6 +186,13 @@ export class SchemaCache {
       for (const e of entities) {
         entityByTable.set(e.table_name, e);
         entityByDisplayName.set(e.display_name.toLowerCase(), e);
+      }
+
+      const propertiesByTable = new Map<string, SchemaProperty[]>();
+      for (const prop of properties) {
+        const list = propertiesByTable.get(prop.table_name) ?? [];
+        list.push(prop);
+        propertiesByTable.set(prop.table_name, list);
       }
 
       const actionsByTable = new Map<string, SchemaEntityAction[]>();
@@ -177,11 +204,14 @@ export class SchemaCache {
 
       this.perUserCache.set(cacheKey, {
         entities,
+        properties,
         actions,
         entityByTable,
         entityByDisplayName,
+        propertiesByTable,
         actionsByTable,
-        entitiesVersion: currentVersion,
+        entitiesVersion,
+        propertiesVersion,
       });
     } catch {
       // If per-user fetch fails, tools will fall back to shared cache via accessors

@@ -80,7 +80,7 @@ function healthResponse(): Response {
  * (e.g., Caddy handle_path strips /_/mcp but clients fetch /.well-known
  * from the origin).
  */
-function buildProtectedResourceMetadata(config: ServerConfig): string | undefined {
+export function buildProtectedResourceMetadata(config: ServerConfig): string | undefined {
   if (!config.keycloakUrl || !config.keycloakRealm) {
     return undefined;
   }

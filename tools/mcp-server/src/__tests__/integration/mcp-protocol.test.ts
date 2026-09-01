@@ -28,6 +28,7 @@ import { registerCreateRecord } from '../../tools/create-record.js';
 import { registerUpdateRecord } from '../../tools/update-record.js';
 import { registerExecuteAction } from '../../tools/execute-action.js';
 import { registerAddNote } from '../../tools/add-note.js';
+import { registerListNotes } from '../../tools/list-notes.js';
 import { registerGetStatusWorkflow } from '../../tools/get-status-workflow.js';
 import type {
   SchemaEntity,
@@ -150,6 +151,7 @@ function buildTestServer(
   registerUpdateRecord(server, client, cache, resolver);
   registerExecuteAction(server, client, cache, resolver);
   registerAddNote(server, client, cache, resolver);
+  registerListNotes(server, client, cache, resolver);
   registerGetStatusWorkflow(server, client, cache, resolver);
 
   return server;
@@ -207,6 +209,7 @@ describe('MCP Protocol Integration', () => {
       expect(toolNames).toContain('update_record');
       expect(toolNames).toContain('execute_action');
       expect(toolNames).toContain('add_note');
+      expect(toolNames).toContain('list_notes');
       expect(toolNames).toContain('get_status_workflow');
     });
 

@@ -44,32 +44,35 @@ export class NameResolver {
     );
     if (byDisplay) return byDisplay;
 
-    // 3. Substring match
+    // 3. Substring match — prefer readable entities (hides internal junction tables)
     const substringMatches = entities.filter(
       e =>
         e.display_name.toLowerCase().includes(normalized) ||
         e.table_name.includes(normalized),
     );
+    const readableMatches = substringMatches.filter(e => e.select);
+    const effectiveMatches = readableMatches.length > 0 ? readableMatches : substringMatches;
 
-    if (substringMatches.length === 1) return substringMatches[0];
+    if (effectiveMatches.length === 1) return effectiveMatches[0];
 
-    if (substringMatches.length > 1) {
-      const candidates = substringMatches
+    if (effectiveMatches.length > 1) {
+      const candidates = effectiveMatches
         .map(e => `"${e.display_name}" (${e.table_name})`)
         .join(', ');
       throw new NameResolutionError(
         `Ambiguous entity name "${name}". Did you mean one of: ${candidates}?`,
-        substringMatches.map(e => e.display_name),
+        effectiveMatches.map(e => e.display_name),
       );
     }
 
-    // 4. No match
-    const allNames = entities
+    // 4. No match — only suggest entities the user can read (hides internal junction tables)
+    const readable = entities.filter(e => e.select);
+    const allNames = readable
       .slice(0, 10)
       .map(e => `"${e.display_name}"`)
       .join(', ');
     throw new NameResolutionError(
-      `Entity "${name}" not found. Available entities include: ${allNames}${entities.length > 10 ? '...' : ''}`,
+      `Entity "${name}" not found. Available entities include: ${allNames}${readable.length > 10 ? '...' : ''}`,
     );
   }
 
@@ -82,7 +85,7 @@ export class NameResolver {
    * Returns the SchemaProperty or throws with suggestions.
    */
   resolveColumn(tableName: string, name: string): SchemaProperty {
-    const properties = this.cache.getProperties(tableName);
+    const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName);
     const normalized = name.trim().toLowerCase();
 
     // 1. Exact column_name match
@@ -201,22 +204,24 @@ export class NameResolver {
   // ============================================================================
 
   /**
-   * Resolve a status display name to a status ID.
+   * Resolve a status name to a status ID.
+   * Priority: status_key first, then display_name (matches Excel import behavior).
    */
-  resolveStatus(entityType: string, displayName: string): number {
+  resolveStatus(entityType: string, name: string): number {
     const statuses = this.cache.getStatuses(entityType);
-    const normalized = displayName.trim().toLowerCase();
+    const normalized = name.trim().toLowerCase();
 
-    const exact = statuses.find(s => s.display_name.toLowerCase() === normalized);
-    if (exact) return exact.id;
-
-    // Try by status_key
+    // Try by status_key first (programmatic identifier, preferred)
     const byKey = statuses.find(s => s.status_key?.toLowerCase() === normalized);
     if (byKey) return byKey.id;
 
+    // Fall back to display_name
+    const byName = statuses.find(s => s.display_name.toLowerCase() === normalized);
+    if (byName) return byName.id;
+
     const available = statuses.map(s => `"${s.display_name}"`).join(', ');
     throw new NameResolutionError(
-      `Status "${displayName}" not found for entity type "${entityType}". Available: ${available}`,
+      `Status "${name}" not found for entity type "${entityType}". Available: ${available}`,
       statuses.map(s => s.display_name),
     );
   }
@@ -299,7 +304,7 @@ export class NameResolver {
     data: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     const resolved: Record<string, unknown> = {};
-    const properties = this.cache.getProperties(tableName);
+    const properties = this.cache.getPropertiesForUser(this.cacheKey, tableName);
 
     for (const [key, value] of Object.entries(data)) {
       // Resolve the column name

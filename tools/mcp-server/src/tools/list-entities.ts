@@ -62,7 +62,6 @@ export function registerListEntities(
           e.select ? 'read' : null,
           e.insert ? 'create' : null,
           e.update ? 'edit' : null,
-          e.delete ? 'delete' : null,
         ].filter(Boolean).join(', ');
 
         const features: string[] = [];

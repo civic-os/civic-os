@@ -68,6 +68,15 @@ export function registerCreateRecord(
         throw err;
       }
 
+      // Convert empty display_name to null so the DB's NOT NULL constraint
+      // catches it with a friendly error instead of silently breaking FK resolution.
+      if ('display_name' in resolvedData) {
+        const dn = resolvedData.display_name;
+        if (dn === '' || (typeof dn === 'string' && dn.trim() === '')) {
+          resolvedData.display_name = null;
+        }
+      }
+
       try {
         const response = await client.post<Record<string, unknown>[]>(
           resolved.table_name,
@@ -78,15 +87,29 @@ export function registerCreateRecord(
         const created = Array.isArray(response.data) ? response.data[0] : response.data;
         const id = (created as Record<string, unknown>)?.id;
 
+        let text = `Successfully created ${resolved.display_name} record${id != null ? ` (ID: ${id})` : ''}.`;
+        if (id != null) {
+          text += `\n\nUse \`get_record\` with entity "${resolved.display_name}" and ID ${id} to see the full record.`;
+        }
+
         return {
-          content: [{
-            type: 'text' as const,
-            text: `Successfully created ${resolved.display_name} record${id ? ` (ID: ${id})` : ''}.\n\n` +
-              `Use \`get_record\` with entity "${resolved.display_name}" and ID ${id} to see the full record.`,
-          }],
+          content: [{ type: 'text' as const, text }],
         };
       } catch (err) {
         if (err instanceof PostgRESTRequestError) {
+          // Not-null violation — resolve column name to display name
+          if (err.code === '23502') {
+            const colMatch = err.message.match(/column "([^"]+)"/);
+            if (colMatch?.[1]) {
+              const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
+              const prop = allProperties.find(p => p.column_name === colMatch[1]);
+              const fieldName = prop ? prop.display_name : colMatch[1];
+              return {
+                content: [{ type: 'text' as const, text: `Required field "${fieldName}" is missing.` }],
+                isError: true,
+              };
+            }
+          }
           return {
             content: [{ type: 'text' as const, text: err.toHumanMessage(cache.constraintMessages) }],
             isError: true,

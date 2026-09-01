@@ -12,7 +12,9 @@ import type { PostgRESTClient } from '../postgrest-client.js';
 import { PostgRESTRequestError } from '../postgrest-client.js';
 import type { SchemaCache } from '../schema-cache.js';
 import type { NameResolver } from '../name-resolver.js';
+import { NameResolutionError } from '../name-resolver.js';
 import type { ActionCondition, EntityActionResult } from '../interfaces.js';
+import { buildSelectString } from '../select-builder.js';
 
 export function registerExecuteAction(
   server: McpServer,
@@ -28,7 +30,7 @@ export function registerExecuteAction(
       description:
         'Execute an entity action (approval, status change, workflow transition, etc.). ' +
         'Actions embed server-side business logic — prefer this over update_record for ' +
-        'status changes and workflow operations. No ETag required (RPCs are atomic).',
+        'status changes and workflow operations.',
       inputSchema: z.object({
         entity: z.string().describe('Entity display name or table name'),
         id: z.union([z.number(), z.string()]).describe('Record ID to act on'),
@@ -57,13 +59,16 @@ export function registerExecuteAction(
         };
       }
 
-      // Fetch current record to check conditions
+      // Fetch current record to check conditions.
+      // Use FK embedding so dot-notation conditions (e.g., "status_id.status_key") resolve correctly.
       let currentRecord: Record<string, unknown> | undefined;
       if (actionConfig.visibility_condition || actionConfig.enabled_condition) {
         try {
+          const allProperties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
+          const selectStr = buildSelectString(allProperties);
           const response = await client.get<Record<string, unknown>[]>(
             resolved.table_name,
-            { id: `eq.${id}` },
+            { select: selectStr, id: `eq.${id}` },
           );
           currentRecord = response.data[0];
         } catch {
@@ -74,10 +79,11 @@ export function registerExecuteAction(
       // Check visibility condition
       if (currentRecord && actionConfig.visibility_condition) {
         if (!evaluateCondition(actionConfig.visibility_condition, currentRecord)) {
+          const reason = describeConditionFailure(actionConfig.visibility_condition, currentRecord);
           return {
             content: [{
               type: 'text' as const,
-              text: `Action "${actionConfig.display_name}" is not available for this record in its current state.`,
+              text: `Action "${actionConfig.display_name}" is not available for this record.\n\n${reason}\n\nUse \`get_record\` to see the current state and available actions.`,
             }],
             isError: true,
           };
@@ -87,12 +93,12 @@ export function registerExecuteAction(
       // Check enabled condition
       if (currentRecord && actionConfig.enabled_condition) {
         if (!evaluateCondition(actionConfig.enabled_condition, currentRecord)) {
+          const reason = actionConfig.disabled_tooltip
+            ?? describeConditionFailure(actionConfig.enabled_condition, currentRecord);
           return {
             content: [{
               type: 'text' as const,
-              text: actionConfig.disabled_tooltip
-                ? `Action "${actionConfig.display_name}" is disabled: ${actionConfig.disabled_tooltip}`
-                : `Action "${actionConfig.display_name}" is disabled for this record in its current state.`,
+              text: `Action "${actionConfig.display_name}" is disabled: ${reason}\n\nUse \`get_record\` to see the current state and available actions.`,
             }],
             isError: true,
           };
@@ -125,7 +131,7 @@ export function registerExecuteAction(
           const value = params[actionParam.param_name] ?? params[actionParam.display_name];
           if (value === undefined) continue;
 
-          // Resolve FK param values
+          // Resolve FK param values — surface name resolution errors
           if (typeof value === 'string' && actionParam.join_table) {
             try {
               rpcPayload[actionParam.param_name] = await resolver.resolveForeignKeyValue(
@@ -133,8 +139,14 @@ export function registerExecuteAction(
                 value,
               );
               continue;
-            } catch {
-              // Fall through to raw value
+            } catch (paramErr) {
+              if (paramErr instanceof NameResolutionError) {
+                return {
+                  content: [{ type: 'text' as const, text: `Parameter "${actionParam.display_name}": ${paramErr.message}` }],
+                  isError: true,
+                };
+              }
+              // Non-resolution error — fall through to raw value
             }
           }
 
@@ -146,8 +158,13 @@ export function registerExecuteAction(
                 value,
               );
               continue;
-            } catch {
-              // Fall through to raw value
+            } catch (paramErr) {
+              if (paramErr instanceof NameResolutionError) {
+                return {
+                  content: [{ type: 'text' as const, text: `Parameter "${actionParam.display_name}": ${paramErr.message}` }],
+                  isError: true,
+                };
+              }
             }
           }
 
@@ -159,8 +176,13 @@ export function registerExecuteAction(
                 value,
               );
               continue;
-            } catch {
-              // Fall through to raw value
+            } catch (paramErr) {
+              if (paramErr instanceof NameResolutionError) {
+                return {
+                  content: [{ type: 'text' as const, text: `Parameter "${actionParam.display_name}": ${paramErr.message}` }],
+                  isError: true,
+                };
+              }
             }
           }
 
@@ -258,4 +280,41 @@ function resolveFieldValue(record: Record<string, unknown>, field: string): unkn
   }
 
   return current;
+}
+
+/**
+ * Build a human-readable explanation of why a condition failed.
+ * Tells the LLM what the record's current value is vs what was expected.
+ */
+function describeConditionFailure(
+  condition: ActionCondition,
+  record: Record<string, unknown>,
+): string {
+  if ('or' in condition) {
+    const parts = condition.or.map(c => describeConditionFailure(c, record));
+    return `None of these conditions are met:\n${parts.map(p => `  - ${p}`).join('\n')}`;
+  }
+
+  if ('and' in condition) {
+    const failing = condition.and.filter(c => !evaluateCondition(c, record));
+    const parts = failing.map(c => describeConditionFailure(c, record));
+    return parts.join('; ');
+  }
+
+  const { field, operator, value } = condition;
+  const actual = resolveFieldValue(record, field);
+  const fmt = (v: unknown) => v === null || v === undefined ? 'null' : JSON.stringify(v);
+
+  switch (operator) {
+    case 'eq': return `${field} is ${fmt(actual)}, expected ${fmt(value)}`;
+    case 'ne': return `${field} is ${fmt(actual)}, must not be ${fmt(value)}`;
+    case 'gt': return `${field} is ${fmt(actual)}, must be > ${fmt(value)}`;
+    case 'lt': return `${field} is ${fmt(actual)}, must be < ${fmt(value)}`;
+    case 'gte': return `${field} is ${fmt(actual)}, must be >= ${fmt(value)}`;
+    case 'lte': return `${field} is ${fmt(actual)}, must be <= ${fmt(value)}`;
+    case 'in': return `${field} is ${fmt(actual)}, must be one of ${fmt(value)}`;
+    case 'is_null': return `${field} is ${fmt(actual)}, must be null`;
+    case 'is_not_null': return `${field} is null, must have a value`;
+    default: return `${field} failed condition "${operator}"`;
+  }
 }

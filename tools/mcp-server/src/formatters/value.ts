@@ -157,7 +157,7 @@ function formatDateTime(value: string): string {
 }
 
 /** Format timestamptz (convert to user's local timezone) */
-function formatDateTimeLocal(value: string): string {
+export function formatDateTimeLocal(value: string): string {
   try {
     const d = new Date(value);
     return d.toLocaleString('en-US', {

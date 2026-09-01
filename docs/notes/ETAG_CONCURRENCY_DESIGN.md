@@ -1,7 +1,9 @@
 # ETag-Based Optimistic Concurrency Control
 
-> Status: **Proposed** — design document, not yet implemented.
+> Status: **Invalidated** — PostgREST does not support native ETags.
 > **Target:** Pre-v1.0 release
+
+> **Correction (2026-09-01):** This design was based on the incorrect assumption that PostgREST natively supports HTTP ETag headers (`ETag`, `If-Match`, `If-None-Match`, 412 responses). **PostgREST has never implemented ETag support** — see [PostgREST issue #1176](https://github.com/PostgREST/postgrest/issues/1176), open since August 2018. The PostgREST documentation page on ETags referenced below does not exist. The MCP server's ETag code was removed in v0.72.3 since `response.etag` was always `undefined`. To implement optimistic concurrency, use the **database-level `updated_at` column** alternative described at the bottom of this document, or a `row_version INTEGER` column with a `CHECK` constraint.
 
 ## Problem
 

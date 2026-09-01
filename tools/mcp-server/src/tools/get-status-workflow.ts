@@ -36,7 +36,7 @@ export function registerGetStatusWorkflow(
       await cache.ensureFreshForUser(client, cacheKey);
 
       const resolved = resolver.resolveEntity(entity);
-      const properties = cache.getProperties(resolved.table_name);
+      const properties = cache.getPropertiesForUser(cacheKey, resolved.table_name);
 
       // Find status properties
       const statusProps = properties.filter(p => p.type === EntityPropertyType.Status);

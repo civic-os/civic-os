@@ -6,15 +6,10 @@
  * Tests Bearer extraction, health endpoint, CORS headers, and OAuth metadata.
  */
 
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
-import {
-  createMcpHandler,
-  oauthMetadataResponse,
-  type AuthMetadataOptions,
-  type OAuthMetadata,
-} from '@modelcontextprotocol/server';
-import { extractBearerToken } from '../http.js';
-import { createServer, PKG_VERSION } from '../index.js';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { createMcpHandler } from '@modelcontextprotocol/server';
+import { extractBearerToken, buildProtectedResourceMetadata } from '../http.js';
+import { createServer, PKG_VERSION, type ServerConfig } from '../index.js';
 import { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
 
@@ -120,51 +115,70 @@ describe('extractBearerToken', () => {
 });
 
 // ============================================================================
-// OAuth Metadata Response
+// OAuth Protected Resource Metadata (buildProtectedResourceMetadata)
 // ============================================================================
 
-describe('OAuth metadata response', () => {
-  const keycloakUrl = 'http://localhost:8080';
-  const realm = 'civic-os-dev';
-  const realmUrl = `${keycloakUrl}/realms/${realm}`;
-
-  const options: AuthMetadataOptions = {
-    resourceServerUrl: new URL('http://localhost:3001'),
-    oauthMetadata: {
-      issuer: realmUrl,
-      authorization_endpoint: `${realmUrl}/protocol/openid-connect/auth`,
-      token_endpoint: `${realmUrl}/protocol/openid-connect/token`,
-      response_types_supported: ['code'],
-      grant_types_supported: ['authorization_code', 'refresh_token'],
-      code_challenge_methods_supported: ['S256'],
-    },
-    resourceName: 'Civic OS MCP',
-    dangerouslyAllowInsecureIssuerUrl: true,
+describe('buildProtectedResourceMetadata', () => {
+  const baseConfig: ServerConfig = {
+    postgrestUrl: 'http://localhost:3000',
+    transport: 'http',
+    port: 3001,
   };
 
-  it('returns protected resource metadata for well-known path', () => {
-    const request = new Request('http://localhost:3001/.well-known/oauth-protected-resource');
-    const response = oauthMetadataResponse(request, options);
+  it('returns correct JSON when Keycloak is configured', () => {
+    const config: ServerConfig = {
+      ...baseConfig,
+      keycloakUrl: 'http://localhost:8080',
+      keycloakRealm: 'civic-os-dev',
+    };
 
-    expect(response).toBeDefined();
-    expect(response?.status).toBe(200);
+    const result = buildProtectedResourceMetadata(config);
+    expect(result).toBeDefined();
+
+    const parsed = JSON.parse(result!);
+    expect(parsed.resource).toBe('http://localhost:3001');
+    expect(parsed.authorization_servers).toEqual([
+      'http://localhost:8080/realms/civic-os-dev',
+    ]);
+    expect(parsed.bearer_methods_supported).toEqual(['header']);
   });
 
-  it('returns undefined for non-well-known paths', () => {
-    const request = new Request('http://localhost:3001/mcp');
-    const response = oauthMetadataResponse(request, options);
+  it('uses mcpPublicUrl as resource when provided', () => {
+    const config: ServerConfig = {
+      ...baseConfig,
+      keycloakUrl: 'https://auth.example.com',
+      keycloakRealm: 'my-realm',
+      mcpPublicUrl: 'https://example.com/_/mcp',
+    };
 
-    expect(response).toBeUndefined();
+    const result = buildProtectedResourceMetadata(config);
+    const parsed = JSON.parse(result!);
+    expect(parsed.resource).toBe('https://example.com/_/mcp');
+    expect(parsed.authorization_servers).toEqual([
+      'https://auth.example.com/realms/my-realm',
+    ]);
   });
 
-  it('returns 405 for non-GET methods on well-known path', () => {
-    const request = new Request('http://localhost:3001/.well-known/oauth-protected-resource', {
-      method: 'POST',
-    });
-    const response = oauthMetadataResponse(request, options);
+  it('returns undefined when keycloakUrl is missing', () => {
+    const config: ServerConfig = {
+      ...baseConfig,
+      keycloakRealm: 'civic-os-dev',
+    };
 
-    expect(response).toBeDefined();
-    expect(response?.status).toBe(405);
+    expect(buildProtectedResourceMetadata(config)).toBeUndefined();
+  });
+
+  it('returns undefined when keycloakRealm is missing', () => {
+    const config: ServerConfig = {
+      ...baseConfig,
+      keycloakUrl: 'http://localhost:8080',
+    };
+
+    expect(buildProtectedResourceMetadata(config)).toBeUndefined();
+  });
+
+  it('returns undefined when both Keycloak params are missing', () => {
+    expect(buildProtectedResourceMetadata(baseConfig)).toBeUndefined();
   });
 });
 

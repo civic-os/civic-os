@@ -37,6 +37,7 @@ import { registerCreateRecord } from './tools/create-record.js';
 import { registerUpdateRecord } from './tools/update-record.js';
 import { registerExecuteAction } from './tools/execute-action.js';
 import { registerAddNote } from './tools/add-note.js';
+import { registerListNotes } from './tools/list-notes.js';
 import { registerGetStatusWorkflow } from './tools/get-status-workflow.js';
 
 // ============================================================================
@@ -132,7 +133,7 @@ Getting started:
 - Use list_records to browse data with filters, search, and pagination
 
 Working with data:
-- Always get_record before update_record — ETags are required for optimistic concurrency
+- Always get_record before update_record to see the current state
 - Prefer execute_action over update_record for status changes and workflows
 - Foreign key fields accept display names (e.g., "Acme Corp") — the server resolves them to IDs
 - Use add_note for comments and audit trails on entities that support notes
@@ -156,6 +157,14 @@ export function createServer(cache: SchemaCache, token?: string): McpServer {
   const client = new PostgRESTClient({ baseUrl: cache.baseUrl, token });
   const resolver = new NameResolver(cache, client, cacheKey);
 
+  // Fire-and-forget: sync user record from JWT claims when an authenticated user connects.
+  // This ensures the user row and roles are up-to-date without blocking server creation.
+  if (token) {
+    client.post('rpc/refresh_current_user', {}).catch((err: unknown) => {
+      console.error('refresh_current_user failed:', err instanceof Error ? err.message : err);
+    });
+  }
+
   const server = new McpServer(
     { name: 'civic-os', version: PKG_VERSION },
     { instructions: SERVER_INSTRUCTIONS },
@@ -172,6 +181,7 @@ export function createServer(cache: SchemaCache, token?: string): McpServer {
   registerUpdateRecord(server, client, cache, resolver, cacheKey);
   registerExecuteAction(server, client, cache, resolver, cacheKey);
   registerAddNote(server, client, cache, resolver, cacheKey);
+  registerListNotes(server, client, cache, resolver, cacheKey);
   registerGetStatusWorkflow(server, client, cache, resolver, cacheKey);
 
   // Register MCP Resources
@@ -243,7 +253,7 @@ function registerResources(
         if (entity.description) line += `\n${entity.description}`;
         lines.push(line);
 
-        const properties = cache.getProperties(entity.table_name);
+        const properties = cache.getPropertiesForUser(cacheKey, entity.table_name);
         if (properties.length > 0) {
           const propNames = properties.slice(0, 8).map(p => p.display_name).join(', ');
           lines.push(`Properties: ${propNames}${properties.length > 8 ? '...' : ''}`);
@@ -296,7 +306,7 @@ function registerResources(
         };
       }
 
-      const properties = cache.getProperties(entity.table_name);
+      const properties = cache.getPropertiesForUser(cacheKey, entity.table_name);
       const actions = cache.getActionsForUser(cacheKey, entity.table_name);
       const { getTypeLabel } = await import('./formatters/value.js');
 

@@ -273,7 +273,7 @@ describe('renderRecordDetail()', () => {
     const record = { id: 1, created_at: '2024-01-15T10:30:00Z' };
 
     const result = renderRecordDetail(record, props);
-    expect(result).toContain('**Created**: 2024-01-15T10:30:00Z');
+    expect(result).toContain('**Created**: Jan 15, 2024,');
   });
 
   it('includes updated_at timestamp when present', () => {
@@ -281,7 +281,7 @@ describe('renderRecordDetail()', () => {
     const record = { id: 1, updated_at: '2024-06-01T08:00:00Z' };
 
     const result = renderRecordDetail(record, props);
-    expect(result).toContain('**Updated**: 2024-06-01T08:00:00Z');
+    expect(result).toContain('**Updated**: Jun 1, 2024,');
   });
 
   it('omits created_at when falsy', () => {
