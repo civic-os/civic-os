@@ -87,6 +87,7 @@ function buildAuthMetadataOptions(config: ServerConfig): AuthMetadataOptions | u
     issuer: realmUrl,
     authorization_endpoint: `${realmUrl}/protocol/openid-connect/auth`,
     token_endpoint: `${realmUrl}/protocol/openid-connect/token`,
+    registration_endpoint: `${realmUrl}/clients-registrations/openid-connect`,
     response_types_supported: ['code'],
     grant_types_supported: ['authorization_code', 'refresh_token'],
     code_challenge_methods_supported: ['S256'],
