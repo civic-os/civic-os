@@ -214,6 +214,23 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
     // clientId and scopes are required by AuthInfo but not needed for transparent passthrough;
     // PostgREST handles all authorization via the JWT itself.
     const token = extractBearerToken(request);
+
+    // When OAuth is configured, reject unauthenticated MCP requests with 401.
+    // This triggers the client's OAuth flow (RFC 6750 §3 + MCP spec).
+    if (!token && protectedResourceJson) {
+      const resourceUrl = config.mcpPublicUrl ?? `http://localhost:${config.port}`;
+      return withCors(new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'WWW-Authenticate': `Bearer resource_metadata="${resourceUrl}/.well-known/oauth-protected-resource"`,
+          },
+        },
+      ));
+    }
+
     const response = await handler.fetch(request, {
       authInfo: token ? { token, clientId: 'civic-os-mcp', scopes: [] } : undefined,
     });
