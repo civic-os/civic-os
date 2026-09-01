@@ -3,7 +3,7 @@
 Copyright (C) 2023-2026 Civic OS, L3C
 
 **Created:** 2026-08-31
-**Status:** v0.72.3 -- stdio + HTTP Streamable transport, per-request auth, OAuth discovery (pre-created client + DCR), 12 tools
+**Status:** v0.72.5 -- stdio + HTTP Streamable transport, per-request auth, self-contained OAuth discovery (pre-created client + DCR), 12 tools
 
 ## Purpose
 
@@ -266,35 +266,51 @@ MCP clients authenticate users via OAuth 2.1 Authorization Code + PKCE flow agai
 
 See `docs/AUTHENTICATION.md` (Step 9) for setup instructions for both approaches.
 
-### OAuth Discovery (RFC 9728)
+### OAuth Discovery (RFC 9728 + RFC 8414)
 
-When `KEYCLOAK_URL` and `KEYCLOAK_REALM` env vars are set, the HTTP server exposes RFC 9728 protected resource metadata at `/.well-known/oauth-protected-resource`. This enables OAuth-capable MCP clients (Claude Code, Claude Desktop, claude.ai) to auto-discover Keycloak and perform the Authorization Code + PKCE flow.
+When `KEYCLOAK_URL` and `KEYCLOAK_REALM` env vars are set, the HTTP server exposes both OAuth discovery endpoints:
 
-The `buildProtectedResourceMetadata()` function in `http.ts` generates the discovery document -- a simple JSON response with `resource`, `authorization_servers`, and `bearer_methods_supported` fields. No token verification or Keycloak service account is needed.
+- **`/.well-known/oauth-protected-resource`** (RFC 9728) -- `buildProtectedResourceMetadata()` generates a static JSON response with `resource`, `authorization_servers`, and `bearer_methods_supported` fields.
+- **`/.well-known/oauth-authorization-server`** (RFC 8414) -- `OidcConfigCache` fetches and caches Keycloak's OIDC discovery document (`/realms/{realm}/.well-known/openid-configuration`) with a 1-hour TTL and stale-on-error fallback.
 
-**Why only `oauth-protected-resource`**: We serve the protected resource metadata (RFC 9728) but NOT `oauth-authorization-server` (RFC 8414). Clients discover the AS metadata directly from Keycloak via the `authorization_servers` array. This avoids path-prefix conflicts when the MCP server sits behind a reverse proxy (e.g., Caddy `handle_path` strips `/_/mcp` but clients fetch `/.well-known` from the origin).
+Both endpoints accept path suffixes (e.g., `/.well-known/oauth-protected-resource/_/mcp`) since the MCP SDK constructs suffix-qualified well-known paths from the resource URL.
+
+**Why the MCP server handles both endpoints**: MCP SDK clients construct `/.well-known/oauth-*` paths from the resource URL's origin, not its path prefix. These paths bypass typical path-prefix routing rules (e.g., Caddy `handle_path /_/mcp/*`). By handling both endpoints in the MCP server, the routing layer only needs a single rule: "route `/.well-known/oauth-*` to the MCP server." No Keycloak-specific proxy rules, URL rewriting, or TLS header manipulation. This makes deployments portable across Caddy, nginx, K8s HTTPRoute, and any other reverse proxy.
 
 ### HTTP Routing
 
 ```
-GET  /health                              → 200 { status: ok, version }
-OPTIONS *                                 → 204 with CORS headers
-GET  /.well-known/oauth-protected-resource → RFC 9728 metadata (if Keycloak configured)
-POST /mcp                                 → MCP Streamable handler
-GET  /mcp                                 → MCP SSE stream
+GET  /health                                       → 200 { status: ok, version }
+OPTIONS *                                          → 204 with CORS headers
+GET  /.well-known/oauth-protected-resource[/*]     → RFC 9728 metadata (if Keycloak configured)
+GET  /.well-known/oauth-authorization-server[/*]   → Keycloak OIDC config (cached, if Keycloak configured)
+POST /mcp                                          → MCP Streamable handler
+GET  /mcp                                          → MCP SSE stream
 ```
 
 CORS headers (`Access-Control-Allow-Origin: *`) are added to all responses except health checks.
 
-### Caddy Integration
+### Reverse Proxy Integration
 
-Route `/_/mcp/*` to the MCP server container:
+The routing layer needs two rules: (1) route `/_/mcp/*` to the MCP server for MCP protocol traffic, and (2) route `/.well-known/oauth-*` to the MCP server for OAuth discovery.
+
+**Caddy:**
 
 ```
 handle_path /_/mcp/* {
     reverse_proxy mcp-server:3001
 }
+
+handle_path /.well-known/oauth-protected-resource* {
+    reverse_proxy mcp-server:3001
+}
+
+handle_path /.well-known/oauth-authorization-server* {
+    reverse_proxy mcp-server:3001
+}
 ```
+
+**K8s HTTPRoute** — see `docs/AUTHENTICATION.md` (Step 9c) for a complete manifest.
 
 ## Container
 

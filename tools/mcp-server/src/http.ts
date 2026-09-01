@@ -71,14 +71,8 @@ function healthResponse(): Response {
 // ============================================================================
 
 /**
- * Build the OAuth Protected Resource Metadata JSON response.
- *
- * Only serves /.well-known/oauth-protected-resource — does NOT serve
- * /.well-known/oauth-authorization-server. Clients discover the AS metadata
- * directly from Keycloak via the authorization_servers array, which avoids
- * path-prefix conflicts when the MCP server sits behind a reverse proxy
- * (e.g., Caddy handle_path strips /_/mcp but clients fetch /.well-known
- * from the origin).
+ * Build the OAuth Protected Resource Metadata JSON response (RFC 9728).
+ * Served at /.well-known/oauth-protected-resource.
  */
 export function buildProtectedResourceMetadata(config: ServerConfig): string | undefined {
   if (!config.keycloakUrl || !config.keycloakRealm) {
@@ -93,6 +87,53 @@ export function buildProtectedResourceMetadata(config: ServerConfig): string | u
     authorization_servers: [realmUrl],
     bearer_methods_supported: ['header'],
   });
+}
+
+// ============================================================================
+// OAuth Authorization Server Metadata (RFC 8414)
+// ============================================================================
+
+/**
+ * Fetch and cache Keycloak's OIDC discovery document for the configured realm.
+ *
+ * The MCP server serves this at /.well-known/oauth-authorization-server so it
+ * is fully self-contained — the routing layer (Caddy, K8s HTTPRoute, nginx)
+ * only needs to route /.well-known/oauth-* paths to the MCP server, with no
+ * Keycloak-specific proxy rules. This makes the deployment portable across
+ * infrastructure types.
+ *
+ * The OIDC config is cached for 1 hour. On fetch failure, stale cache is
+ * returned if available; otherwise a 503 is sent.
+ */
+export class OidcConfigCache {
+  private json: string | undefined;
+  private fetchedAt = 0;
+  private readonly ttlMs = 60 * 60 * 1000; // 1 hour
+  private readonly oidcUrl: string;
+
+  constructor(keycloakUrl: string, keycloakRealm: string) {
+    this.oidcUrl = `${keycloakUrl}/realms/${keycloakRealm}/.well-known/openid-configuration`;
+  }
+
+  async get(): Promise<string | undefined> {
+    if (this.json && Date.now() - this.fetchedAt < this.ttlMs) {
+      return this.json;
+    }
+
+    try {
+      const response = await fetch(this.oidcUrl);
+      if (!response.ok) {
+        console.error(`Failed to fetch OIDC config from ${this.oidcUrl}: ${response.status}`);
+        return this.json; // stale cache
+      }
+      this.json = await response.text();
+      this.fetchedAt = Date.now();
+      return this.json;
+    } catch (err) {
+      console.error('Failed to fetch OIDC config:', err instanceof Error ? err.message : err);
+      return this.json; // stale cache
+    }
+  }
 }
 
 // ============================================================================
@@ -113,6 +154,14 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
   // Build protected resource metadata JSON (undefined if Keycloak not configured)
   const protectedResourceJson = buildProtectedResourceMetadata(config);
 
+  // OIDC config cache for oauth-authorization-server endpoint
+  const oidcCache = (config.keycloakUrl && config.keycloakRealm)
+    ? new OidcConfigCache(config.keycloakUrl, config.keycloakRealm)
+    : undefined;
+
+  // Pre-fetch OIDC config on startup (best-effort, non-blocking)
+  oidcCache?.get().catch(() => {});
+
   // Request handler: route health, OAuth, CORS, then MCP
   const handleRequest = async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
@@ -128,11 +177,34 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
     }
 
     // OAuth Protected Resource Metadata (RFC 9728)
-    if (protectedResourceJson && url.pathname === '/.well-known/oauth-protected-resource') {
+    // Matches /.well-known/oauth-protected-resource and any suffix (e.g., /_/mcp)
+    if (protectedResourceJson && url.pathname.startsWith('/.well-known/oauth-protected-resource')) {
       return withCors(new Response(protectedResourceJson, {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       }));
+    }
+
+    // OAuth Authorization Server Metadata (RFC 8414)
+    // Fetches from Keycloak and caches — makes MCP server self-contained
+    if (url.pathname.startsWith('/.well-known/oauth-authorization-server')) {
+      if (!oidcCache) {
+        return withCors(new Response(
+          JSON.stringify({ error: 'OAuth not configured (KEYCLOAK_URL/KEYCLOAK_REALM not set)' }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } },
+        ));
+      }
+      const oidcJson = await oidcCache.get();
+      if (oidcJson) {
+        return withCors(new Response(oidcJson, {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      }
+      return withCors(new Response(
+        JSON.stringify({ error: 'OIDC configuration not available — Keycloak may be unreachable' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } },
+      ));
     }
 
     // MCP handler — extract Bearer token and pass as authInfo
@@ -192,6 +264,6 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
 
   console.error(`MCP server listening on http://0.0.0.0:${port} (HTTP Streamable transport)`);
   if (protectedResourceJson) {
-    console.error(`OAuth discovery enabled: ${config.keycloakUrl}/realms/${config.keycloakRealm}`);
+    console.error(`OAuth discovery enabled (protected-resource + authorization-server): ${config.keycloakUrl}/realms/${config.keycloakRealm}`);
   }
 }

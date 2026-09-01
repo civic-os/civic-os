@@ -351,11 +351,11 @@ The consolidated worker needs a Keycloak service account to create users and man
 
 **Note**: The pre-configured `examples/keycloak/civic-os-dev.json` realm export already includes this service account client with secret `civic-os-service-secret` for local development. Production deployments must generate a new secret.
 
-### Step 9: Configure MCP Server OAuth (v0.72.1+ — Recommended)
+### Step 9: Configure MCP Server OAuth (v0.72.1+)
 
-MCP clients (Claude Code, Claude Desktop, claude.ai web) need a Keycloak client to authenticate users via the OAuth 2.1 auto-discovery flow. Two approaches are available:
+MCP clients (Claude Code, Claude Desktop, claude.ai web) authenticate users via OAuth 2.1 with Keycloak. This step has three parts: Keycloak client setup, reverse proxy routing, and MCP server configuration.
 
-#### Approach A: Pre-created Client (Recommended)
+#### 9a. Keycloak: Create `civic-os-mcp` Client
 
 The `civic-os-mcp` public client is **already included** in the realm template (`templates/keycloak/realm-template.json`) and dev realm (`examples/keycloak/civic-os-dev.json`). New deployments get it automatically.
 
@@ -365,66 +365,185 @@ For existing deployments, create the client in Keycloak admin console:
    - Go to: Clients → Create client
    - **Client ID**: `civic-os-mcp`
    - **Client type**: OpenID Connect
+   - **Name**: MCP Server OAuth
+2. **Capability config**:
    - **Client authentication**: OFF (public client — no client secret)
-   - **Authentication flow**: Check "Standard flow" (Authorization Code)
-   - Click Save
-
-2. **Configure login settings**:
-   - **Valid redirect URIs**: `http://localhost:*` and `http://127.0.0.1:*` (MCP clients use localhost OAuth callbacks)
+   - **Standard flow**: ON
+   - **Direct access grants**: OFF
+3. **Login settings**:
+   - **Root URL**: (leave blank — headless client, no UI)
+   - **Home URL**: (leave blank)
+   - **Valid redirect URIs**: `http://localhost:*` and `http://127.0.0.1:*` (MCP clients use localhost OAuth callbacks with PKCE)
    - **Web origins**: `+` (auto-derives CORS from redirect URIs)
-   - **PKCE Code Challenge Method**: `S256` (required by MCP spec's OAuth 2.1)
+4. **Advanced tab**:
+   - **Proof Key for Code Exchange (PKCE)**: `S256` (required by MCP spec's OAuth 2.1)
+5. **Client scopes tab** — verify these default scopes are assigned: `web-origins`, `acr`, `roles`, `profile`, `basic`, `email`. Add `offline_access` as optional.
 
-3. **Configure MCP client** with `oauthClientId` to bypass DCR:
+#### 9b. Keycloak: Configure Dynamic Client Registration (DCR)
 
-   **Claude Code** (`.mcp.json`):
-   ```json
-   {
-     "mcpServers": {
-       "my-instance": {
-         "type": "http",
-         "url": "https://your-instance.civic-os.org/_/mcp/",
-         "oauthClientId": "civic-os-mcp"
-       }
-     }
-   }
-   ```
+MCP clients (including Claude Code) use DCR to self-register OAuth clients at runtime. Even when `oauthClientId` is specified in the MCP config, Claude Code still performs DCR — the `oauthClientId` is a hint, not a bypass.
 
-   **Claude Desktop** (`claude_desktop_config.json`):
-   ```json
-   {
-     "mcpServers": {
-       "my-instance": {
-         "type": "http",
-         "url": "https://your-instance.civic-os.org/_/mcp/",
-         "oauthClientId": "civic-os-mcp"
-       }
-     }
-   }
-   ```
+Keycloak's **default** anonymous registration policies block DCR with scope and full-scope restrictions. You must configure them:
 
-#### Approach B: Dynamic Client Registration (DCR)
+1. Go to: **Clients** → **Client registration** tab (top bar, next to "Client list")
+2. Click **Client Registration Policies** sub-tab
+3. Under **Anonymous Access Policies**, configure as follows:
 
-As an alternative, you can enable DCR so MCP clients self-register at runtime without a pre-created client. This is more flexible but requires Keycloak configuration.
+**Required policy:**
 
-The realm template already includes a trusted-hosts DCR policy for `localhost`/`127.0.0.1`. For production, add your MCP server's host to the trusted hosts list in Keycloak:
+| Policy | Provider | Configuration |
+|--------|----------|---------------|
+| Trusted Hosts | `trusted-hosts` | trusted-hosts: `localhost`, `127.0.0.1`; host-must-match: ON; client-uris-must-match: ON |
 
-1. Go to: Realm Settings → Client Registration → Client Registration Policies
-2. Under "Anonymous Access Policies", find "Trusted Hosts"
-3. Add your server's hostname (e.g., `your-instance.civic-os.org`)
+**Policies to REMOVE** (delete from the anonymous policies list):
 
-When DCR is available and no `oauthClientId` is specified, MCP clients will dynamically register a client and complete the OAuth flow automatically.
+| Policy to Remove | Why |
+|-------------------|-----|
+| Allowed Client Scopes | Blocks DCR when requested scopes aren't whitelisted — causes "Policy rejected request to client-registration service" error |
+| Full Scope Disabled | Sets `fullScopeAllowed: false` on DCR clients — causes JWTs to omit realm roles, so PostgREST sees no permissions and returns empty results |
+| Consent Required | Forces consent screen on every login — unnecessary for trusted MCP clients |
+| Allowed Protocol Mappers | May block mappers the MCP client requests |
 
-#### MCP Server Environment Variables
+> **Minimal working config**: The KB instance (`kb.civic-os.org`) uses only the **Trusted Hosts** policy with no other anonymous policies. This is the proven minimal configuration.
 
-Both approaches require the MCP server to serve OAuth discovery metadata:
+#### 9c. Reverse Proxy: Route OAuth Well-Known Paths
 
-```bash
-KEYCLOAK_URL=http://keycloak:8080       # or your public Keycloak URL
-KEYCLOAK_REALM=civic-os                  # your realm name
-MCP_PUBLIC_URL=https://your-instance.civic-os.org/_/mcp  # public MCP server URL
+The MCP SDK constructs OAuth discovery URLs based on the resource URL. For a resource at `https://example.com/_/mcp`, it fetches:
+
+- `/.well-known/oauth-protected-resource/_/mcp` (RFC 9728)
+- `/.well-known/oauth-authorization-server/_/mcp` (RFC 8414)
+- `/.well-known/oauth-authorization-server` (fallback)
+
+These paths do NOT start with `/_/mcp`, so they won't be caught by typical path-prefix routing rules (e.g., Caddy's `handle_path /_/mcp/*`). Without explicit routing, they fall through to the Angular frontend, which returns HTML (causing `Unexpected token '<'` errors).
+
+**Architecture: Self-contained MCP server (v0.72.5+)**
+
+The MCP server handles both well-known endpoints internally:
+- `oauth-protected-resource` — serves the RFC 9728 metadata directly
+- `oauth-authorization-server` — fetches Keycloak's OIDC discovery document, caches it for 1 hour, and serves it to clients
+
+This means the routing layer only needs one simple rule: **route `/.well-known/oauth-*` to the MCP server.** No Keycloak-specific proxy rules, no URL rewriting, no TLS header manipulation. The same routing config works across Caddy, nginx, K8s HTTPRoute, and any other reverse proxy.
+
+**Caddy** — add before the frontend catch-all:
+
+```
+# MCP OAuth well-known metadata → MCP server handles both endpoints
+handle_path /.well-known/oauth-protected-resource* {
+    reverse_proxy mcp-server:3001
+}
+
+handle_path /.well-known/oauth-authorization-server* {
+    reverse_proxy mcp-server:3001
+}
 ```
 
-**How it works**: The MCP server serves RFC 9728 protected resource metadata at `/.well-known/oauth-protected-resource`, pointing clients to Keycloak's authorization and token endpoints. The MCP server never interacts with the `civic-os-mcp` client directly — it's between the MCP client and Keycloak. The MCP server only forwards Bearer tokens to PostgREST for verification.
+After updating, reload: `docker exec <caddy-container> caddy reload --config /etc/caddy/Caddyfile`
+
+**Kubernetes Gateway API** (HTTPRoute):
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-oauth-wellknown
+spec:
+  parentRefs:
+    - name: main-gateway
+  hostnames:
+    - "your-instance.example.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /.well-known/oauth-protected-resource
+        - path:
+            type: PathPrefix
+            value: /.well-known/oauth-authorization-server
+      backendRefs:
+        - name: mcp-server
+          port: 3001
+```
+
+**nginx** (ingress annotation or server block):
+
+```nginx
+location ~ ^/\.well-known/oauth-(protected-resource|authorization-server) {
+    proxy_pass http://mcp-server:3001;
+}
+```
+
+**Verify** all three paths return JSON, not HTML:
+```bash
+curl -s https://your-instance.example.com/.well-known/oauth-protected-resource/_/mcp
+curl -s https://your-instance.example.com/.well-known/oauth-authorization-server/_/mcp
+curl -s https://your-instance.example.com/.well-known/oauth-authorization-server
+```
+
+#### 9d. MCP Server: Environment Variables
+
+Add these to your MCP server's docker-compose environment:
+
+```yaml
+mcp-server:
+  environment:
+    POSTGREST_URL: http://postgrest:3000
+    MCP_TRANSPORT: http
+    MCP_PORT: 3001
+    KEYCLOAK_URL: ${KEYCLOAK_URL}          # e.g., https://auth.example.com
+    KEYCLOAK_REALM: ${KEYCLOAK_REALM}      # e.g., my-realm
+    MCP_PUBLIC_URL: https://${APP_DOMAIN}/_/mcp  # public URL of the MCP server
+```
+
+`MCP_PUBLIC_URL` is **critical** — without it, the OAuth protected resource metadata advertises `http://localhost:3001` as the resource URL, which breaks the OAuth flow.
+
+#### 9e. MCP Client Configuration
+
+**Claude Code** (`.mcp.json` in project root or `~/.claude/settings.json`):
+```json
+{
+  "mcpServers": {
+    "my-instance": {
+      "type": "http",
+      "url": "https://your-instance.example.com/_/mcp/",
+      "oauthClientId": "civic-os-mcp"
+    }
+  }
+}
+```
+
+**Claude Desktop** (`claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "my-instance": {
+      "type": "http",
+      "url": "https://your-instance.example.com/_/mcp/",
+      "oauthClientId": "civic-os-mcp"
+    }
+  }
+}
+```
+
+#### 9f. How It Works
+
+1. MCP client fetches `/.well-known/oauth-protected-resource` → routing layer forwards to MCP server → MCP server returns `authorization_servers` pointing to Keycloak
+2. MCP client fetches `/.well-known/oauth-authorization-server` → routing layer forwards to MCP server → MCP server returns cached Keycloak OIDC discovery document (auth/token/registration endpoints)
+3. MCP client performs DCR at Keycloak's `registration_endpoint` → gets a dynamic client
+4. MCP client opens browser for OAuth 2.1 Authorization Code + PKCE flow → user logs in at Keycloak
+5. MCP client exchanges code for JWT → sends Bearer token with each MCP request
+6. MCP server forwards Bearer token to PostgREST → PostgREST validates JWT against Keycloak JWKS → RLS enforces permissions
+
+The MCP server never validates JWTs itself — it's a transparent token passthrough to PostgREST. The OIDC config from Keycloak is cached for 1 hour, with stale-on-error fallback.
+
+#### 9g. Troubleshooting MCP OAuth
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `Unexpected token '<', "<!doctype"` | Well-known paths hitting Angular frontend (HTML) | Route `/.well-known/oauth-*` to MCP server per Step 9c |
+| `Policy rejected request to client-registration service` | Keycloak DCR policy blocking scopes | Remove "Allowed Client Scopes" policy per Step 9b |
+| Connected but `list_entities` returns empty / "No Entities" | JWT missing realm roles (`fullScopeAllowed: false`) | Remove "Full Scope Disabled" policy per Step 9b |
+| `resource: "http://localhost:3001"` in metadata | `MCP_PUBLIC_URL` not set | Add `MCP_PUBLIC_URL` to docker-compose per Step 9d |
+| 302/400 on OAuth auth request | `civic-os-mcp` client doesn't exist in realm | Create client per Step 9a |
 
 ---
 

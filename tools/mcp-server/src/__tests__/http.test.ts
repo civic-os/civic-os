@@ -8,7 +8,7 @@
 
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { createMcpHandler } from '@modelcontextprotocol/server';
-import { extractBearerToken, buildProtectedResourceMetadata } from '../http.js';
+import { extractBearerToken, buildProtectedResourceMetadata, OidcConfigCache } from '../http.js';
 import { createServer, PKG_VERSION, type ServerConfig } from '../index.js';
 import { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
@@ -179,6 +179,96 @@ describe('buildProtectedResourceMetadata', () => {
 
   it('returns undefined when both Keycloak params are missing', () => {
     expect(buildProtectedResourceMetadata(baseConfig)).toBeUndefined();
+  });
+});
+
+// ============================================================================
+// OidcConfigCache (Authorization Server Metadata)
+// ============================================================================
+
+describe('OidcConfigCache', () => {
+  const oidcResponse = JSON.stringify({
+    issuer: 'http://localhost:8080/realms/civic-os-dev',
+    authorization_endpoint: 'http://localhost:8080/realms/civic-os-dev/protocol/openid-connect/auth',
+    token_endpoint: 'http://localhost:8080/realms/civic-os-dev/protocol/openid-connect/token',
+    registration_endpoint: 'http://localhost:8080/realms/civic-os-dev/clients-registrations/openid-connect',
+  });
+
+  it('fetches OIDC config from Keycloak', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(oidcResponse, { status: 200 }),
+    );
+
+    const cache = new OidcConfigCache('http://localhost:8080', 'civic-os-dev');
+    const result = await cache.get();
+
+    expect(result).toBe(oidcResponse);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'http://localhost:8080/realms/civic-os-dev/.well-known/openid-configuration',
+    );
+
+    fetchSpy.mockRestore();
+  });
+
+  it('returns cached value on subsequent calls', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(oidcResponse, { status: 200 }),
+    );
+
+    const cache = new OidcConfigCache('http://localhost:8080', 'civic-os-dev');
+    await cache.get();
+    const result = await cache.get();
+
+    expect(result).toBe(oidcResponse);
+    expect(fetchSpy).toHaveBeenCalledTimes(1); // Only fetched once
+
+    fetchSpy.mockRestore();
+  });
+
+  it('returns stale cache when fetch fails', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(oidcResponse, { status: 200 }))
+      .mockRejectedValueOnce(new Error('Connection refused'));
+
+    const cache = new OidcConfigCache('http://localhost:8080', 'civic-os-dev');
+    await cache.get();
+
+    // Force cache expiry by accessing private field
+    (cache as unknown as { fetchedAt: number }).fetchedAt = 0;
+
+    const result = await cache.get();
+    expect(result).toBe(oidcResponse); // Returns stale cache
+
+    fetchSpy.mockRestore();
+  });
+
+  it('returns undefined when fetch fails with no cache', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockRejectedValueOnce(new Error('Connection refused'));
+
+    const cache = new OidcConfigCache('http://localhost:8080', 'civic-os-dev');
+    const result = await cache.get();
+
+    expect(result).toBeUndefined();
+
+    fetchSpy.mockRestore();
+  });
+
+  it('returns stale cache on non-200 response', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(oidcResponse, { status: 200 }))
+      .mockResolvedValueOnce(new Response('Internal Server Error', { status: 500 }));
+
+    const cache = new OidcConfigCache('http://localhost:8080', 'civic-os-dev');
+    await cache.get();
+
+    // Force cache expiry
+    (cache as unknown as { fetchedAt: number }).fetchedAt = 0;
+
+    const result = await cache.get();
+    expect(result).toBe(oidcResponse); // Stale cache
+
+    fetchSpy.mockRestore();
   });
 });
 
