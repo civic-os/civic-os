@@ -13,10 +13,7 @@
 
 import {
   createMcpHandler,
-  oauthMetadataResponse,
-  type AuthMetadataOptions,
   type McpHttpHandler,
-  type OAuthMetadata,
 } from '@modelcontextprotocol/server';
 import type { SchemaCache } from './schema-cache.js';
 import { createServer, PKG_VERSION, type ServerConfig } from './index.js';
@@ -70,35 +67,32 @@ function healthResponse(): Response {
 }
 
 // ============================================================================
-// OAuth Discovery (optional)
+// OAuth Protected Resource Metadata (RFC 9728)
 // ============================================================================
 
-function buildAuthMetadataOptions(config: ServerConfig): AuthMetadataOptions | undefined {
+/**
+ * Build the OAuth Protected Resource Metadata JSON response.
+ *
+ * Only serves /.well-known/oauth-protected-resource — does NOT serve
+ * /.well-known/oauth-authorization-server. Clients discover the AS metadata
+ * directly from Keycloak via the authorization_servers array, which avoids
+ * path-prefix conflicts when the MCP server sits behind a reverse proxy
+ * (e.g., Caddy handle_path strips /_/mcp but clients fetch /.well-known
+ * from the origin).
+ */
+function buildProtectedResourceMetadata(config: ServerConfig): string | undefined {
   if (!config.keycloakUrl || !config.keycloakRealm) {
     return undefined;
   }
 
   const realmUrl = `${config.keycloakUrl}/realms/${config.keycloakRealm}`;
-  const resourceServerUrl = config.mcpPublicUrl
-    ? new URL(config.mcpPublicUrl)
-    : new URL(`http://localhost:${config.port}`);
+  const resourceUrl = config.mcpPublicUrl ?? `http://localhost:${config.port}`;
 
-  const oauthMetadata: OAuthMetadata = {
-    issuer: realmUrl,
-    authorization_endpoint: `${realmUrl}/protocol/openid-connect/auth`,
-    token_endpoint: `${realmUrl}/protocol/openid-connect/token`,
-    registration_endpoint: `${realmUrl}/clients-registrations/openid-connect`,
-    response_types_supported: ['code'],
-    grant_types_supported: ['authorization_code', 'refresh_token'],
-    code_challenge_methods_supported: ['S256'],
-  };
-
-  return {
-    resourceServerUrl,
-    oauthMetadata,
-    resourceName: 'Civic OS MCP',
-    dangerouslyAllowInsecureIssuerUrl: true,
-  };
+  return JSON.stringify({
+    resource: resourceUrl,
+    authorization_servers: [realmUrl],
+    bearer_methods_supported: ['header'],
+  });
 }
 
 // ============================================================================
@@ -116,8 +110,8 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
     { legacy: 'stateless' },
   );
 
-  // Build OAuth metadata options (undefined if Keycloak not configured)
-  const authMetadataOptions = buildAuthMetadataOptions(config);
+  // Build protected resource metadata JSON (undefined if Keycloak not configured)
+  const protectedResourceJson = buildProtectedResourceMetadata(config);
 
   // Request handler: route health, OAuth, CORS, then MCP
   const handleRequest = async (request: Request): Promise<Response> => {
@@ -133,12 +127,12 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
       return withCors(new Response(null, { status: 204 }));
     }
 
-    // OAuth discovery (optional — only if Keycloak configured)
-    if (authMetadataOptions) {
-      const metadataResponse = oauthMetadataResponse(request, authMetadataOptions);
-      if (metadataResponse) {
-        return withCors(metadataResponse);
-      }
+    // OAuth Protected Resource Metadata (RFC 9728)
+    if (protectedResourceJson && url.pathname === '/.well-known/oauth-protected-resource') {
+      return withCors(new Response(protectedResourceJson, {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }));
     }
 
     // MCP handler — extract Bearer token and pass as authInfo
@@ -197,7 +191,7 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
   }
 
   console.error(`MCP server listening on http://0.0.0.0:${port} (HTTP Streamable transport)`);
-  if (authMetadataOptions) {
+  if (protectedResourceJson) {
     console.error(`OAuth discovery enabled: ${config.keycloakUrl}/realms/${config.keycloakRealm}`);
   }
 }
