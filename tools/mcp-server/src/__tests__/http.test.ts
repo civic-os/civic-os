@@ -112,6 +112,14 @@ describe('extractBearerToken', () => {
     });
     expect(extractBearerToken(request)).toBe(jwt);
   });
+
+  it('strips double Bearer prefix (token value includes "Bearer ")', () => {
+    const jwt = 'eyJhbGciOiJSUzI1NiJ9.test';
+    const request = new Request('http://localhost/mcp', {
+      headers: { Authorization: `Bearer Bearer ${jwt}` },
+    });
+    expect(extractBearerToken(request)).toBe(jwt);
+  });
 });
 
 // ============================================================================

@@ -47,7 +47,10 @@ function withCors(response: Response): Response {
 export function extractBearerToken(request: Request): string | undefined {
   const authHeader = request.headers.get('Authorization');
   if (authHeader?.startsWith('Bearer ')) {
-    return authHeader.slice(7);
+    const token = authHeader.slice(7);
+    // Defensive: strip a second "Bearer " prefix in case the token value
+    // itself was configured with the prefix (e.g., "Bearer eyJ..." in a config file)
+    return token.startsWith('Bearer ') ? token.slice(7) : token;
   }
   return undefined;
 }
