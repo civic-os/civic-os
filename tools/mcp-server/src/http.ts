@@ -27,8 +27,9 @@ declare const Bun: { serve(options: { port: number; fetch: (req: Request) => Pro
 
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Authorization, Content-Type, Mcp-Session-Id',
+  'Access-Control-Allow-Headers': 'Authorization, Content-Type, Mcp-Session-Id, Mcp-Method, Mcp-Name',
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Expose-Headers': 'Mcp-Session-Id',
 };
 
 /** Add CORS headers to a Response */
@@ -88,7 +89,9 @@ export function buildProtectedResourceMetadata(config: ServerConfig): string | u
   return JSON.stringify({
     resource: resourceUrl,
     authorization_servers: [realmUrl],
+    scopes_supported: ['mcp:tools'],
     bearer_methods_supported: ['header'],
+    resource_name: 'Civic OS MCP',
   });
 }
 
@@ -220,12 +223,12 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
     if (!token && protectedResourceJson) {
       const resourceUrl = config.mcpPublicUrl ?? `http://localhost:${config.port}`;
       return withCors(new Response(
-        JSON.stringify({ error: 'Authentication required' }),
+        JSON.stringify({ error: 'invalid_token', error_description: 'Authentication required' }),
         {
           status: 401,
           headers: {
             'Content-Type': 'application/json',
-            'WWW-Authenticate': `Bearer resource_metadata="${resourceUrl}/.well-known/oauth-protected-resource"`,
+            'WWW-Authenticate': `Bearer error="invalid_token", resource_metadata="${resourceUrl}/.well-known/oauth-protected-resource", scope="mcp:tools"`,
           },
         },
       ));

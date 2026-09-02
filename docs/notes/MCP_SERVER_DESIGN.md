@@ -258,19 +258,37 @@ The MCP server never verifies JWTs. It extracts the Bearer token and passes it t
 
 ### OAuth Authentication
 
-MCP clients authenticate users via OAuth 2.1 Authorization Code + PKCE flow against Keycloak. Two client provisioning approaches are supported:
+MCP clients authenticate users via OAuth 2.1 Authorization Code + PKCE flow against Keycloak. Three client provisioning paths are supported (in order of preference):
 
-1. **Pre-created client** (recommended): A `civic-os-mcp` public client is included in the Keycloak realm template. MCP clients reference it via `oauthClientId: "civic-os-mcp"` in their config, bypassing dynamic registration entirely.
+1. **CIMD (Client Identity Metadata Document)** (future): Keycloak does not yet support CIMD. When available, this will be the preferred path — the MCP client presents a signed identity document and Keycloak auto-provisions a client without DCR.
 
-2. **Dynamic Client Registration (DCR)**: A trusted-hosts policy (also in the realm template) allows MCP clients connecting from localhost to self-register at runtime. More flexible for development but requires Keycloak DCR configuration for production hosts.
+2. **Dynamic Client Registration (DCR)**: MCP clients (including Claude Code and Claude Desktop) self-register at Keycloak's `registration_endpoint` at runtime. The realm template uses a **Consent Required** policy (not Trusted Hosts) so DCR works regardless of source IP — critical because Anthropic's MCP proxy relays registrations from cloud IPs, not localhost.
 
-See `docs/AUTHENTICATION.md` (Step 9) for setup instructions for both approaches.
+3. **Pre-registered client**: A `civic-os-mcp` public client is included in the realm template. MCP clients can reference it via `oauthClientId: "civic-os-mcp"` in their config or Advanced settings. This bypasses DCR entirely but requires the client to know the client ID upfront.
+
+**Audience bridge**: Keycloak does not implement RFC 8707 (`resource` parameter on token requests). To bind tokens to the MCP resource server, add an audience mapper to the `mcp:tools` client scope with `included.custom.audience` set to the MCP public URL. This is instance-specific and must be configured per deployment.
+
+See `docs/AUTHENTICATION.md` (Step 9) for setup instructions and `docs/notes/MCP_OAUTH_COMPATIBILITY_GUIDE.md` for full spec compliance reference.
+
+### 401 Challenge Format
+
+Unauthenticated MCP requests receive a 401 response compliant with RFC 6750 §3 and the MCP OAuth spec:
+
+```
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer error="invalid_token", resource_metadata="<url>/.well-known/oauth-protected-resource", scope="mcp:tools"
+Content-Type: application/json
+
+{"error":"invalid_token","error_description":"Authentication required"}
+```
+
+The `error="invalid_token"` field is required for MCP clients to recognize this as an OAuth challenge. The `scope="mcp:tools"` tells clients which scope to request during authorization.
 
 ### OAuth Discovery (RFC 9728 + RFC 8414)
 
 When `KEYCLOAK_URL` and `KEYCLOAK_REALM` env vars are set, the HTTP server exposes both OAuth discovery endpoints:
 
-- **`/.well-known/oauth-protected-resource`** (RFC 9728) -- `buildProtectedResourceMetadata()` generates a static JSON response with `resource`, `authorization_servers`, and `bearer_methods_supported` fields.
+- **`/.well-known/oauth-protected-resource`** (RFC 9728) -- `buildProtectedResourceMetadata()` generates a static JSON response with `resource`, `authorization_servers`, `scopes_supported: ["mcp:tools"]`, `bearer_methods_supported: ["header"]`, and `resource_name: "Civic OS MCP"`.
 - **`/.well-known/oauth-authorization-server`** (RFC 8414) -- `OidcConfigCache` fetches and caches Keycloak's OIDC discovery document (`/realms/{realm}/.well-known/openid-configuration`) with a 1-hour TTL and stale-on-error fallback.
 
 Both endpoints accept path suffixes (e.g., `/.well-known/oauth-protected-resource/_/mcp`) since the MCP SDK constructs suffix-qualified well-known paths from the resource URL.
@@ -284,31 +302,34 @@ GET  /health                                       → 200 { status: ok, version
 OPTIONS *                                          → 204 with CORS headers
 GET  /.well-known/oauth-protected-resource[/*]     → RFC 9728 metadata (if Keycloak configured)
 GET  /.well-known/oauth-authorization-server[/*]   → Keycloak OIDC config (cached, if Keycloak configured)
+POST /mcp (no Bearer, OAuth configured)            → 401 with WWW-Authenticate challenge
 POST /mcp                                          → MCP Streamable handler
 GET  /mcp                                          → MCP SSE stream
 ```
 
-CORS headers (`Access-Control-Allow-Origin: *`) are added to all responses except health checks.
+CORS headers (`Access-Control-Allow-Origin: *`, `Mcp-Method`, `Mcp-Name` in allowed headers, `Mcp-Session-Id` exposed) are added to all responses except health checks.
 
 ### Reverse Proxy Integration
 
 The routing layer needs two rules: (1) route `/_/mcp/*` to the MCP server for MCP protocol traffic, and (2) route `/.well-known/oauth-*` to the MCP server for OAuth discovery.
 
-**Caddy:**
+**Caddy** (from `infrastructure/vps/Caddyfile`):
 
 ```
 handle_path /_/mcp/* {
     reverse_proxy mcp-server:3001
 }
 
-handle_path /.well-known/oauth-protected-resource* {
+handle /.well-known/oauth-protected-resource* {
     reverse_proxy mcp-server:3001
 }
 
-handle_path /.well-known/oauth-authorization-server* {
+handle /.well-known/oauth-authorization-server* {
     reverse_proxy mcp-server:3001
 }
 ```
+
+Note: well-known routes use `handle` (not `handle_path`) so the full path reaches the MCP server for suffix matching.
 
 **K8s HTTPRoute** — see `docs/AUTHENTICATION.md` (Step 9c) for a complete manifest.
 

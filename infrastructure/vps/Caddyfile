@@ -22,6 +22,18 @@
 		reverse_proxy postgrest:3000
 	}
 
+	handle_path /_/mcp/* {
+		reverse_proxy mcp-server:3001
+	}
+
+	# OAuth discovery — MCP server handles both endpoints
+	handle /.well-known/oauth-protected-resource* {
+		reverse_proxy mcp-server:3001
+	}
+	handle /.well-known/oauth-authorization-server* {
+		reverse_proxy mcp-server:3001
+	}
+
 	redir /_/docs /_/docs/ 308
 	handle_path /_/docs/* {
 		reverse_proxy swagger-ui:8080

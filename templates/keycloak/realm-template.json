@@ -151,8 +151,14 @@
       "rootUrl": "",
       "baseUrl": "",
       "redirectUris": [
+        "http://localhost/callback",
+        "http://localhost:*/callback",
+        "http://127.0.0.1/callback",
+        "http://127.0.0.1:*/callback",
         "http://localhost:*",
-        "http://127.0.0.1:*"
+        "http://127.0.0.1:*",
+        "https://claude.ai/api/mcp/auth_callback",
+        "https://claude.com/api/mcp/auth_callback"
       ],
       "webOrigins": ["+"],
       "attributes": {
@@ -168,7 +174,8 @@
         "email"
       ],
       "optionalClientScopes": [
-        "offline_access"
+        "offline_access",
+        "mcp:tools"
       ]
     }
   ],
@@ -210,16 +217,34 @@
     "ssl": "false"
   },
 
+  "clientScopes": [
+    {
+      "name": "mcp:tools",
+      "description": "MCP tool access — carries audience claim for the MCP resource server",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "Access your data via AI tools"
+      },
+      "protocolMappers": []
+    }
+  ],
+
   "components": {
     "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
       {
-        "name": "Trusted Hosts",
-        "providerId": "trusted-hosts",
+        "name": "Consent Required",
+        "providerId": "consent-required",
+        "subType": "anonymous",
+        "config": {}
+      },
+      {
+        "name": "Max Clients Limit",
+        "providerId": "max-clients",
         "subType": "anonymous",
         "config": {
-          "host-sending-registration-request-must-match": ["true"],
-          "trusted-hosts": ["localhost", "127.0.0.1"],
-          "client-uris-must-match": ["true"]
+          "max-clients": ["200"]
         }
       }
     ],
