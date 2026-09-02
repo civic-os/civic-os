@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # VPS Docker Compose Configuration
@@ -92,10 +92,13 @@ services:
       # API settings - use public URL for OpenAPI spec
       PGRST_OPENAPI_SERVER_PROXY_URI: https://api.${APP_DOMAIN}
       PGRST_LOG_LEVEL: ${POSTGREST_LOG_LEVEL:-info}
+
+      # Admin server for healthcheck (no DB connection consumed)
+      PGRST_ADMIN_SERVER_PORT: 3001
     networks:
       - civic-os-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:3000/ > /dev/null || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/ready || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3

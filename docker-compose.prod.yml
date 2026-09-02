@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # Production Docker Compose Configuration
@@ -70,6 +70,9 @@ services:
       # API settings
       PGRST_OPENAPI_SERVER_PROXY_URI: ${POSTGREST_PUBLIC_URL:-http://localhost:3000}
       PGRST_LOG_LEVEL: ${POSTGREST_LOG_LEVEL:-info}
+
+      # Admin server for healthcheck (no DB connection consumed)
+      PGRST_ADMIN_SERVER_PORT: 3001
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,6 +80,12 @@ services:
         condition: service_completed_successfully
     networks:
       - civic-os-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # Consolidated Worker - S3 Signer, Thumbnail Worker, and Notification Worker (v0.11.0+)
   # Single service with shared connection pool for improved resource efficiency

@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # Official PostgREST images are built FROM scratch with only the static binary.
@@ -8,7 +8,7 @@
 FROM ubuntu:24.04
 
 # Copy PostgREST binary from official image
-COPY --from=postgrest/postgrest:v13.0.7 /bin/postgrest /bin/postgrest
+COPY --from=postgrest/postgrest:v16.2 /bin/postgrest /bin/postgrest
 
 # Install dependencies for JWKS fetching
 # Using BuildKit cache mounts for faster rebuilds (only downloads missing packages)
