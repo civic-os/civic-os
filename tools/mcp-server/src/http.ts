@@ -153,7 +153,7 @@ export class OidcConfigCache {
 export async function startHttpServer(cache: SchemaCache, config: ServerConfig): Promise<void> {
   // Create the MCP handler with per-request server factory
   const handler: McpHttpHandler = createMcpHandler(
-    (ctx) => createServer(cache, ctx.authInfo?.token),
+    (ctx) => createServer(cache, ctx.authInfo?.token, config.serverInstructions),
     { legacy: 'stateless' },
   );
 

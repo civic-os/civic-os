@@ -9,7 +9,7 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { createMcpHandler } from '@modelcontextprotocol/server';
 import { extractBearerToken, buildProtectedResourceMetadata, OidcConfigCache } from '../http.js';
-import { createServer, PKG_VERSION, type ServerConfig } from '../index.js';
+import { buildInstructions, createServer, PKG_VERSION, type ServerConfig } from '../index.js';
 import { SchemaCache } from '../schema-cache.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
 
@@ -508,6 +508,45 @@ describe('CORS headers', () => {
     // The Expose-Headers allows clients to read the Mcp-Session-Id response header
     const expectedExposeHeaders = 'Mcp-Session-Id';
     expect(expectedExposeHeaders).toBe('Mcp-Session-Id');
+  });
+});
+
+// ============================================================================
+// buildInstructions (instance-level context)
+// ============================================================================
+
+describe('buildInstructions', () => {
+  it('returns generic instructions when no serverInstructions provided', () => {
+    const result = buildInstructions();
+    expect(result).toContain('You are connected to a Civic OS instance');
+    expect(result).toContain('list_entities');
+  });
+
+  it('returns generic instructions when undefined', () => {
+    const result = buildInstructions(undefined);
+    expect(result).toBe(buildInstructions());
+  });
+
+  it('prepends serverInstructions before generic instructions', () => {
+    const custom = 'Exemplary Community Services — tracking client intake, referrals, and service enrollments.';
+    const result = buildInstructions(custom);
+    expect(result.startsWith(custom)).toBe(true);
+    expect(result).toContain('\n\n');
+    expect(result).toContain('You are connected to a Civic OS instance');
+  });
+
+  it('createServer works without serverInstructions (backward compat)', () => {
+    const client = makeMockClient();
+    const cache = new SchemaCache(client, 'http://localhost:3000');
+    const server = createServer(cache);
+    expect(server).toBeDefined();
+  });
+
+  it('createServer works with serverInstructions', () => {
+    const client = makeMockClient();
+    const cache = new SchemaCache(client, 'http://localhost:3000');
+    const server = createServer(cache, undefined, 'Test instance context');
+    expect(server).toBeDefined();
   });
 });
 

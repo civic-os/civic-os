@@ -52,6 +52,7 @@ export interface ServerConfig {
   keycloakUrl?: string;
   keycloakRealm?: string;
   mcpPublicUrl?: string;
+  serverInstructions?: string;
 }
 
 function parseArgs(): ServerConfig {
@@ -61,6 +62,7 @@ function parseArgs(): ServerConfig {
   let transport: 'stdio' | 'http' =
     (process.env['MCP_TRANSPORT'] as 'stdio' | 'http') ?? 'stdio';
   let port = parseInt(process.env['MCP_PORT'] ?? '3001', 10);
+  let serverInstructions = process.env['MCP_SERVER_INSTRUCTIONS'];
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -78,6 +80,9 @@ function parseArgs(): ServerConfig {
       case '--port':
         port = parseInt(args[++i], 10);
         break;
+      case '--instructions':
+        serverInstructions = args[++i];
+        break;
       case '--help':
       case '-h':
         console.error(`
@@ -91,6 +96,7 @@ Options:
   --token, -t <jwt>      JWT token for authentication (default: $CIVICOS_TOKEN, stdio only)
   --transport <mode>     Transport: stdio (default) or http (default: $MCP_TRANSPORT)
   --port <port>          HTTP port (default: $MCP_PORT or 3001)
+  --instructions <text>  Instance context prepended to server instructions ($MCP_SERVER_INSTRUCTIONS)
   --help, -h             Show this help message
 
 Environment Variables:
@@ -98,6 +104,7 @@ Environment Variables:
   CIVICOS_TOKEN          JWT token for authentication (stdio mode)
   MCP_TRANSPORT          Transport mode: stdio or http
   MCP_PORT               HTTP server port (default: 3001)
+  MCP_SERVER_INSTRUCTIONS  Instance context prepended to generic usage instructions
   KEYCLOAK_URL           Keycloak base URL (enables OAuth discovery in http mode)
   KEYCLOAK_REALM         Keycloak realm name (default: civic-os)
   MCP_PUBLIC_URL         Public URL of the MCP server (for OAuth metadata)
@@ -115,6 +122,7 @@ Examples:
     token,
     transport,
     port,
+    serverInstructions,
     keycloakUrl: process.env['KEYCLOAK_URL'],
     keycloakRealm: process.env['KEYCLOAK_REALM'] ?? 'civic-os',
     mcpPublicUrl: process.env['MCP_PUBLIC_URL'],
@@ -125,7 +133,7 @@ Examples:
 // Server Instructions
 // ============================================================================
 
-const SERVER_INSTRUCTIONS = `You are connected to a Civic OS instance — a meta-application framework that dynamically generates CRUD views from PostgreSQL schema metadata.
+const BASE_INSTRUCTIONS = `You are connected to a Civic OS instance — a meta-application framework that dynamically generates CRUD views from PostgreSQL schema metadata.
 
 Getting started:
 - Start with list_entities to discover available data types and your permissions
@@ -139,6 +147,17 @@ Working with data:
 - Use add_note for comments and audit trails on entities that support notes
 - Use get_status_workflow to understand allowed state transitions before changing statuses`;
 
+/**
+ * Build the full instructions string for the MCP server.
+ * When serverInstructions is provided (via MCP_SERVER_INSTRUCTIONS env var),
+ * it is prepended before the generic usage instructions so LLM clients
+ * immediately understand the purpose of this specific instance.
+ */
+export function buildInstructions(serverInstructions?: string): string {
+  if (!serverInstructions) return BASE_INSTRUCTIONS;
+  return serverInstructions + '\n\n' + BASE_INSTRUCTIONS;
+}
+
 // ============================================================================
 // Server Factory
 // ============================================================================
@@ -151,7 +170,7 @@ Working with data:
  *
  * SchemaCache is shared (process-lifetime); PostgRESTClient and NameResolver are per-session.
  */
-export function createServer(cache: SchemaCache, token?: string): McpServer {
+export function createServer(cache: SchemaCache, token?: string, serverInstructions?: string): McpServer {
   // Per-session client, cache key, and resolver — each request gets its own token
   const cacheKey = token ? extractUserCacheKey(token) : undefined;
   const client = new PostgRESTClient({ baseUrl: cache.baseUrl, token });
@@ -167,7 +186,7 @@ export function createServer(cache: SchemaCache, token?: string): McpServer {
 
   const server = new McpServer(
     { name: 'civic-os', version: PKG_VERSION },
-    { instructions: SERVER_INSTRUCTIONS },
+    { instructions: buildInstructions(serverInstructions) },
   );
 
   // Register all tools — pass client + cacheKey for per-user permission caching
@@ -185,7 +204,7 @@ export function createServer(cache: SchemaCache, token?: string): McpServer {
   registerGetStatusWorkflow(server, client, cache, resolver, cacheKey);
 
   // Register MCP Resources
-  registerResources(server, client, cache, cacheKey);
+  registerResources(server, client, cache, cacheKey, serverInstructions);
 
   return server;
 }
@@ -217,7 +236,7 @@ async function main(): Promise<void> {
   } else {
     // stdio transport — single-user session with optional static token
     const { serveStdio } = await import('@modelcontextprotocol/server/stdio');
-    serveStdio(() => createServer(cache, config.token));
+    serveStdio(() => createServer(cache, config.token, config.serverInstructions));
   }
 }
 
@@ -230,6 +249,7 @@ function registerResources(
   client: PostgRESTClient,
   cache: SchemaCache,
   cacheKey?: string,
+  serverInstructions?: string,
 ): void {
   // Schema overview resource
   server.registerResource(
@@ -246,6 +266,10 @@ function registerResources(
       const lines: string[] = [];
       lines.push('# Civic OS Schema Overview');
       lines.push('');
+      if (serverInstructions) {
+        lines.push(serverInstructions);
+        lines.push('');
+      }
 
       for (const entity of cache.getEntitiesForUser(cacheKey)) {
         if (!entity.select) continue;

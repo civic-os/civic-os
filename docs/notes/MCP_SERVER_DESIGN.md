@@ -3,7 +3,7 @@
 Copyright (C) 2023-2026 Civic OS, L3C
 
 **Created:** 2026-08-31
-**Status:** v0.72.5 -- stdio + HTTP Streamable transport, per-request auth, self-contained OAuth discovery (pre-created client + DCR), 12 tools
+**Status:** v0.72.9 -- stdio + HTTP Streamable transport, per-request auth, self-contained OAuth discovery (pre-created client + DCR), instance context, 12 tools
 
 ## Purpose
 
@@ -190,6 +190,16 @@ The resolution order in `list_records` filters:
 1. **Status columns** → `resolveStatus(prop.status_entity_type, value)` (sync, scoped)
 2. **Category columns** → `resolveCategory(prop.category_entity_type, value)` (sync, scoped)
 3. **FK columns** → `resolveForeignKeyValue(prop.join_table, value)` (async, table-wide)
+
+## Instance Context
+
+Every Civic OS deployment serves a different domain (parks & rec, grants management, internal CRM), but the MCP server's `instructions` field — sent to every LLM client during `initialize` — was generic. The `MCP_SERVER_INSTRUCTIONS` env var (or `--instructions` CLI flag) lets deployers prepend free-text context before the generic usage instructions:
+
+```
+MCP_SERVER_INSTRUCTIONS=Exemplary Community Services — tracking client intake, referrals, and service enrollments.
+```
+
+The `buildInstructions()` function concatenates `serverInstructions + '\n\n' + BASE_INSTRUCTIONS`. When the env var is unset, only the generic instructions are sent (backward-compatible). The same text is also prepended to the `civicos://schema/overview` resource.
 
 ## List View: Always-Include-ID
 

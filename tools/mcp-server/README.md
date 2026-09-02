@@ -105,6 +105,7 @@ Users and LLMs speak in display names. The server resolves:
 |--------|----------|---------|---------|
 | PostgREST URL | `--url`, `-u` | `POSTGREST_URL` | `http://localhost:3000` |
 | JWT Token | `--token`, `-t` | `CIVICOS_TOKEN` | (none) |
+| Instance Context | `--instructions` | `MCP_SERVER_INSTRUCTIONS` | (none) |
 
 ## Development
 
