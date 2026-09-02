@@ -96,21 +96,21 @@ if [[ "${1:-}" == "--ci" ]]; then
   echo "=== CI Mode: Starting docker-compose stack ==="
   cd "$SCRIPT_DIR"
   docker compose -f docker-compose.test.yml up -d
-  trap 'echo "=== Tearing down..."; cd "$SCRIPT_DIR" && docker compose -f docker-compose.test.yml down -v && rm -f jwt-secret.jwks' EXIT
+  trap 'echo "=== Tearing down..."; cd "$SCRIPT_DIR" && docker compose -f docker-compose.test.yml down -v' EXIT
 fi
 
 # ============================================================================
 # Phase 1: Wait for services
 # ============================================================================
 # docker-compose.test.yml orchestrates the startup order:
-#   postgres (healthy) + keycloak (healthy) → jwks-init → postgrest
+#   postgres (healthy) + keycloak (healthy) → postgrest (auto-fetches JWKS)
 # We just need to wait for PostgREST to be ready.
 
 echo ""
 echo "=== Phase 1: Service Readiness ==="
 
 wait_for_url "PostgREST" "$POSTGREST_URL/" 60
-pass "PostgREST is up (postgres healthy, JWKS loaded from Keycloak)"
+pass "PostgREST is up (postgres healthy, JWKS auto-fetched from Keycloak)"
 
 wait_for_url "MCP Server" "$MCP_URL/health" 30
 pass "MCP HTTP server is up (health endpoint ready)"

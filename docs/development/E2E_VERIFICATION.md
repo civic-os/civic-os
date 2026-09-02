@@ -119,7 +119,7 @@ Key pages to check based on change type:
 
 ## Troubleshooting
 
-- **PostgREST 401/403**: Run `fetch-keycloak-jwk.sh` to refresh JWT verification keys
+- **PostgREST 401/403**: Restart PostgREST to re-fetch JWKS (`docker-compose restart postgrest`)
 - **Migration errors**: Check `sqitch.plan` for dependency ordering issues
 - **UI not updating**: Hard refresh (`Ctrl+Shift+R`) or clear Angular cache
 - **Playwright can't connect**: Ensure `npm start` is running and dev server is at `localhost:4200`

@@ -129,11 +129,10 @@ docker-compose restart postgrest
 docker-compose logs postgrest | grep -i "jwk\|jwt\|error"
 ```
 
-For dev environments using `fetch-keycloak-jwk.sh`:
+For dev environments, PostgREST auto-fetches JWKS on startup:
 
 ```bash
-source .env
-./fetch-keycloak-jwk.sh
+docker-compose restart postgrest
 ```
 
 ### Step 3: Restart the Go Worker

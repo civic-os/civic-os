@@ -27,7 +27,6 @@ This deployment tracks:
 
 - Docker and Docker Compose installed
 - Node.js 20+ and npm (for Angular frontend)
-- jq (for Keycloak JWKS script)
 
 ### 1. Review Environment Settings
 
@@ -38,19 +37,13 @@ cat .env
 # Update POSTGRES_PASSWORD if you want a different password
 ```
 
-### 2. Fetch Keycloak JWT Secret
-
-```bash
-./fetch-keycloak-jwk.sh
-```
-
-This fetches the public key from the shared Keycloak instance at `auth.civic-os.org`.
-
-### 3. Start Database Services
+### 2. Start Database Services
 
 ```bash
 docker-compose up -d
 ```
+
+PostgREST uses a custom Docker image that auto-fetches JWKS from Keycloak on startup, so no manual key fetching is needed.
 
 This will:
 - Create PostgreSQL 17 + PostGIS database
@@ -58,7 +51,7 @@ This will:
 - Start PostgREST API on port 3001
 - Start Swagger UI on port 8082
 
-### 4. Verify Database Initialization
+### 3. Verify Database Initialization
 
 Check that all tables were created successfully:
 
@@ -71,7 +64,7 @@ curl http://localhost:3001/schema_entities
 curl http://localhost:3001/organizations
 ```
 
-### 5. Start Angular Frontend
+### 4. Start Angular Frontend
 
 From the **project root** (not this directory):
 
@@ -84,7 +77,7 @@ The frontend will be available at http://localhost:4200
 
 **Important**: The Angular app is shared across all Civic OS deployments. To point it at this database, you may need to update the API URL in `src/environments/environment.development.ts` to `http://localhost:3001/` (note the port 3001 instead of 3000).
 
-### 6. Access the Application
+### 5. Access the Application
 
 Open http://localhost:4200 in your browser. You should see:
 

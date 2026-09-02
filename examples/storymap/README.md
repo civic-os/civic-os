@@ -184,7 +184,6 @@ examples/storymap/
 ├── README.md                          # This file
 ├── docker-compose.yml                 # Infrastructure definition
 ├── .env.example                       # Environment variables template
-├── jwt-secret.jwks                    # Keycloak public keys
 ├── mock-data-config.json              # Mock data generation config
 └── init-scripts/
     ├── 00_create_authenticator.sh     # PostgREST role setup

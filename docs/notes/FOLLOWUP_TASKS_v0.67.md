@@ -42,12 +42,7 @@ Condensed from seven example sweeps — every item below was hit in practice:
 - `.env`: copy `.env.example` (or `../pothole/.env` if absent); ensure
   `POSTGRES_DB`/`POSTGRES_PASSWORD` are set; re-quote any value containing `<>`
   as ONE string (compose aborts otherwise).
-- `touch jwt-secret.jwks` BEFORE first `docker compose up -d` (Docker otherwise
-  creates it as a directory and PostgREST crash-loops).
-- After Keycloak is up, fetch JWKS from the LOCAL realm regardless of what .env
-  claims: `curl -s http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/certs > jwt-secret.jwks`
-  then `docker compose stop postgrest && docker compose up -d --force-recreate postgrest`
-  (recreate, not restart — the bind-mount type is fixed at container creation).
+- PostgREST auto-fetches JWKS from Keycloak on startup (no manual steps needed).
 - Stale volume symptoms ("password authentication failed", pre-existing tables)
   → `docker compose down -v && up -d`.
 - Login: testadmin/testadmin (realm `civic-os-dev`, client `civic-os-dev-client`).

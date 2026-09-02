@@ -6,12 +6,11 @@
 #
 # Startup order (orchestrated via depends_on + healthchecks):
 #   1. postgres + keycloak start in parallel
-#   2. jwks-init waits for keycloak healthy, fetches JWKS, writes to host file
-#   3. PostgREST starts after postgres healthy + jwks-init complete
+#   2. PostgREST starts after postgres + keycloak healthy (auto-fetches JWKS)
 #
 # Usage:
 #   cd tools/mcp-server/tests/integration
-#   docker compose -f docker-compose.test.yml up -d
+#   docker compose -f docker-compose.test.yml up -d --build
 #   ./run-tests.sh
 #   docker compose -f docker-compose.test.yml down -v
 
@@ -70,31 +69,10 @@ services:
       retries: 10
       start_period: 60s
 
-  # Fetch JWKS from Keycloak and write to host file for PostgREST.
-  # Same logic as fetch-keycloak-jwk.sh but runs inside docker-compose.
-  jwks-init:
-    image: curlimages/curl:latest
-    container_name: mcp_test_jwks_init
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        set -e
-        JWKS_URL="http://keycloak:8080/realms/civic-os-dev/protocol/openid-connect/certs"
-        echo "Fetching JWKS from $$JWKS_URL..."
-        JWKS=$$(curl -sf "$$JWKS_URL")
-        echo "$$JWKS" > /output/jwt-secret.jwks
-        echo "JWKS written to /output/jwt-secret.jwks"
-    volumes:
-      - ./:/output
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    networks:
-      - mcp-test-network
-
   postgrest:
-    image: postgrest/postgrest:latest
+    build:
+      context: ../../../..
+      dockerfile: docker/postgrest/Dockerfile
     container_name: mcp_test_postgrest
     ports:
       - "23000:3000"
@@ -106,16 +84,23 @@ services:
       PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
       PGRST_JWT_AUD: "account"
       PGRST_LOG_LEVEL: "info"
-    volumes:
-      - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+      PGRST_ADMIN_SERVER_PORT: 3001
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: civic-os-dev
     depends_on:
       postgres:
         condition: service_healthy
-      jwks-init:
-        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
     networks:
       - mcp-test-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # MCP server in HTTP transport mode for integration testing.
   # Proxies tool calls to PostgREST with per-request Bearer token passthrough.
@@ -134,7 +119,7 @@ services:
       KEYCLOAK_REALM: civic-os-dev
     depends_on:
       postgrest:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mcp-test-network
     healthcheck:

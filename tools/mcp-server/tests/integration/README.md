@@ -18,16 +18,11 @@ Tests the MCP server against a real PostgreSQL + PostgREST + Keycloak environmen
 ## Running Locally
 
 ```bash
-# Start the test stack
-docker compose -f docker-compose.test.yml up -d
+# Start the test stack (PostgREST auto-fetches JWKS from Keycloak)
+docker compose -f docker-compose.test.yml up -d --build
 
 # Wait for Keycloak to be ready (can take 60-90s on first run)
-# Then fetch the JWKS for PostgREST
-cd ../../../../examples/pothole
-KEYCLOAK_PORT=28082 ./fetch-keycloak-jwk.sh
-cd ../../tools/mcp-server/tests/integration
-
-# Run tests
+# Then run tests
 ./run-tests.sh
 ```
 

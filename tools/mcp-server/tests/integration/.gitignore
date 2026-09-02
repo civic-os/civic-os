@@ -1,2 +1,2 @@
-# Generated at runtime by run-tests.sh
-jwt-secret.jwks
+# Node modules (tests may install deps locally)
+node_modules/

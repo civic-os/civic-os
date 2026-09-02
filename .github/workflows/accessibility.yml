@@ -84,6 +84,7 @@ jobs:
               - '.github/workflows/accessibility.yml'
               - 'docker/ci-a11y/**'
               - 'docker/dev-postgres/**'
+              - 'docker/postgrest/**'
               - 'postgres/migrations/**'
               - 'sqitch.plan'
               - 'examples/pothole/init-scripts/**'
@@ -145,26 +146,9 @@ jobs:
 
       - name: Start backend stack (postgres + PostgREST + Keycloak)
         run: |
-          # jwt-secret.jwks must exist as a FILE before the first compose up,
-          # or Docker creates the bind-mount source as a directory and
-          # PostgREST crash-loops.
-          touch docker/ci-a11y/jwt-secret.jwks
+          # PostgREST uses docker/postgrest/Dockerfile which auto-fetches
+          # Keycloak's JWKS on startup — no manual fetch step needed.
           docker compose -f docker/ci-a11y/docker-compose.yml up -d --build
-
-      - name: Wait for Keycloak and install its signing keys into PostgREST
-        run: |
-          # Keycloak generates fresh signing keys on every startup, so the JWKS
-          # must be fetched from THIS boot and PostgREST recreated (not
-          # restarted - the bind-mount is fixed at container creation).
-          for i in $(seq 1 60); do
-            if curl -sf http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/certs -o docker/ci-a11y/jwt-secret.jwks; then
-              break
-            fi
-            sleep 5
-          done
-          grep -q '"keys"' docker/ci-a11y/jwt-secret.jwks
-          docker compose -f docker/ci-a11y/docker-compose.yml stop postgrest
-          docker compose -f docker/ci-a11y/docker-compose.yml up -d --force-recreate postgrest
 
       - name: Wait for PostgREST to serve the schema
         run: |

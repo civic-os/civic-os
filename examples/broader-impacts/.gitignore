@@ -1,8 +1,5 @@
 # Environment files (contain secrets)
 .env
 
-# JWT secrets
-jwt-secret.jwks
-
 # Temporary token files
 token.txt

@@ -13,7 +13,7 @@
 #
 # Prerequisites:
 #   - Docker compose running (pothole example)
-#   - Keycloak JWT fetched (fetch-keycloak-jwk.sh)
+#   - PostgREST running (auto-fetches JWKS from Keycloak)
 #   - jq installed
 # =============================================================================
 

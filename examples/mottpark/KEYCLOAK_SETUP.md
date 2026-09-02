@@ -11,8 +11,8 @@ docker-compose up -d keycloak
 # 2. Wait for Keycloak to be healthy
 docker-compose ps keycloak  # Should show "healthy"
 
-# 3. Fetch JWT keys and restart PostgREST
-./fetch-keycloak-jwk.sh && docker-compose restart postgrest
+# 3. Start PostgREST (auto-fetches JWKS from Keycloak)
+docker-compose up -d --build
 
 # 4. Start the Angular frontend
 npm start
@@ -210,12 +210,9 @@ chmod +x create-test-user.sh
    KEYCLOAK_CLIENT_ID=mottpark-dev-client
    ```
 
-2. Start Keycloak and fetch keys:
+2. Start services (PostgREST auto-fetches JWKS from Keycloak):
    ```bash
-   docker-compose up -d keycloak
-   # Wait for healthy
-   ./fetch-keycloak-jwk.sh
-   docker-compose restart postgrest
+   docker-compose up -d --build
    ```
 
 ### To use shared Keycloak:
@@ -227,10 +224,9 @@ chmod +x create-test-user.sh
    KEYCLOAK_CLIENT_ID=myclient
    ```
 
-2. Fetch shared instance keys:
+2. Restart PostgREST to pick up the new Keycloak URL:
    ```bash
-   ./fetch-keycloak-jwk.sh
-   docker-compose restart postgrest
+   docker-compose up -d --build
    ```
 
 3. Stop local Keycloak (optional):
@@ -253,9 +249,8 @@ Common issues:
 
 ### "Invalid token" errors in PostgREST
 
-The JWT keys haven't been refreshed after Keycloak started:
+PostgREST may have started before Keycloak was ready. Restart it to re-fetch JWKS:
 ```bash
-./fetch-keycloak-jwk.sh
 docker-compose restart postgrest
 ```
 

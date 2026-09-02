@@ -83,9 +83,7 @@ For quick testing without running Docker, you can use the shared Keycloak instan
    }
    ```
 
-2. Run `./fetch-keycloak-jwk.sh` in the example directory to get the shared instance's public key
-
-3. Start the application
+2. Start the application
 
 **When to use this:** Initial exploration of Civic OS when you can't run Docker locally.
 
@@ -449,6 +447,8 @@ The `mcp:tools` scope is **already included** in the realm template. For existin
 
 > **Note**: The audience mapper bridges Keycloak's lack of RFC 8707 support. Without it, tokens lack an `aud` claim for the MCP resource server.
 
+> **⚠️ Realm export/import pitfall**: If you export your realm to JSON (for backup or migration), be aware that a `clientScopes` array in the realm JSON tells Keycloak to use it as the **complete** set of client scopes. Keycloak will NOT auto-create the built-in defaults (`profile`, `email`, `roles`, `web-origins`, `acr`, `basic`, etc.). If you add `mcp:tools` to a realm export, ensure the export already contains the full set of default scope definitions. The realm template and dev JSON in this repository include all required scopes.
+
 #### 9e. Reverse Proxy: Route OAuth Well-Known Paths
 
 The MCP SDK constructs OAuth discovery URLs based on the resource URL. For a resource at `https://example.com/_/mcp`, it fetches:
@@ -673,22 +673,13 @@ provideKeycloak({
 }),
 ```
 
-### 3. Fetch JWKS (JWT Signing Key)
+### 3. Start Services
 
-PostgREST needs Keycloak's public key to verify JWT tokens:
-
-```bash
-cd example
-./fetch-keycloak-jwk.sh
-```
-
-This creates `jwt-secret.jwks` containing Keycloak's public key.
-
-### 4. Restart Services
+PostgREST uses a custom Docker image that automatically fetches Keycloak's JWKS (signing key) on startup — no manual steps needed:
 
 ```bash
 cd example
-docker-compose restart postgrest
+docker-compose up -d --build
 cd ..
 npm start
 ```
@@ -827,12 +818,11 @@ curl -H "Authorization: Bearer $TOKEN" \
 - "JWT verification failed" in PostgREST logs
 
 **Solutions:**
-1. Re-run `./fetch-keycloak-jwk.sh` to update public key
-2. Restart PostgREST: `docker-compose restart postgrest`
-3. Check `jwt-secret.jwks` exists and contains a key
-4. Verify JWKS URL is accessible:
+1. Restart PostgREST to re-fetch JWKS: `docker-compose restart postgrest`
+2. Check PostgREST logs for JWKS fetch errors: `docker-compose logs postgrest`
+3. Verify Keycloak JWKS URL is accessible:
    ```bash
-   curl http://localhost:8080/realms/civic-os-dev/protocol/openid-connect/certs
+   curl http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/certs
    ```
 
 ### Permissions Not Working

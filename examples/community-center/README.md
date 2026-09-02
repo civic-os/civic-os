@@ -45,8 +45,6 @@ Then open your browser to `http://localhost:4200` and navigate to:
 ### Helper Files
 
 - **`community-center.sql`** - Consolidated SQL file combining all init scripts for easy deployment
-- **`jwt-secret.jwks`** - Keycloak JWT public key for local development (shared dev realm)
-- **`fetch-keycloak-jwk.sh`** - Script to fetch latest JWT key from Keycloak
 - **`mock-data-config.json`** - Configuration for mock data generation (future use)
 - **`docker-compose.yml`** - Complete Docker stack for local development
 - **`.env.example`** - Environment variable template

@@ -168,7 +168,7 @@ Docker Compose runs PostgreSQL 17 with PostGIS 3.5 and PostgREST locally with Ke
 
 **Important**: Schema changes should be made via migrations (see Database Migrations section below). To apply new migrations, recreate the database (`docker-compose down -v && docker-compose up -d`) or run migrations manually via the migrations container.
 
-**PostgREST + Keycloak JWK**: After every fresh `docker-compose up -d`, run `./fetch-keycloak-jwk.sh` from the example directory once Keycloak is ready — PostgREST cannot verify JWTs until this script fetches Keycloak's signing key.
+**PostgREST + Keycloak JWK**: PostgREST uses a custom Docker image (`docker/postgrest/Dockerfile`) that automatically fetches Keycloak's JWKS on startup — no manual steps needed. PostgREST depends on `keycloak: service_healthy` so the signing keys are available when the entrypoint runs. Just `docker compose up -d --build`.
 
 **PostGIS**: Installed in dedicated `postgis` schema (not `public`) to keep the public schema clean. Functions accessible via `search_path`. Use schema-qualified references: `postgis.geography(Point, 4326)` and `postgis.ST_AsText()`.
 

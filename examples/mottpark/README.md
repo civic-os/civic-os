@@ -47,8 +47,8 @@ This example includes a **local Keycloak instance** for full RBAC testing.
 # Start Keycloak (takes ~90 seconds to be ready)
 docker-compose up -d keycloak
 
-# Wait for healthy, then fetch JWT keys
-./fetch-keycloak-jwk.sh && docker-compose restart postgrest
+# Wait for healthy, then start PostgREST (auto-fetches JWKS)
+docker-compose up -d --build
 ```
 
 ### Test Accounts
@@ -76,7 +76,7 @@ KEYCLOAK_URL=https://auth.civic-os.org
 KEYCLOAK_REALM=civic-os-dev
 KEYCLOAK_CLIENT_ID=myclient
 ```
-Then run `./fetch-keycloak-jwk.sh && docker-compose restart postgrest`
+Then run `docker-compose up -d --build` to restart PostgREST with the new Keycloak URL
 
 ## Stripe Testing
 
@@ -126,8 +126,6 @@ mottpark/
 ├── docker-compose.yml      # Service definitions
 ├── .env                    # Local environment variables
 ├── .env.example           # Template for .env
-├── jwt-secret.jwks        # JWT verification keys
-├── fetch-keycloak-jwk.sh  # Script to update JWT keys
 ├── README.md              # This file
 ├── KEYCLOAK_SETUP.md      # Keycloak Admin API documentation
 ├── keycloak/              # Keycloak realm configuration

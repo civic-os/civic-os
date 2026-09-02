@@ -106,7 +106,6 @@ metadata.validations.
 ## Setup Checklist
 
 - [ ] Docker environment running: `cd examples/neighborhood-hub && docker-compose up -d`
-- [ ] Keycloak JWK fetched: `./fetch-keycloak-jwk.sh`
 - [ ] Frontend running: `npm start` → http://localhost:4200
 - [ ] Logged in as `testadmin` (password: `testadmin`) — has full CRUD on guided form tables
 - [ ] **IMPORTANT**: Mock data ships with 5 `building_use_requests` records. The precondition

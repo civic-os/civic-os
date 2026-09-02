@@ -101,7 +101,6 @@ civic-os-frontend/
 │   ├── docker-compose.yml
 │   ├── .env
 │   ├── .env.example
-│   ├── jwt-secret.jwks
 │   └── README.md         # Optional: deployment-specific docs
 ├── postgres/             # Shared Civic OS core scripts (DO NOT MODIFY)
 ├── src/                  # Angular frontend (shared across deployments)
@@ -563,8 +562,8 @@ postgrest:
     PGRST_DB_PRE_REQUEST: "metadata.check_jwt"
     PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"
     PGRST_JWT_AUD: "account"
-  volumes:
-    - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+    KEYCLOAK_URL: http://keycloak:8080
+    KEYCLOAK_REALM: civic-os-dev
 ```
 
 **Key Settings**:
@@ -692,12 +691,7 @@ Civic OS uses Keycloak for authentication. You have two options:
 
 ### Option A: Use Shared Keycloak (Quick Start)
 
-Use the default shared instance at `auth.civic-os.org`:
-
-```bash
-# Fetch the public key (JWKS)
-./fetch-keycloak-jwk.sh
-```
+Use the default shared instance at `auth.civic-os.org`. PostgREST auto-fetches JWKS on startup — no manual steps needed.
 
 **Limitations**:
 - Cannot create custom roles or users
@@ -716,8 +710,7 @@ For full RBAC testing and production deployments, run your own Keycloak instance
 3. Access admin console: `http://localhost:8081` (admin/admin)
 4. Create realm, client, roles, and users (see AUTHENTICATION.md)
 5. **Review user registration model**: Open registration is enabled by default (new users get the `user` role). For admin-only registration, see [Restricting to Admin-Only Registration](../AUTHENTICATION.md#restricting-to-admin-only-registration)
-6. Update `.env` with your Keycloak URL
-7. Fetch JWKS: `./fetch-keycloak-jwk.sh`
+6. Update `.env` with your Keycloak URL (PostgREST auto-fetches JWKS on startup)
 
 ---
 
@@ -1734,9 +1727,6 @@ cp ../examples/pothole/docker-compose.yml ./docker-compose.yml
 cp ../examples/pothole/.env.example ./.env.example
 cp ../examples/pothole/.env.example ./.env
 
-# Copy Keycloak fetch script
-cp ../examples/pothole/fetch-keycloak-jwk.sh ./fetch-keycloak-jwk.sh
-chmod +x ./fetch-keycloak-jwk.sh
 ```
 
 ### Step 6: Configure Environment
@@ -1751,14 +1741,9 @@ POSTGRES_DB=library_db
 POSTGRES_PASSWORD=your_secure_password_here
 ```
 
-### Step 7: Fetch Keycloak Key
+### Step 7: Start Services
 ```bash
-./fetch-keycloak-jwk.sh
-```
-
-### Step 8: Start Services
-```bash
-docker-compose up -d
+docker-compose up -d --build  # PostgREST auto-fetches JWKS from Keycloak
 
 # Watch logs
 docker-compose logs -f

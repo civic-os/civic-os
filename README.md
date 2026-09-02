@@ -46,9 +46,7 @@ npm install
 #    B) Run your own Keycloak (see docs/AUTHENTICATION.md for RBAC testing)
 cd examples/pothole
 cp .env.example .env
-docker-compose up -d
-./fetch-keycloak-jwk.sh  # Fetch Keycloak public key
-docker-compose restart postgrest
+docker-compose up -d --build  # Builds PostgREST with auto-JWKS fetch
 cd ../..
 
 # 4. Start the Angular development server

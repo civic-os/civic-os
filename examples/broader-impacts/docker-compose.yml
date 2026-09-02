@@ -22,13 +22,16 @@ services:
     networks:
       - postgrest-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 10s
       retries: 5
+      start_period: 120s
 
   postgrest:
-    image: postgrest/postgrest:latest
+    build:
+      context: ../..
+      dockerfile: docker/postgrest/Dockerfile
     container_name: broader_impacts_postgrest
     ports:
       - "3000:3000"
@@ -41,14 +44,23 @@ services:
       PGRST_JWT_AUD: "account"
       PGRST_OPENAPI_SERVER_PROXY_URI: "http://localhost:3000"
       PGRST_LOG_LEVEL: "info"
-    volumes:
-      - ./jwt-secret.jwks:/etc/postgrest/jwt-secret.jwks:ro
+      PGRST_ADMIN_SERVER_PORT: 3001
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: civic-os-dev
     depends_on:
       postgres:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     networks:
       - postgrest-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # Optional: Swagger UI for API documentation
   swagger-ui:
@@ -59,7 +71,8 @@ services:
     environment:
       API_URL: "http://localhost:3000/"
     depends_on:
-      - postgrest
+      postgrest:
+        condition: service_healthy
     networks:
       - postgrest-network
 
@@ -176,6 +189,8 @@ services:
         condition: service_healthy
       inbucket:
         condition: service_started
+      keycloak:
+        condition: service_healthy
     restart: unless-stopped
 
   # Local Keycloak for RBAC testing
@@ -198,7 +213,7 @@ services:
     networks:
       - postgrest-network
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
       interval: 30s
       timeout: 10s
       retries: 5

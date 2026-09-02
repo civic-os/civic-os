@@ -1511,8 +1511,7 @@ END $$;
    cd examples/community-center
    cp .env.example .env
    # Edit .env with database credentials
-   ./fetch-keycloak-jwk.sh
-   docker-compose up -d
+   docker-compose up -d --build  # PostgREST auto-fetches JWKS
    ```
 
 2. **Test Availability Calendar** (public view):

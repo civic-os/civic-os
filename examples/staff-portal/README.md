@@ -67,8 +67,6 @@ Then open your browser to `http://localhost:4200`.
 
 - **`docker-compose.yml`** - Complete Docker stack (PostgreSQL, PostgREST, MinIO, Inbucket, Keycloak)
 - **`.env.example`** - Environment variable template
-- **`jwt-secret.jwks`** - Keycloak JWT public key for local development
-- **`fetch-keycloak-jwk.sh`** - Script to fetch latest JWT key from Keycloak
 - **`mock-data-config.json`** - Configuration for mock data generation
 
 ## Schema Overview

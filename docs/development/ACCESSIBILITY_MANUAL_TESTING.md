@@ -44,8 +44,7 @@ the reference target.
 # 1. Start the backend (Postgres + PostgREST + Keycloak)
 cd examples/pothole
 cp .env.example .env            # edit POSTGRES_PASSWORD to any value
-docker compose up -d
-./fetch-keycloak-jwk.sh          # once Keycloak is up; wires PostgREST JWT verification
+docker compose up -d --build    # PostgREST auto-fetches JWKS from Keycloak
 
 # 2. Load mock data (so lists/detail pages aren't empty)
 #    From the repo root:

@@ -63,27 +63,7 @@ KEYCLOAK_REALM=civic-os-dev
 KEYCLOAK_CLIENT_ID=myclient
 ```
 
-### 2. Fetch Keycloak Public Key (JWKS)
-
-Run the provided script to automatically fetch the public key from Keycloak:
-
-```bash
-cd example
-./fetch-keycloak-jwk.sh
-```
-
-This script:
-- Fetches the JWKS from Keycloak
-- Extracts the RS256 public key
-- Saves it as `jwt-secret.jwks` in JWKS format (required by PostgREST)
-
-**Manual Method**: If you prefer to fetch manually:
-```bash
-curl -s "https://auth.civic-os.org/realms/civic-os-dev/protocol/openid-connect/certs" | \
-  jq '{keys: [.keys[] | select(.alg=="RS256") | {kid, kty, alg, use, n, e}]}' > jwt-secret.jwks
-```
-
-### 3. Start the Services
+### 2. Start the Services
 
 ```bash
 docker-compose up -d
@@ -94,7 +74,9 @@ This will start:
 - PostgREST on port `3000`
 - Swagger UI on port `8080` (optional, for API docs)
 
-### 4. Verify Setup
+PostgREST uses a custom Docker image that auto-fetches JWKS from Keycloak on startup, so no manual key fetching is needed.
+
+### 3. Verify Setup
 
 Check that all services are running:
 
@@ -108,13 +90,13 @@ Test PostgREST API:
 curl http://localhost:3000/schema_entities
 ```
 
-### 5. Configure Frontend
+### 4. Configure Frontend
 
 The frontend is already configured to use this setup:
 - `src/environments/environment.development.ts` points to `http://localhost:3000/`
 - `src/app/app.config.ts` includes Keycloak configuration
 
-### 6. Run the Frontend
+### 5. Run the Frontend
 
 ```bash
 cd ..  # Back to project root
@@ -153,7 +135,7 @@ The initialization script (`init-scripts/init.sql`) creates:
    - Otherwise → set role to `web_anon`
 6. Row Level Security (RLS) policies enforce access control
 
-**Note**: The `jwt-secret.jwks` file contains Keycloak's public key in JWKS format. If Keycloak rotates its keys, you'll need to re-run `./fetch-keycloak-jwk.sh` and restart PostgREST (`docker-compose restart postgrest`).
+**Note**: PostgREST auto-fetches Keycloak's public key (JWKS) on startup. If Keycloak rotates its keys, restart PostgREST to pick up the new keys: `docker-compose restart postgrest`.
 
 ## JWT Helper Functions
 

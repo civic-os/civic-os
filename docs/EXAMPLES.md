@@ -189,10 +189,7 @@ docker-compose up -d
 
 ```bash
 cd examples/mottpark
-docker-compose up -d keycloak  # Start Keycloak first
-# Wait ~90 seconds for healthy
-./fetch-keycloak-jwk.sh && docker-compose restart postgrest
-docker-compose up -d  # Start remaining services
+docker-compose up -d --build  # PostgREST auto-fetches JWKS from Keycloak
 ```
 
 ---
@@ -296,10 +293,7 @@ docker-compose up -d
 
 ```bash
 cd examples/neighborhood-hub
-docker-compose up -d
-# Wait for Keycloak, then:
-./fetch-keycloak-jwk.sh
-docker-compose restart postgrest
+docker-compose up -d --build  # PostgREST auto-fetches JWKS from Keycloak
 ```
 
 ---
@@ -324,9 +318,7 @@ docker-compose up -d
 ```bash
 cd examples/<example-name>
 cp .env.example .env              # Create local config
-docker-compose up -d              # Start services
-./fetch-keycloak-jwk.sh           # Fetch JWT keys (if applicable)
-docker-compose restart postgrest  # Apply JWT config
+docker-compose up -d --build      # Start services (PostgREST auto-fetches JWKS)
 
 # From repo root:
 npm start                         # Start Angular frontend
