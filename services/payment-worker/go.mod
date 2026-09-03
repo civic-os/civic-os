@@ -1,6 +1,6 @@
 module github.com/civic-os/payment-worker
 
-go 1.24.0
+go 1.26.0
 
 require (
 	github.com/jackc/pgx/v5 v5.7.6

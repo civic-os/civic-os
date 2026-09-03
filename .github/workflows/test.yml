@@ -240,7 +240,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: '1.26'
 
       - name: Install system dependencies (consolidated-worker)
         if: matrix.service == 'consolidated-worker-go'
@@ -350,7 +350,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: '1.26'
 
       - name: Install Angular dependencies
         run: npm ci

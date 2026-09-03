@@ -28,7 +28,7 @@ import { METADATA_SYSTEM_TABLES, isSystemType } from '../../constants/system-typ
 import { TranslationService } from '../../services/translation.service';
 
 // JointJS type imports (type-only to avoid runtime overhead)
-import type { dia, shapes } from '@joint/core';
+import type { dia, routers, shapes } from '@joint/core';
 
 /**
  * Interactive Schema Editor using JointJS for visual database schema management.
@@ -834,14 +834,14 @@ export class SchemaEditorPage implements OnDestroy {
     }
 
     const link = cell;
-    const sourceId = link.get('source').id;
-    const targetId = link.get('target').id;
+    const sourceId = link.get('source')?.id;
+    const targetId = link.get('target')?.id;
 
     if (!sourceId || !targetId) return;
 
     const siblings = graph.getLinks().filter((l: dia.Link) => {
-      const src = l.get('source').id;
-      const tgt = l.get('target').id;
+      const src = l.get('source')?.id;
+      const tgt = l.get('target')?.id;
       return (src === sourceId && tgt === targetId) || (src === targetId && tgt === sourceId);
     });
 
@@ -1046,14 +1046,14 @@ export class SchemaEditorPage implements OnDestroy {
     this.graph.on('remove', (cell: dia.Cell) => {
       if (cell.isLink()) {
         // When a link is removed, recalculate vertices for remaining sibling links
-        const sourceId = cell.get('source').id;
-        const targetId = cell.get('target').id;
+        const sourceId = cell.get('source')?.id;
+        const targetId = cell.get('target')?.id;
 
         if (sourceId && targetId) {
           // Find remaining links between these elements
           const siblings = this.graph.getLinks().filter((l: dia.Link) => {
-            const src = l.get('source').id;
-            const tgt = l.get('target').id;
+            const src = l.get('source')?.id;
+            const tgt = l.get('target')?.id;
             return (src === sourceId && tgt === targetId) || (src === targetId && tgt === sourceId);
           });
 
@@ -1503,8 +1503,8 @@ export class SchemaEditorPage implements OnDestroy {
     this.graph.startBatch('reconnect');
 
     links.forEach((link: dia.Link) => {
-      const sourceId = link.get('source').id;
-      const targetId = link.get('target').id;
+      const sourceId = link.get('source')?.id;
+      const targetId = link.get('target')?.id;
       const sourceTable = link.get('sourceTable');
       const targetTable = link.get('targetTable');
 
@@ -1613,12 +1613,12 @@ export class SchemaEditorPage implements OnDestroy {
         // See: https://github.com/clientIO/joint/discussions/2738
 
         // Apply router settings based on geometric relationship
-        const router = link.get('router');
+        const router = link.get('router') as routers.RouterJSON | undefined;
         if (router && sourceSide && targetSide) {
           router.args = router.args || {};
-          router.args.perpendicular = false; // CRITICAL: Disable auto-perpendicular to use explicit directions
-          router.args.startDirections = [sourceSide];
-          router.args.endDirections = [targetSide];
+          router.args['perpendicular'] = false; // CRITICAL: Disable auto-perpendicular to use explicit directions
+          router.args['startDirections'] = [sourceSide];
+          router.args['endDirections'] = [targetSide];
           link.router(router);
         }
       }
@@ -1696,8 +1696,8 @@ export class SchemaEditorPage implements OnDestroy {
       // Add edges to dagre graph
       const links = this.graph.getLinks();
       links.forEach((link: dia.Link) => {
-        const source = link.get('source').id;
-        const target = link.get('target').id;
+        const source = link.get('source')?.id;
+        const target = link.get('target')?.id;
         if (source && target) {
           dagreGraph.setEdge(source, target);
         }
@@ -1959,12 +1959,12 @@ export class SchemaEditorPage implements OnDestroy {
         const targetSide = this.geometricPortCalculator.determineSideFromAngle(targetAngle, targetSize.width, targetSize.height);
 
         // Update router directions based on geometry
-        const router = link.get('router');
+        const router = link.get('router') as routers.RouterJSON | undefined;
         if (router && sourceSide && targetSide) {
           router.args = router.args || {};
-          router.args.perpendicular = false; // CRITICAL: Disable auto-perpendicular
-          router.args.startDirections = [sourceSide];
-          router.args.endDirections = [targetSide];
+          router.args['perpendicular'] = false; // CRITICAL: Disable auto-perpendicular
+          router.args['startDirections'] = [sourceSide];
+          router.args['endDirections'] = [targetSide];
           link.router(router);  // Apply router config inside batch
         }
       }

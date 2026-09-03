@@ -1,10 +1,10 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # ======================================
 # Stage 1: Build Angular Application
 # ======================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/app/.angular \
 # ======================================
 # Stage 2: Production Nginx Server
 # ======================================
-FROM nginx:alpine
+FROM nginx:1.30-alpine
 
 # Install envsubst for environment variable substitution
 RUN apk add --no-cache gettext

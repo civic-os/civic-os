@@ -1,7 +1,7 @@
 # =============================================================================
 # Build Stage
 # =============================================================================
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # Install build dependencies for CGO (required by pgx)
 RUN apk add --no-cache \
@@ -33,7 +33,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build \
 # =============================================================================
 # Runtime Stage
 # =============================================================================
-FROM alpine:3.20
+FROM alpine:3.22
 
 # Install runtime dependencies
 # - ca-certificates: for HTTPS requests to Stripe API
