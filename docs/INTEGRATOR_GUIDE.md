@@ -481,8 +481,8 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
 **`metadata.civic_os_users`** (PUBLIC view) - User profile data visible to all authenticated users
 
 Fields:
-- `id` (UUID PK) - User identifier (from Keycloak 'sub' claim)
-- `display_name` - User's display name (from Keycloak 'preferred_username')
+- `id` (UUID PK) - User identifier (from Keycloak 'sub' claim on first login)
+- `display_name` - User's display name (bootstrapped from Keycloak on first login; managed in Civic OS thereafter)
 
 This is a **view** combining data from `metadata.civic_os_users` (public profile) and `metadata.civic_os_users_private` (private contact info).
 
@@ -490,16 +490,16 @@ This is a **view** combining data from `metadata.civic_os_users` (public profile
 
 Fields:
 - `user_id` (UUID PK FK) - References civic_os_users.id
-- `full_name` - Full legal name (from Keycloak 'name')
-- `email` - Email address (from Keycloak 'email')
-- `phone` - Phone number (from Keycloak custom attribute)
+- `full_name` - Full legal name (bootstrapped from Keycloak on first login)
+- `email` - Email address (bootstrapped from Keycloak on first login)
+- `phone` - Phone number (managed in Civic OS only; not synced from Keycloak since v0.65.0)
 
 **Privacy Model**:
 - Private fields are NULL in `civic_os_users` view unless:
   - User is viewing their own record (`user_id = current_user_id()`), OR
   - User has `civic_os_users_private:read` permission
 
-**Data Sync**: User data is synced from Keycloak on login via `refresh_current_user()` RPC. This ensures Civic OS has current profile information without storing passwords.
+**Data Sync** (v0.74.0+): User data is bootstrapped from Keycloak JWT on **first login only** via `refresh_current_user()` RPC. After initial creation, Civic OS is the sole authority — users update profiles via the `/profile` page (`update_own_profile()` RPC), admins via User Management (`update_user_info()` RPC). Both paths sync changes back to Keycloak via the trigger + worker pipeline. Roles are also first-login-only; admin role assignment/revocation flows one way: Civic OS → Keycloak.
 
 ### User Provisioning (v0.31.0+)
 

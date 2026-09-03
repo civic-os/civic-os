@@ -201,7 +201,7 @@ Ensure roles appear in JWT tokens so Civic OS can read them.
 
 ### Step 5: Configure User Profile (Phone Number)
 
-Civic OS syncs user profile data from Keycloak JWT claims to the database. To enable phone number management, add a custom user attribute and JWT mapper.
+Civic OS bootstraps user profile data from Keycloak JWT claims on **first login only** (v0.74.0+). After initial creation, profile data is managed in Civic OS — users via the `/profile` page, admins via User Management. To enable phone number bootstrapping, add a custom user attribute and JWT mapper.
 
 #### 5a. Add Phone Number User Attribute
 
@@ -248,7 +248,7 @@ After configuring the mapper:
    SELECT id, display_name, phone FROM civic_os_users WHERE phone IS NOT NULL;
    ```
 
-> **Note**: Phone numbers are synced from Keycloak on login. Users manage their phone number via Keycloak's account console (accessible from the "Account Settings" menu in Civic OS).
+> **Note** (v0.74.0+): Phone numbers are bootstrapped from Keycloak on **first login only**. After that, users manage their phone number via the Civic OS `/profile` page, and admins via User Management.
 
 ### Step 6: Create Test Users
 
@@ -925,7 +925,7 @@ After (admin-only — links pre-existing accounts only):
 
 **3. Ensure the service account client is configured** (see [Step 8](#step-8-create-service-account-client-v0310-required-for-user-provisioning)) — this becomes the sole path for account creation.
 
-**Optional — Disable Keycloak Account Console:** Keycloak exposes an account management UI at `https://<keycloak>/realms/<realm>/account/`. To prevent users from editing their own profile outside the app, disable the `account-console` client. Note: Civic OS links to this console for "Account Settings" — remove or redirect that link if disabled.
+**Optional — Disable Keycloak Account Console:** Keycloak exposes an account management UI at `https://<keycloak>/realms/<realm>/account/`. Since v0.74.0, Civic OS is the sole authority for profile data after first login — the `/profile` page and User Management are the primary editing paths. Disabling the `account-console` client prevents users from making profile changes in Keycloak that won't sync back to Civic OS.
 
 ---
 

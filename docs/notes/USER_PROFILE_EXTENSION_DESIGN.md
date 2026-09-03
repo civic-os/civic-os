@@ -4,7 +4,7 @@
 
 ## Problem
 
-Civic OS users are limited to built-in `civic_os_users` fields (name, email, phone) synced from Keycloak. Real-world instances need richer profiles — a toolshed app needs "borrower" info, a volunteer platform needs skills/availability. These are app-level 1:1 extensions of the user entity with no framework coupling today.
+Civic OS users are limited to built-in `civic_os_users` fields (name, email, phone) bootstrapped from Keycloak on first login (v0.74.0+: Civic OS is the sole authority after initial bootstrap). Real-world instances need richer profiles — a toolshed app needs "borrower" info, a volunteer platform needs skills/availability. These are app-level 1:1 extensions of the user entity with no framework coupling today.
 
 ## Solution
 

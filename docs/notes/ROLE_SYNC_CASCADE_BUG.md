@@ -1,7 +1,7 @@
 # Role Sync Cascade Bug
 
-**Status**: Known issue, not yet fixed
-**Severity**: High — causes permanent, silent role loss
+**Status**: Fixed in v0.74.0 (first-login bootstrapper)
+**Severity**: High — caused permanent, silent role loss
 **Discovered**: 2026-09 during v0.74.0 Playwright verification; confirmed to have occurred in production
 
 ## The Anti-Pattern
@@ -44,6 +44,20 @@ The sync treats Keycloak as the **sole source of truth** for roles, but also **w
 
 Option 1 is the simplest and safest. The current behavior (DB deletes propagating to Keycloak) was never an explicit design goal — it's an emergent side effect of the trigger + worker pipeline.
 
-## Workaround
+## Fix (v0.74.0)
+
+Migration `v0-74-0-fix-role-sync-cascade` converts `refresh_current_user()` from a continuous sync into a **first-login-only bootstrapper**:
+
+1. **User upserts** changed from `ON CONFLICT DO UPDATE` to `ON CONFLICT DO NOTHING`. Name, email, phone are set on first login only. After that, users edit via `/profile` page, admins via User Management.
+2. **Role sync** only runs when the user has **zero existing roles** in `user_roles` (first login). Phase 2 (DELETE) removed entirely — no more cascade. Phase 4 (touch synced_at) removed as unnecessary.
+3. **`get_real_user_roles()`** preserved (v0.41.2 impersonation fix).
+
+After first login, all user data flows one way: Civic OS DB → Keycloak via the existing trigger + worker pipeline.
+
+## Data Recovery
+
+No automatic recovery in the migration (instance-specific data). If users lost roles due to the cascade bug, re-assign via User Management. If user data drifted between Keycloak and Civic OS, update in Civic OS directly.
+
+## Historical Workaround (pre-v0.74.0)
 
 If a user loses a role, manually re-assign it via Keycloak admin UI (`/admin/master/console/#/civic-os-dev/users/{user-id}/role-mapping`). The next login will re-sync it to the database.

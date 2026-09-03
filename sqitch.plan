@@ -105,3 +105,4 @@ v0-69-1-pwa-app-name-translations [v0-69-0-pwa-translations] 2026-07-29T12:00:00
 v0-70-0-add-markdown-domain [v0-69-1-pwa-app-name-translations] 2026-08-04T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add markdown domain and editor a11y translations for rich-text content columns
 v0-70-0-trackable-notifications [v0-70-0-add-markdown-domain] 2026-08-05T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add trackable notifications with engagement tracking, CAN-SPAM compliance, and RFC 8058 unsubscribe
 v0-71-0-ical-http-caching [v0-70-0-trackable-notifications] 2026-08-23T12:00:00Z Daniel Kurin <dkurin@civic-os.org> # Add HTTP caching (ETag/304), line folding, stable DTSTAMP, and REFRESH-INTERVAL to iCal helpers
+v0-74-0-fix-role-sync-cascade [v0-71-0-ical-http-caching] 2026-09-03T19:00:00Z Daniel Kurin <dkurin@civic-os.org> # Fix role sync cascade: convert refresh_current_user to first-login-only bootstrapper
