@@ -138,7 +138,7 @@
             <div class="badge badge-primary gap-2">
               @if (linkRelated()) {
                 <a
-                  [routerLink]="['/view', prop().many_to_many_meta?.relatedTable, item.id]"
+                  [routerLink]="['/view', $safeNavigationMigration(prop().many_to_many_meta?.relatedTable), item.id]"
                   class="!text-primary-content hover:underline">
                   {{ formatM2mLabel(item) }}
                 </a>
@@ -161,7 +161,7 @@
     }
     @if (propType() == EntityPropertyType.FileImage) {
       <button type="button" class="block w-32 h-32 rounded border overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-           [title]="'Click to view full size: ' + datum()?.file_name"
+           [title]="'Click to view full size: ' + $safeNavigationMigration(datum()?.file_name)"
            [attr.aria-label]="'a11y.view_full_size' | translate"
            (click)="onImageClick(datum())">
         <app-file-thumbnail
@@ -194,7 +194,7 @@
           <button type="button" class="font-medium cursor-pointer hover:text-primary text-start bg-transparent p-0 border-0" (click)="onPdfClick(datum())">
             {{ datum()?.file_name }}
           </button>
-          <span class="text-sm text-base-content/60">{{ formatFileSize(datum()?.file_size) }}</span>
+          <span class="text-sm text-base-content/60">{{ formatFileSize($safeNavigationMigration(datum()?.file_size)) }}</span>
         </div>
       </div>
     }
@@ -215,12 +215,12 @@
         }
         <div class="flex flex-col">
           <a
-            [href]="getS3Url(datum()?.s3_original_key)"
-            [download]="datum()?.file_name"
+            [href]="getS3Url($safeNavigationMigration(datum()?.s3_original_key))"
+            [download]="$safeNavigationMigration(datum()?.file_name)"
             class="font-medium link link-primary">
             {{ datum()?.file_name }}
           </a>
-          <span class="text-sm text-base-content/60">{{ formatFileSize(datum()?.file_size) }}</span>
+          <span class="text-sm text-base-content/60">{{ formatFileSize($safeNavigationMigration(datum()?.file_size)) }}</span>
         </div>
       </div>
     }

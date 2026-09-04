@@ -17,7 +17,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { DataService } from './data.service';
@@ -60,7 +60,7 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         AuthService,
         { provide: KEYCLOAK_EVENT_SIGNAL, useValue: keycloakEventSignal },

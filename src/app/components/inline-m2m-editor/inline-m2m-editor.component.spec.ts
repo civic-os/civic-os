@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { of } from 'rxjs';
 import { InlineM2mEditorComponent } from './inline-m2m-editor.component';
 import { DataService } from '../../services/data.service';
@@ -57,7 +57,7 @@ describe('InlineM2mEditorComponent', () => {
       imports: [InlineM2mEditorComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService }
       ]

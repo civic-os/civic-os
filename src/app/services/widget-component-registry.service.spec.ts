@@ -16,17 +16,20 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetComponentRegistry } from './widget-component-registry.service';
 
 // Mock widget components for testing
-@Component({ selector: 'app-mock-markdown-widget', template: '<div>Markdown</div>' })
+@Component({ selector: 'app-mock-markdown-widget', changeDetection: ChangeDetectionStrategy.Eager,
+ template: '<div>Markdown</div>' })
 class MockMarkdownWidgetComponent { }
 
-@Component({ selector: 'app-mock-list-widget', template: '<div>List</div>' })
+@Component({ selector: 'app-mock-list-widget', changeDetection: ChangeDetectionStrategy.Eager,
+ template: '<div>List</div>' })
 class MockListWidgetComponent { }
 
-@Component({ selector: 'app-mock-stat-widget', template: '<div>Stat</div>' })
+@Component({ selector: 'app-mock-stat-widget', changeDetection: ChangeDetectionStrategy.Eager,
+ template: '<div>Stat</div>' })
 class MockStatWidgetComponent { }
 
 describe('WidgetComponentRegistry', () => {

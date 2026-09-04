@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { of, throwError, Observable, BehaviorSubject } from 'rxjs';
@@ -50,7 +50,7 @@ describe('DashboardSelectorComponent', () => {
       imports: [DashboardSelectorComponent, CommonModule],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: { paramMap: paramMapSubject.asObservable() } }

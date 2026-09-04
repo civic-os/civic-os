@@ -16,7 +16,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { errorTrackingInterceptor } from './error-tracking.interceptor';
@@ -37,7 +37,7 @@ describe('errorTrackingInterceptor', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(withInterceptors([errorTrackingInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([errorTrackingInterceptor])),
         provideHttpClientTesting(),
         { provide: AnalyticsService, useValue: mockAnalytics }
       ]

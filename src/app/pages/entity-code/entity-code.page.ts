@@ -10,7 +10,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { switchMap, catchError, of, map } from 'rxjs';
 import { IntrospectionService } from '../../services/introspection.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -40,7 +40,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-entity-code',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, CodeViewerComponent],
+  imports: [TranslatePipe, CodeViewerComponent],
   templateUrl: './entity-code.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

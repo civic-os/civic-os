@@ -4,7 +4,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { StaticAssetsService, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from './static-assets.service';
 import { AuthService } from './auth.service';
@@ -20,7 +20,7 @@ describe('StaticAssetsService', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: AuthService, useValue: mockAuth },
         StaticAssetsService

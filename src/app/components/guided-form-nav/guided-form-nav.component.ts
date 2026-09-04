@@ -3,7 +3,7 @@
  */
 
 import { Component, input, output, computed, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { GuidedFormService } from '../../services/guided-form.service';
 import { TranslationService } from '../../services/translation.service';
 import { GuidedFormContext, EffectiveGuidedFormStep } from '../../interfaces/guided-form';
@@ -16,7 +16,7 @@ const REVIEW_STEP_ORDER = Number.MAX_SAFE_INTEGER;
 @Component({
   selector: 'app-guided-form-nav',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [TranslatePipe],
   templateUrl: './guided-form-nav.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

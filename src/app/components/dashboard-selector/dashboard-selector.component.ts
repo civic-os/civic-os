@@ -17,7 +17,7 @@
 
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
@@ -37,7 +37,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
  */
 @Component({
   selector: 'app-dashboard-selector',
-  imports: [CommonModule, TranslatePipe],
+  imports: [TranslatePipe],
   templateUrl: './dashboard-selector.component.html',
   styleUrl: './dashboard-selector.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

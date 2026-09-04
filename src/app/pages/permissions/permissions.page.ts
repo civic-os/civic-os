@@ -19,7 +19,7 @@ import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { PermissionsService, Role, RolePermission, EntityActionPermission, RoleDelegation } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of, switchMap, map, catchError, BehaviorSubject, take, tap } from 'rxjs';
@@ -47,7 +47,7 @@ interface PermissionsData {
 @Component({
   selector: 'app-permissions',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, CosModalComponent, TranslatePipe],
+  imports: [FormsModule, CosModalComponent, TranslatePipe],
   templateUrl: './permissions.page.html',
   styleUrl: './permissions.page.css'
 })

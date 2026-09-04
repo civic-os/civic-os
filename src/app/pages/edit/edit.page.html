@@ -33,7 +33,7 @@
               }
             </h1>
             @if (seriesMembership()?.is_member) {
-              <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
+              <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', $safeNavigationMigration(seriesMembership()?.group_id)]">
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">repeat</span>
                 {{ seriesMembership()?.group_name || 'Recurring' }}
               </a>
@@ -62,7 +62,7 @@
                     } @else if (showCompletedStepDisplayMode() && isProperty(item) && item.type !== 17) {
                       <!-- Completed step display mode: read-only property display -->
                       <div [class]="'col-span-full sm:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 3) + ' lg:col-span-' + Math.min(SchemaService.getRenderableColumnSpan(item), 6) + ' 2xl:col-span-' + SchemaService.getRenderableColumnSpan(item)">
-                        <app-display-property [datum]="displayData()?.[item.column_name]" [property]="item"></app-display-property>
+                        <app-display-property [datum]="$safeNavigationMigration(displayData()?.[item.column_name])" [property]="item"></app-display-property>
                       </div>
                     } @else if (showCompletedStepDisplayMode() && isProperty(item) && item.type === 17 && item.show_inline) {
                       <!-- Completed step display mode: read-only M:M chips -->

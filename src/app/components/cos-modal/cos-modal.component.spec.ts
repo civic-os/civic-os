@@ -4,7 +4,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal, provideZonelessChangeDetection } from '@angular/core';
+import { Component, signal, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { CosModalComponent } from './cos-modal.component';
 
@@ -14,6 +14,7 @@ import { CosModalComponent } from './cos-modal.component';
 @Component({
   standalone: true,
   imports: [CosModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <button id="opener" type="button">Open</button>
     <cos-modal

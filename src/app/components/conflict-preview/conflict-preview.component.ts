@@ -16,7 +16,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, computed, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ConflictInfo } from '../../interfaces/entity';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -50,7 +50,7 @@ export interface ConflictPreviewResult {
 @Component({
   selector: 'app-conflict-preview',
   standalone: true,
-  imports: [CommonModule, CosModalComponent, TranslatePipe],
+  imports: [CosModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg" [label]="'a11y.schedule_preview' | translate">

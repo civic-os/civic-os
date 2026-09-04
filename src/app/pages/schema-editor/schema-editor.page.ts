@@ -17,7 +17,7 @@
 
 // Geometric port ordering implementation
 import { Component, inject, signal, computed, effect, viewChild, ElementRef, OnDestroy, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { SchemaService } from '../../services/schema.service';
 import { ThemeService } from '../../services/theme.service';
 import { GeometricPortCalculatorService } from '../../services/schema-diagram/geometric-port-calculator.service';
@@ -54,7 +54,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-schema-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, CommonModule, SchemaInspectorPanelComponent],
+  imports: [TranslatePipe, SchemaInspectorPanelComponent],
   templateUrl: './schema-editor.page.html',
   styleUrl: './schema-editor.page.css'
 })

@@ -16,13 +16,14 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal, provideZonelessChangeDetection } from '@angular/core';
+import { Component, signal, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ActionBarComponent, ActionButton } from './action-bar.component';
 
 // Test host component to provide inputs
 @Component({
   standalone: true,
   imports: [ActionBarComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [style.width.px]="containerWidth()">
       <app-action-bar

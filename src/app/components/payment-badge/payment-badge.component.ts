@@ -16,7 +16,7 @@
  */
 
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { PaymentValue } from '../../interfaces/entity';
 
 /**
@@ -33,7 +33,7 @@ import { PaymentValue } from '../../interfaces/entity';
 @Component({
   selector: 'app-payment-badge',
   standalone: true,
-  imports: [CommonModule],  // CurrencyPipe used programmatically in tooltip()
+  imports: [],  // CurrencyPipe used programmatically in tooltip()
   templateUrl: './payment-badge.component.html',
   styleUrl: './payment-badge.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

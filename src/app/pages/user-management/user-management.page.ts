@@ -324,7 +324,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
           <p class="text-sm text-base-content/60 mb-4">
             {{ editUser()?.full_name }}
             @if (editUser()?.last_login_at) {
-              · Last login {{ editUser()?.last_login_at | date:'short' }}
+              · Last login {{ $safeNavigationMigration(editUser()?.last_login_at) | date:'short' }}
             } @else {
               · Never logged in
             }
@@ -332,7 +332,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 
           <!-- View Profile Link -->
           <a class="btn btn-sm btn-outline mb-4"
-             [routerLink]="['/profile', editUser()?.id]"
+             [routerLink]="['/profile', $safeNavigationMigration(editUser()?.id)]"
              (click)="closeEditModal()">
             <span class="material-symbols-outlined text-sm" aria-hidden="true">person</span>
             View Profile

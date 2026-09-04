@@ -16,7 +16,7 @@
  */
 
 import { Component, input, signal, inject, ChangeDetectionStrategy, effect, computed, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { EntityNote } from '../../interfaces/entity';
@@ -44,7 +44,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-entity-notes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, SimpleMarkdownPipe, TranslatePipe],
+  imports: [FormsModule, SimpleMarkdownPipe, TranslatePipe],
   templateUrl: './entity-notes.component.html'
 })
 export class EntityNotesComponent {

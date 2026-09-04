@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from './recurring-schedule-form.component';
 import { RecurringService } from '../../services/recurring.service';
 
@@ -38,7 +38,7 @@ describe('RecurringScheduleFormComponent', () => {
       imports: [RecurringScheduleFormComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: RecurringService, useValue: mockRecurringService }
       ]
     }).compileComponents();

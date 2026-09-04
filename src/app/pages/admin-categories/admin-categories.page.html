@@ -215,7 +215,7 @@
       <input type="text"
              id="cat-key"
              class="input input-bordered w-full"
-             [value]="editingCategory()?.category_key"
+             [value]="$safeNavigationMigration(editingCategory()?.category_key)"
              disabled>
       <div class="label"><span class="text-base-content/60 text-xs">Auto-generated. Cannot be changed.</span></div>
     </div>

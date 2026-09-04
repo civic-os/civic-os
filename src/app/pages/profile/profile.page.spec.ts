@@ -6,7 +6,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, Subject, BehaviorSubject } from 'rxjs';
 import { convertToParamMap, ParamMap } from '@angular/router';
@@ -145,7 +145,7 @@ describe('ProfilePage', () => {
       imports: [ProfilePage],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: ProfileService, useValue: mockProfileService },

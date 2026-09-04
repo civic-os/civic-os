@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 
 /**
@@ -31,6 +31,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-empty-state',
   standalone: true,
   imports: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div role="alert" class="alert justify-start" [class]="'alert-' + alertType()">
       <span class="material-symbols-outlined" aria-hidden="true">{{ icon() }}</span>

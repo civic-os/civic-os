@@ -3,7 +3,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { PhotoGalleryEditorComponent } from './photo-gallery-editor.component';
@@ -54,7 +54,7 @@ describe('PhotoGalleryEditorComponent', () => {
       imports: [PhotoGalleryEditorComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         provideTranslationTesting(),
         GalleryService,

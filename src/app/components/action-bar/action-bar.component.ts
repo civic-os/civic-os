@@ -28,7 +28,7 @@ import {
   effect,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 /**
  * Represents a button in the action bar.
@@ -69,7 +69,7 @@ export interface ActionButton {
 @Component({
   selector: 'app-action-bar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex gap-2 items-center" #container>

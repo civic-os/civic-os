@@ -318,7 +318,7 @@
       <input type="text"
              id="status-key"
              class="input input-bordered w-full"
-             [value]="editingStatus()?.status_key"
+             [value]="$safeNavigationMigration(editingStatus()?.status_key)"
              disabled>
       <div class="label"><span class="text-base-content/60 text-xs">Auto-generated. Cannot be changed.</span></div>
     </div>

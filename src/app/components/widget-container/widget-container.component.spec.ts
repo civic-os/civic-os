@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, provideZonelessChangeDetection } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WidgetContainerComponent } from './widget-container.component';
 import { WidgetComponentRegistry } from '../../services/widget-component-registry.service';
@@ -27,6 +27,7 @@ import { createMockWidget, MOCK_WIDGETS } from '../../testing';
 @Component({
   selector: 'app-test-widget',
   template: '<div class="test-widget">Test Widget Content</div>',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 class TestWidgetComponent {

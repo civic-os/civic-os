@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SeriesGroupManagementPage } from './series-group-management.page';
 import { RecurringService } from '../../services/recurring.service';
@@ -92,7 +92,7 @@ describe('SeriesGroupManagementPage', () => {
       providers: [
         provideTranslationTesting(),
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: RecurringService, useValue: mockRecurringService },
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: AuthService, useValue: mockAuthService },

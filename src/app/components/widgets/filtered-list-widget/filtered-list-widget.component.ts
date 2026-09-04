@@ -16,7 +16,7 @@
  */
 
 import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router, RouterLink } from '@angular/router';
 import { DashboardWidget, FilteredListWidgetConfig } from '../../../interfaces/dashboard';
 import { DisplayPropertyComponent } from '../../display-property/display-property.component';
@@ -37,7 +37,7 @@ import { DataQuery } from '../../../interfaces/query';
 import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-filtered-list-widget',
-  imports: [LoadingIndicatorComponent, CommonModule, DisplayPropertyComponent, RouterLink, TranslatePipe],
+  imports: [LoadingIndicatorComponent, DisplayPropertyComponent, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './filtered-list-widget.component.html',
   styleUrl: './filtered-list-widget.component.css'

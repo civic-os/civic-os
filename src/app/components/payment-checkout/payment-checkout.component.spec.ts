@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PaymentCheckoutComponent } from './payment-checkout.component';
 import { DataService } from '../../services/data.service';
@@ -73,7 +73,7 @@ describe('PaymentCheckoutComponent', () => {
       providers: [
         provideTranslationTesting(),
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: DataService, useValue: dataServiceSpy }
       ]

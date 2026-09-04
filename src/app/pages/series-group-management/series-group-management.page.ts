@@ -16,7 +16,7 @@
  */
 
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SeriesGroup, SchemaEntityTable, CreateSeriesResult } from '../../interfaces/entity';
@@ -45,13 +45,12 @@ import { catchError, map } from 'rxjs/operators';
   selector: 'app-series-group-management-page',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     SeriesGroupDetailComponent,
     CreateSeriesWizardComponent,
     CosModalComponent,
     TranslatePipe
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container mx-auto px-4 py-6">

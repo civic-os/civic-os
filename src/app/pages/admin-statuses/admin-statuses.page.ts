@@ -16,7 +16,7 @@
  */
 
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -29,7 +29,7 @@ type ActiveTab = 'statuses' | 'transitions';
 @Component({
   selector: 'app-admin-statuses',
   standalone: true,
-  imports: [CommonModule, FormsModule, CosModalComponent, TranslatePipe],
+  imports: [FormsModule, CosModalComponent, TranslatePipe],
   templateUrl: './admin-statuses.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

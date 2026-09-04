@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { SeriesEditorModalComponent } from './series-editor-modal.component';
 import { SchemaService } from '../../services/schema.service';
 import { RecurringService } from '../../services/recurring.service';
@@ -47,7 +47,7 @@ describe('SeriesEditorModalComponent', () => {
       providers: [
         provideTranslationTesting(),
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: SchemaService, useValue: mockSchemaService },
         { provide: RecurringService, useValue: mockRecurringService }
       ]

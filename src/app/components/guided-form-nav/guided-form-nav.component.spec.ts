@@ -5,7 +5,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { GuidedFormNavComponent } from './guided-form-nav.component';
 import { GuidedFormService } from '../../services/guided-form.service';
@@ -72,7 +72,7 @@ describe('GuidedFormNavComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: GuidedFormService, useValue: mockGuidedFormService }
       ]

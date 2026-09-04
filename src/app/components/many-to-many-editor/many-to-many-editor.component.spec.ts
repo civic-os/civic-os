@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { ManyToManyEditorComponent } from './many-to-many-editor.component';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
@@ -62,7 +62,7 @@ describe('ManyToManyEditorComponent', () => {
       imports: [ManyToManyEditorComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: DataService, useValue: mockDataService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: SchemaService, useValue: mockSchemaService },

@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { EditRecurringTimeSlotComponent, RecurringTimeSlotValue } from './edit-recurring-time-slot.component';
 import { RecurringService } from '../../services/recurring.service';
 import { of } from 'rxjs';
@@ -40,7 +40,7 @@ describe('EditRecurringTimeSlotComponent', () => {
       imports: [EditRecurringTimeSlotComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         { provide: RecurringService, useValue: mockRecurringService }
       ]
     }).compileComponents();

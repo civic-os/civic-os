@@ -17,7 +17,7 @@
             </a>
           }
           @if (seriesMembership()?.is_member) {
-            <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', seriesMembership()?.group_id]">
+            <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', $safeNavigationMigration(seriesMembership()?.group_id)]">
               <span class="material-symbols-outlined text-sm" aria-hidden="true">repeat</span>
               {{ seriesMembership()?.group_name || 'Recurring' }}
             </a>
@@ -318,7 +318,7 @@
           (closed)="closeActionModal()"
           [size]="currentAction()?.parameters?.length ? 'md' : 'sm'"
           [closeOnBackdrop]="!actionLoading()"
-          [label]="currentAction()?.display_name">
+          [label]="$safeNavigationMigration(currentAction()?.display_name)">
           @if (currentAction(); as action) {
             <h3 class="font-bold text-lg mb-4">{{ action.display_name }}</h3>
 

@@ -29,7 +29,7 @@ import {
   ViewChild,
   ElementRef
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SchemaService } from '../../services/schema.service';
 import { RecurringService, CreateSeriesParams } from '../../services/recurring.service';
@@ -68,14 +68,13 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   selector: 'app-create-series-wizard',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
     CosModalComponent,
     TranslatePipe
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="xl" [closeOnBackdrop]="!creating()" [label]="'a11y.create_recurring_series' | translate">

@@ -16,7 +16,7 @@
  */
 
 import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, Subscription, debounceTime } from 'rxjs';
@@ -43,7 +43,7 @@ const SOURCE_TYPES = [
 @Component({
   selector: 'app-admin-translations',
   standalone: true,
-  imports: [CommonModule, FormsModule, CosModalComponent, ImportModalComponent, TranslatePipe],
+  imports: [FormsModule, CosModalComponent, ImportModalComponent, TranslatePipe],
   templateUrl: './admin-translations.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

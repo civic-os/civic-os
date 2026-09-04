@@ -16,7 +16,7 @@
  */
 
 import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { DashboardWidget, MapWidgetConfig } from '../../../interfaces/dashboard';
 import { GeoPointMapComponent, MapMarker } from '../../geo-point-map/geo-point-map.component';
@@ -37,7 +37,7 @@ import { DataQuery } from '../../../interfaces/query';
 import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-map-widget',
-  imports: [LoadingIndicatorComponent, CommonModule, GeoPointMapComponent, GeoPolygonMapComponent],
+  imports: [LoadingIndicatorComponent, GeoPointMapComponent, GeoPolygonMapComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './map-widget.component.html',
   styleUrl: './map-widget.component.css'

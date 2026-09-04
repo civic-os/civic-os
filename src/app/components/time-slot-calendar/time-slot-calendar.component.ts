@@ -28,7 +28,7 @@ import {
   AfterViewInit,
   untracked
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg, DateSelectArg, EventInput, DatesSetArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -69,7 +69,7 @@ export interface CalendarEvent {
 @Component({
   selector: 'app-time-slot-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule],
+  imports: [FullCalendarModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './time-slot-calendar.component.html',
   styleUrl: './time-slot-calendar.component.css'

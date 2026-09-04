@@ -27,7 +27,7 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin, of, Observable } from 'rxjs';
@@ -81,7 +81,6 @@ type EditTab = 'info' | 'schedule' | 'template';
   selector: 'app-series-group-detail',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     SeriesVersionTimelineComponent,
@@ -89,7 +88,7 @@ type EditTab = 'info' | 'schedule' | 'template';
     EditPropertyComponent,
     CosModalComponent,
     TranslatePipe
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (loading) {

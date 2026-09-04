@@ -4,7 +4,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -26,7 +26,7 @@ describe('StaticAssetsPage', () => {
       providers: [
         provideTranslationTesting(),
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: StaticAssetsService, useValue: mockService }

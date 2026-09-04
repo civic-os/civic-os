@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { FkSearchModalComponent } from './fk-search-modal.component';
@@ -94,7 +94,7 @@ describe('FkSearchModalComponent', () => {
       imports: [FkSearchModalComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideTranslationTesting(),
         { provide: DataService, useValue: mockDataService },
         { provide: SchemaService, useValue: mockSchemaService }

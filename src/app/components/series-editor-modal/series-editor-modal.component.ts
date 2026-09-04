@@ -27,7 +27,7 @@ import {
   OnChanges,
   SimpleChanges
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SeriesGroup, Series, SchemaEntityProperty, EntityPropertyType } from '../../interfaces/entity';
 import { RecurringScheduleFormComponent, RecurringScheduleValue } from '../recurring-schedule-form/recurring-schedule-form.component';
@@ -65,14 +65,13 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
   selector: 'app-series-editor-modal',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RecurringScheduleFormComponent,
     EditPropertyComponent,
     CosModalComponent,
     TranslatePipe
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="lg" [label]="'a11y.edit_recurring_series' | translate">
