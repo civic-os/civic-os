@@ -17,6 +17,8 @@ import {
 } from '@modelcontextprotocol/server';
 import type { SchemaCache } from './schema-cache.js';
 import { createServer, PKG_VERSION, type ServerConfig } from './index.js';
+import { getLogger } from './logger.js';
+import { extractUserId } from './jwt-utils.js';
 
 // Bun runtime type declaration for runtime detection
 declare const Bun: { serve(options: { port: number; fetch: (req: Request) => Promise<Response> }): unknown } | undefined;
@@ -129,14 +131,14 @@ export class OidcConfigCache {
     try {
       const response = await fetch(this.oidcUrl);
       if (!response.ok) {
-        console.error(`Failed to fetch OIDC config from ${this.oidcUrl}: ${response.status}`);
+        getLogger(['mcp', 'http']).warn('oidc_fetch_failed', { url: this.oidcUrl, status: response.status });
         return this.json; // stale cache
       }
       this.json = await response.text();
       this.fetchedAt = Date.now();
       return this.json;
     } catch (err) {
-      console.error('Failed to fetch OIDC config:', err instanceof Error ? err.message : err);
+      getLogger(['mcp', 'http']).warn('oidc_fetch_failed', { error: err instanceof Error ? err.message : String(err) });
       return this.json; // stale cache
     }
   }
@@ -151,6 +153,8 @@ export class OidcConfigCache {
  * Handles routing: health → OAuth discovery → CORS preflight → MCP handler.
  */
 export async function startHttpServer(cache: SchemaCache, config: ServerConfig): Promise<void> {
+  const httpLogger = getLogger(['mcp', 'http']);
+
   // Create the MCP handler with per-request server factory
   const handler: McpHttpHandler = createMcpHandler(
     (ctx) => createServer(cache, ctx.authInfo?.token, config.serverInstructions),
@@ -217,12 +221,13 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
     // clientId and scopes are required by AuthInfo but not needed for transparent passthrough;
     // PostgREST handles all authorization via the JWT itself.
     const token = extractBearerToken(request);
+    const start = performance.now();
 
     // When OAuth is configured, reject unauthenticated MCP requests with 401.
     // This triggers the client's OAuth flow (RFC 6750 §3 + MCP spec).
     if (!token && protectedResourceJson) {
       const resourceUrl = config.mcpPublicUrl ?? `http://localhost:${config.port}`;
-      return withCors(new Response(
+      const challengeResponse = withCors(new Response(
         JSON.stringify({ error: 'invalid_token', error_description: 'Authentication required' }),
         {
           status: 401,
@@ -232,12 +237,20 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
           },
         },
       ));
+      httpLogger.info('request', { method: request.method, path: url.pathname, status: 401, duration_ms: Math.round(performance.now() - start) });
+      return challengeResponse;
     }
 
     const response = await handler.fetch(request, {
       authInfo: token ? { token, clientId: 'civic-os-mcp', scopes: [] } : undefined,
     });
-    return withCors(response);
+    const corsResponse = withCors(response);
+    const durationMs = Math.round(performance.now() - start);
+    const userId = token ? extractUserId(token) : undefined;
+    const logProps: Record<string, unknown> = { method: request.method, path: url.pathname, status: corsResponse.status, duration_ms: durationMs };
+    if (userId) logProps.user_id = userId;
+    httpLogger.info('request', logProps);
+    return corsResponse;
   };
 
   const port = config.port;
@@ -285,8 +298,8 @@ export async function startHttpServer(cache: SchemaCache, config: ServerConfig):
     server.listen(port);
   }
 
-  console.error(`MCP server listening on http://0.0.0.0:${port} (HTTP Streamable transport)`);
+  httpLogger.info('server_started', { transport: 'http', port });
   if (protectedResourceJson) {
-    console.error(`OAuth discovery enabled (protected-resource + authorization-server): ${config.keycloakUrl}/realms/${config.keycloakRealm}`);
+    httpLogger.info('oauth_enabled', { realm_url: `${config.keycloakUrl}/realms/${config.keycloakRealm}` });
   }
 }

@@ -33,3 +33,19 @@ export function extractUserCacheKey(token: string): string | undefined {
     return undefined;
   }
 }
+
+/**
+ * Extract just the user ID (sub claim) from a JWT for logging.
+ * Unlike extractUserCacheKey, omits the signature fingerprint
+ * since logs don't need cache isolation.
+ */
+export function extractUserId(token: string): string | undefined {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return undefined;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    return payload.sub ?? undefined;
+  } catch {
+    return undefined;
+  }
+}

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { extractUserCacheKey } from '../jwt-utils.js';
+import { extractUserCacheKey, extractUserId } from '../jwt-utils.js';
 
 // Helper to create a minimal JWT with a given payload
 function makeJwt(payload: Record<string, unknown>): string {
@@ -54,5 +54,39 @@ describe('extractUserCacheKey()', () => {
     const token = makeJwt({ sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' });
     const key = extractUserCacheKey(token);
     expect(key).toContain('a1b2c3d4-e5f6-7890-abcd-ef1234567890:');
+  });
+});
+
+describe('extractUserId()', () => {
+  it('returns sub claim for valid JWT', () => {
+    const token = makeJwt({ sub: 'user-123', role: 'authenticated' });
+    expect(extractUserId(token)).toBe('user-123');
+  });
+
+  it('returns UUID sub claim', () => {
+    const token = makeJwt({ sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' });
+    expect(extractUserId(token)).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+  });
+
+  it('returns undefined for JWT without sub', () => {
+    const token = makeJwt({ role: 'web_anon' });
+    expect(extractUserId(token)).toBeUndefined();
+  });
+
+  it('returns undefined for malformed token', () => {
+    expect(extractUserId('not-a-jwt')).toBeUndefined();
+    expect(extractUserId('a.b')).toBeUndefined();
+    expect(extractUserId('')).toBeUndefined();
+  });
+
+  it('returns undefined for invalid base64 payload', () => {
+    expect(extractUserId('header.!!!invalid!!!.sig')).toBeUndefined();
+  });
+
+  it('returns same sub regardless of signature', () => {
+    const header = Buffer.from(JSON.stringify({ alg: 'RS256' })).toString('base64url');
+    const body = Buffer.from(JSON.stringify({ sub: 'user-123' })).toString('base64url');
+    expect(extractUserId(`${header}.${body}.sig_AAA`)).toBe('user-123');
+    expect(extractUserId(`${header}.${body}.sig_BBB`)).toBe('user-123');
   });
 });

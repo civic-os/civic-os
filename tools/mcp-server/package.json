@@ -1,6 +1,6 @@
 {
   "name": "@civic-os/mcp-server",
-  "version": "0.74.0",
+  "version": "0.73.1",
   "description": "MCP server for Civic OS — semantic API adapter over PostgREST",
   "type": "module",
   "main": "dist/index.js",
@@ -16,6 +16,7 @@
     "sync-version": "node -e \"const r=require('../../package.json');const p=require('./package.json');p.version=r.version;require('fs').writeFileSync('./package.json',JSON.stringify(p,null,2)+'\\n')\""
   },
   "dependencies": {
+    "@logtape/logtape": "^2.3.3",
     "@modelcontextprotocol/server": "^2.0.0",
     "zod": "^4.5.0"
   },

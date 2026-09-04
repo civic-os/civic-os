@@ -20,7 +20,8 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/server';
 import { PostgRESTClient } from './postgrest-client.js';
 import { SchemaCache } from './schema-cache.js';
 import { NameResolver } from './name-resolver.js';
-import { extractUserCacheKey } from './jwt-utils.js';
+import { extractUserCacheKey, extractUserId } from './jwt-utils.js';
+import { configureLogging, getLogger } from './logger.js';
 
 // Read version from package.json so it stays in sync with the root Civic OS version.
 const require = createRequire(import.meta.url);
@@ -53,6 +54,7 @@ export interface ServerConfig {
   keycloakRealm?: string;
   mcpPublicUrl?: string;
   serverInstructions?: string;
+  logLevel?: string;
 }
 
 function parseArgs(): ServerConfig {
@@ -63,6 +65,7 @@ function parseArgs(): ServerConfig {
     (process.env['MCP_TRANSPORT'] as 'stdio' | 'http') ?? 'stdio';
   let port = parseInt(process.env['MCP_PORT'] ?? '3001', 10);
   let serverInstructions = process.env['MCP_SERVER_INSTRUCTIONS'];
+  let logLevel = process.env['MCP_LOG_LEVEL'];
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -83,6 +86,9 @@ function parseArgs(): ServerConfig {
       case '--instructions':
         serverInstructions = args[++i];
         break;
+      case '--log-level':
+        logLevel = args[++i];
+        break;
       case '--help':
       case '-h':
         console.error(`
@@ -97,6 +103,7 @@ Options:
   --transport <mode>     Transport: stdio (default) or http (default: $MCP_TRANSPORT)
   --port <port>          HTTP port (default: $MCP_PORT or 3001)
   --instructions <text>  Instance context prepended to server instructions ($MCP_SERVER_INSTRUCTIONS)
+  --log-level <level>    Log level: debug, info, warning, error, fatal, silent ($MCP_LOG_LEVEL, default: info)
   --help, -h             Show this help message
 
 Environment Variables:
@@ -105,6 +112,7 @@ Environment Variables:
   MCP_TRANSPORT          Transport mode: stdio or http
   MCP_PORT               HTTP server port (default: 3001)
   MCP_SERVER_INSTRUCTIONS  Instance context prepended to generic usage instructions
+  MCP_LOG_LEVEL          Log level: debug, info, warning, error, fatal, silent (default: info)
   KEYCLOAK_URL           Keycloak base URL (enables OAuth discovery in http mode)
   KEYCLOAK_REALM         Keycloak realm name (default: civic-os)
   MCP_PUBLIC_URL         Public URL of the MCP server (for OAuth metadata)
@@ -123,6 +131,7 @@ Examples:
     transport,
     port,
     serverInstructions,
+    logLevel,
     keycloakUrl: process.env['KEYCLOAK_URL'],
     keycloakRealm: process.env['KEYCLOAK_REALM'] ?? 'civic-os',
     mcpPublicUrl: process.env['MCP_PUBLIC_URL'],
@@ -163,6 +172,56 @@ export function buildInstructions(serverInstructions?: string): string {
 // ============================================================================
 
 /**
+ * Intercept server.registerTool() to wrap every tool handler with timing and logging.
+ * Avoids modifying individual tool files — the proxy is installed once before registration.
+ */
+function instrumentToolHandlers(server: McpServer, userId?: string): void {
+  const toolLogger = getLogger(['mcp', 'tool']);
+  const origRegisterTool = server.registerTool.bind(server);
+
+  server.registerTool = ((...args: unknown[]) => {
+    const toolName = args[0] as string;
+    const handlerIdx = args.length - 1;
+    const handler = args[handlerIdx] as (a: Record<string, unknown>, e: unknown) => Promise<{ content?: Array<{ text?: string }>; isError?: boolean }>;
+
+    args[handlerIdx] = async (toolArgs: Record<string, unknown>, extra: unknown) => {
+      const start = performance.now();
+      try {
+        const result = await handler(toolArgs, extra);
+        const durationMs = Math.round(performance.now() - start);
+        const props: Record<string, unknown> = {
+          tool: toolName,
+          duration_ms: durationMs,
+          success: !result?.isError,
+        };
+        if (toolArgs?.entity) props.entity = toolArgs.entity;
+        if (userId) props.user_id = userId;
+
+        if (result?.isError) {
+          const errorText = (result.content?.[0] as { text?: string } | undefined)?.text;
+          if (errorText) props.error = errorText;
+          toolLogger.warn('tool_error', props);
+        } else {
+          toolLogger.info('tool_call', props);
+        }
+        return result;
+      } catch (err) {
+        const durationMs = Math.round(performance.now() - start);
+        toolLogger.error('tool_exception', {
+          tool: toolName,
+          user_id: userId,
+          duration_ms: durationMs,
+          error: err instanceof Error ? err.message : String(err),
+        });
+        throw err;
+      }
+    };
+
+    return (origRegisterTool as Function)(...args);
+  }) as typeof server.registerTool;
+}
+
+/**
  * Create and configure an MCP server instance with all tools and resources.
  *
  * In stdio mode: uses the provided token for a single-user session.
@@ -171,8 +230,11 @@ export function buildInstructions(serverInstructions?: string): string {
  * SchemaCache is shared (process-lifetime); PostgRESTClient and NameResolver are per-session.
  */
 export function createServer(cache: SchemaCache, token?: string, serverInstructions?: string): McpServer {
+  const logger = getLogger(['mcp']);
+
   // Per-session client, cache key, and resolver — each request gets its own token
   const cacheKey = token ? extractUserCacheKey(token) : undefined;
+  const userId = token ? extractUserId(token) : undefined;
   const client = new PostgRESTClient({ baseUrl: cache.baseUrl, token });
   const resolver = new NameResolver(cache, client, cacheKey);
 
@@ -180,7 +242,7 @@ export function createServer(cache: SchemaCache, token?: string, serverInstructi
   // This ensures the user row and roles are up-to-date without blocking server creation.
   if (token) {
     client.post('rpc/refresh_current_user', {}).catch((err: unknown) => {
-      console.error('refresh_current_user failed:', err instanceof Error ? err.message : err);
+      logger.warn('refresh_current_user failed', { error: err instanceof Error ? err.message : String(err), user_id: userId });
     });
   }
 
@@ -188,6 +250,9 @@ export function createServer(cache: SchemaCache, token?: string, serverInstructi
     { name: 'civic-os', version: PKG_VERSION },
     { instructions: buildInstructions(serverInstructions) },
   );
+
+  // Wrap all tool handlers with timing/logging before registration
+  instrumentToolHandlers(server, userId);
 
   // Register all tools — pass client + cacheKey for per-user permission caching
   registerListEntities(server, client, cache, cacheKey);
@@ -215,6 +280,8 @@ export function createServer(cache: SchemaCache, token?: string, serverInstructi
 
 async function main(): Promise<void> {
   const config = parseArgs();
+  await configureLogging(config.logLevel);
+  const logger = getLogger(['mcp']);
 
   // Initialize shared schema cache with an anonymous client (schema views are public)
   const anonymousClient = new PostgRESTClient({ baseUrl: config.postgrestUrl });
@@ -223,10 +290,9 @@ async function main(): Promise<void> {
   // Pre-load schema cache (best-effort; will load on first tool call if this fails)
   try {
     await cache.initialize();
-    console.error(`Schema cache loaded: ${cache.entities.length} entities, ${cache.properties.length} properties`);
+    logger.info('schema_cache_loaded', { entities: cache.entities.length, properties: cache.properties.length });
   } catch (err) {
-    console.error('Warning: Failed to pre-load schema cache. It will be loaded on first tool call.');
-    console.error(err instanceof Error ? err.message : err);
+    logger.warn('schema_cache_failed', { error: err instanceof Error ? err.message : String(err) });
   }
 
   if (config.transport === 'http') {
