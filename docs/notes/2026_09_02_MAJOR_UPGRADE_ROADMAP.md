@@ -346,16 +346,16 @@ Abandon branch. Angular 20 still supported until November.
 **Risk**: LOW
 **Blast radius**: Dev tooling only — no UI changes.
 
-#### Scope (3 packages)
+#### Scope (2 packages)
 
 - `eslint` 9 → 10
 - `@eslint/js` 9 → 10
-- `typescript-eslint` 8 → 9
+- ~~`typescript-eslint` 8 → 9~~ — v9 doesn't exist; v8.69.0 already supports ESLint 10 via peer dep
 
 #### Execution
 
-1. Branch: `upgrade/eslint-10`
-2. `npm install eslint@10 @eslint/js@10 typescript-eslint@9`
+1. Branch: `upgrade/angular-22` (continuing from Phase 1)
+2. `npm install eslint@10 @eslint/js@10`
 3. Review `eslint.config.js` for deprecated options — already uses flat config
 
 #### Key file
@@ -380,7 +380,33 @@ npm run build               # still builds (ESLint is not in build path, but san
 
 #### Rollback
 
-Revert 3 devDependencies. Zero production impact.
+Revert 2 devDependencies. Zero production impact.
+
+#### Phase 2 Results (2026-09-04)
+
+**Status**: COMPLETE — single commit, zero regressions.
+
+**Branch**: `upgrade/angular-22` (continuing from Phase 1)
+
+**Scope correction**: `typescript-eslint` v9 does not exist. The package stays on major version 8 (v8.69.0), which already declares `eslint: '^8.57.0 || ^9.0.0 || ^10.0.0'` in its peer deps. Only 2 packages upgraded, not 3.
+
+| Package | Before | After |
+|---------|--------|-------|
+| `eslint` | 9.39.5 | 10.10.0 |
+| `@eslint/js` | 9.39.5 | 10.0.1 |
+
+**New `eslint:recommended` rule findings**: ESLint 10 adds 3 rules to `eslint:recommended`. Only `no-useless-assignment` fired (2 errors):
+- `data.service.ts:150` — `let totalCount = 0` initializer dead (all branches reassign)
+- `recurring.service.ts:599` — `let description = ''` initializer dead (switch has default case)
+
+Both fixed by removing the initializer value (`let x = 0` → `let x: type`), which is correct since every code path assigns before use.
+
+The other 2 new rules (`no-unassigned-vars`, `preserve-caught-error`) produced zero hits.
+
+**Verification results**:
+- `npm run lint`: 0 errors, 140 warnings (same warning count as Phase 1 baseline)
+- `npm run test:headless`: 3034 SUCCESS, 1 SKIPPED (unchanged from baseline)
+- `npm run build`: clean production build (same 2 CommonJS warnings from @unovis)
 
 ---
 
@@ -628,7 +654,7 @@ Revert either package independently. Admin-only features with zero user data imp
 |-------|-------|------|------|--------------|-----------------|
 | 0 | Pre-flight baseline | 0 | — | — | 9 reference screenshots |
 | 1 | Angular 22 + TS 6 + companions | ~22 | MED | All pages | 13 tests: auth, CRUD, dashboard, admin, system |
-| 2 | ESLint 10 | 3 | LOW | Dev tooling | 1 smoke test |
+| 2 | ESLint 10 | 2 | LOW | Dev tooling | 1 smoke test |
 | 3 | Jasmine 7 | 2–4 | MED | Test infra | 2 smoke tests |
 | 4 | FullCalendar 7 | 5 | MED | Calendar pages + dashboard widgets | 9 tests: month/week/day, nav, events, RTL, dashboard |
 | 5 | Blockly 13 + pgsql/parser 1.5 | 2 | HIGH | System pages (admin-only) | 10 tests: functions, code viewer, blocks, theme, policies, WASM |

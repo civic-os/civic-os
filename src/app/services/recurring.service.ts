@@ -596,7 +596,7 @@ export class RecurringService {
   describeRRule(rrule: string): string {
     const config = this.parseRRuleString(rrule);
 
-    let description = '';
+    let description: string;
     const interval = config.interval || 1;
 
     switch (config.frequency) {
