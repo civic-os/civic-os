@@ -313,7 +313,7 @@ Civic OS provides **dual enforcement** validation: frontend via `metadata.valida
 
 **Reference Implementation**: Schema Editor (`/schema-editor`). Use this pattern when building visual editors or workflow designers. See `docs/development/JOINTJS_INTEGRATION.md` for integration guide and `docs/notes/SCHEMA_EDITOR_DESIGN.md` for design details.
 
-## Angular 20 Critical Patterns
+## Angular 22 Critical Patterns
 
 **IMPORTANT**: Use Signals for reactive component state and `OnPush` change detection on all components. These ensure proper change detection with zoneless architecture and `@if`/`@for` control flow.
 
