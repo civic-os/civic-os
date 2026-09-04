@@ -61,6 +61,7 @@ export default tseslint.config(
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unused-expressions': 'off', // pervasive optional-chaining call style
+      '@angular-eslint/prefer-on-push-component-change-detection': 'off', // Angular 22 added Eager to legacy Default components; non-a11y
       '@angular-eslint/prefer-inject': 'off',      // constructor DI still widely used; non-a11y migration
       '@angular-eslint/no-output-native': 'warn',  // pre-existing @Output naming; non-a11y
       '@angular-eslint/no-input-rename': 'warn',   // intentional input aliases; non-a11y
