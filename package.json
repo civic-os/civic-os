@@ -63,7 +63,7 @@
     "chrono-node": "^2.10.1",
     "dagre": "^0.8.5",
     "dompurify": "^3.4.14",
-    "keycloak-angular": "^20.1.0",
+    "keycloak-angular": "^22.0.0",
     "keycloak-js": "^26.2.4",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
