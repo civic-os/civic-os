@@ -22,70 +22,73 @@ import { Subject } from 'rxjs';
 import { PwaService } from './pwa.service';
 
 describe('PwaService', () => {
-  let service: PwaService;
-  let mockSwUpdate: { isEnabled: boolean; versionUpdates: Subject<any> };
-
-  beforeEach(() => {
-    mockSwUpdate = {
-      isEnabled: false,
-      versionUpdates: new Subject()
+    let service: PwaService;
+    let mockSwUpdate: {
+        isEnabled: boolean;
+        versionUpdates: Subject<any>;
     };
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: SwUpdate, useValue: mockSwUpdate }
-      ]
+    beforeEach(() => {
+        mockSwUpdate = {
+            isEnabled: false,
+            versionUpdates: new Subject()
+        };
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                { provide: SwUpdate, useValue: mockSwUpdate }
+            ]
+        });
+        service = TestBed.inject(PwaService);
     });
-    service = TestBed.inject(PwaService);
-  });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 
-  it('should track online status', () => {
-    expect(service.isOnline()).toBeTrue();
-  });
+    it('should track online status', () => {
+        expect(service.isOnline()).toBe(true);
+    });
 
-  it('should not show install banner by default', () => {
-    expect(service.showInstallBanner()).toBeFalse();
-  });
+    it('should not show install banner by default', () => {
+        expect(service.showInstallBanner()).toBe(false);
+    });
 
-  it('should not show install in settings by default', () => {
-    expect(service.showInstallInSettings()).toBeFalse();
-  });
+    it('should not show install in settings by default', () => {
+        expect(service.showInstallInSettings()).toBe(false);
+    });
 
-  it('should not have update available by default', () => {
-    expect(service.updateAvailable()).toBeFalse();
-  });
+    it('should not have update available by default', () => {
+        expect(service.updateAvailable()).toBe(false);
+    });
 
-  it('should not show update toast by default', () => {
-    expect(service.showUpdateToast()).toBeFalse();
-  });
+    it('should not show update toast by default', () => {
+        expect(service.showUpdateToast()).toBe(false);
+    });
 
-  it('should not show update toast when not in standalone display mode', () => {
-    // In test environment, display-mode is not standalone, so installed() is false.
-    // Even if updateAvailable were true, showUpdateToast requires installed() to be true.
-    expect(service.installed()).toBeFalse();
-    expect(service.showUpdateToast()).toBeFalse();
-  });
+    it('should not show update toast when not in standalone display mode', () => {
+        // In test environment, display-mode is not standalone, so installed() is false.
+        // Even if updateAvailable were true, showUpdateToast requires installed() to be true.
+        expect(service.installed()).toBe(false);
+        expect(service.showUpdateToast()).toBe(false);
+    });
 
-  it('should update online status on offline event', () => {
-    window.dispatchEvent(new Event('offline'));
-    expect(service.isOnline()).toBeFalse();
+    it('should update online status on offline event', () => {
+        window.dispatchEvent(new Event('offline'));
+        expect(service.isOnline()).toBe(false);
 
-    window.dispatchEvent(new Event('online'));
-    expect(service.isOnline()).toBeTrue();
-  });
+        window.dispatchEvent(new Event('online'));
+        expect(service.isOnline()).toBe(true);
+    });
 
-  it('should dismiss install banner and persist to localStorage', () => {
-    service.dismissInstallBanner();
-    expect(service.installDismissed()).toBeTrue();
-    expect(localStorage.getItem('civic-os-pwa-install-dismissed')).toBe('true');
-  });
+    it('should dismiss install banner and persist to localStorage', () => {
+        service.dismissInstallBanner();
+        expect(service.installDismissed()).toBe(true);
+        expect(localStorage.getItem('civic-os-pwa-install-dismissed')).toBe('true');
+    });
 
-  afterEach(() => {
-    localStorage.removeItem('civic-os-pwa-install-dismissed');
-  });
+    afterEach(() => {
+        localStorage.removeItem('civic-os-pwa-install-dismissed');
+    });
 });

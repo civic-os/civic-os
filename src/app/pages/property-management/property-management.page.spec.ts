@@ -1,3 +1,4 @@
+import type { Mock } from "vitest";
 /**
  * Copyright (C) 2023-2025 Civic OS, L3C
  *
@@ -27,840 +28,828 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
 
 describe('PropertyManagementPage', () => {
-  let component: PropertyManagementPage;
-  let fixture: ComponentFixture<PropertyManagementPage>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockPropertyManagementService: jasmine.SpyObj<PropertyManagementService>;
+    let component: PropertyManagementPage;
+    let fixture: ComponentFixture<PropertyManagementPage>;
+    let mockSchemaService: any;
+    let mockPropertyManagementService: any;
 
-  const mockEntities = [
-    { table_name: 'Issue', display_name: 'Issues', description: 'Track issues', search_fields: null, sort_order: 0, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null },
-    { table_name: 'WorkPackage', display_name: 'Work Packages', description: null, search_fields: null, sort_order: 1, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null }
-  ];
+    const mockEntities = [
+        { table_name: 'Issue', display_name: 'Issues', description: 'Track issues', search_fields: null, sort_order: 0, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null },
+        { table_name: 'WorkPackage', display_name: 'Work Packages', description: null, search_fields: null, sort_order: 1, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null }
+    ];
 
-  const mockProperties: SchemaEntityProperty[] = [
-    {
-      table_catalog: 'civic_os_db',
-      table_schema: 'public',
-      table_name: 'Issue',
-      column_name: 'title',
-      display_name: 'Title',
-      description: 'Issue title',
-      sort_order: 0,
-      column_width: 200,
-      sortable: true,
-      column_default: '',
-      is_nullable: false,
-      data_type: 'character varying',
-      character_maximum_length: 255,
-      udt_schema: 'pg_catalog',
-      udt_name: 'varchar',
-      is_self_referencing: false,
-      is_identity: false,
-      is_generated: false,
-      is_updatable: true,
-      join_schema: '',
-      join_table: '',
-      join_column: '',
-      geography_type: '',
-      show_on_list: true,
-      show_on_create: true,
-      show_on_edit: true,
-      show_on_detail: true,
-      type: EntityPropertyType.TextShort
-    },
-    {
-      table_catalog: 'civic_os_db',
-      table_schema: 'public',
-      table_name: 'Issue',
-      column_name: 'description',
-      display_name: 'Description',
-      description: undefined,
-      sort_order: 1,
-      column_width: undefined,
-      sortable: true,
-      column_default: '',
-      is_nullable: true,
-      data_type: 'text',
-      character_maximum_length: 0,
-      udt_schema: 'pg_catalog',
-      udt_name: 'text',
-      is_self_referencing: false,
-      is_identity: false,
-      is_generated: false,
-      is_updatable: true,
-      join_schema: '',
-      join_table: '',
-      join_column: '',
-      geography_type: '',
-      show_on_list: true,
-      show_on_create: true,
-      show_on_edit: true,
-      show_on_detail: true,
-      type: EntityPropertyType.TextLong
+    const mockProperties: SchemaEntityProperty[] = [
+        {
+            table_catalog: 'civic_os_db',
+            table_schema: 'public',
+            table_name: 'Issue',
+            column_name: 'title',
+            display_name: 'Title',
+            description: 'Issue title',
+            sort_order: 0,
+            column_width: 200,
+            sortable: true,
+            column_default: '',
+            is_nullable: false,
+            data_type: 'character varying',
+            character_maximum_length: 255,
+            udt_schema: 'pg_catalog',
+            udt_name: 'varchar',
+            is_self_referencing: false,
+            is_identity: false,
+            is_generated: false,
+            is_updatable: true,
+            join_schema: '',
+            join_table: '',
+            join_column: '',
+            geography_type: '',
+            show_on_list: true,
+            show_on_create: true,
+            show_on_edit: true,
+            show_on_detail: true,
+            type: EntityPropertyType.TextShort
+        },
+        {
+            table_catalog: 'civic_os_db',
+            table_schema: 'public',
+            table_name: 'Issue',
+            column_name: 'description',
+            display_name: 'Description',
+            description: undefined,
+            sort_order: 1,
+            column_width: undefined,
+            sortable: true,
+            column_default: '',
+            is_nullable: true,
+            data_type: 'text',
+            character_maximum_length: 0,
+            udt_schema: 'pg_catalog',
+            udt_name: 'text',
+            is_self_referencing: false,
+            is_identity: false,
+            is_generated: false,
+            is_updatable: true,
+            join_schema: '',
+            join_table: '',
+            join_column: '',
+            geography_type: '',
+            show_on_list: true,
+            show_on_create: true,
+            show_on_edit: true,
+            show_on_detail: true,
+            type: EntityPropertyType.TextLong
+        }
+    ];
+
+    /**
+     * Helper to extract property items from the items signal.
+     * Filters out static text items and returns only property rows.
+     */
+    function getPropertyItems(component: PropertyManagementPage) {
+        return component.items().filter(item => item.itemType === 'property');
     }
-  ];
 
-  /**
-   * Helper to extract property items from the items signal.
-   * Filters out static text items and returns only property rows.
-   */
-  function getPropertyItems(component: PropertyManagementPage) {
-    return component.items().filter(item => item.itemType === 'property');
-  }
-
-  beforeEach(async () => {
-    mockSchemaService = jasmine.createSpyObj('SchemaService', [
-      'getEntitiesForMenu',
-      'getPropertiesForEntityFresh',
-      'getStaticTextForEntity',
-      'refreshCache',
-      'refreshStaticTextCache'
-    ]);
-    mockPropertyManagementService = jasmine.createSpyObj('PropertyManagementService', [
-      'isAdmin',
-      'upsertPropertyMetadata',
-      'updatePropertiesOrder',
-      'updateStaticTextOrder',
-      'updateStaticText'
-    ]);
-
-    await TestBed.configureTestingModule({
-      imports: [PropertyManagementPage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslationTesting(),
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: PropertyManagementService, useValue: mockPropertyManagementService }
-      ]
-    })
-    .compileComponents();
-  });
-
-  it('should create', () => {
-    // Set up mocks before creating component
-    mockPropertyManagementService.isAdmin.and.returnValue(of(false));
-    mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-    fixture = TestBed.createComponent(PropertyManagementPage);
-    component = fixture.componentInstance;
-
-    expect(component).toBeTruthy();
-  });
-
-  describe('Admin Access Check', () => {
-    it('should set adminLoading to false after admin check completes', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        // After admin check completes, adminLoading should be false
-        expect(component.adminLoading()).toBe(false);
-        expect(component.isAdmin()).toBe(true);
-        expect(component.adminError()).toBeUndefined();
-        done();
-      }, 100);
-    });
-
-    it('should allow access when user is admin', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.isAdmin()).toBe(true);
-        expect(component.error()).toBeUndefined();
-        done();
-      }, 100);
-    });
-
-    it('should deny access when user is not admin', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(false));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.isAdmin()).toBe(false);
-        done();
-      }, 100);
-    });
-
-    it('should handle admin check error', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(throwError(() => new Error('Network error')));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.adminError()).toBe('Failed to verify admin access');
-        expect(component.isAdmin()).toBe(false);
-        expect(component.adminLoading()).toBe(false);
-        done();
-      }, 100);
-    });
-  });
-
-  describe('Entity Selection', () => {
-    it('should load items when entity is selected', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          const properties = getPropertyItems(component);
-          expect(properties.length).toBe(2);
-          expect(properties[0].column_name).toBe('title');
-          expect(component.loading()).toBe(false);
-          done();
-        }, 10);
-      }, 100);
-    });
-
-    it('should clear items when no entity is selected', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      component.selectedEntity.set(undefined);
-      component.onEntityChange();
-
-      expect(component.items().length).toBe(0);
-    });
-
-    it('should handle item loading error', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(throwError(() => new Error('Load error')));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          expect(component.error()).toBe('Failed to load items');
-          expect(component.loading()).toBe(false);
-          done();
-        }, 10);
-      }, 100);
-    });
-  });
-
-  describe('Property Expansion', () => {
-    it('should toggle property expansion', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          const properties = getPropertyItems(component);
-          expect(properties[0].expanded).toBe(false);
-
-          component.toggleExpanded(properties[0]);
-          const updatedProperties = getPropertyItems(component);
-          expect(updatedProperties[0].expanded).toBe(true);
-
-          component.toggleExpanded(updatedProperties[0]);
-          const finalProperties = getPropertyItems(component);
-          expect(finalProperties[0].expanded).toBe(false);
-          done();
-        }, 10);
-      }, 100);
-    });
-  });
-
-  describe('Drag and Drop', () => {
-    it('should reorder items and update sort order', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
-      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          const event: CdkDragDrop<any> = {
-            previousIndex: 0,
-            currentIndex: 1,
-            item: null as any,
-            container: null as any,
-            previousContainer: null as any,
-            isPointerOverContainer: true,
-            distance: { x: 0, y: 0 },
-            dropPoint: { x: 0, y: 0 },
-            event: null as any
-          };
-
-          component.onDrop(event);
-
-          const properties = getPropertyItems(component);
-          expect(properties[0].column_name).toBe('description');
-          expect(properties[1].column_name).toBe('title');
-
-          expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
-            { table_name: 'Issue', column_name: 'description', sort_order: 0 },
-            { table_name: 'Issue', column_name: 'title', sort_order: 1 }
-          ]);
-          done();
-        }, 10);
-      }, 100);
-    });
-
-    it('should refresh schema cache after reorder', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
-      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          const event: CdkDragDrop<any> = {
-            previousIndex: 0,
-            currentIndex: 1,
-            item: null as any,
-            container: null as any,
-            previousContainer: null as any,
-            isPointerOverContainer: true,
-            distance: { x: 0, y: 0 },
-            dropPoint: { x: 0, y: 0 },
-            event: null as any
-          };
-
-          component.onDrop(event);
-
-          setTimeout(() => {
-            expect(mockSchemaService.refreshCache).toHaveBeenCalled();
-            expect(mockSchemaService.refreshStaticTextCache).toHaveBeenCalled();
-            done();
-          }, 10);
-        }, 10);
-      }, 100);
-    });
-  });
-
-  describe('Keyboard Reorder (move buttons)', () => {
-    it('moveDown should reorder items, persist new sort order, and announce position', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
-      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          component.moveDown(0); // Move 'title' down one position
-
-          const properties = getPropertyItems(component);
-          expect(properties[0].column_name).toBe('description');
-          expect(properties[1].column_name).toBe('title');
-
-          expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
-            { table_name: 'Issue', column_name: 'description', sort_order: 0 },
-            { table_name: 'Issue', column_name: 'title', sort_order: 1 }
-          ]);
-          expect(component.reorderAnnouncement()).toContain('2');
-          done();
-        }, 10);
-      }, 100);
-    });
-
-    it('moveUp at the top boundary should not reorder or persist', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
-      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          component.moveUp(0);
-
-          const properties = getPropertyItems(component);
-          expect(properties[0].column_name).toBe('title');
-          expect(mockPropertyManagementService.updatePropertiesOrder).not.toHaveBeenCalled();
-          done();
-        }, 10);
-      }, 100);
-    });
-  });
-
-  describe('Metadata Saving', () => {
-    it('should save metadata on blur', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.upsertPropertyMetadata.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          const properties = getPropertyItems(component);
-          const property = properties[0] as any;
-          property.customDisplayName = 'Updated Title';
-          component.onFieldBlur(property);
-
-          setTimeout(() => {
-            expect(mockPropertyManagementService.upsertPropertyMetadata).toHaveBeenCalledWith(
-              'Issue',
-              'title',
-              'Updated Title',
-              'Issue title',
-              0,
-              200,
-              true,
-              false,  // filterable defaults to false when undefined
-              true,
-              true,
-              true,
-              true,
-              null    // is_recurring defaults to null when undefined
-            );
-            done();
-          }, 10);
-        }, 10);
-      }, 100);
-    });
-
-    it('should show saved indicator after save completes', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.upsertPropertyMetadata.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          const properties = getPropertyItems(component);
-          const property = properties[0] as any;
-          component.onFieldBlur(property);
-
-          setTimeout(() => {
-            expect(component.isSaving(property)).toBe(false);
-            expect(component.isSaved(property)).toBe(true);
-            done();
-          }, 10);
-        }, 10);
-      }, 100);
-    });
-
-    it('should refresh schema cache but NOT reload items after save', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-      mockPropertyManagementService.upsertPropertyMetadata.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.selectedEntity.set(mockEntities[0]);
-        component.onEntityChange();
-
-        setTimeout(() => {
-          // Reset the call count after initial load
-          mockSchemaService.refreshCache.calls.reset();
-          (mockSchemaService.getPropertiesForEntityFresh as jasmine.Spy).calls.reset();
-
-          const properties = getPropertyItems(component);
-          const property = properties[0] as any;
-          property.customDisplayName = 'New Name';
-          component.onFieldBlur(property);
-
-          setTimeout(() => {
-            // Should call refreshCache
-            expect(mockSchemaService.refreshCache).toHaveBeenCalled();
-
-            // Should NOT reload items (no additional call to getPropertiesForEntityFresh)
-            expect(mockSchemaService.getPropertiesForEntityFresh).not.toHaveBeenCalled();
-
-            // Local state should still have the updated value via ngModel
-            const updatedProperties = getPropertyItems(component);
-            expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
-            done();
-          }, 10);
-        }, 10);
-      }, 150);
-    });
-  });
-
-  describe('Auto-Select First Entity', () => {
-    it('should auto-select first entity when entities load', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        // Should auto-select first entity
-        expect(component.selectedEntity()).toBeDefined();
-        expect(component.selectedEntity()?.table_name).toBe('Issue');
-        expect(getPropertyItems(component).length).toBe(2);
-        done();
-      }, 150);
-    });
-
-    it('should not auto-select if entity already selected', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      // Manually set entity before initialization
-      component.selectedEntity.set(mockEntities[1]);
-
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        // Should keep the manually selected entity
-        expect(component.selectedEntity()?.table_name).toBe('WorkPackage');
-        done();
-      }, 150);
-    });
-
-    it('should handle empty entities array gracefully', (done) => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.selectedEntity()).toBeUndefined();
-        expect(component.items().length).toBe(0);
-        done();
-      }, 150);
-    });
-  });
-
-  describe('Property Sorting', () => {
-    it('should sort items by sort_order in ascending order', (done) => {
-      const unsortedProperties = [
-        { ...mockProperties[1], sort_order: 2 },  // description with sort_order 2
-        { ...mockProperties[0], sort_order: 1 }   // title with sort_order 1
-      ];
-
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(unsortedProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const properties = getPropertyItems(component);
-        expect(properties.length).toBe(2);
-        // Should be sorted by sort_order
-        expect(properties[0].column_name).toBe('title');      // sort_order 1
-        expect(properties[1].column_name).toBe('description'); // sort_order 2
-        done();
-      }, 150);
-    });
-
-    it('should maintain sort after items are loaded', (done) => {
-      const unsortedProperties = [
-        { ...mockProperties[1], sort_order: 5 },
-        { ...mockProperties[0], sort_order: 3 }
-      ];
-
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(unsortedProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const properties = getPropertyItems(component);
-        expect(properties[0].sort_order).toBe(3);
-        expect(properties[1].sort_order).toBe(5);
-        expect(properties[0].sort_order).toBeLessThan(properties[1].sort_order);
-        done();
-      }, 150);
-    });
-  });
-
-  describe('compareEntities()', () => {
-    it('should return true for entities with same table_name', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      const entity1 = { ...mockEntities[0] };
-      const entity2 = { ...mockEntities[0] };
-
-      expect(component.compareEntities(entity1, entity2)).toBe(true);
-    });
-
-    it('should return false for entities with different table_name', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      expect(component.compareEntities(mockEntities[0], mockEntities[1])).toBe(false);
-    });
-
-    it('should handle null/undefined entities', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      expect(component.compareEntities(null as any, null as any)).toBe(true);
-      expect(component.compareEntities(undefined as any, undefined as any)).toBe(true);
-      expect(component.compareEntities(mockEntities[0], null as any)).toBe(false);
-      expect(component.compareEntities(null as any, mockEntities[0])).toBe(false);
-    });
-  });
-
-  describe('Helper Methods', () => {
-    it('should get correct property type label', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      const property = {
-        ...mockProperties[0],
-        itemType: 'property' as const,
-        customDisplayName: null,
-        customDescription: null,
-        customColumnWidth: null,
-        expanded: false
-      };
-      expect(component.getPropertyTypeLabel(property)).toBe('Text (Short)');
-
-      property.type = EntityPropertyType.ForeignKeyName;
-      expect(component.getPropertyTypeLabel(property)).toBe('Foreign Key');
-    });
-
-    it('should have labels for all EntityPropertyType values', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      const enumValues = Object.values(EntityPropertyType).filter(v => typeof v === 'number') as number[];
-      for (const val of enumValues) {
-        if (val === EntityPropertyType.Unknown) continue; // Unknown is the fallback label
-        const label = component.getPropertyTypeLabel({ type: val } as any);
-        expect(label).not.toBe('Unknown',
-          `Missing label for EntityPropertyType value ${val} (${EntityPropertyType[val]})`);
-      }
-    });
-
-    it('should get correct display name placeholder', () => {
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-
-      const property = {
-        ...mockProperties[0],
-        itemType: 'property' as const,
-        customDisplayName: null,
-        customDescription: null,
-        customColumnWidth: null,
-        expanded: false
-      };
-      expect(component.getDisplayNamePlaceholder(property)).toBe('Title');
-    });
-  });
-
-  describe('Static Text Integration', () => {
-    it('should load and display static text items alongside properties', (done) => {
-      const mockStaticTexts = [
-        {
-          itemType: 'static_text' as const,
-          id: 1,
-          table_name: 'Issue',
-          content: '## Instructions\nPlease fill out the form below.',
-          sort_order: -1,  // Lower than properties (0, 1) to ensure it comes first
-          column_width: 2,
-          show_on_detail: true,
-          show_on_create: true,
-          show_on_edit: false
-        }
-      ];
-
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of(mockStaticTexts));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        // Should have both properties and static text
-        expect(component.items().length).toBe(3);
-
-        // First item should be static text (sort_order 0)
-        expect(component.items()[0].itemType).toBe('static_text');
-
-        // Properties should follow
-        const properties = getPropertyItems(component);
-        expect(properties.length).toBe(2);
-        done();
-      }, 150);
-    });
-
-    it('should call updateStaticTextOrder when static text is reordered', (done) => {
-      const mockStaticTexts = [
-        {
-          itemType: 'static_text' as const,
-          id: 1,
-          table_name: 'Issue',
-          content: 'Static text content',
-          sort_order: 5,
-          column_width: 2,
-          show_on_detail: true,
-          show_on_create: true,
-          show_on_edit: false
-        }
-      ];
-
-      mockPropertyManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForMenu.and.returnValue(of(mockEntities));
-      mockSchemaService.getPropertiesForEntityFresh.and.returnValue(of(mockProperties));
-      mockSchemaService.getStaticTextForEntity.and.returnValue(of(mockStaticTexts));
-      mockPropertyManagementService.updatePropertiesOrder.and.returnValue(of({ success: true }));
-      mockPropertyManagementService.updateStaticTextOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(PropertyManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const event: CdkDragDrop<any> = {
-          previousIndex: 2,  // Move static text from last position
-          currentIndex: 0,   // to first position
-          item: null as any,
-          container: null as any,
-          previousContainer: null as any,
-          isPointerOverContainer: true,
-          distance: { x: 0, y: 0 },
-          dropPoint: { x: 0, y: 0 },
-          event: null as any
+    beforeEach(async () => {
+        mockSchemaService = {
+            getEntitiesForMenu: vi.fn().mockName("SchemaService.getEntitiesForMenu"),
+            getPropertiesForEntityFresh: vi.fn().mockName("SchemaService.getPropertiesForEntityFresh"),
+            getStaticTextForEntity: vi.fn().mockName("SchemaService.getStaticTextForEntity"),
+            refreshCache: vi.fn().mockName("SchemaService.refreshCache"),
+            refreshStaticTextCache: vi.fn().mockName("SchemaService.refreshStaticTextCache")
+        };
+        mockPropertyManagementService = {
+            isAdmin: vi.fn().mockName("PropertyManagementService.isAdmin"),
+            upsertPropertyMetadata: vi.fn().mockName("PropertyManagementService.upsertPropertyMetadata"),
+            updatePropertiesOrder: vi.fn().mockName("PropertyManagementService.updatePropertiesOrder"),
+            updateStaticTextOrder: vi.fn().mockName("PropertyManagementService.updateStaticTextOrder"),
+            updateStaticText: vi.fn().mockName("PropertyManagementService.updateStaticText")
         };
 
-        component.onDrop(event);
-
-        setTimeout(() => {
-          expect(mockPropertyManagementService.updateStaticTextOrder).toHaveBeenCalledWith([
-            { id: 1, sort_order: 0 }
-          ]);
-          done();
-        }, 10);
-      }, 150);
+        await TestBed.configureTestingModule({
+            imports: [PropertyManagementPage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting(),
+                { provide: SchemaService, useValue: mockSchemaService },
+                { provide: PropertyManagementService, useValue: mockPropertyManagementService }
+            ]
+        })
+            .compileComponents();
     });
-  });
+
+    it('should create', () => {
+        // Set up mocks before creating component
+        mockPropertyManagementService.isAdmin.mockReturnValue(of(false));
+        mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+        fixture = TestBed.createComponent(PropertyManagementPage);
+        component = fixture.componentInstance;
+
+        expect(component).toBeTruthy();
+    });
+
+    describe('Admin Access Check', () => {
+        it('should set adminLoading to false after admin check completes', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                // After admin check completes, adminLoading should be false
+                expect(component.adminLoading()).toBe(false);
+                expect(component.isAdmin()).toBe(true);
+                expect(component.adminError()).toBeUndefined();
+                ;
+            }, 100);
+        });
+
+        it('should allow access when user is admin', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.isAdmin()).toBe(true);
+                expect(component.error()).toBeUndefined();
+                ;
+            }, 100);
+        });
+
+        it('should deny access when user is not admin', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(false));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.isAdmin()).toBe(false);
+                ;
+            }, 100);
+        });
+
+        it('should handle admin check error', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(throwError(() => new Error('Network error')));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.adminError()).toBe('Failed to verify admin access');
+                expect(component.isAdmin()).toBe(false);
+                expect(component.adminLoading()).toBe(false);
+                ;
+            }, 100);
+        });
+    });
+
+    describe('Entity Selection', () => {
+        it('should load items when entity is selected', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    const properties = getPropertyItems(component);
+                    expect(properties.length).toBe(2);
+                    expect(properties[0].column_name).toBe('title');
+                    expect(component.loading()).toBe(false);
+                    ;
+                }, 10);
+            }, 100);
+        });
+
+        it('should clear items when no entity is selected', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            component.selectedEntity.set(undefined);
+            component.onEntityChange();
+
+            expect(component.items().length).toBe(0);
+        });
+
+        it('should handle item loading error', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(throwError(() => new Error('Load error')));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    expect(component.error()).toBe('Failed to load items');
+                    expect(component.loading()).toBe(false);
+                    ;
+                }, 10);
+            }, 100);
+        });
+    });
+
+    describe('Property Expansion', () => {
+        it('should toggle property expansion', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    const properties = getPropertyItems(component);
+                    expect(properties[0].expanded).toBe(false);
+
+                    component.toggleExpanded(properties[0]);
+                    const updatedProperties = getPropertyItems(component);
+                    expect(updatedProperties[0].expanded).toBe(true);
+
+                    component.toggleExpanded(updatedProperties[0]);
+                    const finalProperties = getPropertyItems(component);
+                    expect(finalProperties[0].expanded).toBe(false);
+                    ;
+                }, 10);
+            }, 100);
+        });
+    });
+
+    describe('Drag and Drop', () => {
+        it('should reorder items and update sort order', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.updatePropertiesOrder.mockReturnValue(of({ success: true }));
+            mockPropertyManagementService.updateStaticTextOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    const event: CdkDragDrop<any> = {
+                        previousIndex: 0,
+                        currentIndex: 1,
+                        item: null as any,
+                        container: null as any,
+                        previousContainer: null as any,
+                        isPointerOverContainer: true,
+                        distance: { x: 0, y: 0 },
+                        dropPoint: { x: 0, y: 0 },
+                        event: null as any
+                    };
+
+                    component.onDrop(event);
+
+                    const properties = getPropertyItems(component);
+                    expect(properties[0].column_name).toBe('description');
+                    expect(properties[1].column_name).toBe('title');
+
+                    expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
+                        { table_name: 'Issue', column_name: 'description', sort_order: 0 },
+                        { table_name: 'Issue', column_name: 'title', sort_order: 1 }
+                    ]);
+                    ;
+                }, 10);
+            }, 100);
+        });
+
+        it('should refresh schema cache after reorder', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.updatePropertiesOrder.mockReturnValue(of({ success: true }));
+            mockPropertyManagementService.updateStaticTextOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    const event: CdkDragDrop<any> = {
+                        previousIndex: 0,
+                        currentIndex: 1,
+                        item: null as any,
+                        container: null as any,
+                        previousContainer: null as any,
+                        isPointerOverContainer: true,
+                        distance: { x: 0, y: 0 },
+                        dropPoint: { x: 0, y: 0 },
+                        event: null as any
+                    };
+
+                    component.onDrop(event);
+
+                    setTimeout(() => {
+                        expect(mockSchemaService.refreshCache).toHaveBeenCalled();
+                        expect(mockSchemaService.refreshStaticTextCache).toHaveBeenCalled();
+                        ;
+                    }, 10);
+                }, 10);
+            }, 100);
+        });
+    });
+
+    describe('Keyboard Reorder (move buttons)', () => {
+        it('moveDown should reorder items, persist new sort order, and announce position', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.updatePropertiesOrder.mockReturnValue(of({ success: true }));
+            mockPropertyManagementService.updateStaticTextOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    component.moveDown(0); // Move 'title' down one position
+
+                    const properties = getPropertyItems(component);
+                    expect(properties[0].column_name).toBe('description');
+                    expect(properties[1].column_name).toBe('title');
+
+                    expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
+                        { table_name: 'Issue', column_name: 'description', sort_order: 0 },
+                        { table_name: 'Issue', column_name: 'title', sort_order: 1 }
+                    ]);
+                    expect(component.reorderAnnouncement()).toContain('2');
+                    ;
+                }, 10);
+            }, 100);
+        });
+
+        it('moveUp at the top boundary should not reorder or persist', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.updatePropertiesOrder.mockReturnValue(of({ success: true }));
+            mockPropertyManagementService.updateStaticTextOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    component.moveUp(0);
+
+                    const properties = getPropertyItems(component);
+                    expect(properties[0].column_name).toBe('title');
+                    expect(mockPropertyManagementService.updatePropertiesOrder).not.toHaveBeenCalled();
+                    ;
+                }, 10);
+            }, 100);
+        });
+    });
+
+    describe('Metadata Saving', () => {
+        it('should save metadata on blur', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.upsertPropertyMetadata.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    const properties = getPropertyItems(component);
+                    const property = properties[0] as any;
+                    property.customDisplayName = 'Updated Title';
+                    component.onFieldBlur(property);
+
+                    setTimeout(() => {
+                        expect(mockPropertyManagementService.upsertPropertyMetadata).toHaveBeenCalledWith('Issue', 'title', 'Updated Title', 'Issue title', 0, 200, true, false, // filterable defaults to false when undefined
+                        true, true, true, true, null // is_recurring defaults to null when undefined
+                        );
+                        ;
+                    }, 10);
+                }, 10);
+            }, 100);
+        });
+
+        it('should show saved indicator after save completes', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.upsertPropertyMetadata.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    const properties = getPropertyItems(component);
+                    const property = properties[0] as any;
+                    component.onFieldBlur(property);
+
+                    setTimeout(() => {
+                        expect(component.isSaving(property)).toBe(false);
+                        expect(component.isSaved(property)).toBe(true);
+                        ;
+                    }, 10);
+                }, 10);
+            }, 100);
+        });
+
+        it('should refresh schema cache but NOT reload items after save', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+            mockPropertyManagementService.upsertPropertyMetadata.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                component.selectedEntity.set(mockEntities[0]);
+                component.onEntityChange();
+
+                setTimeout(() => {
+                    // Reset the call count after initial load
+                    mockSchemaService.refreshCache.mockClear();
+                    (mockSchemaService.getPropertiesForEntityFresh as Mock).mockClear();
+
+                    const properties = getPropertyItems(component);
+                    const property = properties[0] as any;
+                    property.customDisplayName = 'New Name';
+                    component.onFieldBlur(property);
+
+                    setTimeout(() => {
+                        // Should call refreshCache
+                        expect(mockSchemaService.refreshCache).toHaveBeenCalled();
+
+                        // Should NOT reload items (no additional call to getPropertiesForEntityFresh)
+                        expect(mockSchemaService.getPropertiesForEntityFresh).not.toHaveBeenCalled();
+
+                        // Local state should still have the updated value via ngModel
+                        const updatedProperties = getPropertyItems(component);
+                        expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
+                        ;
+                    }, 10);
+                }, 10);
+            }, 150);
+        });
+    });
+
+    describe('Auto-Select First Entity', () => {
+        it('should auto-select first entity when entities load', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                // Should auto-select first entity
+                expect(component.selectedEntity()).toBeDefined();
+                expect(component.selectedEntity()?.table_name).toBe('Issue');
+                expect(getPropertyItems(component).length).toBe(2);
+                ;
+            }, 150);
+        });
+
+        it('should not auto-select if entity already selected', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            // Manually set entity before initialization
+            component.selectedEntity.set(mockEntities[1]);
+
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                // Should keep the manually selected entity
+                expect(component.selectedEntity()?.table_name).toBe('WorkPackage');
+                ;
+            }, 150);
+        });
+
+        it('should handle empty entities array gracefully', async () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.selectedEntity()).toBeUndefined();
+                expect(component.items().length).toBe(0);
+                ;
+            }, 150);
+        });
+    });
+
+    describe('Property Sorting', () => {
+        it('should sort items by sort_order in ascending order', async () => {
+            const unsortedProperties = [
+                { ...mockProperties[1], sort_order: 2 }, // description with sort_order 2
+                { ...mockProperties[0], sort_order: 1 } // title with sort_order 1
+            ];
+
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(unsortedProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                const properties = getPropertyItems(component);
+                expect(properties.length).toBe(2);
+                // Should be sorted by sort_order
+                expect(properties[0].column_name).toBe('title'); // sort_order 1
+                expect(properties[1].column_name).toBe('description'); // sort_order 2
+                ;
+            }, 150);
+        });
+
+        it('should maintain sort after items are loaded', async () => {
+            const unsortedProperties = [
+                { ...mockProperties[1], sort_order: 5 },
+                { ...mockProperties[0], sort_order: 3 }
+            ];
+
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(unsortedProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                const properties = getPropertyItems(component);
+                expect(properties[0].sort_order).toBe(3);
+                expect(properties[1].sort_order).toBe(5);
+                expect(properties[0].sort_order).toBeLessThan(properties[1].sort_order);
+                ;
+            }, 150);
+        });
+    });
+
+    describe('compareEntities()', () => {
+        it('should return true for entities with same table_name', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            const entity1 = { ...mockEntities[0] };
+            const entity2 = { ...mockEntities[0] };
+
+            expect(component.compareEntities(entity1, entity2)).toBe(true);
+        });
+
+        it('should return false for entities with different table_name', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            expect(component.compareEntities(mockEntities[0], mockEntities[1])).toBe(false);
+        });
+
+        it('should handle null/undefined entities', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            expect(component.compareEntities(null as any, null as any)).toBe(true);
+            expect(component.compareEntities(undefined as any, undefined as any)).toBe(true);
+            expect(component.compareEntities(mockEntities[0], null as any)).toBe(false);
+            expect(component.compareEntities(null as any, mockEntities[0])).toBe(false);
+        });
+    });
+
+    describe('Helper Methods', () => {
+        it('should get correct property type label', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            const property = {
+                ...mockProperties[0],
+                itemType: 'property' as const,
+                customDisplayName: null,
+                customDescription: null,
+                customColumnWidth: null,
+                expanded: false
+            };
+            expect(component.getPropertyTypeLabel(property)).toBe('Text (Short)');
+
+            property.type = EntityPropertyType.ForeignKeyName;
+            expect(component.getPropertyTypeLabel(property)).toBe('Foreign Key');
+        });
+
+        it('should have labels for all EntityPropertyType values', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            const enumValues = Object.values(EntityPropertyType).filter(v => typeof v === 'number') as number[];
+            for (const val of enumValues) {
+                if (val === EntityPropertyType.Unknown)
+                    continue; // Unknown is the fallback label
+                const label = component.getPropertyTypeLabel({ type: val } as any);
+                expect(label, `Missing label for EntityPropertyType value ${val} (${EntityPropertyType[val]})`).not.toBe('Unknown');
+            }
+        });
+
+        it('should get correct display name placeholder', () => {
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+
+            const property = {
+                ...mockProperties[0],
+                itemType: 'property' as const,
+                customDisplayName: null,
+                customDescription: null,
+                customColumnWidth: null,
+                expanded: false
+            };
+            expect(component.getDisplayNamePlaceholder(property)).toBe('Title');
+        });
+    });
+
+    describe('Static Text Integration', () => {
+        it('should load and display static text items alongside properties', async () => {
+            const mockStaticTexts = [
+                {
+                    itemType: 'static_text' as const,
+                    id: 1,
+                    table_name: 'Issue',
+                    content: '## Instructions\nPlease fill out the form below.',
+                    sort_order: -1, // Lower than properties (0, 1) to ensure it comes first
+                    column_width: 2,
+                    show_on_detail: true,
+                    show_on_create: true,
+                    show_on_edit: false
+                }
+            ];
+
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of(mockStaticTexts));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                // Should have both properties and static text
+                expect(component.items().length).toBe(3);
+
+                // First item should be static text (sort_order 0)
+                expect(component.items()[0].itemType).toBe('static_text');
+
+                // Properties should follow
+                const properties = getPropertyItems(component);
+                expect(properties.length).toBe(2);
+                ;
+            }, 150);
+        });
+
+        it('should call updateStaticTextOrder when static text is reordered', async () => {
+            const mockStaticTexts = [
+                {
+                    itemType: 'static_text' as const,
+                    id: 1,
+                    table_name: 'Issue',
+                    content: 'Static text content',
+                    sort_order: 5,
+                    column_width: 2,
+                    show_on_detail: true,
+                    show_on_create: true,
+                    show_on_edit: false
+                }
+            ];
+
+            mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
+            mockSchemaService.getPropertiesForEntityFresh.mockReturnValue(of(mockProperties));
+            mockSchemaService.getStaticTextForEntity.mockReturnValue(of(mockStaticTexts));
+            mockPropertyManagementService.updatePropertiesOrder.mockReturnValue(of({ success: true }));
+            mockPropertyManagementService.updateStaticTextOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(PropertyManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                const event: CdkDragDrop<any> = {
+                    previousIndex: 2, // Move static text from last position
+                    currentIndex: 0, // to first position
+                    item: null as any,
+                    container: null as any,
+                    previousContainer: null as any,
+                    isPointerOverContainer: true,
+                    distance: { x: 0, y: 0 },
+                    dropPoint: { x: 0, y: 0 },
+                    event: null as any
+                };
+
+                component.onDrop(event);
+
+                setTimeout(() => {
+                    expect(mockPropertyManagementService.updateStaticTextOrder).toHaveBeenCalledWith([
+                        { id: 1, sort_order: 0 }
+                    ]);
+                    ;
+                }, 10);
+            }, 150);
+        });
+    });
 });

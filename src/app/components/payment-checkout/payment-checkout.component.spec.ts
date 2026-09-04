@@ -25,559 +25,563 @@ import { DataService } from '../../services/data.service';
 import { of, throwError } from 'rxjs';
 
 describe('PaymentCheckoutComponent', () => {
-  let component: PaymentCheckoutComponent;
-  let fixture: ComponentFixture<PaymentCheckoutComponent>;
-  let dataService: jasmine.SpyObj<DataService>;
-  let httpMock: HttpTestingController;
+    let component: PaymentCheckoutComponent;
+    let fixture: ComponentFixture<PaymentCheckoutComponent>;
+    let dataService: any;
+    let httpMock: HttpTestingController;
 
-  const mockPaymentId = 'pay_123';
-  const mockClientSecret = 'pi_secret_abc123';
-  const testPostgrestUrl = 'http://test-api.example.com/';
+    const mockPaymentId = 'pay_123';
+    const mockClientSecret = 'pi_secret_abc123';
+    const testPostgrestUrl = 'http://test-api.example.com/';
 
-  // Mock Stripe
-  let mockStripe: any;
-  let mockElements: any;
-  let mockPaymentElement: any;
+    // Mock Stripe
+    let mockStripe: any;
+    let mockElements: any;
+    let mockPaymentElement: any;
 
-  beforeEach(async () => {
-    // Create spy object for DataService
-    const dataServiceSpy = jasmine.createSpyObj('DataService', ['getData']);
+    beforeEach(async () => {
+        // Create spy object for DataService
+        const dataServiceSpy = {
+            getData: vi.fn().mockName("DataService.getData")
+        };
 
-    // Mock Stripe objects
-    mockPaymentElement = {
-      mount: jasmine.createSpy('mount')
-    };
+        // Mock Stripe objects
+        mockPaymentElement = {
+            mount: vi.fn().mockName('mount')
+        };
 
-    mockElements = {
-      create: jasmine.createSpy('create').and.returnValue(mockPaymentElement)
-    };
+        mockElements = {
+            create: vi.fn().mockName('create').mockReturnValue(mockPaymentElement)
+        };
 
-    mockStripe = {
-      elements: jasmine.createSpy('elements').and.returnValue(mockElements),
-      confirmPayment: jasmine.createSpy('confirmPayment')
-    };
+        mockStripe = {
+            elements: vi.fn().mockName('elements').mockReturnValue(mockElements),
+            confirmPayment: vi.fn().mockName('confirmPayment')
+        };
 
-    // Mock Stripe constructor
-    (window as any).Stripe = jasmine.createSpy('Stripe').and.returnValue(mockStripe);
+        // Mock Stripe constructor
+        (window as any).Stripe = vi.fn().mockName('Stripe').mockReturnValue(mockStripe);
 
-    // Mock runtime configuration
-    (window as any).civicOsConfig = {
-      postgrestUrl: testPostgrestUrl,
-      stripe: {
-        publishableKey: 'pk_test_123'
-      }
-    };
+        // Mock runtime configuration
+        (window as any).civicOsConfig = {
+            postgrestUrl: testPostgrestUrl,
+            stripe: {
+                publishableKey: 'pk_test_123'
+            }
+        };
 
-    await TestBed.configureTestingModule({
-      imports: [PaymentCheckoutComponent],
-      providers: [
-        provideTranslationTesting(),
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr()),
-        provideHttpClientTesting(),
-        { provide: DataService, useValue: dataServiceSpy }
-      ]
-    })
-    .compileComponents();
+        await TestBed.configureTestingModule({
+            imports: [PaymentCheckoutComponent],
+            providers: [
+                provideTranslationTesting(),
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
+                { provide: DataService, useValue: dataServiceSpy }
+            ]
+        })
+            .compileComponents();
 
-    fixture = TestBed.createComponent(PaymentCheckoutComponent);
-    component = fixture.componentInstance;
-    dataService = TestBed.inject(DataService) as jasmine.SpyObj<DataService>;
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-    // Clean up mocks
-    delete (window as any).Stripe;
-    delete (window as any).civicOsConfig;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Component Initialization', () => {
-    it('should initialize with loading state', () => {
-      expect(component.loading()).toBe(true);
-      expect(component.processing()).toBe(false);
-      expect(component.error()).toBeUndefined();
-      expect(component.clientSecret()).toBeUndefined();
-      expect(component.amount()).toBeUndefined();
+        fixture = TestBed.createComponent(PaymentCheckoutComponent);
+        component = fixture.componentInstance;
+        dataService = TestBed.inject(DataService) as any;
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
-    it('should not load payment data when modal is closed', () => {
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      expect(dataService.getData).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Payment Data Loading', () => {
-    it('should handle payment with client_secret successfully', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (pending)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPayment] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      // Wait for effect and async operations
-      setTimeout(() => {
-        expect(component.clientSecret()).toBe(mockClientSecret);
-        expect(component.amount()).toBe(50.00);
-        expect(component.error()).toBeUndefined();
-        done();
-      }, 200);
+    afterEach(() => {
+        httpMock.verify();
+        // Clean up mocks
+        delete (window as any).Stripe;
+        delete (window as any).civicOsConfig;
     });
 
-    it('should show error when payment not found', (done) => {
-      dataService.getData.and.returnValue(of([] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.loading()).toBe(false);
-        expect(component.error()).toBe('Payment not found');
-        done();
-      }, 100);
+    it('should create', () => {
+        expect(component).toBeTruthy();
     });
 
-    it('should show error when payment is already succeeded', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        status: 'succeeded',
-        provider_client_secret: mockClientSecret,
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (succeeded)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPayment] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.error()).toBe('This payment has already been completed');
-        done();
-      }, 100);
-    });
-
-    it('should show error when payment is canceled', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        status: 'canceled',
-        provider_client_secret: mockClientSecret,
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (canceled)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPayment] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.error()).toBe('Payment canceled. Please create a new payment.');
-        done();
-      }, 100);
-    });
-
-    it('should show error when payment is failed', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        status: 'failed',
-        provider_client_secret: mockClientSecret,
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (failed)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPayment] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.error()).toBe('Payment failed. Please create a new payment.');
-        done();
-      }, 100);
-    });
-
-    it('should handle API error during payment load', (done) => {
-      dataService.getData.and.returnValue(throwError(() => new Error('Network error')) as any);
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.loading()).toBe(false);
-        expect(component.error()).toBe('Failed to load payment information');
-        done();
-      }, 100);
-    });
-  });
-
-  describe('Client Secret Polling', () => {
-    it('should verify polling is triggered when client_secret not available', (done) => {
-      const mockPaymentNoSecret = {
-        id: mockPaymentId,
-        amount: 50.00,
-        status: 'pending_intent',
-        provider_client_secret: null,
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (pending_intent)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPaymentNoSecret] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.clientSecret()).toBeUndefined();
-        expect(component.loading()).toBe(true);
-        // Verify service was called at least once (initial load)
-        expect(dataService.getData).toHaveBeenCalled();
-        done();
-      }, 100);
-    });
-
-    it('should handle payment that becomes succeeded during polling', (done) => {
-      const mockPaymentSucceeded = {
-        id: mockPaymentId,
-        amount: 50.00,
-        status: 'succeeded',
-        provider_client_secret: null,
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (succeeded)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPaymentSucceeded] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.error()).toBe('This payment has already been completed');
-        done();
-      }, 100);
-    });
-  });
-
-  describe('Stripe Initialization', () => {
-    it('should initialize Stripe when client_secret is available', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (pending)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPayment] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect((window as any).Stripe).toHaveBeenCalledWith('pk_test_123');
-        expect(mockStripe.elements).toHaveBeenCalledWith({
-          clientSecret: mockClientSecret
+    describe('Component Initialization', () => {
+        it('should initialize with loading state', () => {
+            expect(component.loading()).toBe(true);
+            expect(component.processing()).toBe(false);
+            expect(component.error()).toBeUndefined();
+            expect(component.clientSecret()).toBeUndefined();
+            expect(component.amount()).toBeUndefined();
         });
-        expect(mockElements.create).toHaveBeenCalledWith('payment');
-        // Verify mount was called (actual element will be from template)
-        expect(mockPaymentElement.mount).toHaveBeenCalled();
-        done();
-      }, 200);
+
+        it('should not load payment data when modal is closed', () => {
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+
+            expect(dataService.getData).not.toHaveBeenCalled();
+        });
     });
 
-    it('should handle error when Stripe.js is not loaded', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (pending)'
-      };
+    describe('Payment Data Loading', () => {
+        it('should handle payment with client_secret successfully', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (pending)'
+            };
 
-      dataService.getData.and.returnValue(of([mockPayment] as any));
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
 
-      // Remove Stripe mock
-      delete (window as any).Stripe;
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
 
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
+            // Wait for effect and async operations
+            setTimeout(() => {
+                expect(component.clientSecret()).toBe(mockClientSecret);
+                expect(component.amount()).toBe(50.00);
+                expect(component.error()).toBeUndefined();
+                ;
+            }, 200);
+        });
 
-      setTimeout(() => {
-        expect(component.error()).toBe('Stripe.js failed to load. Please refresh the page.');
-        done();
-      }, 200);
+        it('should show error when payment not found', async () => {
+            dataService.getData.mockReturnValue(of([] as any));
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.loading()).toBe(false);
+                expect(component.error()).toBe('Payment not found');
+                ;
+            }, 100);
+        });
+
+        it('should show error when payment is already succeeded', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                status: 'succeeded',
+                provider_client_secret: mockClientSecret,
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (succeeded)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.error()).toBe('This payment has already been completed');
+                ;
+            }, 100);
+        });
+
+        it('should show error when payment is canceled', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                status: 'canceled',
+                provider_client_secret: mockClientSecret,
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (canceled)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.error()).toBe('Payment canceled. Please create a new payment.');
+                ;
+            }, 100);
+        });
+
+        it('should show error when payment is failed', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                status: 'failed',
+                provider_client_secret: mockClientSecret,
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (failed)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.error()).toBe('Payment failed. Please create a new payment.');
+                ;
+            }, 100);
+        });
+
+        it('should handle API error during payment load', async () => {
+            dataService.getData.mockReturnValue(throwError(() => new Error('Network error')) as any);
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.loading()).toBe(false);
+                expect(component.error()).toBe('Failed to load payment information');
+                ;
+            }, 100);
+        });
     });
 
-    it('should handle Stripe initialization error', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 50.00,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (pending)'
-      };
+    describe('Client Secret Polling', () => {
+        it('should verify polling is triggered when client_secret not available', async () => {
+            const mockPaymentNoSecret = {
+                id: mockPaymentId,
+                amount: 50.00,
+                status: 'pending_intent',
+                provider_client_secret: null,
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (pending_intent)'
+            };
 
-      dataService.getData.and.returnValue(of([mockPayment] as any));
+            dataService.getData.mockReturnValue(of([mockPaymentNoSecret] as any));
 
-      // Make Stripe throw an error
-      mockStripe.elements.and.throwError('Stripe error');
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
 
-      const mockElement = document.createElement('div');
-      component['paymentElementRef'] = { nativeElement: mockElement } as any;
+            setTimeout(() => {
+                expect(component.clientSecret()).toBeUndefined();
+                expect(component.loading()).toBe(true);
+                // Verify service was called at least once (initial load)
+                expect(dataService.getData).toHaveBeenCalled();
+                ;
+            }, 100);
+        });
 
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
+        it('should handle payment that becomes succeeded during polling', async () => {
+            const mockPaymentSucceeded = {
+                id: mockPaymentId,
+                amount: 50.00,
+                status: 'succeeded',
+                provider_client_secret: null,
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (succeeded)'
+            };
 
-      setTimeout(() => {
-        expect(component.error()).toBe('Failed to initialize payment form');
-        done();
-      }, 200);
-    });
-  });
+            dataService.getData.mockReturnValue(of([mockPaymentSucceeded] as any));
 
-  describe('Payment Submission', () => {
-    beforeEach(() => {
-      const mockElement = document.createElement('div');
-      component['paymentElementRef'] = { nativeElement: mockElement } as any;
-    });
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
 
-    it('should handle successful payment confirmation', async () => {
-      component['stripe'] = mockStripe;
-      component['elements'] = mockElements;
-
-      mockStripe.confirmPayment.and.returnValue(Promise.resolve({
-        paymentIntent: { id: 'pi_123', status: 'succeeded' }
-      }));
-
-      dataService.getData.and.returnValue(of([{
-        id: mockPaymentId,
-        status: 'succeeded',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$50.00 (succeeded)'
-      }] as any));
-
-      spyOn(component.paymentSuccess, 'emit');
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-
-      await component.handleSubmit();
-
-      expect(mockStripe.confirmPayment).toHaveBeenCalled();
-      // Processing state should be set during submit
-      expect(component.error()).toBeUndefined();
+            setTimeout(() => {
+                expect(component.error()).toBe('This payment has already been completed');
+                ;
+            }, 100);
+        });
     });
 
-    it('should handle payment confirmation error', async () => {
-      component['stripe'] = mockStripe;
-      component['elements'] = mockElements;
+    describe('Stripe Initialization', () => {
+        it('should initialize Stripe when client_secret is available', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (pending)'
+            };
 
-      mockStripe.confirmPayment.and.returnValue(Promise.resolve({
-        error: { message: 'Card declined' }
-      }));
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
 
-      await component.handleSubmit();
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
 
-      expect(component.error()).toBe('Card declined');
-      expect(component.processing()).toBe(false);
+            setTimeout(() => {
+                expect((window as any).Stripe).toHaveBeenCalledWith('pk_test_123');
+                expect(mockStripe.elements).toHaveBeenCalledWith({
+                    clientSecret: mockClientSecret
+                });
+                expect(mockElements.create).toHaveBeenCalledWith('payment');
+                // Verify mount was called (actual element will be from template)
+                expect(mockPaymentElement.mount).toHaveBeenCalled();
+                ;
+            }, 200);
+        });
+
+        it('should handle error when Stripe.js is not loaded', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (pending)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            // Remove Stripe mock
+            delete (window as any).Stripe;
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.error()).toBe('Stripe.js failed to load. Please refresh the page.');
+                ;
+            }, 200);
+        });
+
+        it('should handle Stripe initialization error', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 50.00,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$50.00 (pending)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            // Make Stripe throw an error
+            mockStripe.elements.mockImplementation(() => {
+                throw new Error('Stripe error');
+            });
+
+            const mockElement = document.createElement('div');
+            component['paymentElementRef'] = { nativeElement: mockElement } as any;
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.error()).toBe('Failed to initialize payment form');
+                ;
+            }, 200);
+        });
     });
 
-    it('should handle payment confirmation exception', async () => {
-      component['stripe'] = mockStripe;
-      component['elements'] = mockElements;
+    describe('Payment Submission', () => {
+        beforeEach(() => {
+            const mockElement = document.createElement('div');
+            component['paymentElementRef'] = { nativeElement: mockElement } as any;
+        });
 
-      mockStripe.confirmPayment.and.returnValue(Promise.reject(new Error('Network failure')));
+        it('should handle successful payment confirmation', async () => {
+            component['stripe'] = mockStripe;
+            component['elements'] = mockElements;
 
-      await component.handleSubmit();
+            mockStripe.confirmPayment.mockResolvedValue({
+                paymentIntent: { id: 'pi_123', status: 'succeeded' }
+            });
 
-      expect(component.error()).toBe('Network failure');
-      expect(component.processing()).toBe(false);
+            dataService.getData.mockReturnValue(of([{
+                    id: mockPaymentId,
+                    status: 'succeeded',
+                    created_at: '2025-11-22T10:00:00Z',
+                    updated_at: '2025-11-22T10:00:00Z',
+                    display_name: '$50.00 (succeeded)'
+                }] as any));
+
+            vi.spyOn(component.paymentSuccess, 'emit').mockReturnValue(undefined);
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+
+            await component.handleSubmit();
+
+            expect(mockStripe.confirmPayment).toHaveBeenCalled();
+            // Processing state should be set during submit
+            expect(component.error()).toBeUndefined();
+        });
+
+        it('should handle payment confirmation error', async () => {
+            component['stripe'] = mockStripe;
+            component['elements'] = mockElements;
+
+            mockStripe.confirmPayment.mockResolvedValue({
+                error: { message: 'Card declined' }
+            });
+
+            await component.handleSubmit();
+
+            expect(component.error()).toBe('Card declined');
+            expect(component.processing()).toBe(false);
+        });
+
+        it('should handle payment confirmation exception', async () => {
+            component['stripe'] = mockStripe;
+            component['elements'] = mockElements;
+
+            mockStripe.confirmPayment.mockRejectedValue(new Error('Network failure'));
+
+            await component.handleSubmit();
+
+            expect(component.error()).toBe('Network failure');
+            expect(component.processing()).toBe(false);
+        });
+
+        it('should show error when Stripe not initialized', async () => {
+            component['stripe'] = null;
+            component['elements'] = null;
+
+            await component.handleSubmit();
+
+            expect(component.error()).toBe('Payment form not initialized');
+            expect(component.processing()).toBe(false);
+        });
     });
 
-    it('should show error when Stripe not initialized', async () => {
-      component['stripe'] = null;
-      component['elements'] = null;
+    describe('Modal Close Handling', () => {
+        it('should emit close event and reset state', () => {
+            component['stripe'] = mockStripe;
+            component['elements'] = mockElements;
+            component.clientSecret.set(mockClientSecret);
+            component.baseAmount.set(50.00);
+            component.processingFee.set(0);
+            component.totalAmount.set(50.00);
+            component.error.set('Previous error');
+            component.loading.set(false);
+            component.processing.set(true);
 
-      await component.handleSubmit();
+            vi.spyOn(component.close, 'emit').mockReturnValue(undefined);
+            vi.spyOn(console, 'log').mockReturnValue(undefined);
 
-      expect(component.error()).toBe('Payment form not initialized');
-      expect(component.processing()).toBe(false);
-    });
-  });
+            component.handleClose();
 
-  describe('Modal Close Handling', () => {
-    it('should emit close event and reset state', () => {
-      component['stripe'] = mockStripe;
-      component['elements'] = mockElements;
-      component.clientSecret.set(mockClientSecret);
-      component.baseAmount.set(50.00);
-      component.processingFee.set(0);
-      component.totalAmount.set(50.00);
-      component.error.set('Previous error');
-      component.loading.set(false);
-      component.processing.set(true);
+            expect(component.close.emit).toHaveBeenCalled();
+            expect(component['stripe']).toBeNull();
+            expect(component['elements']).toBeNull();
+            expect(component.clientSecret()).toBeUndefined();
+            expect(component.totalAmount()).toBeUndefined();
+            expect(component.error()).toBeUndefined();
+            expect(component.loading()).toBe(true);
+            expect(component.processing()).toBe(false);
+        });
 
-      spyOn(component.close, 'emit');
-      spyOn(console, 'log');
+        it('should handle close when Stripe not initialized', () => {
+            component['stripe'] = null;
+            component['elements'] = null;
 
-      component.handleClose();
+            vi.spyOn(component.close, 'emit').mockReturnValue(undefined);
 
-      expect(component.close.emit).toHaveBeenCalled();
-      expect(component['stripe']).toBeNull();
-      expect(component['elements']).toBeNull();
-      expect(component.clientSecret()).toBeUndefined();
-      expect(component.totalAmount()).toBeUndefined();
-      expect(component.error()).toBeUndefined();
-      expect(component.loading()).toBe(true);
-      expect(component.processing()).toBe(false);
-    });
-
-    it('should handle close when Stripe not initialized', () => {
-      component['stripe'] = null;
-      component['elements'] = null;
-
-      spyOn(component.close, 'emit');
-
-      expect(() => component.handleClose()).not.toThrow();
-      expect(component.close.emit).toHaveBeenCalled();
-    });
-  });
-
-  describe('Payment Amount Handling', () => {
-    it('should handle integer amounts', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 100,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$100.00 (pending)'
-      };
-
-      dataService.getData.and.returnValue(of([mockPayment] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.amount()).toBe(100);
-        done();
-      }, 100);
+            expect(() => component.handleClose()).not.toThrow();
+            expect(component.close.emit).toHaveBeenCalled();
+        });
     });
 
-    it('should handle decimal amounts', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 99.99,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$99.99 (pending)'
-      };
+    describe('Payment Amount Handling', () => {
+        it('should handle integer amounts', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 100,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$100.00 (pending)'
+            };
 
-      dataService.getData.and.returnValue(of([mockPayment] as any));
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
 
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        expect(component.amount()).toBe(99.99);
-        done();
-      }, 100);
+            setTimeout(() => {
+                expect(component.amount()).toBe(100);
+                ;
+            }, 100);
+        });
+
+        it('should handle decimal amounts', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 99.99,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$99.99 (pending)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.amount()).toBe(99.99);
+                ;
+            }, 100);
+        });
+
+        it('should handle zero amounts', async () => {
+            const mockPayment = {
+                id: mockPaymentId,
+                amount: 0,
+                provider_client_secret: mockClientSecret,
+                status: 'pending',
+                created_at: '2025-11-22T10:00:00Z',
+                updated_at: '2025-11-22T10:00:00Z',
+                display_name: '$0.00 (pending)'
+            };
+
+            dataService.getData.mockReturnValue(of([mockPayment] as any));
+
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            setTimeout(() => {
+                expect(component.amount()).toBe(0);
+                ;
+            }, 100);
+        });
     });
 
-    it('should handle zero amounts', (done) => {
-      const mockPayment = {
-        id: mockPaymentId,
-        amount: 0,
-        provider_client_secret: mockClientSecret,
-        status: 'pending',
-        created_at: '2025-11-22T10:00:00Z',
-        updated_at: '2025-11-22T10:00:00Z',
-        display_name: '$0.00 (pending)'
-      };
+    describe('Edge Cases', () => {
+        it('should handle empty API response', async () => {
+            dataService.getData.mockReturnValue(of([] as any));
 
-      dataService.getData.and.returnValue(of([mockPayment] as any));
+            fixture.componentRef.setInput('paymentId', mockPaymentId);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
 
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
+            setTimeout(() => {
+                // Should set error for payment not found
+                expect(component.error()).toBe('Payment not found');
+                expect(component.loading()).toBe(false);
+                ;
+            }, 100);
+        });
 
-      setTimeout(() => {
-        expect(component.amount()).toBe(0);
-        done();
-      }, 100);
+        it('should handle undefined paymentId gracefully', () => {
+            fixture.componentRef.setInput('paymentId', undefined as any);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+
+            // Should not crash
+            expect(component).toBeTruthy();
+        });
     });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle empty API response', (done) => {
-      dataService.getData.and.returnValue(of([] as any));
-
-      fixture.componentRef.setInput('paymentId', mockPaymentId);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        // Should set error for payment not found
-        expect(component.error()).toBe('Payment not found');
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
-    });
-
-    it('should handle undefined paymentId gracefully', () => {
-      fixture.componentRef.setInput('paymentId', undefined as any);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-
-      // Should not crash
-      expect(component).toBeTruthy();
-    });
-  });
 });

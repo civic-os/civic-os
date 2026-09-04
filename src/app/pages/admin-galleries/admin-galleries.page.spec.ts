@@ -19,65 +19,65 @@ import { GalleryService } from '../../services/gallery.service';
 import { of } from 'rxjs';
 
 describe('AdminGalleriesPage', () => {
-  let component: AdminGalleriesPage;
-  let fixture: ComponentFixture<AdminGalleriesPage>;
+    let component: AdminGalleriesPage;
+    let fixture: ComponentFixture<AdminGalleriesPage>;
 
-  const mockAuthService = {
-    isAdmin: () => true,
-    hasPermission: () => true,
-    authenticated: () => true,
-    currentUser: () => ({ id: '1', email: 'admin@test.com' }),
-  };
+    const mockAuthService = {
+        isAdmin: () => true,
+        hasPermission: () => true,
+        authenticated: () => true,
+        currentUser: () => ({ id: '1', email: 'admin@test.com' }),
+    };
 
-  const mockGalleryService = {
-    getStorageStats: () => of({ total_galleries: 5, total_images: 25, total_storage_bytes: 1048576 })
-  };
+    const mockGalleryService = {
+        getStorageStats: () => of({ total_galleries: 5, total_images: 25, total_storage_bytes: 1048576 })
+    };
 
-  const mockSchemaService = {
-    getEntities: () => of([]),
-    getProperties: () => of([])
-  };
+    const mockSchemaService = {
+        getEntities: () => of([]),
+        getProperties: () => of([])
+    };
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [AdminGalleriesPage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr()),
-        provideHttpClientTesting(),
-        provideRouter([]),
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: GalleryService, useValue: mockGalleryService },
-      ]
-    }).compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [AdminGalleriesPage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
+                provideRouter([]),
+                { provide: AuthService, useValue: mockAuthService },
+                { provide: SchemaService, useValue: mockSchemaService },
+                { provide: GalleryService, useValue: mockGalleryService },
+            ]
+        }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminGalleriesPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(AdminGalleriesPage);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-  it('should have admin permission check', () => {
-    expect(component.canView()).toBeTrue();
-  });
+    it('should have admin permission check', () => {
+        expect(component.canView()).toBe(true);
+    });
 
-  it('should format file sizes correctly', () => {
-    expect(component.formatFileSize(0)).toBe('0 B');
-    expect(component.formatFileSize(1024)).toBe('1.0 KB');
-    expect(component.formatFileSize(1048576)).toBe('1.0 MB');
-  });
+    it('should format file sizes correctly', () => {
+        expect(component.formatFileSize(0)).toBe('0 B');
+        expect(component.formatFileSize(1024)).toBe('1.0 KB');
+        expect(component.formatFileSize(1048576)).toBe('1.0 MB');
+    });
 
-  it('should return null route for draft galleries', () => {
-    const draft = { id: '1', entity_type: 'issues', entity_id: null } as any;
-    expect(component.getEntityRoute(draft)).toBeNull();
-  });
+    it('should return null route for draft galleries', () => {
+        const draft = { id: '1', entity_type: 'issues', entity_id: null } as any;
+        expect(component.getEntityRoute(draft)).toBeNull();
+    });
 
-  it('should return route for linked galleries', () => {
-    const linked = { id: '1', entity_type: 'issues', entity_id: '42' } as any;
-    expect(component.getEntityRoute(linked)).toEqual(['/view', 'issues', '42']);
-  });
+    it('should return route for linked galleries', () => {
+        const linked = { id: '1', entity_type: 'issues', entity_id: '42' } as any;
+        expect(component.getEntityRoute(linked)).toEqual(['/view', 'issues', '42']);
+    });
 });

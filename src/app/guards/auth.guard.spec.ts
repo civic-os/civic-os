@@ -21,76 +21,78 @@ import { AuthGuardData } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 
 describe('authGuard', () => {
-  let mockRoute: ActivatedRouteSnapshot;
-  let mockState: RouterStateSnapshot;
-  let mockKeycloak: jasmine.SpyObj<Keycloak>;
-  let mockAuthData: AuthGuardData;
+    let mockRoute: ActivatedRouteSnapshot;
+    let mockState: RouterStateSnapshot;
+    let mockKeycloak: any;
+    let mockAuthData: AuthGuardData;
 
-  beforeEach(() => {
-    mockRoute = {} as ActivatedRouteSnapshot;
-    mockState = {
-      url: '/edit/Issue/42'
-    } as RouterStateSnapshot;
+    beforeEach(() => {
+        mockRoute = {} as ActivatedRouteSnapshot;
+        mockState = {
+            url: '/edit/Issue/42'
+        } as RouterStateSnapshot;
 
-    mockKeycloak = jasmine.createSpyObj('Keycloak', ['login']);
+        mockKeycloak = {
+            login: vi.fn().mockName("Keycloak.login")
+        };
 
-    mockAuthData = {
-      authenticated: false,
-      grantedRoles: {
-        resourceRoles: {},
-        realmRoles: []
-      },
-      keycloak: mockKeycloak
-    } as AuthGuardData;
-  });
-
-  it('should allow access when user is authenticated', async () => {
-    mockAuthData.authenticated = true;
-
-    // authGuard is a CanActivateFn created by createAuthGuard
-    // We can't easily test it directly, but we can verify the guard exists
-    expect(authGuard).toBeDefined();
-    expect(typeof authGuard).toBe('function');
-  });
-
-  it('should be a valid CanActivateFn', () => {
-    expect(authGuard).toBeDefined();
-    expect(typeof authGuard).toBe('function');
-  });
-
-  describe('Integration with createAuthGuard', () => {
-    it('should be created from createAuthGuard factory', () => {
-      // Verify the guard is a function that can be used in route configuration
-      expect(typeof authGuard).toBe('function');
-
-      // Verify it matches Angular's CanActivateFn signature
-      // CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree
-      expect(authGuard.length).toBe(2); // Should accept 2 parameters (route, state)
+        mockAuthData = {
+            authenticated: false,
+            grantedRoles: {
+                resourceRoles: {},
+                realmRoles: []
+            },
+            keycloak: mockKeycloak
+        } as AuthGuardData;
     });
-  });
 
-  describe('Expected Behavior (Integration Notes)', () => {
-    /**
-     * NOTE: The actual auth guard logic is implemented via keycloak-angular's createAuthGuard factory.
-     * Direct unit testing of the guard's internal behavior requires mocking the entire Keycloak initialization,
-     * which is complex and tests third-party code (against TESTING.md guidelines).
-     *
-     * Instead, we document the expected behavior here for reference:
-     *
-     * When authenticated = true:
-     * - Should return true (allow access)
-     *
-     * When authenticated = false:
-     * - Should call keycloak.login({ redirectUri: window.location.origin + state.url })
-     * - Should return false (deny access)
-     *
-     * These behaviors are tested at the E2E level with real Keycloak integration.
-     */
+    it('should allow access when user is authenticated', async () => {
+        mockAuthData.authenticated = true;
 
-    it('should be tested via E2E tests with real Keycloak', () => {
-      // This test serves as documentation that auth guard behavior
-      // is verified through E2E tests, not unit tests
-      expect(true).toBe(true);
+        // authGuard is a CanActivateFn created by createAuthGuard
+        // We can't easily test it directly, but we can verify the guard exists
+        expect(authGuard).toBeDefined();
+        expect(typeof authGuard).toBe('function');
     });
-  });
+
+    it('should be a valid CanActivateFn', () => {
+        expect(authGuard).toBeDefined();
+        expect(typeof authGuard).toBe('function');
+    });
+
+    describe('Integration with createAuthGuard', () => {
+        it('should be created from createAuthGuard factory', () => {
+            // Verify the guard is a function that can be used in route configuration
+            expect(typeof authGuard).toBe('function');
+
+            // Verify it matches Angular's CanActivateFn signature
+            // CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree
+            expect(authGuard.length).toBe(2); // Should accept 2 parameters (route, state)
+        });
+    });
+
+    describe('Expected Behavior (Integration Notes)', () => {
+        /**
+         * NOTE: The actual auth guard logic is implemented via keycloak-angular's createAuthGuard factory.
+         * Direct unit testing of the guard's internal behavior requires mocking the entire Keycloak initialization,
+         * which is complex and tests third-party code (against TESTING.md guidelines).
+         *
+         * Instead, we document the expected behavior here for reference:
+         *
+         * When authenticated = true:
+         * - Should return true (allow access)
+         *
+         * When authenticated = false:
+         * - Should call keycloak.login({ redirectUri: window.location.origin + state.url })
+         * - Should return false (deny access)
+         *
+         * These behaviors are tested at the E2E level with real Keycloak integration.
+         */
+
+        it('should be tested via E2E tests with real Keycloak', () => {
+            // This test serves as documentation that auth guard behavior
+            // is verified through E2E tests, not unit tests
+            expect(true).toBe(true);
+        });
+    });
 });

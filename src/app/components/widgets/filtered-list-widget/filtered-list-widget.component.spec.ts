@@ -26,295 +26,295 @@ import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 
 describe('FilteredListWidgetComponent', () => {
-  let component: FilteredListWidgetComponent;
-  let fixture: ComponentFixture<FilteredListWidgetComponent>;
-  let mockDataService: jasmine.SpyObj<DataService>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+    let component: FilteredListWidgetComponent;
+    let fixture: ComponentFixture<FilteredListWidgetComponent>;
+    let mockDataService: any;
+    let mockSchemaService: any;
+    let mockRouter: any;
 
-  const mockWidget: DashboardWidget = {
-    id: 1,
-    dashboard_id: 1,
-    widget_type: 'filtered_list',
-    title: 'Recent Participants',
-    entity_key: 'participants',
-    refresh_interval_seconds: null,
-    sort_order: 1,
-    width: 1,
-    height: 1,
-    config: {
-      filters: [{ column: 'status', operator: 'eq', value: 'Active' }],
-      orderBy: 'enrolled_date',
-      orderDirection: 'desc',
-      limit: 10,
-      showColumns: ['display_name', 'enrolled_date', 'status']
-    },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-
-  const mockProperties = [
-    {
-      table_name: 'participants',
-      column_name: 'id',
-      display_name: 'ID',
-      data_type: 'int4',
-      property_type: 'IntegerNumber',
-      is_nullable: false,
-      sort_order: 0,
-      validations: []
-    },
-    {
-      table_name: 'participants',
-      column_name: 'display_name',
-      display_name: 'Name',
-      data_type: 'varchar',
-      property_type: 'TextShort',
-      is_nullable: false,
-      sort_order: 1,
-      validations: []
-    },
-    {
-      table_name: 'participants',
-      column_name: 'enrolled_date',
-      display_name: 'Enrollment Date',
-      data_type: 'date',
-      property_type: 'Date',
-      is_nullable: false,
-      sort_order: 2,
-      validations: []
-    },
-    {
-      table_name: 'participants',
-      column_name: 'status',
-      display_name: 'Status',
-      data_type: 'varchar',
-      property_type: 'TextShort',
-      is_nullable: false,
-      sort_order: 3,
-      validations: []
-    }
-  ];
-
-  const mockRecords = [
-    { id: 1, display_name: 'John Doe', enrolled_date: '2020-01-15', status: 'Active', created_at: '2020-01-01', updated_at: '2020-01-01' },
-    { id: 2, display_name: 'Jane Smith', enrolled_date: '2021-03-20', status: 'Active', created_at: '2021-03-01', updated_at: '2021-03-01' }
-  ];
-
-  beforeEach(async () => {
-    mockDataService = jasmine.createSpyObj('DataService', ['getData']);
-    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getProperties']);
-
-    // Default mock responses
-    mockDataService.getData.and.returnValue(of(mockRecords as any));
-    mockSchemaService.getProperties.and.returnValue(of(mockProperties as any));
-
-    await TestBed.configureTestingModule({
-      imports: [FilteredListWidgetComponent],
-      providers: [
-        provideTranslationTesting(),
-        provideZonelessChangeDetection(),
-        // Real router provides ActivatedRoute for the first-cell RouterLink; navigate is spied below.
-        provideRouter([]),
-        { provide: DataService, useValue: mockDataService },
-        { provide: SchemaService, useValue: mockSchemaService }
-      ]
-    }).compileComponents();
-
-    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    spyOn(mockRouter, 'navigate');
-
-    fixture = TestBed.createComponent(FilteredListWidgetComponent);
-    component = fixture.componentInstance;
-
-    // Set required input
-    fixture.componentRef.setInput('widget', mockWidget);
-  });
-
-  it('should create', () => {
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
-  it('should extract config from widget', () => {
-    fixture.detectChanges();
-    const config = component.config();
-    expect(config.orderBy).toBe('enrolled_date');
-    expect(config.orderDirection).toBe('desc');
-    expect(config.limit).toBe(10);
-  });
-
-  it('should provide defaults for optional config fields', (done) => {
-    const widgetWithMinimalConfig: DashboardWidget = {
-      ...mockWidget,
-      config: {}
+    const mockWidget: DashboardWidget = {
+        id: 1,
+        dashboard_id: 1,
+        widget_type: 'filtered_list',
+        title: 'Recent Participants',
+        entity_key: 'participants',
+        refresh_interval_seconds: null,
+        sort_order: 1,
+        width: 1,
+        height: 1,
+        config: {
+            filters: [{ column: 'status', operator: 'eq', value: 'Active' }],
+            orderBy: 'enrolled_date',
+            orderDirection: 'desc',
+            limit: 10,
+            showColumns: ['display_name', 'enrolled_date', 'status']
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
     };
 
-    fixture.componentRef.setInput('widget', widgetWithMinimalConfig);
-    fixture.detectChanges();
+    const mockProperties = [
+        {
+            table_name: 'participants',
+            column_name: 'id',
+            display_name: 'ID',
+            data_type: 'int4',
+            property_type: 'IntegerNumber',
+            is_nullable: false,
+            sort_order: 0,
+            validations: []
+        },
+        {
+            table_name: 'participants',
+            column_name: 'display_name',
+            display_name: 'Name',
+            data_type: 'varchar',
+            property_type: 'TextShort',
+            is_nullable: false,
+            sort_order: 1,
+            validations: []
+        },
+        {
+            table_name: 'participants',
+            column_name: 'enrolled_date',
+            display_name: 'Enrollment Date',
+            data_type: 'date',
+            property_type: 'Date',
+            is_nullable: false,
+            sort_order: 2,
+            validations: []
+        },
+        {
+            table_name: 'participants',
+            column_name: 'status',
+            display_name: 'Status',
+            data_type: 'varchar',
+            property_type: 'TextShort',
+            is_nullable: false,
+            sort_order: 3,
+            validations: []
+        }
+    ];
 
-    setTimeout(() => {
-      const config = component.config();
-      expect(config.filters).toEqual([]);
-      expect(config.orderBy).toBe('id');
-      expect(config.orderDirection).toBe('desc');
-      expect(config.limit).toBe(10);
-      expect(config.showColumns).toEqual(['display_name']);
-      done();
-    }, 10);
-  });
+    const mockRecords = [
+        { id: 1, display_name: 'John Doe', enrolled_date: '2020-01-15', status: 'Active', created_at: '2020-01-01', updated_at: '2020-01-01' },
+        { id: 2, display_name: 'Jane Smith', enrolled_date: '2021-03-20', status: 'Active', created_at: '2021-03-01', updated_at: '2021-03-01' }
+    ];
 
-  it('should fetch entity properties and data', (done) => {
-    fixture.detectChanges();
+    beforeEach(async () => {
+        mockDataService = {
+            getData: vi.fn().mockName("DataService.getData")
+        };
+        mockSchemaService = {
+            getProperties: vi.fn().mockName("SchemaService.getProperties")
+        };
 
-    setTimeout(() => {
-      expect(mockSchemaService.getProperties).toHaveBeenCalled();
-      expect(mockDataService.getData).toHaveBeenCalled();
-      done();
-    }, 10);
-  });
+        // Default mock responses
+        mockDataService.getData.mockReturnValue(of(mockRecords as any));
+        mockSchemaService.getProperties.mockReturnValue(of(mockProperties as any));
 
-  it('should load entity properties for column rendering', (done) => {
-    fixture.detectChanges();
+        await TestBed.configureTestingModule({
+            imports: [FilteredListWidgetComponent],
+            providers: [
+                provideTranslationTesting(),
+                provideZonelessChangeDetection(),
+                // Real router provides ActivatedRoute for the first-cell RouterLink; navigate is spied below.
+                provideRouter([]),
+                { provide: DataService, useValue: mockDataService },
+                { provide: SchemaService, useValue: mockSchemaService }
+            ]
+        }).compileComponents();
 
-    setTimeout(() => {
-      expect(component.properties().length).toBe(4);
-      expect(component.properties().some(p => p.column_name === 'display_name')).toBe(true);
-      done();
-    }, 10);
-  });
+        mockRouter = TestBed.inject(Router) as any;
+        vi.spyOn(mockRouter, 'navigate').mockReturnValue(undefined);
 
-  it('should populate records signal with fetched data', (done) => {
-    fixture.detectChanges();
+        fixture = TestBed.createComponent(FilteredListWidgetComponent);
+        component = fixture.componentInstance;
 
-    setTimeout(() => {
-      expect(component.records().length).toBe(2);
-      expect(component.records()[0].display_name).toBe('John Doe');
-      expect(component.records()[1].display_name).toBe('Jane Smith');
-      done();
-    }, 10);
-  });
+        // Set required input
+        fixture.componentRef.setInput('widget', mockWidget);
+    });
 
-  it('should navigate to detail page on row click', (done) => {
-    fixture.detectChanges();
+    it('should create', () => {
+        fixture.detectChanges();
+        expect(component).toBeTruthy();
+    });
 
-    setTimeout(() => {
-      component.onRowClick(42);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
-      done();
-    }, 10);
-  });
+    it('should extract config from widget', () => {
+        fixture.detectChanges();
+        const config = component.config();
+        expect(config.orderBy).toBe('enrolled_date');
+        expect(config.orderDirection).toBe('desc');
+        expect(config.limit).toBe(10);
+    });
 
-  it('should get property metadata for column', (done) => {
-    fixture.detectChanges();
+    it('should provide defaults for optional config fields', async () => {
+        const widgetWithMinimalConfig: DashboardWidget = {
+            ...mockWidget,
+            config: {}
+        };
 
-    setTimeout(() => {
-      const property = component.getProperty('enrolled_date');
-      expect(property).toBeDefined();
-      expect(property?.display_name).toBe('Enrollment Date');
-      done();
-    }, 10);
-  });
+        fixture.componentRef.setInput('widget', widgetWithMinimalConfig);
+        fixture.detectChanges();
 
-  it('should get column label from property metadata', (done) => {
-    fixture.detectChanges();
+        setTimeout(() => {
+            const config = component.config();
+            expect(config.filters).toEqual([]);
+            expect(config.orderBy).toBe('id');
+            expect(config.orderDirection).toBe('desc');
+            expect(config.limit).toBe(10);
+            expect(config.showColumns).toEqual(['display_name']);
+            ;
+        }, 10);
+    });
 
-    setTimeout(() => {
-      const label = component.getColumnLabel('enrolled_date');
-      expect(label).toBe('Enrollment Date');
-      done();
-    }, 10);
-  });
+    it('should fetch entity properties and data', async () => {
+        fixture.detectChanges();
 
-  it('should fallback to column name if property not found', (done) => {
-    fixture.detectChanges();
+        setTimeout(() => {
+            expect(mockSchemaService.getProperties).toHaveBeenCalled();
+            expect(mockDataService.getData).toHaveBeenCalled();
+            ;
+        }, 10);
+    });
 
-    setTimeout(() => {
-      const label = component.getColumnLabel('unknown_column');
-      expect(label).toBe('unknown_column');
-      done();
-    }, 10);
-  });
+    it('should load entity properties for column rendering', async () => {
+        fixture.detectChanges();
 
-  it('should handle empty data gracefully', (done) => {
-    mockDataService.getData.and.returnValue(of([] as any));
+        setTimeout(() => {
+            expect(component.properties().length).toBe(4);
+            expect(component.properties().some(p => p.column_name === 'display_name')).toBe(true);
+            ;
+        }, 10);
+    });
 
-    // Re-create component to pick up new mock
-    fixture = TestBed.createComponent(FilteredListWidgetComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('widget', mockWidget);
-    fixture.detectChanges();
+    it('should populate records signal with fetched data', async () => {
+        fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(component.records().length).toBe(0);
-      expect(component.isLoading()).toBe(false);
-      done();
-    }, 10);
-  });
+        setTimeout(() => {
+            expect(component.records().length).toBe(2);
+            expect(component.records()[0].display_name).toBe('John Doe');
+            expect(component.records()[1].display_name).toBe('Jane Smith');
+            ;
+        }, 10);
+    });
 
-  it('should handle data service errors gracefully', (done) => {
-    spyOn(console, 'error');
-    mockDataService.getData.and.returnValue(
-      throwError(() => new Error('API Error'))
-    );
+    it('should navigate to detail page on row click', async () => {
+        fixture.detectChanges();
 
-    // Re-create component to pick up new mock
-    fixture = TestBed.createComponent(FilteredListWidgetComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('widget', mockWidget);
-    fixture.detectChanges();
+        setTimeout(() => {
+            component.onRowClick(42);
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
+            ;
+        }, 10);
+    });
 
-    setTimeout(() => {
-      expect(component.records().length).toBe(0);
-      expect(component.isLoading()).toBe(false);
-      expect(component.error()).toBe('Failed to load data');
-      done();
-    }, 10);
-  });
+    it('should get property metadata for column', async () => {
+        fixture.detectChanges();
 
-  it('should handle schema service errors gracefully', (done) => {
-    spyOn(console, 'error');
-    mockSchemaService.getProperties.and.returnValue(
-      throwError(() => new Error('Schema Error'))
-    );
+        setTimeout(() => {
+            const property = component.getProperty('enrolled_date');
+            expect(property).toBeDefined();
+            expect(property?.display_name).toBe('Enrollment Date');
+            ;
+        }, 10);
+    });
 
-    // Re-create component to pick up new mock
-    fixture = TestBed.createComponent(FilteredListWidgetComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('widget', mockWidget);
-    fixture.detectChanges();
+    it('should get column label from property metadata', async () => {
+        fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(component.isLoading()).toBe(false);
-      expect(component.error()).toBe('Failed to load schema');
-      done();
-    }, 10);
-  });
+        setTimeout(() => {
+            const label = component.getColumnLabel('enrolled_date');
+            expect(label).toBe('Enrollment Date');
+            ;
+        }, 10);
+    });
 
-  it('should set loading state correctly', (done) => {
-    expect(component.isLoading()).toBe(true);
+    it('should fallback to column name if property not found', async () => {
+        fixture.detectChanges();
 
-    fixture.detectChanges();
+        setTimeout(() => {
+            const label = component.getColumnLabel('unknown_column');
+            expect(label).toBe('unknown_column');
+            ;
+        }, 10);
+    });
 
-    setTimeout(() => {
-      expect(component.isLoading()).toBe(false);
-      done();
-    }, 10);
-  });
+    it('should handle empty data gracefully', async () => {
+        mockDataService.getData.mockReturnValue(of([] as any));
 
-  it('should handle widget without entity_key', (done) => {
-    const widgetNoEntity: DashboardWidget = {
-      ...mockWidget,
-      entity_key: null
-    };
+        // Re-create component to pick up new mock
+        fixture = TestBed.createComponent(FilteredListWidgetComponent);
+        component = fixture.componentInstance;
+        fixture.componentRef.setInput('widget', mockWidget);
+        fixture.detectChanges();
 
-    fixture.componentRef.setInput('widget', widgetNoEntity);
-    fixture.detectChanges();
+        setTimeout(() => {
+            expect(component.records().length).toBe(0);
+            expect(component.isLoading()).toBe(false);
+            ;
+        }, 10);
+    });
 
-    setTimeout(() => {
-      expect(component.records().length).toBe(0);
-      expect(component.isLoading()).toBe(false);
-      done();
-    }, 10);
-  });
+    it('should handle data service errors gracefully', async () => {
+        vi.spyOn(console, 'error').mockReturnValue(undefined);
+        mockDataService.getData.mockReturnValue(throwError(() => new Error('API Error')));
+
+        // Re-create component to pick up new mock
+        fixture = TestBed.createComponent(FilteredListWidgetComponent);
+        component = fixture.componentInstance;
+        fixture.componentRef.setInput('widget', mockWidget);
+        fixture.detectChanges();
+
+        setTimeout(() => {
+            expect(component.records().length).toBe(0);
+            expect(component.isLoading()).toBe(false);
+            expect(component.error()).toBe('Failed to load data');
+            ;
+        }, 10);
+    });
+
+    it('should handle schema service errors gracefully', async () => {
+        vi.spyOn(console, 'error').mockReturnValue(undefined);
+        mockSchemaService.getProperties.mockReturnValue(throwError(() => new Error('Schema Error')));
+
+        // Re-create component to pick up new mock
+        fixture = TestBed.createComponent(FilteredListWidgetComponent);
+        component = fixture.componentInstance;
+        fixture.componentRef.setInput('widget', mockWidget);
+        fixture.detectChanges();
+
+        setTimeout(() => {
+            expect(component.isLoading()).toBe(false);
+            expect(component.error()).toBe('Failed to load schema');
+            ;
+        }, 10);
+    });
+
+    it('should set loading state correctly', async () => {
+        expect(component.isLoading()).toBe(true);
+
+        fixture.detectChanges();
+
+        setTimeout(() => {
+            expect(component.isLoading()).toBe(false);
+            ;
+        }, 10);
+    });
+
+    it('should handle widget without entity_key', async () => {
+        const widgetNoEntity: DashboardWidget = {
+            ...mockWidget,
+            entity_key: null
+        };
+
+        fixture.componentRef.setInput('widget', widgetNoEntity);
+        fixture.detectChanges();
+
+        setTimeout(() => {
+            expect(component.records().length).toBe(0);
+            expect(component.isLoading()).toBe(false);
+            ;
+        }, 10);
+    });
 });

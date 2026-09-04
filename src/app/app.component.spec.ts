@@ -30,525 +30,562 @@ import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 
 describe('AppComponent', () => {
-  let mockAuthService: jasmine.SpyObj<AuthService>;
-  let mockThemeService: jasmine.SpyObj<ThemeService>;
-  let mockAnalyticsService: jasmine.SpyObj<AnalyticsService>;
-  let mockImpersonationService: jasmine.SpyObj<ImpersonationService>;
-  let httpMock: HttpTestingController;
+    let mockAuthService: any;
+    let mockThemeService: any;
+    let mockAnalyticsService: any;
+    let mockImpersonationService: any;
+    let httpMock: HttpTestingController;
 
-  beforeEach(async () => {
-    mockAuthService = jasmine.createSpyObj('AuthService', ['isAdmin', 'hasRole', 'authenticated', 'hasPermission', 'isRealAdmin'], {
-      userRoles: []
-    });
-    mockAuthService.authenticated.and.returnValue(false);
-    // Default hasPermission to return false (synchronous boolean)
-    mockAuthService.hasPermission.and.returnValue(false);
-    // Default isRealAdmin to return false
-    mockAuthService.isRealAdmin.and.returnValue(false);
+    beforeEach(async () => {
+        mockAuthService = {
+            isAdmin: vi.fn().mockName("AuthService.isAdmin"),
+            hasRole: vi.fn().mockName("AuthService.hasRole"),
+            authenticated: vi.fn().mockName("AuthService.authenticated"),
+            hasPermission: vi.fn().mockName("AuthService.hasPermission"),
+            isRealAdmin: vi.fn().mockName("AuthService.isRealAdmin"),
+            userRoles: []
+        };
+        mockAuthService.authenticated.mockReturnValue(false);
+        // Default hasPermission to return false (synchronous boolean)
+        mockAuthService.hasPermission.mockReturnValue(false);
+        // Default isRealAdmin to return false
+        mockAuthService.isRealAdmin.mockReturnValue(false);
 
-    // Mock ThemeService with signal
-    const themeSignal = signal('corporate');
-    mockThemeService = jasmine.createSpyObj('ThemeService', ['setTheme', 'getMapTileConfig'], {
-      theme: themeSignal,
-      isDark: signal(false)
-    });
+        // Mock ThemeService with signal
+        const themeSignal = signal('corporate');
+        mockThemeService = {
+            setTheme: vi.fn().mockName("ThemeService.setTheme"),
+            getMapTileConfig: vi.fn().mockName("ThemeService.getMapTileConfig"),
+            theme: themeSignal,
+            isDark: signal(false)
+        };
 
-    // Mock AnalyticsService
-    mockAnalyticsService = jasmine.createSpyObj('AnalyticsService', ['trackPageView', 'trackEvent', 'getUserPreference']);
-    mockAnalyticsService.getUserPreference.and.returnValue(true);
+        // Mock AnalyticsService
+        mockAnalyticsService = {
+            trackPageView: vi.fn().mockName("AnalyticsService.trackPageView"),
+            trackEvent: vi.fn().mockName("AnalyticsService.trackEvent"),
+            getUserPreference: vi.fn().mockName("AnalyticsService.getUserPreference")
+        };
+        mockAnalyticsService.getUserPreference.mockReturnValue(true);
 
-    // Mock ImpersonationService with signal
-    mockImpersonationService = jasmine.createSpyObj('ImpersonationService', ['startImpersonation', 'stopImpersonation'], {
-      isActive: signal(false),
-      impersonatedRoles: signal<string[]>([])
-    });
+        // Mock ImpersonationService with signal
+        mockImpersonationService = {
+            startImpersonation: vi.fn().mockName("ImpersonationService.startImpersonation"),
+            stopImpersonation: vi.fn().mockName("ImpersonationService.stopImpersonation"),
+            isActive: signal(false),
+            impersonatedRoles: signal<string[]>([])
+        };
 
-    await TestBed.configureTestingModule({
-      imports: [AppComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideRouter([]),
-        provideHttpClient(withXhr()),
-        provideHttpClientTesting(),
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: ThemeService, useValue: mockThemeService },
-        { provide: AnalyticsService, useValue: mockAnalyticsService },
-        { provide: ImpersonationService, useValue: mockImpersonationService },
-        { provide: SwUpdate, useValue: { isEnabled: false, versionUpdates: new Subject() } }
-      ]
-    }).compileComponents();
+        await TestBed.configureTestingModule({
+            imports: [AppComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideRouter([]),
+                provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
+                { provide: AuthService, useValue: mockAuthService },
+                { provide: ThemeService, useValue: mockThemeService },
+                { provide: AnalyticsService, useValue: mockAnalyticsService },
+                { provide: ImpersonationService, useValue: mockImpersonationService },
+                { provide: SwUpdate, useValue: { isEnabled: false, versionUpdates: new Subject() } }
+            ]
+        }).compileComponents();
 
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-    // Clean up data-theme attribute to prevent test pollution
-    document.documentElement.removeAttribute('data-theme');
-  });
-
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-
-    // Handle HTTP requests made during component initialization (may be multiple)
-    const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
-    schemaEntitiesReqs.forEach(req => req.flush([]));
-
-    // Handle version check request (VersionService.init())
-    const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
-    versionReqs.forEach(req => req.flush([
-      { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-    ]));
-
-    // Handle dashboard requests from DashboardSelectorComponent
-    const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
-    dashboardReqs.forEach(req => req.flush([]));
-
-    // Handle constraint messages request (SchemaService.init())
-    const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
-    constraintMsgsReqs.forEach(req => req.flush([]));
-
-    expect(app).toBeTruthy();
-  });
-
-  it(`should have the default app title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-
-    // Handle HTTP requests made during component initialization (may be multiple)
-    const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
-    schemaEntitiesReqs.forEach(req => req.flush([]));
-
-    // Handle version check request (VersionService.init())
-    const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
-    versionReqs.forEach(req => req.flush([
-      { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-    ]));
-
-    // Handle dashboard requests from DashboardSelectorComponent
-    const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
-    dashboardReqs.forEach(req => req.flush([]));
-
-    // Handle constraint messages request (SchemaService.init())
-    const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
-    constraintMsgsReqs.forEach(req => req.flush([]));
-
-    expect(app.appTitle).toEqual('Civic OS');
-  });
-
-  describe('Theme Integration', () => {
-    it('should inject ThemeService', () => {
-      const fixture = TestBed.createComponent(AppComponent);
-      const app = fixture.componentInstance;
-
-      // Handle HTTP requests
-      const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
-      schemaEntitiesReqs.forEach(req => req.flush([]));
-      const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
-      versionReqs.forEach(req => req.flush([
-        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-      ]));
-      const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
-      dashboardReqs.forEach(req => req.flush([]));
-      const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
-      constraintMsgsReqs.forEach(req => req.flush([]));
-
-      expect(app.themeService).toBe(mockThemeService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
-    it('should render palette icon button for theme picker', () => {
-      const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
+    afterEach(() => {
+        httpMock.verify();
+        // Clean up data-theme attribute to prevent test pollution
+        document.documentElement.removeAttribute('data-theme');
+    });
 
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
+    it('should create the app', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        const app = fixture.componentInstance;
+
+        // Handle HTTP requests made during component initialization (may be multiple)
+        const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
+        schemaEntitiesReqs.forEach(req => req.flush([]));
+
+        // Handle version check request (VersionService.init())
+        const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
+        versionReqs.forEach(req => req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
             { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
             { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
+        ]));
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const paletteButton = compiled.querySelector('button[aria-label="Change theme"]');
+        // Handle dashboard requests from DashboardSelectorComponent
+        const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
+        dashboardReqs.forEach(req => req.flush([]));
 
-      expect(paletteButton).toBeTruthy();
-      // Old theme dropdown should no longer exist
-      expect(compiled.querySelectorAll('.theme-controller').length).toBe(0);
+        // Handle constraint messages request (SchemaService.init())
+        const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+        constraintMsgsReqs.forEach(req => req.flush([]));
+
+        expect(app).toBeTruthy();
     });
 
-    it('should open settings modal on Colors tab when palette button is clicked', () => {
-      const fixture = TestBed.createComponent(AppComponent);
-      const app = fixture.componentInstance;
-      fixture.detectChanges();
+    it(`should have the default app title`, () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        const app = fixture.componentInstance;
 
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
+        // Handle HTTP requests made during component initialization (may be multiple)
+        const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
+        schemaEntitiesReqs.forEach(req => req.flush([]));
+
+        // Handle version check request (VersionService.init())
+        const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
+        versionReqs.forEach(req => req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
             { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
             { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
+        ]));
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const paletteButton = compiled.querySelector('button[aria-label="Change theme"]') as HTMLButtonElement;
+        // Handle dashboard requests from DashboardSelectorComponent
+        const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
+        dashboardReqs.forEach(req => req.flush([]));
 
-      paletteButton.click();
+        // Handle constraint messages request (SchemaService.init())
+        const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+        constraintMsgsReqs.forEach(req => req.flush([]));
 
-      expect(app.showSettingsModal()).toBe(true);
-      expect(app.settingsInitialTab()).toBe('colors');
+        expect(app.appTitle).toEqual('Civic OS');
     });
 
-    it('should default settingsInitialTab to preferences', () => {
-      const fixture = TestBed.createComponent(AppComponent);
-      const app = fixture.componentInstance;
+    describe('Theme Integration', () => {
+        it('should inject ThemeService', () => {
+            const fixture = TestBed.createComponent(AppComponent);
+            const app = fixture.componentInstance;
 
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
+            // Handle HTTP requests
+            const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
+            schemaEntitiesReqs.forEach(req => req.flush([]));
+            const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
+            versionReqs.forEach(req => req.flush([
+                { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+            ]));
+            const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
+            dashboardReqs.forEach(req => req.flush([]));
+            const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+            constraintMsgsReqs.forEach(req => req.flush([]));
+
+            expect(app.themeService).toBe(mockThemeService);
+        });
+
+        it('should render palette icon button for theme picker', () => {
+            const fixture = TestBed.createComponent(AppComponent);
+            fixture.detectChanges();
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            const paletteButton = compiled.querySelector('button[aria-label="Change theme"]');
+
+            expect(paletteButton).toBeTruthy();
+            // Old theme dropdown should no longer exist
+            expect(compiled.querySelectorAll('.theme-controller').length).toBe(0);
+        });
+
+        it('should open settings modal on Colors tab when palette button is clicked', () => {
+            const fixture = TestBed.createComponent(AppComponent);
+            const app = fixture.componentInstance;
+            fixture.detectChanges();
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            const paletteButton = compiled.querySelector('button[aria-label="Change theme"]') as HTMLButtonElement;
+
+            paletteButton.click();
+
+            expect(app.showSettingsModal()).toBe(true);
+            expect(app.settingsInitialTab()).toBe('colors');
+        });
+
+        it('should default settingsInitialTab to preferences', () => {
+            const fixture = TestBed.createComponent(AppComponent);
+            const app = fixture.componentInstance;
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            expect(app.settingsInitialTab()).toBe('preferences');
+
+            // Profile menu "Preferences" keeps the default
+            app.openSettings();
+            expect(app.settingsInitialTab()).toBe('preferences');
+        });
+    });
+
+    /**
+     * Helper to create component with specific initial router URL
+     */
+    function createComponentWithUrl(url: string) {
+        const router = TestBed.inject(Router);
+        vi.spyOn(router, 'url', 'get').mockReturnValue(url);
+
+        const fixture = TestBed.createComponent(AppComponent);
+        const app = fixture.componentInstance;
+
+        // Handle HTTP requests
+        const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
+        schemaEntitiesReqs.forEach(req => req.flush([]));
+        const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
+        versionReqs.forEach(req => req.flush([
             { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
             { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
             { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
+        ]));
+        const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
+        dashboardReqs.forEach(req => req.flush([]));
+        const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
+        constraintMsgsReqs.forEach(req => req.flush([]));
 
-      expect(app.settingsInitialTab()).toBe('preferences');
+        return { fixture, app };
+    }
 
-      // Profile menu "Preferences" keeps the default
-      app.openSettings();
-      expect(app.settingsInitialTab()).toBe('preferences');
-    });
-  });
+    describe('isDashboardRoute detection', () => {
 
-  /**
-   * Helper to create component with specific initial router URL
-   */
-  function createComponentWithUrl(url: string) {
-    const router = TestBed.inject(Router);
-    spyOnProperty(router, 'url', 'get').and.returnValue(url);
+        it('should set isDashboardRoute to true when on home page', () => {
+            const { app } = createComponentWithUrl('/');
+            expect(app.isDashboardRoute()).toBe(true);
+        });
 
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
+        it('should set isDashboardRoute to true when on dashboard page', () => {
+            const { app } = createComponentWithUrl('/dashboard/42');
+            expect(app.isDashboardRoute()).toBe(true);
+        });
 
-    // Handle HTTP requests
-    const schemaEntitiesReqs = httpMock.match(req => req.url.includes('schema_entities'));
-    schemaEntitiesReqs.forEach(req => req.flush([]));
-    const versionReqs = httpMock.match(req => req.url.includes('schema_cache_versions'));
-    versionReqs.forEach(req => req.flush([
-      { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-      { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-    ]));
-    const dashboardReqs = httpMock.match(req => req.url.includes('rpc/get_dashboards'));
-    dashboardReqs.forEach(req => req.flush([]));
-    const constraintMsgsReqs = httpMock.match(req => req.url.includes('constraint_messages'));
-    constraintMsgsReqs.forEach(req => req.flush([]));
+        it('should set isDashboardRoute to false when on entity list page', () => {
+            const { app } = createComponentWithUrl('/view/issues');
+            expect(app.isDashboardRoute()).toBe(false);
+        });
 
-    return { fixture, app };
-  }
+        it('should set isDashboardRoute to false when on management page', () => {
+            const { app } = createComponentWithUrl('/entity-management');
+            expect(app.isDashboardRoute()).toBe(false);
+        });
 
-  describe('isDashboardRoute detection', () => {
+        it('should set isDashboardRoute to false when on detail page', () => {
+            const { app } = createComponentWithUrl('/view/issues/123');
+            expect(app.isDashboardRoute()).toBe(false);
+        });
 
-    it('should set isDashboardRoute to true when on home page', () => {
-      const { app } = createComponentWithUrl('/');
-      expect(app.isDashboardRoute()).toBe(true);
+        it('should set isDashboardRoute to false when on edit page', () => {
+            const { app } = createComponentWithUrl('/edit/issues/123');
+            expect(app.isDashboardRoute()).toBe(false);
+        });
     });
 
-    it('should set isDashboardRoute to true when on dashboard page', () => {
-      const { app } = createComponentWithUrl('/dashboard/42');
-      expect(app.isDashboardRoute()).toBe(true);
+    describe('isRouteActive', () => {
+        describe('Home route', () => {
+            it('should match home page', () => {
+                const { app } = createComponentWithUrl('/');
+                expect(app.isRouteActive('/')).toBe(true);
+            });
+
+            it('should match dashboard pages', () => {
+                const { app } = createComponentWithUrl('/dashboard/42');
+                expect(app.isRouteActive('/')).toBe(true);
+            });
+
+            it('should not match other routes', () => {
+                const { app } = createComponentWithUrl('/view/issues');
+                expect(app.isRouteActive('/')).toBe(false);
+            });
+        });
+
+        describe('Entity routes', () => {
+            it('should match list page (exact)', () => {
+                const { app } = createComponentWithUrl('/view/issues');
+                expect(app.isRouteActive('/view/issues')).toBe(true);
+            });
+
+            it('should match detail page (with ID)', () => {
+                const { app } = createComponentWithUrl('/view/issues/123');
+                expect(app.isRouteActive('/view/issues')).toBe(true);
+            });
+
+            it('should match create page for same entity', () => {
+                const { app } = createComponentWithUrl('/create/issues');
+                expect(app.isRouteActive('/view/issues')).toBe(true);
+            });
+
+            it('should match edit page for same entity', () => {
+                const { app } = createComponentWithUrl('/edit/issues/123');
+                expect(app.isRouteActive('/view/issues')).toBe(true);
+            });
+
+            it('should not match different entity', () => {
+                const { app } = createComponentWithUrl('/view/users');
+                expect(app.isRouteActive('/view/issues')).toBe(false);
+            });
+
+            it('should not match different entity create page', () => {
+                const { app } = createComponentWithUrl('/create/users');
+                expect(app.isRouteActive('/view/issues')).toBe(false);
+            });
+
+            it('should not match different entity edit page', () => {
+                const { app } = createComponentWithUrl('/edit/users/456');
+                expect(app.isRouteActive('/view/issues')).toBe(false);
+            });
+        });
+
+        describe('Admin routes', () => {
+            it('should match schema-erd page', () => {
+                const { app } = createComponentWithUrl('/schema-erd');
+                expect(app.isRouteActive('/schema-erd')).toBe(true);
+            });
+
+            it('should match entity-management page', () => {
+                const { app } = createComponentWithUrl('/entity-management');
+                expect(app.isRouteActive('/entity-management')).toBe(true);
+            });
+
+            it('should match property-management page', () => {
+                const { app } = createComponentWithUrl('/property-management');
+                expect(app.isRouteActive('/property-management')).toBe(true);
+            });
+
+            it('should match permissions page', () => {
+                const { app } = createComponentWithUrl('/permissions');
+                expect(app.isRouteActive('/permissions')).toBe(true);
+            });
+
+            it('should not match partial admin route names', () => {
+                const { app } = createComponentWithUrl('/permissions');
+                expect(app.isRouteActive('/entity-management')).toBe(false);
+            });
+        });
     });
 
-    it('should set isDashboardRoute to false when on entity list page', () => {
-      const { app } = createComponentWithUrl('/view/issues');
-      expect(app.isDashboardRoute()).toBe(false);
+    describe('Profile Menu Integration', () => {
+        it('should expose getKeycloakAccountUrl helper to template', () => {
+            const fixture = TestBed.createComponent(AppComponent);
+            const app = fixture.componentInstance;
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            expect(app.getKeycloakAccountUrl).toBeDefined();
+            expect(typeof app.getKeycloakAccountUrl).toBe('function');
+        });
+
+        it('should render Account Settings link when authenticated', () => {
+            // Set authenticated to true
+            mockAuthService.authenticated.mockReturnValue(true);
+
+            const fixture = TestBed.createComponent(AppComponent);
+            fixture.detectChanges();
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            const accountLink = compiled.querySelector('a[href*="/account"]') as HTMLAnchorElement;
+
+            expect(accountLink).toBeTruthy();
+            expect(accountLink.textContent).toContain('Account Settings');
+        });
+
+        it('should include referrer_uri parameter in Account Settings link', () => {
+            mockAuthService.authenticated.mockReturnValue(true);
+
+            const fixture = TestBed.createComponent(AppComponent);
+            fixture.detectChanges();
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            const accountLink = compiled.querySelector('a[href*="/account"]') as HTMLAnchorElement;
+
+            expect(accountLink).toBeTruthy();
+            expect(accountLink.href).toContain('referrer_uri=');
+        });
+
+        it('should NOT render Account Settings link when not authenticated', () => {
+            mockAuthService.authenticated.mockReturnValue(false);
+
+            const fixture = TestBed.createComponent(AppComponent);
+            fixture.detectChanges();
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            const accountLink = compiled.querySelector('a[href*="/account"]') as HTMLAnchorElement;
+
+            // Should not find Account Settings link for unauthenticated users
+            expect(accountLink).toBeNull();
+        });
+
+        it('should show Login link when not authenticated', () => {
+            mockAuthService.authenticated.mockReturnValue(false);
+
+            const fixture = TestBed.createComponent(AppComponent);
+            fixture.detectChanges();
+
+            // Handle HTTP requests
+            const allReqs = httpMock.match(() => true);
+            allReqs.forEach(req => {
+                if (req.request.url.includes('schema_entities')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_properties')) {
+                    req.flush([]);
+                }
+                else if (req.request.url.includes('schema_cache_versions')) {
+                    req.flush([
+                        { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
+                        { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
+                    ]);
+                }
+                else if (req.request.url.includes('rpc/get_dashboards')) {
+                    req.flush([]);
+                }
+            });
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            // Look for the dropdown menu content (login is a pure-action <button>)
+            const menuItems = compiled.querySelectorAll('.menu a, .menu button');
+            const loginLink = Array.from(menuItems).find(link => link.textContent?.includes('Log In'));
+
+            expect(loginLink).toBeTruthy();
+        });
     });
-
-    it('should set isDashboardRoute to false when on management page', () => {
-      const { app } = createComponentWithUrl('/entity-management');
-      expect(app.isDashboardRoute()).toBe(false);
-    });
-
-    it('should set isDashboardRoute to false when on detail page', () => {
-      const { app } = createComponentWithUrl('/view/issues/123');
-      expect(app.isDashboardRoute()).toBe(false);
-    });
-
-    it('should set isDashboardRoute to false when on edit page', () => {
-      const { app } = createComponentWithUrl('/edit/issues/123');
-      expect(app.isDashboardRoute()).toBe(false);
-    });
-  });
-
-  describe('isRouteActive', () => {
-    describe('Home route', () => {
-      it('should match home page', () => {
-        const { app } = createComponentWithUrl('/');
-        expect(app.isRouteActive('/')).toBe(true);
-      });
-
-      it('should match dashboard pages', () => {
-        const { app } = createComponentWithUrl('/dashboard/42');
-        expect(app.isRouteActive('/')).toBe(true);
-      });
-
-      it('should not match other routes', () => {
-        const { app } = createComponentWithUrl('/view/issues');
-        expect(app.isRouteActive('/')).toBe(false);
-      });
-    });
-
-    describe('Entity routes', () => {
-      it('should match list page (exact)', () => {
-        const { app } = createComponentWithUrl('/view/issues');
-        expect(app.isRouteActive('/view/issues')).toBe(true);
-      });
-
-      it('should match detail page (with ID)', () => {
-        const { app } = createComponentWithUrl('/view/issues/123');
-        expect(app.isRouteActive('/view/issues')).toBe(true);
-      });
-
-      it('should match create page for same entity', () => {
-        const { app } = createComponentWithUrl('/create/issues');
-        expect(app.isRouteActive('/view/issues')).toBe(true);
-      });
-
-      it('should match edit page for same entity', () => {
-        const { app } = createComponentWithUrl('/edit/issues/123');
-        expect(app.isRouteActive('/view/issues')).toBe(true);
-      });
-
-      it('should not match different entity', () => {
-        const { app } = createComponentWithUrl('/view/users');
-        expect(app.isRouteActive('/view/issues')).toBe(false);
-      });
-
-      it('should not match different entity create page', () => {
-        const { app } = createComponentWithUrl('/create/users');
-        expect(app.isRouteActive('/view/issues')).toBe(false);
-      });
-
-      it('should not match different entity edit page', () => {
-        const { app } = createComponentWithUrl('/edit/users/456');
-        expect(app.isRouteActive('/view/issues')).toBe(false);
-      });
-    });
-
-    describe('Admin routes', () => {
-      it('should match schema-erd page', () => {
-        const { app } = createComponentWithUrl('/schema-erd');
-        expect(app.isRouteActive('/schema-erd')).toBe(true);
-      });
-
-      it('should match entity-management page', () => {
-        const { app } = createComponentWithUrl('/entity-management');
-        expect(app.isRouteActive('/entity-management')).toBe(true);
-      });
-
-      it('should match property-management page', () => {
-        const { app } = createComponentWithUrl('/property-management');
-        expect(app.isRouteActive('/property-management')).toBe(true);
-      });
-
-      it('should match permissions page', () => {
-        const { app } = createComponentWithUrl('/permissions');
-        expect(app.isRouteActive('/permissions')).toBe(true);
-      });
-
-      it('should not match partial admin route names', () => {
-        const { app } = createComponentWithUrl('/permissions');
-        expect(app.isRouteActive('/entity-management')).toBe(false);
-      });
-    });
-  });
-
-  describe('Profile Menu Integration', () => {
-    it('should expose getKeycloakAccountUrl helper to template', () => {
-      const fixture = TestBed.createComponent(AppComponent);
-      const app = fixture.componentInstance;
-
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
-            { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
-
-      expect(app.getKeycloakAccountUrl).toBeDefined();
-      expect(typeof app.getKeycloakAccountUrl).toBe('function');
-    });
-
-    it('should render Account Settings link when authenticated', () => {
-      // Set authenticated to true
-      mockAuthService.authenticated.and.returnValue(true);
-
-      const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
-
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
-            { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const accountLink = compiled.querySelector('a[href*="/account"]') as HTMLAnchorElement;
-
-      expect(accountLink).toBeTruthy();
-      expect(accountLink.textContent).toContain('Account Settings');
-    });
-
-    it('should include referrer_uri parameter in Account Settings link', () => {
-      mockAuthService.authenticated.and.returnValue(true);
-
-      const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
-
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
-            { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const accountLink = compiled.querySelector('a[href*="/account"]') as HTMLAnchorElement;
-
-      expect(accountLink).toBeTruthy();
-      expect(accountLink.href).toContain('referrer_uri=');
-    });
-
-    it('should NOT render Account Settings link when not authenticated', () => {
-      mockAuthService.authenticated.and.returnValue(false);
-
-      const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
-
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
-            { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const accountLink = compiled.querySelector('a[href*="/account"]') as HTMLAnchorElement;
-
-      // Should not find Account Settings link for unauthenticated users
-      expect(accountLink).toBeNull();
-    });
-
-    it('should show Login link when not authenticated', () => {
-      mockAuthService.authenticated.and.returnValue(false);
-
-      const fixture = TestBed.createComponent(AppComponent);
-      fixture.detectChanges();
-
-      // Handle HTTP requests
-      const allReqs = httpMock.match(() => true);
-      allReqs.forEach(req => {
-        if (req.request.url.includes('schema_entities')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_properties')) {
-          req.flush([]);
-        } else if (req.request.url.includes('schema_cache_versions')) {
-          req.flush([
-            { cache_name: 'entities', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'properties', version: '2025-01-01T00:00:00Z' },
-            { cache_name: 'constraint_messages', version: '2025-01-01T00:00:00Z' }
-          ]);
-        } else if (req.request.url.includes('rpc/get_dashboards')) {
-          req.flush([]);
-        }
-      });
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      // Look for the dropdown menu content (login is a pure-action <button>)
-      const menuItems = compiled.querySelectorAll('.menu a, .menu button');
-      const loginLink = Array.from(menuItems).find(link => link.textContent?.includes('Log In'));
-
-      expect(loginLink).toBeTruthy();
-    });
-  });
 });

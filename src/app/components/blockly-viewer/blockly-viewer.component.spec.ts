@@ -14,70 +14,72 @@ import { BlocklyViewerComponent } from './blockly-viewer.component';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
 
 describe('BlocklyViewerComponent', () => {
-  let component: BlocklyViewerComponent;
-  let fixture: ComponentFixture<BlocklyViewerComponent>;
-  let mockTransformer: jasmine.SpyObj<SqlBlockTransformerService>;
+    let component: BlocklyViewerComponent;
+    let fixture: ComponentFixture<BlocklyViewerComponent>;
+    let mockTransformer: any;
 
-  beforeEach(async () => {
-    mockTransformer = jasmine.createSpyObj('SqlBlockTransformerService', ['toBlocklyWorkspace']);
-    mockTransformer.toBlocklyWorkspace.and.resolveTo({
-      blocks: { languageVersion: 0, blocks: [] }
+    beforeEach(async () => {
+        mockTransformer = {
+            toBlocklyWorkspace: vi.fn().mockName("SqlBlockTransformerService.toBlocklyWorkspace")
+        };
+        mockTransformer.toBlocklyWorkspace.mockResolvedValue({
+            blocks: { languageVersion: 0, blocks: [] }
+        });
+
+        await TestBed.configureTestingModule({
+            imports: [BlocklyViewerComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                { provide: SqlBlockTransformerService, useValue: mockTransformer }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(BlocklyViewerComponent);
+        component = fixture.componentInstance;
     });
 
-    await TestBed.configureTestingModule({
-      imports: [BlocklyViewerComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: SqlBlockTransformerService, useValue: mockTransformer }
-      ]
-    }).compileComponents();
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-    fixture = TestBed.createComponent(BlocklyViewerComponent);
-    component = fixture.componentInstance;
-  });
+    it('should show loading spinner initially', () => {
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges();
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+        const spinner = fixture.debugElement.query(By.css('.loading-spinner'));
+        expect(spinner).toBeTruthy();
+    });
 
-  it('should show loading spinner initially', () => {
-    fixture.componentRef.setInput('sourceCode', 'SELECT 1');
-    fixture.detectChanges();
+    it('should default to loading state', () => {
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges();
 
-    const spinner = fixture.debugElement.query(By.css('.loading-spinner'));
-    expect(spinner).toBeTruthy();
-  });
+        expect(component.loading()).toBe(true);
+        expect(component.error()).toBe(false);
+    });
 
-  it('should default to loading state', () => {
-    fixture.componentRef.setInput('sourceCode', 'SELECT 1');
-    fixture.detectChanges();
+    it('should have default workspace height of 400', () => {
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges();
 
-    expect(component.loading()).toBeTrue();
-    expect(component.error()).toBeFalse();
-  });
+        expect(component.workspaceHeight()).toBe(400);
+    });
 
-  it('should have default workspace height of 400', () => {
-    fixture.componentRef.setInput('sourceCode', 'SELECT 1');
-    fixture.detectChanges();
+    it('should accept optional objectType input', () => {
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.componentRef.setInput('objectType', 'function');
+        fixture.detectChanges();
 
-    expect(component.workspaceHeight()).toBe(400);
-  });
+        expect(component.objectType()).toBe('function');
+    });
 
-  it('should accept optional objectType input', () => {
-    fixture.componentRef.setInput('sourceCode', 'SELECT 1');
-    fixture.componentRef.setInput('objectType', 'function');
-    fixture.detectChanges();
+    it('should have blockly container with border styling', () => {
+        fixture.componentRef.setInput('sourceCode', 'SELECT 1');
+        fixture.detectChanges();
 
-    expect(component.objectType()).toBe('function');
-  });
-
-  it('should have blockly container with border styling', () => {
-    fixture.componentRef.setInput('sourceCode', 'SELECT 1');
-    fixture.detectChanges();
-
-    const container = fixture.debugElement.query(By.css('.blockly-container'));
-    expect(container).toBeTruthy();
-    expect(container.nativeElement.classList.contains('border')).toBeTrue();
-    expect(container.nativeElement.classList.contains('border-base-300')).toBeTrue();
-  });
+        const container = fixture.debugElement.query(By.css('.blockly-container'));
+        expect(container).toBeTruthy();
+        expect(container.nativeElement.classList.contains('border')).toBe(true);
+        expect(container.nativeElement.classList.contains('border-base-300')).toBe(true);
+    });
 });

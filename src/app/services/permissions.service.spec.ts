@@ -24,416 +24,416 @@ import { PermissionsService } from './permissions.service';
 import { SchemaService } from './schema.service';
 
 describe('PermissionsService', () => {
-  let service: PermissionsService;
-  let httpMock: HttpTestingController;
-  const testPostgrestUrl = 'http://test-api.example.com/';
+    let service: PermissionsService;
+    let httpMock: HttpTestingController;
+    const testPostgrestUrl = 'http://test-api.example.com/';
 
-  beforeEach(() => {
-    // Mock runtime configuration
-    (window as any).civicOsConfig = {
-      postgrestUrl: testPostgrestUrl
-    };
+    beforeEach(() => {
+        // Mock runtime configuration
+        (window as any).civicOsConfig = {
+            postgrestUrl: testPostgrestUrl
+        };
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr()),
-        provideHttpClientTesting(),
-        PermissionsService,
-        {
-          provide: SchemaService,
-          useValue: {
-            getEntities: () => of([
-              { table_name: 'issues', display_name: 'Issues' },
-              { table_name: 'users', display_name: 'Users' }
-            ])
-          }
-        }
-      ]
-    });
-    service = TestBed.inject(PermissionsService);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-    // Clean up mock
-    delete (window as any).civicOsConfig;
-  });
-
-  describe('Basic Service Setup', () => {
-    it('should be created', () => {
-      expect(service).toBeTruthy();
-    });
-  });
-
-  describe('getRoles()', () => {
-    it('should call get_roles RPC function', (done) => {
-      const mockRoles = [
-        { id: 1, display_name: 'admin', description: 'Administrator', role_key: 'admin' },
-        { id: 2, display_name: 'user', description: 'Regular user', role_key: 'user' }
-      ];
-
-      service.getRoles().subscribe(roles => {
-        expect(roles).toEqual(mockRoles);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_roles');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
-      req.flush(mockRoles);
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
+                PermissionsService,
+                {
+                    provide: SchemaService,
+                    useValue: {
+                        getEntities: () => of([
+                            { table_name: 'issues', display_name: 'Issues' },
+                            { table_name: 'users', display_name: 'Users' }
+                        ])
+                    }
+                }
+            ]
+        });
+        service = TestBed.inject(PermissionsService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
-    it('should return empty array on error', (done) => {
-      service.getRoles().subscribe(roles => {
-        expect(roles).toEqual([]);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_roles');
-      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
-    });
-  });
-
-  describe('getTables()', () => {
-    it('should get tables from schema service', (done) => {
-      service.getTables().subscribe(tables => {
-        expect(tables).toEqual(['issues', 'users']);
-        done();
-      });
-    });
-  });
-
-  describe('getRolePermissions()', () => {
-    it('should call get_role_permissions with role ID', (done) => {
-      const mockPermissions = [
-        { role_id: 1, role_name: 'admin', table_name: 'issues', permission_type: 'read', has_permission: 't' },
-        { role_id: 1, role_name: 'admin', table_name: 'issues', permission_type: 'create', has_permission: 't' }
-      ];
-
-      service.getRolePermissions(1).subscribe(permissions => {
-        expect(permissions.length).toBe(2);
-        expect(permissions[0].has_permission).toBe(true); // Converted from 't'
-        expect(permissions[1].has_permission).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
-      expect(req.request.body).toEqual({ p_role_id: 1 });
-      req.flush(mockPermissions);
+    afterEach(() => {
+        httpMock.verify();
+        // Clean up mock
+        delete (window as any).civicOsConfig;
     });
 
-    it('should convert PostgreSQL boolean strings to JavaScript booleans', (done) => {
-      const mockPermissions = [
-        { role_id: 1, role_name: 'user', table_name: 'issues', permission_type: 'read', has_permission: 't' },
-        { role_id: 1, role_name: 'user', table_name: 'issues', permission_type: 'create', has_permission: 'f' }
-      ];
-
-      service.getRolePermissions(1).subscribe(permissions => {
-        expect(permissions[0].has_permission).toBe(true);
-        expect(permissions[1].has_permission).toBe(false);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
-      req.flush(mockPermissions);
+    describe('Basic Service Setup', () => {
+        it('should be created', () => {
+            expect(service).toBeTruthy();
+        });
     });
 
-    it('should return empty array on error', (done) => {
-      service.getRolePermissions(1).subscribe(permissions => {
-        expect(permissions).toEqual([]);
-        done();
-      });
+    describe('getRoles()', () => {
+        it('should call get_roles RPC function', async () => {
+            const mockRoles = [
+                { id: 1, display_name: 'admin', description: 'Administrator', role_key: 'admin' },
+                { id: 2, display_name: 'user', description: 'Regular user', role_key: 'user' }
+            ];
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
-      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
-    });
-  });
+            service.getRoles().subscribe(roles => {
+                expect(roles).toEqual(mockRoles);
+                ;
+            });
 
-  describe('setRolePermission()', () => {
-    it('should call set_role_permission RPC function', (done) => {
-      service.setRolePermission(1, 'issues', 'read', true).subscribe(response => {
-        expect(response.success).toBe(true);
-        done();
-      });
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_roles');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({});
+            req.flush(mockRoles);
+        });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({
-        p_role_id: 1,
-        p_table_name: 'issues',
-        p_permission: 'read',
-        p_enabled: true
-      });
-      req.flush({});
-    });
+        it('should return empty array on error', async () => {
+            service.getRoles().subscribe(roles => {
+                expect(roles).toEqual([]);
+                ;
+            });
 
-    it('should handle API error responses', (done) => {
-      const errorResponse = { success: false, error: 'Permission not found' };
-
-      service.setRolePermission(1, 'issues', 'invalid', true).subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Permission not found');
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
-      req.flush(errorResponse);
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_roles');
+            req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+        });
     });
 
-    it('should handle HTTP errors', (done) => {
-      service.setRolePermission(1, 'issues', 'read', true).subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Failed to update permission');
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
-      req.flush({ message: 'Error' }, { status: 403, statusText: 'Forbidden' });
-    });
-  });
-
-  describe('isAdmin()', () => {
-    it('should call is_admin RPC function', (done) => {
-      service.isAdmin().subscribe(isAdmin => {
-        expect(isAdmin).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
-      req.flush(true);
+    describe('getTables()', () => {
+        it('should get tables from schema service', async () => {
+            service.getTables().subscribe(tables => {
+                expect(tables).toEqual(['issues', 'users']);
+                ;
+            });
+        });
     });
 
-    it('should return false on error', (done) => {
-      service.isAdmin().subscribe(isAdmin => {
-        expect(isAdmin).toBe(false);
-        done();
-      });
+    describe('getRolePermissions()', () => {
+        it('should call get_role_permissions with role ID', async () => {
+            const mockPermissions = [
+                { role_id: 1, role_name: 'admin', table_name: 'issues', permission_type: 'read', has_permission: 't' },
+                { role_id: 1, role_name: 'admin', table_name: 'issues', permission_type: 'create', has_permission: 't' }
+            ];
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
-      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
-    });
-  });
+            service.getRolePermissions(1).subscribe(permissions => {
+                expect(permissions.length).toBe(2);
+                expect(permissions[0].has_permission).toBe(true); // Converted from 't'
+                expect(permissions[1].has_permission).toBe(true);
+                ;
+            });
 
-  describe('createRole()', () => {
-    it('should call create_role RPC function with role name and description', (done) => {
-      const responseBody = { success: true, role_id: 5 };
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
+            expect(req.request.body).toEqual({ p_role_id: 1 });
+            req.flush(mockPermissions);
+        });
 
-      service.createRole('moderator', 'Moderates content').subscribe(response => {
-        expect(response.success).toBe(true);
-        expect(response.roleId).toBe(5);
-        done();
-      });
+        it('should convert PostgreSQL boolean strings to JavaScript booleans', async () => {
+            const mockPermissions = [
+                { role_id: 1, role_name: 'user', table_name: 'issues', permission_type: 'read', has_permission: 't' },
+                { role_id: 1, role_name: 'user', table_name: 'issues', permission_type: 'create', has_permission: 'f' }
+            ];
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({
-        p_display_name: 'moderator',
-        p_description: 'Moderates content'
-      });
-      req.flush(responseBody);
-    });
+            service.getRolePermissions(1).subscribe(permissions => {
+                expect(permissions[0].has_permission).toBe(true);
+                expect(permissions[1].has_permission).toBe(false);
+                ;
+            });
 
-    it('should handle role creation without description', (done) => {
-      const responseBody = { success: true, role_id: 6 };
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
+            req.flush(mockPermissions);
+        });
 
-      service.createRole('viewer').subscribe(response => {
-        expect(response.success).toBe(true);
-        expect(response.roleId).toBe(6);
-        done();
-      });
+        it('should return empty array on error', async () => {
+            service.getRolePermissions(1).subscribe(permissions => {
+                expect(permissions).toEqual([]);
+                ;
+            });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      expect(req.request.body).toEqual({
-        p_display_name: 'viewer',
-        p_description: null
-      });
-      req.flush(responseBody);
-    });
-
-    it('should handle duplicate role name error', (done) => {
-      const errorResponse = { success: false, error: 'Role with this name already exists' };
-
-      service.createRole('admin').subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Role with this name already exists');
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      req.flush(errorResponse);
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
+            req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+        });
     });
 
-    it('should handle empty role name error', (done) => {
-      const errorResponse = { success: false, error: 'Role name cannot be empty' };
+    describe('setRolePermission()', () => {
+        it('should call set_role_permission RPC function', async () => {
+            service.setRolePermission(1, 'issues', 'read', true).subscribe(response => {
+                expect(response.success).toBe(true);
+                ;
+            });
 
-      service.createRole('').subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Role name cannot be empty');
-        done();
-      });
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({
+                p_role_id: 1,
+                p_table_name: 'issues',
+                p_permission: 'read',
+                p_enabled: true
+            });
+            req.flush({});
+        });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      req.flush(errorResponse);
+        it('should handle API error responses', async () => {
+            const errorResponse = { success: false, error: 'Permission not found' };
+
+            service.setRolePermission(1, 'issues', 'invalid', true).subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Permission not found');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
+            req.flush(errorResponse);
+        });
+
+        it('should handle HTTP errors', async () => {
+            service.setRolePermission(1, 'issues', 'read', true).subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Failed to update permission');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
+            req.flush({ message: 'Error' }, { status: 403, statusText: 'Forbidden' });
+        });
     });
 
-    it('should handle admin permission error', (done) => {
-      const errorResponse = { success: false, error: 'Admin access required' };
+    describe('isAdmin()', () => {
+        it('should call is_admin RPC function', async () => {
+            service.isAdmin().subscribe(isAdmin => {
+                expect(isAdmin).toBe(true);
+                ;
+            });
 
-      service.createRole('hacker').subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Admin access required');
-        done();
-      });
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({});
+            req.flush(true);
+        });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      req.flush(errorResponse);
+        it('should return false on error', async () => {
+            service.isAdmin().subscribe(isAdmin => {
+                expect(isAdmin).toBe(false);
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
+            req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+        });
     });
 
-    it('should handle network errors', (done) => {
-      service.createRole('moderator').subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Failed to create role');
-        done();
-      });
+    describe('createRole()', () => {
+        it('should call create_role RPC function with role name and description', async () => {
+            const responseBody = { success: true, role_id: 5 };
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      req.error(new ProgressEvent('Network error'), { status: 0 });
+            service.createRole('moderator', 'Moderates content').subscribe(response => {
+                expect(response.success).toBe(true);
+                expect(response.roleId).toBe(5);
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({
+                p_display_name: 'moderator',
+                p_description: 'Moderates content'
+            });
+            req.flush(responseBody);
+        });
+
+        it('should handle role creation without description', async () => {
+            const responseBody = { success: true, role_id: 6 };
+
+            service.createRole('viewer').subscribe(response => {
+                expect(response.success).toBe(true);
+                expect(response.roleId).toBe(6);
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            expect(req.request.body).toEqual({
+                p_display_name: 'viewer',
+                p_description: null
+            });
+            req.flush(responseBody);
+        });
+
+        it('should handle duplicate role name error', async () => {
+            const errorResponse = { success: false, error: 'Role with this name already exists' };
+
+            service.createRole('admin').subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Role with this name already exists');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            req.flush(errorResponse);
+        });
+
+        it('should handle empty role name error', async () => {
+            const errorResponse = { success: false, error: 'Role name cannot be empty' };
+
+            service.createRole('').subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Role name cannot be empty');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            req.flush(errorResponse);
+        });
+
+        it('should handle admin permission error', async () => {
+            const errorResponse = { success: false, error: 'Admin access required' };
+
+            service.createRole('hacker').subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Admin access required');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            req.flush(errorResponse);
+        });
+
+        it('should handle network errors', async () => {
+            service.createRole('moderator').subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Failed to create role');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            req.error(new ProgressEvent('Network error'), { status: 0 });
+        });
+
+        it('should handle HTTP 500 errors', async () => {
+            service.createRole('moderator').subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Failed to create role');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
+            req.flush({ message: 'Internal server error' }, { status: 500, statusText: 'Internal Server Error' });
+        });
     });
 
-    it('should handle HTTP 500 errors', (done) => {
-      service.createRole('moderator').subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Failed to create role');
-        done();
-      });
+    describe('getRoleCanManage()', () => {
+        it('should POST to get_role_can_manage RPC with role ID', async () => {
+            const mockDelegations = [
+                { managed_role_id: 2, managed_role_name: 'editor', managed_role_key: 'editor' },
+                { managed_role_id: 3, managed_role_name: 'user', managed_role_key: 'user' }
+            ];
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
-      req.flush({ message: 'Internal server error' }, { status: 500, statusText: 'Internal Server Error' });
-    });
-  });
+            service.getRoleCanManage(1).subscribe(delegations => {
+                expect(delegations).toEqual(mockDelegations);
+                ;
+            });
 
-  describe('getRoleCanManage()', () => {
-    it('should POST to get_role_can_manage RPC with role ID', (done) => {
-      const mockDelegations = [
-        { managed_role_id: 2, managed_role_name: 'editor', managed_role_key: 'editor' },
-        { managed_role_id: 3, managed_role_name: 'user', managed_role_key: 'user' }
-      ];
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({ p_manager_role_id: 1 });
+            req.flush(mockDelegations);
+        });
 
-      service.getRoleCanManage(1).subscribe(delegations => {
-        expect(delegations).toEqual(mockDelegations);
-        done();
-      });
+        it('should return empty array on error', async () => {
+            service.getRoleCanManage(1).subscribe(delegations => {
+                expect(delegations).toEqual([]);
+                ;
+            });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ p_manager_role_id: 1 });
-      req.flush(mockDelegations);
-    });
-
-    it('should return empty array on error', (done) => {
-      service.getRoleCanManage(1).subscribe(delegations => {
-        expect(delegations).toEqual([]);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
-      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
-    });
-  });
-
-  describe('setRoleCanManage()', () => {
-    it('should POST correct params for enabling delegation', (done) => {
-      service.setRoleCanManage(1, 2, true).subscribe(response => {
-        expect(response.success).toBe(true);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({
-        p_manager_role_id: 1,
-        p_managed_role_id: 2,
-        p_enabled: true
-      });
-      req.flush({ success: true });
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
+            req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+        });
     });
 
-    it('should POST correct params for disabling delegation', (done) => {
-      service.setRoleCanManage(1, 2, false).subscribe(response => {
-        expect(response.success).toBe(true);
-        done();
-      });
+    describe('setRoleCanManage()', () => {
+        it('should POST correct params for enabling delegation', async () => {
+            service.setRoleCanManage(1, 2, true).subscribe(response => {
+                expect(response.success).toBe(true);
+                ;
+            });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
-      expect(req.request.body).toEqual({
-        p_manager_role_id: 1,
-        p_managed_role_id: 2,
-        p_enabled: false
-      });
-      req.flush({ success: true });
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({
+                p_manager_role_id: 1,
+                p_managed_role_id: 2,
+                p_enabled: true
+            });
+            req.flush({ success: true });
+        });
+
+        it('should POST correct params for disabling delegation', async () => {
+            service.setRoleCanManage(1, 2, false).subscribe(response => {
+                expect(response.success).toBe(true);
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+            expect(req.request.body).toEqual({
+                p_manager_role_id: 1,
+                p_managed_role_id: 2,
+                p_enabled: false
+            });
+            req.flush({ success: true });
+        });
+
+        it('should handle API error response', async () => {
+            service.setRoleCanManage(1, 2, true).subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Admin access required');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+            req.flush({ success: false, error: 'Admin access required' });
+        });
+
+        it('should handle HTTP error', async () => {
+            service.setRoleCanManage(1, 2, true).subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Failed to update role delegation');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
+            req.flush({ message: 'Error' }, { status: 403, statusText: 'Forbidden' });
+        });
     });
 
-    it('should handle API error response', (done) => {
-      service.setRoleCanManage(1, 2, true).subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Admin access required');
-        done();
-      });
+    describe('deleteRole()', () => {
+        it('should POST to delete_role RPC with role ID and return affected_users', async () => {
+            service.deleteRole(5).subscribe(response => {
+                expect(response.success).toBe(true);
+                expect(response.body?.affected_users).toBe(3);
+                ;
+            });
 
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
-      req.flush({ success: false, error: 'Admin access required' });
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({ p_role_id: 5 });
+            req.flush({ success: true, message: 'Role "volunteer" deleted', affected_users: 3 });
+        });
+
+        it('should handle built-in role error', async () => {
+            service.deleteRole(1).subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Cannot delete built-in role "user"');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
+            req.flush({ success: false, error: 'Cannot delete built-in role "user"' });
+        });
+
+        it('should handle HTTP error', async () => {
+            service.deleteRole(5).subscribe(response => {
+                expect(response.success).toBe(false);
+                expect(response.error?.humanMessage).toBe('Failed to delete role');
+                ;
+            });
+
+            const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
+            req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+        });
     });
-
-    it('should handle HTTP error', (done) => {
-      service.setRoleCanManage(1, 2, true).subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Failed to update role delegation');
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
-      req.flush({ message: 'Error' }, { status: 403, statusText: 'Forbidden' });
-    });
-  });
-
-  describe('deleteRole()', () => {
-    it('should POST to delete_role RPC with role ID and return affected_users', (done) => {
-      service.deleteRole(5).subscribe(response => {
-        expect(response.success).toBe(true);
-        expect(response.body?.affected_users).toBe(3);
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ p_role_id: 5 });
-      req.flush({ success: true, message: 'Role "volunteer" deleted', affected_users: 3 });
-    });
-
-    it('should handle built-in role error', (done) => {
-      service.deleteRole(1).subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Cannot delete built-in role "user"');
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
-      req.flush({ success: false, error: 'Cannot delete built-in role "user"' });
-    });
-
-    it('should handle HTTP error', (done) => {
-      service.deleteRole(5).subscribe(response => {
-        expect(response.success).toBe(false);
-        expect(response.error?.humanMessage).toBe('Failed to delete role');
-        done();
-      });
-
-      const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
-      req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
-    });
-  });
 });

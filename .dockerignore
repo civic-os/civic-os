@@ -41,7 +41,7 @@ examples/
 
 # Test files
 *.spec.ts
-karma.conf.js
+test-setup.ts
 
 # CI/CD
 .github/

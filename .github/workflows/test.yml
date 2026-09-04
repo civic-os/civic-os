@@ -25,8 +25,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Run unit tests
         run: npm run test:headless -- --code-coverage
@@ -354,8 +352,6 @@ jobs:
 
       - name: Install Angular dependencies
         run: npm ci
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Lint Angular code
         run: npx ng lint || true  # Don't fail CI on lint warnings for now

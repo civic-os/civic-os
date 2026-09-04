@@ -24,124 +24,124 @@ import { ImpersonationService } from '../services/impersonation.service';
 import { getPostgrestUrl } from '../config/runtime';
 
 describe('impersonationInterceptor', () => {
-  let http: HttpClient;
-  let httpMock: HttpTestingController;
-  let impersonationService: ImpersonationService;
+    let http: HttpClient;
+    let httpMock: HttpTestingController;
+    let impersonationService: ImpersonationService;
 
-  const STORAGE_KEY = 'civic_os_impersonation';
+    const STORAGE_KEY = 'civic_os_impersonation';
 
-  beforeEach(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    beforeEach(() => {
+        localStorage.removeItem(STORAGE_KEY);
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
-        provideHttpClientTesting(),
-        ImpersonationService
-      ]
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
+                provideHttpClientTesting(),
+                ImpersonationService
+            ]
+        });
+
+        http = TestBed.inject(HttpClient);
+        httpMock = TestBed.inject(HttpTestingController);
+        impersonationService = TestBed.inject(ImpersonationService);
     });
 
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
-    impersonationService = TestBed.inject(ImpersonationService);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-    localStorage.removeItem(STORAGE_KEY);
-  });
-
-  it('should not add header when impersonation is not active', () => {
-    http.get(`${getPostgrestUrl()}test`).subscribe();
-
-    const req = httpMock.expectOne(`${getPostgrestUrl()}test`);
-    expect(req.request.headers.has('X-Impersonate-Roles')).toBeFalse();
-    req.flush({});
-  });
-
-  it('should add header when impersonation is active', () => {
-    // Manually set localStorage to simulate active impersonation
-    // (avoiding the audit log HTTP call for simplicity)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      active: true,
-      roles: ['user', 'editor']
-    }));
-
-    // Create a fresh instance that reads from localStorage
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
-        provideHttpClientTesting(),
-        ImpersonationService
-      ]
+    afterEach(() => {
+        httpMock.verify();
+        localStorage.removeItem(STORAGE_KEY);
     });
 
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
+    it('should not add header when impersonation is not active', () => {
+        http.get(`${getPostgrestUrl()}test`).subscribe();
 
-    http.get(`${getPostgrestUrl()}schema_entities`).subscribe();
-
-    const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
-    expect(req.request.headers.get('X-Impersonate-Roles')).toBe('user,editor');
-    req.flush({});
-  });
-
-  it('should not add header for refresh_current_user RPC even when impersonating', () => {
-    // Set up active impersonation
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      active: true,
-      roles: ['user']
-    }));
-
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
-        provideHttpClientTesting(),
-        ImpersonationService
-      ]
+        const req = httpMock.expectOne(`${getPostgrestUrl()}test`);
+        expect(req.request.headers.has('X-Impersonate-Roles')).toBe(false);
+        req.flush({});
     });
 
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
+    it('should add header when impersonation is active', () => {
+        // Manually set localStorage to simulate active impersonation
+        // (avoiding the audit log HTTP call for simplicity)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            active: true,
+            roles: ['user', 'editor']
+        }));
 
-    // refresh_current_user must always use real JWT roles, never impersonated
-    http.post(`${getPostgrestUrl()}rpc/refresh_current_user`, {}).subscribe();
+        // Create a fresh instance that reads from localStorage
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
+                provideHttpClientTesting(),
+                ImpersonationService
+            ]
+        });
 
-    const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/refresh_current_user`);
-    expect(req.request.headers.has('X-Impersonate-Roles')).toBeFalse();
-    req.flush({});
-  });
+        http = TestBed.inject(HttpClient);
+        httpMock = TestBed.inject(HttpTestingController);
 
-  it('should not add header for non-PostgREST requests', () => {
-    // Set up active impersonation
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      active: true,
-      roles: ['user']
-    }));
+        http.get(`${getPostgrestUrl()}schema_entities`).subscribe();
 
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
-        provideHttpClientTesting(),
-        ImpersonationService
-      ]
+        const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
+        expect(req.request.headers.get('X-Impersonate-Roles')).toBe('user,editor');
+        req.flush({});
     });
 
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
+    it('should not add header for refresh_current_user RPC even when impersonating', () => {
+        // Set up active impersonation
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            active: true,
+            roles: ['user']
+        }));
 
-    // Request to a different URL (not PostgREST)
-    http.get('https://api.example.com/data').subscribe();
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
+                provideHttpClientTesting(),
+                ImpersonationService
+            ]
+        });
 
-    const req = httpMock.expectOne('https://api.example.com/data');
-    expect(req.request.headers.has('X-Impersonate-Roles')).toBeFalse();
-    req.flush({});
-  });
+        http = TestBed.inject(HttpClient);
+        httpMock = TestBed.inject(HttpTestingController);
+
+        // refresh_current_user must always use real JWT roles, never impersonated
+        http.post(`${getPostgrestUrl()}rpc/refresh_current_user`, {}).subscribe();
+
+        const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/refresh_current_user`);
+        expect(req.request.headers.has('X-Impersonate-Roles')).toBe(false);
+        req.flush({});
+    });
+
+    it('should not add header for non-PostgREST requests', () => {
+        // Set up active impersonation
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            active: true,
+            roles: ['user']
+        }));
+
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr(), withInterceptors([impersonationInterceptor])),
+                provideHttpClientTesting(),
+                ImpersonationService
+            ]
+        });
+
+        http = TestBed.inject(HttpClient);
+        httpMock = TestBed.inject(HttpTestingController);
+
+        // Request to a different URL (not PostgREST)
+        http.get('https://api.example.com/data').subscribe();
+
+        const req = httpMock.expectOne('https://api.example.com/data');
+        expect(req.request.headers.has('X-Impersonate-Roles')).toBe(false);
+        req.flush({});
+    });
 });

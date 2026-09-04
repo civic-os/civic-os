@@ -1,3 +1,4 @@
+import type { Mock } from "vitest";
 /**
  * Copyright (C) 2023-2026 Civic OS, L3C
  *
@@ -22,73 +23,77 @@ import { ThemeService } from '../../services/theme.service';
 import { TranslationService } from '../../services/translation.service';
 
 describe('ThemePickerComponent', () => {
-  let fixture: ComponentFixture<ThemePickerComponent>;
-  let component: ThemePickerComponent;
-  let themeSignal: WritableSignal<string>;
-  let mockThemeService: { theme: WritableSignal<string>; setTheme: jasmine.Spy };
-  let mockTranslationService: jasmine.SpyObj<TranslationService>;
-
-  beforeEach(async () => {
-    themeSignal = signal('corporate');
-    mockThemeService = {
-      theme: themeSignal,
-      setTheme: jasmine.createSpy('setTheme'),
+    let fixture: ComponentFixture<ThemePickerComponent>;
+    let component: ThemePickerComponent;
+    let themeSignal: WritableSignal<string>;
+    let mockThemeService: {
+        theme: WritableSignal<string>;
+        setTheme: Mock;
     };
-    mockTranslationService = jasmine.createSpyObj('TranslationService', ['get'], {
-      version: () => 1,
+    let mockTranslationService: any;
+
+    beforeEach(async () => {
+        themeSignal = signal('corporate');
+        mockThemeService = {
+            theme: themeSignal,
+            setTheme: vi.fn().mockName('setTheme'),
+        };
+        mockTranslationService = {
+            get: vi.fn().mockName("TranslationService.get"),
+            version: () => 1
+        };
+        mockTranslationService.get.mockImplementation((key: string) => key);
+
+        await TestBed.configureTestingModule({
+            imports: [ThemePickerComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                { provide: ThemeService, useValue: mockThemeService },
+                { provide: TranslationService, useValue: mockTranslationService },
+            ],
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(ThemePickerComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
-    mockTranslationService.get.and.callFake((key: string) => key);
 
-    await TestBed.configureTestingModule({
-      imports: [ThemePickerComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: ThemeService, useValue: mockThemeService },
-        { provide: TranslationService, useValue: mockTranslationService },
-      ],
-    }).compileComponents();
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-    fixture = TestBed.createComponent(ThemePickerComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    it('marks the currently selected theme button with aria-pressed="true"', () => {
+        const el = fixture.nativeElement as HTMLElement;
+        const pressed = Array.from(el.querySelectorAll('button[aria-pressed="true"]'));
+        // Exactly one button (the current theme) is pressed
+        expect(pressed.length).toBe(1);
+        expect(pressed[0].textContent).toContain('Corporate');
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('sets aria-pressed on non-selected theme buttons to false', () => {
+        const el = fixture.nativeElement as HTMLElement;
+        const unpressed = el.querySelectorAll('button[aria-pressed="false"]');
+        expect(unpressed.length).toBeGreaterThan(0);
+    });
 
-  it('marks the currently selected theme button with aria-pressed="true"', () => {
-    const el = fixture.nativeElement as HTMLElement;
-    const pressed = Array.from(el.querySelectorAll('button[aria-pressed="true"]'));
-    // Exactly one button (the current theme) is pressed
-    expect(pressed.length).toBe(1);
-    expect(pressed[0].textContent).toContain('Corporate');
-  });
+    it('shows a single reduced-contrast note in the All Colors section header', () => {
+        const el = fixture.nativeElement as HTMLElement;
+        const notes = Array.from(el.querySelectorAll('p'))
+            .filter(p => p.textContent?.trim() === 'a11y.reduced_contrast');
+        // One note as a section subtitle, not per-theme
+        expect(notes.length).toBe(1);
+    });
 
-  it('sets aria-pressed on non-selected theme buttons to false', () => {
-    const el = fixture.nativeElement as HTMLElement;
-    const unpressed = el.querySelectorAll('button[aria-pressed="false"]');
-    expect(unpressed.length).toBeGreaterThan(0);
-  });
+    it('does not label individual theme buttons with a reduced-contrast note', () => {
+        const el = fixture.nativeElement as HTMLElement;
+        // No note spans inside buttons
+        const buttonNotes = Array.from(el.querySelectorAll('button span'))
+            .filter(s => s.textContent?.trim() === 'a11y.reduced_contrast');
+        expect(buttonNotes.length).toBe(0);
+    });
 
-  it('shows a single reduced-contrast note in the All Colors section header', () => {
-    const el = fixture.nativeElement as HTMLElement;
-    const notes = Array.from(el.querySelectorAll('p'))
-      .filter(p => p.textContent?.trim() === 'a11y.reduced_contrast');
-    // One note as a section subtitle, not per-theme
-    expect(notes.length).toBe(1);
-  });
-
-  it('does not label individual theme buttons with a reduced-contrast note', () => {
-    const el = fixture.nativeElement as HTMLElement;
-    // No note spans inside buttons
-    const buttonNotes = Array.from(el.querySelectorAll('button span'))
-      .filter(s => s.textContent?.trim() === 'a11y.reduced_contrast');
-    expect(buttonNotes.length).toBe(0);
-  });
-
-  it('calls setTheme when a theme is selected', () => {
-    component.selectTheme('dracula');
-    expect(mockThemeService.setTheme).toHaveBeenCalledWith('dracula');
-  });
+    it('calls setTheme when a theme is selected', () => {
+        component.selectTheme('dracula');
+        expect(mockThemeService.setTheme).toHaveBeenCalledWith('dracula');
+    });
 });

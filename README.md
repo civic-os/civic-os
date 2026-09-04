@@ -11,11 +11,11 @@ A meta-application framework that automatically generates CRUD (Create, Read, Up
 - **Role-Based Access Control** - Flexible permission system with database-driven roles and table-level CRUD permissions
 - **Dynamic Schema Introspection** - Real-time ERD generation showing database relationships and structure
 - **Metadata-Driven UI** - Customize display names, descriptions, field ordering, and validation rules without code changes
-- **Modern Stack** - Angular 20 with Signals, Tailwind CSS, DaisyUI, and reactive patterns
+- **Modern Stack** - Angular 22 with Signals, Tailwind CSS, DaisyUI, and reactive patterns
 
 ## Technology Stack
 
-- **Frontend**: Angular 20 (with Signals and standalone components)
+- **Frontend**: Angular 22 (with Signals and standalone components)
 - **Backend**: PostgREST API (auto-generated REST API from PostgreSQL)
 - **Database**: PostgreSQL 17 with PostGIS 3.5
 - **Authentication**: Keycloak (OAuth2/OIDC)
@@ -65,7 +65,7 @@ npm start              # Start dev server (http://localhost:4200)
 npm run watch          # Build in watch mode
 
 # Testing
-npm test               # Run unit tests (watch mode)
+npm test               # Run unit tests (Vitest, watch mode)
 npm run test:headless                              # Run once and exit
 
 # Building

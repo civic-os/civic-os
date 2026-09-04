@@ -24,72 +24,76 @@ import { SwUpdate } from '@angular/service-worker';
 import { Subject } from 'rxjs';
 
 describe('PwaInstallBannerComponent', () => {
-  let component: PwaInstallBannerComponent;
-  let fixture: ComponentFixture<PwaInstallBannerComponent>;
-  let mockPwaService: jasmine.SpyObj<PwaService> & {
-    showInstallBanner: ReturnType<typeof signal>;
-    isOnline: ReturnType<typeof signal>;
-  };
+    let component: PwaInstallBannerComponent;
+    let fixture: ComponentFixture<PwaInstallBannerComponent>;
+    let mockPwaService: any & {
+        showInstallBanner: ReturnType<typeof signal>;
+        isOnline: ReturnType<typeof signal>;
+    };
 
-  beforeEach(async () => {
-    mockPwaService = {
-      ...jasmine.createSpyObj('PwaService', ['promptInstall', 'dismissInstallBanner']),
-      showInstallBanner: signal(false),
-      isOnline: signal(true)
-    } as any;
+    beforeEach(async () => {
+        mockPwaService = {
+            ...{
+                promptInstall: vi.fn().mockName("PwaService.promptInstall"),
+                dismissInstallBanner: vi.fn().mockName("PwaService.dismissInstallBanner")
+            },
+            showInstallBanner: signal(false),
+            isOnline: signal(true)
+        } as any;
 
-    const mockTranslation = jasmine.createSpyObj('TranslationService', ['get'], {
-      version: signal(0)
+        const mockTranslation = {
+            get: vi.fn().mockName("TranslationService.get"),
+            version: signal(0)
+        };
+        mockTranslation.get.mockImplementation((key: string) => key);
+
+        await TestBed.configureTestingModule({
+            imports: [PwaInstallBannerComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                { provide: PwaService, useValue: mockPwaService },
+                { provide: TranslationService, useValue: mockTranslation },
+                { provide: SwUpdate, useValue: { isEnabled: false, versionUpdates: new Subject() } }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(PwaInstallBannerComponent);
+        component = fixture.componentInstance;
     });
-    mockTranslation.get.and.callFake((key: string) => key);
 
-    await TestBed.configureTestingModule({
-      imports: [PwaInstallBannerComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: PwaService, useValue: mockPwaService },
-        { provide: TranslationService, useValue: mockTranslation },
-        { provide: SwUpdate, useValue: { isEnabled: false, versionUpdates: new Subject() } }
-      ]
-    }).compileComponents();
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-    fixture = TestBed.createComponent(PwaInstallBannerComponent);
-    component = fixture.componentInstance;
-  });
+    it('should not show banner when showInstallBanner is false', () => {
+        fixture.detectChanges();
+        const el = fixture.nativeElement.querySelector('.alert');
+        expect(el).toBeNull();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should show banner when showInstallBanner is true', () => {
+        mockPwaService.showInstallBanner.set(true);
+        fixture.detectChanges();
+        const el = fixture.nativeElement.querySelector('.alert');
+        expect(el).toBeTruthy();
+    });
 
-  it('should not show banner when showInstallBanner is false', () => {
-    fixture.detectChanges();
-    const el = fixture.nativeElement.querySelector('.alert');
-    expect(el).toBeNull();
-  });
+    it('should call promptInstall when install button clicked', async () => {
+        mockPwaService.showInstallBanner.set(true);
+        mockPwaService.promptInstall.mockResolvedValue('accepted');
+        fixture.detectChanges();
 
-  it('should show banner when showInstallBanner is true', () => {
-    mockPwaService.showInstallBanner.set(true);
-    fixture.detectChanges();
-    const el = fixture.nativeElement.querySelector('.alert');
-    expect(el).toBeTruthy();
-  });
+        const btn = fixture.nativeElement.querySelector('.btn-primary');
+        btn.click();
+        expect(mockPwaService.promptInstall).toHaveBeenCalled();
+    });
 
-  it('should call promptInstall when install button clicked', async () => {
-    mockPwaService.showInstallBanner.set(true);
-    mockPwaService.promptInstall.and.returnValue(Promise.resolve('accepted'));
-    fixture.detectChanges();
+    it('should call dismissInstallBanner when dismiss button clicked', () => {
+        mockPwaService.showInstallBanner.set(true);
+        fixture.detectChanges();
 
-    const btn = fixture.nativeElement.querySelector('.btn-primary');
-    btn.click();
-    expect(mockPwaService.promptInstall).toHaveBeenCalled();
-  });
-
-  it('should call dismissInstallBanner when dismiss button clicked', () => {
-    mockPwaService.showInstallBanner.set(true);
-    fixture.detectChanges();
-
-    const btn = fixture.nativeElement.querySelector('.btn-ghost');
-    btn.click();
-    expect(mockPwaService.dismissInstallBanner).toHaveBeenCalled();
-  });
+        const btn = fixture.nativeElement.querySelector('.btn-ghost');
+        btn.click();
+        expect(mockPwaService.dismissInstallBanner).toHaveBeenCalled();
+    });
 });

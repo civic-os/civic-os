@@ -34,561 +34,574 @@ import { EntityPropertyType } from '../../interfaces/entity';
 import Keycloak from 'keycloak-js';
 
 describe('CreatePage', () => {
-  let component: CreatePage;
-  let fixture: ComponentFixture<CreatePage>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockDataService: jasmine.SpyObj<DataService>;
-  let mockAnalyticsService: jasmine.SpyObj<AnalyticsService>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
-  let mockRouter: jasmine.SpyObj<Router>;
-  let mockKeycloak: jasmine.SpyObj<Keycloak>;
-  let mockNavigationService: jasmine.SpyObj<NavigationService>;
-  let routeParams: BehaviorSubject<any>;
-  let queryParams: BehaviorSubject<any>;
+    let component: CreatePage;
+    let fixture: ComponentFixture<CreatePage>;
+    let mockSchemaService: any;
+    let mockDataService: any;
+    let mockAnalyticsService: any;
+    let mockAuthService: any;
+    let mockRouter: any;
+    let mockKeycloak: any;
+    let mockNavigationService: any;
+    let routeParams: BehaviorSubject<any>;
+    let queryParams: BehaviorSubject<any>;
 
-  beforeEach(async () => {
-    routeParams = new BehaviorSubject({ entityKey: 'Issue' });
-    queryParams = new BehaviorSubject({});
+    beforeEach(async () => {
+        routeParams = new BehaviorSubject({ entityKey: 'Issue' });
+        queryParams = new BehaviorSubject({});
 
-    mockSchemaService = jasmine.createSpyObj('SchemaService', [
-      'getEntity',
-      'getPropsForCreate',
-      'getCreateRenderables'
-    ]);
-    mockDataService = jasmine.createSpyObj('DataService', ['createData', 'getData']);
-    mockAnalyticsService = jasmine.createSpyObj('AnalyticsService', ['trackEvent']);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['login'], {
-      authenticated: signal(false)
-    });
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockKeycloak = jasmine.createSpyObj('Keycloak', ['updateToken']);
-    mockNavigationService = jasmine.createSpyObj('NavigationService', ['goBack']);
+        mockSchemaService = {
+            getEntity: vi.fn().mockName("SchemaService.getEntity"),
+            getPropsForCreate: vi.fn().mockName("SchemaService.getPropsForCreate"),
+            getCreateRenderables: vi.fn().mockName("SchemaService.getCreateRenderables")
+        };
+        mockDataService = {
+            createData: vi.fn().mockName("DataService.createData"),
+            getData: vi.fn().mockName("DataService.getData")
+        };
+        mockAnalyticsService = {
+            trackEvent: vi.fn().mockName("AnalyticsService.trackEvent")
+        };
+        mockAuthService = {
+            login: vi.fn().mockName("AuthService.login"),
+            authenticated: signal(false)
+        };
+        mockRouter = {
+            navigate: vi.fn().mockName("Router.navigate")
+        };
+        mockKeycloak = {
+            updateToken: vi.fn().mockName("Keycloak.updateToken")
+        };
+        mockNavigationService = {
+            goBack: vi.fn().mockName("NavigationService.goBack")
+        };
 
-    // Setup getData to return empty array by default (for foreign key dropdowns)
-    mockDataService.getData.and.returnValue(of([]));
+        // Setup getData to return empty array by default (for foreign key dropdowns)
+        mockDataService.getData.mockReturnValue(of([]));
 
-    // Setup updateToken to return resolved promise by default (for form submission)
-    mockKeycloak.updateToken.and.returnValue(Promise.resolve(true));
+        // Setup updateToken to return resolved promise by default (for form submission)
+        mockKeycloak.updateToken.mockResolvedValue(true);
 
-    // Setup default for renderables (most tests use properties$ directly)
-    mockSchemaService.getCreateRenderables.and.returnValue(of([]));
+        // Setup default for renderables (most tests use properties$ directly)
+        mockSchemaService.getCreateRenderables.mockReturnValue(of([]));
 
-    await TestBed.configureTestingModule({
-      imports: [CreatePage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr()),
-        provideRouter([]),
-        { provide: ActivatedRoute, useValue: { params: routeParams.asObservable(), queryParams: queryParams.asObservable() } },
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: DataService, useValue: mockDataService },
-        { provide: AnalyticsService, useValue: mockAnalyticsService },
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: Router, useValue: mockRouter },
-        { provide: Keycloak, useValue: mockKeycloak },
-        { provide: NavigationService, useValue: mockNavigationService }
-      ]
-    })
-    .compileComponents();
+        await TestBed.configureTestingModule({
+            imports: [CreatePage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideRouter([]),
+                { provide: ActivatedRoute, useValue: { params: routeParams.asObservable(), queryParams: queryParams.asObservable() } },
+                { provide: SchemaService, useValue: mockSchemaService },
+                { provide: DataService, useValue: mockDataService },
+                { provide: AnalyticsService, useValue: mockAnalyticsService },
+                { provide: AuthService, useValue: mockAuthService },
+                { provide: Router, useValue: mockRouter },
+                { provide: Keycloak, useValue: mockKeycloak },
+                { provide: NavigationService, useValue: mockNavigationService }
+            ]
+        })
+            .compileComponents();
 
-    fixture = TestBed.createComponent(CreatePage);
-    component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('Observable Chain Integration', () => {
-    it('should load entity metadata from route params', (done) => {
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([]));
-
-      component.entity$.subscribe(entity => {
-        expect(entity).toBeDefined();
-        expect(entity?.table_name).toBe('Issue');
-        expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-        done();
-      });
+        fixture = TestBed.createComponent(CreatePage);
+        component = fixture.componentInstance;
     });
 
-    it('should store entityKey from route params', (done) => {
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([]));
-
-      component.entity$.subscribe(() => {
-        expect(component.entityKey).toBe('Issue');
-        done();
-      });
+    it('should create', () => {
+        expect(component).toBeTruthy();
     });
 
-    it('should fetch properties for create form', (done) => {
-      const mockProps = [
-        MOCK_PROPERTIES.textShort,
-        MOCK_PROPERTIES.foreignKey
-      ];
+    describe('Observable Chain Integration', () => {
+        it('should load entity metadata from route params', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([]));
 
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of(mockProps));
+            component.entity$.subscribe(entity => {
+                expect(entity).toBeDefined();
+                expect(entity?.table_name).toBe('Issue');
+                expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
+                ;
+            });
+        });
 
-      component.properties$.subscribe(props => {
-        expect(props.length).toBe(2);
-        expect(mockSchemaService.getPropsForCreate).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-        done();
-      });
+        it('should store entityKey from route params', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([]));
+
+            component.entity$.subscribe(() => {
+                expect(component.entityKey).toBe('Issue');
+                ;
+            });
+        });
+
+        it('should fetch properties for create form', async () => {
+            const mockProps = [
+                MOCK_PROPERTIES.textShort,
+                MOCK_PROPERTIES.foreignKey
+            ];
+
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of(mockProps));
+
+            component.properties$.subscribe(props => {
+                expect(props.length).toBe(2);
+                expect(mockSchemaService.getPropsForCreate).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
+                ;
+            });
+        });
+
+        it('should return empty array when entity is undefined', async () => {
+            routeParams.next({});
+            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+
+            component.properties$.subscribe(props => {
+                expect(props).toEqual([]);
+                expect(mockSchemaService.getPropsForCreate).not.toHaveBeenCalled();
+                ;
+            });
+        });
     });
 
-    it('should return empty array when entity is undefined', (done) => {
-      routeParams.next({});
-      mockSchemaService.getEntity.and.returnValue(of(undefined));
+    describe('Form Generation', () => {
+        it('should create form with controls for each property', async () => {
+            const mockProps = [
+                MOCK_PROPERTIES.textShort,
+                MOCK_PROPERTIES.integer,
+                MOCK_PROPERTIES.boolean
+            ];
 
-      component.properties$.subscribe(props => {
-        expect(props).toEqual([]);
-        expect(mockSchemaService.getPropsForCreate).not.toHaveBeenCalled();
-        done();
-      });
-    });
-  });
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of(mockProps));
 
-  describe('Form Generation', () => {
-    it('should create form with controls for each property', (done) => {
-      const mockProps = [
-        MOCK_PROPERTIES.textShort,
-        MOCK_PROPERTIES.integer,
-        MOCK_PROPERTIES.boolean
-      ];
+            component.properties$.subscribe(() => {
+                expect(component.createForm).toBeDefined();
+                expect(component.createForm?.get('name')).toBeDefined();
+                expect(component.createForm?.get('count')).toBeDefined();
+                expect(component.createForm?.get('is_active')).toBeDefined();
+                ;
+            });
+        });
 
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of(mockProps));
+        it('should set default values for form controls', async () => {
+            const mockProps = [
+                MOCK_PROPERTIES.textShort,
+                MOCK_PROPERTIES.boolean
+            ];
 
-      component.properties$.subscribe(() => {
-        expect(component.createForm).toBeDefined();
-        expect(component.createForm?.get('name')).toBeDefined();
-        expect(component.createForm?.get('count')).toBeDefined();
-        expect(component.createForm?.get('is_active')).toBeDefined();
-        done();
-      });
-    });
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of(mockProps));
 
-    it('should set default values for form controls', (done) => {
-      const mockProps = [
-        MOCK_PROPERTIES.textShort,
-        MOCK_PROPERTIES.boolean
-      ];
+            component.properties$.subscribe(() => {
+                // Boolean should default to false
+                expect(component.createForm?.get('is_active')?.value).toBe(false);
+                // Other types default to null
+                expect(component.createForm?.get('name')?.value).toBeNull();
+                ;
+            });
+        });
 
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of(mockProps));
+        it('should add validators for required (non-nullable) fields', async () => {
+            const mockProps = [
+                createMockProperty({ ...MOCK_PROPERTIES.textShort, is_nullable: false }),
+                createMockProperty({ ...MOCK_PROPERTIES.integer, is_nullable: true })
+            ];
 
-      component.properties$.subscribe(() => {
-        // Boolean should default to false
-        expect(component.createForm?.get('is_active')?.value).toBe(false);
-        // Other types default to null
-        expect(component.createForm?.get('name')?.value).toBeNull();
-        done();
-      });
-    });
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of(mockProps));
 
-    it('should add validators for required (non-nullable) fields', (done) => {
-      const mockProps = [
-        createMockProperty({ ...MOCK_PROPERTIES.textShort, is_nullable: false }),
-        createMockProperty({ ...MOCK_PROPERTIES.integer, is_nullable: true })
-      ];
+            component.properties$.subscribe(() => {
+                const nameControl = component.createForm?.get('name');
+                const countControl = component.createForm?.get('count');
 
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of(mockProps));
+                // Required field should have validator
+                expect(nameControl?.hasError('required')).toBe(true);
 
-      component.properties$.subscribe(() => {
-        const nameControl = component.createForm?.get('name');
-        const countControl = component.createForm?.get('count');
-
-        // Required field should have validator
-        expect(nameControl?.hasError('required')).toBe(true);
-
-        // Optional field should not require validation
-        countControl?.setValue(null);
-        expect(countControl?.hasError('required')).toBe(false);
-        done();
-      });
-    });
-  });
-
-  describe('submitForm()', () => {
-    beforeEach(() => {
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
-
-      // Initialize component
-      fixture.detectChanges();
+                // Optional field should not require validation
+                countControl?.setValue(null);
+                expect(countControl?.hasError('required')).toBe(false);
+                ;
+            });
+        });
     });
 
-    it('should call createData with form values', (done) => {
-      mockDataService.createData.and.returnValue(of({ success: true, body: {} }));
+    describe('submitForm()', () => {
+        beforeEach(() => {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
 
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test Issue' });
-        component.submitForm({});
+            // Initialize component
+            fixture.detectChanges();
+        });
 
-        // Wait for async promise to resolve
-        setTimeout(() => {
-          expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
-          done();
-        }, 10);
-      });
+        it('should call createData with form values', async () => {
+            mockDataService.createData.mockReturnValue(of({ success: true, body: {} }));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test Issue' });
+                component.submitForm({});
+
+                // Wait for async promise to resolve
+                setTimeout(() => {
+                    expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
+                    ;
+                }, 10);
+            });
+        });
+
+        it('should show success modal on successful create', async () => {
+            mockDataService.createData.mockReturnValue(of({ success: true, body: { id: 1 } }));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test' });
+                component.submitForm({});
+
+                // Wait for async observable to complete
+                setTimeout(() => {
+                    expect(component.showSuccessModal()).toBe(true);
+                    expect(component.showErrorModal()).toBe(false);
+                    ;
+                }, 10);
+            });
+        });
+
+        it('should show error modal on failed create', async () => {
+            const error = {
+                httpCode: 400,
+                message: 'Database error',
+                details: 'Constraint violation',
+                hint: 'Check your input',
+                humanMessage: 'Could not create'
+            };
+            mockDataService.createData.mockReturnValue(of({ success: false, error }));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test' });
+                component.submitForm({});
+
+                // Wait for async observable to complete
+                setTimeout(() => {
+                    expect(component.showErrorModal()).toBe(true);
+                    expect(component.currentError()).toEqual(error);
+                    expect(component.showSuccessModal()).toBe(false);
+                    ;
+                }, 10);
+            });
+        });
+
+        it('should not submit when entityKey is undefined', () => {
+            component.entityKey = undefined;
+            component.createForm = undefined;
+
+            component.submitForm({});
+
+            expect(mockDataService.createData).not.toHaveBeenCalled();
+        });
+
+        it('should not submit when createForm is undefined', () => {
+            component.entityKey = 'Issue';
+            component.createForm = undefined;
+
+            component.submitForm({});
+
+            expect(mockDataService.createData).not.toHaveBeenCalled();
+        });
     });
 
-    it('should show success modal on successful create', (done) => {
-      mockDataService.createData.and.returnValue(of({ success: true, body: { id: 1 } }));
+    describe('Form Validation UX', () => {
+        beforeEach(() => {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([
+                createMockProperty({ ...MOCK_PROPERTIES.textShort, is_nullable: false })
+            ]));
 
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test' });
-        component.submitForm({});
+            fixture.detectChanges();
+        });
 
-        // Wait for async observable to complete
-        setTimeout(() => {
-          expect(component.showSuccessModal()).toBeTrue();
-          expect(component.showErrorModal()).toBeFalse();
-          done();
-        }, 10);
-      });
+        it('should not submit when form is invalid', async () => {
+            mockDataService.createData.mockReturnValue(of({ success: true, body: {} }));
+
+            component.properties$.subscribe(() => {
+                // Leave form empty (required field not filled)
+                component.submitForm({});
+
+                expect(mockDataService.createData).not.toHaveBeenCalled();
+                ;
+            });
+        });
+
+        it('should set showValidationError flag when submitting invalid form', async () => {
+            component.properties$.subscribe(() => {
+                expect(component.showValidationError).toBe(false);
+
+                // Submit invalid form
+                component.submitForm({});
+
+                expect(component.showValidationError).toBe(true);
+                ;
+            });
+        });
+
+        it('should mark all controls as touched when submitting invalid form', async () => {
+            component.properties$.subscribe(() => {
+                const nameControl = component.createForm?.get('name');
+                expect(nameControl?.touched).toBe(false);
+
+                // Submit invalid form
+                component.submitForm({});
+
+                expect(nameControl?.touched).toBe(true);
+                ;
+            });
+        });
+
+        it('should hide error banner when form becomes valid', async () => {
+            component.properties$.subscribe(() => {
+                // Submit invalid form to show error
+                component.submitForm({});
+                expect(component.showValidationError).toBe(true);
+
+                // Make form valid
+                component.createForm?.patchValue({ name: 'Valid Name' });
+
+                // Wait for statusChanges observable to trigger
+                setTimeout(() => {
+                    expect(component.showValidationError).toBe(false);
+                    ;
+                }, 50);
+            });
+        });
+
+        it('should call scrollToFirstError when form is invalid', async () => {
+            component.properties$.subscribe(() => {
+                vi.spyOn(component as any, 'scrollToFirstError').mockReturnValue(undefined);
+
+                // Submit invalid form
+                component.submitForm({});
+
+                expect((component as any).scrollToFirstError).toHaveBeenCalled();
+                ;
+            });
+        });
     });
 
-    it('should show error modal on failed create', (done) => {
-      const error = {
-        httpCode: 400,
-        message: 'Database error',
-        details: 'Constraint violation',
-        hint: 'Check your input',
-        humanMessage: 'Could not create'
-      };
-      mockDataService.createData.and.returnValue(of({ success: false, error }));
+    describe('goBack()', () => {
+        it('should delegate to NavigationService with fallback URL', () => {
+            component.entityKey = 'Issue';
+            component.goBack();
 
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test' });
-        component.submitForm({});
-
-        // Wait for async observable to complete
-        setTimeout(() => {
-          expect(component.showErrorModal()).toBeTrue();
-          expect(component.currentError()).toEqual(error);
-          expect(component.showSuccessModal()).toBeFalse();
-          done();
-        }, 10);
-      });
+            expect(mockNavigationService.goBack).toHaveBeenCalledWith('/view/Issue');
+        });
     });
 
-    it('should not submit when entityKey is undefined', () => {
-      component.entityKey = undefined;
-      component.createForm = undefined;
+    describe('navToList()', () => {
+        it('should navigate to current entity list with replaceUrl', () => {
+            component.entityKey = 'Issue';
+            component.navToList();
 
-      component.submitForm({});
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue'], { replaceUrl: true });
+        });
 
-      expect(mockDataService.createData).not.toHaveBeenCalled();
+        it('should navigate to specified entity list with replaceUrl', () => {
+            component.entityKey = 'Issue';
+            component.navToList('Status');
+
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Status'], { replaceUrl: true });
+        });
     });
 
-    it('should not submit when createForm is undefined', () => {
-      component.entityKey = 'Issue';
-      component.createForm = undefined;
+    describe('navToDetail()', () => {
+        it('should navigate with replaceUrl: true', () => {
+            component.entityKey = 'Issue';
+            (component as any).createdRecordId = 42;
+            component.navToDetail();
 
-      component.submitForm({});
-
-      expect(mockDataService.createData).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Form Validation UX', () => {
-    beforeEach(() => {
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([
-        createMockProperty({ ...MOCK_PROPERTIES.textShort, is_nullable: false })
-      ]));
-
-      fixture.detectChanges();
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue', 42], { replaceUrl: true });
+        });
     });
 
-    it('should not submit when form is invalid', (done) => {
-      mockDataService.createData.and.returnValue(of({ success: true, body: {} }));
+    describe('navToCreate()', () => {
+        beforeEach(() => {
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
+        });
 
-      component.properties$.subscribe(() => {
-        // Leave form empty (required field not filled)
-        component.submitForm({});
+        it('should close success modal, reset form with defaults, and navigate', async () => {
+            component.properties$.subscribe(() => {
+                component.showSuccessModal.set(true);
+                component.createForm?.patchValue({ name: 'Old Value' });
 
-        expect(mockDataService.createData).not.toHaveBeenCalled();
-        done();
-      });
+                component.navToCreate();
+
+                expect(component.showSuccessModal()).toBe(false);
+                expect(component.createForm?.get('name')?.value).toBeNull();
+                expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Issue']);
+                ;
+            });
+        });
+
+        it('should navigate to specified entity create', async () => {
+            component.properties$.subscribe(() => {
+                component.navToCreate('Status');
+
+                expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Status']);
+                ;
+            });
+        });
+
+        it('should reset boolean fields to false, not null', async () => {
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.boolean]));
+
+            component.properties$.subscribe(() => {
+                // Simulate user having filled out the form
+                component.createForm?.patchValue({ name: 'Test', is_active: true });
+
+                component.navToCreate();
+
+                expect(component.createForm?.get('is_active')?.value).toBe(false);
+                expect(component.createForm?.get('name')?.value).toBeNull();
+                ;
+            });
+        });
     });
 
-    it('should set showValidationError flag when submitting invalid form', (done) => {
-      component.properties$.subscribe(() => {
-        expect(component.showValidationError).toBe(false);
+    describe('Route Parameter Changes', () => {
+        it('should recreate form when entityKey changes', async () => {
+            let callCount = 0;
 
-        // Submit invalid form
-        component.submitForm({});
+            mockSchemaService.getEntity.mockImplementation((key: string) => {
+                if (key === 'Issue')
+                    return of(MOCK_ENTITIES.issue);
+                if (key === 'Status')
+                    return of(MOCK_ENTITIES.status);
+                return of(undefined);
+            });
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
 
-        expect(component.showValidationError).toBe(true);
-        done();
-      });
+            component.properties$.subscribe(() => {
+                callCount++;
+                if (callCount === 1) {
+                    expect(component.entityKey).toBe('Issue');
+                    expect(component.createForm).toBeDefined();
+
+                    // Trigger route change
+                    routeParams.next({ entityKey: 'Status' });
+                }
+                else if (callCount === 2) {
+                    expect(component.entityKey).toBe('Status');
+                    expect(component.createForm).toBeDefined();
+                    ;
+                }
+            });
+        });
     });
 
-    it('should mark all controls as touched when submitting invalid form', (done) => {
-      component.properties$.subscribe(() => {
-        const nameControl = component.createForm?.get('name');
-        expect(nameControl?.touched).toBe(false);
+    describe('Entity Description Tooltip', () => {
+        it('should display entity with description in template', async () => {
+            const entityWithDescription = { ...MOCK_ENTITIES.issue, description: 'Track system issues' };
+            mockSchemaService.getEntity.mockReturnValue(of(entityWithDescription));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
 
-        // Submit invalid form
-        component.submitForm({});
+            component.entity$.subscribe(entity => {
+                expect(entity?.description).toBe('Track system issues');
+                ;
+            });
+        });
 
-        expect(nameControl?.touched).toBe(true);
-        done();
-      });
+        it('should handle entities without description', async () => {
+            const entityWithoutDescription = { ...MOCK_ENTITIES.issue, description: null };
+            mockSchemaService.getEntity.mockReturnValue(of(entityWithoutDescription));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
+
+            component.entity$.subscribe(entity => {
+                expect(entity?.description).toBeNull();
+                ;
+            });
+        });
     });
 
-    it('should hide error banner when form becomes valid', (done) => {
-      component.properties$.subscribe(() => {
-        // Submit invalid form to show error
-        component.submitForm({});
-        expect(component.showValidationError).toBe(true);
+    describe('Token Refresh (Keycloak Integration)', () => {
+        let mockKeycloak: any;
 
-        // Make form valid
-        component.createForm?.patchValue({ name: 'Valid Name' });
+        beforeEach(() => {
+            mockKeycloak = {
+                updateToken: vi.fn().mockName("Keycloak.updateToken")
+            };
+            mockSchemaService.getEntity.mockReturnValue(of(MOCK_ENTITIES.issue));
+            mockSchemaService.getPropsForCreate.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
 
-        // Wait for statusChanges observable to trigger
-        setTimeout(() => {
-          expect(component.showValidationError).toBe(false);
-          done();
-        }, 50);
-      });
+            // Manually inject the mock Keycloak instance
+            (component as any).keycloak = mockKeycloak;
+
+            fixture.detectChanges();
+        });
+
+        it('should call updateToken before form submission', async () => {
+            mockKeycloak.updateToken.mockResolvedValue(true);
+            mockDataService.createData.mockReturnValue(of({ success: true, body: { id: 1 } }));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test Issue' });
+                component.submitForm({});
+
+                setTimeout(() => {
+                    expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
+                    expect(mockDataService.createData).toHaveBeenCalled();
+                    ;
+                }, 10);
+            });
+        });
+
+        it('should proceed with submission when token refresh succeeds', async () => {
+            mockKeycloak.updateToken.mockResolvedValue(true);
+            mockDataService.createData.mockReturnValue(of({ success: true, body: { id: 1 } }));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test Issue' });
+                component.submitForm({});
+
+                setTimeout(() => {
+                    expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
+                    expect(component.showSuccessModal()).toBe(true);
+                    expect(component.showErrorModal()).toBe(false);
+                    ;
+                }, 10);
+            });
+        });
+
+        it('should show 401 error modal when token refresh fails', async () => {
+            mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test Issue' });
+                component.submitForm({});
+
+                setTimeout(() => {
+                    expect(component.showErrorModal()).toBe(true);
+                    expect(component.currentError()).toEqual(expect.objectContaining({
+                        httpCode: 401,
+                        message: 'Session expired',
+                        humanMessage: 'Session Expired',
+                        hint: 'Your login session has expired. Please refresh the page to log in again.'
+                    }));
+                    expect(mockDataService.createData).not.toHaveBeenCalled();
+                    expect(component.showSuccessModal()).toBe(false);
+                    ;
+                }, 10);
+            });
+        });
+
+        it('should not call createData when token refresh fails', async () => {
+            mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
+
+            component.properties$.subscribe(() => {
+                component.createForm?.patchValue({ name: 'Test Issue' });
+                component.submitForm({});
+
+                setTimeout(() => {
+                    expect(mockDataService.createData).not.toHaveBeenCalled();
+                    ;
+                }, 10);
+            });
+        });
     });
-
-    it('should call scrollToFirstError when form is invalid', (done) => {
-      component.properties$.subscribe(() => {
-        spyOn<any>(component, 'scrollToFirstError');
-
-        // Submit invalid form
-        component.submitForm({});
-
-        expect((component as any).scrollToFirstError).toHaveBeenCalled();
-        done();
-      });
-    });
-  });
-
-  describe('goBack()', () => {
-    it('should delegate to NavigationService with fallback URL', () => {
-      component.entityKey = 'Issue';
-      component.goBack();
-
-      expect(mockNavigationService.goBack).toHaveBeenCalledWith('/view/Issue');
-    });
-  });
-
-  describe('navToList()', () => {
-    it('should navigate to current entity list with replaceUrl', () => {
-      component.entityKey = 'Issue';
-      component.navToList();
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue'], { replaceUrl: true });
-    });
-
-    it('should navigate to specified entity list with replaceUrl', () => {
-      component.entityKey = 'Issue';
-      component.navToList('Status');
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Status'], { replaceUrl: true });
-    });
-  });
-
-  describe('navToDetail()', () => {
-    it('should navigate with replaceUrl: true', () => {
-      component.entityKey = 'Issue';
-      (component as any).createdRecordId = 42;
-      component.navToDetail();
-
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['view', 'Issue', 42], { replaceUrl: true });
-    });
-  });
-
-  describe('navToCreate()', () => {
-    beforeEach(() => {
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
-    });
-
-    it('should close success modal, reset form with defaults, and navigate', (done) => {
-      component.properties$.subscribe(() => {
-        component.showSuccessModal.set(true);
-        component.createForm?.patchValue({ name: 'Old Value' });
-
-        component.navToCreate();
-
-        expect(component.showSuccessModal()).toBe(false);
-        expect(component.createForm?.get('name')?.value).toBeNull();
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Issue']);
-        done();
-      });
-    });
-
-    it('should navigate to specified entity create', (done) => {
-      component.properties$.subscribe(() => {
-        component.navToCreate('Status');
-
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Status']);
-        done();
-      });
-    });
-
-    it('should reset boolean fields to false, not null', (done) => {
-      mockSchemaService.getPropsForCreate.and.returnValue(
-        of([MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.boolean])
-      );
-
-      component.properties$.subscribe(() => {
-        // Simulate user having filled out the form
-        component.createForm?.patchValue({ name: 'Test', is_active: true });
-
-        component.navToCreate();
-
-        expect(component.createForm?.get('is_active')?.value).toBe(false);
-        expect(component.createForm?.get('name')?.value).toBeNull();
-        done();
-      });
-    });
-  });
-
-  describe('Route Parameter Changes', () => {
-    it('should recreate form when entityKey changes', (done) => {
-      let callCount = 0;
-
-      mockSchemaService.getEntity.and.callFake((key: string) => {
-        if (key === 'Issue') return of(MOCK_ENTITIES.issue);
-        if (key === 'Status') return of(MOCK_ENTITIES.status);
-        return of(undefined);
-      });
-      mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
-
-      component.properties$.subscribe(() => {
-        callCount++;
-        if (callCount === 1) {
-          expect(component.entityKey).toBe('Issue');
-          expect(component.createForm).toBeDefined();
-
-          // Trigger route change
-          routeParams.next({ entityKey: 'Status' });
-        } else if (callCount === 2) {
-          expect(component.entityKey).toBe('Status');
-          expect(component.createForm).toBeDefined();
-          done();
-        }
-      });
-    });
-  });
-
-  describe('Entity Description Tooltip', () => {
-    it('should display entity with description in template', (done) => {
-      const entityWithDescription = { ...MOCK_ENTITIES.issue, description: 'Track system issues' };
-      mockSchemaService.getEntity.and.returnValue(of(entityWithDescription));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
-
-      component.entity$.subscribe(entity => {
-        expect(entity?.description).toBe('Track system issues');
-        done();
-      });
-    });
-
-    it('should handle entities without description', (done) => {
-      const entityWithoutDescription = { ...MOCK_ENTITIES.issue, description: null };
-      mockSchemaService.getEntity.and.returnValue(of(entityWithoutDescription));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
-
-      component.entity$.subscribe(entity => {
-        expect(entity?.description).toBeNull();
-        done();
-      });
-    });
-  });
-
-  describe('Token Refresh (Keycloak Integration)', () => {
-    let mockKeycloak: jasmine.SpyObj<any>;
-
-    beforeEach(() => {
-      mockKeycloak = jasmine.createSpyObj('Keycloak', ['updateToken']);
-      mockSchemaService.getEntity.and.returnValue(of(MOCK_ENTITIES.issue));
-      mockSchemaService.getPropsForCreate.and.returnValue(of([MOCK_PROPERTIES.textShort]));
-
-      // Manually inject the mock Keycloak instance
-      (component as any).keycloak = mockKeycloak;
-
-      fixture.detectChanges();
-    });
-
-    it('should call updateToken before form submission', (done) => {
-      mockKeycloak.updateToken.and.returnValue(Promise.resolve(true));
-      mockDataService.createData.and.returnValue(of({ success: true, body: { id: 1 } }));
-
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test Issue' });
-        component.submitForm({});
-
-        setTimeout(() => {
-          expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
-          expect(mockDataService.createData).toHaveBeenCalled();
-          done();
-        }, 10);
-      });
-    });
-
-    it('should proceed with submission when token refresh succeeds', (done) => {
-      mockKeycloak.updateToken.and.returnValue(Promise.resolve(true));
-      mockDataService.createData.and.returnValue(of({ success: true, body: { id: 1 } }));
-
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test Issue' });
-        component.submitForm({});
-
-        setTimeout(() => {
-          expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
-          expect(component.showSuccessModal()).toBeTrue();
-          expect(component.showErrorModal()).toBeFalse();
-          done();
-        }, 10);
-      });
-    });
-
-    it('should show 401 error modal when token refresh fails', (done) => {
-      mockKeycloak.updateToken.and.returnValue(Promise.reject(new Error('Token refresh failed')));
-
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test Issue' });
-        component.submitForm({});
-
-        setTimeout(() => {
-          expect(component.showErrorModal()).toBeTrue();
-          expect(component.currentError()).toEqual(
-            jasmine.objectContaining({
-              httpCode: 401,
-              message: 'Session expired',
-              humanMessage: 'Session Expired',
-              hint: 'Your login session has expired. Please refresh the page to log in again.'
-            })
-          );
-          expect(mockDataService.createData).not.toHaveBeenCalled();
-          expect(component.showSuccessModal()).toBeFalse();
-          done();
-        }, 10);
-      });
-    });
-
-    it('should not call createData when token refresh fails', (done) => {
-      mockKeycloak.updateToken.and.returnValue(Promise.reject(new Error('Token refresh failed')));
-
-      component.properties$.subscribe(() => {
-        component.createForm?.patchValue({ name: 'Test Issue' });
-        component.submitForm({});
-
-        setTimeout(() => {
-          expect(mockDataService.createData).not.toHaveBeenCalled();
-          done();
-        }, 10);
-      });
-    });
-  });
 });

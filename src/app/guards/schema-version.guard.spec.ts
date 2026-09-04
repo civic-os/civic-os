@@ -13,178 +13,185 @@ import { SchemaService } from '../services/schema.service';
 import { ProfileService } from '../services/profile.service';
 
 describe('schemaVersionGuard', () => {
-  let mockVersionService: jasmine.SpyObj<VersionService>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockProfileService: jasmine.SpyObj<ProfileService>;
-  let mockRoute: ActivatedRouteSnapshot;
-  let mockState: RouterStateSnapshot;
+    let mockVersionService: any;
+    let mockSchemaService: any;
+    let mockProfileService: any;
+    let mockRoute: ActivatedRouteSnapshot;
+    let mockState: RouterStateSnapshot;
 
-  beforeEach(() => {
-    mockVersionService = jasmine.createSpyObj('VersionService', ['checkForUpdates']);
-    mockSchemaService = jasmine.createSpyObj('SchemaService', ['refreshEntitiesCache', 'refreshPropertiesCache']);
-    mockProfileService = jasmine.createSpyObj('ProfileService', ['invalidateCache']);
+    beforeEach(() => {
+        mockVersionService = {
+            checkForUpdates: vi.fn().mockName("VersionService.checkForUpdates")
+        };
+        mockSchemaService = {
+            refreshEntitiesCache: vi.fn().mockName("SchemaService.refreshEntitiesCache"),
+            refreshPropertiesCache: vi.fn().mockName("SchemaService.refreshPropertiesCache")
+        };
+        mockProfileService = {
+            invalidateCache: vi.fn().mockName("ProfileService.invalidateCache")
+        };
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: VersionService, useValue: mockVersionService },
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: ProfileService, useValue: mockProfileService }
-      ]
-    });
-
-    mockRoute = {} as ActivatedRouteSnapshot;
-    mockState = { url: '/test' } as RouterStateSnapshot;
-
-    // Spy on console.log
-    spyOn(console, 'log');
-  });
-
-  it('should allow navigation immediately when no changes detected', (done) => {
-    const noChanges: CacheUpdateCheck = {
-      entitiesNeedsRefresh: false,
-      propertiesNeedsRefresh: false,
-      constraintMessagesNeedsRefresh: false,
-      profileExtensionsNeedsRefresh: false,
-      hasChanges: false
-    };
-    mockVersionService.checkForUpdates.and.returnValue(of(noChanges));
-
-    TestBed.runInInjectionContext(() => {
-      const result$ = schemaVersionGuard(mockRoute, mockState);
-
-      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
-        (result$ as any).subscribe((result: boolean) => {
-          expect(result).toBe(true);
-          expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
-          expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
-          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-          expect(console.log).not.toHaveBeenCalled();
-          done();
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                { provide: VersionService, useValue: mockVersionService },
+                { provide: SchemaService, useValue: mockSchemaService },
+                { provide: ProfileService, useValue: mockProfileService }
+            ]
         });
-      }
+
+        mockRoute = {} as ActivatedRouteSnapshot;
+        mockState = { url: '/test' } as RouterStateSnapshot;
+
+        // Spy on console.log
+        vi.spyOn(console, 'log').mockReturnValue(undefined);
     });
-  });
 
-  it('should refresh entities cache when entities version changed', (done) => {
-    const entitiesChanged: CacheUpdateCheck = {
-      entitiesNeedsRefresh: true,
-      propertiesNeedsRefresh: false,
-      constraintMessagesNeedsRefresh: false,
-      profileExtensionsNeedsRefresh: false,
-      hasChanges: true
-    };
-    mockVersionService.checkForUpdates.and.returnValue(of(entitiesChanged));
+    it('should allow navigation immediately when no changes detected', async () => {
+        const noChanges: CacheUpdateCheck = {
+            entitiesNeedsRefresh: false,
+            propertiesNeedsRefresh: false,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            hasChanges: false
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(noChanges));
 
-    TestBed.runInInjectionContext(() => {
-      const result$ = schemaVersionGuard(mockRoute, mockState);
+        TestBed.runInInjectionContext(() => {
+            const result$ = schemaVersionGuard(mockRoute, mockState);
 
-      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
-        (result$ as any).subscribe((result: boolean) => {
-          expect(result).toBe(true);
-          expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
-          expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
-          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-          done();
+            if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+                (result$ as any).subscribe((result: boolean) => {
+                    expect(result).toBe(true);
+                    expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
+                    expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+                    expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
+                    expect(console.log).not.toHaveBeenCalled();
+                    ;
+                });
+            }
         });
-      }
     });
-  });
 
-  it('should refresh properties cache when properties version changed', (done) => {
-    const propertiesChanged: CacheUpdateCheck = {
-      entitiesNeedsRefresh: false,
-      propertiesNeedsRefresh: true,
-      constraintMessagesNeedsRefresh: false,
-      profileExtensionsNeedsRefresh: false,
-      hasChanges: true
-    };
-    mockVersionService.checkForUpdates.and.returnValue(of(propertiesChanged));
+    it('should refresh entities cache when entities version changed', async () => {
+        const entitiesChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: true,
+            propertiesNeedsRefresh: false,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(entitiesChanged));
 
-    TestBed.runInInjectionContext(() => {
-      const result$ = schemaVersionGuard(mockRoute, mockState);
+        TestBed.runInInjectionContext(() => {
+            const result$ = schemaVersionGuard(mockRoute, mockState);
 
-      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
-        (result$ as any).subscribe((result: boolean) => {
-          expect(result).toBe(true);
-          expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
-          expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
-          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-          done();
+            if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+                (result$ as any).subscribe((result: boolean) => {
+                    expect(result).toBe(true);
+                    expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
+                    expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+                    expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
+                    ;
+                });
+            }
         });
-      }
     });
-  });
 
-  it('should refresh both caches when both versions changed', (done) => {
-    const bothChanged: CacheUpdateCheck = {
-      entitiesNeedsRefresh: true,
-      propertiesNeedsRefresh: true,
-      constraintMessagesNeedsRefresh: false,
-      profileExtensionsNeedsRefresh: false,
-      hasChanges: true
-    };
-    mockVersionService.checkForUpdates.and.returnValue(of(bothChanged));
+    it('should refresh properties cache when properties version changed', async () => {
+        const propertiesChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: false,
+            propertiesNeedsRefresh: true,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(propertiesChanged));
 
-    TestBed.runInInjectionContext(() => {
-      const result$ = schemaVersionGuard(mockRoute, mockState);
+        TestBed.runInInjectionContext(() => {
+            const result$ = schemaVersionGuard(mockRoute, mockState);
 
-      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
-        (result$ as any).subscribe((result: boolean) => {
-          expect(result).toBe(true);
-          expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
-          expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
-          expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-          done();
+            if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+                (result$ as any).subscribe((result: boolean) => {
+                    expect(result).toBe(true);
+                    expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
+                    expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
+                    expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
+                    ;
+                });
+            }
         });
-      }
     });
-  });
 
-  it('should invalidate profile cache when profile extensions version changed', (done) => {
-    const profileChanged: CacheUpdateCheck = {
-      entitiesNeedsRefresh: false,
-      propertiesNeedsRefresh: false,
-      constraintMessagesNeedsRefresh: false,
-      profileExtensionsNeedsRefresh: true,
-      hasChanges: true
-    };
-    mockVersionService.checkForUpdates.and.returnValue(of(profileChanged));
+    it('should refresh both caches when both versions changed', async () => {
+        const bothChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: true,
+            propertiesNeedsRefresh: true,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(bothChanged));
 
-    TestBed.runInInjectionContext(() => {
-      const result$ = schemaVersionGuard(mockRoute, mockState);
+        TestBed.runInInjectionContext(() => {
+            const result$ = schemaVersionGuard(mockRoute, mockState);
 
-      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
-        (result$ as any).subscribe((result: boolean) => {
-          expect(result).toBe(true);
-          expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
-          expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
-          expect(mockProfileService.invalidateCache).toHaveBeenCalledTimes(1);
-          done();
+            if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+                (result$ as any).subscribe((result: boolean) => {
+                    expect(result).toBe(true);
+                    expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
+                    expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
+                    expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
+                    ;
+                });
+            }
         });
-      }
     });
-  });
 
-  it('should always return true to allow navigation', (done) => {
-    const bothChanged: CacheUpdateCheck = {
-      entitiesNeedsRefresh: true,
-      propertiesNeedsRefresh: true,
-      constraintMessagesNeedsRefresh: false,
-      profileExtensionsNeedsRefresh: false,
-      hasChanges: true
-    };
-    mockVersionService.checkForUpdates.and.returnValue(of(bothChanged));
+    it('should invalidate profile cache when profile extensions version changed', async () => {
+        const profileChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: false,
+            propertiesNeedsRefresh: false,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: true,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(profileChanged));
 
-    TestBed.runInInjectionContext(() => {
-      const result$ = schemaVersionGuard(mockRoute, mockState);
+        TestBed.runInInjectionContext(() => {
+            const result$ = schemaVersionGuard(mockRoute, mockState);
 
-      if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
-        (result$ as any).subscribe((result: boolean) => {
-          expect(result).toBe(true);
-          done();
+            if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+                (result$ as any).subscribe((result: boolean) => {
+                    expect(result).toBe(true);
+                    expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
+                    expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
+                    expect(mockProfileService.invalidateCache).toHaveBeenCalledTimes(1);
+                    ;
+                });
+            }
         });
-      }
     });
-  });
+
+    it('should always return true to allow navigation', async () => {
+        const bothChanged: CacheUpdateCheck = {
+            entitiesNeedsRefresh: true,
+            propertiesNeedsRefresh: true,
+            constraintMessagesNeedsRefresh: false,
+            profileExtensionsNeedsRefresh: false,
+            hasChanges: true
+        };
+        mockVersionService.checkForUpdates.mockReturnValue(of(bothChanged));
+
+        TestBed.runInInjectionContext(() => {
+            const result$ = schemaVersionGuard(mockRoute, mockState);
+
+            if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
+                (result$ as any).subscribe((result: boolean) => {
+                    expect(result).toBe(true);
+                    ;
+                });
+            }
+        });
+    });
 });

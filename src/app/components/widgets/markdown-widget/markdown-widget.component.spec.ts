@@ -23,152 +23,152 @@ import { DashboardWidget, MarkdownWidgetConfig } from '../../../interfaces/dashb
 import { createMockWidget, MOCK_WIDGETS } from '../../../testing';
 
 describe('MarkdownWidgetComponent', () => {
-  let component: MarkdownWidgetComponent;
-  let fixture: ComponentFixture<MarkdownWidgetComponent>;
+    let component: MarkdownWidgetComponent;
+    let fixture: ComponentFixture<MarkdownWidgetComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MarkdownWidgetComponent, MarkdownModule],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideMarkdown()
-      ]
-    }).compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [MarkdownWidgetComponent, MarkdownModule],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideMarkdown()
+            ]
+        }).compileComponents();
 
-    fixture = TestBed.createComponent(MarkdownWidgetComponent);
-    component = fixture.componentInstance;
-  });
-
-  describe('Basic Component Setup', () => {
-    it('should create', () => {
-      // Set required input
-      fixture.componentRef.setInput('widget', MOCK_WIDGETS.markdown);
-      fixture.detectChanges();
-
-      expect(component).toBeTruthy();
+        fixture = TestBed.createComponent(MarkdownWidgetComponent);
+        component = fixture.componentInstance;
     });
 
-    it('should have widget input', () => {
-      const mockWidget = MOCK_WIDGETS.markdown;
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+    describe('Basic Component Setup', () => {
+        it('should create', () => {
+            // Set required input
+            fixture.componentRef.setInput('widget', MOCK_WIDGETS.markdown);
+            fixture.detectChanges();
 
-      expect(component.widget()).toEqual(mockWidget);
-    });
-  });
+            expect(component).toBeTruthy();
+        });
 
-  describe('config computed signal', () => {
-    it('should extract config as MarkdownWidgetConfig', () => {
-      const mockWidget = createMockWidget({
-        widget_type: 'markdown',
-        config: {
-          content: '# Test Heading',
-          enableHtml: true
-        }
-      });
+        it('should have widget input', () => {
+            const mockWidget = MOCK_WIDGETS.markdown;
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
-
-      const config = component.config();
-      expect(config).toBeDefined();
-      expect(config.content).toBe('# Test Heading');
-      expect(config.enableHtml).toBe(true);
+            expect(component.widget()).toEqual(mockWidget);
+        });
     });
 
-    it('should handle config with enableHtml: false', () => {
-      const mockWidget = createMockWidget({
-        widget_type: 'markdown',
-        config: {
-          content: '# Secure Content',
-          enableHtml: false
-        }
-      });
+    describe('config computed signal', () => {
+        it('should extract config as MarkdownWidgetConfig', () => {
+            const mockWidget = createMockWidget({
+                widget_type: 'markdown',
+                config: {
+                    content: '# Test Heading',
+                    enableHtml: true
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      const config = component.config();
-      expect(config.enableHtml).toBe(false);
+            const config = component.config();
+            expect(config).toBeDefined();
+            expect(config.content).toBe('# Test Heading');
+            expect(config.enableHtml).toBe(true);
+        });
+
+        it('should handle config with enableHtml: false', () => {
+            const mockWidget = createMockWidget({
+                widget_type: 'markdown',
+                config: {
+                    content: '# Secure Content',
+                    enableHtml: false
+                }
+            });
+
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
+
+            const config = component.config();
+            expect(config.enableHtml).toBe(false);
+        });
+
+        it('should update when widget input changes', () => {
+            const mockWidget1 = createMockWidget({
+                config: { content: 'First', enableHtml: false }
+            });
+            const mockWidget2 = createMockWidget({
+                config: { content: 'Second', enableHtml: true }
+            });
+
+            fixture.componentRef.setInput('widget', mockWidget1);
+            fixture.detectChanges();
+            expect(component.config().content).toBe('First');
+
+            fixture.componentRef.setInput('widget', mockWidget2);
+            fixture.detectChanges();
+            expect(component.config().content).toBe('Second');
+        });
     });
 
-    it('should update when widget input changes', () => {
-      const mockWidget1 = createMockWidget({
-        config: { content: 'First', enableHtml: false }
-      });
-      const mockWidget2 = createMockWidget({
-        config: { content: 'Second', enableHtml: true }
-      });
+    describe('content computed signal', () => {
+        it('should return markdown content from config', () => {
+            const markdownContent = '# Welcome\n\nThis is **bold** text.';
+            const mockWidget = createMockWidget({
+                config: {
+                    content: markdownContent,
+                    enableHtml: false
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget1);
-      fixture.detectChanges();
-      expect(component.config().content).toBe('First');
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      fixture.componentRef.setInput('widget', mockWidget2);
-      fixture.detectChanges();
-      expect(component.config().content).toBe('Second');
-    });
-  });
+            expect(component.content()).toBe(markdownContent);
+        });
 
-  describe('content computed signal', () => {
-    it('should return markdown content from config', () => {
-      const markdownContent = '# Welcome\n\nThis is **bold** text.';
-      const mockWidget = createMockWidget({
-        config: {
-          content: markdownContent,
-          enableHtml: false
-        }
-      });
+        it('should return empty string when config.content is null', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: null as any,
+                    enableHtml: false
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.content()).toBe(markdownContent);
-    });
+            expect(component.content()).toBe('');
+        });
 
-    it('should return empty string when config.content is null', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: null as any,
-          enableHtml: false
-        }
-      });
+        it('should return empty string when config.content is undefined', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    enableHtml: false
+                } as MarkdownWidgetConfig
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.content()).toBe('');
-    });
+            expect(component.content()).toBe('');
+        });
 
-    it('should return empty string when config.content is undefined', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          enableHtml: false
-        } as MarkdownWidgetConfig
-      });
+        it('should return empty string when config.content is empty string', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '',
+                    enableHtml: false
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.content()).toBe('');
-    });
+            expect(component.content()).toBe('');
+        });
 
-    it('should return empty string when config.content is empty string', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '',
-          enableHtml: false
-        }
-      });
-
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
-
-      expect(component.content()).toBe('');
-    });
-
-    it('should handle multiline markdown content', () => {
-      const multilineContent = `# Title
+        it('should handle multiline markdown content', () => {
+            const multilineContent = `# Title
 
 Paragraph 1
 
@@ -178,234 +178,234 @@ Paragraph 1
 - Item 2
 - Item 3`;
 
-      const mockWidget = createMockWidget({
-        config: {
-          content: multilineContent,
-          enableHtml: false
-        }
-      });
+            const mockWidget = createMockWidget({
+                config: {
+                    content: multilineContent,
+                    enableHtml: false
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.content()).toBe(multilineContent);
+            expect(component.content()).toBe(multilineContent);
+        });
+
+        it('should handle content with special characters', () => {
+            const specialContent = '# Test\n\n`code` & **bold** & *italic*';
+            const mockWidget = createMockWidget({
+                config: {
+                    content: specialContent,
+                    enableHtml: false
+                }
+            });
+
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
+
+            expect(component.content()).toBe(specialContent);
+        });
     });
 
-    it('should handle content with special characters', () => {
-      const specialContent = '# Test\n\n`code` & **bold** & *italic*';
-      const mockWidget = createMockWidget({
-        config: {
-          content: specialContent,
-          enableHtml: false
-        }
-      });
+    describe('enableHtml computed signal', () => {
+        it('should return true when config.enableHtml is true', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '# Test',
+                    enableHtml: true
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.content()).toBe(specialContent);
-    });
-  });
+            expect(component.enableHtml()).toBe(true);
+        });
 
-  describe('enableHtml computed signal', () => {
-    it('should return true when config.enableHtml is true', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '# Test',
-          enableHtml: true
-        }
-      });
+        it('should return false when config.enableHtml is false', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '# Test',
+                    enableHtml: false
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.enableHtml()).toBe(true);
-    });
+            expect(component.enableHtml()).toBe(false);
+        });
 
-    it('should return false when config.enableHtml is false', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '# Test',
-          enableHtml: false
-        }
-      });
+        it('should default to false when config.enableHtml is undefined', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '# Test'
+                } as MarkdownWidgetConfig
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.enableHtml()).toBe(false);
-    });
+            expect(component.enableHtml()).toBe(false);
+        });
 
-    it('should default to false when config.enableHtml is undefined', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '# Test'
-        } as MarkdownWidgetConfig
-      });
+        it('should default to false when config.enableHtml is null', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '# Test',
+                    enableHtml: null as any
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.enableHtml()).toBe(false);
-    });
-
-    it('should default to false when config.enableHtml is null', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '# Test',
-          enableHtml: null as any
-        }
-      });
-
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
-
-      expect(component.enableHtml()).toBe(false);
-    });
-  });
-
-  describe('Template Rendering', () => {
-    it('should render markdown content in the DOM', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '# Test Heading',
-          enableHtml: false
-        }
-      });
-
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const markdownDiv = compiled.querySelector('.markdown-widget');
-
-      expect(markdownDiv).toBeTruthy();
-      expect(markdownDiv?.classList.contains('prose')).toBe(true);
-      expect(markdownDiv?.classList.contains('max-w-none')).toBe(true);
+            expect(component.enableHtml()).toBe(false);
+        });
     });
 
-    it('should contain markdown directive', () => {
-      const mockWidget = createMockWidget({
-        config: {
-          content: '**Bold text**',
-          enableHtml: false
-        }
-      });
+    describe('Template Rendering', () => {
+        it('should render markdown content in the DOM', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '# Test Heading',
+                    enableHtml: false
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const markdownElement = compiled.querySelector('markdown');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const markdownDiv = compiled.querySelector('.markdown-widget');
 
-      expect(markdownElement).toBeTruthy();
-    });
-  });
+            expect(markdownDiv).toBeTruthy();
+            expect(markdownDiv?.classList.contains('prose')).toBe(true);
+            expect(markdownDiv?.classList.contains('max-w-none')).toBe(true);
+        });
 
-  describe('Pre-configured Mock Widgets', () => {
-    it('should work with MOCK_WIDGETS.markdown', () => {
-      fixture.componentRef.setInput('widget', MOCK_WIDGETS.markdown);
-      fixture.detectChanges();
+        it('should contain markdown directive', () => {
+            const mockWidget = createMockWidget({
+                config: {
+                    content: '**Bold text**',
+                    enableHtml: false
+                }
+            });
 
-      expect(component.content()).toContain('Test Markdown');
-      expect(component.content()).toContain('**bold**');
-      expect(component.enableHtml()).toBe(false);
-    });
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-    it('should work with MOCK_WIDGETS.markdownNoTitle', () => {
-      fixture.componentRef.setInput('widget', MOCK_WIDGETS.markdownNoTitle);
-      fixture.detectChanges();
+            const compiled = fixture.nativeElement as HTMLElement;
+            const markdownElement = compiled.querySelector('markdown');
 
-      expect(component.widget().title).toBeNull();
-      expect(component.content()).toBe('Simple content without title');
-    });
-  });
-
-  describe('Change Detection with OnPush', () => {
-    it('should update computed signals when widget input changes', () => {
-      const widget1 = createMockWidget({
-        config: {
-          content: 'Content 1',
-          enableHtml: false
-        }
-      });
-      const widget2 = createMockWidget({
-        config: {
-          content: 'Content 2',
-          enableHtml: true
-        }
-      });
-
-      fixture.componentRef.setInput('widget', widget1);
-      fixture.detectChanges();
-      expect(component.content()).toBe('Content 1');
-      expect(component.enableHtml()).toBe(false);
-
-      fixture.componentRef.setInput('widget', widget2);
-      fixture.detectChanges();
-      expect(component.content()).toBe('Content 2');
-      expect(component.enableHtml()).toBe(true);
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle empty config object', () => {
-      const mockWidget = createMockWidget({
-        config: {} as MarkdownWidgetConfig
-      });
-
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
-
-      expect(component.content()).toBe('');
-      expect(component.enableHtml()).toBe(false);
+            expect(markdownElement).toBeTruthy();
+        });
     });
 
-    it('should handle very long markdown content', () => {
-      const longContent = '# Heading\n\n' + 'Lorem ipsum '.repeat(1000);
-      const mockWidget = createMockWidget({
-        config: {
-          content: longContent,
-          enableHtml: false
-        }
-      });
+    describe('Pre-configured Mock Widgets', () => {
+        it('should work with MOCK_WIDGETS.markdown', () => {
+            fixture.componentRef.setInput('widget', MOCK_WIDGETS.markdown);
+            fixture.detectChanges();
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            expect(component.content()).toContain('Test Markdown');
+            expect(component.content()).toContain('**bold**');
+            expect(component.enableHtml()).toBe(false);
+        });
 
-      expect(component.content().length).toBeGreaterThan(10000);
-      expect(component.content()).toBe(longContent);
+        it('should work with MOCK_WIDGETS.markdownNoTitle', () => {
+            fixture.componentRef.setInput('widget', MOCK_WIDGETS.markdownNoTitle);
+            fixture.detectChanges();
+
+            expect(component.widget().title).toBeNull();
+            expect(component.content()).toBe('Simple content without title');
+        });
     });
 
-    it('should handle markdown with HTML when enableHtml is true', () => {
-      const htmlContent = '# Test\n\n<div class="custom">HTML Content</div>';
-      const mockWidget = createMockWidget({
-        config: {
-          content: htmlContent,
-          enableHtml: true
-        }
-      });
+    describe('Change Detection with OnPush', () => {
+        it('should update computed signals when widget input changes', () => {
+            const widget1 = createMockWidget({
+                config: {
+                    content: 'Content 1',
+                    enableHtml: false
+                }
+            });
+            const widget2 = createMockWidget({
+                config: {
+                    content: 'Content 2',
+                    enableHtml: true
+                }
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', widget1);
+            fixture.detectChanges();
+            expect(component.content()).toBe('Content 1');
+            expect(component.enableHtml()).toBe(false);
 
-      expect(component.content()).toBe(htmlContent);
-      expect(component.enableHtml()).toBe(true);
+            fixture.componentRef.setInput('widget', widget2);
+            fixture.detectChanges();
+            expect(component.content()).toBe('Content 2');
+            expect(component.enableHtml()).toBe(true);
+        });
     });
 
-    it('should handle markdown with code blocks', () => {
-      const codeContent = '# Code Example\n\n```typescript\nconst x = 10;\n```';
-      const mockWidget = createMockWidget({
-        config: {
-          content: codeContent,
-          enableHtml: false
-        }
-      });
+    describe('Edge Cases', () => {
+        it('should handle empty config object', () => {
+            const mockWidget = createMockWidget({
+                config: {} as MarkdownWidgetConfig
+            });
 
-      fixture.componentRef.setInput('widget', mockWidget);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
 
-      expect(component.content()).toBe(codeContent);
+            expect(component.content()).toBe('');
+            expect(component.enableHtml()).toBe(false);
+        });
+
+        it('should handle very long markdown content', () => {
+            const longContent = '# Heading\n\n' + 'Lorem ipsum '.repeat(1000);
+            const mockWidget = createMockWidget({
+                config: {
+                    content: longContent,
+                    enableHtml: false
+                }
+            });
+
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
+
+            expect(component.content().length).toBeGreaterThan(10000);
+            expect(component.content()).toBe(longContent);
+        });
+
+        it('should handle markdown with HTML when enableHtml is true', () => {
+            const htmlContent = '# Test\n\n<div class="custom">HTML Content</div>';
+            const mockWidget = createMockWidget({
+                config: {
+                    content: htmlContent,
+                    enableHtml: true
+                }
+            });
+
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
+
+            expect(component.content()).toBe(htmlContent);
+            expect(component.enableHtml()).toBe(true);
+        });
+
+        it('should handle markdown with code blocks', () => {
+            const codeContent = '# Code Example\n\n```typescript\nconst x = 10;\n```';
+            const mockWidget = createMockWidget({
+                config: {
+                    content: codeContent,
+                    enableHtml: false
+                }
+            });
+
+            fixture.componentRef.setInput('widget', mockWidget);
+            fixture.detectChanges();
+
+            expect(component.content()).toBe(codeContent);
+        });
     });
-  });
 });

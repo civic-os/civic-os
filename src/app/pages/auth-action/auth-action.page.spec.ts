@@ -15,89 +15,89 @@ import { AuthService } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
 
 describe('AuthActionPage', () => {
-  let mockRouter: jasmine.SpyObj<Router>;
-  let routeData: Record<string, string>;
-  let queryParams: Record<string, string>;
-  let authenticatedSignal: WritableSignal<boolean>;
+    let mockRouter: any;
+    let routeData: Record<string, string>;
+    let queryParams: Record<string, string>;
+    let authenticatedSignal: WritableSignal<boolean>;
 
-  function createMockAuth(authenticated: boolean) {
-    authenticatedSignal = signal(authenticated);
-    return {
-      authenticated: authenticatedSignal,
-      login: jasmine.createSpy('login'),
-      loginWithRedirect: jasmine.createSpy('loginWithRedirect'),
-      logout: jasmine.createSpy('logout'),
-    };
-  }
+    function createMockAuth(authenticated: boolean) {
+        authenticatedSignal = signal(authenticated);
+        return {
+            authenticated: authenticatedSignal,
+            login: vi.fn().mockName('login'),
+            loginWithRedirect: vi.fn().mockName('loginWithRedirect'),
+            logout: vi.fn().mockName('logout'),
+        };
+    }
 
-  function createComponent(authenticated = false) {
-    const mockAuth = createMockAuth(authenticated);
-    TestBed.configureTestingModule({
-      imports: [AuthActionPage],
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: AuthService, useValue: mockAuth },
-        { provide: Router, useValue: mockRouter },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              data: routeData,
-              queryParamMap: convertToParamMap(queryParams),
-            },
-          },
-        },
-        {
-          provide: TranslationService,
-          useValue: { get: (key: string) => key },
-        },
-      ],
+    function createComponent(authenticated = false) {
+        const mockAuth = createMockAuth(authenticated);
+        TestBed.configureTestingModule({
+            imports: [AuthActionPage],
+            providers: [
+                provideZonelessChangeDetection(),
+                { provide: AuthService, useValue: mockAuth },
+                { provide: Router, useValue: mockRouter },
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        snapshot: {
+                            data: routeData,
+                            queryParamMap: convertToParamMap(queryParams),
+                        },
+                    },
+                },
+                {
+                    provide: TranslationService,
+                    useValue: { get: (key: string) => key },
+                },
+            ],
+        });
+        const fixture = TestBed.createComponent(AuthActionPage);
+        fixture.detectChanges();
+        return { fixture, mockAuth };
+    }
+
+    beforeEach(() => {
+        mockRouter = {
+            navigateByUrl: vi.fn().mockName("Router.navigateByUrl")
+        };
+        routeData = { mode: 'login' };
+        queryParams = {};
     });
-    const fixture = TestBed.createComponent(AuthActionPage);
-    fixture.detectChanges();
-    return { fixture, mockAuth };
-  }
 
-  beforeEach(() => {
-    mockRouter = jasmine.createSpyObj('Router', ['navigateByUrl']);
-    routeData = { mode: 'login' };
-    queryParams = {};
-  });
+    it('should call loginWithRedirect when unauthenticated', () => {
+        queryParams = { returnUrl: '/view/issues' };
+        const { mockAuth } = createComponent(false);
+        expect(mockAuth.loginWithRedirect).toHaveBeenCalledWith(window.location.origin + '/view/issues');
+    });
 
-  it('should call loginWithRedirect when unauthenticated', () => {
-    queryParams = { returnUrl: '/view/issues' };
-    const { mockAuth } = createComponent(false);
-    expect(mockAuth.loginWithRedirect).toHaveBeenCalledWith(
-      window.location.origin + '/view/issues'
-    );
-  });
+    it('should navigate to returnUrl when already authenticated', () => {
+        queryParams = { returnUrl: '/view/issues' };
+        createComponent(true);
+        expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/view/issues');
+    });
 
-  it('should navigate to returnUrl when already authenticated', () => {
-    queryParams = { returnUrl: '/view/issues' };
-    createComponent(true);
-    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/view/issues');
-  });
+    it('should navigate to / when authenticated with no returnUrl', () => {
+        createComponent(true);
+        expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/');
+    });
 
-  it('should navigate to / when authenticated with no returnUrl', () => {
-    createComponent(true);
-    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/');
-  });
+    it('should call logout for logout mode', () => {
+        routeData = { mode: 'logout' };
+        const { mockAuth } = createComponent(false);
+        expect(mockAuth.logout).toHaveBeenCalled();
+    });
 
-  it('should call logout for logout mode', () => {
-    routeData = { mode: 'logout' };
-    const { mockAuth } = createComponent(false);
-    expect(mockAuth.logout).toHaveBeenCalled();
-  });
+    it('should sanitize returnUrl that does not start with /', () => {
+        queryParams = { returnUrl: 'https://evil.com' };
+        createComponent(true);
+        expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/');
+    });
 
-  it('should sanitize returnUrl that does not start with /', () => {
-    queryParams = { returnUrl: 'https://evil.com' };
-    createComponent(true);
-    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/');
-  });
-
-  it('should sanitize protocol-relative returnUrl (//evil.com)', () => {
-    queryParams = { returnUrl: '//evil.com' };
-    createComponent(true);
-    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/');
-  });
+    it('should sanitize protocol-relative returnUrl (//evil.com)', () => {
+        queryParams = { returnUrl: '//evil.com' };
+        createComponent(true);
+        expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/');
+    });
 });

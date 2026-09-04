@@ -25,92 +25,96 @@ import { AuthService } from '../services/auth.service';
 import { getPostgrestUrl } from '../config/runtime';
 
 describe('authErrorInterceptor', () => {
-  let http: HttpClient;
-  let httpMock: HttpTestingController;
-  let mockKeycloak: jasmine.SpyObj<Keycloak>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
+    let http: HttpClient;
+    let httpMock: HttpTestingController;
+    let mockKeycloak: any;
+    let mockAuthService: any;
 
-  beforeEach(() => {
-    mockKeycloak = jasmine.createSpyObj('Keycloak', ['login']);
-    mockKeycloak.login.and.returnValue(Promise.resolve());
+    beforeEach(() => {
+        mockKeycloak = {
+            login: vi.fn().mockName("Keycloak.login")
+        };
+        mockKeycloak.login.mockResolvedValue();
 
-    mockAuthService = jasmine.createSpyObj('AuthService', ['authenticated']);
-    mockAuthService.authenticated.and.returnValue(true);
+        mockAuthService = {
+            authenticated: vi.fn().mockName("AuthService.authenticated")
+        };
+        mockAuthService.authenticated.mockReturnValue(true);
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withXhr(), withInterceptors([authErrorInterceptor])),
-        provideHttpClientTesting(),
-        { provide: Keycloak, useValue: mockKeycloak },
-        { provide: AuthService, useValue: mockAuthService }
-      ]
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr(), withInterceptors([authErrorInterceptor])),
+                provideHttpClientTesting(),
+                { provide: Keycloak, useValue: mockKeycloak },
+                { provide: AuthService, useValue: mockAuthService }
+            ]
+        });
+
+        http = TestBed.inject(HttpClient);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-  });
-
-  it('should redirect to login on 401 from PostgREST when authenticated', () => {
-    http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
-      error: () => { /* expected */ }
+    afterEach(() => {
+        httpMock.verify();
     });
 
-    const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
-    req.flush({ message: 'JWT expired' }, { status: 401, statusText: 'Unauthorized' });
+    it('should redirect to login on 401 from PostgREST when authenticated', () => {
+        http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
+            error: () => { }
+        });
 
-    expect(mockKeycloak.login).toHaveBeenCalled();
-  });
+        const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
+        req.flush({ message: 'JWT expired' }, { status: 401, statusText: 'Unauthorized' });
 
-  it('should not redirect on 401 when not authenticated', () => {
-    mockAuthService.authenticated.and.returnValue(false);
-
-    http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
-      error: () => { /* expected */ }
+        expect(mockKeycloak.login).toHaveBeenCalled();
     });
 
-    const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
-    req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+    it('should not redirect on 401 when not authenticated', () => {
+        mockAuthService.authenticated.mockReturnValue(false);
 
-    expect(mockKeycloak.login).not.toHaveBeenCalled();
-  });
+        http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
+            error: () => { }
+        });
 
-  it('should not redirect on non-401 errors', () => {
-    http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
-      error: () => { /* expected */ }
+        const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
+        req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+
+        expect(mockKeycloak.login).not.toHaveBeenCalled();
     });
 
-    const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
-    req.flush({ message: 'Server Error' }, { status: 500, statusText: 'Internal Server Error' });
+    it('should not redirect on non-401 errors', () => {
+        http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
+            error: () => { }
+        });
 
-    expect(mockKeycloak.login).not.toHaveBeenCalled();
-  });
+        const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
+        req.flush({ message: 'Server Error' }, { status: 500, statusText: 'Internal Server Error' });
 
-  it('should not redirect on 401 from non-PostgREST URLs', () => {
-    http.get('https://api.example.com/data').subscribe({
-      error: () => { /* expected */ }
+        expect(mockKeycloak.login).not.toHaveBeenCalled();
     });
 
-    const req = httpMock.expectOne('https://api.example.com/data');
-    req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+    it('should not redirect on 401 from non-PostgREST URLs', () => {
+        http.get('https://api.example.com/data').subscribe({
+            error: () => { }
+        });
 
-    expect(mockKeycloak.login).not.toHaveBeenCalled();
-  });
+        const req = httpMock.expectOne('https://api.example.com/data');
+        req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
-  it('should pass through successful responses', () => {
-    let responseData: unknown;
-    http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
-      next: (data) => { responseData = data; }
+        expect(mockKeycloak.login).not.toHaveBeenCalled();
     });
 
-    const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
-    req.flush([{ id: 1, name: 'test' }]);
+    it('should pass through successful responses', () => {
+        let responseData: unknown;
+        http.get(`${getPostgrestUrl()}schema_entities`).subscribe({
+            next: (data) => { responseData = data; }
+        });
 
-    expect(responseData).toEqual([{ id: 1, name: 'test' }]);
-    expect(mockKeycloak.login).not.toHaveBeenCalled();
-  });
+        const req = httpMock.expectOne(`${getPostgrestUrl()}schema_entities`);
+        req.flush([{ id: 1, name: 'test' }]);
+
+        expect(responseData).toEqual([{ id: 1, name: 'test' }]);
+        expect(mockKeycloak.login).not.toHaveBeenCalled();
+    });
 });
