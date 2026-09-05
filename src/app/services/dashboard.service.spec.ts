@@ -71,7 +71,6 @@ describe('DashboardService', () => {
             service.getDashboards().subscribe(dashboards => {
                 expect(dashboards).toEqual(mockDashboards);
                 expect(dashboards.length).toBe(2);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
@@ -88,7 +87,6 @@ describe('DashboardService', () => {
                 // Second call - should return from cache without HTTP request
                 service.getDashboards().subscribe(cachedDashboards => {
                     expect(cachedDashboards).toEqual(mockDashboards);
-                    ;
                 });
                 // No HTTP request should be made for the second call
             });
@@ -101,7 +99,6 @@ describe('DashboardService', () => {
             service.getDashboards().subscribe(dashboards => {
                 expect(dashboards).toEqual([]);
                 expect(dashboards.length).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
@@ -111,7 +108,6 @@ describe('DashboardService', () => {
         it('should handle HTTP errors gracefully', async () => {
             service.getDashboards().subscribe(dashboards => {
                 expect(dashboards).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboards');
@@ -127,7 +123,6 @@ describe('DashboardService', () => {
                 expect(dashboard).toEqual(mockDashboard);
                 expect(dashboard?.id).toBe(3);
                 expect(dashboard?.widgets?.length).toBe(2);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboard');
@@ -163,7 +158,6 @@ describe('DashboardService', () => {
                 expect(dashboard?.widgets).toBeDefined();
                 expect(dashboard?.widgets?.length).toBe(1);
                 expect(dashboard?.widgets?.[0].title).toBe('Widget 1');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboard');
@@ -173,7 +167,6 @@ describe('DashboardService', () => {
         it('should return undefined for null response (not found)', async () => {
             service.getDashboard(999).subscribe(dashboard => {
                 expect(dashboard).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboard');
@@ -184,7 +177,6 @@ describe('DashboardService', () => {
         it('should handle HTTP errors gracefully', async () => {
             service.getDashboard(1).subscribe(dashboard => {
                 expect(dashboard).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_dashboard');
@@ -196,7 +188,6 @@ describe('DashboardService', () => {
         it('should call RPC get_user_default_dashboard', async () => {
             service.getDefaultDashboard().subscribe(dashboardId => {
                 expect(dashboardId).toBe(1);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_user_default_dashboard');
@@ -208,7 +199,6 @@ describe('DashboardService', () => {
         it('should return dashboard ID', async () => {
             service.getDefaultDashboard().subscribe(dashboardId => {
                 expect(dashboardId).toBe(42);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_user_default_dashboard');
@@ -218,7 +208,6 @@ describe('DashboardService', () => {
         it('should return undefined if no default', async () => {
             service.getDefaultDashboard().subscribe(dashboardId => {
                 expect(dashboardId).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_user_default_dashboard');
@@ -228,7 +217,6 @@ describe('DashboardService', () => {
         it('should handle HTTP errors gracefully', async () => {
             service.getDefaultDashboard().subscribe(dashboardId => {
                 expect(dashboardId).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_user_default_dashboard');
@@ -244,7 +232,6 @@ describe('DashboardService', () => {
                 expect(types.length).toBe(mockTypes.length);
                 expect(types[0].widget_type).toBeDefined();
                 expect(types[0].display_name).toBeDefined();
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('widget_types') &&
@@ -259,7 +246,6 @@ describe('DashboardService', () => {
 
             service.getWidgetTypes().subscribe(types => {
                 expect(types.every(t => t.is_active)).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('widget_types'));
@@ -269,7 +255,6 @@ describe('DashboardService', () => {
         it('should handle empty array response', async () => {
             service.getWidgetTypes().subscribe(types => {
                 expect(types).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('widget_types'));
@@ -279,7 +264,6 @@ describe('DashboardService', () => {
         it('should handle HTTP errors gracefully', async () => {
             service.getWidgetTypes().subscribe(types => {
                 expect(types).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('widget_types'));
@@ -345,7 +329,6 @@ describe('DashboardService', () => {
                     expect(response.success).toBe(false);
                     expect(response.error?.httpCode).toBe(501);
                     expect(response.error?.humanMessage).toContain('not yet implemented');
-                    ;
                 });
             });
         });
@@ -356,7 +339,6 @@ describe('DashboardService', () => {
                     expect(response.success).toBe(false);
                     expect(response.error?.httpCode).toBe(501);
                     expect(response.error?.humanMessage).toContain('not yet implemented');
-                    ;
                 });
             });
         });
@@ -367,7 +349,6 @@ describe('DashboardService', () => {
                     expect(response.success).toBe(false);
                     expect(response.error?.httpCode).toBe(501);
                     expect(response.error?.humanMessage).toContain('not yet implemented');
-                    ;
                 });
             });
         });
@@ -378,7 +359,6 @@ describe('DashboardService', () => {
                     expect(response.success).toBe(false);
                     expect(response.error?.httpCode).toBe(501);
                     expect(response.error?.humanMessage).toContain('not yet implemented');
-                    ;
                 });
             });
         });

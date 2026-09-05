@@ -456,7 +456,6 @@ describe('UserManagementPage', () => {
                 ]);
                 expect(result.success).toBe(true);
                 expect(result.importedCount).toBe(1);
-                ;
             });
         });
 
@@ -472,7 +471,6 @@ describe('UserManagementPage', () => {
             component.submitUserImport(rows).subscribe(() => {
                 const calledWith = vi.mocked(mockUserService.importUsersDetailed).mock.lastCall[0];
                 expect(calledWith[0].initial_roles).toEqual(['user']);
-                ;
             });
         });
 
@@ -488,7 +486,6 @@ describe('UserManagementPage', () => {
             component.submitUserImport(rows).subscribe(() => {
                 const calledWith = vi.mocked(mockUserService.importUsersDetailed).mock.lastCall[0];
                 expect(calledWith[0].send_welcome_email).toBe(true);
-                ;
             });
         });
 
@@ -504,7 +501,6 @@ describe('UserManagementPage', () => {
             component.submitUserImport(rows).subscribe(() => {
                 const calledWith = vi.mocked(mockUserService.importUsersDetailed).mock.lastCall[0];
                 expect(calledWith[0].send_welcome_sms).toBe(false);
-                ;
             });
         });
 

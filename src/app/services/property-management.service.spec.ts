@@ -60,7 +60,6 @@ describe('PropertyManagementService', () => {
         it('should call RPC function with correct parameters', async () => {
             service.upsertPropertyMetadata('Issue', 'title', 'Issue Title', 'The title of the issue', 1, 200, true, true, true, true, true, true).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_property_metadata');
@@ -86,7 +85,6 @@ describe('PropertyManagementService', () => {
         it('should handle null values', async () => {
             service.upsertPropertyMetadata('Issue', 'title', null, null, null, null, false, false, false, false, false, false).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_property_metadata');
@@ -112,7 +110,6 @@ describe('PropertyManagementService', () => {
             service.upsertPropertyMetadata('Issue', 'title', 'Issue Title', null, 1, null, true, true, true, true, true, true).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to save property metadata');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_property_metadata');
@@ -146,7 +143,6 @@ describe('PropertyManagementService', () => {
 
             service.updatePropertiesOrder(properties).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             // Expect 3 separate RPC calls - use match to get all requests
@@ -171,7 +167,6 @@ describe('PropertyManagementService', () => {
 
             service.updatePropertiesOrder(properties).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const requests = httpMock.match(testPostgrestUrl + 'rpc/update_property_sort_order');
@@ -191,7 +186,6 @@ describe('PropertyManagementService', () => {
         it('should handle empty array', async () => {
             service.updatePropertiesOrder([]).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             httpMock.expectNone(testPostgrestUrl + 'rpc/update_property_sort_order');
@@ -203,7 +197,6 @@ describe('PropertyManagementService', () => {
             service.updatePropertiesOrder(properties).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to update properties order');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_property_sort_order');
@@ -215,7 +208,6 @@ describe('PropertyManagementService', () => {
         it('should call RPC function', async () => {
             service.isAdmin().subscribe(result => {
                 expect(result).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
@@ -227,7 +219,6 @@ describe('PropertyManagementService', () => {
         it('should return false on error', async () => {
             service.isAdmin().subscribe(result => {
                 expect(result).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');

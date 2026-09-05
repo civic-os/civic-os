@@ -104,7 +104,6 @@ describe('profileCompletionGuard', () => {
             expect(result).toBe(true); // Always allows navigation
             expect(mockProfileService.incompleteRequired()).toEqual([missing]);
             expect(mockProfileService.profileComplete).toBe(false);
-            ;
         });
     });
 
@@ -119,7 +118,6 @@ describe('profileCompletionGuard', () => {
             expect(result).toBe(true);
             expect(mockProfileService.incompleteRequired()).toEqual([]);
             expect(mockProfileService.profileComplete).toBe(true);
-            ;
         });
     });
 
@@ -131,7 +129,6 @@ describe('profileCompletionGuard', () => {
         result$.subscribe((result: boolean) => {
             expect(result).toBe(true);
             expect(mockProfileService.profileComplete).toBe(true);
-            ;
         });
     });
 
@@ -142,7 +139,6 @@ describe('profileCompletionGuard', () => {
         const result$ = runGuard('/view/issues');
         result$.subscribe((result: boolean) => {
             expect(result).toBe(true);
-            ;
         });
     });
 });

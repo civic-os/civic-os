@@ -60,7 +60,6 @@ describe('EntityManagementService', () => {
         it('should call RPC function with correct parameters', async () => {
             service.upsertEntityMetadata('Issue', 'Issues', 'Track issues', 1).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_entity_metadata');
@@ -86,7 +85,6 @@ describe('EntityManagementService', () => {
         it('should handle null values', async () => {
             service.upsertEntityMetadata('Issue', null, null, null).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_entity_metadata');
@@ -112,7 +110,6 @@ describe('EntityManagementService', () => {
             service.upsertEntityMetadata('Issue', 'Issues', null, 1).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to save entity metadata');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_entity_metadata');
@@ -130,7 +127,6 @@ describe('EntityManagementService', () => {
 
             service.updateEntitiesOrder(entities).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             // Expect 3 separate RPC calls - use match to get all requests
@@ -147,7 +143,6 @@ describe('EntityManagementService', () => {
         it('should handle empty array', async () => {
             service.updateEntitiesOrder([]).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             httpMock.expectNone(testPostgrestUrl + 'rpc/update_entity_sort_order');
@@ -159,7 +154,6 @@ describe('EntityManagementService', () => {
             service.updateEntitiesOrder(entities).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to update entities order');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_entity_sort_order');
@@ -171,7 +165,6 @@ describe('EntityManagementService', () => {
         it('should call RPC function', async () => {
             service.isAdmin().subscribe(result => {
                 expect(result).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
@@ -183,7 +176,6 @@ describe('EntityManagementService', () => {
         it('should return false on error', async () => {
             service.isAdmin().subscribe(result => {
                 expect(result).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');

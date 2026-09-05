@@ -93,7 +93,6 @@ describe('DataService', () => {
             service.getInverseRelationshipPreview('WorkPackage', 'issue_id', 7, 5).subscribe(result => {
                 expect(result.records.length).toBe(1);
                 expect(result.totalCount).toBe(12);
-                ;
             });
 
             const req = httpMock.expectOne(`${testPostgrestUrl}WorkPackage?issue_id=eq.7&select=id,display_name&limit=5`);
@@ -107,7 +106,6 @@ describe('DataService', () => {
             service.getInverseRelationshipPreview('step_records', 'parent_id', 7, 5, 'id').subscribe(result => {
                 expect(result.records).toEqual([{ id: 3 } as any]);
                 expect(result.totalCount).toBe(1);
-                ;
             });
 
             const req = httpMock.expectOne(`${testPostgrestUrl}step_records?parent_id=eq.7&select=id&limit=5`);
@@ -118,7 +116,6 @@ describe('DataService', () => {
             service.getInverseRelationshipPreview('team_rosters', 'team_id', 7, 5, 'count').subscribe(result => {
                 expect(result.records).toEqual([]);
                 expect(result.totalCount).toBe(9);
-                ;
             });
 
             // Selects the (known to exist) filter column with limit=0 so no row data
@@ -135,7 +132,6 @@ describe('DataService', () => {
 
             service.getData({ key: 'Issue', fields: [] }).subscribe(data => {
                 expect(data).toEqual(mockData);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -152,7 +148,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('select=name,description,id'));
             expect(req.request.url).toContain('id');
             req.flush([]);
-            ;
         });
 
         it('should not duplicate id field if already present', async () => {
@@ -170,7 +165,6 @@ describe('DataService', () => {
             expect(idCount).toBe(1);
 
             req.flush([]);
-            ;
         });
 
         it('should NOT inject id when isSummaryView is true', async () => {
@@ -184,7 +178,6 @@ describe('DataService', () => {
             expect(req.request.url).toContain('select=display_name,issue_count');
             expect(req.request.url).not.toContain(',id');
             req.flush([]);
-            ;
         });
 
         it('should still inject id when isSummaryView is false', async () => {
@@ -197,7 +190,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.url).toContain('select=name,id');
             req.flush([]);
-            ;
         });
 
         it('should build select parameter with multiple fields', async () => {
@@ -209,7 +201,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('select=name,status_id,created_at,id'));
             expect(req.request.url).toContain('select=');
             req.flush([]);
-            ;
         });
 
         it('should build order parameter with default ascending direction', async () => {
@@ -222,7 +213,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('order=created_at.asc'));
             expect(req.request.url).toContain('order=created_at.asc');
             req.flush([]);
-            ;
         });
 
         it('should build order parameter with descending direction', async () => {
@@ -236,7 +226,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('order=created_at.desc'));
             expect(req.request.url).toContain('order=created_at.desc');
             req.flush([]);
-            ;
         });
 
         it('should build entityId filter', async () => {
@@ -249,7 +238,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('id=eq.42'));
             expect(req.request.url).toContain('id=eq.42');
             req.flush([]);
-            ;
         });
 
         it('should combine multiple query parameters', async () => {
@@ -271,7 +259,6 @@ describe('DataService', () => {
 
             expect(req.request.url).toContain('&');
             req.flush([]);
-            ;
         });
 
         it('should construct correct PostgREST URL', async () => {
@@ -283,7 +270,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.startsWith(testPostgrestUrl));
             expect(req.request.url).toContain(testPostgrestUrl);
             req.flush([]);
-            ;
         });
     });
 
@@ -309,7 +295,6 @@ describe('DataService', () => {
             req.flush(mockData, {
                 headers: { 'Content-Range': '0-1/237' }
             });
-            ;
         });
 
         it('should use default pagination when not specified', async () => {
@@ -321,7 +306,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('0-24'); // Default: page 1, pageSize 25
             req.flush([], { headers: { 'Content-Range': '0-0/0' } });
-            ;
         });
 
         it('should calculate Range header for page 1', async () => {
@@ -334,7 +318,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('0-24'); // offset 0, end 24
             req.flush([], { headers: { 'Content-Range': '0-24/100' } });
-            ;
         });
 
         it('should calculate Range header for page 5', async () => {
@@ -347,7 +330,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('100-124'); // offset 100, end 124
             req.flush([], { headers: { 'Content-Range': '100-124/237' } });
-            ;
         });
 
         it('should calculate Range header with pageSize 50', async () => {
@@ -360,7 +342,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('100-149'); // (3-1)*50 = 100, end = 149
             req.flush([], { headers: { 'Content-Range': '100-149/500' } });
-            ;
         });
 
         it('should calculate Range header with pageSize 100', async () => {
@@ -373,7 +354,6 @@ describe('DataService', () => {
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
             expect(req.request.headers.get('Range')).toBe('100-199'); // (2-1)*100 = 100, end = 199
             req.flush([], { headers: { 'Content-Range': '100-199/350' } });
-            ;
         });
 
         it('should NOT inject id when isSummaryView is true', async () => {
@@ -388,7 +368,6 @@ describe('DataService', () => {
             expect(req.request.url).toContain('select=display_name,issue_count');
             expect(req.request.url).not.toContain(',id');
             req.flush([], { headers: { 'Content-Range': '0-0/3' } });
-            ;
         });
     });
 
@@ -403,7 +382,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual(mockData);
                 expect(response.totalCount).toBe(237);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -421,7 +399,6 @@ describe('DataService', () => {
                 pagination: { page: 1, pageSize: 25 }
             }).subscribe(response => {
                 expect(response.totalCount).toBe(1);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -439,7 +416,6 @@ describe('DataService', () => {
                 pagination: { page: 5, pageSize: 25 }
             }).subscribe(response => {
                 expect(response.totalCount).toBe(10000);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -458,7 +434,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data.length).toBe(12);
                 expect(response.totalCount).toBe(237);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -476,7 +451,6 @@ describe('DataService', () => {
                 pagination: { page: 1, pageSize: 25 }
             }).subscribe(response => {
                 expect(response.totalCount).toBe(1); // Fallback to data.length
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -492,7 +466,6 @@ describe('DataService', () => {
                 pagination: { page: 1, pageSize: 25 }
             }).subscribe(response => {
                 expect(response.totalCount).toBe(1); // Fallback to data.length when wildcard
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -509,7 +482,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual([]);
                 expect(response.totalCount).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -534,7 +506,6 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('select=');
             req.flush([], { headers: { 'Content-Range': '50-99/237' } });
-            ;
         });
 
         it('should combine pagination with order parameters', async () => {
@@ -553,7 +524,6 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('order=created_at.desc');
             req.flush([], { headers: { 'Content-Range': '0-24/100' } });
-            ;
         });
 
         it('should combine pagination with entityId filter', async () => {
@@ -571,7 +541,6 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('id=eq.42');
             req.flush([], { headers: { 'Content-Range': '0-0/1' } });
-            ;
         });
 
         it('should combine pagination with search query', async () => {
@@ -589,7 +558,6 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('civic_os_text_search=');
             req.flush([], { headers: { 'Content-Range': '0-10/11' } });
-            ;
         });
 
         it('should combine pagination with filters', async () => {
@@ -609,7 +577,6 @@ describe('DataService', () => {
             });
             expect(req.request.url).toContain('status_id=eq.2');
             req.flush([], { headers: { 'Content-Range': '0-15/16' } });
-            ;
         });
 
         it('should combine all query parameters with pagination', async () => {
@@ -634,7 +601,6 @@ describe('DataService', () => {
 
             expect(req.request.url).toContain('&');
             req.flush([], { headers: { 'Content-Range': '100-125/126' } });
-            ;
         });
     });
 
@@ -655,7 +621,6 @@ describe('DataService', () => {
                 expect(response.totalCount).toBeDefined();
                 expect(Array.isArray(response.data)).toBe(true);
                 expect(typeof response.totalCount).toBe('number');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -678,7 +643,6 @@ describe('DataService', () => {
                 expect(response.data).toEqual(mockData);
                 expect(response.data.length).toBe(2);
                 expect((response.data[0] as any).name).toBe('Test 1');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -697,7 +661,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual([]);
                 expect(response.totalCount).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -712,7 +675,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual([]);
                 expect(response.totalCount).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -727,7 +689,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual([]);
                 expect(response.totalCount).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -742,7 +703,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual([]);
                 expect(response.totalCount).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -761,7 +721,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data).toEqual([]);
                 expect(response.totalCount).toBe(237);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -781,7 +740,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data.length).toBe(200);
                 expect(response.totalCount).toBe(237);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -800,7 +758,6 @@ describe('DataService', () => {
                 pagination: { page: 1, pageSize: 10 }
             }).subscribe(response => {
                 expect(response.data.length).toBe(10);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -820,7 +777,6 @@ describe('DataService', () => {
             }).subscribe(response => {
                 expect(response.data.length).toBe(1);
                 expect(response.totalCount).toBe(1);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -838,7 +794,6 @@ describe('DataService', () => {
                 pagination: { page: 1, pageSize: 25 }
             }).subscribe(response => {
                 expect(response.totalCount).toBe(10537);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -856,7 +811,6 @@ describe('DataService', () => {
                 pagination: { page: 1, pageSize: 25 }
             }).subscribe(response => {
                 expect(response.totalCount).toBe(1); // Fallback to data.length
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue'));
@@ -874,7 +828,6 @@ describe('DataService', () => {
             service.createData('Issue', newData).subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.body).toEqual(createdData);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
@@ -890,7 +843,6 @@ describe('DataService', () => {
             service.createData('Issue', newData).subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.error).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
@@ -910,7 +862,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.message).toBe('Duplicate key violation');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
@@ -925,7 +876,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -940,7 +890,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 'abc-123', updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.abc-123'));
@@ -956,7 +905,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.error).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -971,7 +919,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -984,7 +931,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1001,7 +947,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1013,7 +958,6 @@ describe('DataService', () => {
         it('should DELETE record with id filter', async () => {
             service.deleteData('Issue', 5).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.5'));
@@ -1024,7 +968,6 @@ describe('DataService', () => {
         it('should handle string IDs', async () => {
             service.deleteData('Issue', 'abc-123').subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.abc-123'));
@@ -1037,7 +980,6 @@ describe('DataService', () => {
             service.deleteData('Issue', 1).subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.error).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1056,7 +998,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.code).toBe('23503');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.5'));
@@ -1072,7 +1013,6 @@ describe('DataService', () => {
             service.deleteData('Issue', 1).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1083,7 +1023,6 @@ describe('DataService', () => {
             service.deleteData('Issue', 999).subscribe(response => {
                 // PostgREST returns 200 even if no rows deleted, which is standard REST behavior
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.999'));
@@ -1095,7 +1034,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.httpCode).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1107,7 +1045,6 @@ describe('DataService', () => {
         it('should call RPC function', async () => {
             service.refreshCurrentUser().subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('rpc/refresh_current_user'));
@@ -1119,7 +1056,6 @@ describe('DataService', () => {
         it('should handle RPC errors', async () => {
             service.refreshCurrentUser().subscribe(response => {
                 expect(response.success).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('rpc/refresh_current_user'));
@@ -1135,7 +1071,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.httpCode).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'Issue');
@@ -1151,7 +1086,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.error).toBeUndefined();
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1166,7 +1100,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1179,7 +1112,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1196,7 +1128,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1211,7 +1142,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1224,7 +1154,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1237,7 +1166,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1250,7 +1178,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1265,7 +1192,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1278,7 +1204,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1291,7 +1216,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1304,7 +1228,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1318,7 +1241,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1331,7 +1253,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true); // Fallback for unsupported types
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1345,7 +1266,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(false); // Not detected as EWKB, compared as string
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1359,7 +1279,6 @@ describe('DataService', () => {
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(false); // Not detected as EWKB, compared as string
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1372,7 +1291,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1385,7 +1303,6 @@ describe('DataService', () => {
 
             service.editData('Issue', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('Issue?id=eq.1'));
@@ -1400,7 +1317,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1413,7 +1329,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1426,7 +1341,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1441,7 +1355,6 @@ describe('DataService', () => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
                 expect(response.error?.humanMessage).toBe('Changes may not have been saved');
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1454,7 +1367,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1467,7 +1379,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1480,7 +1391,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(false); // Mismatch because #123 is not valid format
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1493,7 +1403,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1506,7 +1415,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1519,7 +1427,6 @@ describe('DataService', () => {
 
             service.editData('tags', 1, updatedData).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('tags?id=eq.1'));
@@ -1721,7 +1628,6 @@ describe('DataService', () => {
 
                 service.addManyToManyRelation(5, meta, 3).subscribe(response => {
                     expect(response.success).toBe(true);
-                    ;
                 });
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'issue_tags');
@@ -1751,7 +1657,6 @@ describe('DataService', () => {
 
                 service.addManyToManyRelation('abc-123-uuid', meta, 2).subscribe(response => {
                     expect(response.success).toBe(true);
-                    ;
                 });
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'user_roles');
@@ -1781,7 +1686,6 @@ describe('DataService', () => {
                 service.addManyToManyRelation(5, meta, 3).subscribe(response => {
                     expect(response.success).toBe(false);
                     expect(response.error).toBeDefined();
-                    ;
                 });
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'issue_tags');
@@ -1807,7 +1711,6 @@ describe('DataService', () => {
                 service.addManyToManyRelation(5, meta, 3).subscribe(response => {
                     expect(response.success).toBe(false);
                     expect(response.error).toBeDefined();
-                    ;
                 });
 
                 const req = httpMock.expectOne(testPostgrestUrl + 'issue_tags');
@@ -1834,7 +1737,6 @@ describe('DataService', () => {
 
                 service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
                     expect(response.success).toBe(true);
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3'));
@@ -1860,7 +1762,6 @@ describe('DataService', () => {
 
                 service.removeManyToManyRelation('abc-123-uuid', meta, 2).subscribe(response => {
                     expect(response.success).toBe(true);
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('user_roles?user_id=eq.abc-123-uuid&role_id=eq.2'));
@@ -1887,7 +1788,6 @@ describe('DataService', () => {
                 service.removeManyToManyRelation(5, meta, 999).subscribe(response => {
                     // PostgREST returns 200 even if no rows matched, which is standard REST behavior
                     expect(response.success).toBe(true);
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.999'));
@@ -1913,7 +1813,6 @@ describe('DataService', () => {
                 service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
                     expect(response.success).toBe(false);
                     expect(response.error).toBeDefined();
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3'));
@@ -1939,7 +1838,6 @@ describe('DataService', () => {
                 service.removeManyToManyRelation(5, meta, 3).subscribe(response => {
                     expect(response.success).toBe(false);
                     expect(response.error).toBeDefined();
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('issue_tags?issue_id=eq.5&tag_id=eq.3'));
@@ -2096,7 +1994,6 @@ describe('DataService', () => {
 
             service.bulkInsertJunctions('partner_service_categories', records).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'partner_service_categories');
@@ -2110,7 +2007,6 @@ describe('DataService', () => {
         it('should return success for empty records array', async () => {
             service.bulkInsertJunctions('partner_service_categories', []).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             // No HTTP request should be made
@@ -2125,7 +2021,6 @@ describe('DataService', () => {
             service.bulkInsertJunctions('partner_service_categories', records).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error).toBeDefined();
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'partner_service_categories');

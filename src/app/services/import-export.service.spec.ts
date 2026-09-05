@@ -168,7 +168,6 @@ describe('ImportExportService', () => {
 
             service.fetchForeignKeyLookups(propsWithoutFK).subscribe(result => {
                 expect(result.size).toBe(0);
-                ;
             });
         });
 
@@ -201,7 +200,6 @@ describe('ImportExportService', () => {
                 expect(lookup.displayNameToIds.get('open')).toEqual([1]);
                 expect(lookup.idsToDisplayName.get(1)).toBe('Open');
 
-                ;
             });
         });
 
@@ -229,7 +227,6 @@ describe('ImportExportService', () => {
                 expect(lookup.validIds.has('def-456')).toBe(true);
                 expect(lookup.displayNameToIds.get('john doe')).toEqual(['abc-123']);
 
-                ;
             });
         });
 
@@ -259,7 +256,6 @@ describe('ImportExportService', () => {
                 expect(lookup.validIds.has(1)).toBe(true);
                 expect(lookup.validIds.has(2)).toBe(true);
 
-                ;
             });
         });
 
@@ -294,7 +290,6 @@ describe('ImportExportService', () => {
                 expect(lookup.idsToDisplayName.get(2)).toBe('lowercase');
                 expect(lookup.idsToDisplayName.get(3)).toBe('MixedCase');
 
-                ;
             });
         });
 
@@ -317,7 +312,6 @@ describe('ImportExportService', () => {
                 expect(lookup.displayNameToIds.size).toBe(0);
                 expect(lookup.idsToDisplayName.size).toBe(0);
 
-                ;
             });
         });
     });
@@ -1432,14 +1426,12 @@ describe('ImportExportService', () => {
                     expect(lookup.displayNameToIds.get('legal aid')).toEqual([1]);
                     expect(lookup.displayNameToIds.get('healthcare')).toEqual([2]);
 
-                    ;
                 });
             });
 
             it('should skip rich junctions (with extra columns)', async () => {
                 service.fetchForeignKeyLookups([richM2mProp]).subscribe(result => {
                     expect(result.size).toBe(0);
-                    ;
                 });
             });
 
@@ -1454,7 +1446,6 @@ describe('ImportExportService', () => {
 
                 service.fetchForeignKeyLookups([parentHopProp]).subscribe(result => {
                     expect(result.size).toBe(0);
-                    ;
                 });
             });
 
@@ -1477,7 +1468,6 @@ describe('ImportExportService', () => {
                     expect(result.size).toBe(1);
                     // Should only fetch once
                     expect(mockDataService.getData).toHaveBeenCalledTimes(1);
-                    ;
                 });
             });
         });

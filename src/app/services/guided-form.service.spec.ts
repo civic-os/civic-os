@@ -89,7 +89,6 @@ describe('GuidedFormService', () => {
                 const cached = service.getContext('test_guidedForm', 'test_parent', 42);
                 expect(cached).toBeDefined();
                 expect(cached!.parent_id).toBe(42);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
@@ -108,7 +107,6 @@ describe('GuidedFormService', () => {
                 // Second call — should return from cache, no HTTP
                 service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
                     expect(ctx.parent_id).toBe(42);
-                    ;
                 });
             });
 
@@ -129,7 +127,6 @@ describe('GuidedFormService', () => {
             service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
                 expect(ctx.steps[0].conditions).toEqual([]);
                 expect(ctx.steps[1].conditions).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
@@ -147,7 +144,6 @@ describe('GuidedFormService', () => {
                 service.refreshContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
                     expect(ctx.parent_status_key).toBe('submitted');
                     expect(service.getContext('test_guidedForm', 'test_parent', 42)?.parent_status_key).toBe('submitted');
-                    ;
                 });
 
                 const refreshReq = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
@@ -163,7 +159,6 @@ describe('GuidedFormService', () => {
         it('should call start_guided_form RPC', async () => {
             service.startGuidedForm('test_guidedForm').subscribe(result => {
                 expect(result).toEqual(expect.objectContaining({ parent_id: 42, parent_table: 'test_parent' }));
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/start_guided_form');
@@ -175,7 +170,6 @@ describe('GuidedFormService', () => {
         it('should call complete_guided_form_step RPC', async () => {
             service.completeStep('test_guidedForm', 42, 'step1').subscribe(result => {
                 expect(result).toEqual({ all_data_steps_complete: false, next_step_key: 'step2', next_step_table: 'test_step2', next_record_id: 99 });
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/complete_guided_form_step');
@@ -187,7 +181,6 @@ describe('GuidedFormService', () => {
         it('should call submit_guided_form RPC', async () => {
             service.submitGuidedForm('test_guidedForm', 42).subscribe(result => {
                 expect(result).toEqual(expect.objectContaining({ navigate_to: '/view/test_parent/42' }));
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/submit_guided_form');
@@ -199,7 +192,6 @@ describe('GuidedFormService', () => {
         it('should call cancel_guided_form RPC', async () => {
             service.cancelGuidedForm('test_guidedForm', 42).subscribe(result => {
                 expect(result).toEqual({ cancelled: true });
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/cancel_guided_form');
@@ -211,7 +203,6 @@ describe('GuidedFormService', () => {
         it('should call ensure_guided_form_step_record RPC', async () => {
             service.ensureStepRecord('test_guidedForm', 42, 'step1').subscribe(result => {
                 expect(result).toEqual({ record_id: 99, created: true });
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/ensure_guided_form_step_record');

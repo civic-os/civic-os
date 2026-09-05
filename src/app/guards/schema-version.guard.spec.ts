@@ -67,7 +67,6 @@ describe('schemaVersionGuard', () => {
                     expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
                     expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
                     expect(console.log).not.toHaveBeenCalled();
-                    ;
                 });
             }
         });
@@ -92,7 +91,6 @@ describe('schemaVersionGuard', () => {
                     expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
                     expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
                     expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-                    ;
                 });
             }
         });
@@ -117,7 +115,6 @@ describe('schemaVersionGuard', () => {
                     expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
                     expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
                     expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-                    ;
                 });
             }
         });
@@ -142,7 +139,6 @@ describe('schemaVersionGuard', () => {
                     expect(mockSchemaService.refreshEntitiesCache).toHaveBeenCalledTimes(1);
                     expect(mockSchemaService.refreshPropertiesCache).toHaveBeenCalledTimes(1);
                     expect(mockProfileService.invalidateCache).not.toHaveBeenCalled();
-                    ;
                 });
             }
         });
@@ -167,7 +163,6 @@ describe('schemaVersionGuard', () => {
                     expect(mockSchemaService.refreshEntitiesCache).not.toHaveBeenCalled();
                     expect(mockSchemaService.refreshPropertiesCache).not.toHaveBeenCalled();
                     expect(mockProfileService.invalidateCache).toHaveBeenCalledTimes(1);
-                    ;
                 });
             }
         });
@@ -189,7 +184,6 @@ describe('schemaVersionGuard', () => {
             if (result$ instanceof Promise || typeof (result$ as any).subscribe === 'function') {
                 (result$ as any).subscribe((result: boolean) => {
                     expect(result).toBe(true);
-                    ;
                 });
             }
         });

@@ -147,7 +147,6 @@ describe('GeoPolygonMapComponent', () => {
 
             component.valueChange.subscribe(value => {
                 expect(value).toBe('SRID=4326;POLYGON((-83.7 43, -83.6 43, -83.6 43.1, -83.7 43))');
-                ;
             });
 
             component.applyCoordinates();

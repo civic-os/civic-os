@@ -68,7 +68,6 @@ describe('SchemaService', () => {
             service.getEntities().subscribe(entities => {
                 expect(entities).toEqual(mockEntities);
                 expect(entities.length).toBe(2);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', mockEntities);
@@ -82,7 +81,6 @@ describe('SchemaService', () => {
                 // Second call - should return from cache without HTTP request
                 service.getEntities().subscribe(cachedEntities => {
                     expect(cachedEntities).toEqual(mockEntities);
-                    ;
                 });
                 // No HTTP request should be made for the second call
             });
@@ -101,7 +99,6 @@ describe('SchemaService', () => {
             service.getEntity('Issue').subscribe(entity => {
                 expect(entity).toBeDefined();
                 expect(entity?.table_name).toBe('Issue');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', mockEntities);
@@ -110,7 +107,6 @@ describe('SchemaService', () => {
         it('should return undefined for non-existent entity', async () => {
             service.getEntity('NonExistent').subscribe(entity => {
                 expect(entity).toBeUndefined();
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', []);
@@ -129,7 +125,6 @@ describe('SchemaService', () => {
                 expect(props[0].column_name).toBe('name');
                 // Should have type calculated
                 expect(props[0].type).toBe(EntityPropertyType.TextShort);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', []);
@@ -145,7 +140,6 @@ describe('SchemaService', () => {
                     expect(cachedProps).toEqual(expect.arrayContaining([
                         expect.objectContaining({ column_name: 'name' })
                     ]));
-                    ;
                 });
             });
 
@@ -186,7 +180,6 @@ describe('SchemaService', () => {
                 expect(byTable.get('work_details')?.previewMode).toBe('display_name');
                 expect(byTable.get('step_records')?.previewMode).toBe('id');
                 expect(byTable.get('team_rosters')?.previewMode).toBe('count');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', []);
@@ -417,7 +410,6 @@ describe('SchemaService', () => {
                 expect(props.find(p => p.column_name === 'id')).toBeUndefined();
                 expect(props.find(p => p.column_name === 'created_at')).toBeUndefined();
                 expect(props.find(p => p.column_name === 'updated_at')).toBeUndefined();
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -434,7 +426,6 @@ describe('SchemaService', () => {
             service.getPropsForList(MOCK_ENTITIES.issue).subscribe(props => {
                 expect(props.length).toBe(1);
                 expect(props[0].column_name).toBe('issue_name');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -464,7 +455,6 @@ describe('SchemaService', () => {
                 expect(props.length).toBe(2);
                 expect(props.find(p => p.column_name === 'name')).toBeDefined();
                 expect(props.find(p => p.column_name === 'location')).toBeDefined();
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [entityWithMap]);
@@ -493,7 +483,6 @@ describe('SchemaService', () => {
             service.getPropsForList(entityWithMap).subscribe(props => {
                 expect(props.length).toBe(2);
                 expect(props.filter(p => p.column_name === 'location').length).toBe(1);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [entityWithMap]);
@@ -513,7 +502,6 @@ describe('SchemaService', () => {
             service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
                 expect(props.length).toBe(1);
                 expect(props[0].column_name).toBe('name');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -530,7 +518,6 @@ describe('SchemaService', () => {
             service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
                 expect(props.length).toBe(1);
                 expect(props[0].column_name).toBe('name');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -548,7 +535,6 @@ describe('SchemaService', () => {
             service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
                 expect(props.length).toBe(1);
                 expect(props[0].column_name).toBe('name');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -568,7 +554,6 @@ describe('SchemaService', () => {
                 expect(props[0].column_name).toBe('name');
                 expect(props[1].column_name).toBe('status');
                 expect(props.find(p => p.column_name === 'internal_notes')).toBeUndefined();
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -587,7 +572,6 @@ describe('SchemaService', () => {
             service.getPropsForEdit(MOCK_ENTITIES.issue).subscribe(props => {
                 expect(props.length).toBe(1);
                 expect(props[0].column_name).toBe('name');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -607,7 +591,6 @@ describe('SchemaService', () => {
                 expect(props.find(p => p.column_name === 'title')).toBeDefined();
                 expect(props.find(p => p.column_name === 'calculated_field')).toBeUndefined();
                 expect(props.find(p => p.column_name === 'description')).toBeDefined();
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -630,7 +613,6 @@ describe('SchemaService', () => {
                     expect(props[0].column_name).toBe('status'); // sort_order: 0
                     expect(props[1].column_name).toBe('count'); // sort_order: 1
                     expect(props[2].column_name).toBe('name'); // sort_order: 2
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -649,7 +631,6 @@ describe('SchemaService', () => {
                 service.getPropsForDetail(MOCK_ENTITIES.issue).subscribe(props => {
                     expect(props[0].column_name).toBe('title'); // sort_order: 3
                     expect(props[1].column_name).toBe('description'); // sort_order: 5
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -671,7 +652,6 @@ describe('SchemaService', () => {
                     expect(props.find(p => p.column_name === 'internal_id')).toBeUndefined();
                     expect(props.find(p => p.column_name === 'created_at')).toBeDefined();
                     expect(props.find(p => p.column_name === 'updated_at')).toBeDefined();
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -692,7 +672,6 @@ describe('SchemaService', () => {
                     expect(props[0].column_name).toBe('field_b'); // sort_order: 5
                     expect(props[1].column_name).toBe('field_c'); // sort_order: 7
                     expect(props[2].column_name).toBe('field_a'); // sort_order: 10
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -711,7 +690,6 @@ describe('SchemaService', () => {
                 service.getPropsForEdit(MOCK_ENTITIES.issue).subscribe(props => {
                     expect(props[0].column_name).toBe('first'); // sort_order: 1
                     expect(props[1].column_name).toBe('last'); // sort_order: 99
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
@@ -811,7 +789,6 @@ describe('SchemaService', () => {
                 expect(props[0].column_name).toBe('title');
                 expect(props[0].type).toBe(EntityPropertyType.TextShort);
                 expect(props[1].type).toBe(EntityPropertyType.TextLong);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
@@ -828,7 +805,6 @@ describe('SchemaService', () => {
                 expect(props.length).toBe(1);
                 expect(props[0].table_name).toBe('Issue');
                 expect(props[0].column_name).toBe('title');
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
@@ -847,7 +823,6 @@ describe('SchemaService', () => {
                 // Second call - should make another HTTP request
                 service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props2 => {
                     expect(props2.length).toBe(1);
-                    ;
                 });
 
                 // Expect second HTTP request
@@ -867,7 +842,6 @@ describe('SchemaService', () => {
 
             service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props => {
                 expect(props.length).toBe(0);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
@@ -885,7 +859,6 @@ describe('SchemaService', () => {
                 expect(props[0].type).toBe(EntityPropertyType.TextShort);
                 expect(props[1].type).toBe(EntityPropertyType.IntegerNumber);
                 expect(props[2].type).toBe(EntityPropertyType.Boolean);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
@@ -1040,7 +1013,6 @@ describe('SchemaService', () => {
                     expect(statuses[0].display_name).toBe('Pending');
                     expect(statuses[1].display_name).toBe('Approved');
                     expect(statuses[2].display_name).toBe('Denied');
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
@@ -1055,7 +1027,6 @@ describe('SchemaService', () => {
                     // Second call - should return from cache
                     service.getStatusesForEntity('reservation_request').subscribe(cachedStatuses => {
                         expect(cachedStatuses.length).toBe(3);
-                        ;
                     });
                     // No second HTTP request should be made
                 });
@@ -1076,7 +1047,6 @@ describe('SchemaService', () => {
                     service.getStatusesForEntity('issue').subscribe(statuses => {
                         expect(statuses.length).toBe(2);
                         expect(statuses[0].display_name).toBe('Open');
-                        ;
                     });
 
                     const issueReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
@@ -1092,7 +1062,6 @@ describe('SchemaService', () => {
             it('should handle HTTP errors gracefully', async () => {
                 service.getStatusesForEntity('invalid_entity').subscribe(statuses => {
                     expect(statuses).toEqual([]);
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
@@ -1108,7 +1077,6 @@ describe('SchemaService', () => {
                     const cached = service.getStatusOptionsSync('reservation_request');
                     expect(cached.length).toBe(3);
                     expect(cached[0].display_name).toBe('Pending');
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
@@ -1146,7 +1114,6 @@ describe('SchemaService', () => {
                     expect(result[0].id).toBe(1);
                     expect(result[0].display_name).toBe('Pending');
                     expect(result[0].color).toBe('#fbbf24');
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
@@ -1167,7 +1134,6 @@ describe('SchemaService', () => {
                         expect(issueOptions.length).toBe(1);
                         expect(reservationOptions[0].display_name).toBe('Pending');
                         expect(issueOptions[0].display_name).toBe('Open');
-                        ;
                     });
 
                     const issueReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
@@ -1249,7 +1215,6 @@ describe('SchemaService', () => {
                 // Next request should trigger fresh HTTP
                 service.getStatusesForEntity('reservation_request').subscribe(statuses => {
                     expect(statuses.length).toBe(3);
-                    ;
                 });
 
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
@@ -1338,7 +1303,6 @@ describe('SchemaService', () => {
                 // Next request should trigger fresh HTTP
                 service.getStatusesForEntity('reservation_request').subscribe(statuses => {
                     expect(statuses.length).toBe(3);
-                    ;
                 });
 
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
@@ -1362,7 +1326,6 @@ describe('SchemaService', () => {
                     expect(types.length).toBe(2);
                     expect(types[0].display_name).toBe('Clock In');
                     expect(types[1].display_name).toBe('Clock Out');
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
@@ -1375,7 +1338,6 @@ describe('SchemaService', () => {
                 service.getCategoriesForEntity('time_entry').subscribe(() => {
                     service.getCategoriesForEntity('time_entry').subscribe(cachedTypes => {
                         expect(cachedTypes.length).toBe(2);
-                        ;
                     });
                 });
 
@@ -1393,7 +1355,6 @@ describe('SchemaService', () => {
                     service.getCategoriesForEntity('building').subscribe(categories => {
                         expect(categories.length).toBe(2);
                         expect(categories[0].display_name).toBe('Commercial');
-                        ;
                     });
 
                     const buildingReq = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
@@ -1409,7 +1370,6 @@ describe('SchemaService', () => {
             it('should handle HTTP errors gracefully', async () => {
                 service.getCategoriesForEntity('invalid_entity').subscribe(categories => {
                     expect(categories).toEqual([]);
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
@@ -1423,7 +1383,6 @@ describe('SchemaService', () => {
                     const cached = service.getCategoryOptionsSync('time_entry');
                     expect(cached.length).toBe(2);
                     expect(cached[0].display_name).toBe('Clock In');
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
@@ -1459,7 +1418,6 @@ describe('SchemaService', () => {
                     expect(result[0].id).toBe(1);
                     expect(result[0].display_name).toBe('Clock In');
                     expect(result[0].color).toBe('#22c55e');
-                    ;
                 });
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
@@ -1521,7 +1479,6 @@ describe('SchemaService', () => {
 
                 service.getCategoriesForEntity('time_entry').subscribe(categories => {
                     expect(categories.length).toBe(2);
-                    ;
                 });
 
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
@@ -1850,7 +1807,6 @@ describe('SchemaService', () => {
                 expect(m2mProp?.many_to_many_meta?.targetColumn).toBe('tag_id');
                 expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(true);
 
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
@@ -1901,7 +1857,6 @@ describe('SchemaService', () => {
                 expect(m2mProp?.many_to_many_meta?.sourceColumn).toBe('tag_id');
                 expect(m2mProp?.many_to_many_meta?.targetColumn).toBe('issue_id');
 
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
@@ -1943,7 +1898,6 @@ describe('SchemaService', () => {
             service.getPropertiesForEntity(entities[0]).subscribe(props => {
                 const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
                 expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(true);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
@@ -1984,7 +1938,6 @@ describe('SchemaService', () => {
             service.getPropertiesForEntity(entities[0]).subscribe(props => {
                 const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
                 expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(false);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
@@ -2148,7 +2101,6 @@ describe('SchemaService', () => {
             service.getConstraintMessages().subscribe(messages => {
                 expect(messages).toEqual(mockMessages);
                 expect(messages.length).toBe(2);
-                ;
             });
 
             expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
@@ -2169,7 +2121,6 @@ describe('SchemaService', () => {
                 // Second call - should return from cache without HTTP request
                 service.getConstraintMessages().subscribe(cachedMessages => {
                     expect(cachedMessages).toEqual(mockMessages);
-                    ;
                 });
                 // No HTTP request should be made for the second call
             });
@@ -2180,7 +2131,6 @@ describe('SchemaService', () => {
         it('should handle HTTP errors gracefully and return empty array', async () => {
             service.getConstraintMessages().subscribe(messages => {
                 expect(messages).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(req => req.url.includes('constraint_messages'));
@@ -2202,7 +2152,6 @@ describe('SchemaService', () => {
             const sub2 = service.getConstraintMessages().subscribe();
             const sub3 = service.getConstraintMessages().subscribe(messages => {
                 expect(messages).toEqual(mockMessages);
-                ;
             });
 
             // Should only make ONE HTTP request despite three subscriptions
@@ -2249,7 +2198,6 @@ describe('SchemaService', () => {
                 // Next call to getConstraintMessages() should trigger a new fetch
                 service.getConstraintMessages().subscribe(() => {
                     expect(service.constraintMessages).toEqual(secondMessages);
-                    ;
                 });
 
                 const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
@@ -2305,7 +2253,6 @@ describe('SchemaService', () => {
                 service.getStaticText().subscribe(staticTexts => {
                     expect(staticTexts).toEqual(mockStaticTexts);
                     expect(staticTexts.length).toBe(3);
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
@@ -2317,7 +2264,6 @@ describe('SchemaService', () => {
                     // Second call - should return from cache
                     service.getStaticText().subscribe(cachedStaticTexts => {
                         expect(cachedStaticTexts).toEqual(mockStaticTexts);
-                        ;
                     });
                 });
 
@@ -2330,7 +2276,6 @@ describe('SchemaService', () => {
                 service.getStaticTextForEntity('Issue').subscribe(staticTexts => {
                     expect(staticTexts.length).toBe(2);
                     expect(staticTexts.every(st => st.table_name === 'Issue')).toBe(true);
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
@@ -2339,7 +2284,6 @@ describe('SchemaService', () => {
             it('should return empty array for entity with no static text', async () => {
                 service.getStaticTextForEntity('NonExistentEntity').subscribe(staticTexts => {
                     expect(staticTexts.length).toBe(0);
-                    ;
                 });
 
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
@@ -2360,7 +2304,6 @@ describe('SchemaService', () => {
                     // Next call should fetch fresh data
                     service.getStaticText().subscribe(refreshedStaticTexts => {
                         expect(refreshedStaticTexts).toEqual(updatedStaticTexts);
-                        ;
                     });
 
                     expectPostgrestRequest(httpMock, 'static_text', updatedStaticTexts);

@@ -76,7 +76,6 @@ describe('PermissionsService', () => {
 
             service.getRoles().subscribe(roles => {
                 expect(roles).toEqual(mockRoles);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_roles');
@@ -88,7 +87,6 @@ describe('PermissionsService', () => {
         it('should return empty array on error', async () => {
             service.getRoles().subscribe(roles => {
                 expect(roles).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_roles');
@@ -100,7 +98,6 @@ describe('PermissionsService', () => {
         it('should get tables from schema service', async () => {
             service.getTables().subscribe(tables => {
                 expect(tables).toEqual(['issues', 'users']);
-                ;
             });
         });
     });
@@ -116,7 +113,6 @@ describe('PermissionsService', () => {
                 expect(permissions.length).toBe(2);
                 expect(permissions[0].has_permission).toBe(true); // Converted from 't'
                 expect(permissions[1].has_permission).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
@@ -133,7 +129,6 @@ describe('PermissionsService', () => {
             service.getRolePermissions(1).subscribe(permissions => {
                 expect(permissions[0].has_permission).toBe(true);
                 expect(permissions[1].has_permission).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
@@ -143,7 +138,6 @@ describe('PermissionsService', () => {
         it('should return empty array on error', async () => {
             service.getRolePermissions(1).subscribe(permissions => {
                 expect(permissions).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_permissions');
@@ -155,7 +149,6 @@ describe('PermissionsService', () => {
         it('should call set_role_permission RPC function', async () => {
             service.setRolePermission(1, 'issues', 'read', true).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
@@ -175,7 +168,6 @@ describe('PermissionsService', () => {
             service.setRolePermission(1, 'issues', 'invalid', true).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Permission not found');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
@@ -186,7 +178,6 @@ describe('PermissionsService', () => {
             service.setRolePermission(1, 'issues', 'read', true).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to update permission');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_permission');
@@ -198,7 +189,6 @@ describe('PermissionsService', () => {
         it('should call is_admin RPC function', async () => {
             service.isAdmin().subscribe(isAdmin => {
                 expect(isAdmin).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
@@ -210,7 +200,6 @@ describe('PermissionsService', () => {
         it('should return false on error', async () => {
             service.isAdmin().subscribe(isAdmin => {
                 expect(isAdmin).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
@@ -225,7 +214,6 @@ describe('PermissionsService', () => {
             service.createRole('moderator', 'Moderates content').subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.roleId).toBe(5);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -243,7 +231,6 @@ describe('PermissionsService', () => {
             service.createRole('viewer').subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.roleId).toBe(6);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -260,7 +247,6 @@ describe('PermissionsService', () => {
             service.createRole('admin').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Role with this name already exists');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -273,7 +259,6 @@ describe('PermissionsService', () => {
             service.createRole('').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Role name cannot be empty');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -286,7 +271,6 @@ describe('PermissionsService', () => {
             service.createRole('hacker').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Admin access required');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -297,7 +281,6 @@ describe('PermissionsService', () => {
             service.createRole('moderator').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to create role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -308,7 +291,6 @@ describe('PermissionsService', () => {
             service.createRole('moderator').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to create role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_role');
@@ -325,7 +307,6 @@ describe('PermissionsService', () => {
 
             service.getRoleCanManage(1).subscribe(delegations => {
                 expect(delegations).toEqual(mockDelegations);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
@@ -337,7 +318,6 @@ describe('PermissionsService', () => {
         it('should return empty array on error', async () => {
             service.getRoleCanManage(1).subscribe(delegations => {
                 expect(delegations).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_role_can_manage');
@@ -349,7 +329,6 @@ describe('PermissionsService', () => {
         it('should POST correct params for enabling delegation', async () => {
             service.setRoleCanManage(1, 2, true).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
@@ -365,7 +344,6 @@ describe('PermissionsService', () => {
         it('should POST correct params for disabling delegation', async () => {
             service.setRoleCanManage(1, 2, false).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
@@ -381,7 +359,6 @@ describe('PermissionsService', () => {
             service.setRoleCanManage(1, 2, true).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Admin access required');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
@@ -392,7 +369,6 @@ describe('PermissionsService', () => {
             service.setRoleCanManage(1, 2, true).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to update role delegation');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/set_role_can_manage');
@@ -405,7 +381,6 @@ describe('PermissionsService', () => {
             service.deleteRole(5).subscribe(response => {
                 expect(response.success).toBe(true);
                 expect(response.body?.affected_users).toBe(3);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
@@ -418,7 +393,6 @@ describe('PermissionsService', () => {
             service.deleteRole(1).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Cannot delete built-in role "user"');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');
@@ -429,7 +403,6 @@ describe('PermissionsService', () => {
             service.deleteRole(5).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to delete role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/delete_role');

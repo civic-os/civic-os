@@ -70,7 +70,6 @@ describe('UserManagementService', () => {
 
             service.getManagedUsers().subscribe(users => {
                 expect(users).toEqual(mockUsers as any);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'managed_users?order=created_at.desc');
@@ -104,7 +103,6 @@ describe('UserManagementService', () => {
         it('should return empty array on error', async () => {
             service.getManagedUsers().subscribe(users => {
                 expect(users).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'managed_users?order=created_at.desc');
@@ -118,7 +116,6 @@ describe('UserManagementService', () => {
 
             service.createUser(user).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_provisioned_user');
@@ -135,7 +132,6 @@ describe('UserManagementService', () => {
             service.createUser(user).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Role "nonexistent" does not exist');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_provisioned_user');
@@ -147,7 +143,6 @@ describe('UserManagementService', () => {
 
             service.createUser(user).subscribe(response => {
                 expect(response.success).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_provisioned_user');
@@ -164,7 +159,6 @@ describe('UserManagementService', () => {
 
             service.importUsers(users).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
@@ -176,7 +170,6 @@ describe('UserManagementService', () => {
         it('should handle partial failure response', async () => {
             service.importUsers([{ email: 'a@test.com', first_name: 'A', last_name: 'User' }]).subscribe(response => {
                 expect(response.success).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
@@ -186,7 +179,6 @@ describe('UserManagementService', () => {
         it('should handle HTTP error', async () => {
             service.importUsers([]).subscribe(response => {
                 expect(response.success).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
@@ -204,7 +196,6 @@ describe('UserManagementService', () => {
                 expect(result.success).toBe(true);
                 expect(result.created_count).toBe(1);
                 expect(result.error_count).toBe(0);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
@@ -225,7 +216,6 @@ describe('UserManagementService', () => {
                 expect(result.error_count).toBe(1);
                 expect(result.errors.length).toBe(1);
                 expect(result.errors[0].email).toBe('b@test.com');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
@@ -243,7 +233,6 @@ describe('UserManagementService', () => {
                 expect(result.created_count).toBe(0);
                 expect(result.error_count).toBe(1);
                 expect(result.errors.length).toBe(1);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
@@ -255,7 +244,6 @@ describe('UserManagementService', () => {
         it('should POST to retry_user_provisioning RPC', async () => {
             service.retryProvisioning(42).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/retry_user_provisioning');
@@ -268,7 +256,6 @@ describe('UserManagementService', () => {
             service.retryProvisioning(42).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Only failed requests can be retried');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/retry_user_provisioning');
@@ -278,7 +265,6 @@ describe('UserManagementService', () => {
         it('should handle HTTP error', async () => {
             service.retryProvisioning(42).subscribe(response => {
                 expect(response.success).toBe(false);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/retry_user_provisioning');
@@ -295,7 +281,6 @@ describe('UserManagementService', () => {
 
             service.getManageableRoles().subscribe(roles => {
                 expect(roles).toEqual(mockRoles);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_manageable_roles');
@@ -307,7 +292,6 @@ describe('UserManagementService', () => {
         it('should return empty array on error', async () => {
             service.getManageableRoles().subscribe(roles => {
                 expect(roles).toEqual([]);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_manageable_roles');
@@ -319,7 +303,6 @@ describe('UserManagementService', () => {
         it('should POST to assign_user_role RPC with correct params', async () => {
             service.assignUserRole('uuid-123', 'editor').subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/assign_user_role');
@@ -332,7 +315,6 @@ describe('UserManagementService', () => {
             service.assignUserRole('uuid-123', 'admin').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Your role cannot assign the "admin" role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/assign_user_role');
@@ -343,7 +325,6 @@ describe('UserManagementService', () => {
             service.assignUserRole('uuid-123', 'editor').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to assign role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/assign_user_role');
@@ -355,7 +336,6 @@ describe('UserManagementService', () => {
         it('should POST to revoke_user_role RPC with correct params', async () => {
             service.revokeUserRole('uuid-123', 'editor').subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/revoke_user_role');
@@ -368,7 +348,6 @@ describe('UserManagementService', () => {
             service.revokeUserRole('uuid-123', 'admin').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Your role cannot revoke the "admin" role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/revoke_user_role');
@@ -379,7 +358,6 @@ describe('UserManagementService', () => {
             service.revokeUserRole('uuid-123', 'editor').subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Failed to revoke role');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/revoke_user_role');
@@ -396,7 +374,6 @@ describe('UserManagementService', () => {
                 phone: '5559876543'
             }).subscribe(response => {
                 expect(response.success).toBe(true);
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
@@ -428,7 +405,6 @@ describe('UserManagementService', () => {
             }).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Permission denied');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
@@ -441,7 +417,6 @@ describe('UserManagementService', () => {
             }).subscribe(response => {
                 expect(response.success).toBe(false);
                 expect(response.error?.humanMessage).toBe('Internal error');
-                ;
             });
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');

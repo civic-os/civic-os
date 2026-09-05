@@ -243,7 +243,7 @@ describe('ListPage', () => {
     });
   });
 
-  it('should load entity metadata from route params', (done) => {
+  it('should load entity metadata from route params', async () => {
     const mockEntity = createMockEntity({ table_name: 'Issue' });
     mockSchemaService.getEntity.mockReturnValue(of(mockEntity));
     mockSchemaService.getPropsForList.mockReturnValue(of([]));
@@ -251,14 +251,12 @@ describe('ListPage', () => {
 
     const page = TestBed.createComponent(ListPage).componentInstance;
 
-    page.entity$.subscribe(entity => {
-      expect(entity?.table_name).toBe('Issue');
-      expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-      done();
-    });
+    const entity = await firstValueFrom(page.entity$);
+    expect(entity?.table_name).toBe('Issue');
+    expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
   });
 
-  it('should build PostgREST query from property metadata', (done) => {
+  it('should build PostgREST query from property metadata', async () => {
     const mockEntity = createMockEntity({ table_name: 'Issue' });
     const mockProps = [
       createMockProperty({ column_name: 'name', type: EntityPropertyType.TextShort }),
@@ -271,15 +269,13 @@ describe('ListPage', () => {
 
     const page = TestBed.createComponent(ListPage).componentInstance;
 
-    page.data$.subscribe(() => {
-      expect(mockDataService.getData).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: 'Issue',
-          fields: expect.arrayContaining(['name', 'status_id:Status(id,display_name)'])
-        })
-      );
-      done();
-    });
+    await firstValueFrom(page.data$);
+    expect(mockDataService.getData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: 'Issue',
+        fields: expect.arrayContaining(['name', 'status_id:Status(id,display_name)'])
+      })
+    );
   });
 });
 ```
@@ -535,12 +531,10 @@ it('should return entity', () => {
   expect(result.table_name).toBe('Issue'); // ❌ Fails
 });
 
-// ✅ Subscribe and assert in callback
-it('should return entity', (done) => {
-  service.getEntity('Issue').subscribe(entity => {
-    expect(entity?.table_name).toBe('Issue');
-    done();
-  });
+// ✅ Use firstValueFrom for async assertions
+it('should return entity', async () => {
+  const entity = await firstValueFrom(service.getEntity('Issue'));
+  expect(entity?.table_name).toBe('Issue');
 });
 ```
 
@@ -663,13 +657,9 @@ beforeEach(() => {
 
 ```typescript
 // ❌ WRONG - Trying to test Leaflet map creation in unit tests
-it('should initialize map', (done) => {
+it('should initialize map', () => {
   fixture.detectChanges();
-
-  setTimeout(() => {
-    expect(component['map']).toBeDefined(); // ❌ Fails - DOM element not found
-    done();
-  }, 100);
+  expect(component['map']).toBeDefined(); // ❌ Fails - DOM element not found
 });
 ```
 
@@ -681,13 +671,9 @@ beforeEach(() => {
   vi.spyOn<any, any>(component, 'initializeMap').mockImplementation(() => {});
 });
 
-it('should call initializeMap after view init', (done) => {
+it('should call initializeMap after view init', () => {
   fixture.detectChanges();
-
-  setTimeout(() => {
-    expect(component['initializeMap']).toHaveBeenCalled();
-    done();
-  }, 10);
+  expect(component['initializeMap']).toHaveBeenCalled();
 });
 ```
 
@@ -757,35 +743,33 @@ this.data$ = this.properties$.pipe(
 
 ```typescript
 // ❌ WRONG - Long timeout makes tests slow, still fragile
-it('should update dialog', (done) => {
+it('should update dialog', async () => {
   component.submitForm({});
 
-  setTimeout(() => { // ❌ 100ms delay per test adds up!
-    expect(component.successDialog.open).toHaveBeenCalled();
-    done();
-  }, 100);
+  await new Promise(resolve => setTimeout(resolve, 100)); // ❌ 100ms delay per test adds up!
+  expect(component.successDialog.open).toHaveBeenCalled();
 });
 ```
 
-**Solution:** Use minimal delays (10ms) or test synchronously when possible:
+**Solution:** Test synchronously when possible, or use `vi.useFakeTimers()`:
 
 ```typescript
-// ✅ CORRECT - Minimal timeout for async operations
-it('should update dialog', (done) => {
-  component.submitForm({});
-
-  setTimeout(() => {
-    expect(component.successDialog.open).toHaveBeenCalled();
-    done();
-  }, 10); // ✅ 10ms is enough for microtask queue
-});
-
-// ✅ BETTER - Test synchronously when possible
+// ✅ BEST - Test synchronously when possible
 it('should call service method', () => {
   component.submitForm({});
 
   // No setTimeout needed for synchronous assertions
   expect(mockDataService.createData).toHaveBeenCalled();
+});
+
+// ✅ CORRECT - Use fake timers for code that uses setTimeout internally
+it('should update dialog after delay', () => {
+  vi.useFakeTimers();
+  component.submitForm({});
+
+  vi.advanceTimersByTime(10);
+  expect(component.successDialog.open).toHaveBeenCalled();
+  vi.useRealTimers();
 });
 ```
 
@@ -809,19 +793,17 @@ When tests hang or timeout, follow these steps:
 3. **Check for common issues:**
    - Observable never emitting (use `of(value)` not `of()`)
    - Missing service mocks in child components
-   - `done()` callback not being called in async tests
+   - Observable never completing (blocks `firstValueFrom`)
    - DOM elements not available in headless mode
    - Long setTimeout delays accumulating
 
 4. **Use console logging sparingly:**
    ```typescript
-   it('should complete', (done) => {
+   it('should complete', async () => {
      console.log('Test started'); // Debug checkpoint
-     observable$.subscribe(value => {
-       console.log('Got value:', value); // Verify emission
-       expect(value).toBeDefined();
-       done();
-     });
+     const value = await firstValueFrom(observable$);
+     console.log('Got value:', value); // Verify emission
+     expect(value).toBeDefined();
    });
    ```
 
