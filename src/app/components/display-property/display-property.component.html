@@ -139,7 +139,7 @@
               @if (linkRelated()) {
                 <a
                   [routerLink]="['/view', $safeNavigationMigration(prop().many_to_many_meta?.relatedTable), item.id]"
-                  class="!text-primary-content hover:underline">
+                  class="!text-[inherit] hover:underline">
                   {{ formatM2mLabel(item) }}
                 </a>
               } @else {

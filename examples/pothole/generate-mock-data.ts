@@ -338,8 +338,8 @@ class MockDataGenerator {
         provider: 'example.com'
       });
 
-      // Generate phone number in format ###-###-####
-      const phone = `${faker.string.numeric(3)}-${faker.string.numeric(3)}-${faker.string.numeric(4)}`;
+      // Generate 10-digit phone number (no formatting — column is varchar(10))
+      const phone = faker.string.numeric(10);
 
       return {
         id: user.id, // Same UUID as civic_os_users

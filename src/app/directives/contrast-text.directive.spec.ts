@@ -123,6 +123,73 @@ describe('ContrastTextDirective', () => {
     });
   });
 
+  describe('with oklch background (DaisyUI 5 / modern browsers)', () => {
+    let fixture: ComponentFixture<TestHostComponent>;
+    let badgeEl: HTMLElement;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [TestHostComponent],
+        providers: [
+          provideZonelessChangeDetection(),
+          { provide: ThemeService, useValue: mockThemeService },
+        ],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(TestHostComponent);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      badgeEl = fixture.nativeElement.querySelector('.badge');
+    });
+
+    it('should set white text on dark oklch background', async () => {
+      // happy-dom doesn't preserve oklch in getComputedStyle, so mock it
+      vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+        backgroundColor: 'oklch(0.35 0.15 260)',
+      } as CSSStyleDeclaration);
+
+      fixture.componentInstance.bg.set('rgb(0, 0, 0)'); // trigger change
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await fixture.whenStable();
+
+      expect(badgeEl.style.color).toBe('white');
+    });
+
+    it('should set black text on light oklch background', async () => {
+      vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+        backgroundColor: 'oklch(0.95 0.02 100)',
+      } as CSSStyleDeclaration);
+
+      fixture.componentInstance.bg.set('rgb(255, 255, 255)'); // trigger change
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await fixture.whenStable();
+
+      expect(badgeEl.style.color).toBe('black');
+    });
+
+    it('should skip oklch with low alpha', async () => {
+      // Mock must be in place before component creation so the initial
+      // evaluation also sees transparent — otherwise the initial rgb(0,0,0)
+      // sets color to 'white' and the skip doesn't clear it.
+      vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+        backgroundColor: 'oklch(0.5 0.1 200 / 0.3)',
+      } as CSSStyleDeclaration);
+
+      const freshFixture = TestBed.createComponent(TestHostComponent);
+      freshFixture.detectChanges();
+      await freshFixture.whenStable();
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await freshFixture.whenStable();
+
+      const el = freshFixture.nativeElement.querySelector('.badge') as HTMLElement;
+      expect(el.style.color).toBe('');
+    });
+  });
+
   describe('with transparent background (alpha < 0.5)', () => {
     let fixture: ComponentFixture<TransparentHostComponent>;
     let badgeEl: HTMLElement;
