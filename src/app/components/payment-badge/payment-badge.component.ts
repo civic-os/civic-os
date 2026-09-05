@@ -18,6 +18,7 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { PaymentValue } from '../../interfaces/entity';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /**
  * PaymentBadgeComponent - Displays payment status as a colored badge
@@ -33,7 +34,7 @@ import { PaymentValue } from '../../interfaces/entity';
 @Component({
   selector: 'app-payment-badge',
   standalone: true,
-  imports: [],  // CurrencyPipe used programmatically in tooltip()
+  imports: [ContrastTextDirective],  // CurrencyPipe used programmatically in tooltip()
   templateUrl: './payment-badge.component.html',
   styleUrl: './payment-badge.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

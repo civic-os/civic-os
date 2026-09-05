@@ -33,7 +33,7 @@
               }
             </h1>
             @if (seriesMembership()?.is_member) {
-              <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', $safeNavigationMigration(seriesMembership()?.group_id)]">
+              <a appContrastText class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', $safeNavigationMigration(seriesMembership()?.group_id)]">
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">repeat</span>
                 {{ seriesMembership()?.group_name || 'Recurring' }}
               </a>
@@ -74,7 +74,7 @@
                           @for (rel of currentData?.[item.column_name] || []; track rel.id) {
                             <a
                               [routerLink]="['/view', item.many_to_many_meta!.relatedTable, rel.id]"
-                              class="badge badge-lg badge-primary gap-2 py-3 px-3 bg-opacity-80 cursor-pointer hover:bg-opacity-100 transition-opacity">
+                              appContrastText class="badge badge-lg badge-primary gap-2 py-3 px-3 bg-opacity-80 cursor-pointer hover:bg-opacity-100 transition-opacity">
                               <span>{{ rel.display_name }}</span>
                               @if (rel.color) {
                                 <span class="w-3 h-3 rounded-full inline-block" [style.background-color]="rel.color"></span>

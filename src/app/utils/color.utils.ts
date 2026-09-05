@@ -34,6 +34,25 @@ function contrastRatio(l1: number, l2: number): number {
 
 /**
  * Choose the text color ('black' or 'white') that yields the higher WCAG
+ * contrast ratio against the given background specified as 0-255 RGB channels.
+ *
+ * This is the core implementation — accepts raw RGB to avoid hex round-tripping
+ * when working with parsed `rgb()`/`rgba()` values (e.g., from `getComputedStyle`).
+ *
+ * @param r - Red channel (0-255)
+ * @param g - Green channel (0-255)
+ * @param b - Blue channel (0-255)
+ * @returns 'white' or 'black' — whichever contrasts better with the background
+ */
+export function getContrastTextColorFromRgb(r: number, g: number, b: number): 'white' | 'black' {
+  const bgLuminance = relativeLuminance(r, g, b);
+  const contrastWithBlack = contrastRatio(bgLuminance, 0);
+  const contrastWithWhite = contrastRatio(bgLuminance, 1);
+  return contrastWithBlack >= contrastWithWhite ? 'black' : 'white';
+}
+
+/**
+ * Choose the text color ('black' or 'white') that yields the higher WCAG
  * contrast ratio against the given background color.
  *
  * Unlike a simple YIQ brightness threshold, this computes the actual WCAG 2.1
@@ -50,10 +69,5 @@ export function getContrastTextColor(hexColor: string): 'white' | 'black' {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-
-  const bgLuminance = relativeLuminance(r, g, b);
-  const contrastWithBlack = contrastRatio(bgLuminance, 0); // black text
-  const contrastWithWhite = contrastRatio(bgLuminance, 1); // white text
-
-  return contrastWithBlack >= contrastWithWhite ? 'black' : 'white';
+  return getContrastTextColorFromRgb(r, g, b);
 }

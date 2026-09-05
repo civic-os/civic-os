@@ -56,10 +56,10 @@
                      (keydown.space)="$event.preventDefault(); togglePolicy(getPolicyKey(policy))">
                   <span class="font-mono text-sm flex-1">{{ policy.policy_name }}</span>
                   <div class="flex items-center gap-2 flex-shrink-0">
-                    <span class="badge badge-sm" [ngClass]="getCommandBadgeClass(policy.command)">
+                    <span appContrastText class="badge badge-sm" [ngClass]="getCommandBadgeClass(policy.command)">
                       {{ policy.command }}
                     </span>
-                    <span class="badge badge-sm" [class.badge-success]="policy.permissive === 'PERMISSIVE'"
+                    <span appContrastText class="badge badge-sm" [class.badge-success]="policy.permissive === 'PERMISSIVE'"
                           [class.badge-warning]="policy.permissive !== 'PERMISSIVE'">
                       {{ policy.permissive }}
                     </span>

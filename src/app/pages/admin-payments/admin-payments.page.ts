@@ -28,6 +28,7 @@ import { getPostgrestUrl } from '../../config/runtime';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /**
  * Payment transaction from the payment_transactions view
@@ -100,7 +101,7 @@ interface RefundFormData {
 @Component({
   selector: 'app-admin-payments',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe, RouterLink, NgxCurrency, CosModalComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe, RouterLink, NgxCurrency, CosModalComponent, TranslatePipe, ContrastTextDirective],
   templateUrl: './admin-payments.page.html',
   styleUrl: './admin-payments.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush

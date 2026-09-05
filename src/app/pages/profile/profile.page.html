@@ -264,9 +264,9 @@
           <div class="collapse-title font-medium">
             {{ ext.display_name }}
             @if (ext.has_record) {
-              <span class="badge badge-success badge-sm ms-2">{{ 'profile.complete' | translate }}</span>
+              <span appContrastText class="badge badge-success badge-sm ms-2">{{ 'profile.complete' | translate }}</span>
             } @else if (ext.is_required) {
-              <span class="badge badge-error badge-sm ms-2">{{ 'profile.required' | translate }}</span>
+              <span appContrastText class="badge badge-error badge-sm ms-2">{{ 'profile.required' | translate }}</span>
             } @else {
               <span class="badge badge-ghost badge-sm ms-2">{{ 'profile.not_started' | translate }}</span>
             }

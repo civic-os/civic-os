@@ -67,12 +67,12 @@
                 </td>
                 <td>
                   <div class="flex gap-1 flex-wrap">
-                    <div class="badge badge-sm badge-primary">Email</div>
+                    <div appContrastText class="badge badge-sm badge-primary">Email</div>
                     @if (template.sms_template) {
-                      <div class="badge badge-sm badge-secondary">SMS</div>
+                      <div appContrastText class="badge badge-sm badge-secondary">SMS</div>
                     }
                     @if (template.is_bulk) {
-                      <div class="badge badge-sm badge-warning">{{ 'template.bulk_badge' | translate }}</div>
+                      <div appContrastText class="badge badge-sm badge-warning">{{ 'template.bulk_badge' | translate }}</div>
                     }
                   </div>
                 </td>

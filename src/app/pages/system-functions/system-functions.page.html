@@ -67,7 +67,7 @@
                     <span class="badge badge-sm badge-outline">{{ fn.language }}</span>
                   }
                   @if (fn.can_execute) {
-                    <span class="badge badge-sm badge-success badge-outline">executable</span>
+                    <span appContrastText class="badge badge-sm badge-success badge-outline">executable</span>
                   }
                 </div>
                 @if (fn.description) {
@@ -79,10 +79,10 @@
                   <span class="text-xs text-base-content/50 font-mono">→ {{ fn.returns_type }}</span>
                 }
                 @if (fn.entity_effects && fn.entity_effects.length > 0) {
-                  <span class="badge badge-sm badge-info">{{ fn.entity_effects.length }} effects</span>
+                  <span appContrastText class="badge badge-sm badge-info">{{ fn.entity_effects.length }} effects</span>
                 }
                 @if (fn.hidden_effects_count > 0) {
-                  <span class="badge badge-sm badge-warning">{{ fn.hidden_effects_count }} hidden</span>
+                  <span appContrastText class="badge badge-sm badge-warning">{{ fn.hidden_effects_count }} hidden</span>
                 }
               </div>
             </div>

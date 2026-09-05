@@ -120,7 +120,7 @@
             (click)="switchTab('missing')">
       Missing
       @if (missingCount() > 0) {
-        <span class="badge badge-warning badge-sm ms-2">{{ missingCount() }}</span>
+        <span appContrastText class="badge badge-warning badge-sm ms-2">{{ missingCount() }}</span>
       }
     </button>
   </div>
@@ -218,7 +218,7 @@
               @for (m of filteredMissing(); track m.source_key) {
                 <tr>
                   <td>
-                    <span class="badge badge-warning badge-sm whitespace-nowrap">{{ sourceTypeLabel(m.source_type) }}</span>
+                    <span appContrastText class="badge badge-warning badge-sm whitespace-nowrap">{{ sourceTypeLabel(m.source_type) }}</span>
                   </td>
                   <td>
                     <code class="bg-base-200 px-1 rounded text-xs break-all">{{ m.source_key }}</code>

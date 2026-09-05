@@ -215,7 +215,7 @@
           @if (belongsToRelationships().length > 0) {
             <div>
               <h3 class="text-sm font-semibold text-base-content/80 mb-2 flex items-center gap-2">
-                <span class="badge badge-sm badge-secondary">Belongs To</span>
+                <span appContrastText class="badge badge-sm badge-secondary">Belongs To</span>
                 <span class="text-xs text-base-content/60">Foreign Key References</span>
               </h3>
               <div class="space-y-2">
@@ -253,7 +253,7 @@
           @if (hasManyRelationships().length > 0) {
             <div>
               <h3 class="text-sm font-semibold text-base-content/80 mb-2 flex items-center gap-2">
-                <span class="badge badge-sm badge-info">Has Many</span>
+                <span appContrastText class="badge badge-sm badge-info">Has Many</span>
                 <span class="text-xs text-base-content/60">Referenced By</span>
               </h3>
               <div class="space-y-2">
@@ -291,7 +291,7 @@
           @if (manyToManyRelationships().length > 0) {
             <div>
               <h3 class="text-sm font-semibold text-base-content/80 mb-2 flex items-center gap-2">
-                <span class="badge badge-sm badge-accent">Many-to-Many</span>
+                <span appContrastText class="badge badge-sm badge-accent">Many-to-Many</span>
                 <span class="text-xs text-base-content/60">Bidirectional</span>
               </h3>
               <div class="space-y-2">

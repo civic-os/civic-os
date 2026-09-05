@@ -23,13 +23,14 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { StatusAdminService, StatusType, StatusValue, StatusTransition } from '../../services/status-admin.service';
 import { SchemaService } from '../../services/schema.service';
 import { getContrastTextColor } from '../../utils/color.utils';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 type ActiveTab = 'statuses' | 'transitions';
 
 @Component({
   selector: 'app-admin-statuses',
   standalone: true,
-  imports: [FormsModule, CosModalComponent, TranslatePipe],
+  imports: [FormsModule, CosModalComponent, TranslatePipe, ContrastTextDirective],
   templateUrl: './admin-statuses.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

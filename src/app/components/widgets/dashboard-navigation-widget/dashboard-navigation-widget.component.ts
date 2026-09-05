@@ -19,6 +19,7 @@ import { Component, input, computed, inject, ChangeDetectionStrategy } from '@an
 
 import { RouterLink, Router } from '@angular/router';
 import { DashboardWidget, DashboardNavigationWidgetConfig } from '../../../interfaces/dashboard';
+import { ContrastTextDirective } from '../../../directives/contrast-text.directive';
 
 /**
  * Dashboard Navigation Widget Component
@@ -28,7 +29,7 @@ import { DashboardWidget, DashboardNavigationWidgetConfig } from '../../../inter
  */
 @Component({
   selector: 'app-dashboard-navigation-widget',
-  imports: [RouterLink],
+  imports: [RouterLink, ContrastTextDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard-navigation-widget.component.html',
   styleUrl: './dashboard-navigation-widget.component.css'

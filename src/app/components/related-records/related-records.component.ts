@@ -7,6 +7,7 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { InverseRelationshipData } from '../../interfaces/entity';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /**
  * Displays a grid of related record cards for inverse relationships.
@@ -18,7 +19,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-related-records',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, ContrastTextDirective],
   templateUrl: './related-records.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

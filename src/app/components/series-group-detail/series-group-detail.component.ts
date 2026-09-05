@@ -42,6 +42,7 @@ import { RecurringService } from '../../services/recurring.service';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /** Resolved template value with display info */
 interface ResolvedValue {
@@ -87,7 +88,8 @@ type EditTab = 'info' | 'schedule' | 'template';
     RecurringScheduleFormComponent,
     EditPropertyComponent,
     CosModalComponent,
-    TranslatePipe
+    TranslatePipe,
+    ContrastTextDirective
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -207,7 +209,8 @@ type EditTab = 'info' | 'schedule' | 'template';
                           <span class="text-base-content/40">-</span>
                         } @else if (resolved.type === EntityPropertyType.Status || resolved.type === EntityPropertyType.Category) {
                           <span
-                            class="badge badge-sm text-white"
+                            class="badge badge-sm"
+                            appContrastText
                             [style.background-color]="resolved.color || '#3B82F6'">
                             {{ resolved.display }}
                           </span>

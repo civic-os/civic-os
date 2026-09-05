@@ -71,13 +71,13 @@
                 <td>
                   <div class="flex gap-1">
                     @if (asset.desktop_file_id) {
-                      <div class="badge badge-sm badge-primary">Desktop</div>
+                      <div appContrastText class="badge badge-sm badge-primary">Desktop</div>
                     }
                     @if (asset.tablet_file_id) {
-                      <div class="badge badge-sm badge-secondary">Tablet</div>
+                      <div appContrastText class="badge badge-sm badge-secondary">Tablet</div>
                     }
                     @if (asset.mobile_file_id) {
-                      <div class="badge badge-sm badge-accent">Mobile</div>
+                      <div appContrastText class="badge badge-sm badge-accent">Mobile</div>
                     }
                     @if (!hasCrops(asset)) {
                       <span class="text-base-content/40 text-sm">No crops</span>

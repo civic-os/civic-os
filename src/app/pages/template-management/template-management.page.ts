@@ -4,11 +4,12 @@ import { NotificationService, NotificationTemplate } from '../../services/notifi
 import { TemplateEditorComponent } from '../../components/template-editor/template-editor.component';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
   selector: 'app-template-management',
   standalone: true,
-  imports: [TemplateEditorComponent, CosModalComponent, TranslatePipe],
+  imports: [TemplateEditorComponent, CosModalComponent, TranslatePipe, ContrastTextDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './template-management.page.html',
   styleUrl: './template-management.page.css'

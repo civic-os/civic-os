@@ -44,6 +44,7 @@ import { TranslationService } from './services/translation.service';
 import { OfflineBannerComponent } from './components/offline-banner/offline-banner.component';
 import { PwaInstallBannerComponent } from './components/pwa-install-banner/pwa-install-banner.component';
 import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-update-toast.component';
+import { ContrastTextDirective } from './directives/contrast-text.directive';
 
 @Component({
     selector: 'app-root',
@@ -59,7 +60,8 @@ import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-updat
     TranslatePipe,
     OfflineBannerComponent,
     PwaInstallBannerComponent,
-    PwaUpdateToastComponent
+    PwaUpdateToastComponent,
+    ContrastTextDirective
 ],
     templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,

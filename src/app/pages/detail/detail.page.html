@@ -17,7 +17,7 @@
             </a>
           }
           @if (seriesMembership()?.is_member) {
-            <a class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', $safeNavigationMigration(seriesMembership()?.group_id)]">
+            <a appContrastText class="badge badge-info gap-1 cursor-pointer" [routerLink]="['/admin/recurring-schedules', $safeNavigationMigration(seriesMembership()?.group_id)]">
               <span class="material-symbols-outlined text-sm" aria-hidden="true">repeat</span>
               {{ seriesMembership()?.group_name || 'Recurring' }}
             </a>
@@ -132,7 +132,7 @@
                     @let visibleItems = isExpanded || allItems.length <= INLINE_M2M_CHIP_LIMIT ? allItems : allItems.slice(0, INLINE_M2M_CHIP_LIMIT);
                     @for (val of visibleItems; track val.id) {
                       <a [routerLink]="['/view', item.many_to_many_meta!.relatedTable, val.id]"
-                         class="badge badge-lg badge-primary !text-primary-content gap-1 py-3 px-3 cursor-pointer hover:opacity-80 transition-opacity">
+                         appContrastText class="badge badge-lg badge-primary gap-1 py-3 px-3 cursor-pointer hover:opacity-80 transition-opacity">
                         @if (val.color) {
                           <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="val.color"></span>
                         }
@@ -223,7 +223,7 @@
                   <div class="card-body">
                     <h3 class="card-title">
                       {{ section.meta.sourceEntityDisplayName }}
-                      <span class="badge badge-primary">{{ section.events.length }}</span>
+                      <span appContrastText class="badge badge-primary">{{ section.events.length }}</span>
                     </h3>
 
                     <div class="card-actions justify-end mb-4">

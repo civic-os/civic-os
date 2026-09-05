@@ -11,7 +11,7 @@
       <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
       <span class="hidden sm:inline">Filters</span>
       @if (activeFilterCount() > 0) {
-        <span class="badge badge-primary badge-sm">{{ activeFilterCount() }}</span>
+        <span appContrastText class="badge badge-primary badge-sm">{{ activeFilterCount() }}</span>
       }
       <span class="material-symbols-outlined" aria-hidden="true">
         {{ isExpanded() ? 'expand_less' : 'expand_more' }}

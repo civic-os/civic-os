@@ -32,6 +32,7 @@ import { getS3Config } from '../../config/runtime';
 import { getContrastTextColor } from '../../utils/color.utils';
 import { MarkdownModule } from 'ngx-markdown';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
     selector: 'app-display-property',
@@ -50,6 +51,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
         FileThumbnailComponent,
         MarkdownModule,
         TranslatePipe,
+        ContrastTextDirective,
     ],
     templateUrl: './display-property.component.html',
     styleUrl: './display-property.component.css'

@@ -21,6 +21,7 @@ import { SchemaEntityProperty } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
 import { DataService } from '../../services/data.service';
 import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /**
  * Inline M:M editor for Edit/Create pages with buffered save.
@@ -38,7 +39,7 @@ import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-searc
 @Component({
   selector: 'app-inline-m2m-editor',
   standalone: true,
-  imports: [FkSearchModalComponent],
+  imports: [FkSearchModalComponent, ContrastTextDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './inline-m2m-editor.component.html',
 })

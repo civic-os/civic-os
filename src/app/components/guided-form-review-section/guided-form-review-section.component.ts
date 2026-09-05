@@ -16,11 +16,12 @@ import { GuidedFormContext, EffectiveGuidedFormStep } from '../../interfaces/gui
 import { DisplayPropertyComponent } from '../display-property/display-property.component';
 import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
   selector: 'app-guided-form-review-section',
   standalone: true,
-  imports: [RouterModule, DisplayPropertyComponent, LoadingIndicatorComponent, TranslatePipe],
+  imports: [RouterModule, DisplayPropertyComponent, LoadingIndicatorComponent, TranslatePipe, ContrastTextDirective],
   templateUrl: './guided-form-review-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

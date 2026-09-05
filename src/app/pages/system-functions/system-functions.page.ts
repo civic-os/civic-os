@@ -15,6 +15,7 @@ import { catchError, of } from 'rxjs';
 import { IntrospectionService } from '../../services/introspection.service';
 import { SchemaFunction } from '../../interfaces/introspection';
 import { CodeViewerComponent } from '../../components/code-viewer/code-viewer.component';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /**
  * System Functions & RPCs page.
@@ -30,7 +31,7 @@ import { CodeViewerComponent } from '../../components/code-viewer/code-viewer.co
 @Component({
   selector: 'app-system-functions',
   standalone: true,
-  imports: [FormsModule, CodeViewerComponent],
+  imports: [FormsModule, CodeViewerComponent, ContrastTextDirective],
   templateUrl: './system-functions.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

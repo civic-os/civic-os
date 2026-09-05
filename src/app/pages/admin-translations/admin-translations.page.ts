@@ -31,6 +31,7 @@ import { TranslationService } from '../../services/translation.service';
 import { SchemaService } from '../../services/schema.service';
 import { DashboardService } from '../../services/dashboard.service';
 import { LocaleService, LocaleInfo } from '../../services/locale.service';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /** Source types shown in the filter dropdown.
  * 'widget_config' is grouped under 'dashboard' in the UI. */
@@ -43,7 +44,7 @@ const SOURCE_TYPES = [
 @Component({
   selector: 'app-admin-translations',
   standalone: true,
-  imports: [FormsModule, CosModalComponent, ImportModalComponent, TranslatePipe],
+  imports: [FormsModule, CosModalComponent, ImportModalComponent, TranslatePipe, ContrastTextDirective],
   templateUrl: './admin-translations.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

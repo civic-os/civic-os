@@ -207,9 +207,9 @@
                 <td class="text-sm">{{ formatFileSize(gallery.total_size) }}</td>
                 <td>
                   @if (gallery.is_linked) {
-                    <span class="badge badge-success badge-sm">Linked</span>
+                    <span appContrastText class="badge badge-success badge-sm">Linked</span>
                   } @else {
-                    <span class="badge badge-warning badge-sm">Draft</span>
+                    <span appContrastText class="badge badge-warning badge-sm">Draft</span>
                   }
                 </td>
                 <td class="text-sm whitespace-nowrap">{{ gallery.created_at | date:'short' }}</td>
