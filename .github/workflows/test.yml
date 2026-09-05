@@ -12,6 +12,8 @@ jobs:
   angular-tests:
     name: Angular Unit Tests
     runs-on: ubuntu-latest
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
 
     steps:
       - name: Checkout code
@@ -335,6 +337,8 @@ jobs:
   lint:
     name: Lint and Format
     runs-on: ubuntu-latest
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
 
     steps:
       - name: Checkout code
