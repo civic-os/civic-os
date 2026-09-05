@@ -35,7 +35,10 @@
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css",
               "node_modules/prismjs/themes/prism-tomorrow.css",
-              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css"
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css",
+              "@fullcalendar/angular/skeleton.css",
+              "@fullcalendar/angular/themes/classic/theme.css",
+              "src/app/themes/fullcalendar-daisyui-palette.css"
             ],
             "scripts": [
               "node_modules/prismjs/prism.js",

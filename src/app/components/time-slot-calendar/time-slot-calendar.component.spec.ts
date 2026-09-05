@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -195,7 +195,7 @@ describe('TimeSlotCalendarComponent', () => {
             title: 'Test Event',
             start: new Date('2025-03-15T14:00:00Z'),
             end: new Date('2025-03-15T16:00:00Z'),
-            backgroundColor: '#FF0000',
+            color: '#FF0000',
             extendedProps: { customData: 'test' }
         };
 
