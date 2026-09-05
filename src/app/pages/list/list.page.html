@@ -119,7 +119,7 @@
           [events]="calendarEvents()"
           [loading]="isLoading()"
           [initialView]="(calendarState$ | async)?.view || 'timeGridWeek'"
-          [initialDate]="(calendarState$ | async)?.date"
+          [initialDate]="$safeNavigationMigration((calendarState$ | async)?.date)"
           (eventClick)="onCalendarEventClick($event)"
           (dateRangeChange)="onCalendarDateRangeChange($event)">
         </app-time-slot-calendar>

@@ -147,7 +147,7 @@ export class DataService {
 
         // Parse count from Content-Range header: "0-24/237" -> 237
         const contentRange = response.headers.get('Content-Range');
-        let totalCount = 0;
+        let totalCount: number;
         if (contentRange) {
           const match = contentRange.match(/\/(\d+|\*)$/);
           if (match && match[1] !== '*') {

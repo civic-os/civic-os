@@ -21,225 +21,225 @@ import { AnalyticsService } from './analytics.service';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 describe('AnalyticsService', () => {
-  let service: AnalyticsService;
-  let mockTracker: jasmine.SpyObj<MatomoTracker>;
-  let originalDoNotTrack: string | null;
+    let service: AnalyticsService;
+    let mockTracker: any;
+    let originalDoNotTrack: string | null;
 
-  beforeEach(() => {
-    // Save original DNT value
-    originalDoNotTrack = navigator.doNotTrack;
+    beforeEach(() => {
+        // Save original DNT value
+        originalDoNotTrack = navigator.doNotTrack;
 
-    // Mock MatomoTracker
-    mockTracker = jasmine.createSpyObj('MatomoTracker', [
-      'trackPageView',
-      'trackEvent',
-      'setUserId',
-      'resetUserId',
-      'optUserOut',
-      'forgetUserOptOut'
-    ]);
+        // Mock MatomoTracker
+        mockTracker = {
+            trackPageView: vi.fn().mockName("MatomoTracker.trackPageView"),
+            trackEvent: vi.fn().mockName("MatomoTracker.trackEvent"),
+            setUserId: vi.fn().mockName("MatomoTracker.setUserId"),
+            resetUserId: vi.fn().mockName("MatomoTracker.resetUserId"),
+            optUserOut: vi.fn().mockName("MatomoTracker.optUserOut"),
+            forgetUserOptOut: vi.fn().mockName("MatomoTracker.forgetUserOptOut")
+        };
 
-    // Clear localStorage
-    localStorage.clear();
+        // Clear localStorage
+        localStorage.clear();
 
-    // Mock runtime configuration with Matomo enabled
-    (window as any).civicOsConfig = {
-      matomo: {
-        url: 'https://stats.civic-os.org',
-        siteId: '7',
-        enabled: true
-      }
-    };
+        // Mock runtime configuration with Matomo enabled
+        (window as any).civicOsConfig = {
+            matomo: {
+                url: 'https://stats.civic-os.org',
+                siteId: '7',
+                enabled: true
+            }
+        };
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        AnalyticsService,
-        { provide: MatomoTracker, useValue: mockTracker }
-      ]
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                AnalyticsService,
+                { provide: MatomoTracker, useValue: mockTracker }
+            ]
+        });
+
+        service = TestBed.inject(AnalyticsService);
     });
 
-    service = TestBed.inject(AnalyticsService);
-  });
+    afterEach(() => {
+        // Restore original DNT value
+        Object.defineProperty(navigator, 'doNotTrack', {
+            value: originalDoNotTrack,
+            configurable: true
+        });
 
-  afterEach(() => {
-    // Restore original DNT value
-    Object.defineProperty(navigator, 'doNotTrack', {
-      value: originalDoNotTrack,
-      configurable: true
+        // Clean up mock
+        delete (window as any).civicOsConfig;
+        localStorage.clear();
     });
 
-    // Clean up mock
-    delete (window as any).civicOsConfig;
-    localStorage.clear();
-  });
-
-  describe('Service Setup', () => {
-    it('should be created', () => {
-      expect(service).toBeTruthy();
-    });
-  });
-
-  describe('isEnabled()', () => {
-    it('should return true when all conditions are met', () => {
-      expect(service.isEnabled()).toBe(true);
+    describe('Service Setup', () => {
+        it('should be created', () => {
+            expect(service).toBeTruthy();
+        });
     });
 
-    it('should return false when user has opted out', () => {
-      localStorage.setItem('analytics_enabled', 'false');
-      expect(service.isEnabled()).toBe(false);
+    describe('isEnabled()', () => {
+        it('should return true when all conditions are met', () => {
+            expect(service.isEnabled()).toBe(true);
+        });
+
+        it('should return false when user has opted out', () => {
+            localStorage.setItem('analytics_enabled', 'false');
+            expect(service.isEnabled()).toBe(false);
+        });
+
+        it('should return false when browser DNT is set to "1"', () => {
+            Object.defineProperty(navigator, 'doNotTrack', {
+                value: '1',
+                configurable: true
+            });
+            expect(service.isEnabled()).toBe(false);
+        });
+
+        it('should return true when localStorage is not set (defaults to enabled)', () => {
+            localStorage.removeItem('analytics_enabled');
+            expect(service.isEnabled()).toBe(true);
+        });
+
+        it('should return true when localStorage is explicitly set to "true"', () => {
+            localStorage.setItem('analytics_enabled', 'true');
+            expect(service.isEnabled()).toBe(true);
+        });
     });
 
-    it('should return false when browser DNT is set to "1"', () => {
-      Object.defineProperty(navigator, 'doNotTrack', {
-        value: '1',
-        configurable: true
-      });
-      expect(service.isEnabled()).toBe(false);
+    describe('setEnabled()', () => {
+        it('should set localStorage to "true" when enabling', () => {
+            service.setEnabled(true);
+            expect(localStorage.getItem('analytics_enabled')).toBe('true');
+        });
+
+        it('should set localStorage to "false" when disabling', () => {
+            service.setEnabled(false);
+            expect(localStorage.getItem('analytics_enabled')).toBe('false');
+        });
+
+        it('should call forgetUserOptOut() when enabling', () => {
+            service.setEnabled(true);
+            expect(mockTracker.forgetUserOptOut).toHaveBeenCalled();
+        });
+
+        it('should call optUserOut() when disabling', () => {
+            service.setEnabled(false);
+            expect(mockTracker.optUserOut).toHaveBeenCalled();
+        });
+
     });
 
-    it('should return true when localStorage is not set (defaults to enabled)', () => {
-      localStorage.removeItem('analytics_enabled');
-      expect(service.isEnabled()).toBe(true);
+    describe('getUserPreference()', () => {
+        it('should return true when localStorage is not set (defaults to enabled)', () => {
+            localStorage.removeItem('analytics_enabled');
+            expect(service.getUserPreference()).toBe(true);
+        });
+
+        it('should return true when localStorage is "true"', () => {
+            localStorage.setItem('analytics_enabled', 'true');
+            expect(service.getUserPreference()).toBe(true);
+        });
+
+        it('should return false when localStorage is "false"', () => {
+            localStorage.setItem('analytics_enabled', 'false');
+            expect(service.getUserPreference()).toBe(false);
+        });
     });
 
-    it('should return true when localStorage is explicitly set to "true"', () => {
-      localStorage.setItem('analytics_enabled', 'true');
-      expect(service.isEnabled()).toBe(true);
-    });
-  });
+    describe('trackPageView()', () => {
+        it('should call tracker.trackPageView() when enabled', () => {
+            service.trackPageView();
+            expect(mockTracker.trackPageView).toHaveBeenCalled();
+        });
 
-  describe('setEnabled()', () => {
-    it('should set localStorage to "true" when enabling', () => {
-      service.setEnabled(true);
-      expect(localStorage.getItem('analytics_enabled')).toBe('true');
-    });
+        it('should call tracker.trackPageView() with custom title', () => {
+            service.trackPageView('/issues');
+            expect(mockTracker.trackPageView).toHaveBeenCalledWith('/issues');
+        });
 
-    it('should set localStorage to "false" when disabling', () => {
-      service.setEnabled(false);
-      expect(localStorage.getItem('analytics_enabled')).toBe('false');
-    });
+        it('should not call tracker when disabled (user opt-out)', () => {
+            localStorage.setItem('analytics_enabled', 'false');
+            service.trackPageView();
+            expect(mockTracker.trackPageView).not.toHaveBeenCalled();
+        });
 
-    it('should call forgetUserOptOut() when enabling', () => {
-      service.setEnabled(true);
-      expect(mockTracker.forgetUserOptOut).toHaveBeenCalled();
-    });
+        it('should not call tracker when DNT is set', () => {
+            Object.defineProperty(navigator, 'doNotTrack', {
+                value: '1',
+                configurable: true
+            });
+            service.trackPageView();
+            expect(mockTracker.trackPageView).not.toHaveBeenCalled();
+        });
 
-    it('should call optUserOut() when disabling', () => {
-      service.setEnabled(false);
-      expect(mockTracker.optUserOut).toHaveBeenCalled();
-    });
-
-  });
-
-  describe('getUserPreference()', () => {
-    it('should return true when localStorage is not set (defaults to enabled)', () => {
-      localStorage.removeItem('analytics_enabled');
-      expect(service.getUserPreference()).toBe(true);
     });
 
-    it('should return true when localStorage is "true"', () => {
-      localStorage.setItem('analytics_enabled', 'true');
-      expect(service.getUserPreference()).toBe(true);
+    describe('trackEvent()', () => {
+        it('should call tracker.trackEvent() with all parameters', () => {
+            service.trackEvent('Entity', 'Create', 'issues', 1);
+            expect(mockTracker.trackEvent).toHaveBeenCalledWith('Entity', 'Create', 'issues', 1);
+        });
+
+        it('should call tracker.trackEvent() without optional parameters', () => {
+            service.trackEvent('Entity', 'Create');
+            expect(mockTracker.trackEvent).toHaveBeenCalledWith('Entity', 'Create', undefined, undefined);
+        });
+
+        it('should call tracker.trackEvent() with name only', () => {
+            service.trackEvent('Search', 'Query', 'issues');
+            expect(mockTracker.trackEvent).toHaveBeenCalledWith('Search', 'Query', 'issues', undefined);
+        });
+
+        it('should not call tracker when disabled', () => {
+            localStorage.setItem('analytics_enabled', 'false');
+            service.trackEvent('Entity', 'Create', 'issues');
+            expect(mockTracker.trackEvent).not.toHaveBeenCalled();
+        });
+
     });
 
-    it('should return false when localStorage is "false"', () => {
-      localStorage.setItem('analytics_enabled', 'false');
-      expect(service.getUserPreference()).toBe(false);
-    });
-  });
+    describe('trackError()', () => {
+        it('should call trackEvent() with Error category and Application action', () => {
+            vi.spyOn(service, 'trackEvent').mockReturnValue(undefined);
+            service.trackError('Failed to load issues', 500);
+            expect(service.trackEvent).toHaveBeenCalledWith('Error', 'Application', 'Failed to load issues', 500);
+        });
 
-  describe('trackPageView()', () => {
-    it('should call tracker.trackPageView() when enabled', () => {
-      service.trackPageView();
-      expect(mockTracker.trackPageView).toHaveBeenCalled();
-    });
-
-    it('should call tracker.trackPageView() with custom title', () => {
-      service.trackPageView('/issues');
-      expect(mockTracker.trackPageView).toHaveBeenCalledWith('/issues');
+        it('should call trackEvent() without status code', () => {
+            vi.spyOn(service, 'trackEvent').mockReturnValue(undefined);
+            service.trackError('Validation failed');
+            expect(service.trackEvent).toHaveBeenCalledWith('Error', 'Application', 'Validation failed', undefined);
+        });
     });
 
-    it('should not call tracker when disabled (user opt-out)', () => {
-      localStorage.setItem('analytics_enabled', 'false');
-      service.trackPageView();
-      expect(mockTracker.trackPageView).not.toHaveBeenCalled();
+    describe('setUserId()', () => {
+        it('should call tracker.setUserId() when enabled', () => {
+            service.setUserId('user-123');
+            expect(mockTracker.setUserId).toHaveBeenCalledWith('user-123');
+        });
+
+        it('should not call tracker when disabled', () => {
+            localStorage.setItem('analytics_enabled', 'false');
+            service.setUserId('user-123');
+            expect(mockTracker.setUserId).not.toHaveBeenCalled();
+        });
+
     });
 
-    it('should not call tracker when DNT is set', () => {
-      Object.defineProperty(navigator, 'doNotTrack', {
-        value: '1',
-        configurable: true
-      });
-      service.trackPageView();
-      expect(mockTracker.trackPageView).not.toHaveBeenCalled();
+    describe('resetUserId()', () => {
+        it('should call tracker.resetUserId() when enabled', () => {
+            service.resetUserId();
+            expect(mockTracker.resetUserId).toHaveBeenCalled();
+        });
+
+        it('should not call tracker when disabled', () => {
+            localStorage.setItem('analytics_enabled', 'false');
+            service.resetUserId();
+            expect(mockTracker.resetUserId).not.toHaveBeenCalled();
+        });
+
     });
-
-  });
-
-  describe('trackEvent()', () => {
-    it('should call tracker.trackEvent() with all parameters', () => {
-      service.trackEvent('Entity', 'Create', 'issues', 1);
-      expect(mockTracker.trackEvent).toHaveBeenCalledWith('Entity', 'Create', 'issues', 1);
-    });
-
-    it('should call tracker.trackEvent() without optional parameters', () => {
-      service.trackEvent('Entity', 'Create');
-      expect(mockTracker.trackEvent).toHaveBeenCalledWith('Entity', 'Create', undefined, undefined);
-    });
-
-    it('should call tracker.trackEvent() with name only', () => {
-      service.trackEvent('Search', 'Query', 'issues');
-      expect(mockTracker.trackEvent).toHaveBeenCalledWith('Search', 'Query', 'issues', undefined);
-    });
-
-    it('should not call tracker when disabled', () => {
-      localStorage.setItem('analytics_enabled', 'false');
-      service.trackEvent('Entity', 'Create', 'issues');
-      expect(mockTracker.trackEvent).not.toHaveBeenCalled();
-    });
-
-  });
-
-  describe('trackError()', () => {
-    it('should call trackEvent() with Error category and Application action', () => {
-      spyOn(service, 'trackEvent');
-      service.trackError('Failed to load issues', 500);
-      expect(service.trackEvent).toHaveBeenCalledWith('Error', 'Application', 'Failed to load issues', 500);
-    });
-
-    it('should call trackEvent() without status code', () => {
-      spyOn(service, 'trackEvent');
-      service.trackError('Validation failed');
-      expect(service.trackEvent).toHaveBeenCalledWith('Error', 'Application', 'Validation failed', undefined);
-    });
-  });
-
-  describe('setUserId()', () => {
-    it('should call tracker.setUserId() when enabled', () => {
-      service.setUserId('user-123');
-      expect(mockTracker.setUserId).toHaveBeenCalledWith('user-123');
-    });
-
-    it('should not call tracker when disabled', () => {
-      localStorage.setItem('analytics_enabled', 'false');
-      service.setUserId('user-123');
-      expect(mockTracker.setUserId).not.toHaveBeenCalled();
-    });
-
-  });
-
-  describe('resetUserId()', () => {
-    it('should call tracker.resetUserId() when enabled', () => {
-      service.resetUserId();
-      expect(mockTracker.resetUserId).toHaveBeenCalled();
-    });
-
-    it('should not call tracker when disabled', () => {
-      localStorage.setItem('analytics_enabled', 'false');
-      service.resetUserId();
-      expect(mockTracker.resetUserId).not.toHaveBeenCalled();
-    });
-
-  });
 });

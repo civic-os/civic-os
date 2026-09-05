@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -28,14 +28,16 @@ import {
   AfterViewInit,
   untracked
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventClickArg, DateSelectArg, EventInput, DatesSetArg } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import { CalendarOptions, EventClickInfo, DateSelectInfo, EventInput, DatesSetInfo } from '@fullcalendar/angular';
+import dayGridPlugin from '@fullcalendar/angular/daygrid';
+import timeGridPlugin from '@fullcalendar/angular/timegrid';
+import interactionPlugin from '@fullcalendar/angular/interaction';
+import themePlugin from '@fullcalendar/angular/themes/classic';
 import { ThemeService } from '../../services/theme.service';
 import { LocaleService } from '../../services/locale.service';
+import { getContrastTextColor } from '../../utils/color.utils';
 
 export interface CalendarEvent {
   id: string | number;
@@ -61,15 +63,13 @@ export interface CalendarEvent {
  * - Date selection for creating new events
  * - Drag and resize support in edit mode
  *
- * KNOWN ISSUE: Events may display with a ~1 hour vertical offset in timeGrid views.
- * Root cause is unclear - we pass correct ISO strings to FullCalendar, but rendering
- * positions events incorrectly. Event times are correct in detail views and database.
- * TODO: Consider alternative calendar library (angular-calendar, PrimeNG, or custom solution)
+ * Uses FullCalendar 7 with Classic theme + DaisyUI palette mapping for theming.
+ * See src/app/themes/fullcalendar-daisyui-palette.css for the color bridge.
  */
 @Component({
   selector: 'app-time-slot-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule],
+  imports: [FullCalendarModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './time-slot-calendar.component.html',
   styleUrl: './time-slot-calendar.component.css'
@@ -203,7 +203,7 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
   // CRITICAL: Don't include reactive inputs (view, date, events) - those are updated imperatively via effects
   // This prevents calendar recreation on change detection
   calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+    plugins: [themePlugin, dayGridPlugin, timeGridPlugin, interactionPlugin],
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -212,6 +212,18 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     selectMirror: true,
     weekends: true,
     fixedWeekCount: false, // Show only the weeks needed (4-6), not always 6
+
+    // Per-view overrides
+    views: {
+      // Week: restore date range in title (FC7 defaults to month-only)
+      timeGridWeek: {
+        titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+      },
+      // Day: show only weekday in column header (date is already in the title)
+      timeGridDay: {
+        dayHeaderFormat: { weekday: 'long' }
+      }
+    },
 
     // Accessibility (WCAG 2.1.1): make every event focusable and keyboard-activatable
     // (Tab to reach, Enter/Space to fire eventClick), not just those with an event.url.
@@ -232,20 +244,32 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     // Note: dayMaxEvents, moreLinkClick, eventDisplay are set imperatively in ngAfterViewInit
     // to support configuration via inputs
 
-    eventClick: (arg: EventClickArg) => this.handleEventClick(arg),
-    select: (arg: DateSelectArg) => this.handleDateSelect(arg),
+    // Month view: add class for multi-line text wrapping (CSS in palette file)
+    // Auto-contrast: pick black or white text based on event background luminance
+    eventDidMount: (info) => {
+      if (info.view?.type === 'dayGridMonth') {
+        info.el.classList.add('civic-month-event');
+      }
+      const eventColor = info.el.style.getPropertyValue('--fc-event-color');
+      if (eventColor) {
+        info.el.style.setProperty('--fc-event-contrast-color', getContrastTextColor(eventColor));
+      }
+    },
+    eventClick: (arg: EventClickInfo) => this.handleEventClick(arg),
+    select: (arg: DateSelectInfo) => this.handleDateSelect(arg),
     datesSet: (arg) => this.handleDatesSet(arg),
     height: '600px', // Fixed height to prevent resize loops
     allDaySlot: false,
     slotDuration: '01:00:00', // 1-hour slots (clear visual alignment for display mode)
-    slotLabelInterval: '01:00:00', // Show hourly labels
+    slotHeaderInterval: '01:00:00', // Show hourly labels
     slotMinTime: '00:00:00', // Start at midnight (ensures accurate positioning calculations)
     slotMaxTime: '24:00:00', // End at midnight next day (full 24-hour range)
     eventMinHeight: 20, // Minimum event height in pixels for visibility
     expandRows: false, // Consistent slot heights (no dynamic stretching)
+    slotMinHeight: 30, // Minimum slot height for proper scrollTime behavior
     scrollTime: '08:00:00', // Start scroll at 8am
     nowIndicator: true, // Show current time indicator
-    slotLabelFormat: {
+    slotHeaderFormat: {
       hour: 'numeric',
       minute: '2-digit',
       omitZeroMinute: false,
@@ -313,21 +337,21 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     }));
   }
 
-  private handleEventClick(arg: EventClickArg) {
+  private handleEventClick(arg: EventClickInfo) {
     const id = arg.event.id;
     const event: CalendarEvent = {
       id: id,
       title: arg.event.title,
       start: arg.event.start!,
       end: arg.event.end!,
-      color: arg.event.backgroundColor,
+      color: arg.event.color,
       extendedProps: arg.event.extendedProps
     };
 
     this.eventClick.emit(event);
   }
 
-  private handleDateSelect(arg: DateSelectArg) {
+  private handleDateSelect(arg: DateSelectInfo) {
     const start = arg.start;
     const end = arg.end;
 
@@ -340,7 +364,7 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     }
   }
 
-  private handleDatesSet(arg: DatesSetArg) {
+  private handleDatesSet(arg: DatesSetInfo) {
     // Called when the visible date range changes (initial load, prev/next, view change)
 
     // Guard: Suppress datesSet events fired during FullCalendar initialization.
@@ -434,4 +458,5 @@ export class TimeSlotCalendarComponent implements AfterViewInit {
     // Fallback
     return { start: date, end: date };
   }
+
 }

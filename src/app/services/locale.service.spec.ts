@@ -17,193 +17,193 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { LocaleService } from './locale.service';
 import { AuthService } from './auth.service';
 
 describe('LocaleService', () => {
-  let service: LocaleService;
+    let service: LocaleService;
 
-  beforeEach(() => {
-    // Clear localStorage to avoid leaking state between tests
-    localStorage.removeItem('civic-os-locale');
+    beforeEach(() => {
+        // Clear localStorage to avoid leaking state between tests
+        localStorage.removeItem('civic-os-locale');
 
-    const mockAuthService = {
-      authenticated: signal(false),
-      getCurrentUserId: () => ({ subscribe: () => {} })
-    };
+        const mockAuthService = {
+            authenticated: signal(false),
+            getCurrentUserId: () => ({ subscribe: () => { } })
+        };
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        { provide: AuthService, useValue: mockAuthService },
-        LocaleService
-      ]
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
+                { provide: AuthService, useValue: mockAuthService },
+                LocaleService
+            ]
+        });
+
+        service = TestBed.inject(LocaleService);
     });
 
-    service = TestBed.inject(LocaleService);
-  });
-
-  afterEach(() => {
-    // Reset document direction after each test
-    document.documentElement.dir = 'ltr';
-    document.documentElement.lang = 'en';
-    localStorage.removeItem('civic-os-locale');
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  describe('isRtl()', () => {
-    it('should return true for Arabic', () => {
-      service.setLocale('ar');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeTrue();
+    afterEach(() => {
+        // Reset document direction after each test
+        document.documentElement.dir = 'ltr';
+        document.documentElement.lang = 'en';
+        localStorage.removeItem('civic-os-locale');
     });
 
-    it('should return true for Hebrew', () => {
-      service.setLocale('he');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeTrue();
+    it('should be created', () => {
+        expect(service).toBeTruthy();
     });
 
-    it('should return true for Persian', () => {
-      service.setLocale('fa');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeTrue();
+    describe('isRtl()', () => {
+        it('should return true for Arabic', () => {
+            service.setLocale('ar');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(true);
+        });
+
+        it('should return true for Hebrew', () => {
+            service.setLocale('he');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(true);
+        });
+
+        it('should return true for Persian', () => {
+            service.setLocale('fa');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(true);
+        });
+
+        it('should return true for Urdu', () => {
+            service.setLocale('ur');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(true);
+        });
+
+        it('should return true for Pashto', () => {
+            service.setLocale('ps');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(true);
+        });
+
+        it('should return true for Dari', () => {
+            service.setLocale('prs');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(true);
+        });
+
+        it('should return false for English', () => {
+            service.setLocale('en');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(false);
+        });
+
+        it('should return false for Spanish', () => {
+            service.setLocale('es');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(false);
+        });
+
+        it('should return false for French', () => {
+            service.setLocale('fr');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(false);
+        });
+
+        it('should return false for German', () => {
+            service.setLocale('de');
+            TestBed.flushEffects();
+            expect(service.isRtl()).toBe(false);
+        });
     });
 
-    it('should return true for Urdu', () => {
-      service.setLocale('ur');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeTrue();
+    describe('document.dir attribute', () => {
+        it('should set dir to rtl for Arabic', () => {
+            service.setLocale('ar');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('rtl');
+        });
+
+        it('should set dir to ltr for English', () => {
+            service.setLocale('en');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('ltr');
+        });
+
+        it('should set dir to rtl for Hebrew', () => {
+            service.setLocale('he');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('rtl');
+        });
     });
 
-    it('should return true for Pashto', () => {
-      service.setLocale('ps');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeTrue();
+    describe('document.lang attribute', () => {
+        it('should set lang to ar for Arabic', () => {
+            service.setLocale('ar');
+            TestBed.flushEffects();
+            expect(document.documentElement.lang).toBe('ar');
+        });
+
+        it('should set lang to en for English', () => {
+            service.setLocale('en');
+            TestBed.flushEffects();
+            expect(document.documentElement.lang).toBe('en');
+        });
     });
 
-    it('should return true for Dari', () => {
-      service.setLocale('prs');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeTrue();
+    describe('round-trip locale switching', () => {
+        it('should toggle dir correctly through en → ar → es → en', () => {
+            service.setLocale('en');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('ltr');
+
+            service.setLocale('ar');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('rtl');
+
+            service.setLocale('es');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('ltr');
+
+            service.setLocale('en');
+            TestBed.flushEffects();
+            expect(document.documentElement.dir).toBe('ltr');
+        });
     });
 
-    it('should return false for English', () => {
-      service.setLocale('en');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeFalse();
+    describe('getLocaleInfo()', () => {
+        it('should return Pashto info', () => {
+            const info = service.getLocaleInfo('ps');
+            expect(info).toEqual({ code: 'ps', name: 'پښتو', englishName: 'Pashto' });
+        });
+
+        it('should return Dari info', () => {
+            const info = service.getLocaleInfo('prs');
+            expect(info).toEqual({ code: 'prs', name: 'دری', englishName: 'Dari' });
+        });
+
+        it('should return Hebrew info', () => {
+            const info = service.getLocaleInfo('he');
+            expect(info).toEqual({ code: 'he', name: 'עברית', englishName: 'Hebrew' });
+        });
+
+        it('should return Persian info', () => {
+            const info = service.getLocaleInfo('fa');
+            expect(info).toEqual({ code: 'fa', name: 'فارسی', englishName: 'Persian' });
+        });
+
+        it('should return Urdu info', () => {
+            const info = service.getLocaleInfo('ur');
+            expect(info).toEqual({ code: 'ur', name: 'اردو', englishName: 'Urdu' });
+        });
+
+        it('should fallback for unknown locale', () => {
+            const info = service.getLocaleInfo('xx');
+            expect(info).toEqual({ code: 'xx', name: 'xx', englishName: 'xx' });
+        });
     });
-
-    it('should return false for Spanish', () => {
-      service.setLocale('es');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeFalse();
-    });
-
-    it('should return false for French', () => {
-      service.setLocale('fr');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeFalse();
-    });
-
-    it('should return false for German', () => {
-      service.setLocale('de');
-      TestBed.flushEffects();
-      expect(service.isRtl()).toBeFalse();
-    });
-  });
-
-  describe('document.dir attribute', () => {
-    it('should set dir to rtl for Arabic', () => {
-      service.setLocale('ar');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('rtl');
-    });
-
-    it('should set dir to ltr for English', () => {
-      service.setLocale('en');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('ltr');
-    });
-
-    it('should set dir to rtl for Hebrew', () => {
-      service.setLocale('he');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('rtl');
-    });
-  });
-
-  describe('document.lang attribute', () => {
-    it('should set lang to ar for Arabic', () => {
-      service.setLocale('ar');
-      TestBed.flushEffects();
-      expect(document.documentElement.lang).toBe('ar');
-    });
-
-    it('should set lang to en for English', () => {
-      service.setLocale('en');
-      TestBed.flushEffects();
-      expect(document.documentElement.lang).toBe('en');
-    });
-  });
-
-  describe('round-trip locale switching', () => {
-    it('should toggle dir correctly through en → ar → es → en', () => {
-      service.setLocale('en');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('ltr');
-
-      service.setLocale('ar');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('rtl');
-
-      service.setLocale('es');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('ltr');
-
-      service.setLocale('en');
-      TestBed.flushEffects();
-      expect(document.documentElement.dir).toBe('ltr');
-    });
-  });
-
-  describe('getLocaleInfo()', () => {
-    it('should return Pashto info', () => {
-      const info = service.getLocaleInfo('ps');
-      expect(info).toEqual({ code: 'ps', name: 'پښتو', englishName: 'Pashto' });
-    });
-
-    it('should return Dari info', () => {
-      const info = service.getLocaleInfo('prs');
-      expect(info).toEqual({ code: 'prs', name: 'دری', englishName: 'Dari' });
-    });
-
-    it('should return Hebrew info', () => {
-      const info = service.getLocaleInfo('he');
-      expect(info).toEqual({ code: 'he', name: 'עברית', englishName: 'Hebrew' });
-    });
-
-    it('should return Persian info', () => {
-      const info = service.getLocaleInfo('fa');
-      expect(info).toEqual({ code: 'fa', name: 'فارسی', englishName: 'Persian' });
-    });
-
-    it('should return Urdu info', () => {
-      const info = service.getLocaleInfo('ur');
-      expect(info).toEqual({ code: 'ur', name: 'اردو', englishName: 'Urdu' });
-    });
-
-    it('should fallback for unknown locale', () => {
-      const info = service.getLocaleInfo('xx');
-      expect(info).toEqual({ code: 'xx', name: 'xx', englishName: 'xx' });
-    });
-  });
 });

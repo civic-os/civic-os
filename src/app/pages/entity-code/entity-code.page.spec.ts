@@ -20,104 +20,108 @@ import { SqlBlockTransformerService } from '../../services/sql-block-transformer
 import { EntitySourceCodeResponse } from '../../interfaces/introspection';
 
 describe('EntityCodePage', () => {
-  let component: EntityCodePage;
-  let fixture: ComponentFixture<EntityCodePage>;
-  let mockIntrospection: jasmine.SpyObj<IntrospectionService>;
-  let mockTransformer: jasmine.SpyObj<SqlBlockTransformerService>;
+    let component: EntityCodePage;
+    let fixture: ComponentFixture<EntityCodePage>;
+    let mockIntrospection: any;
+    let mockTransformer: any;
 
-  const mockResponse: EntitySourceCodeResponse = {
-    code_objects: [
-      {
-        object_type: 'view_definition',
-        object_name: 'manager_events',
-        display_name: 'Manager Events View',
-        description: 'Virtual entity view',
-        source_code: 'SELECT * FROM events WHERE manager_id = current_user_id()',
-        language: 'sql',
-        related_table: 'manager_events',
-        category: 'view'
-      },
-      {
-        object_type: 'trigger_function',
-        object_name: 'handle_manager_event_insert',
-        display_name: 'Handle Insert',
-        description: 'INSTEAD OF INSERT trigger function',
-        source_code: 'CREATE FUNCTION handle_manager_event_insert() RETURNS trigger AS $$ BEGIN RETURN NEW; END; $$ LANGUAGE plpgsql;',
-        language: 'plpgsql',
-        related_table: 'manager_events',
-        category: 'trigger'
-      },
-      {
-        object_type: 'check_constraint',
-        object_name: 'check_title_length',
-        display_name: 'Title Length Check',
-        description: null,
-        source_code: 'CHECK (length(title) > 0)',
-        language: 'sql',
-        related_table: 'manager_events',
-        category: 'constraint'
-      }
-    ],
-    hidden_code_count: 1
-  };
+    const mockResponse: EntitySourceCodeResponse = {
+        code_objects: [
+            {
+                object_type: 'view_definition',
+                object_name: 'manager_events',
+                display_name: 'Manager Events View',
+                description: 'Virtual entity view',
+                source_code: 'SELECT * FROM events WHERE manager_id = current_user_id()',
+                language: 'sql',
+                related_table: 'manager_events',
+                category: 'view'
+            },
+            {
+                object_type: 'trigger_function',
+                object_name: 'handle_manager_event_insert',
+                display_name: 'Handle Insert',
+                description: 'INSTEAD OF INSERT trigger function',
+                source_code: 'CREATE FUNCTION handle_manager_event_insert() RETURNS trigger AS $$ BEGIN RETURN NEW; END; $$ LANGUAGE plpgsql;',
+                language: 'plpgsql',
+                related_table: 'manager_events',
+                category: 'trigger'
+            },
+            {
+                object_type: 'check_constraint',
+                object_name: 'check_title_length',
+                display_name: 'Title Length Check',
+                description: null,
+                source_code: 'CHECK (length(title) > 0)',
+                language: 'sql',
+                related_table: 'manager_events',
+                category: 'constraint'
+            }
+        ],
+        hidden_code_count: 1
+    };
 
-  beforeEach(async () => {
-    mockIntrospection = jasmine.createSpyObj('IntrospectionService', ['getEntitySourceCode']);
-    mockIntrospection.getEntitySourceCode.and.returnValue(of(mockResponse));
+    beforeEach(async () => {
+        mockIntrospection = {
+            getEntitySourceCode: vi.fn().mockName("IntrospectionService.getEntitySourceCode")
+        };
+        mockIntrospection.getEntitySourceCode.mockReturnValue(of(mockResponse));
 
-    mockTransformer = jasmine.createSpyObj('SqlBlockTransformerService', ['toBlocklyWorkspace']);
-    mockTransformer.toBlocklyWorkspace.and.resolveTo({ blocks: { languageVersion: 0, blocks: [] } });
+        mockTransformer = {
+            toBlocklyWorkspace: vi.fn().mockName("SqlBlockTransformerService.toBlocklyWorkspace")
+        };
+        mockTransformer.toBlocklyWorkspace.mockResolvedValue({ blocks: { languageVersion: 0, blocks: [] } });
 
-    await TestBed.configureTestingModule({
-      imports: [EntityCodePage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslationTesting(),
-        provideMarkdown(),
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            paramMap: of(new Map([['tableName', 'manager_events']]))
-          }
-        },
-        { provide: IntrospectionService, useValue: mockIntrospection },
-        { provide: SqlBlockTransformerService, useValue: mockTransformer }
-      ]
-    }).compileComponents();
+        await TestBed.configureTestingModule({
+            imports: [EntityCodePage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting(),
+                provideMarkdown(),
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        paramMap: of(new Map([['tableName', 'manager_events']]))
+                    }
+                },
+                { provide: IntrospectionService, useValue: mockIntrospection },
+                { provide: SqlBlockTransformerService, useValue: mockTransformer }
+            ]
+        }).compileComponents();
 
-    fixture = TestBed.createComponent(EntityCodePage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(EntityCodePage);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-  it('should load source code data', () => {
-    expect(component.loading()).toBeFalse();
-    expect(component.response()).toBeTruthy();
-  });
+    it('should load source code data', () => {
+        expect(component.loading()).toBe(false);
+        expect(component.response()).toBeTruthy();
+    });
 
-  it('should show hidden count', () => {
-    expect(component.hiddenCount()).toBe(1);
-  });
+    it('should show hidden count', () => {
+        expect(component.hiddenCount()).toBe(1);
+    });
 
-  it('should group code objects into sections', () => {
-    const sections = component.sections();
-    expect(sections.length).toBe(3);
-    expect(sections[0].title).toBe('View Definition');
-    expect(sections[1].title).toBe('Trigger Functions');
-    expect(sections[2].title).toBe('CHECK Constraints');
-  });
+    it('should group code objects into sections', () => {
+        const sections = component.sections();
+        expect(sections.length).toBe(3);
+        expect(sections[0].title).toBe('View Definition');
+        expect(sections[1].title).toBe('Trigger Functions');
+        expect(sections[2].title).toBe('CHECK Constraints');
+    });
 
-  it('should not create empty sections', () => {
-    const sectionTypes = component.sections().map(s => s.objectType);
-    expect(sectionTypes).not.toContain('rls_policy');
-    expect(sectionTypes).not.toContain('column_default');
-  });
+    it('should not create empty sections', () => {
+        const sectionTypes = component.sections().map(s => s.objectType);
+        expect(sectionTypes).not.toContain('rls_policy');
+        expect(sectionTypes).not.toContain('column_default');
+    });
 
-  it('should call getEntitySourceCode with correct table name', () => {
-    expect(mockIntrospection.getEntitySourceCode).toHaveBeenCalledWith('manager_events');
-  });
+    it('should call getEntitySourceCode with correct table name', () => {
+        expect(mockIntrospection.getEntitySourceCode).toHaveBeenCalledWith('manager_events');
+    });
 });

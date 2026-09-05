@@ -16,13 +16,14 @@
  */
 
 import { Component, input, Output, EventEmitter, signal, computed, inject, effect, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
 import { DataService } from '../../services/data.service';
 import { SchemaService } from '../../services/schema.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 interface FilterState {
   [column: string]: any;
@@ -46,7 +47,7 @@ const PAYMENT_STATUS_OPTIONS: FilterOption[] = [
 
 @Component({
   selector: 'app-filter-bar',
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, ContrastTextDirective],
   templateUrl: './filter-bar.component.html',
   styleUrl: './filter-bar.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

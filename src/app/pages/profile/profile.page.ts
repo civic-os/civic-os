@@ -23,11 +23,12 @@ import { RelatedRecordsComponent } from '../../components/related-records/relate
 import { EntityActionPanelComponent } from '../../components/entity-action-panel/entity-action-panel.component';
 import { getSmsConfig } from '../../config/runtime';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DisplayPropertyComponent, RelatedRecordsComponent, EntityActionPanelComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, DisplayPropertyComponent, RelatedRecordsComponent, EntityActionPanelComponent, TranslatePipe, ContrastTextDirective],
   templateUrl: './profile.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

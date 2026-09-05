@@ -2,7 +2,7 @@
  * Copyright (C) 2023-2025 Civic OS, L3C
  */
 
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FileReference } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   standalone: true,
   imports: [CosModalComponent, TranslatePipe],
   templateUrl: './image-viewer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-viewer.component.css'
 })
 export class ImageViewerComponent {

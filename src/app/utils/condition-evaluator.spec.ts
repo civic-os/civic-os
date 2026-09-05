@@ -225,7 +225,7 @@ describe('evaluateCondition', () => {
     describe('unknown operator', () => {
         it('should return false for unknown operator', () => {
             const condition = { field: 'status_id', operator: 'unknown' as any, value: 1 };
-            spyOn(console, 'warn');
+            vi.spyOn(console, 'warn').mockReturnValue(undefined);
             expect(evaluateCondition(condition, testData)).toBe(false);
             expect(console.warn).toHaveBeenCalled();
         });
@@ -331,9 +331,9 @@ describe('evaluateCondition', () => {
             const condition: ActionCondition = {
                 and: [
                     { or: [
-                        { field: 'status_id', operator: 'eq', value: 1 },
-                        { field: 'status_id', operator: 'eq', value: 2 }
-                    ]},
+                            { field: 'status_id', operator: 'eq', value: 1 },
+                            { field: 'status_id', operator: 'eq', value: 2 }
+                        ] },
                     { field: 'amount', operator: 'gt', value: 50 }
                 ]
             };
@@ -423,8 +423,8 @@ describe('evaluateCondition', () => {
                     { field: 'status_id', operator: 'eq', value: 8 }
                 ]
             };
-            expect(evaluateCondition(condition, { status_id: 5 })).toBe(true);  // Pending
-            expect(evaluateCondition(condition, { status_id: 8 })).toBe(true);  // Needs Revision
+            expect(evaluateCondition(condition, { status_id: 5 })).toBe(true); // Pending
+            expect(evaluateCondition(condition, { status_id: 8 })).toBe(true); // Needs Revision
             expect(evaluateCondition(condition, { status_id: 6 })).toBe(false); // Submitted
             expect(evaluateCondition(condition, { status_id: 7 })).toBe(false); // Approved
         });
@@ -455,9 +455,9 @@ describe('extractConditionFieldNames', () => {
         const result = extractConditionFieldNames({
             and: [
                 { or: [
-                    { field: 'status_id', operator: 'eq', value: 1 },
-                    { field: 'type', operator: 'eq', value: 'a' }
-                ]},
+                        { field: 'status_id', operator: 'eq', value: 1 },
+                        { field: 'type', operator: 'eq', value: 'a' }
+                    ] },
                 { field: 'amount', operator: 'gt', value: 0 }
             ]
         });

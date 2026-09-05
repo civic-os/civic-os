@@ -46,24 +46,23 @@ describe('Import Validation Worker - EntityPropertyType Sync', () => {
     // TypeScript numeric enums have reverse mappings (key→value AND value→key),
     // so filter to only numeric values to get the true member count.
     const enumValues = Object.values(EntityPropertyType).filter(v => typeof v === 'number');
-    expect(enumValues.length).toBe(EXPECTED_COUNT,
+    expect(enumValues.length,
       `EntityPropertyType has ${enumValues.length} members but expected ${EXPECTED_COUNT}. ` +
       `If you added a new type, update: (1) EXPECTED_COUNT in this test, ` +
       `(2) worker copy in import-validation.worker.ts, ` +
       `(3) type labels in property-management.page.ts getPropertyTypeLabel(), ` +
       `(4) MCP server enum in tools/mcp-server/src/interfaces.ts, ` +
       `(5) detectPropertyType() in tools/mcp-server/src/schema-cache.ts, ` +
-      `(6) formatValue() in tools/mcp-server/src/formatters/value.ts`);
+      `(6) formatValue() in tools/mcp-server/src/formatters/value.ts`).toBe(EXPECTED_COUNT);
   });
 
   it('should have contiguous enum values from 0 to max', () => {
     const enumValues = Object.values(EntityPropertyType)
       .filter(v => typeof v === 'number') as number[];
     const max = Math.max(...enumValues);
-    expect(max).toBe(EXPECTED_COUNT - 1,
-      `Enum max value (${max}) should be ${EXPECTED_COUNT - 1} for contiguous values`);
+    expect(max, `Enum max value (${max}) should be ${EXPECTED_COUNT - 1} for contiguous values`).toBe(EXPECTED_COUNT - 1);
     for (let i = 0; i <= max; i++) {
-      expect(enumValues).toContain(i, `Missing enum value ${i}`);
+      expect(enumValues, `Missing enum value ${i}`).toContain(i);
     }
   });
 });

@@ -18,7 +18,7 @@
 
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
@@ -45,7 +45,7 @@ interface EntityData {
 @Component({
   selector: 'app-entity-management',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, DragDropModule, TranslatePipe],
+  imports: [FormsModule, DragDropModule, TranslatePipe],
   templateUrl: './entity-management.page.html',
   styleUrl: './entity-management.page.css'
 })

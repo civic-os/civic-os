@@ -17,7 +17,7 @@
 
 import { Component, forwardRef, signal, computed, effect, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { RRuleFrequency, RRuleDayOfWeek, RRuleConfig } from '../../interfaces/entity';
 import { RecurringService } from '../../services/recurring.service';
@@ -46,7 +46,7 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
 @Component({
   selector: 'app-recurrence-rule-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

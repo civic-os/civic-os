@@ -27,7 +27,7 @@ import { FileUploadService } from '../../services/file-upload.service';
 import { SchemaService } from '../../services/schema.service';
 import { GalleryService } from '../../services/gallery.service';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
-import { NgxCurrencyDirective } from '@dintecom/ngx-currency';
+import { NgxCurrency } from '@dintecom/ngx-currency';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
@@ -50,7 +50,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
     imports: [
     CommonModule,
     NgxMaskDirective,
-    NgxCurrencyDirective,
+    NgxCurrency,
     ReactiveFormsModule,
     GeoPointMapComponent,
     GeoPolygonMapComponent,

@@ -16,7 +16,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage, CropperPosition } from 'ngx-image-cropper';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
@@ -25,13 +25,14 @@ import { StaticAssetsService, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from '
 import { FileUploadService } from '../../services/file-upload.service';
 import { StaticAsset, CropState, CropCoordinates, CropBreakpoint, CropPresetProfile } from '../../interfaces/dashboard';
 import { getS3Config } from '../../config/runtime';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 type CropStep = 'upload' | 'profile' | 'crop-desktop' | 'crop-tablet' | 'crop-mobile' | 'saving';
 
 @Component({
   selector: 'app-static-assets',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageCropperComponent, CosModalComponent, TranslatePipe],
+  imports: [FormsModule, ImageCropperComponent, CosModalComponent, TranslatePipe, ContrastTextDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './static-assets.page.html',
   styleUrl: './static-assets.page.css'

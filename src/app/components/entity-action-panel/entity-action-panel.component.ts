@@ -18,7 +18,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { forkJoin, of, merge, Subscription } from 'rxjs';
 import { catchError, debounceTime } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -62,13 +62,12 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-entity-action-panel',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ActionBarComponent,
     CosModalComponent,
     PhotoGalleryEditorComponent,
     TranslatePipe
-  ],
+],
   templateUrl: './entity-action-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -2,7 +2,7 @@
  * Copyright (C) 2023-2025 Civic OS, L3C
  */
 
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FileReference } from '../../interfaces/entity';
 import { getS3Config } from '../../config/runtime';
@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   standalone: true,
   imports: [CosModalComponent, TranslatePipe],
   templateUrl: './pdf-viewer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pdf-viewer.component.css'
 })
 export class PdfViewerComponent {

@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { FkSearchModalComponent } from './fk-search-modal.component';
@@ -28,1065 +28,1071 @@ import { provideTranslationTesting } from '../../testing/translation-testing';
 import { EntityPropertyType } from '../../interfaces/entity';
 
 describe('FkSearchModalComponent', () => {
-  let component: FkSearchModalComponent;
-  let fixture: ComponentFixture<FkSearchModalComponent>;
-  let mockDataService: jasmine.SpyObj<DataService>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
+    let component: FkSearchModalComponent;
+    let fixture: ComponentFixture<FkSearchModalComponent>;
+    let mockDataService: any;
+    let mockSchemaService: any;
 
-  const mockListProps = [
-    createMockProperty({
-      column_name: 'display_name',
-      display_name: 'Name',
-      type: EntityPropertyType.TextShort
-    }),
-    createMockProperty({
-      column_name: 'email',
-      display_name: 'Email',
-      type: EntityPropertyType.Email
-    })
-  ];
-
-  const mockFilterProps = [
-    createMockProperty({
-      column_name: 'status_id',
-      display_name: 'Status',
-      type: EntityPropertyType.ForeignKeyName,
-      filterable: true,
-      join_table: 'statuses',
-      join_column: 'id'
-    })
-  ];
-
-  const mockEntity = createMockEntity({
-    table_name: 'borrowers',
-    display_name: 'Borrowers',
-    search_fields: ['display_name']
-  });
-
-  const mockRows = [
-    { id: 1, display_name: 'Alice Smith', email: 'alice@example.com' },
-    { id: 2, display_name: 'Bob Jones', email: 'bob@example.com' },
-    { id: 3, display_name: 'Carol White', email: 'carol@example.com' }
-  ];
-
-  // Helper to wait for async effects and data loading
-  async function waitForData() {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    fixture.detectChanges();
-    await fixture.whenStable();
-  }
-
-  beforeEach(async () => {
-    mockDataService = jasmine.createSpyObj('DataService', ['getData', 'getDataPaginated', 'callRpc']);
-    mockSchemaService = jasmine.createSpyObj('SchemaService', [
-      'getEntity', 'getPropsForList', 'getPropsForFilter',
-      'getStatusOptionsSync', 'ensureStatusOptionsLoaded',
-      'getCategoryOptionsSync', 'ensureCategoryOptionsLoaded'
-    ]);
-
-    mockDataService.getData.and.returnValue(of([]));
-    mockDataService.getDataPaginated.and.returnValue(of({ data: mockRows as any, totalCount: 3 }));
-    mockSchemaService.getEntity.and.returnValue(of(mockEntity));
-    mockSchemaService.getPropsForList.and.returnValue(of(mockListProps));
-    mockSchemaService.getPropsForFilter.and.returnValue(of([]));
-
-    await TestBed.configureTestingModule({
-      imports: [FkSearchModalComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(),
-        provideTranslationTesting(),
-        { provide: DataService, useValue: mockDataService },
-        { provide: SchemaService, useValue: mockSchemaService }
-      ]
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(FkSearchModalComponent);
-    component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    fixture.componentRef.setInput('isOpen', false);
-    fixture.componentRef.setInput('joinTable', 'borrowers');
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
-
-  describe('Table Mode', () => {
-    beforeEach(() => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.detectChanges();
-    });
-
-    it('should fetch properties via SchemaService when opened', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(mockSchemaService.getEntity).toHaveBeenCalledWith('borrowers');
-      expect(mockSchemaService.getPropsForList).toHaveBeenCalled();
-    });
-
-    it('should load data via getDataPaginated', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(mockDataService.getDataPaginated).toHaveBeenCalled();
-      expect(component.rows().length).toBe(3);
-      expect(component.totalCount()).toBe(3);
-    });
-
-    it('should highlight row on click', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Click second row via component method
-      component.onRowClick(mockRows[1] as any);
-      fixture.detectChanges();
-
-      expect(component.pendingSelection()).toEqual({ id: 2, displayName: 'Bob Jones' });
-      expect(component.isSelected(2)).toBe(true);
-      expect(component.isSelected(1)).toBe(false);
-    });
-
-    it('should emit confirmed with selection on Confirm', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      spyOn(component.confirmed, 'emit');
-
-      // Select row via method
-      component.onRowClick(mockRows[0] as any);
-      component.onConfirm();
-
-      expect(component.confirmed.emit).toHaveBeenCalledWith({ id: 1, displayName: 'Alice Smith' });
-    });
-
-    it('should emit closed on Cancel', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      spyOn(component.closed, 'emit');
-      component.onCancel();
-
-      expect(component.closed.emit).toHaveBeenCalled();
-    });
-
-    it('should disable Confirm when selection matches current value', async () => {
-      fixture.componentRef.setInput('currentValue', 1);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Pre-highlighted current value
-      expect(component.pendingSelection()?.id).toBe(1);
-      expect(component.confirmEnabled()).toBe(false);
-
-      // Click a different row
-      component.onRowClick(mockRows[1] as any);
-      expect(component.confirmEnabled()).toBe(true);
-    });
-
-    it('should emit confirmed with null on Clear', async () => {
-      fixture.componentRef.setInput('isNullable', true);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      spyOn(component.confirmed, 'emit');
-      component.onClear();
-
-      expect(component.confirmed.emit).toHaveBeenCalledWith(null);
-    });
-
-    it('should show Clear button only when nullable', async () => {
-      fixture.componentRef.setInput('isNullable', true);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const clearBtn = fixture.debugElement.queryAll(By.css('.cos-modal-action button'))
-        .find(b => b.nativeElement.textContent.includes('Clear'));
-      expect(clearBtn).toBeTruthy();
-    });
-
-    it('should not show Clear button when not nullable', async () => {
-      fixture.componentRef.setInput('isNullable', false);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const clearBtn = fixture.debugElement.queryAll(By.css('.cos-modal-action button'))
-        .find(b => b.nativeElement.textContent.includes('Clear'));
-      expect(clearBtn).toBeFalsy();
-    });
-
-    it('should display search input when entity has search_fields', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search"]'));
-      expect(searchInput).toBeTruthy();
-    });
-  });
-
-  describe('RPC ID Filtering', () => {
-    const rpcOptions = [
-      { id: 1, text: 'Approved Alice' },
-      { id: 2, text: 'Approved Bob' },
-      { id: 3, text: 'Approved Carol' }
+    const mockListProps = [
+        createMockProperty({
+            column_name: 'display_name',
+            display_name: 'Name',
+            type: EntityPropertyType.TextShort
+        }),
+        createMockProperty({
+            column_name: 'email',
+            display_name: 'Email',
+            type: EntityPropertyType.Email
+        })
     ];
 
-    beforeEach(() => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', rpcOptions);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-    });
-
-    it('should inject RPC IDs as filter into table query', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(mockDataService.getDataPaginated).toHaveBeenCalled();
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      // Should include an `in` filter with the RPC option IDs
-      expect(callArgs.filters).toBeTruthy();
-      const idFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
-      expect(idFilter).toBeTruthy();
-      expect(idFilter!.value).toBe('(1,2,3)');
-    });
-
-    it('should still use full entity columns with RPC options', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should load entity metadata and show list properties (not just Name)
-      expect(mockSchemaService.getEntity).toHaveBeenCalledWith('borrowers');
-      expect(mockSchemaService.getPropsForList).toHaveBeenCalled();
-      expect(component.listProperties().length).toBe(2); // display_name + email
-    });
-
-    it('should show full column headers with RPC options', async () => {
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const headers = fixture.debugElement.queryAll(By.css('thead th'));
-      // radio + display_name + email (full entity columns, not just "Name")
-      expect(headers.length).toBe(3);
-    });
-  });
-
-  describe('Confirm Button State', () => {
-    it('should be disabled when no change from current value', () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('currentValue', 1);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      component.pendingSelection.set({ id: 1, displayName: 'Alice' });
-      expect(component.confirmEnabled()).toBe(false);
-    });
-
-    it('should be enabled when selection differs from current', () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('currentValue', 1);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      component.pendingSelection.set({ id: 2, displayName: 'Bob' });
-      expect(component.confirmEnabled()).toBe(true);
-    });
-
-    it('should be enabled when current is null and selection is made', () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('currentValue', null);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      component.pendingSelection.set({ id: 1, displayName: 'Alice' });
-      expect(component.confirmEnabled()).toBe(true);
-    });
-  });
-
-  describe('Sort', () => {
-    it('should toggle sort direction on same column', () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      component.orderField.set('display_name');
-      component.orderDirection.set('asc');
-
-      component.onSort('display_name');
-      expect(component.orderDirection()).toBe('desc');
-
-      component.onSort('display_name');
-      expect(component.orderDirection()).toBe('asc');
-    });
-
-    it('should reset to asc when sorting by new column', () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      component.orderField.set('display_name');
-      component.orderDirection.set('desc');
-
-      component.onSort('email');
-      expect(component.orderField()).toBe('email');
-      expect(component.orderDirection()).toBe('asc');
-    });
-
-    it('should return correct sort icon', () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      component.orderField.set('display_name');
-      component.orderDirection.set('asc');
-
-      expect(component.getSortIcon('display_name')).toBe('arrow_upward');
-      expect(component.getSortIcon('email')).toBe('');
-
-      component.orderDirection.set('desc');
-      expect(component.getSortIcon('display_name')).toBe('arrow_downward');
-    });
-  });
-
-  describe('Multi-Select Mode (v0.46.0)', () => {
-    const currentItems = [
-      { id: 1, display_name: 'Urgent', color: '#FF0000' },
-      { id: 2, display_name: 'Road Surface', color: '#00FF00' }
+    const mockFilterProps = [
+        createMockProperty({
+            column_name: 'status_id',
+            display_name: 'Status',
+            type: EntityPropertyType.ForeignKeyName,
+            filterable: true,
+            join_table: 'statuses',
+            join_column: 'id'
+        })
     ];
 
-    function setupMultiSelect() {
-      fixture.componentRef.setInput('joinTable', 'tags');
-      fixture.componentRef.setInput('multiSelect', true);
-      fixture.componentRef.setInput('currentValueIds', [1, 2]);
-      fixture.componentRef.setInput('currentValueItems', currentItems);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
+    const mockEntity = createMockEntity({
+        table_name: 'borrowers',
+        display_name: 'Borrowers',
+        search_fields: ['display_name']
+    });
+
+    const mockRows = [
+        { id: 1, display_name: 'Alice Smith', email: 'alice@example.com' },
+        { id: 2, display_name: 'Bob Jones', email: 'bob@example.com' },
+        { id: 3, display_name: 'Carol White', email: 'carol@example.com' }
+    ];
+
+    // Helper to wait for async effects and data loading
+    async function waitForData() {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        fixture.detectChanges();
+        await fixture.whenStable();
     }
 
-    it('should initialize workingSelection from currentValueIds on open', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    beforeEach(async () => {
+        mockDataService = {
+            getData: vi.fn().mockName("DataService.getData"),
+            getDataPaginated: vi.fn().mockName("DataService.getDataPaginated"),
+            callRpc: vi.fn().mockName("DataService.callRpc")
+        };
+        mockSchemaService = {
+            getEntity: vi.fn().mockName("SchemaService.getEntity"),
+            getPropsForList: vi.fn().mockName("SchemaService.getPropsForList"),
+            getPropsForFilter: vi.fn().mockName("SchemaService.getPropsForFilter"),
+            getStatusOptionsSync: vi.fn().mockName("SchemaService.getStatusOptionsSync"),
+            ensureStatusOptionsLoaded: vi.fn().mockName("SchemaService.ensureStatusOptionsLoaded"),
+            getCategoryOptionsSync: vi.fn().mockName("SchemaService.getCategoryOptionsSync"),
+            ensureCategoryOptionsLoaded: vi.fn().mockName("SchemaService.ensureCategoryOptionsLoaded")
+        };
 
-      expect(component.workingSelection().has(1)).toBeTrue();
-      expect(component.workingSelection().has(2)).toBeTrue();
-      expect(component.workingSelection().size).toBe(2);
+        mockDataService.getData.mockReturnValue(of([]));
+        mockDataService.getDataPaginated.mockReturnValue(of({ data: mockRows as any, totalCount: 3 }));
+        mockSchemaService.getEntity.mockReturnValue(of(mockEntity));
+        mockSchemaService.getPropsForList.mockReturnValue(of(mockListProps));
+        mockSchemaService.getPropsForFilter.mockReturnValue(of([]));
+
+        await TestBed.configureTestingModule({
+            imports: [FkSearchModalComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideTranslationTesting(),
+                { provide: DataService, useValue: mockDataService },
+                { provide: SchemaService, useValue: mockSchemaService }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(FkSearchModalComponent);
+        component = fixture.componentInstance;
     });
 
-    it('should populate chipCache from currentValueItems on open', async () => {
-      // Use IDs that don't overlap with mock page rows (1,2,3) so they
-      // aren't overwritten by loadTableData's cache update
-      const nonOverlappingItems = [
-        { id: 100, display_name: 'Tag Alpha', color: '#FF0000' },
-        { id: 200, display_name: 'Tag Beta', color: '#00FF00' }
-      ];
-      fixture.componentRef.setInput('joinTable', 'tags');
-      fixture.componentRef.setInput('multiSelect', true);
-      fixture.componentRef.setInput('currentValueIds', [100, 200]);
-      fixture.componentRef.setInput('currentValueItems', nonOverlappingItems);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const cache = component.chipCache();
-      expect(cache.get(100)?.display_name).toBe('Tag Alpha');
-      expect(cache.get(100)?.color).toBe('#FF0000');
-      expect(cache.get(200)?.display_name).toBe('Tag Beta');
+    it('should create', () => {
+        fixture.componentRef.setInput('isOpen', false);
+        fixture.componentRef.setInput('joinTable', 'borrowers');
+        fixture.detectChanges();
+        expect(component).toBeTruthy();
     });
 
-    it('should render checkboxes instead of radios in multi-select mode', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('Table Mode', () => {
+        beforeEach(() => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.detectChanges();
+        });
 
-      const checkboxes = fixture.debugElement.queryAll(By.css('input[type="checkbox"]'));
-      const radios = fixture.debugElement.queryAll(By.css('input[type="radio"]'));
-      expect(checkboxes.length).toBeGreaterThan(0);
-      expect(radios.length).toBe(0);
+        it('should fetch properties via SchemaService when opened', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(mockSchemaService.getEntity).toHaveBeenCalledWith('borrowers');
+            expect(mockSchemaService.getPropsForList).toHaveBeenCalled();
+        });
+
+        it('should load data via getDataPaginated', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(mockDataService.getDataPaginated).toHaveBeenCalled();
+            expect(component.rows().length).toBe(3);
+            expect(component.totalCount()).toBe(3);
+        });
+
+        it('should highlight row on click', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Click second row via component method
+            component.onRowClick(mockRows[1] as any);
+            fixture.detectChanges();
+
+            expect(component.pendingSelection()).toEqual({ id: 2, displayName: 'Bob Jones' });
+            expect(component.isSelected(2)).toBe(true);
+            expect(component.isSelected(1)).toBe(false);
+        });
+
+        it('should emit confirmed with selection on Confirm', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            vi.spyOn(component.confirmed, 'emit').mockReturnValue(undefined);
+
+            // Select row via method
+            component.onRowClick(mockRows[0] as any);
+            component.onConfirm();
+
+            expect(component.confirmed.emit).toHaveBeenCalledWith({ id: 1, displayName: 'Alice Smith' });
+        });
+
+        it('should emit closed on Cancel', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            vi.spyOn(component.closed, 'emit').mockReturnValue(undefined);
+            component.onCancel();
+
+            expect(component.closed.emit).toHaveBeenCalled();
+        });
+
+        it('should disable Confirm when selection matches current value', async () => {
+            fixture.componentRef.setInput('currentValue', 1);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Pre-highlighted current value
+            expect(component.pendingSelection()?.id).toBe(1);
+            expect(component.confirmEnabled()).toBe(false);
+
+            // Click a different row
+            component.onRowClick(mockRows[1] as any);
+            expect(component.confirmEnabled()).toBe(true);
+        });
+
+        it('should emit confirmed with null on Clear', async () => {
+            fixture.componentRef.setInput('isNullable', true);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            vi.spyOn(component.confirmed, 'emit').mockReturnValue(undefined);
+            component.onClear();
+
+            expect(component.confirmed.emit).toHaveBeenCalledWith(null);
+        });
+
+        it('should show Clear button only when nullable', async () => {
+            fixture.componentRef.setInput('isNullable', true);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const clearBtn = fixture.debugElement.queryAll(By.css('.cos-modal-action button'))
+                .find(b => b.nativeElement.textContent.includes('Clear'));
+            expect(clearBtn).toBeTruthy();
+        });
+
+        it('should not show Clear button when not nullable', async () => {
+            fixture.componentRef.setInput('isNullable', false);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const clearBtn = fixture.debugElement.queryAll(By.css('.cos-modal-action button'))
+                .find(b => b.nativeElement.textContent.includes('Clear'));
+            expect(clearBtn).toBeFalsy();
+        });
+
+        it('should display search input when entity has search_fields', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search"]'));
+            expect(searchInput).toBeTruthy();
+        });
     });
 
-    it('should toggle selection on checkbox click', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('RPC ID Filtering', () => {
+        const rpcOptions = [
+            { id: 1, text: 'Approved Alice' },
+            { id: 2, text: 'Approved Bob' },
+            { id: 3, text: 'Approved Carol' }
+        ];
 
-      // Add item 3 to selection
-      component.toggleSelection(3, 'Carol White');
-      expect(component.workingSelection().has(3)).toBeTrue();
-      expect(component.workingSelection().size).toBe(3);
+        beforeEach(() => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', rpcOptions);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+        });
 
-      // Remove item 1 from selection
-      component.toggleSelection(1, 'Urgent', '#FF0000');
-      expect(component.workingSelection().has(1)).toBeFalse();
-      expect(component.workingSelection().size).toBe(2);
+        it('should inject RPC IDs as filter into table query', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(mockDataService.getDataPaginated).toHaveBeenCalled();
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            // Should include an `in` filter with the RPC option IDs
+            expect(callArgs.filters).toBeTruthy();
+            const idFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
+            expect(idFilter).toBeTruthy();
+            expect(idFilter!.value).toBe('(1,2,3)');
+        });
+
+        it('should still use full entity columns with RPC options', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Should load entity metadata and show list properties (not just Name)
+            expect(mockSchemaService.getEntity).toHaveBeenCalledWith('borrowers');
+            expect(mockSchemaService.getPropsForList).toHaveBeenCalled();
+            expect(component.listProperties().length).toBe(2); // display_name + email
+        });
+
+        it('should show full column headers with RPC options', async () => {
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const headers = fixture.debugElement.queryAll(By.css('thead th'));
+            // radio + display_name + email (full entity columns, not just "Name")
+            expect(headers.length).toBe(3);
+        });
     });
 
-    it('should show selected chips in right panel', async () => {
-      // Use non-overlapping IDs so page data doesn't overwrite chip cache
-      const items = [
-        { id: 100, display_name: 'Urgent', color: '#FF0000' },
-        { id: 200, display_name: 'Road Surface', color: '#00FF00' }
-      ];
-      fixture.componentRef.setInput('joinTable', 'tags');
-      fixture.componentRef.setInput('multiSelect', true);
-      fixture.componentRef.setInput('currentValueIds', [100, 200]);
-      fixture.componentRef.setInput('currentValueItems', items);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('Confirm Button State', () => {
+        it('should be disabled when no change from current value', () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('currentValue', 1);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
 
-      const chips = component.selectedChips();
-      expect(chips.length).toBe(2);
-      // Sorted alphabetically
-      expect(chips[0].display_name).toBe('Road Surface');
-      expect(chips[1].display_name).toBe('Urgent');
+            component.pendingSelection.set({ id: 1, displayName: 'Alice' });
+            expect(component.confirmEnabled()).toBe(false);
+        });
+
+        it('should be enabled when selection differs from current', () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('currentValue', 1);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+
+            component.pendingSelection.set({ id: 2, displayName: 'Bob' });
+            expect(component.confirmEnabled()).toBe(true);
+        });
+
+        it('should be enabled when current is null and selection is made', () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('currentValue', null);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+
+            component.pendingSelection.set({ id: 1, displayName: 'Alice' });
+            expect(component.confirmEnabled()).toBe(true);
+        });
     });
 
-    it('should remove chip from right panel via removeChip', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('Sort', () => {
+        it('should toggle sort direction on same column', () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
 
-      component.removeChip(1);
-      expect(component.workingSelection().has(1)).toBeFalse();
-      expect(component.selectedChips().length).toBe(1);
+            component.orderField.set('display_name');
+            component.orderDirection.set('asc');
+
+            component.onSort('display_name');
+            expect(component.orderDirection()).toBe('desc');
+
+            component.onSort('display_name');
+            expect(component.orderDirection()).toBe('asc');
+        });
+
+        it('should reset to asc when sorting by new column', () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+
+            component.orderField.set('display_name');
+            component.orderDirection.set('desc');
+
+            component.onSort('email');
+            expect(component.orderField()).toBe('email');
+            expect(component.orderDirection()).toBe('asc');
+        });
+
+        it('should return correct sort icon', () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+
+            component.orderField.set('display_name');
+            component.orderDirection.set('asc');
+
+            expect(component.getSortIcon('display_name')).toBe('arrow_upward');
+            expect(component.getSortIcon('email')).toBe('');
+
+            component.orderDirection.set('desc');
+            expect(component.getSortIcon('display_name')).toBe('arrow_downward');
+        });
     });
 
-    it('should persist selection across pagination', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('Multi-Select Mode (v0.46.0)', () => {
+        const currentItems = [
+            { id: 1, display_name: 'Urgent', color: '#FF0000' },
+            { id: 2, display_name: 'Road Surface', color: '#00FF00' }
+        ];
 
-      // Add item 3 from current page
-      component.toggleSelection(3, 'Carol White');
+        function setupMultiSelect() {
+            fixture.componentRef.setInput('joinTable', 'tags');
+            fixture.componentRef.setInput('multiSelect', true);
+            fixture.componentRef.setInput('currentValueIds', [1, 2]);
+            fixture.componentRef.setInput('currentValueItems', currentItems);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+        }
 
-      // Simulate page change (data reload with different rows)
-      mockDataService.getDataPaginated.and.returnValue(of({
-        data: [
-          { id: 4, display_name: 'Dave Green', email: 'd@test.com' },
-          { id: 5, display_name: 'Eve Black', email: 'e@test.com' }
-        ] as any,
-        totalCount: 5
-      }));
-      component.onPageChange(2);
-      await waitForData();
+        it('should initialize workingSelection from currentValueIds on open', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
 
-      // Selection should persist
-      expect(component.workingSelection().has(1)).toBeTrue();
-      expect(component.workingSelection().has(2)).toBeTrue();
-      expect(component.workingSelection().has(3)).toBeTrue();
-      expect(component.selectedChips().length).toBe(3);
+            expect(component.workingSelection().has(1)).toBe(true);
+            expect(component.workingSelection().has(2)).toBe(true);
+            expect(component.workingSelection().size).toBe(2);
+        });
+
+        it('should populate chipCache from currentValueItems on open', async () => {
+            // Use IDs that don't overlap with mock page rows (1,2,3) so they
+            // aren't overwritten by loadTableData's cache update
+            const nonOverlappingItems = [
+                { id: 100, display_name: 'Tag Alpha', color: '#FF0000' },
+                { id: 200, display_name: 'Tag Beta', color: '#00FF00' }
+            ];
+            fixture.componentRef.setInput('joinTable', 'tags');
+            fixture.componentRef.setInput('multiSelect', true);
+            fixture.componentRef.setInput('currentValueIds', [100, 200]);
+            fixture.componentRef.setInput('currentValueItems', nonOverlappingItems);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const cache = component.chipCache();
+            expect(cache.get(100)?.display_name).toBe('Tag Alpha');
+            expect(cache.get(100)?.color).toBe('#FF0000');
+            expect(cache.get(200)?.display_name).toBe('Tag Beta');
+        });
+
+        it('should render checkboxes instead of radios in multi-select mode', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const checkboxes = fixture.debugElement.queryAll(By.css('input[type="checkbox"]'));
+            const radios = fixture.debugElement.queryAll(By.css('input[type="radio"]'));
+            expect(checkboxes.length).toBeGreaterThan(0);
+            expect(radios.length).toBe(0);
+        });
+
+        it('should toggle selection on checkbox click', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Add item 3 to selection
+            component.toggleSelection(3, 'Carol White');
+            expect(component.workingSelection().has(3)).toBe(true);
+            expect(component.workingSelection().size).toBe(3);
+
+            // Remove item 1 from selection
+            component.toggleSelection(1, 'Urgent', '#FF0000');
+            expect(component.workingSelection().has(1)).toBe(false);
+            expect(component.workingSelection().size).toBe(2);
+        });
+
+        it('should show selected chips in right panel', async () => {
+            // Use non-overlapping IDs so page data doesn't overwrite chip cache
+            const items = [
+                { id: 100, display_name: 'Urgent', color: '#FF0000' },
+                { id: 200, display_name: 'Road Surface', color: '#00FF00' }
+            ];
+            fixture.componentRef.setInput('joinTable', 'tags');
+            fixture.componentRef.setInput('multiSelect', true);
+            fixture.componentRef.setInput('currentValueIds', [100, 200]);
+            fixture.componentRef.setInput('currentValueItems', items);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const chips = component.selectedChips();
+            expect(chips.length).toBe(2);
+            // Sorted alphabetically
+            expect(chips[0].display_name).toBe('Road Surface');
+            expect(chips[1].display_name).toBe('Urgent');
+        });
+
+        it('should remove chip from right panel via removeChip', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.removeChip(1);
+            expect(component.workingSelection().has(1)).toBe(false);
+            expect(component.selectedChips().length).toBe(1);
+        });
+
+        it('should persist selection across pagination', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Add item 3 from current page
+            component.toggleSelection(3, 'Carol White');
+
+            // Simulate page change (data reload with different rows)
+            mockDataService.getDataPaginated.mockReturnValue(of({
+                data: [
+                    { id: 4, display_name: 'Dave Green', email: 'd@test.com' },
+                    { id: 5, display_name: 'Eve Black', email: 'e@test.com' }
+                ] as any,
+                totalCount: 5
+            }));
+            component.onPageChange(2);
+            await waitForData();
+
+            // Selection should persist
+            expect(component.workingSelection().has(1)).toBe(true);
+            expect(component.workingSelection().has(2)).toBe(true);
+            expect(component.workingSelection().has(3)).toBe(true);
+            expect(component.selectedChips().length).toBe(3);
+        });
+
+        it('should compute pendingDiff correctly', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Add item 3, remove item 1
+            component.toggleSelection(3, 'Carol White');
+            component.toggleSelection(1, 'Urgent');
+
+            const diff = component.pendingDiff();
+            expect(diff.toAdd).toEqual([3]);
+            expect(diff.toRemove).toEqual([1]);
+        });
+
+        it('should disable Apply when diff is empty', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // No changes made
+            expect(component.applyEnabled()).toBe(false);
+        });
+
+        it('should enable Apply when diff is non-empty', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.toggleSelection(3, 'Carol White');
+            expect(component.applyEnabled()).toBe(true);
+        });
+
+        it('should emit applied with diff on Apply', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            vi.spyOn(component.applied, 'emit').mockReturnValue(undefined);
+
+            component.toggleSelection(3, 'Carol White');
+            component.toggleSelection(1, 'Urgent');
+            component.onApply();
+
+            expect(component.applied.emit).toHaveBeenCalledWith(expect.objectContaining({ toAdd: [3], toRemove: [1] }));
+        });
+
+        it('should populate chipCache from page data', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Row data should be cached
+            const cache = component.chipCache();
+            expect(cache.get(3)?.display_name).toBe('Carol White');
+        });
+
+        it('should show Apply button instead of Confirm in multi-select mode', async () => {
+            setupMultiSelect();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const buttons = fixture.debugElement.queryAll(By.css('.cos-modal-action button'));
+            const buttonTexts = buttons.map(b => b.nativeElement.textContent.trim());
+            expect(buttonTexts.some(t => t.includes('Apply'))).toBe(true);
+            expect(buttonTexts.some(t => t.includes('Confirm'))).toBe(false);
+        });
     });
 
-    it('should compute pendingDiff correctly', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('Server Filter (v0.53.0)', () => {
+        beforeEach(() => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+        });
 
-      // Add item 3, remove item 1
-      component.toggleSelection(3, 'Carol White');
-      component.toggleSelection(1, 'Urgent');
+        it('should include serverFilter in query when provided', async () => {
+            fixture.componentRef.setInput('serverFilter', { column: 'is_eligible', operator: 'is', value: 'true' });
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
 
-      const diff = component.pendingDiff();
-      expect(diff.toAdd).toEqual([3]);
-      expect(diff.toRemove).toEqual([1]);
+            expect(mockDataService.getDataPaginated).toHaveBeenCalled();
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            const serverFilter = callArgs.filters!.find((f: any) => f.column === 'is_eligible');
+            expect(serverFilter).toBeTruthy();
+            expect(serverFilter!.operator).toBe('is');
+            expect(serverFilter!.value).toBe('true');
+        });
+
+        it('should use serverFilter instead of rpcIdFilter when both are available', async () => {
+            const rpcOptions = [
+                { id: 1, text: 'Option A' },
+                { id: 2, text: 'Option B' }
+            ];
+            fixture.componentRef.setInput('rpcOptions', rpcOptions);
+            fixture.componentRef.setInput('serverFilter', { column: 'is_eligible', operator: 'is', value: 'true' });
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            // serverFilter should be present
+            const serverFilter = callArgs.filters!.find((f: any) => f.column === 'is_eligible');
+            expect(serverFilter).toBeTruthy();
+            // rpcIdFilter (in operator) should NOT be present
+            const inFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
+            expect(inFilter).toBeFalsy();
+        });
+
+        it('should fall back to rpcIdFilter when serverFilter is null', async () => {
+            const rpcOptions = [
+                { id: 1, text: 'Option A' },
+                { id: 2, text: 'Option B' }
+            ];
+            fixture.componentRef.setInput('rpcOptions', rpcOptions);
+            fixture.componentRef.setInput('serverFilter', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            // rpcIdFilter (in operator) should be present since serverFilter is null
+            const inFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
+            expect(inFilter).toBeTruthy();
+            expect(inFilter!.value).toBe('(1,2)');
+        });
+
+        it('should not add any extra filter when both serverFilter and rpcOptions are null', async () => {
+            fixture.componentRef.setInput('serverFilter', null);
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            // No server filter and no in filter
+            const serverFilter = callArgs.filters?.find((f: any) => f.column === 'is_eligible');
+            const inFilter = callArgs.filters?.find((f: any) => f.operator === 'in');
+            expect(serverFilter).toBeFalsy();
+            expect(inFilter).toBeFalsy();
+        });
     });
 
-    it('should disable Apply when diff is empty', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('Fallback for unregistered entities', () => {
+        it('should fall back gracefully when entity not in SchemaService', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+            mockDataService.getDataPaginated.mockReturnValue(of({
+                data: [{ id: 1, display_name: 'Fallback Item' }] as any,
+                totalCount: 1
+            }));
 
-      // No changes made
-      expect(component.applyEnabled()).toBeFalse();
+            fixture.componentRef.setInput('joinTable', 'unregistered_table');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(component.listProperties().length).toBe(0);
+            expect(mockDataService.getDataPaginated).toHaveBeenCalled();
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            expect(callArgs.fields).toEqual(['id', 'display_name']);
+        });
     });
 
-    it('should enable Apply when diff is non-empty', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('localStorage Persistence', () => {
+        const storageKey = 'fk_modal:tool_reservations.tool_type_id';
 
-      component.toggleSelection(3, 'Carol White');
-      expect(component.applyEnabled()).toBeTrue();
+        afterEach(() => {
+            localStorage.removeItem(storageKey);
+        });
+
+        function setupWithStorageKey() {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('storageKey', storageKey);
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+        }
+
+        it('should restore pageSize and sort from localStorage on open', async () => {
+            localStorage.setItem(storageKey, JSON.stringify({
+                pageSize: 50,
+                orderField: 'display_name',
+                orderDirection: 'desc',
+                filters: []
+            }));
+
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(component.pageSize()).toBe(50);
+            expect(component.orderField()).toBe('display_name');
+            expect(component.orderDirection()).toBe('desc');
+        });
+
+        it('should restore filters from localStorage on open', async () => {
+            mockSchemaService.getPropsForFilter.mockReturnValue(of(mockFilterProps));
+
+            localStorage.setItem(storageKey, JSON.stringify({
+                pageSize: 10,
+                orderField: 'id',
+                orderDirection: 'asc',
+                filters: [{ column: 'status_id', operator: 'eq', value: '1' }]
+            }));
+
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(component.filters().length).toBe(1);
+            expect(component.filters()[0].column).toBe('status_id');
+        });
+
+        it('should save state on pageSize change', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.onPageSizeChange(25);
+
+            const stored = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(stored.pageSize).toBe(25);
+        });
+
+        it('should save state on sort change', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.onSort('display_name');
+
+            const stored = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(stored.orderField).toBe('display_name');
+            expect(stored.orderDirection).toBe('asc');
+        });
+
+        it('should save state on filter change', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.onFiltersChange([{ column: 'status_id', operator: 'eq', value: '2' }]);
+
+            const stored = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(stored.filters.length).toBe(1);
+            expect(stored.filters[0].column).toBe('status_id');
+        });
+
+        it('should not persist when storageKey is empty (backward compat)', async () => {
+            fixture.componentRef.setInput('joinTable', 'borrowers');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('storageKey', '');
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.onPageSizeChange(50);
+
+            // No key should be written to localStorage
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('fk_modal:'));
+            expect(keys.length).toBe(0);
+        });
+
+        it('should use defaults when no stored state exists', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(component.pageSize()).toBe(10);
+            expect(component.orderField()).toBe('id');
+            expect(component.orderDirection()).toBe('asc');
+            expect(component.filters().length).toBe(0);
+        });
+
+        it('should strip stale filters referencing removed columns', async () => {
+            // Store filters referencing a column that won't be in filterProperties
+            localStorage.setItem(storageKey, JSON.stringify({
+                pageSize: 10,
+                orderField: 'id',
+                orderDirection: 'asc',
+                filters: [
+                    { column: 'status_id', operator: 'eq', value: '1' },
+                    { column: 'nonexistent_col', operator: 'eq', value: 'foo' }
+                ]
+            }));
+
+            // Only status_id is a valid filter column
+            mockSchemaService.getPropsForFilter.mockReturnValue(of(mockFilterProps));
+
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Stale filter should be stripped, valid one kept
+            expect(component.filters().length).toBe(1);
+            expect(component.filters()[0].column).toBe('status_id');
+
+            // Cleaned state should be re-persisted
+            const stored = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(stored.filters.length).toBe(1);
+        });
+
+        it('should handle pageSize saved as string (from <select> ngModel)', async () => {
+            // Angular <select> with [value] emits strings, not numbers.
+            // Simulate a stored state where pageSize was saved as a string.
+            localStorage.setItem(storageKey, JSON.stringify({
+                pageSize: '50', // string, not number
+                orderField: 'display_name',
+                orderDirection: 'asc',
+                filters: []
+            }));
+
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Should coerce string "50" to number 50
+            expect(component.pageSize()).toBe(50);
+            expect(component.orderField()).toBe('display_name');
+        });
+
+        it('should save pageSize as number even when signal holds a string', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Simulate what PaginationComponent does: emit string from <select>
+            component.onPageSizeChange('25' as any);
+
+            const stored = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(typeof stored.pageSize).toBe('number');
+            expect(stored.pageSize).toBe(25);
+        });
+
+        it('should handle corrupted localStorage gracefully (invalid JSON)', async () => {
+            localStorage.setItem(storageKey, 'not valid json!!!');
+
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Should fall back to defaults, no error thrown
+            expect(component.pageSize()).toBe(10);
+            expect(component.orderField()).toBe('id');
+            expect(component.orderDirection()).toBe('asc');
+        });
+
+        it('should handle corrupted localStorage gracefully (wrong shape)', async () => {
+            localStorage.setItem(storageKey, JSON.stringify({ pageSize: 'not a number' }));
+
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Should fall back to defaults
+            expect(component.pageSize()).toBe(10);
+        });
+
+        it('should restore sort state on close and reopen without navigation', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Change sort manually
+            component.onSort('email');
+
+            // Close and re-open
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Should restore from localStorage (which was persisted with email/asc)
+            const stored = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(stored.orderField).toBe('email');
+            expect(component.orderField()).toBe('email');
+        });
+
+        it('should restore pageSize on close and reopen without navigation', async () => {
+            setupWithStorageKey();
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Change page size
+            component.onPageSizeChange(50);
+            expect(component.pageSize()).toBe(50);
+
+            // Verify it was saved to localStorage
+            const savedState = JSON.parse(localStorage.getItem(storageKey)!);
+            expect(savedState.pageSize).toBe(50);
+
+            // Close modal
+            fixture.componentRef.setInput('isOpen', false);
+            fixture.detectChanges();
+
+            // Reopen modal (same component, no navigation)
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Page size should be restored from localStorage
+            expect(component.pageSize()).toBe(50);
+        });
     });
 
-    it('should emit applied with diff on Apply', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
+    describe('System Type Config (v0.49.1)', () => {
+        it('should use system type config for civic_os_users when entity not in schema_entities', async () => {
+            // civic_os_users is not registered in schema_entities, but has a system type config
+            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+            mockDataService.getDataPaginated.mockReturnValue(of({
+                data: [
+                    { id: 'uuid-1', display_name: 'Alice Smith', email: 'alice@example.com', phone: '5551234567' },
+                    { id: 'uuid-2', display_name: 'Bob Jones', email: 'bob@example.com', phone: null }
+                ] as any,
+                totalCount: 2
+            }));
 
-      spyOn(component.applied, 'emit');
+            fixture.componentRef.setInput('joinTable', 'civic_os_users');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
 
-      component.toggleSelection(3, 'Carol White');
-      component.toggleSelection(1, 'Urgent');
-      component.onApply();
+            // Should have populated listProperties from system config (3 columns: Name, Email, Phone)
+            expect(component.listProperties().length).toBe(3);
+            expect(component.listProperties()[0].column_name).toBe('display_name');
+            expect(component.listProperties()[1].column_name).toBe('email');
+            expect(component.listProperties()[2].column_name).toBe('phone');
 
-      expect(component.applied.emit).toHaveBeenCalledWith(
-        jasmine.objectContaining({ toAdd: [3], toRemove: [1] })
-      );
+            // Should have search enabled (via fulltextColumn + searchFields)
+            expect(component.hasSearchFields()).toBe(true);
+
+            // Should NOT have called getPropsForList (not a registered entity)
+            expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
+        });
+
+        it('should use hybrid search (wfts + ILIKE via or=()) for civic_os_users', async () => {
+            // Hybrid semantics matching the List page: partial names ("Smi") match
+            // via ILIKE on display_name/email, whole words and tokenized phone
+            // fragments match via wfts on civic_os_text_search.
+            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+            mockDataService.getDataPaginated.mockReturnValue(of({
+                data: [
+                    { id: 'uuid-1', display_name: 'Alice Smith', email: 'alice@example.com', phone: '5551234567' }
+                ] as any,
+                totalCount: 1
+            }));
+
+            fixture.componentRef.setInput('joinTable', 'civic_os_users');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Perform a search
+            component.onSearchInput('Smi');
+            await waitForData();
+
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            // Should use rawQueryParams with the combined or=() clause, not the legacy wfts path
+            expect(callArgs.searchQuery).toBeUndefined();
+            expect(callArgs.rawQueryParams).toEqual([
+                'or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*,email.ilike.*Smi*)'
+            ]);
+        });
+
+        it('should use hybrid search for schema entities with fulltext and substring columns', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of({
+                table_name: 'contacts',
+                display_name: 'Contacts',
+                search_fields: null,
+                fulltext_search_column: 'civic_os_text_search',
+                substring_search_column: 'display_name'
+            } as any));
+            mockSchemaService.getPropsForList.mockReturnValue(of([]));
+            mockSchemaService.getPropsForFilter.mockReturnValue(of([]));
+            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
+
+            fixture.componentRef.setInput('joinTable', 'contacts');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            expect(component.hasSearchFields()).toBe(true);
+
+            component.onSearchInput('Smi');
+            await waitForData();
+
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            expect(callArgs.searchQuery).toBeUndefined();
+            expect(callArgs.rawQueryParams).toEqual([
+                'or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*)'
+            ]);
+        });
+
+        it('should fall back to the legacy wfts path for entities without hybrid columns', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of({
+                table_name: 'legacy_things',
+                display_name: 'Legacy',
+                search_fields: ['display_name'],
+                fulltext_search_column: null,
+                substring_search_column: null
+            } as any));
+            mockSchemaService.getPropsForList.mockReturnValue(of([]));
+            mockSchemaService.getPropsForFilter.mockReturnValue(of([]));
+            mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
+
+            fixture.componentRef.setInput('joinTable', 'legacy_things');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            component.onSearchInput('term');
+            await waitForData();
+
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            expect(callArgs.searchQuery).toBe('term');
+            expect(callArgs.rawQueryParams).toBeUndefined();
+        });
+
+        it('should show search input for civic_os_users system type', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+            mockDataService.getDataPaginated.mockReturnValue(of({
+                data: [{ id: 'uuid-1', display_name: 'Alice' }] as any,
+                totalCount: 1
+            }));
+
+            fixture.componentRef.setInput('joinTable', 'civic_os_users');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search"]'));
+            expect(searchInput).toBeTruthy();
+        });
+
+        it('should still fall back to empty for unknown unregistered tables', async () => {
+            mockSchemaService.getEntity.mockReturnValue(of(undefined));
+            mockDataService.getDataPaginated.mockReturnValue(of({
+                data: [{ id: 1, display_name: 'Item' }] as any,
+                totalCount: 1
+            }));
+
+            fixture.componentRef.setInput('joinTable', 'some_unknown_table');
+            fixture.componentRef.setInput('rpcOptions', null);
+            fixture.componentRef.setInput('isOpen', true);
+            fixture.detectChanges();
+            await waitForData();
+
+            // Should have no list properties (empty fallback)
+            expect(component.listProperties().length).toBe(0);
+            expect(component.hasSearchFields()).toBe(false);
+        });
     });
-
-    it('should populate chipCache from page data', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Row data should be cached
-      const cache = component.chipCache();
-      expect(cache.get(3)?.display_name).toBe('Carol White');
-    });
-
-    it('should show Apply button instead of Confirm in multi-select mode', async () => {
-      setupMultiSelect();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const buttons = fixture.debugElement.queryAll(By.css('.cos-modal-action button'));
-      const buttonTexts = buttons.map(b => b.nativeElement.textContent.trim());
-      expect(buttonTexts.some(t => t.includes('Apply'))).toBeTrue();
-      expect(buttonTexts.some(t => t.includes('Confirm'))).toBeFalse();
-    });
-  });
-
-  describe('Server Filter (v0.53.0)', () => {
-    beforeEach(() => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-    });
-
-    it('should include serverFilter in query when provided', async () => {
-      fixture.componentRef.setInput('serverFilter', { column: 'is_eligible', operator: 'is', value: 'true' });
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(mockDataService.getDataPaginated).toHaveBeenCalled();
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      const serverFilter = callArgs.filters!.find((f: any) => f.column === 'is_eligible');
-      expect(serverFilter).toBeTruthy();
-      expect(serverFilter!.operator).toBe('is');
-      expect(serverFilter!.value).toBe('true');
-    });
-
-    it('should use serverFilter instead of rpcIdFilter when both are available', async () => {
-      const rpcOptions = [
-        { id: 1, text: 'Option A' },
-        { id: 2, text: 'Option B' }
-      ];
-      fixture.componentRef.setInput('rpcOptions', rpcOptions);
-      fixture.componentRef.setInput('serverFilter', { column: 'is_eligible', operator: 'is', value: 'true' });
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      // serverFilter should be present
-      const serverFilter = callArgs.filters!.find((f: any) => f.column === 'is_eligible');
-      expect(serverFilter).toBeTruthy();
-      // rpcIdFilter (in operator) should NOT be present
-      const inFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
-      expect(inFilter).toBeFalsy();
-    });
-
-    it('should fall back to rpcIdFilter when serverFilter is null', async () => {
-      const rpcOptions = [
-        { id: 1, text: 'Option A' },
-        { id: 2, text: 'Option B' }
-      ];
-      fixture.componentRef.setInput('rpcOptions', rpcOptions);
-      fixture.componentRef.setInput('serverFilter', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      // rpcIdFilter (in operator) should be present since serverFilter is null
-      const inFilter = callArgs.filters!.find((f: any) => f.operator === 'in');
-      expect(inFilter).toBeTruthy();
-      expect(inFilter!.value).toBe('(1,2)');
-    });
-
-    it('should not add any extra filter when both serverFilter and rpcOptions are null', async () => {
-      fixture.componentRef.setInput('serverFilter', null);
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      // No server filter and no in filter
-      const serverFilter = callArgs.filters?.find((f: any) => f.column === 'is_eligible');
-      const inFilter = callArgs.filters?.find((f: any) => f.operator === 'in');
-      expect(serverFilter).toBeFalsy();
-      expect(inFilter).toBeFalsy();
-    });
-  });
-
-  describe('Fallback for unregistered entities', () => {
-    it('should fall back gracefully when entity not in SchemaService', async () => {
-      mockSchemaService.getEntity.and.returnValue(of(undefined));
-      mockDataService.getDataPaginated.and.returnValue(of({
-        data: [{ id: 1, display_name: 'Fallback Item' }] as any,
-        totalCount: 1
-      }));
-
-      fixture.componentRef.setInput('joinTable', 'unregistered_table');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(component.listProperties().length).toBe(0);
-      expect(mockDataService.getDataPaginated).toHaveBeenCalled();
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      expect(callArgs.fields).toEqual(['id', 'display_name']);
-    });
-  });
-
-  describe('localStorage Persistence', () => {
-    const storageKey = 'fk_modal:tool_reservations.tool_type_id';
-
-    afterEach(() => {
-      localStorage.removeItem(storageKey);
-    });
-
-    function setupWithStorageKey() {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('storageKey', storageKey);
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-    }
-
-    it('should restore pageSize and sort from localStorage on open', async () => {
-      localStorage.setItem(storageKey, JSON.stringify({
-        pageSize: 50,
-        orderField: 'display_name',
-        orderDirection: 'desc',
-        filters: []
-      }));
-
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(component.pageSize()).toBe(50);
-      expect(component.orderField()).toBe('display_name');
-      expect(component.orderDirection()).toBe('desc');
-    });
-
-    it('should restore filters from localStorage on open', async () => {
-      mockSchemaService.getPropsForFilter.and.returnValue(of(mockFilterProps));
-
-      localStorage.setItem(storageKey, JSON.stringify({
-        pageSize: 10,
-        orderField: 'id',
-        orderDirection: 'asc',
-        filters: [{ column: 'status_id', operator: 'eq', value: '1' }]
-      }));
-
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(component.filters().length).toBe(1);
-      expect(component.filters()[0].column).toBe('status_id');
-    });
-
-    it('should save state on pageSize change', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      component.onPageSizeChange(25);
-
-      const stored = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(stored.pageSize).toBe(25);
-    });
-
-    it('should save state on sort change', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      component.onSort('display_name');
-
-      const stored = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(stored.orderField).toBe('display_name');
-      expect(stored.orderDirection).toBe('asc');
-    });
-
-    it('should save state on filter change', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      component.onFiltersChange([{ column: 'status_id', operator: 'eq', value: '2' }]);
-
-      const stored = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(stored.filters.length).toBe(1);
-      expect(stored.filters[0].column).toBe('status_id');
-    });
-
-    it('should not persist when storageKey is empty (backward compat)', async () => {
-      fixture.componentRef.setInput('joinTable', 'borrowers');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('storageKey', '');
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      component.onPageSizeChange(50);
-
-      // No key should be written to localStorage
-      const keys = Object.keys(localStorage).filter(k => k.startsWith('fk_modal:'));
-      expect(keys.length).toBe(0);
-    });
-
-    it('should use defaults when no stored state exists', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(component.pageSize()).toBe(10);
-      expect(component.orderField()).toBe('id');
-      expect(component.orderDirection()).toBe('asc');
-      expect(component.filters().length).toBe(0);
-    });
-
-    it('should strip stale filters referencing removed columns', async () => {
-      // Store filters referencing a column that won't be in filterProperties
-      localStorage.setItem(storageKey, JSON.stringify({
-        pageSize: 10,
-        orderField: 'id',
-        orderDirection: 'asc',
-        filters: [
-          { column: 'status_id', operator: 'eq', value: '1' },
-          { column: 'nonexistent_col', operator: 'eq', value: 'foo' }
-        ]
-      }));
-
-      // Only status_id is a valid filter column
-      mockSchemaService.getPropsForFilter.and.returnValue(of(mockFilterProps));
-
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Stale filter should be stripped, valid one kept
-      expect(component.filters().length).toBe(1);
-      expect(component.filters()[0].column).toBe('status_id');
-
-      // Cleaned state should be re-persisted
-      const stored = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(stored.filters.length).toBe(1);
-    });
-
-    it('should handle pageSize saved as string (from <select> ngModel)', async () => {
-      // Angular <select> with [value] emits strings, not numbers.
-      // Simulate a stored state where pageSize was saved as a string.
-      localStorage.setItem(storageKey, JSON.stringify({
-        pageSize: '50',  // string, not number
-        orderField: 'display_name',
-        orderDirection: 'asc',
-        filters: []
-      }));
-
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should coerce string "50" to number 50
-      expect(component.pageSize()).toBe(50);
-      expect(component.orderField()).toBe('display_name');
-    });
-
-    it('should save pageSize as number even when signal holds a string', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Simulate what PaginationComponent does: emit string from <select>
-      component.onPageSizeChange('25' as any);
-
-      const stored = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(typeof stored.pageSize).toBe('number');
-      expect(stored.pageSize).toBe(25);
-    });
-
-    it('should handle corrupted localStorage gracefully (invalid JSON)', async () => {
-      localStorage.setItem(storageKey, 'not valid json!!!');
-
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should fall back to defaults, no error thrown
-      expect(component.pageSize()).toBe(10);
-      expect(component.orderField()).toBe('id');
-      expect(component.orderDirection()).toBe('asc');
-    });
-
-    it('should handle corrupted localStorage gracefully (wrong shape)', async () => {
-      localStorage.setItem(storageKey, JSON.stringify({ pageSize: 'not a number' }));
-
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should fall back to defaults
-      expect(component.pageSize()).toBe(10);
-    });
-
-    it('should restore sort state on close and reopen without navigation', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Change sort manually
-      component.onSort('email');
-
-      // Close and re-open
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should restore from localStorage (which was persisted with email/asc)
-      const stored = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(stored.orderField).toBe('email');
-      expect(component.orderField()).toBe('email');
-    });
-
-    it('should restore pageSize on close and reopen without navigation', async () => {
-      setupWithStorageKey();
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Change page size
-      component.onPageSizeChange(50);
-      expect(component.pageSize()).toBe(50);
-
-      // Verify it was saved to localStorage
-      const savedState = JSON.parse(localStorage.getItem(storageKey)!);
-      expect(savedState.pageSize).toBe(50);
-
-      // Close modal
-      fixture.componentRef.setInput('isOpen', false);
-      fixture.detectChanges();
-
-      // Reopen modal (same component, no navigation)
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Page size should be restored from localStorage
-      expect(component.pageSize()).toBe(50);
-    });
-  });
-
-  describe('System Type Config (v0.49.1)', () => {
-    it('should use system type config for civic_os_users when entity not in schema_entities', async () => {
-      // civic_os_users is not registered in schema_entities, but has a system type config
-      mockSchemaService.getEntity.and.returnValue(of(undefined));
-      mockDataService.getDataPaginated.and.returnValue(of({
-        data: [
-          { id: 'uuid-1', display_name: 'Alice Smith', email: 'alice@example.com', phone: '5551234567' },
-          { id: 'uuid-2', display_name: 'Bob Jones', email: 'bob@example.com', phone: null }
-        ] as any,
-        totalCount: 2
-      }));
-
-      fixture.componentRef.setInput('joinTable', 'civic_os_users');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should have populated listProperties from system config (3 columns: Name, Email, Phone)
-      expect(component.listProperties().length).toBe(3);
-      expect(component.listProperties()[0].column_name).toBe('display_name');
-      expect(component.listProperties()[1].column_name).toBe('email');
-      expect(component.listProperties()[2].column_name).toBe('phone');
-
-      // Should have search enabled (via fulltextColumn + searchFields)
-      expect(component.hasSearchFields()).toBe(true);
-
-      // Should NOT have called getPropsForList (not a registered entity)
-      expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
-    });
-
-    it('should use hybrid search (wfts + ILIKE via or=()) for civic_os_users', async () => {
-      // Hybrid semantics matching the List page: partial names ("Smi") match
-      // via ILIKE on display_name/email, whole words and tokenized phone
-      // fragments match via wfts on civic_os_text_search.
-      mockSchemaService.getEntity.and.returnValue(of(undefined));
-      mockDataService.getDataPaginated.and.returnValue(of({
-        data: [
-          { id: 'uuid-1', display_name: 'Alice Smith', email: 'alice@example.com', phone: '5551234567' }
-        ] as any,
-        totalCount: 1
-      }));
-
-      fixture.componentRef.setInput('joinTable', 'civic_os_users');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Perform a search
-      component.onSearchInput('Smi');
-      await waitForData();
-
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      // Should use rawQueryParams with the combined or=() clause, not the legacy wfts path
-      expect(callArgs.searchQuery).toBeUndefined();
-      expect(callArgs.rawQueryParams).toEqual([
-        'or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*,email.ilike.*Smi*)'
-      ]);
-    });
-
-    it('should use hybrid search for schema entities with fulltext and substring columns', async () => {
-      mockSchemaService.getEntity.and.returnValue(of({
-        table_name: 'contacts',
-        display_name: 'Contacts',
-        search_fields: null,
-        fulltext_search_column: 'civic_os_text_search',
-        substring_search_column: 'display_name'
-      } as any));
-      mockSchemaService.getPropsForList.and.returnValue(of([]));
-      mockSchemaService.getPropsForFilter.and.returnValue(of([]));
-      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
-
-      fixture.componentRef.setInput('joinTable', 'contacts');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      expect(component.hasSearchFields()).toBe(true);
-
-      component.onSearchInput('Smi');
-      await waitForData();
-
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      expect(callArgs.searchQuery).toBeUndefined();
-      expect(callArgs.rawQueryParams).toEqual([
-        'or=(civic_os_text_search.wfts.Smi,display_name.ilike.*Smi*)'
-      ]);
-    });
-
-    it('should fall back to the legacy wfts path for entities without hybrid columns', async () => {
-      mockSchemaService.getEntity.and.returnValue(of({
-        table_name: 'legacy_things',
-        display_name: 'Legacy',
-        search_fields: ['display_name'],
-        fulltext_search_column: null,
-        substring_search_column: null
-      } as any));
-      mockSchemaService.getPropsForList.and.returnValue(of([]));
-      mockSchemaService.getPropsForFilter.and.returnValue(of([]));
-      mockDataService.getDataPaginated.and.returnValue(of({ data: [], totalCount: 0 }));
-
-      fixture.componentRef.setInput('joinTable', 'legacy_things');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      component.onSearchInput('term');
-      await waitForData();
-
-      const callArgs = mockDataService.getDataPaginated.calls.mostRecent().args[0];
-      expect(callArgs.searchQuery).toBe('term');
-      expect(callArgs.rawQueryParams).toBeUndefined();
-    });
-
-    it('should show search input for civic_os_users system type', async () => {
-      mockSchemaService.getEntity.and.returnValue(of(undefined));
-      mockDataService.getDataPaginated.and.returnValue(of({
-        data: [{ id: 'uuid-1', display_name: 'Alice' }] as any,
-        totalCount: 1
-      }));
-
-      fixture.componentRef.setInput('joinTable', 'civic_os_users');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      const searchInput = fixture.debugElement.query(By.css('input[placeholder="Search"]'));
-      expect(searchInput).toBeTruthy();
-    });
-
-    it('should still fall back to empty for unknown unregistered tables', async () => {
-      mockSchemaService.getEntity.and.returnValue(of(undefined));
-      mockDataService.getDataPaginated.and.returnValue(of({
-        data: [{ id: 1, display_name: 'Item' }] as any,
-        totalCount: 1
-      }));
-
-      fixture.componentRef.setInput('joinTable', 'some_unknown_table');
-      fixture.componentRef.setInput('rpcOptions', null);
-      fixture.componentRef.setInput('isOpen', true);
-      fixture.detectChanges();
-      await waitForData();
-
-      // Should have no list properties (empty fallback)
-      expect(component.listProperties().length).toBe(0);
-      expect(component.hasSearchFields()).toBe(false);
-    });
-  });
 });

@@ -33,7 +33,7 @@ import {
   ValidationErrors,
   FormsModule
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { ConflictInfo } from '../../interfaces/entity';
 import { RecurringService } from '../../services/recurring.service';
 import { parseDatetimeLocal } from '../../utils/date.utils';
@@ -78,12 +78,11 @@ export interface RecurringTimeSlotValue {
   selector: 'app-edit-recurring-time-slot',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RecurrenceRuleEditorComponent,
     ConflictPreviewComponent,
     TranslatePipe
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

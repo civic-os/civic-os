@@ -17,6 +17,7 @@
       @for (item of currentValues(); track item.id) {
         <a
           [routerLink]="['/view', property().many_to_many_meta!.relatedTable, item.id]"
+          appContrastText
           class="badge badge-lg badge-primary gap-2 py-3 px-3 bg-opacity-80 cursor-pointer hover:bg-opacity-100 transition-opacity">
           <span>{{ isRichJunction() ? formatRichJunctionLabel(item.display_name, item._junction, extraColumns()) : item.display_name }}</span>
           @if (item.color) {

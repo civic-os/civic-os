@@ -108,7 +108,7 @@
         [isOpen]="showFkSearchModal()"
         [joinTable]="prop().join_table"
         [joinColumn]="prop().join_column || 'id'"
-        [currentValue]="form().get(prop().column_name)?.value"
+        [currentValue]="$safeNavigationMigration(form().get(prop().column_name)?.value)"
         [isNullable]="prop().is_nullable"
         [title]="'Select ' + prop().display_name"
         [rpcOptions]="useRpcOptions() ? rpcSelectOptions() : null"
@@ -212,7 +212,7 @@
     <div role="group" [attr.aria-label]="prop().display_name">
       <app-geo-point-map
         mode="edit"
-        [initialValue]="form().get(prop().column_name)?.value"
+        [initialValue]="$safeNavigationMigration(form().get(prop().column_name)?.value)"
         width="100%"
         height="250px"
         (valueChange)="onMapValueChange($event)">
@@ -224,7 +224,7 @@
     <div role="group" [attr.aria-label]="prop().display_name">
       <app-geo-polygon-map
         mode="edit"
-        [initialValue]="form().get(prop().column_name)?.value"
+        [initialValue]="$safeNavigationMigration(form().get(prop().column_name)?.value)"
         width="100%"
         height="400px"
         (valueChange)="onMapValueChange($event)">
@@ -412,7 +412,7 @@
             @if (getValidationMessage('min'); as customMsg) {
               {{ customMsg }}
             } @else {
-              {{ 'form.min_value' | translate:{ min: ctl.errors?.['min'].min } }}
+              {{ 'form.min_value' | translate:{ min: $safeNavigationMigration(ctl.errors?.['min'].min) } }}
             }
           </div>
         }
@@ -421,7 +421,7 @@
             @if (getValidationMessage('max'); as customMsg) {
               {{ customMsg }}
             } @else {
-              {{ 'form.max_value' | translate:{ max: ctl.errors?.['max'].max } }}
+              {{ 'form.max_value' | translate:{ max: $safeNavigationMigration(ctl.errors?.['max'].max) } }}
             }
           </div>
         }
@@ -430,7 +430,7 @@
             @if (getValidationMessage('minLength'); as customMsg) {
               {{ customMsg }}
             } @else {
-              {{ 'form.min_length' | translate:{ min: ctl.errors?.['minlength'].requiredLength } }}
+              {{ 'form.min_length' | translate:{ min: $safeNavigationMigration(ctl.errors?.['minlength'].requiredLength) } }}
             }
           </div>
         }
@@ -439,7 +439,7 @@
             @if (getValidationMessage('maxLength'); as customMsg) {
               {{ customMsg }}
             } @else {
-              {{ 'form.max_length' | translate:{ max: ctl.errors?.['maxlength'].requiredLength } }}
+              {{ 'form.max_length' | translate:{ max: $safeNavigationMigration(ctl.errors?.['maxlength'].requiredLength) } }}
             }
           </div>
         }

@@ -16,7 +16,7 @@
  */
 
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { Params } from '@angular/router';
 import { DashboardWidget, NavButtonsWidgetConfig } from '../../../interfaces/dashboard';
@@ -29,7 +29,7 @@ import { DashboardWidget, NavButtonsWidgetConfig } from '../../../interfaces/das
  */
 @Component({
   selector: 'app-nav-buttons-widget',
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './nav-buttons-widget.component.html',
   styleUrl: './nav-buttons-widget.component.css'

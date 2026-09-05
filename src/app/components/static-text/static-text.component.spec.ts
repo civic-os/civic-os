@@ -22,71 +22,71 @@ import { StaticTextComponent } from './static-text.component';
 import { StaticText } from '../../interfaces/entity';
 
 describe('StaticTextComponent', () => {
-  let component: StaticTextComponent;
-  let fixture: ComponentFixture<StaticTextComponent>;
+    let component: StaticTextComponent;
+    let fixture: ComponentFixture<StaticTextComponent>;
 
-  /**
-   * Create a mock StaticText object for testing.
-   */
-  function createMockStaticText(overrides: Partial<StaticText> = {}): StaticText {
-    return {
-      itemType: 'static_text',
-      id: 1,
-      table_name: 'test_entity',
-      content: '# Test Content\n\nThis is **bold** text.',
-      sort_order: 100,
-      column_width: 2,
-      show_on_detail: true,
-      show_on_create: false,
-      show_on_edit: false,
-      ...overrides
-    };
-  }
+    /**
+     * Create a mock StaticText object for testing.
+     */
+    function createMockStaticText(overrides: Partial<StaticText> = {}): StaticText {
+        return {
+            itemType: 'static_text',
+            id: 1,
+            table_name: 'test_entity',
+            content: '# Test Content\n\nThis is **bold** text.',
+            sort_order: 100,
+            column_width: 2,
+            show_on_detail: true,
+            show_on_create: false,
+            show_on_edit: false,
+            ...overrides
+        };
+    }
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [StaticTextComponent, MarkdownModule],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideMarkdown()
-      ]
-    }).compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [StaticTextComponent, MarkdownModule],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideMarkdown()
+            ]
+        }).compileComponents();
 
-    fixture = TestBed.createComponent(StaticTextComponent);
-    component = fixture.componentInstance;
-  });
-
-  describe('Basic Component Setup', () => {
-    it('should create', () => {
-      fixture.componentRef.setInput('staticText', createMockStaticText());
-      fixture.detectChanges();
-
-      expect(component).toBeTruthy();
+        fixture = TestBed.createComponent(StaticTextComponent);
+        component = fixture.componentInstance;
     });
 
-    it('should have staticText input', () => {
-      const mockStaticText = createMockStaticText({ content: '# Custom Content' });
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+    describe('Basic Component Setup', () => {
+        it('should create', () => {
+            fixture.componentRef.setInput('staticText', createMockStaticText());
+            fixture.detectChanges();
 
-      expect(component.staticText()).toEqual(mockStaticText);
-    });
-  });
+            expect(component).toBeTruthy();
+        });
 
-  describe('Content Rendering', () => {
-    it('should render markdown content', () => {
-      const mockStaticText = createMockStaticText({
-        content: '# Hello World\n\nThis is a paragraph.'
-      });
+        it('should have staticText input', () => {
+            const mockStaticText = createMockStaticText({ content: '# Custom Content' });
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
-
-      expect(component.staticText().content).toContain('Hello World');
+            expect(component.staticText()).toEqual(mockStaticText);
+        });
     });
 
-    it('should handle multiline markdown content', () => {
-      const multilineContent = `# Title
+    describe('Content Rendering', () => {
+        it('should render markdown content', () => {
+            const mockStaticText = createMockStaticText({
+                content: '# Hello World\n\nThis is a paragraph.'
+            });
+
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
+
+            expect(component.staticText().content).toContain('Hello World');
+        });
+
+        it('should handle multiline markdown content', () => {
+            const multilineContent = `# Title
 
 Paragraph 1
 
@@ -96,137 +96,137 @@ Paragraph 1
 - Item 2
 - Item 3`;
 
-      const mockStaticText = createMockStaticText({ content: multilineContent });
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            const mockStaticText = createMockStaticText({ content: multilineContent });
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      expect(component.staticText().content).toBe(multilineContent);
+            expect(component.staticText().content).toBe(multilineContent);
+        });
+
+        it('should handle content with special characters', () => {
+            const specialContent = '# Test\n\n`code` & **bold** & *italic*';
+            const mockStaticText = createMockStaticText({ content: specialContent });
+
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
+
+            expect(component.staticText().content).toBe(specialContent);
+        });
+
+        it('should handle markdown with code blocks', () => {
+            const codeContent = '# Code Example\n\n```typescript\nconst x = 10;\n```';
+            const mockStaticText = createMockStaticText({ content: codeContent });
+
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
+
+            expect(component.staticText().content).toBe(codeContent);
+        });
     });
 
-    it('should handle content with special characters', () => {
-      const specialContent = '# Test\n\n`code` & **bold** & *italic*';
-      const mockStaticText = createMockStaticText({ content: specialContent });
+    describe('Template Rendering', () => {
+        it('should render with prose class for typography', () => {
+            const mockStaticText = createMockStaticText({ content: '# Test' });
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      expect(component.staticText().content).toBe(specialContent);
+            const compiled = fixture.nativeElement as HTMLElement;
+            const container = compiled.querySelector('.prose');
+
+            expect(container).toBeTruthy();
+            expect(container?.classList.contains('max-w-none')).toBe(true);
+        });
+
+        it('should contain markdown directive', () => {
+            const mockStaticText = createMockStaticText({ content: '**Bold text**' });
+
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
+
+            const compiled = fixture.nativeElement as HTMLElement;
+            const markdownElement = compiled.querySelector('markdown');
+
+            expect(markdownElement).toBeTruthy();
+        });
     });
 
-    it('should handle markdown with code blocks', () => {
-      const codeContent = '# Code Example\n\n```typescript\nconst x = 10;\n```';
-      const mockStaticText = createMockStaticText({ content: codeContent });
+    describe('Change Detection with OnPush', () => {
+        it('should update when staticText input changes', () => {
+            const staticText1 = createMockStaticText({ content: 'Content 1' });
+            const staticText2 = createMockStaticText({ content: 'Content 2' });
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('staticText', staticText1);
+            fixture.detectChanges();
+            expect(component.staticText().content).toBe('Content 1');
 
-      expect(component.staticText().content).toBe(codeContent);
-    });
-  });
-
-  describe('Template Rendering', () => {
-    it('should render with prose class for typography', () => {
-      const mockStaticText = createMockStaticText({ content: '# Test' });
-
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement as HTMLElement;
-      const container = compiled.querySelector('.prose');
-
-      expect(container).toBeTruthy();
-      expect(container?.classList.contains('max-w-none')).toBe(true);
+            fixture.componentRef.setInput('staticText', staticText2);
+            fixture.detectChanges();
+            expect(component.staticText().content).toBe('Content 2');
+        });
     });
 
-    it('should contain markdown directive', () => {
-      const mockStaticText = createMockStaticText({ content: '**Bold text**' });
+    describe('StaticText Properties', () => {
+        it('should preserve all StaticText properties', () => {
+            const mockStaticText = createMockStaticText({
+                id: 42,
+                table_name: 'my_entity',
+                content: '# My Content',
+                sort_order: 50,
+                column_width: 1,
+                show_on_detail: false,
+                show_on_create: true,
+                show_on_edit: true
+            });
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const markdownElement = compiled.querySelector('markdown');
-
-      expect(markdownElement).toBeTruthy();
-    });
-  });
-
-  describe('Change Detection with OnPush', () => {
-    it('should update when staticText input changes', () => {
-      const staticText1 = createMockStaticText({ content: 'Content 1' });
-      const staticText2 = createMockStaticText({ content: 'Content 2' });
-
-      fixture.componentRef.setInput('staticText', staticText1);
-      fixture.detectChanges();
-      expect(component.staticText().content).toBe('Content 1');
-
-      fixture.componentRef.setInput('staticText', staticText2);
-      fixture.detectChanges();
-      expect(component.staticText().content).toBe('Content 2');
-    });
-  });
-
-  describe('StaticText Properties', () => {
-    it('should preserve all StaticText properties', () => {
-      const mockStaticText = createMockStaticText({
-        id: 42,
-        table_name: 'my_entity',
-        content: '# My Content',
-        sort_order: 50,
-        column_width: 1,
-        show_on_detail: false,
-        show_on_create: true,
-        show_on_edit: true
-      });
-
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
-
-      const st = component.staticText();
-      expect(st.itemType).toBe('static_text');
-      expect(st.id).toBe(42);
-      expect(st.table_name).toBe('my_entity');
-      expect(st.sort_order).toBe(50);
-      expect(st.column_width).toBe(1);
-      expect(st.show_on_detail).toBe(false);
-      expect(st.show_on_create).toBe(true);
-      expect(st.show_on_edit).toBe(true);
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle very long markdown content', () => {
-      const longContent = '# Heading\n\n' + 'Lorem ipsum '.repeat(1000);
-      const mockStaticText = createMockStaticText({ content: longContent });
-
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
-
-      expect(component.staticText().content.length).toBeGreaterThan(10000);
+            const st = component.staticText();
+            expect(st.itemType).toBe('static_text');
+            expect(st.id).toBe(42);
+            expect(st.table_name).toBe('my_entity');
+            expect(st.sort_order).toBe(50);
+            expect(st.column_width).toBe(1);
+            expect(st.show_on_detail).toBe(false);
+            expect(st.show_on_create).toBe(true);
+            expect(st.show_on_edit).toBe(true);
+        });
     });
 
-    it('should handle markdown with horizontal rules', () => {
-      const hrContent = '# Section 1\n\n---\n\n# Section 2';
-      const mockStaticText = createMockStaticText({ content: hrContent });
+    describe('Edge Cases', () => {
+        it('should handle very long markdown content', () => {
+            const longContent = '# Heading\n\n' + 'Lorem ipsum '.repeat(1000);
+            const mockStaticText = createMockStaticText({ content: longContent });
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      expect(component.staticText().content).toBe(hrContent);
-    });
+            expect(component.staticText().content.length).toBeGreaterThan(10000);
+        });
 
-    it('should handle markdown with links', () => {
-      const linkContent = 'Contact us at [email](mailto:test@example.com) or [website](https://example.com).';
-      const mockStaticText = createMockStaticText({ content: linkContent });
+        it('should handle markdown with horizontal rules', () => {
+            const hrContent = '# Section 1\n\n---\n\n# Section 2';
+            const mockStaticText = createMockStaticText({ content: hrContent });
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      expect(component.staticText().content).toBe(linkContent);
-    });
+            expect(component.staticText().content).toBe(hrContent);
+        });
 
-    it('should handle rental agreement style content', () => {
-      const rentalAgreement = `---
+        it('should handle markdown with links', () => {
+            const linkContent = 'Contact us at [email](mailto:test@example.com) or [website](https://example.com).';
+            const mockStaticText = createMockStaticText({ content: linkContent });
+
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
+
+            expect(component.staticText().content).toBe(linkContent);
+        });
+
+        it('should handle rental agreement style content', () => {
+            const rentalAgreement = `---
 
 ## Rental Agreement
 
@@ -238,13 +238,13 @@ By submitting this reservation request, you agree to the following terms:
 
 *For questions, contact Community Services at (555) 123-4567.*`;
 
-      const mockStaticText = createMockStaticText({ content: rentalAgreement });
+            const mockStaticText = createMockStaticText({ content: rentalAgreement });
 
-      fixture.componentRef.setInput('staticText', mockStaticText);
-      fixture.detectChanges();
+            fixture.componentRef.setInput('staticText', mockStaticText);
+            fixture.detectChanges();
 
-      expect(component.staticText().content).toContain('Rental Agreement');
-      expect(component.staticText().content).toContain('Cancellation Policy');
+            expect(component.staticText().content).toContain('Rental Agreement');
+            expect(component.staticText().content).toContain('Cancellation Policy');
+        });
     });
-  });
 });

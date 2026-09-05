@@ -26,449 +26,400 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('EntityManagementPage', () => {
-  let component: EntityManagementPage;
-  let fixture: ComponentFixture<EntityManagementPage>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockEntityManagementService: jasmine.SpyObj<EntityManagementService>;
+    let component: EntityManagementPage;
+    let fixture: ComponentFixture<EntityManagementPage>;
+    let mockSchemaService: any;
+    let mockEntityManagementService: any;
 
-  const mockEntities = [
-    { table_name: 'Issue', display_name: 'Issues', description: 'Track issues', search_fields: null, sort_order: 0, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null },
-    { table_name: 'WorkPackage', display_name: 'Work Packages', description: null, search_fields: null, sort_order: 1, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null },
-    { table_name: 'Bid', display_name: 'Bid', description: null, search_fields: null, sort_order: 2, insert: true, select: true, update: true, delete: false, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null }
-  ];
+    const mockEntities = [
+        { table_name: 'Issue', display_name: 'Issues', description: 'Track issues', search_fields: null, sort_order: 0, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null },
+        { table_name: 'WorkPackage', display_name: 'Work Packages', description: null, search_fields: null, sort_order: 1, insert: true, select: true, update: true, delete: true, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null },
+        { table_name: 'Bid', display_name: 'Bid', description: null, search_fields: null, sort_order: 2, insert: true, select: true, update: true, delete: false, show_map: false, map_property_name: null, show_calendar: false, calendar_property_name: null, calendar_color_property: null }
+    ];
 
-  beforeEach(async () => {
-    mockSchemaService = jasmine.createSpyObj('SchemaService', ['getEntitiesForManagement', 'getPropertiesForEntity', 'refreshCache']);
-    mockEntityManagementService = jasmine.createSpyObj('EntityManagementService', [
-      'isAdmin',
-      'upsertEntityMetadata',
-      'updateEntitiesOrder'
-    ]);
-
-    // Set default return value for getPropertiesForEntity to avoid undefined errors
-    mockSchemaService.getPropertiesForEntity.and.returnValue(of([]));
-
-    await TestBed.configureTestingModule({
-      imports: [EntityManagementPage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslationTesting(),
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: EntityManagementService, useValue: mockEntityManagementService }
-      ]
-    })
-    .compileComponents();
-  });
-
-  it('should create', () => {
-    // Set up mocks before creating component
-    mockEntityManagementService.isAdmin.and.returnValue(of(false));
-
-    fixture = TestBed.createComponent(EntityManagementPage);
-    component = fixture.componentInstance;
-
-    expect(component).toBeTruthy();
-  });
-
-  describe('Admin Access Check', () => {
-    it('should load entities when user is admin', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.isAdmin()).toBe(true);
-        expect(component.entities().length).toBe(3);
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
-    });
-
-    it('should show error when user is not admin', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(false));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.isAdmin()).toBe(false);
-        expect(component.error()).toBe('Admin access required');
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
-    });
-
-    it('should handle admin check error', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(throwError(() => new Error('Network error')));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.error()).toBe('Failed to verify admin access');
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
-    });
-  });
-
-  describe('Entity Loading', () => {
-    it('should map entity data correctly', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const entities = component.entities();
-        expect(entities[0].customDisplayName).toBe('Issues');
-        expect(entities[0].customDescription).toBe('Track issues');
-        expect(entities[1].customDisplayName).toBe('Work Packages'); // Different from table_name
-        expect(entities[1].customDescription).toBeNull();
-        done();
-      }, 100);
-    });
-
-    it('should handle entity loading error', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(throwError(() => new Error('Load error')));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        expect(component.error()).toBe('Failed to load entities');
-        expect(component.loading()).toBe(false);
-        done();
-      }, 100);
-    });
-  });
-
-  describe('Drag and Drop', () => {
-    it('should reorder entities and update sort order', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const event: CdkDragDrop<any> = {
-          previousIndex: 0,
-          currentIndex: 2,
-          item: null as any,
-          container: null as any,
-          previousContainer: null as any,
-          isPointerOverContainer: true,
-          distance: { x: 0, y: 0 },
-          dropPoint: { x: 0, y: 0 },
-          event: null as any
+    beforeEach(async () => {
+        mockSchemaService = {
+            getEntitiesForManagement: vi.fn().mockName("SchemaService.getEntitiesForManagement"),
+            getPropertiesForEntity: vi.fn().mockName("SchemaService.getPropertiesForEntity"),
+            refreshCache: vi.fn().mockName("SchemaService.refreshCache")
+        };
+        mockEntityManagementService = {
+            isAdmin: vi.fn().mockName("EntityManagementService.isAdmin"),
+            upsertEntityMetadata: vi.fn().mockName("EntityManagementService.upsertEntityMetadata"),
+            updateEntitiesOrder: vi.fn().mockName("EntityManagementService.updateEntitiesOrder")
         };
 
-        component.onDrop(event);
+        // Set default return value for getPropertiesForEntity to avoid undefined errors
+        mockSchemaService.getPropertiesForEntity.mockReturnValue(of([]));
 
-        expect(component.entities()[0].table_name).toBe('WorkPackage');
-        expect(component.entities()[1].table_name).toBe('Bid');
-        expect(component.entities()[2].table_name).toBe('Issue');
-
-        expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
-          { table_name: 'WorkPackage', sort_order: 0 },
-          { table_name: 'Bid', sort_order: 1 },
-          { table_name: 'Issue', sort_order: 2 }
-        ]);
-        done();
-      }, 100);
-    });
-
-    it('should refresh schema cache after reorder', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const event: CdkDragDrop<any> = {
-          previousIndex: 0,
-          currentIndex: 1,
-          item: null as any,
-          container: null as any,
-          previousContainer: null as any,
-          isPointerOverContainer: true,
-          distance: { x: 0, y: 0 },
-          dropPoint: { x: 0, y: 0 },
-          event: null as any
-        };
-
-        component.onDrop(event);
-
-        setTimeout(() => {
-          expect(mockSchemaService.refreshCache).toHaveBeenCalled();
-          done();
-        }, 10);
-      }, 100);
-    });
-
-    it('should handle reorder error', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.updateEntitiesOrder.and.returnValue(
-        of({
-          success: false,
-          error: {
-            httpCode: 500,
-            details: '',
-            hint: '',
-            message: 'Update failed',
-            humanMessage: 'Update failed'
-          }
+        await TestBed.configureTestingModule({
+            imports: [EntityManagementPage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting(),
+                { provide: SchemaService, useValue: mockSchemaService },
+                { provide: EntityManagementService, useValue: mockEntityManagementService }
+            ]
         })
-      );
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        const event: CdkDragDrop<any> = {
-          previousIndex: 0,
-          currentIndex: 1,
-          item: null as any,
-          container: null as any,
-          previousContainer: null as any,
-          isPointerOverContainer: true,
-          distance: { x: 0, y: 0 },
-          dropPoint: { x: 0, y: 0 },
-          event: null as any
-        };
-
-        component.onDrop(event);
-
-        setTimeout(() => {
-          expect(component.error()).toBe('Update failed');
-          done();
-        }, 10);
-      }, 100);
-    });
-  });
-
-  describe('Keyboard Reorder (move buttons)', () => {
-    it('moveDown should reorder entities, persist new order, and announce position', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
-
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-
-      setTimeout(() => {
-        component.moveDown(0); // Move 'Issue' down one position
-
-        expect(component.entities()[0].table_name).toBe('WorkPackage');
-        expect(component.entities()[1].table_name).toBe('Issue');
-        expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
-          { table_name: 'WorkPackage', sort_order: 0 },
-          { table_name: 'Issue', sort_order: 1 },
-          { table_name: 'Bid', sort_order: 2 }
-        ]);
-        // Announcement mentions the moved entity's new position (2 of 3)
-        expect(component.reorderAnnouncement()).toContain('2');
-        expect(component.reorderAnnouncement()).toContain('3');
-        done();
-      }, 100);
+            .compileComponents();
     });
 
-    it('moveUp should reorder entities and persist new order', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
+    it('should create', () => {
+        // Set up mocks before creating component
+        mockEntityManagementService.isAdmin.mockReturnValue(of(false));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+        fixture = TestBed.createComponent(EntityManagementPage);
+        component = fixture.componentInstance;
 
-      setTimeout(() => {
-        component.moveUp(2); // Move 'Bid' up one position
-
-        expect(component.entities()[1].table_name).toBe('Bid');
-        expect(component.entities()[2].table_name).toBe('WorkPackage');
-        expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
-          { table_name: 'Issue', sort_order: 0 },
-          { table_name: 'Bid', sort_order: 1 },
-          { table_name: 'WorkPackage', sort_order: 2 }
-        ]);
-        done();
-      }, 100);
+        expect(component).toBeTruthy();
     });
 
-    it('should not move or persist when already at the boundary', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.updateEntitiesOrder.and.returnValue(of({ success: true }));
+    describe('Admin Access Check', () => {
+        it('should load entities when user is admin', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        component.moveUp(0); // First item cannot move up
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isAdmin()).toBe(true);
+            expect(component.entities().length).toBe(3);
+            expect(component.loading()).toBe(false);
+        });
 
-        expect(component.entities()[0].table_name).toBe('Issue');
-        expect(mockEntityManagementService.updateEntitiesOrder).not.toHaveBeenCalled();
-        done();
-      }, 100);
-    });
-  });
+        it('should show error when user is not admin', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(false));
 
-  describe('Metadata Saving', () => {
-    it('should save metadata on blur', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.upsertEntityMetadata.and.returnValue(of({ success: true }));
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isAdmin()).toBe(false);
+            expect(component.error()).toBe('Admin access required');
+            expect(component.loading()).toBe(false);
+        });
 
-      setTimeout(() => {
-        const entity = component.entities()[0];
-        entity.customDisplayName = 'Updated Issues';
-        component.onFieldBlur(entity);
+        it('should handle admin check error', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(throwError(() => new Error('Network error')));
 
-        setTimeout(() => {
-          expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith(
-            'Issue',
-            'Updated Issues',
-            'Track issues',
-            0,
-            false,
-            null,
-            false,
-            null,
-            null,
-            undefined,  // enable_notes
-            undefined,  // supports_recurring
-            undefined,  // recurring_property_name
-            true        // show_in_sidebar
-          );
-          done();
-        }, 10);
-      }, 100);
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('Failed to verify admin access');
+            expect(component.loading()).toBe(false);
+        });
     });
 
-    it('should show saved indicator after save completes', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.upsertEntityMetadata.and.returnValue(of({ success: true }));
+    describe('Entity Loading', () => {
+        it('should map entity data correctly', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        const entity = component.entities()[0];
-        component.onFieldBlur(entity);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entities = component.entities();
+            expect(entities[0].customDisplayName).toBe('Issues');
+            expect(entities[0].customDescription).toBe('Track issues');
+            expect(entities[1].customDisplayName).toBe('Work Packages'); // Different from table_name
+            expect(entities[1].customDescription).toBeNull();
+        });
 
-        // With synchronous mock, save completes immediately
-        setTimeout(() => {
-          expect(component.isSaving('Issue')).toBe(false);
-          expect(component.isSaved('Issue')).toBe(true);
-          done();
-        }, 10);
-      }, 100);
+        it('should handle entity loading error', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(throwError(() => new Error('Load error')));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('Failed to load entities');
+            expect(component.loading()).toBe(false);
+        });
     });
 
-    it('should handle save errors', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
-      mockEntityManagementService.upsertEntityMetadata.and.returnValue(
-        of({
-          success: false,
-          error: {
-            httpCode: 500,
-            details: '',
-            hint: '',
-            message: 'Save failed',
-            humanMessage: 'Save failed'
-          }
-        })
-      );
+    describe('Drag and Drop', () => {
+        it('should reorder entities and update sort order', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({ success: true }));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        const entity = component.entities()[0];
-        component.onFieldBlur(entity);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 2,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-        setTimeout(() => {
-          expect(component.error()).toBe('Save failed');
-          done();
-        }, 10);
-      }, 100);
+            component.onDrop(event);
+
+            expect(component.entities()[0].table_name).toBe('WorkPackage');
+            expect(component.entities()[1].table_name).toBe('Bid');
+            expect(component.entities()[2].table_name).toBe('Issue');
+
+            expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+                { table_name: 'WorkPackage', sort_order: 0 },
+                { table_name: 'Bid', sort_order: 1 },
+                { table_name: 'Issue', sort_order: 2 }
+            ]);
+        });
+
+        it('should refresh schema cache after reorder', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 1,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
+
+            component.onDrop(event);
+
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockSchemaService.refreshCache).toHaveBeenCalled();
+        });
+
+        it('should handle reorder error', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({
+                success: false,
+                error: {
+                    httpCode: 500,
+                    details: '',
+                    hint: '',
+                    message: 'Update failed',
+                    humanMessage: 'Update failed'
+                }
+            }));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 1,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
+
+            component.onDrop(event);
+
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('Update failed');
+        });
     });
-  });
 
-  describe('Helper Methods', () => {
-    it('should get correct display name placeholder', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
+    describe('Keyboard Reorder (move buttons)', () => {
+        it('moveDown should reorder entities, persist new order, and announce position', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({ success: true }));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        const entity = component.entities()[0];
-        expect(component.getDisplayNamePlaceholder(entity)).toBe('Issues');
-        done();
-      }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.moveDown(0); // Move 'Issue' down one position
+
+            expect(component.entities()[0].table_name).toBe('WorkPackage');
+            expect(component.entities()[1].table_name).toBe('Issue');
+            expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+                { table_name: 'WorkPackage', sort_order: 0 },
+                { table_name: 'Issue', sort_order: 1 },
+                { table_name: 'Bid', sort_order: 2 }
+            ]);
+            // Announcement mentions the moved entity's new position (2 of 3)
+            expect(component.reorderAnnouncement()).toContain('2');
+            expect(component.reorderAnnouncement()).toContain('3');
+        });
+
+        it('moveUp should reorder entities and persist new order', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.moveUp(2); // Move 'Bid' up one position
+
+            expect(component.entities()[1].table_name).toBe('Bid');
+            expect(component.entities()[2].table_name).toBe('WorkPackage');
+            expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+                { table_name: 'Issue', sort_order: 0 },
+                { table_name: 'Bid', sort_order: 1 },
+                { table_name: 'WorkPackage', sort_order: 2 }
+            ]);
+        });
+
+        it('should not move or persist when already at the boundary', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.updateEntitiesOrder.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.moveUp(0); // First item cannot move up
+
+            expect(component.entities()[0].table_name).toBe('Issue');
+            expect(mockEntityManagementService.updateEntitiesOrder).not.toHaveBeenCalled();
+        });
     });
 
-    it('should track saved state', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
+    describe('Metadata Saving', () => {
+        it('should save metadata on blur', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.upsertEntityMetadata.mockReturnValue(of({ success: true }));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        expect(component.isSaved('Issue')).toBe(false);
-        component.savedStates().set('Issue', true);
-        expect(component.isSaved('Issue')).toBe(true);
-        done();
-      }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            entity.customDisplayName = 'Updated Issues';
+            component.onFieldBlur(entity);
+
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith('Issue', 'Updated Issues', 'Track issues', 0, false, null, false, null, null, undefined, // enable_notes
+            undefined, // supports_recurring
+            undefined, // recurring_property_name
+            true // show_in_sidebar
+            );
+        });
+
+        it('should show saved indicator after save completes', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.upsertEntityMetadata.mockReturnValue(of({ success: true }));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            component.onFieldBlur(entity);
+
+            // With synchronous mock, save completes immediately
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.isSaving('Issue')).toBe(false);
+            expect(component.isSaved('Issue')).toBe(true);
+        });
+
+        it('should handle save errors', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+            mockEntityManagementService.upsertEntityMetadata.mockReturnValue(of({
+                success: false,
+                error: {
+                    httpCode: 500,
+                    details: '',
+                    hint: '',
+                    message: 'Save failed',
+                    humanMessage: 'Save failed'
+                }
+            }));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            component.onFieldBlur(entity);
+
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('Save failed');
+        });
     });
 
-    it('should track fading state', (done) => {
-      mockEntityManagementService.isAdmin.and.returnValue(of(true));
-      mockSchemaService.getEntitiesForManagement.and.returnValue(of(mockEntities));
+    describe('Helper Methods', () => {
+        it('should get correct display name placeholder', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
 
-      fixture = TestBed.createComponent(EntityManagementPage);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
 
-      setTimeout(() => {
-        expect(component.isFading('Issue')).toBe(false);
-        component.fadingStates().set('Issue', true);
-        expect(component.isFading('Issue')).toBe(true);
-        done();
-      }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            expect(component.getDisplayNamePlaceholder(entity)).toBe('Issues');
+        });
+
+        it('should track saved state', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isSaved('Issue')).toBe(false);
+            component.savedStates().set('Issue', true);
+            expect(component.isSaved('Issue')).toBe(true);
+        });
+
+        it('should track fading state', async () => {
+            mockEntityManagementService.isAdmin.mockReturnValue(of(true));
+            mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
+
+            fixture = TestBed.createComponent(EntityManagementPage);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isFading('Issue')).toBe(false);
+            component.fadingStates().set('Issue', true);
+            expect(component.isFading('Issue')).toBe(true);
+        });
     });
-  });
 });

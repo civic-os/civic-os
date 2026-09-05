@@ -31,7 +31,7 @@
     <div class="flex gap-2">
       @for (chip of config().chips; track chip.url) {
         @if (isCurrentRoute(chip.url)) {
-          <span class="badge badge-primary">{{ chip.text }}</span>
+          <span appContrastText class="badge badge-primary">{{ chip.text }}</span>
         } @else {
           <a [routerLink]="chip.url" class="badge badge-outline hover:badge-primary">{{ chip.text }}</a>
         }

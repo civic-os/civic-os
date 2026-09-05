@@ -16,7 +16,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { errorTrackingInterceptor } from './error-tracking.interceptor';
@@ -24,178 +24,174 @@ import { AnalyticsService } from '../services/analytics.service';
 import { getPostgrestUrl, getKeycloakConfig, getMatomoConfig } from '../config/runtime';
 
 describe('errorTrackingInterceptor', () => {
-  let http: HttpClient;
-  let httpMock: HttpTestingController;
-  let mockAnalytics: jasmine.SpyObj<AnalyticsService>;
+    let http: HttpClient;
+    let httpMock: HttpTestingController;
+    let mockAnalytics: any;
 
-  const postgrestUrl = getPostgrestUrl();
-  const keycloakUrl = getKeycloakConfig().url;
+    const postgrestUrl = getPostgrestUrl();
+    const keycloakUrl = getKeycloakConfig().url;
 
-  beforeEach(() => {
-    mockAnalytics = jasmine.createSpyObj('AnalyticsService', ['trackError']);
+    beforeEach(() => {
+        mockAnalytics = {
+            trackError: vi.fn().mockName("AnalyticsService.trackError")
+        };
 
-    TestBed.configureTestingModule({
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(withInterceptors([errorTrackingInterceptor])),
-        provideHttpClientTesting(),
-        { provide: AnalyticsService, useValue: mockAnalytics }
-      ]
+        TestBed.configureTestingModule({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr(), withInterceptors([errorTrackingInterceptor])),
+                provideHttpClientTesting(),
+                { provide: AnalyticsService, useValue: mockAnalytics }
+            ]
+        });
+
+        http = TestBed.inject(HttpClient);
+        httpMock = TestBed.inject(HttpTestingController);
     });
 
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-  });
-
-  // --- Cancelled/aborted requests ---
-
-  it('should NOT track cancelled requests (status 0)', () => {
-    http.get(`${postgrestUrl}issues`).subscribe({
-      error: () => { /* expected */ }
+    afterEach(() => {
+        httpMock.verify();
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}issues`);
-    req.error(new ProgressEvent('abort'), { status: 0, statusText: 'Unknown Error' });
+    // --- Cancelled/aborted requests ---
 
-    expect(mockAnalytics.trackError).not.toHaveBeenCalled();
-  });
+    it('should NOT track cancelled requests (status 0)', () => {
+        http.get(`${postgrestUrl}issues`).subscribe({
+            error: () => { }
+        });
 
-  // --- PostgREST (API) errors ---
+        const req = httpMock.expectOne(`${postgrestUrl}issues`);
+        req.error(new ProgressEvent('abort'), { status: 0, statusText: 'Unknown Error' });
 
-  it('should track PostgREST 400 errors with API context', () => {
-    http.get(`${postgrestUrl}issues`).subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).not.toHaveBeenCalled();
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}issues`);
-    req.flush({ message: 'Bad Request' }, { status: 400, statusText: 'Bad Request' });
+    // --- PostgREST (API) errors ---
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 400', 400);
-  });
+    it('should track PostgREST 400 errors with API context', () => {
+        http.get(`${postgrestUrl}issues`).subscribe({
+            error: () => { }
+        });
 
-  it('should track PostgREST 404 errors with API context', () => {
-    http.get(`${postgrestUrl}nonexistent`).subscribe({
-      error: () => { /* expected */ }
+        const req = httpMock.expectOne(`${postgrestUrl}issues`);
+        req.flush({ message: 'Bad Request' }, { status: 400, statusText: 'Bad Request' });
+
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 400', 400);
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}nonexistent`);
-    req.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+    it('should track PostgREST 404 errors with API context', () => {
+        http.get(`${postgrestUrl}nonexistent`).subscribe({
+            error: () => { }
+        });
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 404', 404);
-  });
+        const req = httpMock.expectOne(`${postgrestUrl}nonexistent`);
+        req.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
 
-  it('should track PostgREST 500 errors with API context', () => {
-    http.get(`${postgrestUrl}schema_entities`).subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 404', 404);
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}schema_entities`);
-    req.flush({ message: 'Internal Server Error' }, { status: 500, statusText: 'Internal Server Error' });
+    it('should track PostgREST 500 errors with API context', () => {
+        http.get(`${postgrestUrl}schema_entities`).subscribe({
+            error: () => { }
+        });
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 500', 500);
-  });
+        const req = httpMock.expectOne(`${postgrestUrl}schema_entities`);
+        req.flush({ message: 'Internal Server Error' }, { status: 500, statusText: 'Internal Server Error' });
 
-  it('should include PostgreSQL error code in label when present', () => {
-    http.post(`${postgrestUrl}issues`, {}).subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 500', 500);
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}issues`);
-    req.flush(
-      { message: 'duplicate key value', code: '23505', details: 'Key already exists' },
-      { status: 409, statusText: 'Conflict' }
-    );
+    it('should include PostgreSQL error code in label when present', () => {
+        http.post(`${postgrestUrl}issues`, {}).subscribe({
+            error: () => { }
+        });
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 409 (PG 23505)', 409);
-  });
+        const req = httpMock.expectOne(`${postgrestUrl}issues`);
+        req.flush({ message: 'duplicate key value', code: '23505', details: 'Key already exists' }, { status: 409, statusText: 'Conflict' });
 
-  it('should include PG permission error code', () => {
-    http.get(`${postgrestUrl}sensitive_table`).subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 409 (PG 23505)', 409);
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}sensitive_table`);
-    req.flush(
-      { message: 'permission denied', code: '42501' },
-      { status: 403, statusText: 'Forbidden' }
-    );
+    it('should include PG permission error code', () => {
+        http.get(`${postgrestUrl}sensitive_table`).subscribe({
+            error: () => { }
+        });
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 403 (PG 42501)', 403);
-  });
+        const req = httpMock.expectOne(`${postgrestUrl}sensitive_table`);
+        req.flush({ message: 'permission denied', code: '42501' }, { status: 403, statusText: 'Forbidden' });
 
-  // --- Keycloak (Auth) errors ---
-
-  it('should track Keycloak errors with Auth context', () => {
-    http.get(`${keycloakUrl}/realms/civic-os-dev/protocol/openid-connect/token`).subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('API 403 (PG 42501)', 403);
     });
 
-    const req = httpMock.expectOne(`${keycloakUrl}/realms/civic-os-dev/protocol/openid-connect/token`);
-    req.flush({ error: 'invalid_grant' }, { status: 401, statusText: 'Unauthorized' });
+    // --- Keycloak (Auth) errors ---
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('Auth 401', 401);
-  });
+    it('should track Keycloak errors with Auth context', () => {
+        http.get(`${keycloakUrl}/realms/civic-os-dev/protocol/openid-connect/token`).subscribe({
+            error: () => { }
+        });
 
-  // --- External errors ---
+        const req = httpMock.expectOne(`${keycloakUrl}/realms/civic-os-dev/protocol/openid-connect/token`);
+        req.flush({ error: 'invalid_grant' }, { status: 401, statusText: 'Unauthorized' });
 
-  it('should track external URL errors with External context', () => {
-    http.get('https://s3.example.com/bucket/file.pdf').subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('Auth 401', 401);
     });
 
-    const req = httpMock.expectOne('https://s3.example.com/bucket/file.pdf');
-    req.flush({ message: 'Forbidden' }, { status: 403, statusText: 'Forbidden' });
+    // --- External errors ---
 
-    expect(mockAnalytics.trackError).toHaveBeenCalledWith('External 403', 403);
-  });
+    it('should track external URL errors with External context', () => {
+        http.get('https://s3.example.com/bucket/file.pdf').subscribe({
+            error: () => { }
+        });
 
-  // --- Matomo exclusion ---
+        const req = httpMock.expectOne('https://s3.example.com/bucket/file.pdf');
+        req.flush({ message: 'Forbidden' }, { status: 403, statusText: 'Forbidden' });
 
-  it('should NOT track errors from Matomo URLs', () => {
-    const matomoConfig = getMatomoConfig();
-    // Only test if Matomo is configured; otherwise skip gracefully
-    if (!matomoConfig.url) {
-      pending('Matomo not configured in test environment');
-      return;
-    }
-
-    http.get(`${matomoConfig.url}/matomo.php?action_name=test`).subscribe({
-      error: () => { /* expected */ }
+        expect(mockAnalytics.trackError).toHaveBeenCalledWith('External 403', 403);
     });
 
-    const req = httpMock.expectOne(`${matomoConfig.url}/matomo.php?action_name=test`);
-    req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
+    // --- Matomo exclusion ---
 
-    expect(mockAnalytics.trackError).not.toHaveBeenCalled();
-  });
+    it.skip('should NOT track errors from Matomo URLs', () => {
+        const matomoConfig = getMatomoConfig();
+        // Only test if Matomo is configured; otherwise skip gracefully
+        if (!matomoConfig.url) {
+            // Matomo not configured in test environment — test skipped via it.skip
+            return;
+        }
 
-  // --- Successful requests ---
+        http.get(`${matomoConfig.url}/matomo.php?action_name=test`).subscribe({
+            error: () => { }
+        });
 
-  it('should NOT track successful requests', () => {
-    http.get(`${postgrestUrl}schema_entities`).subscribe();
+        const req = httpMock.expectOne(`${matomoConfig.url}/matomo.php?action_name=test`);
+        req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
 
-    const req = httpMock.expectOne(`${postgrestUrl}schema_entities`);
-    req.flush([{ id: 1, name: 'issues' }]);
-
-    expect(mockAnalytics.trackError).not.toHaveBeenCalled();
-  });
-
-  // --- Error propagation ---
-
-  it('should propagate errors to subscribers (not swallow them)', () => {
-    let errorReceived = false;
-    http.get(`${postgrestUrl}issues`).subscribe({
-      error: () => { errorReceived = true; }
+        expect(mockAnalytics.trackError).not.toHaveBeenCalled();
     });
 
-    const req = httpMock.expectOne(`${postgrestUrl}issues`);
-    req.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+    // --- Successful requests ---
 
-    expect(errorReceived).toBeTrue();
-    expect(mockAnalytics.trackError).toHaveBeenCalled();
-  });
+    it('should NOT track successful requests', () => {
+        http.get(`${postgrestUrl}schema_entities`).subscribe();
+
+        const req = httpMock.expectOne(`${postgrestUrl}schema_entities`);
+        req.flush([{ id: 1, name: 'issues' }]);
+
+        expect(mockAnalytics.trackError).not.toHaveBeenCalled();
+    });
+
+    // --- Error propagation ---
+
+    it('should propagate errors to subscribers (not swallow them)', () => {
+        let errorReceived = false;
+        http.get(`${postgrestUrl}issues`).subscribe({
+            error: () => { errorReceived = true; }
+        });
+
+        const req = httpMock.expectOne(`${postgrestUrl}issues`);
+        req.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+
+        expect(errorReceived).toBe(true);
+        expect(mockAnalytics.trackError).toHaveBeenCalled();
+    });
 });

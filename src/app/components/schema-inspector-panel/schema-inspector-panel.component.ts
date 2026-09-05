@@ -16,13 +16,14 @@
  */
 
 import { Component, ChangeDetectionStrategy, input, output, signal, inject, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SchemaEntityTable, SchemaEntityProperty, EntityPropertyType } from '../../interfaces/entity';
 import { SchemaService } from '../../services/schema.service';
 import { PermissionsService, Role, RolePermission } from '../../services/permissions.service';
 import { AuthService } from '../../services/auth.service';
 import { isSystemType } from '../../constants/system-types';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 type TabType = 'properties' | 'relations' | 'validations' | 'permissions';
 
@@ -40,7 +41,7 @@ type TabType = 'properties' | 'relations' | 'validations' | 'permissions';
 @Component({
   selector: 'app-schema-inspector-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslatePipe],
+  imports: [TranslatePipe, ContrastTextDirective],
   templateUrl: './schema-inspector-panel.component.html',
   styleUrl: './schema-inspector-panel.component.css'
 })

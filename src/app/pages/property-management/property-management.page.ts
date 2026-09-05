@@ -18,7 +18,7 @@
 
 import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SchemaService } from '../../services/schema.service';
@@ -81,7 +81,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-property-management',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, CommonModule, FormsModule, DragDropModule],
+  imports: [TranslatePipe, FormsModule, DragDropModule],
   templateUrl: './property-management.page.html',
   styleUrl: './property-management.page.css'
 })

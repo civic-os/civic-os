@@ -16,7 +16,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { SeriesEditScope, SeriesMembership } from '../../interfaces/entity';
 import { CosModalComponent } from '../cos-modal/cos-modal.component';
@@ -52,7 +52,7 @@ export interface ExceptionEditorResult {
 @Component({
   selector: 'app-exception-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, CosModalComponent, TranslatePipe],
+  imports: [FormsModule, CosModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <cos-modal [isOpen]="isOpen" (closed)="onCancel()" size="sm" [label]="'a11y.recurring_event' | translate">

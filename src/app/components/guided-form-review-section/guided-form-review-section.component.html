@@ -27,7 +27,7 @@
           <input type="checkbox" checked [attr.aria-label]="'a11y.toggle_section' | translate:{ name: entityDisplayName() || '' }" />
           <div class="collapse-title font-medium">
             {{ entityDisplayName() }}
-            <span class="badge badge-success badge-sm ms-2">Complete</span>
+            <span appContrastText class="badge badge-success badge-sm ms-2">Complete</span>
           </div>
           <div class="collapse-content">
             @if (parentRecord() && parentProperties().length > 0) {
@@ -60,7 +60,7 @@
           <div class="collapse-title font-medium">
             {{ step.display_name }}
             @if (step.isCompleted) {
-              <span class="badge badge-success badge-sm ms-2">Complete</span>
+              <span appContrastText class="badge badge-success badge-sm ms-2">Complete</span>
             } @else {
               <span class="badge badge-ghost badge-sm ms-2">Skipped</span>
             }

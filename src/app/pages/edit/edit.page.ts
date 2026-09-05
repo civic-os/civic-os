@@ -58,6 +58,7 @@ import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
 import { CommonModule } from '@angular/common';
 import { parseDatetimeLocal } from '../../utils/date.utils';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
     selector: 'app-edit',
@@ -75,7 +76,8 @@ import { parseDatetimeLocal } from '../../utils/date.utils';
     ReactiveFormsModule,
     CosModalComponent,
     RouterModule,
-    TranslatePipe
+    TranslatePipe,
+    ContrastTextDirective
 ],
     templateUrl: './edit.page.html',
     styleUrl: './edit.page.css'

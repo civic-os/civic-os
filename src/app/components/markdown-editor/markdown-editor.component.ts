@@ -20,7 +20,7 @@ import {
   ElementRef, ViewChild, AfterViewInit, OnDestroy, NgZone, inject
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import type { Editor } from '@tiptap/core';
 
@@ -28,7 +28,7 @@ import type { Editor } from '@tiptap/core';
   selector: 'app-markdown-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TranslatePipe],
+  imports: [TranslatePipe],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

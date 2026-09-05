@@ -22,95 +22,95 @@ import { MarkdownEditorComponent } from './markdown-editor.component';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 
 describe('MarkdownEditorComponent', () => {
-  let component: MarkdownEditorComponent;
-  let fixture: ComponentFixture<MarkdownEditorComponent>;
+    let component: MarkdownEditorComponent;
+    let fixture: ComponentFixture<MarkdownEditorComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MarkdownEditorComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslationTesting()
-      ]
-    }).compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [MarkdownEditorComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting()
+            ]
+        }).compileComponents();
 
-    fixture = TestBed.createComponent(MarkdownEditorComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(MarkdownEditorComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-  it('should render a toolbar with role="toolbar"', () => {
-    const toolbar = fixture.debugElement.query(By.css('[role="toolbar"]'));
-    expect(toolbar).toBeTruthy();
-  });
+    it('should render a toolbar with role="toolbar"', () => {
+        const toolbar = fixture.debugElement.query(By.css('[role="toolbar"]'));
+        expect(toolbar).toBeTruthy();
+    });
 
-  it('should render formatting buttons with aria-pressed attributes', () => {
-    const buttons = fixture.debugElement.queryAll(By.css('button[aria-pressed]'));
-    // Bold, Italic, Strike, H1, H2, H3, Bullet, Ordered, Blockquote, Code
-    expect(buttons.length).toBeGreaterThanOrEqual(10);
-  });
+    it('should render formatting buttons with aria-pressed attributes', () => {
+        const buttons = fixture.debugElement.queryAll(By.css('button[aria-pressed]'));
+        // Bold, Italic, Strike, H1, H2, H3, Bullet, Ordered, Blockquote, Code
+        expect(buttons.length).toBeGreaterThanOrEqual(10);
+    });
 
-  it('should render an editor container div', () => {
-    const editorEl = fixture.debugElement.query(By.css('.prose'));
-    expect(editorEl).toBeTruthy();
-  });
+    it('should render an editor container div', () => {
+        const editorEl = fixture.debugElement.query(By.css('.prose'));
+        expect(editorEl).toBeTruthy();
+    });
 
-  // --- ControlValueAccessor interface ---
+    // --- ControlValueAccessor interface ---
 
-  it('should implement registerOnChange', () => {
-    const spy = jasmine.createSpy('onChange');
-    component.registerOnChange(spy);
-    // No error thrown
-    expect(component).toBeTruthy();
-  });
+    it('should implement registerOnChange', () => {
+        const spy = vi.fn().mockName('onChange');
+        component.registerOnChange(spy);
+        // No error thrown
+        expect(component).toBeTruthy();
+    });
 
-  it('should implement registerOnTouched', () => {
-    const spy = jasmine.createSpy('onTouched');
-    component.registerOnTouched(spy);
-    expect(component).toBeTruthy();
-  });
+    it('should implement registerOnTouched', () => {
+        const spy = vi.fn().mockName('onTouched');
+        component.registerOnTouched(spy);
+        expect(component).toBeTruthy();
+    });
 
-  it('should store pending value if editor not yet initialized', () => {
-    // Create a fresh component without triggering ngAfterViewInit
-    const freshFixture = TestBed.createComponent(MarkdownEditorComponent);
-    const freshComponent = freshFixture.componentInstance;
-    // writeValue before editor initializes should not throw
-    freshComponent.writeValue('# Test');
-    expect(freshComponent).toBeTruthy();
-  });
+    it('should store pending value if editor not yet initialized', () => {
+        // Create a fresh component without triggering ngAfterViewInit
+        const freshFixture = TestBed.createComponent(MarkdownEditorComponent);
+        const freshComponent = freshFixture.componentInstance;
+        // writeValue before editor initializes should not throw
+        freshComponent.writeValue('# Test');
+        expect(freshComponent).toBeTruthy();
+    });
 
-  it('should apply disabled state via setDisabledState', () => {
-    component.setDisabledState(true);
-    expect(component.disabled()).toBeTrue();
+    it('should apply disabled state via setDisabledState', () => {
+        component.setDisabledState(true);
+        expect(component.disabled()).toBe(true);
 
-    component.setDisabledState(false);
-    expect(component.disabled()).toBeFalse();
-  });
+        component.setDisabledState(false);
+        expect(component.disabled()).toBe(false);
+    });
 
-  it('should show opacity-50 class when disabled', () => {
-    component.setDisabledState(true);
-    fixture.detectChanges();
+    it('should show opacity-50 class when disabled', () => {
+        component.setDisabledState(true);
+        fixture.detectChanges();
 
-    const editorWrapper = fixture.debugElement.query(By.css('.opacity-50'));
-    expect(editorWrapper).toBeTruthy();
-  });
+        const editorWrapper = fixture.debugElement.query(By.css('.opacity-50'));
+        expect(editorWrapper).toBeTruthy();
+    });
 
-  // --- Toolbar state signals ---
+    // --- Toolbar state signals ---
 
-  it('should initialize all toolbar signals as false', () => {
-    expect(component.isBold()).toBeFalse();
-    expect(component.isItalic()).toBeFalse();
-    expect(component.isStrike()).toBeFalse();
-    expect(component.isCode()).toBeFalse();
-    expect(component.isBulletList()).toBeFalse();
-    expect(component.isOrderedList()).toBeFalse();
-    expect(component.isBlockquote()).toBeFalse();
-    expect(component.isHeading(1)).toBeFalse();
-    expect(component.isHeading(2)).toBeFalse();
-    expect(component.isHeading(3)).toBeFalse();
-  });
+    it('should initialize all toolbar signals as false', () => {
+        expect(component.isBold()).toBe(false);
+        expect(component.isItalic()).toBe(false);
+        expect(component.isStrike()).toBe(false);
+        expect(component.isCode()).toBe(false);
+        expect(component.isBulletList()).toBe(false);
+        expect(component.isOrderedList()).toBe(false);
+        expect(component.isBlockquote()).toBe(false);
+        expect(component.isHeading(1)).toBe(false);
+        expect(component.isHeading(2)).toBe(false);
+        expect(component.isHeading(3)).toBe(false);
+    });
 });

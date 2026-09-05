@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getContrastTextColor } from './color.utils';
+import { getContrastTextColor, getContrastTextColorFromRgb } from './color.utils';
 
 /**
  * Reference WCAG contrast-ratio implementation used to assert the util picks
@@ -141,5 +141,36 @@ describe('getContrastTextColor', () => {
     it('should return black for gray just above mid (#838383)', () => {
       expect(getContrastTextColor('#838383')).toBe('black');
     });
+  });
+});
+
+describe('getContrastTextColorFromRgb', () => {
+  it('should return white for black background (0, 0, 0)', () => {
+    expect(getContrastTextColorFromRgb(0, 0, 0)).toBe('white');
+  });
+
+  it('should return black for white background (255, 255, 255)', () => {
+    expect(getContrastTextColorFromRgb(255, 255, 255)).toBe('black');
+  });
+
+  it('should return black for amber (245, 158, 11)', () => {
+    expect(getContrastTextColorFromRgb(245, 158, 11)).toBe('black');
+  });
+
+  it('should return white for dark green (22, 101, 52)', () => {
+    expect(getContrastTextColorFromRgb(22, 101, 52)).toBe('white');
+  });
+
+  it('should agree with hex version for all test cases', () => {
+    const cases: [string, number, number, number][] = [
+      ['#3B82F6', 59, 130, 246],
+      ['#EF4444', 239, 68, 68],
+      ['#22C55E', 34, 197, 94],
+      ['#8B5CF6', 139, 92, 246],
+      ['#6B7280', 107, 114, 128],
+    ];
+    for (const [hex, r, g, b] of cases) {
+      expect(getContrastTextColorFromRgb(r, g, b)).toBe(getContrastTextColor(hex));
+    }
   });
 });

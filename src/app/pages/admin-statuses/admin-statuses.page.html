@@ -124,12 +124,12 @@
                     <td><code class="bg-base-200 px-1 rounded text-sm">{{ status.status_key }}</code></td>
                     <td>
                       @if (status.is_initial) {
-                        <span class="badge badge-success badge-sm">Initial</span>
+                        <span appContrastText class="badge badge-success badge-sm">Initial</span>
                       }
                     </td>
                     <td>
                       @if (status.is_terminal) {
-                        <span class="badge badge-error badge-sm">Terminal</span>
+                        <span appContrastText class="badge badge-error badge-sm">Terminal</span>
                       }
                     </td>
                     <td>{{ status.sort_order }}</td>
@@ -318,7 +318,7 @@
       <input type="text"
              id="status-key"
              class="input input-bordered w-full"
-             [value]="editingStatus()?.status_key"
+             [value]="$safeNavigationMigration(editingStatus()?.status_key)"
              disabled>
       <div class="label"><span class="text-base-content/60 text-xs">Auto-generated. Cannot be changed.</span></div>
     </div>

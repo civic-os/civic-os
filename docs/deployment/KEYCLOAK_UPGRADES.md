@@ -32,7 +32,15 @@ Scan for changes in these categories (in priority order):
 4. **Database migration** — automatic schema changes that could modify auth flows
 5. **JWKS / Signing** — key format or rotation behavior changes
 
-### 2. Test in Dev First
+### 2. Pre-Flight: Service Account Roles
+
+Starting with Keycloak 26.7.1, admin roles granted via **protocol mappers** no longer provide Admin API access — only directly assigned roles work. Before upgrading to 26.7+, verify:
+
+1. **Keycloak Admin → Clients → `civic-os-service-account` → Service Account Roles** — confirm `manage-users`, `view-users`, `view-realm`, `manage-realm` are **directly assigned** (shown under the "Service Account Roles" tab), not injected via protocol mappers.
+
+2. **Keycloak Admin → Clients → each frontend client → Valid Redirect URIs** — starting with 26.7.3, redirect URIs containing OIDC response parameters (`state`, `code`, `session_state`) are rejected. Clean app URLs like `https://example.com/*` are fine.
+
+### 3. Test in Dev First
 
 The dev `docker-compose.yml` uses an unpinned Keycloak image, so local dev may already be running the target version. Verify:
 
@@ -53,33 +61,48 @@ docker-compose up -d keycloak
 
 Then run through the verification checklist (see Post-Upgrade Verification below).
 
-### 3. Back Up the Realm
+### 3. Back Up the Database
 
-Export your production realm before upgrading:
+Keycloak runs automatic database migrations on startup. These are **not reversible** without a database backup. **Always back up the database before the realm export** — the database backup is the critical one.
 
 ```bash
-# SSH to production server
-# Export realm (excludes user credentials by default)
+# If using peer authentication (common on bare-metal), run as the postgres OS user:
+sudo -u postgres pg_dump keycloak > /root/keycloak-db-backup-$(date +%Y%m%d).sql
+
+# If using password authentication or remote connection:
+pg_dump -h localhost -U postgres keycloak > keycloak-db-backup-$(date +%Y%m%d).sql
+```
+
+**Note on peer auth:** PostgreSQL's default `pg_hba.conf` uses `peer` authentication for local Unix socket connections, which requires the OS username to match the PostgreSQL username. Running `pg_dump -U keycloak` as root will fail with `Peer authentication failed`. Use `sudo -u postgres` to run as the superuser.
+
+### 4. Back Up the Realm
+
+Export all realms before upgrading. This is a secondary safety net — the database backup from step 3 is the authoritative restore point.
+
+**For bare-metal installations**, the export CLI needs the database password explicitly — it does not inherit credentials from the systemd unit's `ExecStart` line:
+
+```bash
+# Export ALL realms (omit --realm to get everything)
+sudo -u keycloak /opt/keycloak/bin/kc.sh export \
+  --dir /opt/keycloak/data/export \
+  --users realm_file \
+  --db-password=<YOUR_DB_PASSWORD>
+
+# Save the export
+cp -r /opt/keycloak/data/export /root/keycloak-realm-backup-$(date +%Y%m%d)
+```
+
+**For Docker installations:**
+
+```bash
 docker exec <keycloak-container> /opt/keycloak/bin/kc.sh export \
   --dir /opt/keycloak/data/export \
-  --realm <your-realm> \
   --users realm_file
 
-# Copy export to local machine
 docker cp <keycloak-container>:/opt/keycloak/data/export ./keycloak-backup-$(date +%Y%m%d)
 ```
 
-### 4. Back Up the Database
-
-Keycloak runs automatic database migrations on startup. These are **not reversible** without a database backup.
-
-```bash
-# If Keycloak uses a dedicated database
-pg_dump -h localhost -U postgres keycloak > keycloak-db-backup-$(date +%Y%m%d).sql
-
-# If Keycloak shares the main Postgres instance
-pg_dump -h localhost -U postgres -n public keycloak_db > keycloak-db-backup-$(date +%Y%m%d).sql
-```
+**Tip:** Don't use `--realm <name>` unless you only need one realm. Omitting it exports all realms as separate JSON files, which is a better backup when the server hosts multiple realms.
 
 ## Upgrade Procedure
 
@@ -155,8 +178,16 @@ For non-containerized Keycloak installations (e.g., direct install on a Linux se
 ### Pre-Upgrade
 
 ```bash
-# Back up the database
-pg_dump -h localhost -U postgres keycloak > keycloak-db-backup-$(date +%Y%m%d).sql
+# Back up the database (use sudo -u postgres for peer auth)
+sudo -u postgres pg_dump keycloak > /root/keycloak-db-backup-$(date +%Y%m%d).sql
+
+# Export all realms (requires --db-password since CLI doesn't inherit from systemd)
+sudo -u keycloak /opt/keycloak/bin/kc.sh export \
+  --dir /opt/keycloak/data/export \
+  --users realm_file \
+  --db-password=<YOUR_DB_PASSWORD>
+
+cp -r /opt/keycloak/data/export /root/keycloak-realm-backup-$(date +%Y%m%d)
 ```
 
 ### Upgrade the Server
@@ -165,7 +196,8 @@ First, download and extract the new Keycloak distribution. `kc.sh build` does NO
 
 ```bash
 # Download new version (update version number as needed)
-KC_VERSION=26.6.1
+KC_VERSION=26.7.3
+cd /tmp
 curl -LO https://github.com/keycloak/keycloak/releases/download/$KC_VERSION/keycloak-$KC_VERSION.tar.gz
 
 # Extract to a staging directory (old Keycloak keeps running)
@@ -179,9 +211,11 @@ rm -rf keycloak-$KC_VERSION keycloak-$KC_VERSION.tar.gz
 # Omitting --db=postgres defaults to H2 and breaks startup
 sudo -u keycloak /opt/keycloak-new/bin/kc.sh build --db=postgres
 
-# Swap directories and restart — only downtime is this step (~10-15 seconds)
-sudo mv /opt/keycloak /opt/keycloak.bak && sudo mv /opt/keycloak-new /opt/keycloak
-sudo systemctl restart keycloak
+# Stop, swap directories, and start — only downtime is this step (~10-15 seconds)
+sudo systemctl stop keycloak
+sudo mv /opt/keycloak /opt/keycloak.bak
+sudo mv /opt/keycloak-new /opt/keycloak
+sudo systemctl start keycloak
 
 # Watch logs for migration output
 journalctl -u keycloak -f
@@ -195,19 +229,19 @@ journalctl -u keycloak -f
 
 ### Restart Dependent Services
 
+After upgrading, restart PostgREST (to re-fetch JWKS) and the consolidated worker (to clear the token cache) on **every instance** that depends on this Keycloak server.
+
 ```bash
-# Restart PostgREST to re-fetch JWKS
-docker-compose restart postgrest
+# VPS instances (Docker Compose):
+docker compose restart postgrest consolidated-worker
 
-# Or for bare-metal PostgREST:
-sudo systemctl restart postgrest
-
-# Restart the Go worker
-docker-compose restart worker
-
-# Or for bare-metal worker:
-sudo systemctl restart civic-os-worker
+# Kubernetes instances — repeat for each namespace:
+kubectl rollout restart deployment postgrest consolidated-worker -n <namespace>
 ```
+
+Verify each instance after restart:
+- PostgREST logs should show `Successfully connected` and `Schema cache loaded`
+- Worker logs should show `✓ Keycloak client configured`
 
 ### Total Downtime
 
@@ -258,7 +292,7 @@ After the server is stable, update the JS adapter in a routine app release:
 
 ```bash
 cd civic-os-frontend
-npm install keycloak-js@^26.6.0 --legacy-peer-deps
+npm install keycloak-js@^26.7.0
 ```
 
 Run tests and verify:
@@ -268,7 +302,7 @@ npm run test:headless
 npm start  # manual smoke test: login, logout, page refresh
 ```
 
-The `keycloak-angular` library (`^20.0.0`) wraps `keycloak-js` and is version-independent — it doesn't need to be bumped for minor Keycloak updates.
+The `keycloak-angular` library (`^22.0.0`) wraps `keycloak-js` and is version-independent — it doesn't need to be bumped for minor Keycloak updates.
 
 ## Routine Upgrade Cadence
 
@@ -351,9 +385,18 @@ If the upgrade fails and Civic OS is broken:
 If the upgrade fails:
 
 1. **Stop Keycloak**: `sudo systemctl stop keycloak`
-2. **Restore database**: `psql -U postgres keycloak < keycloak-db-backup-YYYYMMDD.sql`
-3. **Revert Keycloak**: Re-install the previous version or restore from `/opt/keycloak` backup
+2. **Restore database** (drop and recreate to ensure clean state):
+   ```bash
+   sudo -u postgres psql -c "DROP DATABASE keycloak;"
+   sudo -u postgres psql -c "CREATE DATABASE keycloak OWNER keycloak;"
+   sudo -u postgres psql keycloak < /root/keycloak-db-backup-YYYYMMDD.sql
+   ```
+3. **Revert Keycloak binary**:
+   ```bash
+   sudo mv /opt/keycloak /opt/keycloak-failed
+   sudo mv /opt/keycloak.bak /opt/keycloak
+   ```
 4. **Start Keycloak**: `sudo systemctl start keycloak`
-5. **Restart PostgREST**: `sudo systemctl restart postgrest`
+5. **Restart dependent services** on all instances (see Restart Dependent Services above)
 
 **Important:** Keycloak's database migrations are forward-only. You cannot run an older Keycloak binary against a migrated database. Always restore from backup if rolling back.

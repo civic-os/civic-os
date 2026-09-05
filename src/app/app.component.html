@@ -348,7 +348,7 @@
     <ul class="space-y-2 mb-4">
       @for (ext of profileService.incompleteRequired(); track ext.table_name) {
         <li class="flex items-center gap-2">
-          <span class="badge badge-error badge-sm">{{ 'profile.required' | translate }}</span>
+          <span appContrastText class="badge badge-error badge-sm">{{ 'profile.required' | translate }}</span>
           {{ ext.display_name }}
         </li>
       }

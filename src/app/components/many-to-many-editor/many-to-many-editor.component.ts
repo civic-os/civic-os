@@ -16,7 +16,7 @@
  */
 
 import { Component, input, signal, inject, output, ChangeDetectionStrategy, effect, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -26,12 +26,13 @@ import { AuthService } from '../../services/auth.service';
 import { ApiResponse } from '../../interfaces/api';
 import { FkSearchModalComponent, RichM2mDiff } from '../fk-search-modal/fk-search-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 @Component({
   selector: 'app-many-to-many-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RouterLink, FkSearchModalComponent, TranslatePipe],
+  imports: [FormsModule, RouterLink, FkSearchModalComponent, TranslatePipe, ContrastTextDirective],
   templateUrl: './many-to-many-editor.component.html',
   styleUrl: './many-to-many-editor.component.css'
 })

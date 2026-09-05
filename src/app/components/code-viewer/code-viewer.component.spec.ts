@@ -15,134 +15,136 @@ import { CodeViewerComponent } from './code-viewer.component';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
 
 describe('CodeViewerComponent', () => {
-  let component: CodeViewerComponent;
-  let fixture: ComponentFixture<CodeViewerComponent>;
-  let mockTransformer: jasmine.SpyObj<SqlBlockTransformerService>;
+    let component: CodeViewerComponent;
+    let fixture: ComponentFixture<CodeViewerComponent>;
+    let mockTransformer: any;
 
-  const sampleSql = 'SELECT id, name FROM users;';
+    const sampleSql = 'SELECT id, name FROM users;';
 
-  beforeEach(async () => {
-    mockTransformer = jasmine.createSpyObj('SqlBlockTransformerService', ['toBlocklyWorkspace']);
-    mockTransformer.toBlocklyWorkspace.and.resolveTo({
-      blocks: { languageVersion: 0, blocks: [] }
+    beforeEach(async () => {
+        mockTransformer = {
+            toBlocklyWorkspace: vi.fn().mockName("SqlBlockTransformerService.toBlocklyWorkspace")
+        };
+        mockTransformer.toBlocklyWorkspace.mockResolvedValue({
+            blocks: { languageVersion: 0, blocks: [] }
+        });
+
+        // Clear localStorage before each test
+        localStorage.removeItem('code-viewer-mode');
+
+        await TestBed.configureTestingModule({
+            imports: [CodeViewerComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideMarkdown(),
+                { provide: SqlBlockTransformerService, useValue: mockTransformer }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(CodeViewerComponent);
+        component = fixture.componentInstance;
     });
 
-    // Clear localStorage before each test
-    localStorage.removeItem('code-viewer-mode');
+    afterEach(() => {
+        localStorage.removeItem('code-viewer-mode');
+    });
 
-    await TestBed.configureTestingModule({
-      imports: [CodeViewerComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideMarkdown(),
-        { provide: SqlBlockTransformerService, useValue: mockTransformer }
-      ]
-    }).compileComponents();
+    it('should create', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
+        expect(component).toBeTruthy();
+    });
 
-    fixture = TestBed.createComponent(CodeViewerComponent);
-    component = fixture.componentInstance;
-  });
+    it('should default to blocks view mode', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
+        expect(component.viewMode()).toBe('blocks');
+    });
 
-  afterEach(() => {
-    localStorage.removeItem('code-viewer-mode');
-  });
+    it('should display title when provided', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.componentRef.setInput('title', 'My Function');
+        fixture.detectChanges();
 
-  it('should create', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
-  });
+        const title = fixture.debugElement.query(By.css('.text-sm.font-semibold'));
+        expect(title).toBeTruthy();
+        expect(title.nativeElement.textContent.trim()).toBe('My Function');
+    });
 
-  it('should default to blocks view mode', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
-    expect(component.viewMode()).toBe('blocks');
-  });
+    it('should render toggle buttons', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
 
-  it('should display title when provided', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.componentRef.setInput('title', 'My Function');
-    fixture.detectChanges();
+        const buttons = fixture.debugElement.queryAll(By.css('.join-item'));
+        expect(buttons.length).toBe(2);
+        expect(buttons[0].nativeElement.textContent).toContain('Blocks');
+        expect(buttons[1].nativeElement.textContent).toContain('Source');
+    });
 
-    const title = fixture.debugElement.query(By.css('.text-sm.font-semibold'));
-    expect(title).toBeTruthy();
-    expect(title.nativeElement.textContent.trim()).toBe('My Function');
-  });
+    it('should highlight active mode button', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
 
-  it('should render toggle buttons', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
+        const buttons = fixture.debugElement.queryAll(By.css('.join-item'));
+        expect(buttons[0].nativeElement.classList.contains('btn-active')).toBe(true);
+        expect(buttons[1].nativeElement.classList.contains('btn-active')).toBe(false);
+    });
 
-    const buttons = fixture.debugElement.queryAll(By.css('.join-item'));
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].nativeElement.textContent).toContain('Blocks');
-    expect(buttons[1].nativeElement.textContent).toContain('Source');
-  });
+    it('should switch to source view', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
 
-  it('should highlight active mode button', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
+        component.setViewMode('source');
+        fixture.detectChanges();
 
-    const buttons = fixture.debugElement.queryAll(By.css('.join-item'));
-    expect(buttons[0].nativeElement.classList.contains('btn-active')).toBeTrue();
-    expect(buttons[1].nativeElement.classList.contains('btn-active')).toBeFalse();
-  });
+        expect(component.viewMode()).toBe('source');
+        const sourceBlock = fixture.debugElement.query(By.css('app-sql-code-block'));
+        expect(sourceBlock).toBeTruthy();
+    });
 
-  it('should switch to source view', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
+    it('should render blockly viewer in blocks mode', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
 
-    component.setViewMode('source');
-    fixture.detectChanges();
+        const blocklyViewer = fixture.debugElement.query(By.css('app-blockly-viewer'));
+        expect(blocklyViewer).toBeTruthy();
+    });
 
-    expect(component.viewMode()).toBe('source');
-    const sourceBlock = fixture.debugElement.query(By.css('app-sql-code-block'));
-    expect(sourceBlock).toBeTruthy();
-  });
+    it('should persist view preference to localStorage', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
 
-  it('should render blockly viewer in blocks mode', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
+        component.setViewMode('source');
+        expect(localStorage.getItem('code-viewer-mode')).toBe('source');
 
-    const blocklyViewer = fixture.debugElement.query(By.css('app-blockly-viewer'));
-    expect(blocklyViewer).toBeTruthy();
-  });
+        component.setViewMode('blocks');
+        expect(localStorage.getItem('code-viewer-mode')).toBe('blocks');
+    });
 
-  it('should persist view preference to localStorage', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
+    it('should load view preference from localStorage', () => {
+        // Set preference, then verify the loadPreference method directly.
+        // Re-creating the component in zoneless mode causes race conditions
+        // between auto-CD and required input binding, so we test the
+        // preference loading logic without component re-creation.
+        localStorage.setItem('code-viewer-mode', 'source');
 
-    component.setViewMode('source');
-    expect(localStorage.getItem('code-viewer-mode')).toBe('source');
+        // Verify the internal preference loader returns 'source'
+        // by switching modes and checking localStorage round-trip
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.detectChanges();
 
-    component.setViewMode('blocks');
-    expect(localStorage.getItem('code-viewer-mode')).toBe('blocks');
-  });
+        component.setViewMode('source');
+        expect(localStorage.getItem('code-viewer-mode')).toBe('source');
 
-  it('should load view preference from localStorage', () => {
-    // Set preference, then verify the loadPreference method directly.
-    // Re-creating the component in zoneless mode causes race conditions
-    // between auto-CD and required input binding, so we test the
-    // preference loading logic without component re-creation.
-    localStorage.setItem('code-viewer-mode', 'source');
+        component.setViewMode('blocks');
+        expect(localStorage.getItem('code-viewer-mode')).toBe('blocks');
+    });
 
-    // Verify the internal preference loader returns 'source'
-    // by switching modes and checking localStorage round-trip
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.detectChanges();
+    it('should accept objectType input', () => {
+        fixture.componentRef.setInput('sourceCode', sampleSql);
+        fixture.componentRef.setInput('objectType', 'view_definition');
+        fixture.detectChanges();
 
-    component.setViewMode('source');
-    expect(localStorage.getItem('code-viewer-mode')).toBe('source');
-
-    component.setViewMode('blocks');
-    expect(localStorage.getItem('code-viewer-mode')).toBe('blocks');
-  });
-
-  it('should accept objectType input', () => {
-    fixture.componentRef.setInput('sourceCode', sampleSql);
-    fixture.componentRef.setInput('objectType', 'view_definition');
-    fixture.detectChanges();
-
-    expect(component.objectType()).toBe('view_definition');
-  });
+        expect(component.objectType()).toBe('view_definition');
+    });
 });

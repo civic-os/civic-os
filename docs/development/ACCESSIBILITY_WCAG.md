@@ -859,6 +859,61 @@ These require visual verification:
 
 ---
 
+### MANDATORY: Badge Text Contrast (`appContrastText` Directive)
+
+> **This is a requirement, not a recommendation.** Every DaisyUI badge with a
+> semantic color variant (`badge-primary`, `badge-secondary`, `badge-accent`,
+> `badge-info`, `badge-success`, `badge-warning`, `badge-error`) **must** use the
+> `appContrastText` directive to guarantee WCAG AA text contrast across all 35
+> enabled themes.
+
+**Why**: DaisyUI themes set badge text color via `--color-{variant}-content` CSS
+variables. These are not guaranteed to meet the WCAG 2.1 AA 4.5:1 contrast ratio
+across all themes. Themes like `cyberpunk`, `valentine`, and `wireframe` are known
+to produce low-contrast badge text on certain variants. The directive reads the
+computed background color at runtime and overrides text to black or white using the
+WCAG contrast algorithm from `src/app/utils/color.utils.ts`.
+
+**Usage**:
+```html
+<!-- Add appContrastText to any badge with a semantic color variant -->
+<span appContrastText class="badge badge-primary">Count</span>
+<span appContrastText class="badge badge-success badge-sm">Active</span>
+<div appContrastText class="badge badge-warning">{{ label }}</div>
+```
+
+**Import**:
+```typescript
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
+
+@Component({
+  imports: [ContrastTextDirective],
+  // ...
+})
+```
+
+**When to use**:
+- Any `badge-primary`, `badge-secondary`, `badge-accent`, `badge-info`,
+  `badge-success`, `badge-warning`, or `badge-error` element
+- Custom `[style.background-color]` badges (replaces hardcoded `text-white`)
+
+**When NOT to use**:
+- `badge-ghost` and `badge-outline` — these have transparent/semi-transparent
+  backgrounds; the directive detects alpha < 0.5 and skips them automatically,
+  but there's no need to add it
+- Status/Category badges that already use `getContrastTextColor()` with a
+  custom hex color from the database (e.g., in `display-property.component.ts`)
+
+**How it works**: The directive uses `afterNextRender` for initial evaluation,
+a `MutationObserver` on the `class` attribute for dynamic variant changes
+(e.g., payment badges swapping `badge-success` → `badge-error`), and an
+`effect()` tracking `ThemeService.theme()` for theme switches. It sets
+`color` with `!important` to override any existing text color classes.
+
+**Source**: `src/app/directives/contrast-text.directive.ts`
+
+---
+
 ## Implementation Roadmap
 
 ### Phase 1: Setup & Baseline (Week 1)

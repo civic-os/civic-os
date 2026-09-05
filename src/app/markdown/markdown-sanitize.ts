@@ -22,7 +22,7 @@ import { isAllowedEmbedDomain } from './video-embed.constants';
  * every iframe src against the same allowlist.
  */
 export function markdownSanitize(html: string): string {
-  const purify = DOMPurify();
+  const purify = DOMPurify(window);
 
   purify.addHook('uponSanitizeElement', (node, data) => {
     if (data.tagName === 'iframe') {

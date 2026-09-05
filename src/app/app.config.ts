@@ -20,7 +20,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideRouter, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
 import { localeInterceptor } from './interceptors/locale.interceptor';
@@ -78,7 +78,7 @@ export const appConfig: ApplicationConfig = {
     },
 
     provideRouter(routes),
-    provideHttpClient(withInterceptors([
+    provideHttpClient(withXhr(), withInterceptors([
       includeBearerTokenInterceptor,
       impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
       localeInterceptor,          // Adds Accept-Language header for i18n translation lookup

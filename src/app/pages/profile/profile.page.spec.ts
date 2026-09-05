@@ -6,7 +6,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, Subject, BehaviorSubject } from 'rxjs';
 import { convertToParamMap, ParamMap } from '@angular/router';
@@ -20,480 +20,480 @@ import { UserManagementService } from '../../services/user-management.service';
 import { LocaleService, LocaleInfo } from '../../services/locale.service';
 
 describe('ProfilePage', () => {
-  let component: ProfilePage;
-  let fixture: ComponentFixture<ProfilePage>;
-  let mockProfileService: jasmine.SpyObj<ProfileService>;
-  let mockNotificationService: jasmine.SpyObj<NotificationService>;
-  let mockAuthService: any;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockDataService: jasmine.SpyObj<DataService>;
-  let mockUserManagementService: jasmine.SpyObj<UserManagementService>;
-  let mockLocaleService: any;
-  let paramMapSubject: BehaviorSubject<ParamMap>;
+    let component: ProfilePage;
+    let fixture: ComponentFixture<ProfilePage>;
+    let mockProfileService: any;
+    let mockNotificationService: any;
+    let mockAuthService: any;
+    let mockSchemaService: any;
+    let mockDataService: any;
+    let mockUserManagementService: any;
+    let mockLocaleService: any;
+    let paramMapSubject: BehaviorSubject<ParamMap>;
 
-  const mockUser: UserPrivateRecord = {
-    id: 'user-123',
-    display_name: 'John Doe',
-    first_name: 'John',
-    last_name: 'Doe',
-    email: 'john@example.com',
-    phone: '5551230100'
-  };
-
-  const mockExtension: ProfileExtension = {
-    table_name: 'borrowers',
-    sort_order: 1,
-    is_required: true,
-    display_name: 'Borrower Profile',
-    description: 'Library borrower info',
-    user_fk_column: 'user_id',
-    has_record: false
-  };
-
-  const mockEmailPref: NotificationPreference = {
-    user_id: 'user-123',
-    channel: 'email',
-    enabled: true,
-    email_address: 'john@example.com',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01'
-  };
-
-  beforeEach(async () => {
-    // Start with empty paramMap (own profile)
-    paramMapSubject = new BehaviorSubject<ParamMap>(convertToParamMap({}));
-
-    mockProfileService = jasmine.createSpyObj('ProfileService', [
-      'getProfileExtensions',
-      'updateOwnProfile',
-      'getExtensionRecord',
-      'getCurrentUserPrivateRecord',
-      'getUserProfileRecord',
-      'invalidateCache'
-    ]);
-    mockNotificationService = jasmine.createSpyObj('NotificationService', [
-      'getUserPreferences',
-      'updatePreference',
-      'getBulkEmailSubscriptions',
-      'updateBulkUnsubscribe'
-    ]);
-    mockSchemaService = jasmine.createSpyObj('SchemaService', [
-      'getEntity',
-      'getPropsForDetail',
-      'init',
-      'getEntities',
-      'getEntitiesForMenu',
-      'refreshEntitiesCache',
-      'refreshPropertiesCache',
-      'getPropertiesForEntity',
-      'getInverseRelationships',
-      'getEntityActions'
-    ]);
-    mockDataService = jasmine.createSpyObj('DataService', [
-      'getInverseRelationshipData',
-      'executeRpc',
-      'callRpc',
-      'getData'
-    ]);
-    mockUserManagementService = jasmine.createSpyObj('UserManagementService', [
-      'updateUserInfo'
-    ]);
-
-    // Locale service mock
-    mockLocaleService = {
-      locale: signal('en'),
-      supportedLocales: [
-        { code: 'en', name: 'English', englishName: 'English' },
-        { code: 'es', name: 'Español', englishName: 'Spanish' }
-      ] as LocaleInfo[],
-      setLocale: jasmine.createSpy('setLocale'),
-      isRtl: signal(false),
-      getLocaleInfo: jasmine.createSpy('getLocaleInfo').and.returnValue({ code: 'en', name: 'English', englishName: 'English' })
+    const mockUser: UserPrivateRecord = {
+        id: 'user-123',
+        display_name: 'John Doe',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        phone: '5551230100'
     };
 
-    // Auth service mock with signal
-    mockAuthService = {
-      authenticated: signal(true),
-      getCurrentUserId: jasmine.createSpy('getCurrentUserId').and.returnValue(of('user-123')),
-      isAdmin: jasmine.createSpy('isAdmin').and.returnValue(false),
-      userRoles: signal(['user']),
-      hasPermission: jasmine.createSpy('hasPermission').and.returnValue(false),
-      login: jasmine.createSpy('login'),
-      logout: jasmine.createSpy('logout'),
-      keycloak: { tokenParsed: { sub: 'user-123' } },
-      permissionsCache: signal(new Map()),
-      permissionsLoaded: signal(true),
-      isRealAdmin: jasmine.createSpy('isRealAdmin').and.returnValue(false),
-      realUserRoles: signal([])
+    const mockExtension: ProfileExtension = {
+        table_name: 'borrowers',
+        sort_order: 1,
+        is_required: true,
+        display_name: 'Borrower Profile',
+        description: 'Library borrower info',
+        user_fk_column: 'user_id',
+        has_record: false
     };
 
-    // Default mocks
-    mockProfileService.getCurrentUserPrivateRecord.and.returnValue(of(mockUser));
-    mockProfileService.getProfileExtensions.and.returnValue(of([]));
-    mockProfileService.getUserProfileRecord.and.returnValue(of(mockUser));
-    mockNotificationService.getUserPreferences.and.returnValue(of([mockEmailPref]));
-    mockNotificationService.updatePreference.and.returnValue(of({ success: true }));
-    mockNotificationService.getBulkEmailSubscriptions.and.returnValue(of([]));
-    mockNotificationService.updateBulkUnsubscribe.and.returnValue(of({ success: true }));
-    mockSchemaService.getEntities.and.returnValue(of([]));
-    mockSchemaService.getEntitiesForMenu.and.returnValue(of([]));
-    mockSchemaService.getInverseRelationships.and.returnValue(of([]));
-    mockSchemaService.getEntityActions.and.returnValue(of([]));
-    mockProfileService.getExtensionRecord.and.returnValue(of([]));
+    const mockEmailPref: NotificationPreference = {
+        user_id: 'user-123',
+        channel: 'email',
+        enabled: true,
+        email_address: 'john@example.com',
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01'
+    };
 
-    await TestBed.configureTestingModule({
-      imports: [ProfilePage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([]),
-        { provide: ProfileService, useValue: mockProfileService },
-        { provide: NotificationService, useValue: mockNotificationService },
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: SchemaService, useValue: mockSchemaService },
-        { provide: DataService, useValue: mockDataService },
-        { provide: UserManagementService, useValue: mockUserManagementService },
-        { provide: LocaleService, useValue: mockLocaleService },
-        {
-          provide: ActivatedRoute,
-          useValue: { paramMap: paramMapSubject.asObservable() }
-        }
-      ]
-    }).compileComponents();
+    beforeEach(async () => {
+        // Start with empty paramMap (own profile)
+        paramMapSubject = new BehaviorSubject<ParamMap>(convertToParamMap({}));
 
-    fixture = TestBed.createComponent(ProfilePage);
-    component = fixture.componentInstance;
-  });
+        mockProfileService = {
+            getProfileExtensions: vi.fn().mockName("ProfileService.getProfileExtensions"),
+            updateOwnProfile: vi.fn().mockName("ProfileService.updateOwnProfile"),
+            getExtensionRecord: vi.fn().mockName("ProfileService.getExtensionRecord"),
+            getCurrentUserPrivateRecord: vi.fn().mockName("ProfileService.getCurrentUserPrivateRecord"),
+            getUserProfileRecord: vi.fn().mockName("ProfileService.getUserProfileRecord"),
+            invalidateCache: vi.fn().mockName("ProfileService.invalidateCache")
+        };
+        mockNotificationService = {
+            getUserPreferences: vi.fn().mockName("NotificationService.getUserPreferences"),
+            updatePreference: vi.fn().mockName("NotificationService.updatePreference"),
+            getBulkEmailSubscriptions: vi.fn().mockName("NotificationService.getBulkEmailSubscriptions"),
+            updateBulkUnsubscribe: vi.fn().mockName("NotificationService.updateBulkUnsubscribe")
+        };
+        mockSchemaService = {
+            getEntity: vi.fn().mockName("SchemaService.getEntity"),
+            getPropsForDetail: vi.fn().mockName("SchemaService.getPropsForDetail"),
+            init: vi.fn().mockName("SchemaService.init"),
+            getEntities: vi.fn().mockName("SchemaService.getEntities"),
+            getEntitiesForMenu: vi.fn().mockName("SchemaService.getEntitiesForMenu"),
+            refreshEntitiesCache: vi.fn().mockName("SchemaService.refreshEntitiesCache"),
+            refreshPropertiesCache: vi.fn().mockName("SchemaService.refreshPropertiesCache"),
+            getPropertiesForEntity: vi.fn().mockName("SchemaService.getPropertiesForEntity"),
+            getInverseRelationships: vi.fn().mockName("SchemaService.getInverseRelationships"),
+            getEntityActions: vi.fn().mockName("SchemaService.getEntityActions")
+        };
+        mockDataService = {
+            getInverseRelationshipData: vi.fn().mockName("DataService.getInverseRelationshipData"),
+            executeRpc: vi.fn().mockName("DataService.executeRpc"),
+            callRpc: vi.fn().mockName("DataService.callRpc"),
+            getData: vi.fn().mockName("DataService.getData")
+        };
+        mockUserManagementService = {
+            updateUserInfo: vi.fn().mockName("UserManagementService.updateUserInfo")
+        };
 
-  describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-  });
+        // Locale service mock
+        mockLocaleService = {
+            locale: signal('en'),
+            supportedLocales: [
+                { code: 'en', name: 'English', englishName: 'English' },
+                { code: 'es', name: 'Español', englishName: 'Spanish' }
+            ] as LocaleInfo[],
+            setLocale: vi.fn().mockName('setLocale'),
+            isRtl: signal(false),
+            getLocaleInfo: vi.fn().mockName('getLocaleInfo').mockReturnValue({ code: 'en', name: 'English', englishName: 'English' })
+        };
 
-  describe('Own Profile (no userId param)', () => {
-    it('should load user record on init', async () => {
-      await fixture.whenStable();
-      expect(component.userRecord()).toEqual(mockUser);
-      expect(component.loading()).toBe(false);
-      expect(component.isOwnProfile()).toBe(true);
-      expect(component.canEditCoreInfo()).toBe(true);
-    });
+        // Auth service mock with signal
+        mockAuthService = {
+            authenticated: signal(true),
+            getCurrentUserId: vi.fn().mockName('getCurrentUserId').mockReturnValue(of('user-123')),
+            isAdmin: vi.fn().mockName('isAdmin').mockReturnValue(false),
+            userRoles: signal(['user']),
+            hasPermission: vi.fn().mockName('hasPermission').mockReturnValue(false),
+            login: vi.fn().mockName('login'),
+            logout: vi.fn().mockName('logout'),
+            keycloak: { tokenParsed: { sub: 'user-123' } },
+            permissionsCache: signal(new Map()),
+            permissionsLoaded: signal(true),
+            isRealAdmin: vi.fn().mockName('isRealAdmin').mockReturnValue(false),
+            realUserRoles: signal([])
+        };
 
-    it('should populate edit form when editing', async () => {
-      await fixture.whenStable();
-      component.startEditCoreInfo();
-      expect(component.editingCoreInfo()).toBe(true);
-      expect(component.editFirstName).toBe('John');
-      expect(component.editLastName).toBe('Doe');
-    });
+        // Default mocks
+        mockProfileService.getCurrentUserPrivateRecord.mockReturnValue(of(mockUser));
+        mockProfileService.getProfileExtensions.mockReturnValue(of([]));
+        mockProfileService.getUserProfileRecord.mockReturnValue(of(mockUser));
+        mockNotificationService.getUserPreferences.mockReturnValue(of([mockEmailPref]));
+        mockNotificationService.updatePreference.mockReturnValue(of({ success: true }));
+        mockNotificationService.getBulkEmailSubscriptions.mockReturnValue(of([]));
+        mockNotificationService.updateBulkUnsubscribe.mockReturnValue(of({ success: true }));
+        mockSchemaService.getEntities.mockReturnValue(of([]));
+        mockSchemaService.getEntitiesForMenu.mockReturnValue(of([]));
+        mockSchemaService.getInverseRelationships.mockReturnValue(of([]));
+        mockSchemaService.getEntityActions.mockReturnValue(of([]));
+        mockProfileService.getExtensionRecord.mockReturnValue(of([]));
 
-    it('should cancel editing without saving', async () => {
-      await fixture.whenStable();
-      component.startEditCoreInfo();
-      component.editFirstName = 'Changed';
-      component.cancelEditCoreInfo();
-      expect(component.editingCoreInfo()).toBe(false);
-      expect(component.userRecord()!.first_name).toBe('John');
-    });
+        await TestBed.configureTestingModule({
+            imports: [ProfilePage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
+                provideRouter([]),
+                { provide: ProfileService, useValue: mockProfileService },
+                { provide: NotificationService, useValue: mockNotificationService },
+                { provide: AuthService, useValue: mockAuthService },
+                { provide: SchemaService, useValue: mockSchemaService },
+                { provide: DataService, useValue: mockDataService },
+                { provide: UserManagementService, useValue: mockUserManagementService },
+                { provide: LocaleService, useValue: mockLocaleService },
+                {
+                    provide: ActivatedRoute,
+                    useValue: { paramMap: paramMapSubject.asObservable() }
+                }
+            ]
+        }).compileComponents();
 
-    it('should call updateOwnProfile on save', async () => {
-      mockProfileService.updateOwnProfile.and.returnValue(of({
-        success: true,
-        message: 'Profile updated'
-      }));
-
-      await fixture.whenStable();
-      component.startEditCoreInfo();
-      component.editFirstName = 'Jane';
-      component.editLastName = 'Smith';
-      component.saveCoreInfo();
-
-      expect(mockProfileService.updateOwnProfile).toHaveBeenCalledWith('Jane', 'Smith', '5551230100');
-    });
-
-    it('should not save if first name is empty', async () => {
-      await fixture.whenStable();
-      component.startEditCoreInfo();
-      component.editFirstName = '';
-      component.editLastName = 'Doe';
-      component.saveCoreInfo();
-
-      expect(mockProfileService.updateOwnProfile).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Other User Profile (/profile/:userId)', () => {
-    it('should load other user profile when userId param is present', async () => {
-      mockAuthService.hasPermission.and.returnValue(true);
-      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
-
-      await fixture.whenStable();
-
-      expect(component.isOwnProfile()).toBe(false);
-      expect(component.targetUserId()).toBe('other-user-456');
-      expect(mockProfileService.getUserProfileRecord).toHaveBeenCalledWith('other-user-456');
-    });
-
-    it('should set canEditCoreInfo to true when admin views other user', async () => {
-      mockAuthService.hasPermission.and.returnValue(true);
-      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
-
-      await fixture.whenStable();
-
-      expect(component.canEditCoreInfo()).toBe(true);
+        fixture = TestBed.createComponent(ProfilePage);
+        component = fixture.componentInstance;
     });
 
-    it('should set canEditCoreInfo to false when non-admin views other user', async () => {
-      mockAuthService.hasPermission.and.returnValue(false);
-      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
-
-      await fixture.whenStable();
-
-      expect(component.canEditCoreInfo()).toBe(false);
+    describe('Component Creation', () => {
+        it('should create', () => {
+            expect(component).toBeTruthy();
+        });
     });
 
-    it('should show notFound when user does not exist', async () => {
-      mockProfileService.getUserProfileRecord.and.returnValue(of(null));
-      paramMapSubject.next(convertToParamMap({ userId: 'nonexistent-uuid' }));
+    describe('Own Profile (no userId param)', () => {
+        it('should load user record on init', async () => {
+            await fixture.whenStable();
+            expect(component.userRecord()).toEqual(mockUser);
+            expect(component.loading()).toBe(false);
+            expect(component.isOwnProfile()).toBe(true);
+            expect(component.canEditCoreInfo()).toBe(true);
+        });
 
-      await fixture.whenStable();
+        it('should populate edit form when editing', async () => {
+            await fixture.whenStable();
+            component.startEditCoreInfo();
+            expect(component.editingCoreInfo()).toBe(true);
+            expect(component.editFirstName).toBe('John');
+            expect(component.editLastName).toBe('Doe');
+        });
 
-      expect(component.notFound()).toBe(true);
-      expect(component.loading()).toBe(false);
+        it('should cancel editing without saving', async () => {
+            await fixture.whenStable();
+            component.startEditCoreInfo();
+            component.editFirstName = 'Changed';
+            component.cancelEditCoreInfo();
+            expect(component.editingCoreInfo()).toBe(false);
+            expect(component.userRecord()!.first_name).toBe('John');
+        });
+
+        it('should call updateOwnProfile on save', async () => {
+            mockProfileService.updateOwnProfile.mockReturnValue(of({
+                success: true,
+                message: 'Profile updated'
+            }));
+
+            await fixture.whenStable();
+            component.startEditCoreInfo();
+            component.editFirstName = 'Jane';
+            component.editLastName = 'Smith';
+            component.saveCoreInfo();
+
+            expect(mockProfileService.updateOwnProfile).toHaveBeenCalledWith('Jane', 'Smith', '5551230100');
+        });
+
+        it('should not save if first name is empty', async () => {
+            await fixture.whenStable();
+            component.startEditCoreInfo();
+            component.editFirstName = '';
+            component.editLastName = 'Doe';
+            component.saveCoreInfo();
+
+            expect(mockProfileService.updateOwnProfile).not.toHaveBeenCalled();
+        });
     });
 
-    it('should use userManagementService.updateUserInfo when saving other user', async () => {
-      mockAuthService.hasPermission.and.returnValue(true);
-      mockUserManagementService.updateUserInfo.and.returnValue(of({ success: true }));
-      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+    describe('Other User Profile (/profile/:userId)', () => {
+        it('should load other user profile when userId param is present', async () => {
+            mockAuthService.hasPermission.mockReturnValue(true);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
 
-      await fixture.whenStable();
+            await fixture.whenStable();
 
-      component.startEditCoreInfo();
-      component.editFirstName = 'Updated';
-      component.editLastName = 'Name';
-      component.editPhone = '';
-      component.saveCoreInfo();
+            expect(component.isOwnProfile()).toBe(false);
+            expect(component.targetUserId()).toBe('other-user-456');
+            expect(mockProfileService.getUserProfileRecord).toHaveBeenCalledWith('other-user-456');
+        });
 
-      expect(mockUserManagementService.updateUserInfo).toHaveBeenCalledWith({
-        user_id: 'other-user-456',
-        first_name: 'Updated',
-        last_name: 'Name',
-        phone: undefined
-      });
+        it('should set canEditCoreInfo to true when admin views other user', async () => {
+            mockAuthService.hasPermission.mockReturnValue(true);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+
+            await fixture.whenStable();
+
+            expect(component.canEditCoreInfo()).toBe(true);
+        });
+
+        it('should set canEditCoreInfo to false when non-admin views other user', async () => {
+            mockAuthService.hasPermission.mockReturnValue(false);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+
+            await fixture.whenStable();
+
+            expect(component.canEditCoreInfo()).toBe(false);
+        });
+
+        it('should show notFound when user does not exist', async () => {
+            mockProfileService.getUserProfileRecord.mockReturnValue(of(null));
+            paramMapSubject.next(convertToParamMap({ userId: 'nonexistent-uuid' }));
+
+            await fixture.whenStable();
+
+            expect(component.notFound()).toBe(true);
+            expect(component.loading()).toBe(false);
+        });
+
+        it('should use userManagementService.updateUserInfo when saving other user', async () => {
+            mockAuthService.hasPermission.mockReturnValue(true);
+            mockUserManagementService.updateUserInfo.mockReturnValue(of({ success: true }));
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+
+            await fixture.whenStable();
+
+            component.startEditCoreInfo();
+            component.editFirstName = 'Updated';
+            component.editLastName = 'Name';
+            component.editPhone = '';
+            component.saveCoreInfo();
+
+            expect(mockUserManagementService.updateUserInfo).toHaveBeenCalledWith({
+                user_id: 'other-user-456',
+                first_name: 'Updated',
+                last_name: 'Name',
+                phone: undefined
+            });
+        });
+
+        it('should load extensions with userId when viewing other user', async () => {
+            mockAuthService.hasPermission.mockReturnValue(false);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+
+            await fixture.whenStable();
+
+            expect(mockProfileService.getProfileExtensions).toHaveBeenCalledWith('other-user-456');
+        });
     });
 
-    it('should load extensions with userId when viewing other user', async () => {
-      mockAuthService.hasPermission.and.returnValue(false);
-      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+    describe('Notification Preferences', () => {
+        it('should load email preference', async () => {
+            await fixture.whenStable();
+            expect(component.emailPreference()).toEqual(mockEmailPref);
+        });
 
-      await fixture.whenStable();
-
-      expect(mockProfileService.getProfileExtensions).toHaveBeenCalledWith('other-user-456');
-    });
-  });
-
-  describe('Notification Preferences', () => {
-    it('should load email preference', async () => {
-      await fixture.whenStable();
-      expect(component.emailPreference()).toEqual(mockEmailPref);
+        it('should toggle email preference', async () => {
+            await fixture.whenStable();
+            component.onEmailToggle(false);
+            expect(mockNotificationService.updatePreference).toHaveBeenCalledWith('email', false);
+        });
     });
 
-    it('should toggle email preference', async () => {
-      await fixture.whenStable();
-      component.onEmailToggle(false);
-      expect(mockNotificationService.updatePreference).toHaveBeenCalledWith('email', false);
-    });
-  });
+    describe('Profile Extensions', () => {
+        it('should load extensions', async () => {
+            mockProfileService.getProfileExtensions.mockReturnValue(of([mockExtension]));
 
-  describe('Profile Extensions', () => {
-    it('should load extensions', async () => {
-      mockProfileService.getProfileExtensions.and.returnValue(of([mockExtension]));
+            fixture = TestBed.createComponent(ProfilePage);
+            component = fixture.componentInstance;
+            await fixture.whenStable();
 
-      fixture = TestBed.createComponent(ProfilePage);
-      component = fixture.componentInstance;
-      await fixture.whenStable();
+            expect(component.extensions().length).toBe(1);
+            expect(component.extensions()[0].table_name).toBe('borrowers');
+        });
 
-      expect(component.extensions().length).toBe(1);
-      expect(component.extensions()[0].table_name).toBe('borrowers');
-    });
+        it('should show correct badge for required incomplete extension', async () => {
+            mockProfileService.getProfileExtensions.mockReturnValue(of([mockExtension]));
 
-    it('should show correct badge for required incomplete extension', async () => {
-      mockProfileService.getProfileExtensions.and.returnValue(of([mockExtension]));
+            fixture = TestBed.createComponent(ProfilePage);
+            component = fixture.componentInstance;
+            await fixture.whenStable();
 
-      fixture = TestBed.createComponent(ProfilePage);
-      component = fixture.componentInstance;
-      await fixture.whenStable();
-
-      const ext = component.extensions()[0];
-      expect(ext.is_required).toBe(true);
-      expect(ext.has_record).toBe(false);
-    });
-  });
-
-  describe('Phone Formatting', () => {
-    it('should format phone digits as (XXX) XXX-XXXX', () => {
-      expect(component.getFormattedPhone('5551234567')).toBe('(555) 123-4567');
+            const ext = component.extensions()[0];
+            expect(ext.is_required).toBe(true);
+            expect(ext.has_record).toBe(false);
+        });
     });
 
-    it('should return empty string for empty phone', () => {
-      expect(component.getFormattedPhone('')).toBe('');
-      expect(component.getFormattedPhone(null)).toBe('');
+    describe('Phone Formatting', () => {
+        it('should format phone digits as (XXX) XXX-XXXX', () => {
+            expect(component.getFormattedPhone('5551234567')).toBe('(555) 123-4567');
+        });
+
+        it('should return empty string for empty phone', () => {
+            expect(component.getFormattedPhone('')).toBe('');
+            expect(component.getFormattedPhone(null)).toBe('');
+        });
+
+        it('should detect invalid phone (too short)', () => {
+            component.editPhone = '555';
+            expect(component.isPhoneInvalid()).toBe(true);
+        });
+
+        it('should accept valid 10-digit phone', () => {
+            component.editPhone = '5551234567';
+            expect(component.isPhoneInvalid()).toBe(false);
+        });
+
+        it('should accept empty phone (optional)', () => {
+            component.editPhone = '';
+            expect(component.isPhoneInvalid()).toBe(false);
+        });
     });
 
-    it('should detect invalid phone (too short)', () => {
-      component.editPhone = '555';
-      expect(component.isPhoneInvalid()).toBe(true);
+    describe('Entity Actions', () => {
+        it('should call getEntityActions for civic_os_users when profile loads', async () => {
+            await fixture.whenStable();
+            expect(mockSchemaService.getEntityActions).toHaveBeenCalledWith('civic_os_users');
+        });
+
+        it('should reload own profile on reloadProfile()', async () => {
+            await fixture.whenStable();
+            mockProfileService.getCurrentUserPrivateRecord.mockClear();
+
+            component.reloadProfile();
+            await fixture.whenStable();
+
+            expect(mockProfileService.getCurrentUserPrivateRecord).toHaveBeenCalled();
+        });
+
+        it('should reload other user profile on reloadProfile()', async () => {
+            mockAuthService.hasPermission.mockReturnValue(true);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
+            await fixture.whenStable();
+
+            mockProfileService.getUserProfileRecord.mockClear();
+            component.reloadProfile();
+            await fixture.whenStable();
+
+            expect(mockProfileService.getUserProfileRecord).toHaveBeenCalledWith('other-user-456');
+        });
     });
 
-    it('should accept valid 10-digit phone', () => {
-      component.editPhone = '5551234567';
-      expect(component.isPhoneInvalid()).toBe(false);
+    describe('Enriched User Data', () => {
+        it('should include core user fields', async () => {
+            await fixture.whenStable();
+
+            const enriched = component.enrichedUserData();
+            expect(enriched).toBeTruthy();
+            expect(enriched!['id']).toBe('user-123');
+            expect(enriched!['display_name']).toBe('John Doe');
+            expect(enriched!['first_name']).toBe('John');
+            expect(enriched!['last_name']).toBe('Doe');
+            expect(enriched!['email']).toBe('john@example.com');
+        });
+
+        it('should include has_record from extension metadata', async () => {
+            mockProfileService.getProfileExtensions.mockReturnValue(of([mockExtension]));
+
+            fixture = TestBed.createComponent(ProfilePage);
+            component = fixture.componentInstance;
+            await fixture.whenStable();
+
+            const enriched = component.enrichedUserData();
+            expect(enriched).toBeTruthy();
+            expect(enriched!['borrowers']).toEqual({ has_record: false });
+        });
+
+        it('should merge extension record data when available', async () => {
+            const completedExtension: ProfileExtension = {
+                ...mockExtension,
+                has_record: true
+            };
+            mockProfileService.getProfileExtensions.mockReturnValue(of([completedExtension]));
+            mockSchemaService.getEntity.mockReturnValue(of({ table_name: 'borrowers' } as any));
+            mockSchemaService.getPropsForDetail.mockReturnValue(of([]));
+            mockProfileService.getExtensionRecord.mockReturnValue(of([{ id: 'rec-5', status_id: 1, household_size: 3 }]));
+
+            fixture = TestBed.createComponent(ProfilePage);
+            component = fixture.componentInstance;
+            await fixture.whenStable();
+
+            const enriched = component.enrichedUserData();
+            expect(enriched).toBeTruthy();
+            expect(enriched!['borrowers']).toEqual({ id: 'rec-5', status_id: 1, household_size: 3, has_record: true });
+        });
+
+        it('should return null when no user record', async () => {
+            mockProfileService.getCurrentUserPrivateRecord.mockReturnValue(of(null));
+
+            fixture = TestBed.createComponent(ProfilePage);
+            component = fixture.componentInstance;
+            await fixture.whenStable();
+
+            expect(component.enrichedUserData()).toBeNull();
+        });
+
+        it('should update reactively when extensionRecords changes', async () => {
+            const completedExtension: ProfileExtension = {
+                ...mockExtension,
+                has_record: true
+            };
+            mockProfileService.getProfileExtensions.mockReturnValue(of([completedExtension]));
+            mockSchemaService.getEntity.mockReturnValue(of({ table_name: 'borrowers' } as any));
+            mockSchemaService.getPropsForDetail.mockReturnValue(of([]));
+            // Phase 3 returns empty — no record found initially
+            mockProfileService.getExtensionRecord.mockReturnValue(of([]));
+
+            fixture = TestBed.createComponent(ProfilePage);
+            component = fixture.componentInstance;
+            await fixture.whenStable();
+
+            // After Phase 3 with empty results: only has_record from extension metadata
+            expect(component.enrichedUserData()!['borrowers']).toEqual({ has_record: true });
+
+            // Simulate a later update (e.g., after creating a record and reloading)
+            const recordsMap = new Map<string, any>();
+            recordsMap.set('borrowers', { id: 'rec-5', status_id: 1 });
+            component.extensionRecords.set(recordsMap);
+
+            // Computed should reactively update with the full record
+            expect(component.enrichedUserData()!['borrowers']).toEqual({ id: 'rec-5', status_id: 1, has_record: true });
+        });
     });
 
-    it('should accept empty phone (optional)', () => {
-      component.editPhone = '';
-      expect(component.isPhoneInvalid()).toBe(false);
+    describe('Extension Navigation', () => {
+        it('should use /profile returnTo for own profile edit', async () => {
+            const routerSpy = vi.spyOn(component['router'], 'navigate').mockResolvedValue(true);
+            await fixture.whenStable();
+
+            component.navigateToEditExtension('borrowers', 'rec-1');
+
+            expect(routerSpy).toHaveBeenCalledWith(['edit', 'borrowers', 'rec-1'], {
+                queryParams: { returnTo: '/profile' }
+            });
+        });
+
+        it('should use /profile/:userId returnTo for other user edit', async () => {
+            const routerSpy = vi.spyOn(component['router'], 'navigate').mockResolvedValue(true);
+            mockAuthService.hasPermission.mockReturnValue(true);
+            paramMapSubject.next(convertToParamMap({ userId: 'other-456' }));
+
+            await fixture.whenStable();
+
+            component.navigateToEditExtension('borrowers', 'rec-1');
+
+            expect(routerSpy).toHaveBeenCalledWith(['edit', 'borrowers', 'rec-1'], {
+                queryParams: { returnTo: '/profile/other-456' }
+            });
+        });
     });
-  });
-
-  describe('Entity Actions', () => {
-    it('should call getEntityActions for civic_os_users when profile loads', async () => {
-      await fixture.whenStable();
-      expect(mockSchemaService.getEntityActions).toHaveBeenCalledWith('civic_os_users');
-    });
-
-    it('should reload own profile on reloadProfile()', async () => {
-      await fixture.whenStable();
-      mockProfileService.getCurrentUserPrivateRecord.calls.reset();
-
-      component.reloadProfile();
-      await fixture.whenStable();
-
-      expect(mockProfileService.getCurrentUserPrivateRecord).toHaveBeenCalled();
-    });
-
-    it('should reload other user profile on reloadProfile()', async () => {
-      mockAuthService.hasPermission.and.returnValue(true);
-      paramMapSubject.next(convertToParamMap({ userId: 'other-user-456' }));
-      await fixture.whenStable();
-
-      mockProfileService.getUserProfileRecord.calls.reset();
-      component.reloadProfile();
-      await fixture.whenStable();
-
-      expect(mockProfileService.getUserProfileRecord).toHaveBeenCalledWith('other-user-456');
-    });
-  });
-
-  describe('Enriched User Data', () => {
-    it('should include core user fields', async () => {
-      await fixture.whenStable();
-
-      const enriched = component.enrichedUserData();
-      expect(enriched).toBeTruthy();
-      expect(enriched!['id']).toBe('user-123');
-      expect(enriched!['display_name']).toBe('John Doe');
-      expect(enriched!['first_name']).toBe('John');
-      expect(enriched!['last_name']).toBe('Doe');
-      expect(enriched!['email']).toBe('john@example.com');
-    });
-
-    it('should include has_record from extension metadata', async () => {
-      mockProfileService.getProfileExtensions.and.returnValue(of([mockExtension]));
-
-      fixture = TestBed.createComponent(ProfilePage);
-      component = fixture.componentInstance;
-      await fixture.whenStable();
-
-      const enriched = component.enrichedUserData();
-      expect(enriched).toBeTruthy();
-      expect(enriched!['borrowers']).toEqual({ has_record: false });
-    });
-
-    it('should merge extension record data when available', async () => {
-      const completedExtension: ProfileExtension = {
-        ...mockExtension,
-        has_record: true
-      };
-      mockProfileService.getProfileExtensions.and.returnValue(of([completedExtension]));
-      mockSchemaService.getEntity.and.returnValue(of({ table_name: 'borrowers' } as any));
-      mockSchemaService.getPropsForDetail.and.returnValue(of([]));
-      mockProfileService.getExtensionRecord.and.returnValue(of([{ id: 'rec-5', status_id: 1, household_size: 3 }]));
-
-      fixture = TestBed.createComponent(ProfilePage);
-      component = fixture.componentInstance;
-      await fixture.whenStable();
-
-      const enriched = component.enrichedUserData();
-      expect(enriched).toBeTruthy();
-      expect(enriched!['borrowers']).toEqual({ id: 'rec-5', status_id: 1, household_size: 3, has_record: true });
-    });
-
-    it('should return null when no user record', async () => {
-      mockProfileService.getCurrentUserPrivateRecord.and.returnValue(of(null));
-
-      fixture = TestBed.createComponent(ProfilePage);
-      component = fixture.componentInstance;
-      await fixture.whenStable();
-
-      expect(component.enrichedUserData()).toBeNull();
-    });
-
-    it('should update reactively when extensionRecords changes', async () => {
-      const completedExtension: ProfileExtension = {
-        ...mockExtension,
-        has_record: true
-      };
-      mockProfileService.getProfileExtensions.and.returnValue(of([completedExtension]));
-      mockSchemaService.getEntity.and.returnValue(of({ table_name: 'borrowers' } as any));
-      mockSchemaService.getPropsForDetail.and.returnValue(of([]));
-      // Phase 3 returns empty — no record found initially
-      mockProfileService.getExtensionRecord.and.returnValue(of([]));
-
-      fixture = TestBed.createComponent(ProfilePage);
-      component = fixture.componentInstance;
-      await fixture.whenStable();
-
-      // After Phase 3 with empty results: only has_record from extension metadata
-      expect(component.enrichedUserData()!['borrowers']).toEqual({ has_record: true });
-
-      // Simulate a later update (e.g., after creating a record and reloading)
-      const recordsMap = new Map<string, any>();
-      recordsMap.set('borrowers', { id: 'rec-5', status_id: 1 });
-      component.extensionRecords.set(recordsMap);
-
-      // Computed should reactively update with the full record
-      expect(component.enrichedUserData()!['borrowers']).toEqual({ id: 'rec-5', status_id: 1, has_record: true });
-    });
-  });
-
-  describe('Extension Navigation', () => {
-    it('should use /profile returnTo for own profile edit', async () => {
-      const routerSpy = spyOn(component['router'], 'navigate');
-      await fixture.whenStable();
-
-      component.navigateToEditExtension('borrowers', 'rec-1');
-
-      expect(routerSpy).toHaveBeenCalledWith(['edit', 'borrowers', 'rec-1'], {
-        queryParams: { returnTo: '/profile' }
-      });
-    });
-
-    it('should use /profile/:userId returnTo for other user edit', async () => {
-      const routerSpy = spyOn(component['router'], 'navigate');
-      mockAuthService.hasPermission.and.returnValue(true);
-      paramMapSubject.next(convertToParamMap({ userId: 'other-456' }));
-
-      await fixture.whenStable();
-
-      component.navigateToEditExtension('borrowers', 'rec-1');
-
-      expect(routerSpy).toHaveBeenCalledWith(['edit', 'borrowers', 'rec-1'], {
-        queryParams: { returnTo: '/profile/other-456' }
-      });
-    });
-  });
 });

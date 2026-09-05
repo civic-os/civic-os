@@ -26,7 +26,7 @@ import {
   OnDestroy,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { forkJoin } from 'rxjs';
 import { SchemaEntityTable, SchemaEntityProperty, ValidationErrorSummary, ImportError } from '../../interfaces/entity';
 import { CustomImportConfig, ImportColumn } from '../../interfaces/import';
@@ -77,7 +77,7 @@ type ImportStep = 'choose' | 'validating' | 'results' | 'importing' | 'success';
  */
 @Component({
   selector: 'app-import-modal',
-  imports: [CommonModule, CosModalComponent, TranslatePipe],
+  imports: [CosModalComponent, TranslatePipe],
   templateUrl: './import-modal.component.html',
   styleUrl: './import-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

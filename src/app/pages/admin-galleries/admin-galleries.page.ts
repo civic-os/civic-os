@@ -60,10 +60,11 @@ interface GalleryAdminRow {
  */
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 @Component({
   selector: 'app-admin-galleries',
   standalone: true,
-  imports: [TranslatePipe, CommonModule, FormsModule, DatePipe, RouterLink, PaginationComponent],
+  imports: [TranslatePipe, CommonModule, FormsModule, DatePipe, RouterLink, PaginationComponent, ContrastTextDirective],
   templateUrl: './admin-galleries.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

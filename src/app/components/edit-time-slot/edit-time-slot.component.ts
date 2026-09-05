@@ -17,13 +17,13 @@
 
 import { Component, forwardRef, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { parseDatetimeLocal } from '../../utils/date.utils';
 
 @Component({
   selector: 'app-edit-time-slot',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

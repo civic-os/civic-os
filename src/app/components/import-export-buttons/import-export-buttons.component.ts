@@ -16,7 +16,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { SchemaEntityTable, SchemaEntityProperty, EntityNote } from '../../interfaces/entity';
 import { FilterCriteria } from '../../interfaces/query';
@@ -30,7 +30,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-import-export-buttons',
-  imports: [CommonModule, FormsModule, ImportModalComponent, CosModalComponent, TranslatePipe],
+  imports: [FormsModule, ImportModalComponent, CosModalComponent, TranslatePipe],
   templateUrl: './import-export-buttons.component.html',
   styleUrl: './import-export-buttons.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

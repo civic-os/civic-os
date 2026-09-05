@@ -176,7 +176,7 @@
                 </td>
                 <!-- Status -->
                 <td>
-                  <div class="badge gap-1 whitespace-normal h-auto min-h-[1.5rem] text-center" [ngClass]="getStatusBadgeClass(payment.effective_status)">
+                  <div appContrastText class="badge gap-1 whitespace-normal h-auto min-h-[1.5rem] text-center" [ngClass]="getStatusBadgeClass(payment.effective_status)">
                     <span class="material-symbols-outlined text-xs shrink-0" aria-hidden="true">{{ getStatusIcon(payment.effective_status) }}</span>
                     {{ getStatusLabel(payment.effective_status) }}
                   </div>
@@ -408,7 +408,7 @@
                     -{{ refund.amount | currency:refundHistoryPayment()!.currency:'symbol':'1.2-2' }}
                   </td>
                   <td>
-                    <div class="badge gap-1" [ngClass]="{
+                    <div appContrastText class="badge gap-1" [ngClass]="{
                       'badge-success': refund.status === 'succeeded',
                       'badge-warning': refund.status === 'pending',
                       'badge-error': refund.status === 'failed'

@@ -221,17 +221,17 @@ describe('DisplayPropertyComponent', () => {
 ```typescript
 describe('ListPage', () => {
   let mockActivatedRoute: Partial<ActivatedRoute>;
-  let mockSchemaService: jasmine.SpyObj<SchemaService>;
-  let mockDataService: jasmine.SpyObj<DataService>;
+  let mockSchemaService: { getEntity: Mock; getPropsForList: Mock };
+  let mockDataService: { getData: Mock };
 
   beforeEach(() => {
     const routeParams = new BehaviorSubject({ entityKey: 'Issue' });
     mockActivatedRoute = { params: routeParams.asObservable() };
 
-    mockSchemaService = jasmine.createSpyObj('SchemaService', [
+    mockSchemaService = createSpyObj('SchemaService', [
       'getEntity', 'getPropsForList'
     ]);
-    mockDataService = jasmine.createSpyObj('DataService', ['getData']);
+    mockDataService = createSpyObj('DataService', ['getData']);
 
     TestBed.configureTestingModule({
       imports: [ListPage],
@@ -243,41 +243,39 @@ describe('ListPage', () => {
     });
   });
 
-  it('should load entity metadata from route params', (done) => {
+  it('should load entity metadata from route params', async () => {
     const mockEntity = createMockEntity({ table_name: 'Issue' });
-    mockSchemaService.getEntity.and.returnValue(of(mockEntity));
-    mockSchemaService.getPropsForList.and.returnValue(of([]));
-    mockDataService.getData.and.returnValue(of([]));
+    mockSchemaService.getEntity.mockReturnValue(of(mockEntity));
+    mockSchemaService.getPropsForList.mockReturnValue(of([]));
+    mockDataService.getData.mockReturnValue(of([]));
 
     const page = TestBed.createComponent(ListPage).componentInstance;
 
-    page.entity$.subscribe(entity => {
-      expect(entity?.table_name).toBe('Issue');
-      expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-      done();
-    });
+    const entity = await firstValueFrom(page.entity$);
+    expect(entity?.table_name).toBe('Issue');
+    expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
   });
 
-  it('should build PostgREST query from property metadata', (done) => {
+  it('should build PostgREST query from property metadata', async () => {
     const mockEntity = createMockEntity({ table_name: 'Issue' });
     const mockProps = [
       createMockProperty({ column_name: 'name', type: EntityPropertyType.TextShort }),
       createMockProperty({ column_name: 'status_id', type: EntityPropertyType.ForeignKeyName })
     ];
 
-    mockSchemaService.getEntity.and.returnValue(of(mockEntity));
-    mockSchemaService.getPropsForList.and.returnValue(of(mockProps));
-    mockDataService.getData.and.returnValue(of([]));
+    mockSchemaService.getEntity.mockReturnValue(of(mockEntity));
+    mockSchemaService.getPropsForList.mockReturnValue(of(mockProps));
+    mockDataService.getData.mockReturnValue(of([]));
 
     const page = TestBed.createComponent(ListPage).componentInstance;
 
-    page.data$.subscribe(() => {
-      expect(mockDataService.getData).toHaveBeenCalledWith({
+    await firstValueFrom(page.data$);
+    expect(mockDataService.getData).toHaveBeenCalledWith(
+      expect.objectContaining({
         key: 'Issue',
-        fields: jasmine.arrayContaining(['name', 'status_id:Status(id,display_name)'])
-      });
-      done();
-    });
+        fields: expect.arrayContaining(['name', 'status_id:Status(id,display_name)'])
+      })
+    );
   });
 });
 ```
@@ -432,17 +430,17 @@ Ensure tests cover all property types in the enum:
 
 ### Execute Tests
 ```bash
-# Run all tests
+# Run all tests (Vitest via Angular builder)
 npm test
 
-# Run tests in headless mode (CI)
-npm test -- --no-watch --browsers=ChromeHeadless
+# Run tests once and exit (CI / Claude Code)
+npm run test:headless
 
 # Run specific test file
-ng test --include='**/schema.service.spec.ts'
+ng test --watch=false --include='**/schema.service.spec.ts'
 
 # Run with code coverage
-ng test --code-coverage
+ng test --watch=false --code-coverage
 ```
 
 ### Efficient Debugging
@@ -533,12 +531,10 @@ it('should return entity', () => {
   expect(result.table_name).toBe('Issue'); // ❌ Fails
 });
 
-// ✅ Subscribe and assert in callback
-it('should return entity', (done) => {
-  service.getEntity('Issue').subscribe(entity => {
-    expect(entity?.table_name).toBe('Issue');
-    done();
-  });
+// ✅ Use firstValueFrom for async assertions
+it('should return entity', async () => {
+  const entity = await firstValueFrom(service.getEntity('Issue'));
+  expect(entity?.table_name).toBe('Issue');
 });
 ```
 
@@ -636,7 +632,7 @@ constructor() {
 ```typescript
 // ❌ WRONG - CreatePage renders EditPropertyComponent which needs getData()
 beforeEach(() => {
-  mockDataService = jasmine.createSpyObj('DataService', ['createData']);
+  mockDataService = createSpyObj('DataService', ['createData']);
   // ❌ Missing 'getData' - EditPropertyComponent will crash!
 });
 ```
@@ -646,10 +642,10 @@ beforeEach(() => {
 ```typescript
 // ✅ CORRECT - Mock all service methods needed by component tree
 beforeEach(() => {
-  mockDataService = jasmine.createSpyObj('DataService', ['createData', 'getData']);
+  mockDataService = createSpyObj('DataService', ['createData', 'getData']);
 
   // Setup default return values for child components
-  mockDataService.getData.and.returnValue(of([]));
+  mockDataService.getData.mockReturnValue(of([]));
 });
 ```
 
@@ -661,13 +657,9 @@ beforeEach(() => {
 
 ```typescript
 // ❌ WRONG - Trying to test Leaflet map creation in unit tests
-it('should initialize map', (done) => {
+it('should initialize map', () => {
   fixture.detectChanges();
-
-  setTimeout(() => {
-    expect(component['map']).toBeDefined(); // ❌ Fails - DOM element not found
-    done();
-  }, 100);
+  expect(component['map']).toBeDefined(); // ❌ Fails - DOM element not found
 });
 ```
 
@@ -676,16 +668,12 @@ it('should initialize map', (done) => {
 ```typescript
 // ✅ CORRECT - Mock initializeMap to prevent DOM operations
 beforeEach(() => {
-  spyOn<any>(component, 'initializeMap');
+  vi.spyOn<any, any>(component, 'initializeMap').mockImplementation(() => {});
 });
 
-it('should call initializeMap after view init', (done) => {
+it('should call initializeMap after view init', () => {
   fixture.detectChanges();
-
-  setTimeout(() => {
-    expect(component['initializeMap']).toHaveBeenCalled();
-    done();
-  }, 10);
+  expect(component['initializeMap']).toHaveBeenCalled();
 });
 ```
 
@@ -695,10 +683,10 @@ For testing map-dependent methods that require a map object:
 // ✅ CORRECT - Provide mock map object for methods that need it
 beforeEach(() => {
   component['map'] = {
-    setView: jasmine.createSpy('setView'),
-    getZoom: jasmine.createSpy('getZoom').and.returnValue(13),
-    addLayer: jasmine.createSpy('addLayer'),
-    remove: jasmine.createSpy('remove')
+    setView: vi.fn(),
+    getZoom: vi.fn().mockReturnValue(13),
+    addLayer: vi.fn(),
+    remove: vi.fn()
   } as any;
 });
 
@@ -755,35 +743,33 @@ this.data$ = this.properties$.pipe(
 
 ```typescript
 // ❌ WRONG - Long timeout makes tests slow, still fragile
-it('should update dialog', (done) => {
+it('should update dialog', async () => {
   component.submitForm({});
 
-  setTimeout(() => { // ❌ 100ms delay per test adds up!
-    expect(component.successDialog.open).toHaveBeenCalled();
-    done();
-  }, 100);
+  await new Promise(resolve => setTimeout(resolve, 100)); // ❌ 100ms delay per test adds up!
+  expect(component.successDialog.open).toHaveBeenCalled();
 });
 ```
 
-**Solution:** Use minimal delays (10ms) or test synchronously when possible:
+**Solution:** Test synchronously when possible, or use `vi.useFakeTimers()`:
 
 ```typescript
-// ✅ CORRECT - Minimal timeout for async operations
-it('should update dialog', (done) => {
-  component.submitForm({});
-
-  setTimeout(() => {
-    expect(component.successDialog.open).toHaveBeenCalled();
-    done();
-  }, 10); // ✅ 10ms is enough for microtask queue
-});
-
-// ✅ BETTER - Test synchronously when possible
+// ✅ BEST - Test synchronously when possible
 it('should call service method', () => {
   component.submitForm({});
 
   // No setTimeout needed for synchronous assertions
   expect(mockDataService.createData).toHaveBeenCalled();
+});
+
+// ✅ CORRECT - Use fake timers for code that uses setTimeout internally
+it('should update dialog after delay', () => {
+  vi.useFakeTimers();
+  component.submitForm({});
+
+  vi.advanceTimersByTime(10);
+  expect(component.successDialog.open).toHaveBeenCalled();
+  vi.useRealTimers();
 });
 ```
 
@@ -794,32 +780,30 @@ When tests hang or timeout, follow these steps:
 1. **Identify the hanging test:**
    ```bash
    # Run tests and check where execution stops
-   npm test -- --no-watch --browsers=ChromeHeadless
-   # Note: "Executed X of Y" - test X is the problematic one
+   npm run test:headless
+   # Look for the last test file name before the hang
    ```
 
 2. **Run isolated test file:**
    ```bash
    # Test specific file to isolate issue
-   npm test -- --no-watch --browsers=ChromeHeadless --include='**/problem.spec.ts'
+   ng test --watch=false --include='**/problem.spec.ts'
    ```
 
 3. **Check for common issues:**
    - Observable never emitting (use `of(value)` not `of()`)
    - Missing service mocks in child components
-   - `done()` callback not being called in async tests
+   - Observable never completing (blocks `firstValueFrom`)
    - DOM elements not available in headless mode
    - Long setTimeout delays accumulating
 
 4. **Use console logging sparingly:**
    ```typescript
-   it('should complete', (done) => {
+   it('should complete', async () => {
      console.log('Test started'); // Debug checkpoint
-     observable$.subscribe(value => {
-       console.log('Got value:', value); // Verify emission
-       expect(value).toBeDefined();
-       done();
-     });
+     const value = await firstValueFrom(observable$);
+     console.log('Got value:', value); // Verify emission
+     expect(value).toBeDefined();
    });
    ```
 
@@ -831,10 +815,62 @@ When tests hang or timeout, follow these steps:
 4. **Contract Testing**: Validate PostgREST API responses match expectations
 5. **Mutation Testing**: Use Stryker to verify test quality
 
+## Vitest-Specific Patterns
+
+Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-dom** for DOM emulation. Vitest globals (`describe`, `it`, `expect`, `vi`, `beforeEach`, `afterEach`) are auto-imported.
+
+### Key API Differences from Jasmine
+
+| Jasmine | Vitest |
+|---------|--------|
+| `jasmine.createSpyObj('Name', ['method'])` | `createSpyObj('Name', ['method'])` (helper in `src/app/testing/`) |
+| `spyOn(obj, 'method')` | `vi.spyOn(obj, 'method')` |
+| `jasmine.createSpy('name')` | `vi.fn()` |
+| `.and.returnValue(x)` | `.mockReturnValue(x)` |
+| `.and.callFake(fn)` | `.mockImplementation(fn)` |
+| `.and.callThrough()` | *(default behavior for `vi.spyOn()`)* |
+| `.calls.mostRecent().args` | `.mock.lastCall` |
+| `.calls.all()[i].args[j]` | `.mock.calls[i][j]` |
+| `.calls.count()` | `.mock.calls.length` |
+| `.calls.reset()` | `.mockClear()` |
+| `jasmine.any(Type)` | `expect.any(Type)` |
+| `jasmine.objectContaining({})` | `expect.objectContaining({})` |
+| `jasmine.arrayContaining([])` | `expect.arrayContaining([])` |
+
+### Behavioral Differences
+
+1. **`vi.spyOn()` calls through by default** — unlike Jasmine's `spyOn()` which stubs. If you need a no-op spy, use `.mockImplementation(() => {})`.
+
+2. **`expect(array).toContain(expect.stringContaining())` doesn't work** — use `expect(array.some(x => x.includes('substr'))).toBe(true)` for substring matching in arrays.
+
+3. **`document.createElement` spies** — save the original before spying to avoid infinite recursion:
+   ```typescript
+   const origCreateElement = document.createElement.bind(document);
+   vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+     if (tag === 'a') return mockAnchor;
+     return origCreateElement(tag);
+   });
+   ```
+
+### happy-dom Limitations
+
+- **No `:modal` pseudo-selector** — use `hasAttribute('open')` instead
+- **No focus trapping** for `<dialog>` — test open/close lifecycle rather than focus containment
+- **DOMPurify doesn't work** — happy-dom's parser isn't complete enough for sanitization. Wrap those tests in a browser-detection guard.
+- **Inline styles keep raw hex** — happy-dom doesn't convert `#3b82f6` to `rgb(59, 130, 246)` like browsers do
+- **`@unovis/angular`** — uses bare ESM directory imports that Node.js can't resolve. Those tests are skipped with a TODO.
+
+### Test Setup
+
+`src/test-setup.ts` polyfills missing browser APIs for happy-dom:
+- `window.alert` / `window.confirm` (no-ops)
+- `HTMLDialogElement.showModal()` / `.close()` (basic attribute-based implementation)
+- `HTMLCanvasElement.getContext()` (stub returning a mock 2D context)
+
 ## Resources
 
 - [Angular Testing Guide](https://angular.dev/guide/testing)
-- [Jasmine Documentation](https://jasmine.github.io/)
+- [Vitest Documentation](https://vitest.dev/)
 - [Marble Testing](https://rxjs.dev/guide/testing/marble-testing)
 - [Schema-Driven UI Patterns](https://medium.com/expedia-group-tech/schema-driven-uis-dd8fdb516120)
 
@@ -882,5 +918,5 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/my_table
 
 ---
 
-**Last Updated**: 2026-03-11
+**Last Updated**: 2026-09-04
 **Maintainer**: Development Team

@@ -25,7 +25,7 @@ import {
   effect,
   OnInit
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { RecurrenceRuleEditorComponent } from '../recurrence-rule-editor/recurrence-rule-editor.component';
 import { RecurringService } from '../../services/recurring.service';
@@ -69,7 +69,7 @@ export interface RecurringScheduleValue {
 @Component({
   selector: 'app-recurring-schedule-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RecurrenceRuleEditorComponent],
+  imports: [FormsModule, RecurrenceRuleEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-6">

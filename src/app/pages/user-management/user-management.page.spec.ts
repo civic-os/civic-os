@@ -25,497 +25,493 @@ import { provideTranslationTesting } from '../../testing/translation-testing';
 import { ApiResponse } from '../../interfaces/api';
 
 describe('UserManagementPage', () => {
-  let component: UserManagementPage;
-  let fixture: ComponentFixture<UserManagementPage>;
-  let mockUserService: jasmine.SpyObj<UserManagementService>;
-  let mockImportExportService: jasmine.SpyObj<ImportExportService>;
+    let component: UserManagementPage;
+    let fixture: ComponentFixture<UserManagementPage>;
+    let mockUserService: any;
+    let mockImportExportService: any;
 
-  beforeEach(async () => {
-    mockUserService = jasmine.createSpyObj('UserManagementService', [
-      'getManagedUsers',
-      'createUser',
-      'importUsers',
-      'importUsersDetailed',
-      'retryProvisioning',
-      'getManageableRoles',
-      'assignUserRole',
-      'revokeUserRole',
-      'hasUserManagementAccess',
-      'updateUserInfo',
-      'getNotificationPreferences',
-      'updateNotificationPreference',
-      'getAdminBulkSubscriptions',
-      'adminSetBulkUnsubscribe'
-    ]);
-    mockImportExportService = jasmine.createSpyObj('ImportExportService', [
-      'validateFileSize',
-      'parseExcelFile',
-      'generateUserImportTemplate'
-    ]);
+    beforeEach(async () => {
+        mockUserService = {
+            getManagedUsers: vi.fn().mockName("UserManagementService.getManagedUsers"),
+            createUser: vi.fn().mockName("UserManagementService.createUser"),
+            importUsers: vi.fn().mockName("UserManagementService.importUsers"),
+            importUsersDetailed: vi.fn().mockName("UserManagementService.importUsersDetailed"),
+            retryProvisioning: vi.fn().mockName("UserManagementService.retryProvisioning"),
+            getManageableRoles: vi.fn().mockName("UserManagementService.getManageableRoles"),
+            assignUserRole: vi.fn().mockName("UserManagementService.assignUserRole"),
+            revokeUserRole: vi.fn().mockName("UserManagementService.revokeUserRole"),
+            hasUserManagementAccess: vi.fn().mockName("UserManagementService.hasUserManagementAccess"),
+            updateUserInfo: vi.fn().mockName("UserManagementService.updateUserInfo"),
+            getNotificationPreferences: vi.fn().mockName("UserManagementService.getNotificationPreferences"),
+            updateNotificationPreference: vi.fn().mockName("UserManagementService.updateNotificationPreference"),
+            getAdminBulkSubscriptions: vi.fn().mockName("UserManagementService.getAdminBulkSubscriptions"),
+            adminSetBulkUnsubscribe: vi.fn().mockName("UserManagementService.adminSetBulkUnsubscribe")
+        };
+        mockImportExportService = {
+            validateFileSize: vi.fn().mockName("ImportExportService.validateFileSize"),
+            parseExcelFile: vi.fn().mockName("ImportExportService.parseExcelFile"),
+            generateUserImportTemplate: vi.fn().mockName("ImportExportService.generateUserImportTemplate")
+        };
 
-    // Default mocks
-    mockUserService.getManagedUsers.and.returnValue(of([]));
-    mockUserService.getManageableRoles.and.returnValue(of([
-      { role_id: 1, display_name: 'user', description: 'Basic user', role_key: 'user' },
-      { role_id: 2, display_name: 'editor', description: 'Can edit', role_key: 'editor' }
-    ]));
-    mockUserService.createUser.and.returnValue(of({ success: true }));
-    mockUserService.assignUserRole.and.returnValue(of({ success: true }));
-    mockUserService.revokeUserRole.and.returnValue(of({ success: true }));
-    mockUserService.getAdminBulkSubscriptions.and.returnValue(of([]));
-    mockUserService.adminSetBulkUnsubscribe.and.returnValue(of({ success: true }));
+        // Default mocks
+        mockUserService.getManagedUsers.mockReturnValue(of([]));
+        mockUserService.getManageableRoles.mockReturnValue(of([
+            { role_id: 1, display_name: 'user', description: 'Basic user', role_key: 'user' },
+            { role_id: 2, display_name: 'editor', description: 'Can edit', role_key: 'editor' }
+        ]));
+        mockUserService.createUser.mockReturnValue(of({ success: true }));
+        mockUserService.assignUserRole.mockReturnValue(of({ success: true }));
+        mockUserService.revokeUserRole.mockReturnValue(of({ success: true }));
+        mockUserService.getAdminBulkSubscriptions.mockReturnValue(of([]));
+        mockUserService.adminSetBulkUnsubscribe.mockReturnValue(of({ success: true }));
 
-    await TestBed.configureTestingModule({
-      imports: [UserManagementPage],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideTranslationTesting(),
-        { provide: UserManagementService, useValue: mockUserService },
-        { provide: ImportExportService, useValue: mockImportExportService }
-      ]
-    }).compileComponents();
+        await TestBed.configureTestingModule({
+            imports: [UserManagementPage],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslationTesting(),
+                { provide: UserManagementService, useValue: mockUserService },
+                { provide: ImportExportService, useValue: mockImportExportService }
+            ]
+        }).compileComponents();
 
-    fixture = TestBed.createComponent(UserManagementPage);
-    component = fixture.componentInstance;
-  });
-
-  describe('Component Creation', () => {
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-  });
-
-  describe('getStatusClass()', () => {
-    it('should return badge-success for active', () => {
-      expect(component.getStatusClass('active')).toBe('badge-success');
+        fixture = TestBed.createComponent(UserManagementPage);
+        component = fixture.componentInstance;
     });
 
-    it('should return badge-warning for pending', () => {
-      expect(component.getStatusClass('pending')).toBe('badge-warning');
+    describe('Component Creation', () => {
+        it('should create', () => {
+            expect(component).toBeTruthy();
+        });
     });
 
-    it('should return badge-info for processing', () => {
-      expect(component.getStatusClass('processing')).toBe('badge-info');
+    describe('getStatusClass()', () => {
+        it('should return badge-success for active', () => {
+            expect(component.getStatusClass('active')).toBe('badge-success');
+        });
+
+        it('should return badge-warning for pending', () => {
+            expect(component.getStatusClass('pending')).toBe('badge-warning');
+        });
+
+        it('should return badge-info for processing', () => {
+            expect(component.getStatusClass('processing')).toBe('badge-info');
+        });
+
+        it('should return badge-error for failed', () => {
+            expect(component.getStatusClass('failed')).toBe('badge-error');
+        });
+
+        it('should return badge-ghost for unknown status', () => {
+            expect(component.getStatusClass('unknown')).toBe('badge-ghost');
+        });
     });
 
-    it('should return badge-error for failed', () => {
-      expect(component.getStatusClass('failed')).toBe('badge-error');
+    describe('formatPhone()', () => {
+        it('should format 10-digit phone to (XXX) XXX-XXXX', () => {
+            expect(component.formatPhone('5551234567')).toBe('(555) 123-4567');
+        });
+
+        it('should return unformatted phone if not 10 digits', () => {
+            expect(component.formatPhone('12345')).toBe('12345');
+        });
+
+        it('should return empty string for empty input', () => {
+            expect(component.formatPhone('')).toBe('');
+        });
     });
 
-    it('should return badge-ghost for unknown status', () => {
-      expect(component.getStatusClass('unknown')).toBe('badge-ghost');
-    });
-  });
+    describe('openCreateModal()', () => {
+        it('should reset form state and show modal', () => {
+            // Set some pre-existing state
+            component.createError.set('some error');
+            component.showCreateModal.set(false);
 
-  describe('formatPhone()', () => {
-    it('should format 10-digit phone to (XXX) XXX-XXXX', () => {
-      expect(component.formatPhone('5551234567')).toBe('(555) 123-4567');
-    });
+            component.openCreateModal();
 
-    it('should return unformatted phone if not 10 digits', () => {
-      expect(component.formatPhone('12345')).toBe('12345');
-    });
+            expect(component.showCreateModal()).toBe(true);
+            expect(component.createError()).toBeUndefined();
+            expect(component.newUser.email).toBe('');
+            expect(component.newUser.first_name).toBe('');
+            expect(component.newUser.last_name).toBe('');
+        });
 
-    it('should return empty string for empty input', () => {
-      expect(component.formatPhone('')).toBe('');
-    });
-  });
+        it('should reset selectedRoles to default (user)', () => {
+            component.selectedRoles.set(new Set(['admin', 'editor']));
 
-  describe('openCreateModal()', () => {
-    it('should reset form state and show modal', () => {
-      // Set some pre-existing state
-      component.createError.set('some error');
-      component.showCreateModal.set(false);
+            component.openCreateModal();
 
-      component.openCreateModal();
-
-      expect(component.showCreateModal()).toBe(true);
-      expect(component.createError()).toBeUndefined();
-      expect(component.newUser.email).toBe('');
-      expect(component.newUser.first_name).toBe('');
-      expect(component.newUser.last_name).toBe('');
+            expect(component.selectedRoles().has('user')).toBe(true);
+            expect(component.selectedRoles().size).toBe(1);
+        });
     });
 
-    it('should reset selectedRoles to default (user)', () => {
-      component.selectedRoles.set(new Set(['admin', 'editor']));
+    describe('closeCreateModal()', () => {
+        it('should hide the modal', () => {
+            component.showCreateModal.set(true);
 
-      component.openCreateModal();
+            component.closeCreateModal();
 
-      expect(component.selectedRoles().has('user')).toBe(true);
-      expect(component.selectedRoles().size).toBe(1);
-    });
-  });
-
-  describe('closeCreateModal()', () => {
-    it('should hide the modal', () => {
-      component.showCreateModal.set(true);
-
-      component.closeCreateModal();
-
-      expect(component.showCreateModal()).toBe(false);
-    });
-  });
-
-  describe('submitCreateUser()', () => {
-    it('should set error when required fields are empty', () => {
-      component.newUser = { email: '', first_name: '', last_name: '' };
-
-      component.submitCreateUser();
-
-      expect(component.createError()).toBe('Email, first name, and last name are required');
-      expect(mockUserService.createUser).not.toHaveBeenCalled();
+            expect(component.showCreateModal()).toBe(false);
+        });
     });
 
-    it('should call service on valid input and close modal on success', () => {
-      component.newUser = {
-        email: 'test@example.com',
-        first_name: 'Test',
-        last_name: 'User',
-        send_welcome_email: true
-      };
-      component.selectedRoles.set(new Set(['user', 'editor']));
-      component.showCreateModal.set(true);
+    describe('submitCreateUser()', () => {
+        it('should set error when required fields are empty', () => {
+            component.newUser = { email: '', first_name: '', last_name: '' };
 
-      component.submitCreateUser();
+            component.submitCreateUser();
 
-      expect(mockUserService.createUser).toHaveBeenCalledWith(jasmine.objectContaining({
-        email: 'test@example.com',
-        first_name: 'Test',
-        last_name: 'User',
-        initial_roles: jasmine.arrayContaining(['user', 'editor'])
-      }));
-      expect(component.showCreateModal()).toBe(false);
-      expect(component.successMessage()).toContain('Test User');
+            expect(component.createError()).toBe('Email, first name, and last name are required');
+            expect(mockUserService.createUser).not.toHaveBeenCalled();
+        });
+
+        it('should call service on valid input and close modal on success', () => {
+            component.newUser = {
+                email: 'test@example.com',
+                first_name: 'Test',
+                last_name: 'User',
+                send_welcome_email: true
+            };
+            component.selectedRoles.set(new Set(['user', 'editor']));
+            component.showCreateModal.set(true);
+
+            component.submitCreateUser();
+
+            expect(mockUserService.createUser).toHaveBeenCalledWith(expect.objectContaining({
+                email: 'test@example.com',
+                first_name: 'Test',
+                last_name: 'User',
+                initial_roles: expect.arrayContaining(['user', 'editor'])
+            }));
+            expect(component.showCreateModal()).toBe(false);
+            expect(component.successMessage()).toContain('Test User');
+        });
+
+        it('should show error from API response on failure', () => {
+            mockUserService.createUser.mockReturnValue(of({
+                success: false,
+                error: { message: 'Duplicate email', humanMessage: 'This email is already registered' }
+            }));
+
+            // Open modal first so we can verify it stays open on error
+            component.openCreateModal();
+            expect(component.showCreateModal()).toBe(true);
+
+            component.newUser = {
+                email: 'dup@example.com',
+                first_name: 'Dup',
+                last_name: 'User'
+            };
+
+            component.submitCreateUser();
+
+            expect(component.createError()).toBe('This email is already registered');
+            expect(component.showCreateModal()).toBe(true);
+        });
     });
 
-    it('should show error from API response on failure', () => {
-      mockUserService.createUser.and.returnValue(of({
-        success: false,
-        error: { message: 'Duplicate email', humanMessage: 'This email is already registered' }
-      }));
+    describe('isRoleSelected() / toggleRole()', () => {
+        it('should return true for roles in the selectedRoles set', () => {
+            component.selectedRoles.set(new Set(['user', 'editor']));
 
-      // Open modal first so we can verify it stays open on error
-      component.openCreateModal();
-      expect(component.showCreateModal()).toBe(true);
+            expect(component.isRoleSelected('user')).toBe(true);
+            expect(component.isRoleSelected('editor')).toBe(true);
+            expect(component.isRoleSelected('admin')).toBe(false);
+        });
 
-      component.newUser = {
-        email: 'dup@example.com',
-        first_name: 'Dup',
-        last_name: 'User'
-      };
+        it('should add a role when toggling an unselected role', () => {
+            component.selectedRoles.set(new Set(['user']));
 
-      component.submitCreateUser();
+            component.toggleRole('editor');
 
-      expect(component.createError()).toBe('This email is already registered');
-      expect(component.showCreateModal()).toBe(true);
-    });
-  });
+            expect(component.selectedRoles().has('editor')).toBe(true);
+            expect(component.selectedRoles().has('user')).toBe(true);
+        });
 
-  describe('isRoleSelected() / toggleRole()', () => {
-    it('should return true for roles in the selectedRoles set', () => {
-      component.selectedRoles.set(new Set(['user', 'editor']));
+        it('should remove a role when toggling a selected role', () => {
+            component.selectedRoles.set(new Set(['user', 'editor']));
 
-      expect(component.isRoleSelected('user')).toBe(true);
-      expect(component.isRoleSelected('editor')).toBe(true);
-      expect(component.isRoleSelected('admin')).toBe(false);
+            component.toggleRole('editor');
+
+            expect(component.selectedRoles().has('editor')).toBe(false);
+            expect(component.selectedRoles().has('user')).toBe(true);
+        });
     });
 
-    it('should add a role when toggling an unselected role', () => {
-      component.selectedRoles.set(new Set(['user']));
+    describe('viewError()', () => {
+        it('should set error detail user and show error modal', () => {
+            const mockUser: ManagedUser = {
+                id: '1', display_name: 'Failed User', full_name: 'Failed User',
+                first_name: 'Failed', last_name: 'User',
+                email: 'fail@test.com', phone: null, status: 'failed',
+                error_message: 'Keycloak connection refused', roles: null, created_at: '2025-01-01',
+                provision_id: 42, last_login_at: null,
+                email_notif_enabled: null, sms_notif_enabled: null, sms_opted_out: null
+            };
 
-      component.toggleRole('editor');
+            component.viewError(mockUser);
 
-      expect(component.selectedRoles().has('editor')).toBe(true);
-      expect(component.selectedRoles().has('user')).toBe(true);
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.errorDetailUser()).toEqual(mockUser);
+        });
     });
 
-    it('should remove a role when toggling a selected role', () => {
-      component.selectedRoles.set(new Set(['user', 'editor']));
-
-      component.toggleRole('editor');
-
-      expect(component.selectedRoles().has('editor')).toBe(false);
-      expect(component.selectedRoles().has('user')).toBe(true);
-    });
-  });
-
-  describe('viewError()', () => {
-    it('should set error detail user and show error modal', () => {
-      const mockUser: ManagedUser = {
-        id: '1', display_name: 'Failed User', full_name: 'Failed User',
-        first_name: 'Failed', last_name: 'User',
-        email: 'fail@test.com', phone: null, status: 'failed',
-        error_message: 'Keycloak connection refused', roles: null, created_at: '2025-01-01',
-        provision_id: 42, last_login_at: null,
-        email_notif_enabled: null, sms_notif_enabled: null, sms_opted_out: null
-      };
-
-      component.viewError(mockUser);
-
-      expect(component.showErrorModal()).toBe(true);
-      expect(component.errorDetailUser()).toEqual(mockUser);
-    });
-  });
-
-  describe('Edit User Modal', () => {
-    const mockActiveUser: ManagedUser = {
-      id: 'uuid-123',
-      display_name: 'John D.',
-      full_name: 'John Doe',
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john@example.com',
-      phone: '5551234567',
-      status: 'active',
-      error_message: null,
-      roles: ['user', 'editor'],
-      created_at: '2025-01-01',
-      provision_id: null,
-      last_login_at: '2026-04-15T10:30:00Z',
-      email_notif_enabled: true,
-      sms_notif_enabled: null,
-      sms_opted_out: null
-    };
-
-    const mockPendingUser: ManagedUser = {
-      id: null,
-      display_name: 'Pending P.',
-      full_name: 'Pending Person',
-      first_name: 'Pending',
-      last_name: 'Person',
-      email: 'pending@example.com',
-      phone: null,
-      status: 'pending',
-      error_message: null,
-      roles: ['user'],
-      created_at: '2025-01-02',
-      provision_id: 99,
-      last_login_at: null,
-      email_notif_enabled: null,
-      sms_notif_enabled: null,
-      sms_opted_out: null
-    };
-
-    it('should populate roles from user data', () => {
-      component.openEditModal(mockActiveUser);
-
-      expect(component.showEditModal()).toBe(true);
-      expect(component.editRoles().has('user')).toBe(true);
-      expect(component.editRoles().has('editor')).toBe(true);
-      expect(component.editUser()).toEqual(mockActiveUser);
-      expect(component.editError()).toBeUndefined();
-    });
-
-    it('should not open for pending users', () => {
-      component.openEditModal(mockPendingUser);
-      expect(component.showEditModal()).toBe(false);
-    });
-
-    it('should not open for users without id', () => {
-      component.openEditModal({ ...mockActiveUser, id: null });
-      expect(component.showEditModal()).toBe(false);
-    });
-
-    it('should close modal and reload users', () => {
-      component.showEditModal.set(true);
-      mockUserService.getManagedUsers.calls.reset();
-
-      component.closeEditModal();
-
-      expect(component.showEditModal()).toBe(false);
-      expect(mockUserService.getManagedUsers).toHaveBeenCalled();
-    });
-  });
-
-  describe('Edit Role Toggle', () => {
-    const mockActiveUser: ManagedUser = {
-      id: 'uuid-123',
-      display_name: 'John D.',
-      full_name: 'John Doe',
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john@example.com',
-      phone: '5551234567',
-      status: 'active',
-      error_message: null,
-      roles: ['user', 'editor'],
-      created_at: '2025-01-01',
-      provision_id: null,
-      last_login_at: '2026-04-15T10:30:00Z',
-      email_notif_enabled: true,
-      sms_notif_enabled: null,
-      sms_opted_out: null
-    };
-
-    it('should assign role when toggling unselected role', () => {
-      component.openEditModal(mockActiveUser);
-
-      component.toggleEditRole('admin');
-
-      expect(mockUserService.assignUserRole).toHaveBeenCalledWith('uuid-123', 'admin');
-    });
-
-    it('should revoke role when toggling selected role', () => {
-      component.openEditModal(mockActiveUser);
-
-      component.toggleEditRole('editor');
-
-      expect(mockUserService.revokeUserRole).toHaveBeenCalledWith('uuid-123', 'editor');
-    });
-
-    it('should add role to editRoles set on successful assign', () => {
-      component.openEditModal(mockActiveUser);
-
-      component.toggleEditRole('admin');
-
-      expect(component.editRoles().has('admin')).toBe(true);
-    });
-
-    it('should remove role from editRoles set on successful revoke', () => {
-      component.openEditModal(mockActiveUser);
-
-      component.toggleEditRole('editor');
-
-      expect(component.editRoles().has('editor')).toBe(false);
-    });
-
-    it('should show error and not change roles on failure', () => {
-      mockUserService.assignUserRole.and.returnValue(of({
-        success: false,
-        error: { message: 'Delegation error', humanMessage: 'Your role cannot assign the "admin" role' }
-      }));
-
-      component.openEditModal(mockActiveUser);
-      const rolesBefore = new Set(component.editRoles());
-
-      component.toggleEditRole('admin');
-
-      expect(component.editError()).toContain('cannot assign');
-      expect(component.editRoles()).toEqual(rolesBefore);
-    });
-
-    it('should track per-role loading state', () => {
-      const subject = new Subject<ApiResponse>();
-      mockUserService.assignUserRole.and.returnValue(subject.asObservable());
-
-      component.openEditModal(mockActiveUser);
-      component.toggleEditRole('admin');
-
-      expect(component.editRolesLoading().has('admin')).toBe(true);
-
-      subject.next({ success: true });
-      subject.complete();
-
-      expect(component.editRolesLoading().has('admin')).toBe(false);
-    });
-  });
-
-  describe('getRoleDisplayName()', () => {
-    it('should return display_name for known role keys', () => {
-      expect(component.getRoleDisplayName('user')).toBe('user');
-      expect(component.getRoleDisplayName('editor')).toBe('editor');
-    });
-
-    it('should fall back to raw key for unknown roles', () => {
-      expect(component.getRoleDisplayName('unknown_role')).toBe('unknown_role');
-    });
-  });
-
-  describe('Import Users', () => {
-    it('should have userImportConfig with 7 columns', () => {
-      expect(component.userImportConfig).toBeTruthy();
-      expect(component.userImportConfig.columns.length).toBe(7);
-      expect(component.userImportConfig.title).toBe('Import Users');
-    });
-
-    it('should set showImportModal on openImportModal()', () => {
-      component.openImportModal();
-      expect(component.showImportModal()).toBe(true);
-    });
-
-    it('submitUserImport should transform rows to ProvisionUserRequest format', (done) => {
-      const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: '5551234567', roles: ['editor'], send_welcome_email: false, send_welcome_sms: true }
-      ];
-
-      mockUserService.importUsersDetailed.and.returnValue(of({
-        success: true, created_count: 1, error_count: 0, errors: []
-      }));
-
-      component.submitUserImport(rows).subscribe(result => {
-        expect(mockUserService.importUsersDetailed).toHaveBeenCalledWith([
-          jasmine.objectContaining({
-            email: 'a@test.com',
-            first_name: 'A',
-            last_name: 'User',
+    describe('Edit User Modal', () => {
+        const mockActiveUser: ManagedUser = {
+            id: 'uuid-123',
+            display_name: 'John D.',
+            full_name: 'John Doe',
+            first_name: 'John',
+            last_name: 'Doe',
+            email: 'john@example.com',
             phone: '5551234567',
-            initial_roles: ['editor'],
-            send_welcome_email: false,
-            send_welcome_sms: true
-          })
-        ]);
-        expect(result.success).toBe(true);
-        expect(result.importedCount).toBe(1);
-        done();
-      });
+            status: 'active',
+            error_message: null,
+            roles: ['user', 'editor'],
+            created_at: '2025-01-01',
+            provision_id: null,
+            last_login_at: '2026-04-15T10:30:00Z',
+            email_notif_enabled: true,
+            sms_notif_enabled: null,
+            sms_opted_out: null
+        };
+
+        const mockPendingUser: ManagedUser = {
+            id: null,
+            display_name: 'Pending P.',
+            full_name: 'Pending Person',
+            first_name: 'Pending',
+            last_name: 'Person',
+            email: 'pending@example.com',
+            phone: null,
+            status: 'pending',
+            error_message: null,
+            roles: ['user'],
+            created_at: '2025-01-02',
+            provision_id: 99,
+            last_login_at: null,
+            email_notif_enabled: null,
+            sms_notif_enabled: null,
+            sms_opted_out: null
+        };
+
+        it('should populate roles from user data', () => {
+            component.openEditModal(mockActiveUser);
+
+            expect(component.showEditModal()).toBe(true);
+            expect(component.editRoles().has('user')).toBe(true);
+            expect(component.editRoles().has('editor')).toBe(true);
+            expect(component.editUser()).toEqual(mockActiveUser);
+            expect(component.editError()).toBeUndefined();
+        });
+
+        it('should not open for pending users', () => {
+            component.openEditModal(mockPendingUser);
+            expect(component.showEditModal()).toBe(false);
+        });
+
+        it('should not open for users without id', () => {
+            component.openEditModal({ ...mockActiveUser, id: null });
+            expect(component.showEditModal()).toBe(false);
+        });
+
+        it('should close modal and reload users', () => {
+            component.showEditModal.set(true);
+            mockUserService.getManagedUsers.mockClear();
+
+            component.closeEditModal();
+
+            expect(component.showEditModal()).toBe(false);
+            expect(mockUserService.getManagedUsers).toHaveBeenCalled();
+        });
     });
 
-    it('submitUserImport should default roles to ["user"] when not specified', (done) => {
-      const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
-      ];
+    describe('Edit Role Toggle', () => {
+        const mockActiveUser: ManagedUser = {
+            id: 'uuid-123',
+            display_name: 'John D.',
+            full_name: 'John Doe',
+            first_name: 'John',
+            last_name: 'Doe',
+            email: 'john@example.com',
+            phone: '5551234567',
+            status: 'active',
+            error_message: null,
+            roles: ['user', 'editor'],
+            created_at: '2025-01-01',
+            provision_id: null,
+            last_login_at: '2026-04-15T10:30:00Z',
+            email_notif_enabled: true,
+            sms_notif_enabled: null,
+            sms_opted_out: null
+        };
 
-      mockUserService.importUsersDetailed.and.returnValue(of({
-        success: true, created_count: 1, error_count: 0, errors: []
-      }));
+        it('should assign role when toggling unselected role', () => {
+            component.openEditModal(mockActiveUser);
 
-      component.submitUserImport(rows).subscribe(() => {
-        const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
-        expect(calledWith[0].initial_roles).toEqual(['user']);
-        done();
-      });
+            component.toggleEditRole('admin');
+
+            expect(mockUserService.assignUserRole).toHaveBeenCalledWith('uuid-123', 'admin');
+        });
+
+        it('should revoke role when toggling selected role', () => {
+            component.openEditModal(mockActiveUser);
+
+            component.toggleEditRole('editor');
+
+            expect(mockUserService.revokeUserRole).toHaveBeenCalledWith('uuid-123', 'editor');
+        });
+
+        it('should add role to editRoles set on successful assign', () => {
+            component.openEditModal(mockActiveUser);
+
+            component.toggleEditRole('admin');
+
+            expect(component.editRoles().has('admin')).toBe(true);
+        });
+
+        it('should remove role from editRoles set on successful revoke', () => {
+            component.openEditModal(mockActiveUser);
+
+            component.toggleEditRole('editor');
+
+            expect(component.editRoles().has('editor')).toBe(false);
+        });
+
+        it('should show error and not change roles on failure', () => {
+            mockUserService.assignUserRole.mockReturnValue(of({
+                success: false,
+                error: { message: 'Delegation error', humanMessage: 'Your role cannot assign the "admin" role' }
+            }));
+
+            component.openEditModal(mockActiveUser);
+            const rolesBefore = new Set(component.editRoles());
+
+            component.toggleEditRole('admin');
+
+            expect(component.editError()).toContain('cannot assign');
+            expect(component.editRoles()).toEqual(rolesBefore);
+        });
+
+        it('should track per-role loading state', () => {
+            const subject = new Subject<ApiResponse>();
+            mockUserService.assignUserRole.mockReturnValue(subject.asObservable());
+
+            component.openEditModal(mockActiveUser);
+            component.toggleEditRole('admin');
+
+            expect(component.editRolesLoading().has('admin')).toBe(true);
+
+            subject.next({ success: true });
+            subject.complete();
+
+            expect(component.editRolesLoading().has('admin')).toBe(false);
+        });
     });
 
-    it('submitUserImport should default send_welcome_email to true when not specified', (done) => {
-      const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
-      ];
+    describe('getRoleDisplayName()', () => {
+        it('should return display_name for known role keys', () => {
+            expect(component.getRoleDisplayName('user')).toBe('user');
+            expect(component.getRoleDisplayName('editor')).toBe('editor');
+        });
 
-      mockUserService.importUsersDetailed.and.returnValue(of({
-        success: true, created_count: 1, error_count: 0, errors: []
-      }));
-
-      component.submitUserImport(rows).subscribe(() => {
-        const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
-        expect(calledWith[0].send_welcome_email).toBe(true);
-        done();
-      });
+        it('should fall back to raw key for unknown roles', () => {
+            expect(component.getRoleDisplayName('unknown_role')).toBe('unknown_role');
+        });
     });
 
-    it('submitUserImport should default send_welcome_sms to false when not specified', (done) => {
-      const rows = [
-        { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
-      ];
+    describe('Import Users', () => {
+        it('should have userImportConfig with 7 columns', () => {
+            expect(component.userImportConfig).toBeTruthy();
+            expect(component.userImportConfig.columns.length).toBe(7);
+            expect(component.userImportConfig.title).toBe('Import Users');
+        });
 
-      mockUserService.importUsersDetailed.and.returnValue(of({
-        success: true, created_count: 1, error_count: 0, errors: []
-      }));
+        it('should set showImportModal on openImportModal()', () => {
+            component.openImportModal();
+            expect(component.showImportModal()).toBe(true);
+        });
 
-      component.submitUserImport(rows).subscribe(() => {
-        const calledWith = mockUserService.importUsersDetailed.calls.mostRecent().args[0];
-        expect(calledWith[0].send_welcome_sms).toBe(false);
-        done();
-      });
+        it('submitUserImport should transform rows to ProvisionUserRequest format', async () => {
+            const rows = [
+                { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: '5551234567', roles: ['editor'], send_welcome_email: false, send_welcome_sms: true }
+            ];
+
+            mockUserService.importUsersDetailed.mockReturnValue(of({
+                success: true, created_count: 1, error_count: 0, errors: []
+            }));
+
+            component.submitUserImport(rows).subscribe(result => {
+                expect(mockUserService.importUsersDetailed).toHaveBeenCalledWith([
+                    expect.objectContaining({
+                        email: 'a@test.com',
+                        first_name: 'A',
+                        last_name: 'User',
+                        phone: '5551234567',
+                        initial_roles: ['editor'],
+                        send_welcome_email: false,
+                        send_welcome_sms: true
+                    })
+                ]);
+                expect(result.success).toBe(true);
+                expect(result.importedCount).toBe(1);
+            });
+        });
+
+        it('submitUserImport should default roles to ["user"] when not specified', async () => {
+            const rows = [
+                { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
+            ];
+
+            mockUserService.importUsersDetailed.mockReturnValue(of({
+                success: true, created_count: 1, error_count: 0, errors: []
+            }));
+
+            component.submitUserImport(rows).subscribe(() => {
+                const calledWith = vi.mocked(mockUserService.importUsersDetailed).mock.lastCall[0];
+                expect(calledWith[0].initial_roles).toEqual(['user']);
+            });
+        });
+
+        it('submitUserImport should default send_welcome_email to true when not specified', async () => {
+            const rows = [
+                { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
+            ];
+
+            mockUserService.importUsersDetailed.mockReturnValue(of({
+                success: true, created_count: 1, error_count: 0, errors: []
+            }));
+
+            component.submitUserImport(rows).subscribe(() => {
+                const calledWith = vi.mocked(mockUserService.importUsersDetailed).mock.lastCall[0];
+                expect(calledWith[0].send_welcome_email).toBe(true);
+            });
+        });
+
+        it('submitUserImport should default send_welcome_sms to false when not specified', async () => {
+            const rows = [
+                { email: 'a@test.com', first_name: 'A', last_name: 'User', phone: null, roles: null, send_welcome_email: null, send_welcome_sms: null }
+            ];
+
+            mockUserService.importUsersDetailed.mockReturnValue(of({
+                success: true, created_count: 1, error_count: 0, errors: []
+            }));
+
+            component.submitUserImport(rows).subscribe(() => {
+                const calledWith = vi.mocked(mockUserService.importUsersDetailed).mock.lastCall[0];
+                expect(calledWith[0].send_welcome_sms).toBe(false);
+            });
+        });
+
+        it('onImportSuccess should close modal, show message, and reload users', () => {
+            component.showImportModal.set(true);
+
+            component.onImportSuccess(5);
+
+            expect(component.showImportModal()).toBe(false);
+            expect(component.successMessage()).toContain('5 users');
+            expect(mockUserService.getManagedUsers).toHaveBeenCalled();
+        });
     });
-
-    it('onImportSuccess should close modal, show message, and reload users', () => {
-      component.showImportModal.set(true);
-
-      component.onImportSuccess(5);
-
-      expect(component.showImportModal()).toBe(false);
-      expect(component.successMessage()).toContain('5 users');
-      expect(mockUserService.getManagedUsers).toHaveBeenCalled();
-    });
-  });
 });

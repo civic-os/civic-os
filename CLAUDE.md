@@ -313,7 +313,7 @@ Civic OS provides **dual enforcement** validation: frontend via `metadata.valida
 
 **Reference Implementation**: Schema Editor (`/schema-editor`). Use this pattern when building visual editors or workflow designers. See `docs/development/JOINTJS_INTEGRATION.md` for integration guide and `docs/notes/SCHEMA_EDITOR_DESIGN.md` for design details.
 
-## Angular 20 Critical Patterns
+## Angular 22 Critical Patterns
 
 **IMPORTANT**: Use Signals for reactive component state and `OnPush` change detection on all components. These ensure proper change detection with zoneless architecture and `@if`/`@for` control flow.
 
@@ -363,7 +363,7 @@ Keep all three fresh with every feature. Stale docs are worse than no docs.
 
 **i18n is a feature requirement.** Any feature adding user-visible strings must ship with translations. See `docs/notes/I18N_DESIGN.md` (New Feature i18n Checklist) for the required steps.
 
-**Accessibility is a feature requirement.** New user-facing features must pass the ESLint `@angular-eslint/template` a11y rules (`npm run lint`, enforced in CI via `.github/workflows/accessibility.yml`) — no bare `(click)` on non-interactive elements, use native `<button>`/`<a routerLink>`, associate labels, add translated `aria-label`s (via the translate pipe under the `a11y.` key prefix), and mark decorative icons `aria-hidden`. Keyboard- and screen-reader-verify any new interactive UI. See `docs/development/ACCESSIBILITY_WCAG.md` and `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md`.
+**Accessibility is a feature requirement.** New user-facing features must pass the ESLint `@angular-eslint/template` a11y rules (`npm run lint`, enforced in CI via `.github/workflows/accessibility.yml`) — no bare `(click)` on non-interactive elements, use native `<button>`/`<a routerLink>`, associate labels, add translated `aria-label`s (via the translate pipe under the `a11y.` key prefix), and mark decorative icons `aria-hidden`. Keyboard- and screen-reader-verify any new interactive UI. **Badge contrast**: All DaisyUI badges with semantic color variants (`badge-primary`, `badge-success`, etc.) **must** use the `appContrastText` directive (`src/app/directives/contrast-text.directive.ts`) for WCAG AA text contrast across all 35 themes. See `docs/development/ACCESSIBILITY_WCAG.md` (Badge Text Contrast section) and `docs/notes/ACCESSIBILITY_AUDIT_2026-07.md`.
 
 **⚠️ MANDATORY: Comprehensive E2E Verification**
 

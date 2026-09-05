@@ -17,7 +17,7 @@
 
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Dashboard, DashboardWidget } from '../../interfaces/dashboard';
 import { DashboardService } from '../../services/dashboard.service';
@@ -39,7 +39,7 @@ import { WidgetContainerComponent } from '../../components/widget-container/widg
  */
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CommonModule, WidgetContainerComponent],
+  imports: [WidgetContainerComponent],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -50,6 +50,7 @@ import { GuidedFormReviewSectionComponent } from '../../components/guided-form-r
 import { GuidedFormService } from '../../services/guided-form.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { GuidedFormContext } from '../../interfaces/guided-form';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /**
  * Type guard to check if a value is a PaymentValue object.
@@ -111,7 +112,8 @@ export interface CalendarSection {
     GuidedFormReviewSectionComponent,
     PhotoGalleryEditorComponent,
     RelatedRecordsComponent,
-    TranslatePipe
+    TranslatePipe,
+    ContrastTextDirective
     // TimeSlotCalendarComponent
   ]
 })

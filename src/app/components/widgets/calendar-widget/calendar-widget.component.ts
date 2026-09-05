@@ -16,7 +16,7 @@
  */
 
 import { Component, input, computed, inject, ChangeDetectionStrategy, signal, effect, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
@@ -39,7 +39,7 @@ import { DataQuery, FilterCriteria } from '../../../interfaces/query';
 import { LoadingIndicatorComponent } from '../../loading-indicator/loading-indicator.component';
 @Component({
   selector: 'app-calendar-widget',
-  imports: [LoadingIndicatorComponent, CommonModule, TimeSlotCalendarComponent],
+  imports: [LoadingIndicatorComponent, TimeSlotCalendarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './calendar-widget.component.html',
   styleUrl: './calendar-widget.component.css'

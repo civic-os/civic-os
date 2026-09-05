@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, computed, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
@@ -44,6 +44,7 @@ import { TranslationService } from './services/translation.service';
 import { OfflineBannerComponent } from './components/offline-banner/offline-banner.component';
 import { PwaInstallBannerComponent } from './components/pwa-install-banner/pwa-install-banner.component';
 import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-update-toast.component';
+import { ContrastTextDirective } from './directives/contrast-text.directive';
 
 @Component({
     selector: 'app-root',
@@ -59,9 +60,11 @@ import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-updat
     TranslatePipe,
     OfflineBannerComponent,
     PwaInstallBannerComponent,
-    PwaUpdateToastComponent
+    PwaUpdateToastComponent,
+    ContrastTextDirective
 ],
     templateUrl: './app.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.css'
 })
 export class AppComponent {

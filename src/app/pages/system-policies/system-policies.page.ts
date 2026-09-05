@@ -15,6 +15,7 @@ import { catchError, of } from 'rxjs';
 import { IntrospectionService } from '../../services/introspection.service';
 import { SchemaRlsPolicy } from '../../interfaces/introspection';
 import { CodeViewerComponent } from '../../components/code-viewer/code-viewer.component';
+import { ContrastTextDirective } from '../../directives/contrast-text.directive';
 
 /** Group of policies for one table. */
 interface PolicyGroup {
@@ -36,7 +37,7 @@ interface PolicyGroup {
 @Component({
   selector: 'app-system-policies',
   standalone: true,
-  imports: [CommonModule, FormsModule, CodeViewerComponent],
+  imports: [CommonModule, FormsModule, CodeViewerComponent, ContrastTextDirective],
   templateUrl: './system-policies.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

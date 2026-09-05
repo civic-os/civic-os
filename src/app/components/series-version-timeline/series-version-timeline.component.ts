@@ -16,7 +16,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SeriesVersionSummary } from '../../interfaces/entity';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -40,7 +40,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-series-version-timeline',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="series-timeline">
