@@ -92,15 +92,13 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockDataService.getData).toHaveBeenCalledWith({
-                    key: 'tags',
-                    fields: ['id', 'display_name', 'color'],
-                    orderField: 'display_name'
-                });
-                expect(component.availableOptions()).toEqual(MOCK_RELATED_DATA);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.getData).toHaveBeenCalledWith({
+                key: 'tags',
+                fields: ['id', 'display_name', 'color'],
+                orderField: 'display_name'
+            });
+            expect(component.availableOptions()).toEqual(MOCK_RELATED_DATA);
         });
 
         it('should load options without color field if relatedTableHasColor is false', async () => {
@@ -115,14 +113,12 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockDataService.getData).toHaveBeenCalledWith({
-                    key: 'tags',
-                    fields: ['id', 'display_name'],
-                    orderField: 'display_name'
-                });
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.getData).toHaveBeenCalledWith({
+                key: 'tags',
+                fields: ['id', 'display_name'],
+                orderField: 'display_name'
+            });
         });
 
         it('should check permissions on init', async () => {
@@ -132,12 +128,10 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockAuthService.hasPermission).toHaveBeenCalledWith('issue_tags', 'create');
-                expect(mockAuthService.hasPermission).toHaveBeenCalledWith('issue_tags', 'delete');
-                expect(component.canEdit()).toBe(true);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockAuthService.hasPermission).toHaveBeenCalledWith('issue_tags', 'create');
+            expect(mockAuthService.hasPermission).toHaveBeenCalledWith('issue_tags', 'delete');
+            expect(component.canEdit()).toBe(true);
         });
 
         it('should set canEdit to false if create permission is missing', async () => {
@@ -151,10 +145,8 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.canEdit()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.canEdit()).toBe(false);
         });
 
         it('should set canEdit to false if delete permission is missing', async () => {
@@ -168,10 +160,8 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.canEdit()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.canEdit()).toBe(false);
         });
     });
 
@@ -211,13 +201,11 @@ describe('ManyToManyEditorComponent', () => {
         });
 
         it('should show Edit button when canEdit is true', async () => {
-            setTimeout(() => {
-                fixture.detectChanges();
-                const compiled = fixture.nativeElement;
-                const editButton = compiled.querySelector('button');
-                expect(editButton?.textContent).toContain('Edit');
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
+            const compiled = fixture.nativeElement;
+            const editButton = compiled.querySelector('button');
+            expect(editButton?.textContent).toContain('Edit');
         });
 
         it('should hide Edit button when canEdit is false', async () => {
@@ -226,13 +214,11 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('property', { ...MOCK_M2M_PROPERTY });
             fixture.detectChanges();
 
-            setTimeout(() => {
-                fixture.detectChanges();
-                const compiled = fixture.nativeElement;
-                const editButton = compiled.querySelector('button');
-                expect(editButton).toBeNull();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
+            const compiled = fixture.nativeElement;
+            const editButton = compiled.querySelector('button');
+            expect(editButton).toBeNull();
         });
     });
 
@@ -295,15 +281,13 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.enterEditMode();
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 20));
+            component.enterEditMode();
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement;
-                const searchInput = compiled.querySelector('input[type="search"]');
-                expect(searchInput).toBeTruthy();
-                ;
-            }, 20);
+            const compiled = fixture.nativeElement;
+            const searchInput = compiled.querySelector('input[type="search"]');
+            expect(searchInput).toBeTruthy();
         });
 
         it('should hide search input when 10 or fewer options', () => {
@@ -437,20 +421,16 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            setTimeout(() => {
-                expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(1, MOCK_M2M_PROPERTY.many_to_many_meta!, 2);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(1, MOCK_M2M_PROPERTY.many_to_many_meta!, 2);
         });
 
         it('should call removeManyToManyRelation for removed items', async () => {
             component.toggleSelection(1);
             component.save();
 
-            setTimeout(() => {
-                expect(mockDataService.removeManyToManyRelation).toHaveBeenCalledWith(1, MOCK_M2M_PROPERTY.many_to_many_meta!, 1);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.removeManyToManyRelation).toHaveBeenCalledWith(1, MOCK_M2M_PROPERTY.many_to_many_meta!, 1);
         });
 
         it('should execute multiple operations in parallel', async () => {
@@ -459,11 +439,9 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(3); // Add
             component.save();
 
-            setTimeout(() => {
-                expect(mockDataService.removeManyToManyRelation).toHaveBeenCalledTimes(1);
-                expect(mockDataService.addManyToManyRelation).toHaveBeenCalledTimes(2);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.removeManyToManyRelation).toHaveBeenCalledTimes(1);
+            expect(mockDataService.addManyToManyRelation).toHaveBeenCalledTimes(2);
         });
 
         it('should emit relationChanged on successful save', async () => {
@@ -471,20 +449,16 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            setTimeout(() => {
-                expect(component.relationChanged.emit).toHaveBeenCalled();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.relationChanged.emit).toHaveBeenCalled();
         });
 
         it('should exit edit mode on successful save', async () => {
             component.toggleSelection(2);
             component.save();
 
-            setTimeout(() => {
-                expect(component.isEditing()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.isEditing()).toBe(false);
         });
 
         it('should set loading state during save', () => {
@@ -509,10 +483,8 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            setTimeout(() => {
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle error when all operations fail', async () => {
@@ -520,11 +492,9 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('All changes failed. Please try again.');
-                expect(component.isEditing()).toBe(true); // Stays in edit mode
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('All changes failed. Please try again.');
+            expect(component.isEditing()).toBe(true); // Stays in edit mode
         });
 
         it('should handle partial failures', async () => {
@@ -539,11 +509,9 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(3);
             component.save();
 
-            setTimeout(() => {
-                expect(component.error()).toContain('1 changes succeeded, 1 failed');
-                expect(component.relationChanged.emit).toHaveBeenCalled();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toContain('1 changes succeeded, 1 failed');
+            expect(component.relationChanged.emit).toHaveBeenCalled();
         });
 
         it('should handle network errors', async () => {
@@ -552,11 +520,9 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Failed to save changes');
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('Failed to save changes');
+            expect(component.loading()).toBe(false);
         });
     });
 
@@ -596,15 +562,13 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockDataService.callRpc).toHaveBeenCalledWith('get_eligible_parcels', {
-                    p_id: '1',
-                    p_depends_on: {}
-                });
-                expect(mockDataService.getData).not.toHaveBeenCalled();
-                expect(component.availableOptions()).toEqual(mockRpcOptions);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.callRpc).toHaveBeenCalledWith('get_eligible_parcels', {
+                p_id: '1',
+                p_depends_on: {}
+            });
+            expect(mockDataService.getData).not.toHaveBeenCalled();
+            expect(component.availableOptions()).toEqual(mockRpcOptions);
         });
 
         it('should re-fetch options after successful add mutation when RPC configured', async () => {
@@ -622,20 +586,17 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                // Initial load via RPC
-                const initialCallCount = vi.mocked(mockDataService.callRpc).mock.calls.length;
+            await new Promise(resolve => setTimeout(resolve, 10));
+            // Initial load via RPC
+            const initialCallCount = vi.mocked(mockDataService.callRpc).mock.calls.length;
 
-                component.enterEditMode();
-                component.toggleSelection(20); // Add new
-                component.save();
+            component.enterEditMode();
+            component.toggleSelection(20); // Add new
+            component.save();
 
-                setTimeout(() => {
-                    // After save, should re-fetch options via RPC
-                    expect(vi.mocked(mockDataService.callRpc).mock.calls.length).toBeGreaterThan(initialCallCount);
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            // After save, should re-fetch options via RPC
+            expect(vi.mocked(mockDataService.callRpc).mock.calls.length).toBeGreaterThan(initialCallCount);
         });
 
         it('should re-fetch options after successful remove mutation when RPC configured', async () => {
@@ -653,18 +614,15 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const initialCallCount = vi.mocked(mockDataService.callRpc).mock.calls.length;
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const initialCallCount = vi.mocked(mockDataService.callRpc).mock.calls.length;
 
-                component.enterEditMode();
-                component.toggleSelection(10); // Remove existing
-                component.save();
+            component.enterEditMode();
+            component.toggleSelection(10); // Remove existing
+            component.save();
 
-                setTimeout(() => {
-                    expect(vi.mocked(mockDataService.callRpc).mock.calls.length).toBeGreaterThan(initialCallCount);
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(vi.mocked(mockDataService.callRpc).mock.calls.length).toBeGreaterThan(initialCallCount);
         });
 
         it('should NOT re-fetch after mutation when no RPC configured', async () => {
@@ -675,20 +633,17 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const initialGetDataCount = vi.mocked(mockDataService.getData).mock.calls.length;
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const initialGetDataCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
-                component.enterEditMode();
-                component.toggleSelection(2); // Add
-                component.save();
+            component.enterEditMode();
+            component.toggleSelection(2); // Add
+            component.save();
 
-                setTimeout(() => {
-                    // getData should NOT be called again after save (no RPC, no re-fetch)
-                    expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialGetDataCount);
-                    expect(mockDataService.callRpc).not.toHaveBeenCalled();
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            // getData should NOT be called again after save (no RPC, no re-fetch)
+            expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialGetDataCount);
+            expect(mockDataService.callRpc).not.toHaveBeenCalled();
         });
 
         it('should emit dependencyChanged with column name after mutation (v0.44.0)', async () => {
@@ -701,16 +656,13 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.enterEditMode();
-                component.toggleSelection(2);
-                component.save();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            component.enterEditMode();
+            component.toggleSelection(2);
+            component.save();
 
-                setTimeout(() => {
-                    expect(component.dependencyChanged.emit).toHaveBeenCalledWith('tags');
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dependencyChanged.emit).toHaveBeenCalledWith('tags');
         });
     });
 
@@ -726,10 +678,8 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.useFkSearchModal()).toBe(true);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.useFkSearchModal()).toBe(true);
         });
 
         it('should not use search modal when fk_search_modal is false', async () => {
@@ -738,10 +688,8 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.useFkSearchModal()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.useFkSearchModal()).toBe(false);
         });
 
         it('should show Browse & Select button when fk_search_modal is true', async () => {
@@ -755,12 +703,10 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                fixture.detectChanges();
-                const compiled = fixture.nativeElement;
-                expect(compiled.textContent).toContain('Browse');
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
+            const compiled = fixture.nativeElement;
+            expect(compiled.textContent).toContain('Browse');
         });
 
         it('should call executeManyToManyChanges on modal Apply', async () => {
@@ -776,17 +722,14 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                vi.spyOn(component.relationChanged, 'emit').mockReturnValue(undefined);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            vi.spyOn(component.relationChanged, 'emit').mockReturnValue(undefined);
 
-                component.onSearchModalApply({ toAdd: [2], toRemove: [] });
+            component.onSearchModalApply({ toAdd: [2], toRemove: [] });
 
-                setTimeout(() => {
-                    expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(1, m2mPropWithModal.many_to_many_meta!, 2);
-                    expect(component.showSearchModal()).toBe(false);
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(1, m2mPropWithModal.many_to_many_meta!, 2);
+            expect(component.showSearchModal()).toBe(false);
         });
 
         it('should do nothing on Apply with empty diff', async () => {
@@ -800,16 +743,13 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.onSearchModalApply({ toAdd: [], toRemove: [] });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            component.onSearchModalApply({ toAdd: [], toRemove: [] });
 
-                setTimeout(() => {
-                    expect(mockDataService.addManyToManyRelation).not.toHaveBeenCalled();
-                    expect(mockDataService.removeManyToManyRelation).not.toHaveBeenCalled();
-                    expect(component.showSearchModal()).toBe(false);
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.addManyToManyRelation).not.toHaveBeenCalled();
+            expect(mockDataService.removeManyToManyRelation).not.toHaveBeenCalled();
+            expect(component.showSearchModal()).toBe(false);
         });
 
         it('should convert RPC options for modal format', async () => {
@@ -829,13 +769,11 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const rpcOpts = component.resolvedRpcOptions();
-                expect(rpcOpts).toBeTruthy();
-                expect(rpcOpts!.length).toBe(2);
-                expect(rpcOpts![0]).toEqual({ id: 10, text: 'Parcel A' });
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const rpcOpts = component.resolvedRpcOptions();
+            expect(rpcOpts).toBeTruthy();
+            expect(rpcOpts!.length).toBe(2);
+            expect(rpcOpts![0]).toEqual({ id: 10, text: 'Parcel A' });
         });
 
         it('should return null for resolvedRpcOptions when no RPC configured', async () => {
@@ -844,10 +782,8 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.resolvedRpcOptions()).toBeNull();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.resolvedRpcOptions()).toBeNull();
         });
     });
 });

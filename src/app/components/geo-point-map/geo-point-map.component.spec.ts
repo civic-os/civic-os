@@ -223,7 +223,6 @@ describe('GeoPointMapComponent', () => {
                 expect(coords).toBeDefined();
                 expect(coords![0]).toBe(-83.6875);
                 expect(coords![1]).toBe(43.0125);
-                ;
             });
 
             fixture.detectChanges();
@@ -243,10 +242,8 @@ describe('GeoPointMapComponent', () => {
             fixture.detectChanges();
 
             // Should not emit for null initial value
-            setTimeout(() => {
-                expect(emitted).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(emitted).toBe(false);
         });
     });
 
@@ -276,10 +273,8 @@ describe('GeoPointMapComponent', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(valueEmitted).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(valueEmitted).toBe(false);
         });
     });
 
@@ -305,7 +300,6 @@ describe('GeoPointMapComponent', () => {
 
             component.valueChange.subscribe(value => {
                 expect(value).toBe('SRID=4326;POINT(-83.5 43.2)');
-                ;
             });
 
             component['setLocation'](43.2, -83.5);
@@ -319,7 +313,6 @@ describe('GeoPointMapComponent', () => {
                 expect(coords).toBeDefined();
                 expect(coords![0]).toBeCloseTo(-83.5, 4);
                 expect(coords![1]).toBeCloseTo(43.2, 4);
-                ;
             });
 
             component['setLocation'](43.2, -83.5);
@@ -356,10 +349,8 @@ describe('GeoPointMapComponent', () => {
 
             component.useCurrentLocation();
 
-            setTimeout(() => {
-                expect(component['setLocation']).toHaveBeenCalledWith(40.7128, -74.0060);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component['setLocation']).toHaveBeenCalledWith(40.7128, -74.0060);
         });
 
         it('should handle geolocation errors gracefully', () => {
@@ -422,7 +413,6 @@ describe('GeoPointMapComponent', () => {
         it('should emit coordinatesChange with lng, lat order', async () => {
             component.coordinatesChange.subscribe(coords => {
                 expect(coords).toEqual([-84.5, 42.5]); // lng, lat
-                ;
             });
 
             component['setLocation'](42.5, -84.5);
@@ -431,7 +421,6 @@ describe('GeoPointMapComponent', () => {
         it('should emit valueChange in edit mode', async () => {
             component.valueChange.subscribe(value => {
                 expect(value).toBe('SRID=4326;POINT(-84.5 42.5)');
-                ;
             });
 
             component['setLocation'](42.5, -84.5);
@@ -460,7 +449,6 @@ describe('GeoPointMapComponent', () => {
         it('should emit EWKT valueChange when both inputs hold valid coordinates', async () => {
             component.valueChange.subscribe(value => {
                 expect(value).toBe('SRID=4326;POINT(-83.5 43.2)');
-                ;
             });
 
             component.onCoordinateInput('lat', '43.2');
@@ -512,7 +500,6 @@ describe('GeoPointMapComponent', () => {
     describe('Reset View Functionality', () => {
         it('should emit resetView event when onResetView is called', async () => {
             component.resetView.subscribe(() => {
-                ;
             });
 
             component.onResetView();
@@ -725,7 +712,6 @@ describe('GeoPointMapComponent', () => {
         it('should emit markerClick event when marker is clicked', async () => {
             component.markerClick.subscribe((id: number) => {
                 expect(id).toBe(123);
-                ;
             });
 
             // Simulate marker click emission

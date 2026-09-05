@@ -164,23 +164,19 @@ describe('MapWidgetComponent', () => {
     it('should fetch entity properties and data', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(mockSchemaService.getProperties).toHaveBeenCalled();
-            expect(mockDataService.getData).toHaveBeenCalled();
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(mockSchemaService.getProperties).toHaveBeenCalled();
+        expect(mockDataService.getData).toHaveBeenCalled();
     });
 
     it('should transform records to markers', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers().length).toBe(1);
-            expect(component.markers()[0].id).toBe(1);
-            expect(component.markers()[0].name).toBe('Test Participant');
-            expect(component.markers()[0].wkt).toBe('POINT(-83.7 43.0)');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers().length).toBe(1);
+        expect(component.markers()[0].id).toBe(1);
+        expect(component.markers()[0].name).toBe('Test Participant');
+        expect(component.markers()[0].wkt).toBe('POINT(-83.7 43.0)');
     });
 
     it('should filter out records without geography', async () => {
@@ -195,21 +191,17 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers().length).toBe(1);
-            expect(component.markers()[0].id).toBe(1);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers().length).toBe(1);
+        expect(component.markers()[0].id).toBe(1);
     });
 
     it('should navigate to detail page on marker click', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            component.onMarkerClick(42);
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        component.onMarkerClick(42);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
     });
 
     it('should handle empty data gracefully', async () => {
@@ -221,11 +213,9 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle data service errors gracefully', async () => {
@@ -238,12 +228,10 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toBeTruthy();
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toBeTruthy();
     });
 
     it('should handle schema service errors gracefully', async () => {
@@ -256,11 +244,9 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toBe('Failed to load schema');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toBe('Failed to load schema');
     });
 
     it('should set loading state correctly', async () => {
@@ -268,10 +254,8 @@ describe('MapWidgetComponent', () => {
 
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle widget without entity_key', async () => {
@@ -283,11 +267,9 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle widget without mapPropertyName', async () => {
@@ -302,30 +284,24 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoMap);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should use display_name as marker name', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers()[0].name).toBe('Test Participant');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers()[0].name).toBe('Test Participant');
     });
 
     it('should resolve the entity display name for cluster accessible names', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(mockSchemaService.getEntity).toHaveBeenCalledWith('participants');
-            expect(component.entityDisplayName()).toBe('Participants');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(mockSchemaService.getEntity).toHaveBeenCalledWith('participants');
+        expect(component.entityDisplayName()).toBe('Participants');
     });
 
     it('should clear the entity display name when the widget has no entity_key', async () => {
@@ -337,10 +313,8 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.entityDisplayName()).toBe('');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.entityDisplayName()).toBe('');
     });
 
     it('should fall back to an empty entity display name on lookup error', async () => {
@@ -352,10 +326,8 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.entityDisplayName()).toBe('');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.entityDisplayName()).toBe('');
     });
 
     it('should fallback to Record ID if no display_name', async () => {
@@ -375,9 +347,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.markers()[0].name).toBe('Record 1');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.markers()[0].name).toBe('Record 1');
     });
 });

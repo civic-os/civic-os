@@ -121,11 +121,9 @@ describe('GuidedFormReviewSectionComponent', () => {
             fixture.componentRef.setInput('parentRecord', { id: 42 });
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockGuidedFormService.getStepRecord).toHaveBeenCalled();
-                expect(component.stepRecords().has('step1')).toBe(true);
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(mockGuidedFormService.getStepRecord).toHaveBeenCalled();
+            expect(component.stepRecords().has('step1')).toBe(true);
         });
 
         it('should return step record from cache', async () => {
@@ -133,11 +131,9 @@ describe('GuidedFormReviewSectionComponent', () => {
             fixture.componentRef.setInput('parentRecord', { id: 42 });
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const record = component.getStepRecord('step1');
-                expect(record).toEqual({ id: 1, notes: 'Test notes' });
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            const record = component.getStepRecord('step1');
+            expect(record).toEqual({ id: 1, notes: 'Test notes' });
         });
     });
 

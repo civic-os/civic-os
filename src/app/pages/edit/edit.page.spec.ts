@@ -27,7 +27,7 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { GuidedFormService } from '../../services/guided-form.service';
@@ -131,7 +131,6 @@ describe('EditPage', () => {
                 expect(entity).toBeDefined();
                 expect(entity?.table_name).toBe('Issue');
                 expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-                ;
             });
         });
 
@@ -143,7 +142,6 @@ describe('EditPage', () => {
             component.entity$.subscribe(() => {
                 expect(component.entityKey).toBe('Issue');
                 expect(component.entityId).toBe('42');
-                ;
             });
         });
 
@@ -154,7 +152,6 @@ describe('EditPage', () => {
             component.entity$.subscribe(entity => {
                 expect(entity).toBeUndefined();
                 expect(mockSchemaService.getEntity).not.toHaveBeenCalled();
-                ;
             });
         });
 
@@ -171,7 +168,6 @@ describe('EditPage', () => {
             component.properties$.subscribe(props => {
                 expect(props.length).toBe(2);
                 expect(mockSchemaService.getPropsForEdit).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-                ;
             });
         });
 
@@ -190,7 +186,6 @@ describe('EditPage', () => {
                     entityId: '42'
                 });
                 expect(data).toEqual({ id: 42, name: 'Existing Issue' });
-                ;
             });
         });
     });
@@ -210,7 +205,6 @@ describe('EditPage', () => {
                 expect(component.editForm).toBeDefined();
                 expect(component.editForm?.get('name')).toBeDefined();
                 expect(component.editForm?.get('count')).toBeDefined();
-                ;
             });
         });
 
@@ -230,7 +224,6 @@ describe('EditPage', () => {
                 expect(component.editForm?.get('name')?.value).toBe('Test Issue');
                 expect(component.editForm?.get('count')?.value).toBe(10);
                 expect(component.editForm?.get('is_active')?.value).toBe(true);
-                ;
             });
         });
 
@@ -245,7 +238,6 @@ describe('EditPage', () => {
             component.data$.subscribe(() => {
                 // Note: FormGroup.get returns null for non-existent controls, not undefined
                 expect(component.editForm?.get('id')).toBeNull();
-                ;
             });
         });
 
@@ -263,7 +255,6 @@ describe('EditPage', () => {
                 const nameControl = component.editForm?.get('name');
                 nameControl?.setValue('');
                 expect(nameControl?.hasError('required')).toBe(true);
-                ;
             });
         });
     });
@@ -281,29 +272,23 @@ describe('EditPage', () => {
         it('should call editData with form values', async () => {
             mockDataService.editData.mockReturnValue(of({ success: true }));
 
-            component.data$.subscribe(() => {
-                component.editForm?.patchValue({ name: 'Updated Name' });
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.editForm?.patchValue({ name: 'Updated Name' });
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { name: 'Updated Name' });
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { name: 'Updated Name' });
         });
 
         it('should show success modal on successful update', async () => {
             mockDataService.editData.mockReturnValue(of({ success: true }));
 
-            component.data$.subscribe(() => {
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(component.showSuccessModal()).toBe(true);
-                    expect(component.showErrorModal()).toBe(false);
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.showSuccessModal()).toBe(true);
+            expect(component.showErrorModal()).toBe(false);
         });
 
         it('should show error modal on failed update', async () => {
@@ -316,16 +301,13 @@ describe('EditPage', () => {
             };
             mockDataService.editData.mockReturnValue(of({ success: false, error }));
 
-            component.data$.subscribe(() => {
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(component.showErrorModal()).toBe(true);
-                    expect(component.currentError()).toEqual(error);
-                    expect(component.showSuccessModal()).toBe(false);
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()).toEqual(error);
+            expect(component.showSuccessModal()).toBe(false);
         });
 
         it('should not submit when entityKey is undefined', () => {
@@ -374,7 +356,6 @@ describe('EditPage', () => {
                 component.submitForm({});
 
                 expect(mockDataService.editData).not.toHaveBeenCalled();
-                ;
             });
         });
 
@@ -387,7 +368,6 @@ describe('EditPage', () => {
                 component.submitForm({});
 
                 expect(component.showValidationError()).toBe(true);
-                ;
             });
         });
 
@@ -401,12 +381,11 @@ describe('EditPage', () => {
                 component.submitForm({});
 
                 expect(nameControl?.touched).toBe(true);
-                ;
             });
         });
 
         it('should hide error banner when form becomes valid', async () => {
-            component.data$.subscribe(() => {
+            component.data$.subscribe(async () => {
                 // Make form invalid and submit to show error
                 component.editForm?.patchValue({ name: '' });
                 component.submitForm({});
@@ -416,10 +395,8 @@ describe('EditPage', () => {
                 component.editForm?.patchValue({ name: 'Valid Name' });
 
                 // Wait for statusChanges observable to trigger
-                setTimeout(() => {
-                    expect(component.showValidationError()).toBe(false);
-                    ;
-                }, 50);
+                await new Promise(resolve => setTimeout(resolve, 50));
+                expect(component.showValidationError()).toBe(false);
             });
         });
 
@@ -432,7 +409,6 @@ describe('EditPage', () => {
                 component.submitForm({});
 
                 expect((component as any).scrollToFirstError).toHaveBeenCalled();
-                ;
             });
         });
     });
@@ -486,24 +462,29 @@ describe('EditPage', () => {
                 }
             });
 
-            component.data$.subscribe(data => {
-                callCount++;
-                if (callCount === 1) {
-                    expect(data.id).toBe(42);
-                    expect(component.editForm?.get('name')?.value).toBe('Issue 42');
+            await new Promise<void>((resolve, reject) => {
+                component.data$.subscribe({
+                    next: async data => {
+                        try {
+                            callCount++;
+                            if (callCount === 1) {
+                                expect(data.id).toBe(42);
+                                expect(component.editForm?.get('name')?.value).toBe('Issue 42');
 
-                    // Trigger route change to different record
-                    routeParams.next({ entityKey: 'Issue', entityId: '99' });
-                }
-                else if (callCount === 2) {
-                    expect(data.id).toBe(99);
-                    expect(component.entityId).toBe('99');
-                    // Form should be repopulated with new data
-                    setTimeout(() => {
-                        expect(component.editForm?.get('name')?.value).toBe('Issue 99');
-                        ;
-                    }, 10);
-                }
+                                // Trigger route change to different record
+                                routeParams.next({ entityKey: 'Issue', entityId: '99' });
+                            }
+                            else if (callCount === 2) {
+                                expect(data.id).toBe(99);
+                                expect(component.entityId).toBe('99');
+                                // Form should be repopulated with new data
+                                await new Promise(r => setTimeout(r, 10));
+                                expect(component.editForm?.get('name')?.value).toBe('Issue 99');
+                                resolve();
+                            }
+                        } catch (e) { reject(e); }
+                    }
+                });
             });
         });
 
@@ -531,7 +512,6 @@ describe('EditPage', () => {
                 else if (callCount === 2) {
                     expect(component.entityKey).toBe('Status');
                     expect(component.editForm).toBeDefined();
-                    ;
                 }
             });
         });
@@ -575,7 +555,6 @@ describe('EditPage', () => {
                 expect(callArgs.fields).toContain('due_date');
                 expect(callArgs.fields).toContain('status_id'); // Edit forms use raw ID, not embedded object
                 expect(callArgs.fields).toContain('location:location_text');
-                ;
             });
         });
     });
@@ -589,7 +568,6 @@ describe('EditPage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.description).toBe('Track system issues');
-                ;
             });
         });
 
@@ -601,7 +579,6 @@ describe('EditPage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.description).toBeNull();
-                ;
             });
         });
     });
@@ -636,7 +613,6 @@ describe('EditPage', () => {
                     const controlValue = component.editForm?.get('created_at')?.value;
                     // Should show exactly what's stored (no timezone conversion)
                     expect(controlValue).toBe('2025-01-15T10:30');
-                    ;
                 });
             });
 
@@ -656,7 +632,6 @@ describe('EditPage', () => {
                     const utcDate = new Date('2025-01-15T10:30:00.000Z');
                     const expectedValue = `${utcDate.getFullYear()}-${String(utcDate.getMonth() + 1).padStart(2, '0')}-${String(utcDate.getDate()).padStart(2, '0')}T${String(utcDate.getHours()).padStart(2, '0')}:${String(utcDate.getMinutes()).padStart(2, '0')}`;
                     expect(controlValue).toBe(expectedValue);
-                    ;
                 });
             });
 
@@ -672,7 +647,6 @@ describe('EditPage', () => {
                     const controlValue = component.editForm?.get('amount')?.value;
                     expect(controlValue).toBe(1234.56);
                     expect(typeof controlValue).toBe('number');
-                    ;
                 });
             });
 
@@ -687,7 +661,6 @@ describe('EditPage', () => {
                 component.data$.subscribe(() => {
                     expect(component.editForm?.get('created_at')?.value).toBeNull();
                     expect(component.editForm?.get('amount')?.value).toBeNull();
-                    ;
                 });
             });
         });
@@ -717,18 +690,15 @@ describe('EditPage', () => {
 
                 fixture.detectChanges();
 
-                component.data$.subscribe(() => {
-                    // Form receives '2025-01-15T10:30' from transformValueForControl
-                    // User edits to '2025-01-15T11:45' (naive time, no timezone)
-                    component.editForm?.patchValue({ created_at: '2025-01-15T11:45' });
-                    component.submitForm({});
+                await firstValueFrom(component.data$);
+                // Form receives '2025-01-15T10:30' from transformValueForControl
+                // User edits to '2025-01-15T11:45' (naive time, no timezone)
+                component.editForm?.patchValue({ created_at: '2025-01-15T11:45' });
+                component.submitForm({});
 
-                    setTimeout(() => {
-                        // Should add ':00' seconds for API (no timezone conversion)
-                        expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { created_at: '2025-01-15T11:45:00' });
-                        ;
-                    }, 10);
-                });
+                await new Promise(resolve => setTimeout(resolve, 10));
+                // Should add ':00' seconds for API (no timezone conversion)
+                expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { created_at: '2025-01-15T11:45:00' });
             });
 
             it('should convert DateTimeLocal local time to UTC on submit', async () => {
@@ -742,22 +712,19 @@ describe('EditPage', () => {
 
                 fixture.detectChanges();
 
-                component.data$.subscribe(() => {
-                    // User enters time in their local timezone (e.g., "5:30 PM" shows as "17:30")
-                    const localTimeInput = '2025-01-15T17:30';
-                    component.editForm?.patchValue({ updated_at: localTimeInput });
-                    component.submitForm({});
+                await firstValueFrom(component.data$);
+                // User enters time in their local timezone (e.g., "5:30 PM" shows as "17:30")
+                const localTimeInput = '2025-01-15T17:30';
+                component.editForm?.patchValue({ updated_at: localTimeInput });
+                component.submitForm({});
 
-                    setTimeout(() => {
-                        // Should convert to UTC ISO format with .000Z suffix
-                        // The exact UTC time depends on test runner's timezone
-                        const localDate = new Date(localTimeInput);
-                        const expectedUTC = localDate.toISOString(); // e.g., "2025-01-15T22:30:00.000Z" in EST
+                await new Promise(resolve => setTimeout(resolve, 10));
+                // Should convert to UTC ISO format with .000Z suffix
+                // The exact UTC time depends on test runner's timezone
+                const localDate = new Date(localTimeInput);
+                const expectedUTC = localDate.toISOString(); // e.g., "2025-01-15T22:30:00.000Z" in EST
 
-                        expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { updated_at: expectedUTC });
-                        ;
-                    }, 10);
-                });
+                expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { updated_at: expectedUTC });
             });
 
             it('should keep money value as number on submit', async () => {
@@ -771,19 +738,16 @@ describe('EditPage', () => {
 
                 fixture.detectChanges();
 
-                component.data$.subscribe(() => {
-                    // Form receives 100 (number) from transformValueForControl
-                    // User edits to 250.75
-                    component.editForm?.patchValue({ amount: 250.75 });
-                    component.submitForm({});
+                await firstValueFrom(component.data$);
+                // Form receives 100 (number) from transformValueForControl
+                // User edits to 250.75
+                component.editForm?.patchValue({ amount: 250.75 });
+                component.submitForm({});
 
-                    setTimeout(() => {
-                        const callArgs = vi.mocked(mockDataService.editData).mock.calls[0][2];
-                        expect(callArgs.amount).toBe(250.75);
-                        expect(typeof callArgs.amount).toBe('number');
-                        ;
-                    }, 10);
-                });
+                await new Promise(resolve => setTimeout(resolve, 10));
+                const callArgs = vi.mocked(mockDataService.editData).mock.calls[0][2];
+                expect(callArgs.amount).toBe(250.75);
+                expect(typeof callArgs.amount).toBe('number');
             });
 
             it('should handle mixed property types correctly (DateTime + DateTimeLocal + Money)', async () => {
@@ -808,31 +772,28 @@ describe('EditPage', () => {
 
                 fixture.detectChanges();
 
-                component.data$.subscribe(() => {
-                    const dateTimeInput = '2025-01-20T14:30'; // Naive time
-                    const dateTimeLocalInput = '2025-01-20T18:00'; // Local time
+                await firstValueFrom(component.data$);
+                const dateTimeInput = '2025-01-20T14:30'; // Naive time
+                const dateTimeLocalInput = '2025-01-20T18:00'; // Local time
 
-                    component.editForm?.patchValue({
-                        name: 'Updated Name',
-                        created_at: dateTimeInput,
-                        updated_at: dateTimeLocalInput,
-                        amount: 500
-                    });
-                    component.submitForm({});
+                component.editForm?.patchValue({
+                    name: 'Updated Name',
+                    created_at: dateTimeInput,
+                    updated_at: dateTimeLocalInput,
+                    amount: 500
+                });
+                component.submitForm({});
 
-                    setTimeout(() => {
-                        // DateTime: Just add seconds (naive)
-                        // DateTimeLocal: Convert to UTC ISO format
-                        const expectedDateTimeLocal = new Date(dateTimeLocalInput).toISOString();
+                await new Promise(resolve => setTimeout(resolve, 10));
+                // DateTime: Just add seconds (naive)
+                // DateTimeLocal: Convert to UTC ISO format
+                const expectedDateTimeLocal = new Date(dateTimeLocalInput).toISOString();
 
-                        expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', {
-                            name: 'Updated Name',
-                            created_at: '2025-01-20T14:30:00', // DateTime with seconds
-                            updated_at: expectedDateTimeLocal, // DateTimeLocal as UTC ISO
-                            amount: 500
-                        });
-                        ;
-                    }, 10);
+                expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', {
+                    name: 'Updated Name',
+                    created_at: '2025-01-20T14:30:00', // DateTime with seconds
+                    updated_at: expectedDateTimeLocal, // DateTimeLocal as UTC ISO
+                    amount: 500
                 });
             });
         });
@@ -861,65 +822,53 @@ describe('EditPage', () => {
             mockKeycloak.updateToken.mockResolvedValue(true);
             mockDataService.editData.mockReturnValue(of({ success: true }));
 
-            component.data$.subscribe(() => {
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
-                    expect(mockDataService.editData).toHaveBeenCalled();
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
+            expect(mockDataService.editData).toHaveBeenCalled();
         });
 
         it('should proceed with submission when token refresh succeeds', async () => {
             mockKeycloak.updateToken.mockResolvedValue(true);
             mockDataService.editData.mockReturnValue(of({ success: true }));
 
-            component.data$.subscribe(() => {
-                component.editForm?.patchValue({ name: 'Updated' });
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.editForm?.patchValue({ name: 'Updated' });
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { name: 'Updated' });
-                    expect(component.showSuccessModal()).toBe(true);
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.editData).toHaveBeenCalledWith('Issue', '42', { name: 'Updated' });
+            expect(component.showSuccessModal()).toBe(true);
         });
 
         it('should show 401 error modal when token refresh fails', async () => {
             mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
 
-            component.data$.subscribe(() => {
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(component.showErrorModal()).toBe(true);
-                    expect(component.currentError()).toEqual(expect.objectContaining({
-                        httpCode: 401,
-                        message: 'Session expired',
-                        humanMessage: 'Session Expired',
-                        hint: 'Your login session has expired. Please refresh the page to log in again.'
-                    }));
-                    expect(mockDataService.editData).not.toHaveBeenCalled();
-                    expect(component.showSuccessModal()).toBe(false);
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()).toEqual(expect.objectContaining({
+                httpCode: 401,
+                message: 'Session expired',
+                humanMessage: 'Session Expired',
+                hint: 'Your login session has expired. Please refresh the page to log in again.'
+            }));
+            expect(mockDataService.editData).not.toHaveBeenCalled();
+            expect(component.showSuccessModal()).toBe(false);
         });
 
         it('should not call editData when token refresh fails', async () => {
             mockKeycloak.updateToken.mockRejectedValue(new Error('Expired'));
 
-            component.data$.subscribe(() => {
-                component.submitForm({});
+            await firstValueFrom(component.data$);
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockDataService.editData).not.toHaveBeenCalled();
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.editData).not.toHaveBeenCalled();
         });
     });
 

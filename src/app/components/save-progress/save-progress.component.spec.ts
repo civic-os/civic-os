@@ -63,13 +63,11 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            const states = component.stepStates();
-            expect(states[0].status).toBe('success');
-            expect(states[1].status).toBe('success');
-            expect(component.completed.emit).toHaveBeenCalled();
-            ;
-        }, 100);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const states = component.stepStates();
+        expect(states[0].status).toBe('success');
+        expect(states[1].status).toBe('success');
+        expect(component.completed.emit).toHaveBeenCalled();
     });
 
     it('should stop on error and show error state', async () => {
@@ -81,13 +79,11 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            const states = component.stepStates();
-            expect(states[0].status).toBe('error');
-            expect(states[0].errorMessage).toBe('fail');
-            expect(states[1].status).toBe('pending');
-            ;
-        }, 100);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const states = component.stepStates();
+        expect(states[0].status).toBe('error');
+        expect(states[0].errorMessage).toBe('fail');
+        expect(states[1].status).toBe('pending');
     });
 
     it('should handle Observable errors gracefully', async () => {
@@ -105,7 +101,6 @@ describe('SaveProgressComponent', () => {
         catch (e) {
             // Expected — synchronous throw in execute
         }
-        ;
     });
 
     it('should skip a step and continue to next', async () => {
@@ -118,18 +113,14 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            // Step 1 failed, skip it
-            component.onSkip(0);
-
-            setTimeout(() => {
-                const states = component.stepStates();
-                expect(states[0].status).toBe('skipped');
-                expect(states[1].status).toBe('success');
-                expect(component.completed.emit).toHaveBeenCalled();
-                ;
-            }, 50);
-        }, 50);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        // Step 1 failed, skip it
+        component.onSkip(0);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        const skipStates = component.stepStates();
+        expect(skipStates[0].status).toBe('skipped');
+        expect(skipStates[1].status).toBe('success');
+        expect(component.completed.emit).toHaveBeenCalled();
     });
 
     it('should retry a failed step', async () => {
@@ -143,16 +134,12 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.stepStates()[0].status).toBe('error');
-            component.onRetry(0);
-
-            setTimeout(() => {
-                expect(component.stepStates()[0].status).toBe('success');
-                expect(component.completed.emit).toHaveBeenCalled();
-                ;
-            }, 50);
-        }, 50);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        expect(component.stepStates()[0].status).toBe('error');
+        component.onRetry(0);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        expect(component.stepStates()[0].status).toBe('success');
+        expect(component.completed.emit).toHaveBeenCalled();
     });
 
     it('should use internal stepStates signal for rendering (not mutating inputs)', async () => {
@@ -163,13 +150,11 @@ describe('SaveProgressComponent', () => {
         fixture.componentRef.setInput('steps', steps);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            // Internal stepStates should reflect execution results
-            const states = component.stepStates();
-            expect(states[0].status).toBe('success');
-            // Original input steps should NOT have a status property (they're definitions)
-            expect((steps[0] as any).status).toBeUndefined();
-            ;
-        }, 50);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        // Internal stepStates should reflect execution results
+        const internalStates = component.stepStates();
+        expect(internalStates[0].status).toBe('success');
+        // Original input steps should NOT have a status property (they're definitions)
+        expect((steps[0] as any).status).toBeUndefined();
     });
 });

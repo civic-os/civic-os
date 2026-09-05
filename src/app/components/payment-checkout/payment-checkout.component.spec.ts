@@ -136,12 +136,10 @@ describe('PaymentCheckoutComponent', () => {
             fixture.detectChanges();
 
             // Wait for effect and async operations
-            setTimeout(() => {
-                expect(component.clientSecret()).toBe(mockClientSecret);
-                expect(component.amount()).toBe(50.00);
-                expect(component.error()).toBeUndefined();
-                ;
-            }, 200);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            expect(component.clientSecret()).toBe(mockClientSecret);
+            expect(component.amount()).toBe(50.00);
+            expect(component.error()).toBeUndefined();
         });
 
         it('should show error when payment not found', async () => {
@@ -151,11 +149,9 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBe('Payment not found');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBe('Payment not found');
         });
 
         it('should show error when payment is already succeeded', async () => {
@@ -175,10 +171,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('This payment has already been completed');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('This payment has already been completed');
         });
 
         it('should show error when payment is canceled', async () => {
@@ -198,10 +192,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Payment canceled. Please create a new payment.');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('Payment canceled. Please create a new payment.');
         });
 
         it('should show error when payment is failed', async () => {
@@ -221,10 +213,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Payment failed. Please create a new payment.');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('Payment failed. Please create a new payment.');
         });
 
         it('should handle API error during payment load', async () => {
@@ -234,11 +224,9 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBe('Failed to load payment information');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBe('Failed to load payment information');
         });
     });
 
@@ -260,13 +248,11 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.clientSecret()).toBeUndefined();
-                expect(component.loading()).toBe(true);
-                // Verify service was called at least once (initial load)
-                expect(dataService.getData).toHaveBeenCalled();
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.clientSecret()).toBeUndefined();
+            expect(component.loading()).toBe(true);
+            // Verify service was called at least once (initial load)
+            expect(dataService.getData).toHaveBeenCalled();
         });
 
         it('should handle payment that becomes succeeded during polling', async () => {
@@ -286,10 +272,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('This payment has already been completed');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('This payment has already been completed');
         });
     });
 
@@ -311,16 +295,14 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect((window as any).Stripe).toHaveBeenCalledWith('pk_test_123');
-                expect(mockStripe.elements).toHaveBeenCalledWith({
-                    clientSecret: mockClientSecret
-                });
-                expect(mockElements.create).toHaveBeenCalledWith('payment');
-                // Verify mount was called (actual element will be from template)
-                expect(mockPaymentElement.mount).toHaveBeenCalled();
-                ;
-            }, 200);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            expect((window as any).Stripe).toHaveBeenCalledWith('pk_test_123');
+            expect(mockStripe.elements).toHaveBeenCalledWith({
+                clientSecret: mockClientSecret
+            });
+            expect(mockElements.create).toHaveBeenCalledWith('payment');
+            // Verify mount was called (actual element will be from template)
+            expect(mockPaymentElement.mount).toHaveBeenCalled();
         });
 
         it('should handle error when Stripe.js is not loaded', async () => {
@@ -343,10 +325,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Stripe.js failed to load. Please refresh the page.');
-                ;
-            }, 200);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            expect(component.error()).toBe('Stripe.js failed to load. Please refresh the page.');
         });
 
         it('should handle Stripe initialization error', async () => {
@@ -374,10 +354,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Failed to initialize payment form');
-                ;
-            }, 200);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            expect(component.error()).toBe('Failed to initialize payment form');
         });
     });
 
@@ -506,10 +484,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.amount()).toBe(100);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.amount()).toBe(100);
         });
 
         it('should handle decimal amounts', async () => {
@@ -529,10 +505,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.amount()).toBe(99.99);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.amount()).toBe(99.99);
         });
 
         it('should handle zero amounts', async () => {
@@ -552,10 +526,8 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.amount()).toBe(0);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.amount()).toBe(0);
         });
     });
 
@@ -567,12 +539,10 @@ describe('PaymentCheckoutComponent', () => {
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                // Should set error for payment not found
-                expect(component.error()).toBe('Payment not found');
-                expect(component.loading()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // Should set error for payment not found
+            expect(component.error()).toBe('Payment not found');
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle undefined paymentId gracefully', () => {

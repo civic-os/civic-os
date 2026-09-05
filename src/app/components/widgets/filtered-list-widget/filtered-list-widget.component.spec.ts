@@ -157,87 +157,71 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetWithMinimalConfig);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            const config = component.config();
-            expect(config.filters).toEqual([]);
-            expect(config.orderBy).toBe('id');
-            expect(config.orderDirection).toBe('desc');
-            expect(config.limit).toBe(10);
-            expect(config.showColumns).toEqual(['display_name']);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        const config = component.config();
+        expect(config.filters).toEqual([]);
+        expect(config.orderBy).toBe('id');
+        expect(config.orderDirection).toBe('desc');
+        expect(config.limit).toBe(10);
+        expect(config.showColumns).toEqual(['display_name']);
     });
 
     it('should fetch entity properties and data', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(mockSchemaService.getProperties).toHaveBeenCalled();
-            expect(mockDataService.getData).toHaveBeenCalled();
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(mockSchemaService.getProperties).toHaveBeenCalled();
+        expect(mockDataService.getData).toHaveBeenCalled();
     });
 
     it('should load entity properties for column rendering', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.properties().length).toBe(4);
-            expect(component.properties().some(p => p.column_name === 'display_name')).toBe(true);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.properties().length).toBe(4);
+        expect(component.properties().some(p => p.column_name === 'display_name')).toBe(true);
     });
 
     it('should populate records signal with fetched data', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.records().length).toBe(2);
-            expect(component.records()[0].display_name).toBe('John Doe');
-            expect(component.records()[1].display_name).toBe('Jane Smith');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.records().length).toBe(2);
+        expect(component.records()[0].display_name).toBe('John Doe');
+        expect(component.records()[1].display_name).toBe('Jane Smith');
     });
 
     it('should navigate to detail page on row click', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            component.onRowClick(42);
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        component.onRowClick(42);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
     });
 
     it('should get property metadata for column', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            const property = component.getProperty('enrolled_date');
-            expect(property).toBeDefined();
-            expect(property?.display_name).toBe('Enrollment Date');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        const property = component.getProperty('enrolled_date');
+        expect(property).toBeDefined();
+        expect(property?.display_name).toBe('Enrollment Date');
     });
 
     it('should get column label from property metadata', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            const label = component.getColumnLabel('enrolled_date');
-            expect(label).toBe('Enrollment Date');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        const label = component.getColumnLabel('enrolled_date');
+        expect(label).toBe('Enrollment Date');
     });
 
     it('should fallback to column name if property not found', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            const label = component.getColumnLabel('unknown_column');
-            expect(label).toBe('unknown_column');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        const label = component.getColumnLabel('unknown_column');
+        expect(label).toBe('unknown_column');
     });
 
     it('should handle empty data gracefully', async () => {
@@ -249,11 +233,9 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.records().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.records().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle data service errors gracefully', async () => {
@@ -266,12 +248,10 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.records().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toBe('Failed to load data');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.records().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toBe('Failed to load data');
     });
 
     it('should handle schema service errors gracefully', async () => {
@@ -284,11 +264,9 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toBe('Failed to load schema');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toBe('Failed to load schema');
     });
 
     it('should set loading state correctly', async () => {
@@ -296,10 +274,8 @@ describe('FilteredListWidgetComponent', () => {
 
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle widget without entity_key', async () => {
@@ -311,10 +287,8 @@ describe('FilteredListWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.records().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.records().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
     });
 });

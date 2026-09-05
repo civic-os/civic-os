@@ -159,13 +159,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                // After admin check completes, adminLoading should be false
-                expect(component.adminLoading()).toBe(false);
-                expect(component.isAdmin()).toBe(true);
-                expect(component.adminError()).toBeUndefined();
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // After admin check completes, adminLoading should be false
+            expect(component.adminLoading()).toBe(false);
+            expect(component.isAdmin()).toBe(true);
+            expect(component.adminError()).toBeUndefined();
         });
 
         it('should allow access when user is admin', async () => {
@@ -178,11 +176,9 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.isAdmin()).toBe(true);
-                expect(component.error()).toBeUndefined();
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isAdmin()).toBe(true);
+            expect(component.error()).toBeUndefined();
         });
 
         it('should deny access when user is not admin', async () => {
@@ -193,10 +189,8 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.isAdmin()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isAdmin()).toBe(false);
         });
 
         it('should handle admin check error', async () => {
@@ -207,12 +201,10 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.adminError()).toBe('Failed to verify admin access');
-                expect(component.isAdmin()).toBe(false);
-                expect(component.adminLoading()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.adminError()).toBe('Failed to verify admin access');
+            expect(component.isAdmin()).toBe(false);
+            expect(component.adminLoading()).toBe(false);
         });
     });
 
@@ -227,18 +219,15 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    const properties = getPropertyItems(component);
-                    expect(properties.length).toBe(2);
-                    expect(properties[0].column_name).toBe('title');
-                    expect(component.loading()).toBe(false);
-                    ;
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const properties = getPropertyItems(component);
+            expect(properties.length).toBe(2);
+            expect(properties[0].column_name).toBe('title');
+            expect(component.loading()).toBe(false);
         });
 
         it('should clear items when no entity is selected', () => {
@@ -264,16 +253,13 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    expect(component.error()).toBe('Failed to load items');
-                    expect(component.loading()).toBe(false);
-                    ;
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('Failed to load items');
+            expect(component.loading()).toBe(false);
         });
     });
 
@@ -288,24 +274,21 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    const properties = getPropertyItems(component);
-                    expect(properties[0].expanded).toBe(false);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const properties = getPropertyItems(component);
+            expect(properties[0].expanded).toBe(false);
 
-                    component.toggleExpanded(properties[0]);
-                    const updatedProperties = getPropertyItems(component);
-                    expect(updatedProperties[0].expanded).toBe(true);
+            component.toggleExpanded(properties[0]);
+            const updatedProperties = getPropertyItems(component);
+            expect(updatedProperties[0].expanded).toBe(true);
 
-                    component.toggleExpanded(updatedProperties[0]);
-                    const finalProperties = getPropertyItems(component);
-                    expect(finalProperties[0].expanded).toBe(false);
-                    ;
-                }, 10);
-            }, 100);
+            component.toggleExpanded(updatedProperties[0]);
+            const finalProperties = getPropertyItems(component);
+            expect(finalProperties[0].expanded).toBe(false);
         });
     });
 
@@ -322,36 +305,33 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    const event: CdkDragDrop<any> = {
-                        previousIndex: 0,
-                        currentIndex: 1,
-                        item: null as any,
-                        container: null as any,
-                        previousContainer: null as any,
-                        isPointerOverContainer: true,
-                        distance: { x: 0, y: 0 },
-                        dropPoint: { x: 0, y: 0 },
-                        event: null as any
-                    };
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 1,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-                    component.onDrop(event);
+            component.onDrop(event);
 
-                    const properties = getPropertyItems(component);
-                    expect(properties[0].column_name).toBe('description');
-                    expect(properties[1].column_name).toBe('title');
+            const properties = getPropertyItems(component);
+            expect(properties[0].column_name).toBe('description');
+            expect(properties[1].column_name).toBe('title');
 
-                    expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
-                        { table_name: 'Issue', column_name: 'description', sort_order: 0 },
-                        { table_name: 'Issue', column_name: 'title', sort_order: 1 }
-                    ]);
-                    ;
-                }, 10);
-            }, 100);
+            expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
+                { table_name: 'Issue', column_name: 'description', sort_order: 0 },
+                { table_name: 'Issue', column_name: 'title', sort_order: 1 }
+            ]);
         });
 
         it('should refresh schema cache after reorder', async () => {
@@ -366,32 +346,28 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    const event: CdkDragDrop<any> = {
-                        previousIndex: 0,
-                        currentIndex: 1,
-                        item: null as any,
-                        container: null as any,
-                        previousContainer: null as any,
-                        isPointerOverContainer: true,
-                        distance: { x: 0, y: 0 },
-                        dropPoint: { x: 0, y: 0 },
-                        event: null as any
-                    };
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 1,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-                    component.onDrop(event);
+            component.onDrop(event);
 
-                    setTimeout(() => {
-                        expect(mockSchemaService.refreshCache).toHaveBeenCalled();
-                        expect(mockSchemaService.refreshStaticTextCache).toHaveBeenCalled();
-                        ;
-                    }, 10);
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockSchemaService.refreshCache).toHaveBeenCalled();
+            expect(mockSchemaService.refreshStaticTextCache).toHaveBeenCalled();
         });
     });
 
@@ -408,25 +384,22 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    component.moveDown(0); // Move 'title' down one position
+            await new Promise(resolve => setTimeout(resolve, 10));
+            component.moveDown(0); // Move 'title' down one position
 
-                    const properties = getPropertyItems(component);
-                    expect(properties[0].column_name).toBe('description');
-                    expect(properties[1].column_name).toBe('title');
+            const properties = getPropertyItems(component);
+            expect(properties[0].column_name).toBe('description');
+            expect(properties[1].column_name).toBe('title');
 
-                    expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
-                        { table_name: 'Issue', column_name: 'description', sort_order: 0 },
-                        { table_name: 'Issue', column_name: 'title', sort_order: 1 }
-                    ]);
-                    expect(component.reorderAnnouncement()).toContain('2');
-                    ;
-                }, 10);
-            }, 100);
+            expect(mockPropertyManagementService.updatePropertiesOrder).toHaveBeenCalledWith([
+                { table_name: 'Issue', column_name: 'description', sort_order: 0 },
+                { table_name: 'Issue', column_name: 'title', sort_order: 1 }
+            ]);
+            expect(component.reorderAnnouncement()).toContain('2');
         });
 
         it('moveUp at the top boundary should not reorder or persist', async () => {
@@ -441,19 +414,16 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    component.moveUp(0);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            component.moveUp(0);
 
-                    const properties = getPropertyItems(component);
-                    expect(properties[0].column_name).toBe('title');
-                    expect(mockPropertyManagementService.updatePropertiesOrder).not.toHaveBeenCalled();
-                    ;
-                }, 10);
-            }, 100);
+            const properties = getPropertyItems(component);
+            expect(properties[0].column_name).toBe('title');
+            expect(mockPropertyManagementService.updatePropertiesOrder).not.toHaveBeenCalled();
         });
     });
 
@@ -469,24 +439,20 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    const properties = getPropertyItems(component);
-                    const property = properties[0] as any;
-                    property.customDisplayName = 'Updated Title';
-                    component.onFieldBlur(property);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const properties = getPropertyItems(component);
+            const property = properties[0] as any;
+            property.customDisplayName = 'Updated Title';
+            component.onFieldBlur(property);
 
-                    setTimeout(() => {
-                        expect(mockPropertyManagementService.upsertPropertyMetadata).toHaveBeenCalledWith('Issue', 'title', 'Updated Title', 'Issue title', 0, 200, true, false, // filterable defaults to false when undefined
-                        true, true, true, true, null // is_recurring defaults to null when undefined
-                        );
-                        ;
-                    }, 10);
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockPropertyManagementService.upsertPropertyMetadata).toHaveBeenCalledWith('Issue', 'title', 'Updated Title', 'Issue title', 0, 200, true, false, // filterable defaults to false when undefined
+            true, true, true, true, null // is_recurring defaults to null when undefined
+            );
         });
 
         it('should show saved indicator after save completes', async () => {
@@ -500,22 +466,18 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    const properties = getPropertyItems(component);
-                    const property = properties[0] as any;
-                    component.onFieldBlur(property);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const properties = getPropertyItems(component);
+            const property = properties[0] as any;
+            component.onFieldBlur(property);
 
-                    setTimeout(() => {
-                        expect(component.isSaving(property)).toBe(false);
-                        expect(component.isSaved(property)).toBe(true);
-                        ;
-                    }, 10);
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.isSaving(property)).toBe(false);
+            expect(component.isSaved(property)).toBe(true);
         });
 
         it('should refresh schema cache but NOT reload items after save', async () => {
@@ -529,34 +491,30 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.selectedEntity.set(mockEntities[0]);
-                component.onEntityChange();
+            await new Promise(resolve => setTimeout(resolve, 150));
+            component.selectedEntity.set(mockEntities[0]);
+            component.onEntityChange();
 
-                setTimeout(() => {
-                    // Reset the call count after initial load
-                    mockSchemaService.refreshCache.mockClear();
-                    (mockSchemaService.getPropertiesForEntityFresh as Mock).mockClear();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            // Reset the call count after initial load
+            mockSchemaService.refreshCache.mockClear();
+            (mockSchemaService.getPropertiesForEntityFresh as Mock).mockClear();
 
-                    const properties = getPropertyItems(component);
-                    const property = properties[0] as any;
-                    property.customDisplayName = 'New Name';
-                    component.onFieldBlur(property);
+            const properties = getPropertyItems(component);
+            const property = properties[0] as any;
+            property.customDisplayName = 'New Name';
+            component.onFieldBlur(property);
 
-                    setTimeout(() => {
-                        // Should call refreshCache
-                        expect(mockSchemaService.refreshCache).toHaveBeenCalled();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            // Should call refreshCache
+            expect(mockSchemaService.refreshCache).toHaveBeenCalled();
 
-                        // Should NOT reload items (no additional call to getPropertiesForEntityFresh)
-                        expect(mockSchemaService.getPropertiesForEntityFresh).not.toHaveBeenCalled();
+            // Should NOT reload items (no additional call to getPropertiesForEntityFresh)
+            expect(mockSchemaService.getPropertiesForEntityFresh).not.toHaveBeenCalled();
 
-                        // Local state should still have the updated value via ngModel
-                        const updatedProperties = getPropertyItems(component);
-                        expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
-                        ;
-                    }, 10);
-                }, 10);
-            }, 150);
+            // Local state should still have the updated value via ngModel
+            const updatedProperties = getPropertyItems(component);
+            expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
         });
     });
 
@@ -571,13 +529,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                // Should auto-select first entity
-                expect(component.selectedEntity()).toBeDefined();
-                expect(component.selectedEntity()?.table_name).toBe('Issue');
-                expect(getPropertyItems(component).length).toBe(2);
-                ;
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 150));
+            // Should auto-select first entity
+            expect(component.selectedEntity()).toBeDefined();
+            expect(component.selectedEntity()?.table_name).toBe('Issue');
+            expect(getPropertyItems(component).length).toBe(2);
         });
 
         it('should not auto-select if entity already selected', async () => {
@@ -594,11 +550,9 @@ describe('PropertyManagementPage', () => {
 
             fixture.detectChanges();
 
-            setTimeout(() => {
-                // Should keep the manually selected entity
-                expect(component.selectedEntity()?.table_name).toBe('WorkPackage');
-                ;
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 150));
+            // Should keep the manually selected entity
+            expect(component.selectedEntity()?.table_name).toBe('WorkPackage');
         });
 
         it('should handle empty entities array gracefully', async () => {
@@ -609,11 +563,9 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.selectedEntity()).toBeUndefined();
-                expect(component.items().length).toBe(0);
-                ;
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 150));
+            expect(component.selectedEntity()).toBeUndefined();
+            expect(component.items().length).toBe(0);
         });
     });
 
@@ -633,14 +585,12 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const properties = getPropertyItems(component);
-                expect(properties.length).toBe(2);
-                // Should be sorted by sort_order
-                expect(properties[0].column_name).toBe('title'); // sort_order 1
-                expect(properties[1].column_name).toBe('description'); // sort_order 2
-                ;
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 150));
+            const properties = getPropertyItems(component);
+            expect(properties.length).toBe(2);
+            // Should be sorted by sort_order
+            expect(properties[0].column_name).toBe('title'); // sort_order 1
+            expect(properties[1].column_name).toBe('description'); // sort_order 2
         });
 
         it('should maintain sort after items are loaded', async () => {
@@ -658,13 +608,11 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const properties = getPropertyItems(component);
-                expect(properties[0].sort_order).toBe(3);
-                expect(properties[1].sort_order).toBe(5);
-                expect(properties[0].sort_order).toBeLessThan(properties[1].sort_order);
-                ;
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 150));
+            const properties = getPropertyItems(component);
+            expect(properties[0].sort_order).toBe(3);
+            expect(properties[1].sort_order).toBe(5);
+            expect(properties[0].sort_order).toBeLessThan(properties[1].sort_order);
         });
     });
 
@@ -788,18 +736,16 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                // Should have both properties and static text
-                expect(component.items().length).toBe(3);
+            await new Promise(resolve => setTimeout(resolve, 150));
+            // Should have both properties and static text
+            expect(component.items().length).toBe(3);
 
-                // First item should be static text (sort_order 0)
-                expect(component.items()[0].itemType).toBe('static_text');
+            // First item should be static text (sort_order 0)
+            expect(component.items()[0].itemType).toBe('static_text');
 
-                // Properties should follow
-                const properties = getPropertyItems(component);
-                expect(properties.length).toBe(2);
-                ;
-            }, 150);
+            // Properties should follow
+            const properties = getPropertyItems(component);
+            expect(properties.length).toBe(2);
         });
 
         it('should call updateStaticTextOrder when static text is reordered', async () => {
@@ -828,28 +774,25 @@ describe('PropertyManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const event: CdkDragDrop<any> = {
-                    previousIndex: 2, // Move static text from last position
-                    currentIndex: 0, // to first position
-                    item: null as any,
-                    container: null as any,
-                    previousContainer: null as any,
-                    isPointerOverContainer: true,
-                    distance: { x: 0, y: 0 },
-                    dropPoint: { x: 0, y: 0 },
-                    event: null as any
-                };
+            await new Promise(resolve => setTimeout(resolve, 150));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 2, // Move static text from last position
+                currentIndex: 0, // to first position
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-                component.onDrop(event);
+            component.onDrop(event);
 
-                setTimeout(() => {
-                    expect(mockPropertyManagementService.updateStaticTextOrder).toHaveBeenCalledWith([
-                        { id: 1, sort_order: 0 }
-                    ]);
-                    ;
-                }, 10);
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockPropertyManagementService.updateStaticTextOrder).toHaveBeenCalledWith([
+                { id: 1, sort_order: 0 }
+            ]);
         });
     });
 });

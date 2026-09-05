@@ -521,7 +521,6 @@ describe('EditPropertyComponent', () => {
                 expect(options.length).toBe(2);
                 expect(options[0]).toEqual({ id: 1, text: 'Option 1' });
                 expect(options[1]).toEqual({ id: 2, text: 'Option 2' });
-                ;
             });
         });
 
@@ -1895,7 +1894,6 @@ describe('EditPropertyComponent', () => {
             expect(component.rpcSelectOptions().length).toBe(2);
             expect(component.rpcSelectOptions()[0]).toEqual({ id: 10, text: 'Approved Borrower A' });
             expect(component.useRpcOptions()).toBe(true);
-            ;
         });
 
         it('should pass p_id=null on Create pages (empty entityId)', async () => {
@@ -1928,7 +1926,6 @@ describe('EditPropertyComponent', () => {
             });
 
             expect(component.rpcSelectOptions().length).toBe(2);
-            ;
         });
 
         it('should re-call RPC when a dependency field changes', async () => {
@@ -1965,14 +1962,12 @@ describe('EditPropertyComponent', () => {
             formGroup.get('category_id')?.setValue(5);
 
             // Wait past debounce (300ms)
-            setTimeout(() => {
-                expect(mockDataService.callRpc).toHaveBeenCalled();
-                expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_types_by_category', {
-                    p_id: '42',
-                    p_depends_on: { category_id: 5 }
-                });
-                ;
-            }, 400);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            expect(mockDataService.callRpc).toHaveBeenCalled();
+            expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_types_by_category', {
+                p_id: '42',
+                p_depends_on: { category_id: 5 }
+            });
         });
 
         it('should debounce rapid dependency changes (300ms)', async () => {
@@ -2007,18 +2002,18 @@ describe('EditPropertyComponent', () => {
 
             // Rapid changes within debounce window
             formGroup.get('category_id')?.setValue(1);
-            setTimeout(() => formGroup.get('category_id')?.setValue(2), 50);
-            setTimeout(() => formGroup.get('category_id')?.setValue(3), 100);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            formGroup.get('category_id')?.setValue(2);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            formGroup.get('category_id')?.setValue(3);
 
             // Wait past debounce from last change — only the final value should trigger a call
-            setTimeout(() => {
-                // The debounced callback fires loadOptionsFromRpc once.
-                // The underlying callRpc may be invoked multiple times due to async pipe re-subscription,
-                // but the most recent call should contain the final dependency value.
-                const lastCallArgs = vi.mocked(mockDataService.callRpc).mock.lastCall!;
-                expect(lastCallArgs[1]['p_depends_on']['category_id']).toBe(3);
-                ;
-            }, 500);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // The debounced callback fires loadOptionsFromRpc once.
+            // The underlying callRpc may be invoked multiple times due to async pipe re-subscription,
+            // but the most recent call should contain the final dependency value.
+            const lastCallArgs = vi.mocked(mockDataService.callRpc).mock.lastCall!;
+            expect(lastCallArgs[1]['p_depends_on']['category_id']).toBe(3);
         });
 
         it('should clear selection when dependency change removes current value from options', async () => {
@@ -2052,7 +2047,6 @@ describe('EditPropertyComponent', () => {
             // Value 99 is not in the options, should be cleared
             expect(formGroup.get('borrower_id')?.value).toBeNull();
             expect(formGroup.get('borrower_id')?.touched).toBe(true);
-            ;
         });
 
         it('should NOT clear selection when FK search modal is used and value not in RPC options', async () => {
@@ -2088,7 +2082,6 @@ describe('EditPropertyComponent', () => {
             // Value 99 is NOT in options, but FK search modal means we should NOT invalidate
             expect(formGroup.get('borrower_id')?.value).toBe(99);
             expect(formGroup.get('borrower_id')?.touched).toBeFalsy();
-            ;
         });
 
         it('should call getData when options_source_rpc is not set (existing behavior)', async () => {
@@ -2110,7 +2103,6 @@ describe('EditPropertyComponent', () => {
 
             component.selectOptions$?.subscribe(options => {
                 expect(options.length).toBe(2);
-                ;
             });
         });
     });

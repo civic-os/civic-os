@@ -83,12 +83,10 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.isAdmin()).toBe(true);
-                expect(component.entities().length).toBe(3);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isAdmin()).toBe(true);
+            expect(component.entities().length).toBe(3);
+            expect(component.loading()).toBe(false);
         });
 
         it('should show error when user is not admin', async () => {
@@ -98,12 +96,10 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.isAdmin()).toBe(false);
-                expect(component.error()).toBe('Admin access required');
-                expect(component.loading()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isAdmin()).toBe(false);
+            expect(component.error()).toBe('Admin access required');
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle admin check error', async () => {
@@ -113,11 +109,9 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Failed to verify admin access');
-                expect(component.loading()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('Failed to verify admin access');
+            expect(component.loading()).toBe(false);
         });
     });
 
@@ -130,14 +124,12 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const entities = component.entities();
-                expect(entities[0].customDisplayName).toBe('Issues');
-                expect(entities[0].customDescription).toBe('Track issues');
-                expect(entities[1].customDisplayName).toBe('Work Packages'); // Different from table_name
-                expect(entities[1].customDescription).toBeNull();
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entities = component.entities();
+            expect(entities[0].customDisplayName).toBe('Issues');
+            expect(entities[0].customDescription).toBe('Track issues');
+            expect(entities[1].customDisplayName).toBe('Work Packages'); // Different from table_name
+            expect(entities[1].customDescription).toBeNull();
         });
 
         it('should handle entity loading error', async () => {
@@ -148,11 +140,9 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('Failed to load entities');
-                expect(component.loading()).toBe(false);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.error()).toBe('Failed to load entities');
+            expect(component.loading()).toBe(false);
         });
     });
 
@@ -166,32 +156,30 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const event: CdkDragDrop<any> = {
-                    previousIndex: 0,
-                    currentIndex: 2,
-                    item: null as any,
-                    container: null as any,
-                    previousContainer: null as any,
-                    isPointerOverContainer: true,
-                    distance: { x: 0, y: 0 },
-                    dropPoint: { x: 0, y: 0 },
-                    event: null as any
-                };
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 2,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-                component.onDrop(event);
+            component.onDrop(event);
 
-                expect(component.entities()[0].table_name).toBe('WorkPackage');
-                expect(component.entities()[1].table_name).toBe('Bid');
-                expect(component.entities()[2].table_name).toBe('Issue');
+            expect(component.entities()[0].table_name).toBe('WorkPackage');
+            expect(component.entities()[1].table_name).toBe('Bid');
+            expect(component.entities()[2].table_name).toBe('Issue');
 
-                expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
-                    { table_name: 'WorkPackage', sort_order: 0 },
-                    { table_name: 'Bid', sort_order: 1 },
-                    { table_name: 'Issue', sort_order: 2 }
-                ]);
-                ;
-            }, 100);
+            expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+                { table_name: 'WorkPackage', sort_order: 0 },
+                { table_name: 'Bid', sort_order: 1 },
+                { table_name: 'Issue', sort_order: 2 }
+            ]);
         });
 
         it('should refresh schema cache after reorder', async () => {
@@ -203,26 +191,23 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const event: CdkDragDrop<any> = {
-                    previousIndex: 0,
-                    currentIndex: 1,
-                    item: null as any,
-                    container: null as any,
-                    previousContainer: null as any,
-                    isPointerOverContainer: true,
-                    distance: { x: 0, y: 0 },
-                    dropPoint: { x: 0, y: 0 },
-                    event: null as any
-                };
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 1,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-                component.onDrop(event);
+            component.onDrop(event);
 
-                setTimeout(() => {
-                    expect(mockSchemaService.refreshCache).toHaveBeenCalled();
-                    ;
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockSchemaService.refreshCache).toHaveBeenCalled();
         });
 
         it('should handle reorder error', async () => {
@@ -243,26 +228,23 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const event: CdkDragDrop<any> = {
-                    previousIndex: 0,
-                    currentIndex: 1,
-                    item: null as any,
-                    container: null as any,
-                    previousContainer: null as any,
-                    isPointerOverContainer: true,
-                    distance: { x: 0, y: 0 },
-                    dropPoint: { x: 0, y: 0 },
-                    event: null as any
-                };
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const event: CdkDragDrop<any> = {
+                previousIndex: 0,
+                currentIndex: 1,
+                item: null as any,
+                container: null as any,
+                previousContainer: null as any,
+                isPointerOverContainer: true,
+                distance: { x: 0, y: 0 },
+                dropPoint: { x: 0, y: 0 },
+                event: null as any
+            };
 
-                component.onDrop(event);
+            component.onDrop(event);
 
-                setTimeout(() => {
-                    expect(component.error()).toBe('Update failed');
-                    ;
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('Update failed');
         });
     });
 
@@ -276,21 +258,19 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.moveDown(0); // Move 'Issue' down one position
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.moveDown(0); // Move 'Issue' down one position
 
-                expect(component.entities()[0].table_name).toBe('WorkPackage');
-                expect(component.entities()[1].table_name).toBe('Issue');
-                expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
-                    { table_name: 'WorkPackage', sort_order: 0 },
-                    { table_name: 'Issue', sort_order: 1 },
-                    { table_name: 'Bid', sort_order: 2 }
-                ]);
-                // Announcement mentions the moved entity's new position (2 of 3)
-                expect(component.reorderAnnouncement()).toContain('2');
-                expect(component.reorderAnnouncement()).toContain('3');
-                ;
-            }, 100);
+            expect(component.entities()[0].table_name).toBe('WorkPackage');
+            expect(component.entities()[1].table_name).toBe('Issue');
+            expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+                { table_name: 'WorkPackage', sort_order: 0 },
+                { table_name: 'Issue', sort_order: 1 },
+                { table_name: 'Bid', sort_order: 2 }
+            ]);
+            // Announcement mentions the moved entity's new position (2 of 3)
+            expect(component.reorderAnnouncement()).toContain('2');
+            expect(component.reorderAnnouncement()).toContain('3');
         });
 
         it('moveUp should reorder entities and persist new order', async () => {
@@ -302,18 +282,16 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.moveUp(2); // Move 'Bid' up one position
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.moveUp(2); // Move 'Bid' up one position
 
-                expect(component.entities()[1].table_name).toBe('Bid');
-                expect(component.entities()[2].table_name).toBe('WorkPackage');
-                expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
-                    { table_name: 'Issue', sort_order: 0 },
-                    { table_name: 'Bid', sort_order: 1 },
-                    { table_name: 'WorkPackage', sort_order: 2 }
-                ]);
-                ;
-            }, 100);
+            expect(component.entities()[1].table_name).toBe('Bid');
+            expect(component.entities()[2].table_name).toBe('WorkPackage');
+            expect(mockEntityManagementService.updateEntitiesOrder).toHaveBeenCalledWith([
+                { table_name: 'Issue', sort_order: 0 },
+                { table_name: 'Bid', sort_order: 1 },
+                { table_name: 'WorkPackage', sort_order: 2 }
+            ]);
         });
 
         it('should not move or persist when already at the boundary', async () => {
@@ -325,13 +303,11 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.moveUp(0); // First item cannot move up
+            await new Promise(resolve => setTimeout(resolve, 100));
+            component.moveUp(0); // First item cannot move up
 
-                expect(component.entities()[0].table_name).toBe('Issue');
-                expect(mockEntityManagementService.updateEntitiesOrder).not.toHaveBeenCalled();
-                ;
-            }, 100);
+            expect(component.entities()[0].table_name).toBe('Issue');
+            expect(mockEntityManagementService.updateEntitiesOrder).not.toHaveBeenCalled();
         });
     });
 
@@ -345,20 +321,17 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const entity = component.entities()[0];
-                entity.customDisplayName = 'Updated Issues';
-                component.onFieldBlur(entity);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            entity.customDisplayName = 'Updated Issues';
+            component.onFieldBlur(entity);
 
-                setTimeout(() => {
-                    expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith('Issue', 'Updated Issues', 'Track issues', 0, false, null, false, null, null, undefined, // enable_notes
-                    undefined, // supports_recurring
-                    undefined, // recurring_property_name
-                    true // show_in_sidebar
-                    );
-                    ;
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith('Issue', 'Updated Issues', 'Track issues', 0, false, null, false, null, null, undefined, // enable_notes
+            undefined, // supports_recurring
+            undefined, // recurring_property_name
+            true // show_in_sidebar
+            );
         });
 
         it('should show saved indicator after save completes', async () => {
@@ -370,17 +343,14 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const entity = component.entities()[0];
-                component.onFieldBlur(entity);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            component.onFieldBlur(entity);
 
-                // With synchronous mock, save completes immediately
-                setTimeout(() => {
-                    expect(component.isSaving('Issue')).toBe(false);
-                    expect(component.isSaved('Issue')).toBe(true);
-                    ;
-                }, 10);
-            }, 100);
+            // With synchronous mock, save completes immediately
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.isSaving('Issue')).toBe(false);
+            expect(component.isSaved('Issue')).toBe(true);
         });
 
         it('should handle save errors', async () => {
@@ -401,15 +371,12 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const entity = component.entities()[0];
-                component.onFieldBlur(entity);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            component.onFieldBlur(entity);
 
-                setTimeout(() => {
-                    expect(component.error()).toBe('Save failed');
-                    ;
-                }, 10);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('Save failed');
         });
     });
 
@@ -422,11 +389,9 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const entity = component.entities()[0];
-                expect(component.getDisplayNamePlaceholder(entity)).toBe('Issues');
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const entity = component.entities()[0];
+            expect(component.getDisplayNamePlaceholder(entity)).toBe('Issues');
         });
 
         it('should track saved state', async () => {
@@ -437,12 +402,10 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.isSaved('Issue')).toBe(false);
-                component.savedStates().set('Issue', true);
-                expect(component.isSaved('Issue')).toBe(true);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isSaved('Issue')).toBe(false);
+            component.savedStates().set('Issue', true);
+            expect(component.isSaved('Issue')).toBe(true);
         });
 
         it('should track fading state', async () => {
@@ -453,12 +416,10 @@ describe('EntityManagementPage', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(component.isFading('Issue')).toBe(false);
-                component.fadingStates().set('Issue', true);
-                expect(component.isFading('Issue')).toBe(true);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(component.isFading('Issue')).toBe(false);
+            component.fadingStates().set('Issue', true);
+            expect(component.isFading('Issue')).toBe(true);
         });
     });
 });

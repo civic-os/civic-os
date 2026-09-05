@@ -31,7 +31,7 @@ import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
 
@@ -146,7 +146,6 @@ describe('DetailPage', () => {
                 expect(entity).toBeDefined();
                 expect(entity?.table_name).toBe('Issue');
                 expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-                ;
             });
         });
 
@@ -158,7 +157,6 @@ describe('DetailPage', () => {
             component.entity$.subscribe(() => {
                 expect(component.entityKey).toBe('Issue');
                 expect(component.entityId).toBe('42');
-                ;
             });
         });
 
@@ -169,7 +167,6 @@ describe('DetailPage', () => {
             component.entity$.subscribe(entity => {
                 expect(entity).toBeUndefined();
                 expect(mockSchemaService.getEntity).not.toHaveBeenCalled();
-                ;
             });
         });
 
@@ -187,7 +184,6 @@ describe('DetailPage', () => {
             component.properties$.subscribe(props => {
                 expect(props.length).toBe(3);
                 expect(mockSchemaService.getPropsForDetail).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-                ;
             });
         });
 
@@ -198,7 +194,6 @@ describe('DetailPage', () => {
             component.properties$.subscribe(props => {
                 expect(props).toEqual([]);
                 expect(mockSchemaService.getPropsForDetail).not.toHaveBeenCalled();
-                ;
             });
         });
 
@@ -222,13 +217,11 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of(mockData));
 
-            component.data$.subscribe(data => {
-                expect(mockDataService.getData).toHaveBeenCalledWith({
-                    key: 'Issue',
-                    fields: ['name', 'status_id:Status!status_id(id,display_name)'],
-                    entityId: '42'
-                });
-                ;
+            await firstValueFrom(component.data$);
+            expect(mockDataService.getData).toHaveBeenCalledWith({
+                key: 'Issue',
+                fields: ['name', 'status_id:Status!status_id(id,display_name)'],
+                entityId: '42'
             });
         });
 
@@ -245,7 +238,6 @@ describe('DetailPage', () => {
 
             component.data$.subscribe(data => {
                 expect(data).toEqual(expect.objectContaining({ id: 42, name: 'First Item' }));
-                ;
             });
         });
 
@@ -258,7 +250,6 @@ describe('DetailPage', () => {
 
             component.data$.subscribe(data => {
                 expect(data).toBeUndefined();
-                ;
             });
         });
 
@@ -276,10 +267,8 @@ describe('DetailPage', () => {
                     display_name: 'Test'
                 }]));
 
-            component.data$.subscribe(() => {
-                expect(mockDataService.getData).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'abc-123-uuid' }));
-                ;
-            });
+            await firstValueFrom(component.data$);
+            expect(mockDataService.getData).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'abc-123-uuid' }));
         });
     });
 
@@ -320,7 +309,6 @@ describe('DetailPage', () => {
                 else if (callCount === 2) {
                     expect(data.id).toBe(99);
                     expect(component.entityId).toBe('99');
-                    ;
                 }
             });
         });
@@ -353,7 +341,6 @@ describe('DetailPage', () => {
                 else if (callCount === 2) {
                     expect(entity?.table_name).toBe('Status');
                     expect(component.entityKey).toBe('Status');
-                    ;
                 }
             });
         });
@@ -376,14 +363,11 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of([MOCK_PROPERTIES.textShort]));
             mockDataService.getData.mockReturnValue(of([{ id: 42, name: 'Test', created_at: '', updated_at: '', display_name: 'Test' }]));
 
-            component.data$.subscribe(() => {
-                component.onActionButtonClick('edit');
+            await firstValueFrom(component.data$);
+            component.onActionButtonClick('edit');
 
-                setTimeout(() => {
-                    expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', 'Issue', 42], { replaceUrl: true });
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', 'Issue', 42], { replaceUrl: true });
         });
     });
 
@@ -912,14 +896,12 @@ describe('DetailPage', () => {
             component.actionParamForm()!.get('p_tool_type_id')!.setValue(3);
 
             // Wait for debounce (300ms)
-            setTimeout(() => {
-                expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
-                    p_id: 42,
-                    p_depends_on: { p_tool_type_id: 3 }
-                });
-                expect(component.actionParamOptions()['p_tool_instance_id']).toEqual(rpcOptions);
-                ;
-            }, 400);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_instance_options', {
+                p_id: 42,
+                p_depends_on: { p_tool_type_id: 3 }
+            });
+            expect(component.actionParamOptions()['p_tool_instance_id']).toEqual(rpcOptions);
         });
 
         it('should clear options and reset value when dependency is cleared', async () => {
@@ -959,19 +941,16 @@ describe('DetailPage', () => {
             const form = component.actionParamForm()!;
             form.get('p_tool_type_id')!.setValue(3);
 
-            setTimeout(() => {
-                // Set a selection on the dependent param
-                form.get('p_tool_instance_id')!.setValue(10);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            // Set a selection on the dependent param
+            form.get('p_tool_instance_id')!.setValue(10);
 
-                // Now clear the dependency
-                form.get('p_tool_type_id')!.setValue(null);
+            // Now clear the dependency
+            form.get('p_tool_type_id')!.setValue(null);
 
-                setTimeout(() => {
-                    expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([]);
-                    expect(form.get('p_tool_instance_id')!.value).toBeNull();
-                    ;
-                }, 400);
-            }, 400);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([]);
+            expect(form.get('p_tool_instance_id')!.value).toBeNull();
         });
 
         it('should invalidate selection when no longer in re-fetched options', async () => {
@@ -1017,22 +996,19 @@ describe('DetailPage', () => {
             // First: select type 1, which loads instance 10
             form.get('p_tool_type_id')!.setValue(1);
 
-            setTimeout(() => {
-                // User selects instance 10
-                form.get('p_tool_instance_id')!.setValue(10);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            // User selects instance 10
+            form.get('p_tool_instance_id')!.setValue(10);
 
-                // Now change type — new options won't include 10
-                form.get('p_tool_type_id')!.setValue(2);
+            // Now change type — new options won't include 10
+            form.get('p_tool_type_id')!.setValue(2);
 
-                setTimeout(() => {
-                    // Instance 10 is no longer valid → should be cleared
-                    expect(form.get('p_tool_instance_id')!.value).toBeNull();
-                    expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([
-                        { id: 20, display_name: 'Instance Y' }
-                    ]);
-                    ;
-                }, 400);
-            }, 400);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            // Instance 10 is no longer valid → should be cleared
+            expect(form.get('p_tool_instance_id')!.value).toBeNull();
+            expect(component.actionParamOptions()['p_tool_instance_id']).toEqual([
+                { id: 20, display_name: 'Instance Y' }
+            ]);
         });
 
         it('should clean up dependency watchers when modal is closed', async () => {
@@ -1079,12 +1055,10 @@ describe('DetailPage', () => {
             // Change value on the OLD form's control — should NOT trigger RPC
             // (watchers were cleaned up on close)
             // The new form has fresh controls, so old subs are irrelevant
-            setTimeout(() => {
-                // Verify no RPC calls from stale watchers
-                // (The only callRpc calls would be from the new watcher setup, which we didn't trigger)
-                expect(mockDataService.callRpc).not.toHaveBeenCalled();
-                ;
-            }, 400);
+            await new Promise(resolve => setTimeout(resolve, 400));
+            // Verify no RPC calls from stale watchers
+            // (The only callRpc calls would be from the new watcher setup, which we didn't trigger)
+            expect(mockDataService.callRpc).not.toHaveBeenCalled();
         });
 
         // =========================================================================
@@ -1228,7 +1202,6 @@ describe('DetailPage', () => {
                 expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)');
                 expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)');
                 expect(callArgs.fields).toContain('location:location_text');
-                ;
             });
         });
     });

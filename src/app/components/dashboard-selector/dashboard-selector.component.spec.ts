@@ -106,12 +106,10 @@ describe('DashboardSelectorComponent', () => {
             component = fixture.componentInstance;
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDashboards).toHaveBeenCalled();
-                expect(component.dashboards()).toEqual(mockDashboards);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDashboards).toHaveBeenCalled();
+            expect(component.dashboards()).toEqual(mockDashboards);
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle error loading dashboards', async () => {
@@ -123,13 +121,11 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDashboards).toHaveBeenCalled();
-                expect(component.dashboards()).toEqual([]);
-                expect(component.loading()).toBe(false);
-                expect(console.error).toHaveBeenCalled();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDashboards).toHaveBeenCalled();
+            expect(component.dashboards()).toEqual([]);
+            expect(component.loading()).toBe(false);
+            expect(console.error).toHaveBeenCalled();
         });
 
         it('should update current dashboard ID from route params', () => {
@@ -167,9 +163,7 @@ describe('DashboardSelectorComponent', () => {
             expect(component.loading()).toBe(true);
 
             // Clean up after test
-            setTimeout(() => {
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
         });
 
         it('should populate dashboards signal on success', async () => {
@@ -183,12 +177,10 @@ describe('DashboardSelectorComponent', () => {
 
             component['loadDashboards']();
 
-            setTimeout(() => {
-                expect(component.dashboards()).toEqual(mockDashboards);
-                expect(component.dashboards().length).toBe(3);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboards()).toEqual(mockDashboards);
+            expect(component.dashboards().length).toBe(3);
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle empty dashboards array', async () => {
@@ -196,11 +188,9 @@ describe('DashboardSelectorComponent', () => {
 
             component['loadDashboards']();
 
-            setTimeout(() => {
-                expect(component.dashboards()).toEqual([]);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboards()).toEqual([]);
+            expect(component.loading()).toBe(false);
         });
     });
 
@@ -369,16 +359,14 @@ describe('DashboardSelectorComponent', () => {
             fixture.detectChanges();
 
             // Give it a moment to start loading
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const loadingSpinner = compiled.querySelector('.loading-spinner');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const loadingSpinner = compiled.querySelector('.loading-spinner');
 
-                expect(loadingSpinner).toBeTruthy();
-                expect(compiled.textContent).toContain('Loading dashboards...');
-                ;
-            }, 10);
+            expect(loadingSpinner).toBeTruthy();
+            expect(compiled.textContent).toContain('Loading dashboards...');
         });
 
         it('should render dashboard list when loaded', async () => {
@@ -394,16 +382,14 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const menuItems = compiled.querySelectorAll('.dropdown-content li button');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const menuItems = compiled.querySelectorAll('.dropdown-content li button');
 
-                // +1 for "Default Dashboard" item
-                expect(menuItems.length).toBe(mockDashboards.length + 1);
-                ;
-            }, 10);
+            // +1 for "Default Dashboard" item
+            expect(menuItems.length).toBe(mockDashboards.length + 1);
         });
 
         it('should render default dashboard option', async () => {
@@ -413,31 +399,27 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li button'))
-                    .find(el => el.textContent?.includes('Default Dashboard'));
+            const compiled = fixture.nativeElement as HTMLElement;
+            const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li button'))
+                .find(el => el.textContent?.includes('Default Dashboard'));
 
-                expect(defaultOption).toBeTruthy();
-                ;
-            }, 10);
+            expect(defaultOption).toBeTruthy();
         });
 
         it('should highlight current dashboard with checkmark', async () => {
             component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.multiWidget]);
             component.currentDashboardId.set(1);
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const activeItems = compiled.querySelectorAll('.dropdown-content li button.menu-active');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const activeItems = compiled.querySelectorAll('.dropdown-content li button.menu-active');
 
-                expect(activeItems.length).toBeGreaterThan(0);
-                ;
-            }, 10);
+            expect(activeItems.length).toBeGreaterThan(0);
         });
 
         it('should show public/private icon for dashboards', async () => {
@@ -448,21 +430,19 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const menuItems = compiled.querySelectorAll('.dropdown-content li button');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const menuItems = compiled.querySelectorAll('.dropdown-content li button');
 
-                // Check for public icon (skip first item which is "Default Dashboard")
-                const publicItem = menuItems[1]; // First actual dashboard
-                expect(publicItem.textContent).toContain('public');
+            // Check for public icon (skip first item which is "Default Dashboard")
+            const publicItem = menuItems[1]; // First actual dashboard
+            expect(publicItem.textContent).toContain('public');
 
-                // Check for private icon
-                const privateItem = menuItems[2]; // Second actual dashboard
-                expect(privateItem.textContent).toContain('lock');
-                ;
-            }, 10);
+            // Check for private icon
+            const privateItem = menuItems[2]; // Second actual dashboard
+            expect(privateItem.textContent).toContain('lock');
         });
 
         it('should show dashboard description when present', async () => {
@@ -472,13 +452,11 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                expect(compiled.textContent).toContain('Welcome to Civic OS');
-                ;
-            }, 10);
+            const compiled = fixture.nativeElement as HTMLElement;
+            expect(compiled.textContent).toContain('Welcome to Civic OS');
         });
 
         it('should trigger selectDashboard when clicking dashboard item', async () => {
@@ -489,18 +467,16 @@ describe('DashboardSelectorComponent', () => {
             component = fixture.componentInstance;
             vi.spyOn(component, 'selectDashboard').mockReturnValue(undefined);
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const dashboardItems = compiled.querySelectorAll('.dropdown-content li button');
-                const firstDashboard = dashboardItems[1] as HTMLElement; // Skip "Default Dashboard"
+            const compiled = fixture.nativeElement as HTMLElement;
+            const dashboardItems = compiled.querySelectorAll('.dropdown-content li button');
+            const firstDashboard = dashboardItems[1] as HTMLElement; // Skip "Default Dashboard"
 
-                firstDashboard.click();
+            firstDashboard.click();
 
-                expect(component.selectDashboard).toHaveBeenCalledWith(1);
-                ;
-            }, 10);
+            expect(component.selectDashboard).toHaveBeenCalledWith(1);
         });
 
         it('should trigger selectDefaultDashboard when clicking default option', async () => {
@@ -511,18 +487,16 @@ describe('DashboardSelectorComponent', () => {
             component = fixture.componentInstance;
             vi.spyOn(component, 'selectDefaultDashboard').mockReturnValue(undefined);
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li button'))
-                    .find(el => el.textContent?.includes('Default Dashboard')) as HTMLElement;
+            const compiled = fixture.nativeElement as HTMLElement;
+            const defaultOption = Array.from(compiled.querySelectorAll('.dropdown-content li button'))
+                .find(el => el.textContent?.includes('Default Dashboard')) as HTMLElement;
 
-                defaultOption?.click();
+            defaultOption?.click();
 
-                expect(component.selectDefaultDashboard).toHaveBeenCalled();
-                ;
-            }, 10);
+            expect(component.selectDefaultDashboard).toHaveBeenCalled();
         });
     });
 
@@ -534,21 +508,19 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                let menuItems = compiled.querySelectorAll('.dropdown-content li button');
-                expect(menuItems.length).toBe(2); // Default + 1 dashboard
+            const compiled = fixture.nativeElement as HTMLElement;
+            let menuItems = compiled.querySelectorAll('.dropdown-content li button');
+            expect(menuItems.length).toBe(2); // Default + 1 dashboard
 
-                // Update dashboards
-                component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.userPrivate]);
-                fixture.detectChanges();
+            // Update dashboards
+            component.dashboards.set([MOCK_DASHBOARDS.welcome, MOCK_DASHBOARDS.userPrivate]);
+            fixture.detectChanges();
 
-                menuItems = compiled.querySelectorAll('.dropdown-content li button');
-                expect(menuItems.length).toBe(3); // Default + 2 dashboards
-                ;
-            }, 10);
+            menuItems = compiled.querySelectorAll('.dropdown-content li button');
+            expect(menuItems.length).toBe(3); // Default + 2 dashboards
         });
 
         it('should update button text when current dashboard changes', async () => {
@@ -558,16 +530,14 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                component.currentDashboardId.set(1);
-                fixture.detectChanges();
-                expect(component.getCurrentDashboardName()).toBe('Welcome');
+            await new Promise(resolve => setTimeout(resolve, 10));
+            component.currentDashboardId.set(1);
+            fixture.detectChanges();
+            expect(component.getCurrentDashboardName()).toBe('Welcome');
 
-                component.currentDashboardId.set(3);
-                fixture.detectChanges();
-                expect(component.getCurrentDashboardName()).toBe('Multi-Widget Dashboard');
-                ;
-            }, 10);
+            component.currentDashboardId.set(3);
+            fixture.detectChanges();
+            expect(component.getCurrentDashboardName()).toBe('Multi-Widget Dashboard');
         });
     });
 
@@ -579,12 +549,10 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(component.dashboards()[0].display_name).toBe('Welcome');
-                expect(component.dashboards()[0].is_default).toBe(true);
-                expect(component.dashboards()[0].is_public).toBe(true);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboards()[0].display_name).toBe('Welcome');
+            expect(component.dashboards()[0].is_default).toBe(true);
+            expect(component.dashboards()[0].is_public).toBe(true);
         });
 
         it('should display MOCK_DASHBOARDS.userPrivate correctly', async () => {
@@ -594,11 +562,9 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(component.dashboards()[0].display_name).toBe('My Dashboard');
-                expect(component.dashboards()[0].is_public).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboards()[0].display_name).toBe('My Dashboard');
+            expect(component.dashboards()[0].is_public).toBe(false);
         });
     });
 
@@ -611,12 +577,10 @@ describe('DashboardSelectorComponent', () => {
             fixture = TestBed.createComponent(DashboardSelectorComponent);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
-                // Should not throw error rendering description
-                expect(fixture.nativeElement).toBeTruthy();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
+            // Should not throw error rendering description
+            expect(fixture.nativeElement).toBeTruthy();
         });
 
         it('should handle rapid dashboard selections', () => {

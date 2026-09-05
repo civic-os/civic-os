@@ -27,7 +27,7 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { FormControl, Validators } from '@angular/forms';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -120,7 +120,6 @@ describe('CreatePage', () => {
                 expect(entity).toBeDefined();
                 expect(entity?.table_name).toBe('Issue');
                 expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-                ;
             });
         });
 
@@ -130,7 +129,6 @@ describe('CreatePage', () => {
 
             component.entity$.subscribe(() => {
                 expect(component.entityKey).toBe('Issue');
-                ;
             });
         });
 
@@ -146,7 +144,6 @@ describe('CreatePage', () => {
             component.properties$.subscribe(props => {
                 expect(props.length).toBe(2);
                 expect(mockSchemaService.getPropsForCreate).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-                ;
             });
         });
 
@@ -157,7 +154,6 @@ describe('CreatePage', () => {
             component.properties$.subscribe(props => {
                 expect(props).toEqual([]);
                 expect(mockSchemaService.getPropsForCreate).not.toHaveBeenCalled();
-                ;
             });
         });
     });
@@ -178,7 +174,6 @@ describe('CreatePage', () => {
                 expect(component.createForm?.get('name')).toBeDefined();
                 expect(component.createForm?.get('count')).toBeDefined();
                 expect(component.createForm?.get('is_active')).toBeDefined();
-                ;
             });
         });
 
@@ -196,7 +191,6 @@ describe('CreatePage', () => {
                 expect(component.createForm?.get('is_active')?.value).toBe(false);
                 // Other types default to null
                 expect(component.createForm?.get('name')?.value).toBeNull();
-                ;
             });
         });
 
@@ -219,7 +213,6 @@ describe('CreatePage', () => {
                 // Optional field should not require validation
                 countControl?.setValue(null);
                 expect(countControl?.hasError('required')).toBe(false);
-                ;
             });
         });
     });
@@ -236,32 +229,26 @@ describe('CreatePage', () => {
         it('should call createData with form values', async () => {
             mockDataService.createData.mockReturnValue(of({ success: true, body: {} }));
 
-            component.properties$.subscribe(() => {
-                component.createForm?.patchValue({ name: 'Test Issue' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test Issue' });
+            component.submitForm({});
 
-                // Wait for async promise to resolve
-                setTimeout(() => {
-                    expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
-                    ;
-                }, 10);
-            });
+            // Wait for async promise to resolve
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
         });
 
         it('should show success modal on successful create', async () => {
             mockDataService.createData.mockReturnValue(of({ success: true, body: { id: 1 } }));
 
-            component.properties$.subscribe(() => {
-                component.createForm?.patchValue({ name: 'Test' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test' });
+            component.submitForm({});
 
-                // Wait for async observable to complete
-                setTimeout(() => {
-                    expect(component.showSuccessModal()).toBe(true);
-                    expect(component.showErrorModal()).toBe(false);
-                    ;
-                }, 10);
-            });
+            // Wait for async observable to complete
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.showSuccessModal()).toBe(true);
+            expect(component.showErrorModal()).toBe(false);
         });
 
         it('should show error modal on failed create', async () => {
@@ -274,18 +261,15 @@ describe('CreatePage', () => {
             };
             mockDataService.createData.mockReturnValue(of({ success: false, error }));
 
-            component.properties$.subscribe(() => {
-                component.createForm?.patchValue({ name: 'Test' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test' });
+            component.submitForm({});
 
-                // Wait for async observable to complete
-                setTimeout(() => {
-                    expect(component.showErrorModal()).toBe(true);
-                    expect(component.currentError()).toEqual(error);
-                    expect(component.showSuccessModal()).toBe(false);
-                    ;
-                }, 10);
-            });
+            // Wait for async observable to complete
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()).toEqual(error);
+            expect(component.showSuccessModal()).toBe(false);
         });
 
         it('should not submit when entityKey is undefined', () => {
@@ -325,7 +309,6 @@ describe('CreatePage', () => {
                 component.submitForm({});
 
                 expect(mockDataService.createData).not.toHaveBeenCalled();
-                ;
             });
         });
 
@@ -337,7 +320,6 @@ describe('CreatePage', () => {
                 component.submitForm({});
 
                 expect(component.showValidationError).toBe(true);
-                ;
             });
         });
 
@@ -350,12 +332,11 @@ describe('CreatePage', () => {
                 component.submitForm({});
 
                 expect(nameControl?.touched).toBe(true);
-                ;
             });
         });
 
         it('should hide error banner when form becomes valid', async () => {
-            component.properties$.subscribe(() => {
+            component.properties$.subscribe(async () => {
                 // Submit invalid form to show error
                 component.submitForm({});
                 expect(component.showValidationError).toBe(true);
@@ -364,10 +345,8 @@ describe('CreatePage', () => {
                 component.createForm?.patchValue({ name: 'Valid Name' });
 
                 // Wait for statusChanges observable to trigger
-                setTimeout(() => {
-                    expect(component.showValidationError).toBe(false);
-                    ;
-                }, 50);
+                await new Promise(resolve => setTimeout(resolve, 50));
+                expect(component.showValidationError).toBe(false);
             });
         });
 
@@ -379,7 +358,6 @@ describe('CreatePage', () => {
                 component.submitForm({});
 
                 expect((component as any).scrollToFirstError).toHaveBeenCalled();
-                ;
             });
         });
     });
@@ -435,7 +413,6 @@ describe('CreatePage', () => {
                 expect(component.showSuccessModal()).toBe(false);
                 expect(component.createForm?.get('name')?.value).toBeNull();
                 expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Issue']);
-                ;
             });
         });
 
@@ -444,7 +421,6 @@ describe('CreatePage', () => {
                 component.navToCreate('Status');
 
                 expect(mockRouter.navigate).toHaveBeenCalledWith(['create', 'Status']);
-                ;
             });
         });
 
@@ -459,7 +435,6 @@ describe('CreatePage', () => {
 
                 expect(component.createForm?.get('is_active')?.value).toBe(false);
                 expect(component.createForm?.get('name')?.value).toBeNull();
-                ;
             });
         });
     });
@@ -489,7 +464,6 @@ describe('CreatePage', () => {
                 else if (callCount === 2) {
                     expect(component.entityKey).toBe('Status');
                     expect(component.createForm).toBeDefined();
-                    ;
                 }
             });
         });
@@ -503,7 +477,6 @@ describe('CreatePage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.description).toBe('Track system issues');
-                ;
             });
         });
 
@@ -514,7 +487,6 @@ describe('CreatePage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.description).toBeNull();
-                ;
             });
         });
     });
@@ -539,68 +511,58 @@ describe('CreatePage', () => {
             mockKeycloak.updateToken.mockResolvedValue(true);
             mockDataService.createData.mockReturnValue(of({ success: true, body: { id: 1 } }));
 
-            component.properties$.subscribe(() => {
-                component.createForm?.patchValue({ name: 'Test Issue' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test Issue' });
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
-                    expect(mockDataService.createData).toHaveBeenCalled();
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
+            expect(mockDataService.createData).toHaveBeenCalled();
         });
 
         it('should proceed with submission when token refresh succeeds', async () => {
             mockKeycloak.updateToken.mockResolvedValue(true);
             mockDataService.createData.mockReturnValue(of({ success: true, body: { id: 1 } }));
 
-            component.properties$.subscribe(() => {
-                component.createForm?.patchValue({ name: 'Test Issue' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test Issue' });
+            component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
-                    expect(component.showSuccessModal()).toBe(true);
-                    expect(component.showErrorModal()).toBe(false);
-                    ;
-                }, 10);
-            });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.createData).toHaveBeenCalledWith('Issue', { name: 'Test Issue' });
+            expect(component.showSuccessModal()).toBe(true);
+            expect(component.showErrorModal()).toBe(false);
         });
 
         it('should show 401 error modal when token refresh fails', async () => {
             mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
 
-            component.properties$.subscribe(() => {
+            component.properties$.subscribe(async () => {
                 component.createForm?.patchValue({ name: 'Test Issue' });
                 component.submitForm({});
 
-                setTimeout(() => {
-                    expect(component.showErrorModal()).toBe(true);
-                    expect(component.currentError()).toEqual(expect.objectContaining({
-                        httpCode: 401,
-                        message: 'Session expired',
-                        humanMessage: 'Session Expired',
-                        hint: 'Your login session has expired. Please refresh the page to log in again.'
-                    }));
-                    expect(mockDataService.createData).not.toHaveBeenCalled();
-                    expect(component.showSuccessModal()).toBe(false);
-                    ;
-                }, 10);
+                await new Promise(resolve => setTimeout(resolve, 10));
+                expect(component.showErrorModal()).toBe(true);
+                expect(component.currentError()).toEqual(expect.objectContaining({
+                    httpCode: 401,
+                    message: 'Session expired',
+                    humanMessage: 'Session Expired',
+                    hint: 'Your login session has expired. Please refresh the page to log in again.'
+                }));
+                expect(mockDataService.createData).not.toHaveBeenCalled();
+                expect(component.showSuccessModal()).toBe(false);
             });
         });
 
         it('should not call createData when token refresh fails', async () => {
             mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
 
-            component.properties$.subscribe(() => {
+            component.properties$.subscribe(async () => {
                 component.createForm?.patchValue({ name: 'Test Issue' });
                 component.submitForm({});
 
-                setTimeout(() => {
-                    expect(mockDataService.createData).not.toHaveBeenCalled();
-                    ;
-                }, 10);
+                await new Promise(resolve => setTimeout(resolve, 10));
+                expect(mockDataService.createData).not.toHaveBeenCalled();
             });
         });
     });

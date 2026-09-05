@@ -103,15 +103,13 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
-                expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(dashboardId);
-                expect(component.dashboard()).toEqual(mockDashboard);
-                expect(component.widgets()).toEqual(mockDashboard.widgets || []);
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBeUndefined();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(dashboardId);
+            expect(component.dashboard()).toEqual(mockDashboard);
+            expect(component.widgets()).toEqual(mockDashboard.widgets || []);
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBeUndefined();
         });
 
         it('should set error when no default dashboard exists', async () => {
@@ -125,13 +123,11 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
-                expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
+            expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
         });
 
         it('should handle error loading default dashboard', async () => {
@@ -143,13 +139,11 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBe('Failed to load default dashboard');
-                expect(console.error).toHaveBeenCalled();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBe('Failed to load default dashboard');
+            expect(console.error).toHaveBeenCalled();
         });
     });
 
@@ -170,16 +164,14 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
-                expect(mockDashboardService.getDefaultDashboard).not.toHaveBeenCalled();
-                expect(component.dashboard()).toEqual(mockDashboard);
-                expect(component.widgets()).toEqual(mockDashboard.widgets || []);
-                expect(component.widgets().length).toBe(2);
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBeUndefined();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
+            expect(mockDashboardService.getDefaultDashboard).not.toHaveBeenCalled();
+            expect(component.dashboard()).toEqual(mockDashboard);
+            expect(component.widgets()).toEqual(mockDashboard.widgets || []);
+            expect(component.widgets().length).toBe(2);
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBeUndefined();
         });
 
         it('should handle dashboard not found (undefined response)', async () => {
@@ -195,13 +187,11 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBe('Dashboard not found');
-                expect(component.dashboard()).toBeUndefined();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBe('Dashboard not found');
+            expect(component.dashboard()).toBeUndefined();
         });
 
         it('should handle error loading dashboard', async () => {
@@ -216,13 +206,11 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
-                expect(component.loading()).toBe(false);
-                expect(component.error()).toBe('Failed to load dashboard');
-                expect(console.error).toHaveBeenCalled();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
+            expect(component.loading()).toBe(false);
+            expect(component.error()).toBe('Failed to load dashboard');
+            expect(console.error).toHaveBeenCalled();
         });
     });
 
@@ -252,12 +240,10 @@ describe('DashboardPage', () => {
 
             component['loadDashboard'](3);
 
-            setTimeout(() => {
-                expect(component.dashboard()).toEqual(mockDashboard);
-                expect(component.widgets()).toEqual(mockDashboard.widgets || []);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboard()).toEqual(mockDashboard);
+            expect(component.widgets()).toEqual(mockDashboard.widgets || []);
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle dashboard with no widgets', async () => {
@@ -267,12 +253,10 @@ describe('DashboardPage', () => {
 
             component['loadDashboard'](4);
 
-            setTimeout(() => {
-                expect(component.dashboard()).toEqual(mockDashboard);
-                expect(component.widgets()).toEqual([]);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboard()).toEqual(mockDashboard);
+            expect(component.widgets()).toEqual([]);
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle dashboard with undefined widgets array', async () => {
@@ -285,12 +269,10 @@ describe('DashboardPage', () => {
 
             component['loadDashboard'](5);
 
-            setTimeout(() => {
-                expect(component.dashboard()).toEqual(dashboardWithoutWidgets);
-                expect(component.widgets()).toEqual([]);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboard()).toEqual(dashboardWithoutWidgets);
+            expect(component.widgets()).toEqual([]);
+            expect(component.loading()).toBe(false);
         });
     });
 
@@ -308,13 +290,11 @@ describe('DashboardPage', () => {
 
             component['loadDefaultDashboard']();
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
-                expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(dashboardId);
-                expect(component.dashboard()).toEqual(mockDashboard);
-                expect(component.loading()).toBe(false);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDefaultDashboard).toHaveBeenCalled();
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(dashboardId);
+            expect(component.dashboard()).toEqual(mockDashboard);
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle null default dashboard ID', async () => {
@@ -326,12 +306,10 @@ describe('DashboardPage', () => {
 
             component['loadDefaultDashboard']();
 
-            setTimeout(() => {
-                expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
-                expect(component.loading()).toBe(false);
-                expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.error()).toBe('No default dashboard found. Please contact an administrator.');
+            expect(component.loading()).toBe(false);
+            expect(mockDashboardService.getDashboard).not.toHaveBeenCalled();
         });
     });
 
@@ -362,10 +340,8 @@ describe('DashboardPage', () => {
 
             component.retry();
 
-            setTimeout(() => {
-                expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDashboardService.getDashboard).toHaveBeenCalledWith(3);
         });
 
         it('should reset loading state when retrying', () => {
@@ -426,19 +402,17 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const errorAlert = compiled.querySelector('.alert-error');
-                const retryButton = compiled.querySelector('button');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const errorAlert = compiled.querySelector('.alert-error');
+            const retryButton = compiled.querySelector('button');
 
-                expect(errorAlert).toBeTruthy();
-                expect(compiled.textContent).toContain('Failed to Load Dashboard');
-                expect(compiled.textContent).toContain('Dashboard not found');
-                expect(retryButton?.textContent).toContain('Retry');
-                ;
-            }, 10);
+            expect(errorAlert).toBeTruthy();
+            expect(compiled.textContent).toContain('Failed to Load Dashboard');
+            expect(compiled.textContent).toContain('Dashboard not found');
+            expect(retryButton?.textContent).toContain('Retry');
         });
 
         it('should render dashboard header with title and description', async () => {
@@ -453,17 +427,15 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const header = compiled.querySelector('.dashboard-header h1');
-                const description = compiled.querySelector('.dashboard-header p');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const header = compiled.querySelector('.dashboard-header h1');
+            const description = compiled.querySelector('.dashboard-header p');
 
-                expect(header?.textContent).toContain(mockDashboard.display_name);
-                expect(description?.textContent).toContain(mockDashboard.description!);
-                ;
-            }, 10);
+            expect(header?.textContent).toContain(mockDashboard.display_name);
+            expect(description?.textContent).toContain(mockDashboard.description!);
         });
 
         it('should render widgets grid when widgets exist', async () => {
@@ -478,17 +450,15 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const widgetsGrid = compiled.querySelector('.widgets-grid');
-                const widgetCells = compiled.querySelectorAll('.widget-cell');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const widgetsGrid = compiled.querySelector('.widgets-grid');
+            const widgetCells = compiled.querySelectorAll('.widget-cell');
 
-                expect(widgetsGrid).toBeTruthy();
-                expect(widgetCells.length).toBe(2);
-                ;
-            }, 10);
+            expect(widgetsGrid).toBeTruthy();
+            expect(widgetCells.length).toBe(2);
         });
 
         it('should apply grid layout styles to widgets', async () => {
@@ -503,16 +473,14 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const firstWidget = compiled.querySelector('.widget-cell') as HTMLElement;
+            const compiled = fixture.nativeElement as HTMLElement;
+            const firstWidget = compiled.querySelector('.widget-cell') as HTMLElement;
 
-                expect(firstWidget.style.gridColumn).toContain('span');
-                expect(firstWidget.style.gridRow).toContain('span');
-                ;
-            }, 10);
+            expect(firstWidget.style.gridColumn).toContain('span');
+            expect(firstWidget.style.gridRow).toContain('span');
         });
 
         it('should show empty state when dashboard has no widgets', async () => {
@@ -527,19 +495,17 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const emptyState = compiled.querySelector('.empty-state');
-                const widgetsGrid = compiled.querySelector('.widgets-grid');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const emptyState = compiled.querySelector('.empty-state');
+            const widgetsGrid = compiled.querySelector('.widgets-grid');
 
-                expect(emptyState).toBeTruthy();
-                expect(widgetsGrid).toBeNull();
-                expect(compiled.textContent).toContain('No Widgets');
-                expect(compiled.textContent).toContain("This dashboard doesn't have any widgets yet");
-                ;
-            }, 10);
+            expect(emptyState).toBeTruthy();
+            expect(widgetsGrid).toBeNull();
+            expect(compiled.textContent).toContain('No Widgets');
+            expect(compiled.textContent).toContain("This dashboard doesn't have any widgets yet");
         });
 
         it('should not render loading or error when dashboard loaded', async () => {
@@ -554,19 +520,17 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const loading = compiled.querySelector('.loading-container');
-                const error = compiled.querySelector('.error-container');
-                const dashboard = compiled.querySelector('.dashboard-container');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const loading = compiled.querySelector('.loading-container');
+            const error = compiled.querySelector('.error-container');
+            const dashboard = compiled.querySelector('.dashboard-container');
 
-                expect(loading).toBeNull();
-                expect(error).toBeNull();
-                expect(dashboard).toBeTruthy();
-                ;
-            }, 10);
+            expect(loading).toBeNull();
+            expect(error).toBeNull();
+            expect(dashboard).toBeTruthy();
         });
 
         it('should call retry when retry button clicked', async () => {
@@ -580,17 +544,15 @@ describe('DashboardPage', () => {
             component = fixture.componentInstance;
             vi.spyOn(component, 'retry').mockReturnValue(undefined);
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const retryButton = compiled.querySelector('button') as HTMLButtonElement;
+            const compiled = fixture.nativeElement as HTMLElement;
+            const retryButton = compiled.querySelector('button') as HTMLButtonElement;
 
-                retryButton.click();
+            retryButton.click();
 
-                expect(component.retry).toHaveBeenCalled();
-                ;
-            }, 10);
+            expect(component.retry).toHaveBeenCalled();
         });
     });
 
@@ -605,12 +567,10 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(component.dashboard()?.display_name).toBe('Welcome');
-                expect(component.widgets().length).toBe(1);
-                expect(component.dashboard()?.is_default).toBe(true);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboard()?.display_name).toBe('Welcome');
+            expect(component.widgets().length).toBe(1);
+            expect(component.dashboard()?.is_default).toBe(true);
         });
 
         it('should render MOCK_DASHBOARDS.userPrivate correctly', async () => {
@@ -623,12 +583,10 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                expect(component.dashboard()?.display_name).toBe('My Dashboard');
-                expect(component.dashboard()?.is_public).toBe(false);
-                expect(component.widgets().length).toBe(0);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.dashboard()?.display_name).toBe('My Dashboard');
+            expect(component.dashboard()?.is_public).toBe(false);
+            expect(component.widgets().length).toBe(0);
         });
     });
 
@@ -656,17 +614,15 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const header = compiled.querySelector('.dashboard-header');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const header = compiled.querySelector('.dashboard-header');
 
-                expect(header).toBeNull();
-                // Widgets should still render
-                expect(compiled.querySelector('.widgets-grid')).toBeTruthy();
-                ;
-            }, 10);
+            expect(header).toBeNull();
+            // Widgets should still render
+            expect(compiled.querySelector('.widgets-grid')).toBeTruthy();
         });
 
         it('should show dashboard header when show_title is true', async () => {
@@ -684,16 +640,14 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const header = compiled.querySelector('.dashboard-header');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const header = compiled.querySelector('.dashboard-header');
 
-                expect(header).toBeTruthy();
-                expect(header?.textContent).toContain('Visible Title Dashboard');
-                ;
-            }, 10);
+            expect(header).toBeTruthy();
+            expect(header?.textContent).toContain('Visible Title Dashboard');
         });
 
         it('should show dashboard header when show_title is undefined (default)', async () => {
@@ -711,16 +665,14 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const header = compiled.querySelector('.dashboard-header');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const header = compiled.querySelector('.dashboard-header');
 
-                expect(header).toBeTruthy();
-                expect(header?.textContent).toContain('Default Title Dashboard');
-                ;
-            }, 10);
+            expect(header).toBeTruthy();
+            expect(header?.textContent).toContain('Default Title Dashboard');
         });
 
         it('should handle dashboard with description as null', async () => {
@@ -738,17 +690,15 @@ describe('DashboardPage', () => {
             fixture = TestBed.createComponent(DashboardPage);
             component = fixture.componentInstance;
 
-            setTimeout(() => {
-                fixture.detectChanges();
+            await new Promise(resolve => setTimeout(resolve, 10));
+            fixture.detectChanges();
 
-                const compiled = fixture.nativeElement as HTMLElement;
-                const header = compiled.querySelector('.dashboard-header');
-                const description = header?.querySelector('p');
+            const compiled = fixture.nativeElement as HTMLElement;
+            const header = compiled.querySelector('.dashboard-header');
+            const description = header?.querySelector('p');
 
-                expect(header).toBeTruthy();
-                expect(description).toBeNull(); // No description paragraph rendered
-                ;
-            }, 10);
+            expect(header).toBeTruthy();
+            expect(description).toBeNull(); // No description paragraph rendered
         });
 
         it('should handle rapid retry attempts', () => {

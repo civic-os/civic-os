@@ -143,12 +143,10 @@ describe('TimeSlotCalendarComponent', () => {
         fixture.detectChanges();
 
         // Give effect time to run (effects are microtasks)
-        setTimeout(() => {
-            expect(mockCalendarApi.getEventSources).toHaveBeenCalled();
-            expect(mockEventSource.remove).toHaveBeenCalled();
-            expect(mockCalendarApi.addEventSource).toHaveBeenCalled();
-            ;
-        }, 0);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(mockCalendarApi.getEventSources).toHaveBeenCalled();
+        expect(mockEventSource.remove).toHaveBeenCalled();
+        expect(mockCalendarApi.addEventSource).toHaveBeenCalled();
     });
 
     it('should handle edit mode with time slot value', () => {
@@ -306,11 +304,9 @@ describe('TimeSlotCalendarComponent', () => {
             ]);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockApi.getEventSources).toHaveBeenCalled();
-                expect(mockApi.addEventSource).toHaveBeenCalled();
-                ;
-            }, 0);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            expect(mockApi.getEventSources).toHaveBeenCalled();
+            expect(mockApi.addEventSource).toHaveBeenCalled();
         });
     });
 
@@ -469,10 +465,8 @@ describe('TimeSlotCalendarComponent', () => {
             fixture.componentRef.setInput('initialDate', '2026-04-15');
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockApi.gotoDate).toHaveBeenCalledWith(new Date('2026-04-15T00:00:00'));
-                ;
-            }, 0);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            expect(mockApi.gotoDate).toHaveBeenCalledWith(new Date('2026-04-15T00:00:00'));
         });
 
         it('should call changeView when initialView input changes after init', async () => {
@@ -500,10 +494,8 @@ describe('TimeSlotCalendarComponent', () => {
             fixture.componentRef.setInput('initialView', 'dayGridMonth');
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockApi.changeView).toHaveBeenCalledWith('dayGridMonth');
-                ;
-            }, 0);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            expect(mockApi.changeView).toHaveBeenCalledWith('dayGridMonth');
         });
 
         it('should default to today when initialDate becomes undefined (entity transition)', async () => {
@@ -531,16 +523,14 @@ describe('TimeSlotCalendarComponent', () => {
             fixture.componentRef.setInput('initialDate', undefined);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockApi.gotoDate).toHaveBeenCalled();
-                // Should be called with approximately today's date
-                const calledDate = vi.mocked(mockApi.gotoDate).mock.lastCall![0] as Date;
-                const today = new Date();
-                expect(calledDate.getFullYear()).toBe(today.getFullYear());
-                expect(calledDate.getMonth()).toBe(today.getMonth());
-                expect(calledDate.getDate()).toBe(today.getDate());
-                ;
-            }, 0);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            expect(mockApi.gotoDate).toHaveBeenCalled();
+            // Should be called with approximately today's date
+            const calledDate = vi.mocked(mockApi.gotoDate).mock.lastCall![0] as Date;
+            const today = new Date();
+            expect(calledDate.getFullYear()).toBe(today.getFullYear());
+            expect(calledDate.getMonth()).toBe(today.getMonth());
+            expect(calledDate.getDate()).toBe(today.getDate());
         });
     });
 

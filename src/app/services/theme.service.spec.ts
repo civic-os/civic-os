@@ -104,11 +104,9 @@ describe('ThemeService', () => {
         it('should calculate luminance based on current theme', async () => {
             // Set a theme and verify the computed signal executes without errors
             document.documentElement.setAttribute('data-theme', 'corporate');
-            setTimeout(() => {
-                const result = service.isDark();
-                expect(typeof result).toBe('boolean');
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            const result = service.isDark();
+            expect(typeof result).toBe('boolean');
         });
 
         it('should return true when luminance is below threshold (128)', () => {
@@ -179,22 +177,18 @@ describe('ThemeService', () => {
 
         it('should respond to theme changes', async () => {
             document.documentElement.setAttribute('data-theme', 'light');
-            setTimeout(() => {
-                const config1 = service.getMapTileConfig();
+            await new Promise(resolve => setTimeout(resolve, 50));
+            const config1 = service.getMapTileConfig();
 
-                document.documentElement.setAttribute('data-theme', 'dark');
-                setTimeout(() => {
-                    const config2 = service.getMapTileConfig();
+            document.documentElement.setAttribute('data-theme', 'dark');
+            await new Promise(resolve => setTimeout(resolve, 50));
+            const config2 = service.getMapTileConfig();
 
-                    // Both should return valid configs
-                    expect(config1).toBeDefined();
-                    expect(config2).toBeDefined();
-                    expect(config1.tileUrl).toBeDefined();
-                    expect(config2.tileUrl).toBeDefined();
-
-                    ;
-                }, 50);
-            }, 50);
+            // Both should return valid configs
+            expect(config1).toBeDefined();
+            expect(config2).toBeDefined();
+            expect(config1.tileUrl).toBeDefined();
+            expect(config2.tileUrl).toBeDefined();
         });
     });
 
@@ -442,37 +436,29 @@ describe('ThemeService', () => {
             const initialTheme = service.theme();
 
             // Change theme externally (simulates browser extension or manual DOM change)
-            setTimeout(() => {
-                document.documentElement.setAttribute('data-theme', 'dark');
+            await new Promise(resolve => setTimeout(resolve, 50));
+            document.documentElement.setAttribute('data-theme', 'dark');
 
-                // Give MutationObserver time to fire
-                setTimeout(() => {
-                    expect(service.theme()).toBe('dark');
-                    expect(localStorageSpy.setItem).toHaveBeenCalledWith('civic-os-theme', 'dark');
-                    ;
-                }, 50);
-            }, 50);
+            // Give MutationObserver time to fire
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(service.theme()).toBe('dark');
+            expect(localStorageSpy.setItem).toHaveBeenCalledWith('civic-os-theme', 'dark');
         });
 
         it('should handle multiple rapid external theme changes', async () => {
             // Make multiple rapid external changes
-            setTimeout(() => {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            document.documentElement.setAttribute('data-theme', 'light');
 
-            setTimeout(() => {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            document.documentElement.setAttribute('data-theme', 'dark');
 
-            setTimeout(() => {
-                document.documentElement.setAttribute('data-theme', 'emerald');
-            }, 150);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            document.documentElement.setAttribute('data-theme', 'emerald');
 
-            setTimeout(() => {
-                // Should reflect the final theme
-                expect(service.theme()).toBe('emerald');
-                ;
-            }, 250);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // Should reflect the final theme
+            expect(service.theme()).toBe('emerald');
         });
 
         it('should not create infinite loop when setTheme updates attribute', async () => {
@@ -482,19 +468,16 @@ describe('ThemeService', () => {
             service.setTheme('nord');
 
             // Wait for any potential MutationObserver callback
-            setTimeout(() => {
-                const firstCheckCount = vi.mocked(localStorageSpy.setItem).mock.calls.length;
-                // Should have some calls (at least 1 from setTheme)
-                expect(firstCheckCount).toBeGreaterThan(initialCallCount);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const firstCheckCount = vi.mocked(localStorageSpy.setItem).mock.calls.length;
+            // Should have some calls (at least 1 from setTheme)
+            expect(firstCheckCount).toBeGreaterThan(initialCallCount);
 
-                // Wait again to verify count isn't still increasing (which would indicate infinite loop)
-                setTimeout(() => {
-                    const secondCheckCount = vi.mocked(localStorageSpy.setItem).mock.calls.length;
-                    // Count should stabilize (no infinite loop)
-                    expect(secondCheckCount).toBe(firstCheckCount);
-                    ;
-                }, 100);
-            }, 100);
+            // Wait again to verify count isn't still increasing (which would indicate infinite loop)
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const secondCheckCount = vi.mocked(localStorageSpy.setItem).mock.calls.length;
+            // Count should stabilize (no infinite loop)
+            expect(secondCheckCount).toBe(firstCheckCount);
         });
 
         it('should observe document.documentElement for theme changes', () => {

@@ -114,7 +114,6 @@ describe('ListPage', () => {
                 expect(entity).toBeDefined();
                 expect(entity?.table_name).toBe('Issue');
                 expect(mockSchemaService.getEntity).toHaveBeenCalledWith('Issue');
-                ;
             });
         });
 
@@ -125,7 +124,6 @@ describe('ListPage', () => {
 
             component.entity$.subscribe(() => {
                 expect(component.entityKey).toBe('Issue');
-                ;
             });
         });
 
@@ -154,7 +152,6 @@ describe('ListPage', () => {
                 expect(props[0].column_name).toBe('name');
                 expect(props[1].column_name).toBe('status_id');
                 expect(mockSchemaService.getPropsForList).toHaveBeenCalledWith(MOCK_ENTITIES.issue);
-                ;
             });
         });
 
@@ -166,7 +163,6 @@ describe('ListPage', () => {
             component.properties$.subscribe(props => {
                 expect(props).toEqual([]);
                 expect(mockSchemaService.getPropsForList).not.toHaveBeenCalled();
-                ;
             });
         });
 
@@ -188,21 +184,19 @@ describe('ListPage', () => {
             routeParams.next({ entityKey: 'Issue' });
 
             // Wait for async operations to complete
-            setTimeout(() => {
-                expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
-                    key: 'Issue',
-                    fields: ['name', 'status_id:Status!status_id(id,display_name)'],
-                    searchQuery: undefined,
-                    orderField: undefined,
-                    orderDirection: undefined,
-                    filters: undefined,
-                    rawQueryParams: undefined,
-                    pagination: { page: 1, pageSize: 25 },
-                    isSummaryView: false
-                });
-                expect(component.dataSignal()).toEqual(mockData);
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
+                key: 'Issue',
+                fields: ['name', 'status_id:Status!status_id(id,display_name)'],
+                searchQuery: undefined,
+                orderField: undefined,
+                orderDirection: undefined,
+                filters: undefined,
+                rawQueryParams: undefined,
+                pagination: { page: 1, pageSize: 25 },
+                isSummaryView: false
+            });
+            expect(component.dataSignal()).toEqual(mockData);
         });
 
         it('should handle GeoPoint properties with computed field aliasing', async () => {
@@ -217,20 +211,18 @@ describe('ListPage', () => {
             // Trigger new route params to force data$ to re-emit
             routeParams.next({ entityKey: 'Issue' });
 
-            setTimeout(() => {
-                expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
-                    key: 'Issue',
-                    fields: ['location:location_text'],
-                    searchQuery: undefined,
-                    orderField: undefined,
-                    orderDirection: undefined,
-                    filters: undefined,
-                    rawQueryParams: undefined,
-                    pagination: { page: 1, pageSize: 25 },
-                    isSummaryView: false
-                });
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
+                key: 'Issue',
+                fields: ['location:location_text'],
+                searchQuery: undefined,
+                orderField: undefined,
+                orderDirection: undefined,
+                filters: undefined,
+                rawQueryParams: undefined,
+                pagination: { page: 1, pageSize: 25 },
+                isSummaryView: false
+            });
         });
 
         it('should return empty observable when properties are empty', async () => {
@@ -240,7 +232,6 @@ describe('ListPage', () => {
 
             component.data$.subscribe(data => {
                 expect(data).toEqual({ data: [], totalCount: 0 });
-                ;
             });
         });
 
@@ -249,10 +240,8 @@ describe('ListPage', () => {
             mockSchemaService.getEntity.mockReturnValue(of(undefined));
             routeParams.next({});
 
-            setTimeout(() => {
-                expect(mockDataService.getDataPaginated).not.toHaveBeenCalled();
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(mockDataService.getDataPaginated).not.toHaveBeenCalled();
         });
     });
 
@@ -280,7 +269,6 @@ describe('ListPage', () => {
                 else if (callCount === 2) {
                     expect(entity?.table_name).toBe('Status');
                     expect(component.entityKey).toBe('Status');
-                    ;
                 }
             });
         });
@@ -304,17 +292,15 @@ describe('ListPage', () => {
             // Trigger new route params to force data$ to re-emit
             routeParams.next({ entityKey: 'Issue' });
 
-            setTimeout(() => {
-                expect(mockDataService.getDataPaginated).toHaveBeenCalled();
-                const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
-                expect(callArgs.fields).toContain('name'); // TextShort
-                expect(callArgs.fields).toContain('count'); // Integer
-                expect(callArgs.fields).toContain('is_active'); // Boolean
-                expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)'); // ForeignKey
-                expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)'); // User
-                expect(callArgs.fields).toContain('location:location_text'); // GeoPoint
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(mockDataService.getDataPaginated).toHaveBeenCalled();
+            const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
+            expect(callArgs.fields).toContain('name'); // TextShort
+            expect(callArgs.fields).toContain('count'); // Integer
+            expect(callArgs.fields).toContain('is_active'); // Boolean
+            expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)'); // ForeignKey
+            expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)'); // User
+            expect(callArgs.fields).toContain('location:location_text'); // GeoPoint
         });
     });
 
@@ -327,7 +313,6 @@ describe('ListPage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.description).toBe('Track system issues');
-                ;
             });
         });
 
@@ -339,7 +324,6 @@ describe('ListPage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.description).toBeNull();
-                ;
             });
         });
     });
@@ -353,37 +337,29 @@ describe('ListPage', () => {
             // Update query params to simulate URL change
             queryParams.next({ q: 'pothole main street' });
 
-            setTimeout(() => {
-                expect(component.searchTerms()).toEqual(['pothole', 'main', 'street']);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.searchTerms()).toEqual(['pothole', 'main', 'street']);
         });
 
         it('should return empty array for empty search query', async () => {
             queryParams.next({ q: '' });
 
-            setTimeout(() => {
-                expect(component.searchTerms()).toEqual([]);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.searchTerms()).toEqual([]);
         });
 
         it('should trim whitespace and split search terms', async () => {
             queryParams.next({ q: '  pothole   main   ' });
 
-            setTimeout(() => {
-                expect(component.searchTerms()).toEqual(['pothole', 'main']);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.searchTerms()).toEqual(['pothole', 'main']);
         });
 
         it('should handle single search term', async () => {
             queryParams.next({ q: 'pothole' });
 
-            setTimeout(() => {
-                expect(component.searchTerms()).toEqual(['pothole']);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.searchTerms()).toEqual(['pothole']);
         });
 
         it('should sync searchControl with URL query params', async () => {
@@ -392,10 +368,8 @@ describe('ListPage', () => {
             // Update URL query params
             queryParams.next({ q: 'pothole' });
 
-            setTimeout(() => {
-                expect(component.searchControl.value).toBe('pothole');
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(component.searchControl.value).toBe('pothole');
         });
 
         it('should initialize search from URL query params', () => {
@@ -417,7 +391,6 @@ describe('ListPage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.search_fields).toEqual(['display_name', 'description']);
-                ;
             });
         });
 
@@ -429,7 +402,6 @@ describe('ListPage', () => {
 
             component.entity$.subscribe(entity => {
                 expect(entity?.search_fields).toBeNull();
-                ;
             });
         });
     });
@@ -464,10 +436,8 @@ describe('ListPage', () => {
             component.onRowHover(42);
 
             // After debounce (>150ms), signal should update
-            setTimeout(() => {
-                expect(component.highlightedRecordId()).toBe(42);
-                ;
-            }, 200);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            expect(component.highlightedRecordId()).toBe(42);
         });
 
         it('should handle rapid hover changes by using last value', async () => {
@@ -477,10 +447,8 @@ describe('ListPage', () => {
             component.onRowHover(3);
 
             // After debounce, should have the last value
-            setTimeout(() => {
-                expect(component.highlightedRecordId()).toBe(3);
-                ;
-            }, 200);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            expect(component.highlightedRecordId()).toBe(3);
         });
     });
 
@@ -590,10 +558,8 @@ describe('ListPage', () => {
             // Trigger route params to emit with new mocked entity
             routeParams.next({ entityKey: 'Issue' });
 
-            setTimeout(() => {
-                expect(component.showMap()).toBeTruthy();
-                ;
-            }, 50);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            expect(component.showMap()).toBeTruthy();
         });
 
         it('should not show map when entity has show_map=false', async () => {
@@ -607,11 +573,12 @@ describe('ListPage', () => {
             mockSchemaService.getPropsForList.mockReturnValue(of([]));
             mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
 
-            component.entity$.subscribe(() => {
-                setTimeout(() => {
+            await new Promise<void>(resolve => {
+                component.entity$.subscribe(async () => {
+                    await new Promise(r => setTimeout(r, 10));
                     expect(component.showMap()).toBe(false);
-                    ;
-                }, 10);
+                    resolve();
+                });
             });
         });
 
@@ -637,13 +604,11 @@ describe('ListPage', () => {
             // Trigger data load
             routeParams.next({ entityKey: 'Issue' });
 
-            setTimeout(() => {
-                const markers = component.mapMarkers();
-                expect(markers.length).toBe(2);
-                expect(markers[0]).toEqual({ id: 1, name: 'Issue 1', wkt: 'POINT(-83.5 43.0)' });
-                expect(markers[1]).toEqual({ id: 2, name: 'Issue 2', wkt: 'POINT(-83.6 43.1)' });
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const markers = component.mapMarkers();
+            expect(markers.length).toBe(2);
+            expect(markers[0]).toEqual({ id: 1, name: 'Issue 1', wkt: 'POINT(-83.5 43.0)' });
+            expect(markers[1]).toEqual({ id: 2, name: 'Issue 2', wkt: 'POINT(-83.6 43.1)' });
         });
 
         it('should handle null location values in map markers', async () => {
@@ -664,13 +629,11 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'Issue' });
 
-            setTimeout(() => {
-                const markers = component.mapMarkers();
-                // Should only include non-null locations
-                expect(markers.length).toBe(1);
-                expect(markers[0].id).toBe(1);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const markers = component.mapMarkers();
+            // Should only include non-null locations
+            expect(markers.length).toBe(1);
+            expect(markers[0].id).toBe(1);
         });
     });
 
@@ -685,11 +648,9 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                setTimeout(() => {
-                    const events = component.calendarEvents();
-                    expect(events).toEqual([]);
-                    ;
-                }, 100);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const events = component.calendarEvents();
+                expect(events).toEqual([]);
             });
 
             it('should generate calendar events with default color when calendar_color_property is null', async () => {
@@ -719,20 +680,18 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                setTimeout(() => {
-                    const events = component.calendarEvents();
-                    expect(events.length).toBe(2);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const events = component.calendarEvents();
+                expect(events.length).toBe(2);
 
-                    // All events should use default blue color
-                    expect(events[0].color).toBe('#3B82F6');
-                    expect(events[1].color).toBe('#3B82F6');
+                // All events should use default blue color
+                expect(events[0].color).toBe('#3B82F6');
+                expect(events[1].color).toBe('#3B82F6');
 
-                    // Verify event structure
-                    expect(events[0].title).toBe('Team Meeting');
-                    expect(events[0].start).toEqual(new Date('2025-03-15T14:00:00Z'));
-                    expect(events[0].end).toEqual(new Date('2025-03-15T16:00:00Z'));
-                    ;
-                }, 100);
+                // Verify event structure
+                expect(events[0].title).toBe('Team Meeting');
+                expect(events[0].start).toEqual(new Date('2025-03-15T14:00:00Z'));
+                expect(events[0].end).toEqual(new Date('2025-03-15T16:00:00Z'));
             });
 
             it('should use custom colors from calendar_color_property when specified', async () => {
@@ -771,21 +730,19 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                setTimeout(() => {
-                    const events = component.calendarEvents();
-                    expect(events.length).toBe(3);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const events = component.calendarEvents();
+                expect(events.length).toBe(3);
 
-                    // Each event should have its custom color
-                    expect(events[0].color).toBe('#10B981');
-                    expect(events[1].color).toBe('#EF4444');
-                    expect(events[2].color).toBe('#F59E0B');
+                // Each event should have its custom color
+                expect(events[0].color).toBe('#10B981');
+                expect(events[1].color).toBe('#EF4444');
+                expect(events[2].color).toBe('#F59E0B');
 
-                    // Verify titles are preserved
-                    expect(events[0].title).toBe('Approved Reservation');
-                    expect(events[1].title).toBe('Pending Reservation');
-                    expect(events[2].title).toBe('Tentative Booking');
-                    ;
-                }, 100);
+                // Verify titles are preserved
+                expect(events[0].title).toBe('Approved Reservation');
+                expect(events[1].title).toBe('Pending Reservation');
+                expect(events[2].title).toBe('Tentative Booking');
             });
 
             it('should filter out rows with null time_slot values', async () => {
@@ -821,13 +778,11 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                setTimeout(() => {
-                    const events = component.calendarEvents();
-                    expect(events.length).toBe(2);
-                    expect(events[0].id).toBe(1);
-                    expect(events[1].id).toBe(3);
-                    ;
-                }, 100);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const events = component.calendarEvents();
+                expect(events.length).toBe(2);
+                expect(events[0].id).toBe(1);
+                expect(events[1].id).toBe(3);
             });
 
             it('should fallback to default color when color property value is missing', async () => {
@@ -860,13 +815,11 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                setTimeout(() => {
-                    const events = component.calendarEvents();
-                    expect(events.length).toBe(2);
-                    expect(events[0].color).toBe('#10B981');
-                    expect(events[1].color).toBe('#3B82F6'); // Fallback to default
-                    ;
-                }, 100);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const events = component.calendarEvents();
+                expect(events.length).toBe(2);
+                expect(events[0].color).toBe('#10B981');
+                expect(events[1].color).toBe('#3B82F6'); // Fallback to default
             });
 
             it('should use entity display_name in title when row has no display_name', async () => {
@@ -893,12 +846,10 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                setTimeout(() => {
-                    const events = component.calendarEvents();
-                    expect(events.length).toBe(1);
-                    expect(events[0].title).toBe('Reservation #1');
-                    ;
-                }, 100);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const events = component.calendarEvents();
+                expect(events.length).toBe(1);
+                expect(events[0].title).toBe('Reservation #1');
             });
         });
     });
@@ -1043,10 +994,8 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'issues' });
 
-            setTimeout(() => {
-                expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
         });
 
         it('should include filter column names in label', async () => {
@@ -1059,10 +1008,8 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'issues' });
 
-            setTimeout(() => {
-                expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:priority,status_id', 15);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:priority,status_id', 15);
         });
 
         it('should include search indicator in label', async () => {
@@ -1074,10 +1021,8 @@ describe('ListPage', () => {
             queryParams.next({ q: 'pothole' });
             routeParams.next({ entityKey: 'issues' });
 
-            setTimeout(() => {
-                expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:search', 5);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:search', 5);
         });
 
         it('should combine filters, search, and pagination in label', async () => {
@@ -1089,10 +1034,8 @@ describe('ListPage', () => {
             queryParams.next({ q: 'pothole', f0_col: 'status_id', f0_op: 'eq', f0_val: '1', page: '3' });
             routeParams.next({ entityKey: 'issues' });
 
-            setTimeout(() => {
-                expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:status_id:search:p3', 3);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:status_id:search:p3', 3);
         });
 
         it('should track pagination as separate event from page 1', async () => {
@@ -1102,20 +1045,17 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'issues' });
 
-            setTimeout(() => {
-                // First load: page 1
-                expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // First load: page 1
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
 
-                // Navigate to page 2
-                mockAnalyticsService.trackEvent.mockClear();
-                queryParams.next({ page: '2' });
+            // Navigate to page 2
+            mockAnalyticsService.trackEvent.mockClear();
+            queryParams.next({ page: '2' });
 
-                setTimeout(() => {
-                    // Should fire new event with page indicator
-                    expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:p2', 42);
-                    ;
-                }, 100);
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // Should fire new event with page indicator
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:p2', 42);
         });
 
         it('should omit page indicator for page 1', async () => {
@@ -1126,11 +1066,9 @@ describe('ListPage', () => {
             queryParams.next({ page: '1' });
             routeParams.next({ entityKey: 'issues' });
 
-            setTimeout(() => {
-                // Page 1 should NOT have :p1 suffix
-                expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
-                ;
-            }, 100);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // Page 1 should NOT have :p1 suffix
+            expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
         });
     });
 

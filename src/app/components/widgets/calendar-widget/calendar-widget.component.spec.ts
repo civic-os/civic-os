@@ -178,25 +178,21 @@ describe('CalendarWidgetComponent', () => {
     it('should fetch entity properties and data', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(mockSchemaService.getProperties).toHaveBeenCalled();
-            expect(mockDataService.getData).toHaveBeenCalled();
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(mockSchemaService.getProperties).toHaveBeenCalled();
+        expect(mockDataService.getData).toHaveBeenCalled();
     });
 
     it('should transform records to calendar events', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events().length).toBe(1);
-            expect(component.events()[0].id).toBe(1);
-            expect(component.events()[0].title).toBe('Test Reservation');
-            expect(component.events()[0].color).toBe('#10B981');
-            expect(component.events()[0].start).toEqual(new Date('2025-03-15T14:00:00Z'));
-            expect(component.events()[0].end).toEqual(new Date('2025-03-15T16:00:00Z'));
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events().length).toBe(1);
+        expect(component.events()[0].id).toBe(1);
+        expect(component.events()[0].title).toBe('Test Reservation');
+        expect(component.events()[0].color).toBe('#10B981');
+        expect(component.events()[0].start).toEqual(new Date('2025-03-15T14:00:00Z'));
+        expect(component.events()[0].end).toEqual(new Date('2025-03-15T16:00:00Z'));
     });
 
     it('should filter out records without time_slot', async () => {
@@ -211,11 +207,9 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events().length).toBe(1);
-            expect(component.events()[0].id).toBe(1);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events().length).toBe(1);
+        expect(component.events()[0].id).toBe(1);
     });
 
     it('should open detail page in new tab on event click', () => {
@@ -249,12 +243,10 @@ describe('CalendarWidgetComponent', () => {
 
         component.onDateRangeChange(newRange);
 
-        setTimeout(() => {
-            expect(component.dateRange()).toEqual(newRange);
-            // Should have been called again due to dateRange signal change
-            expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.dateRange()).toEqual(newRange);
+        // Should have been called again due to dateRange signal change
+        expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
     });
 
     it('should navigate to create page on create button click', () => {
@@ -277,11 +269,9 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle data service errors gracefully', async () => {
@@ -294,12 +284,10 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toBeTruthy();
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toBeTruthy();
     });
 
     it('should handle schema service errors gracefully', async () => {
@@ -312,11 +300,9 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toBe('Failed to load schema');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toBe('Failed to load schema');
     });
 
     it('should set loading state correctly', async () => {
@@ -324,10 +310,8 @@ describe('CalendarWidgetComponent', () => {
 
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.isLoading()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.isLoading()).toBe(false);
     });
 
     it('should handle widget without entity_key', async () => {
@@ -343,12 +327,10 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toContain('Missing required configuration');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toContain('Missing required configuration');
     });
 
     it('should handle widget without timeSlotPropertyName', async () => {
@@ -363,21 +345,17 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoTimeSlot);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events().length).toBe(0);
-            expect(component.isLoading()).toBe(false);
-            expect(component.error()).toContain('Missing required configuration');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events().length).toBe(0);
+        expect(component.isLoading()).toBe(false);
+        expect(component.error()).toContain('Missing required configuration');
     });
 
     it('should use display_name as event title', async () => {
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events()[0].title).toBe('Test Reservation');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events()[0].title).toBe('Test Reservation');
     });
 
     it('should fallback to Record ID if no display_name', async () => {
@@ -396,10 +374,8 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events()[0].title).toBe('Record 1');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events()[0].title).toBe('Record 1');
     });
 
     it('should use defaultColor when colorProperty is not set', async () => {
@@ -414,10 +390,8 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoColor);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events()[0].color).toBe('#3B82F6');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events()[0].color).toBe('#3B82F6');
     });
 
     it('should use defaultColor when record has no color value', async () => {
@@ -436,10 +410,8 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.events()[0].color).toBe('#3B82F6');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.events()[0].color).toBe('#3B82F6');
     });
 
     it('should handle invalid tstzrange format gracefully', async () => {
@@ -459,12 +431,10 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            // Should still create event with placeholder dates
-            expect(component.events().length).toBe(1);
-            expect(console.error).toHaveBeenCalled();
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        // Should still create event with placeholder dates
+        expect(component.events().length).toBe(1);
+        expect(console.error).toHaveBeenCalled();
     });
 
     // Permission checking tests
@@ -482,11 +452,9 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetWithButton);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.canShowCreateButton()).toBe(true);
-            expect(mockAuthService.hasPermission).toHaveBeenCalledWith('reservations', 'create');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.canShowCreateButton()).toBe(true);
+        expect(mockAuthService.hasPermission).toHaveBeenCalledWith('reservations', 'create');
     });
 
     it('should hide create button when showCreateButton is false even if user has permission', async () => {
@@ -503,10 +471,8 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoButton);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.canShowCreateButton()).toBe(false);
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.canShowCreateButton()).toBe(false);
     });
 
     it('should hide create button when showCreateButton is true but user lacks permission', async () => {
@@ -526,11 +492,9 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetWithButton);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(component.canShowCreateButton()).toBe(false);
-            expect(mockAuthService.hasPermission).toHaveBeenCalledWith('reservations', 'create');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(component.canShowCreateButton()).toBe(false);
+        expect(mockAuthService.hasPermission).toHaveBeenCalledWith('reservations', 'create');
     });
 
     it('should check permission for correct entity key', async () => {
@@ -549,10 +513,8 @@ describe('CalendarWidgetComponent', () => {
         fixture.componentRef.setInput('widget', customWidget);
         fixture.detectChanges();
 
-        setTimeout(() => {
-            expect(mockAuthService.hasPermission).toHaveBeenCalledWith('appointments', 'create');
-            ;
-        }, 10);
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(mockAuthService.hasPermission).toHaveBeenCalledWith('appointments', 'create');
     });
 
     describe('Filter Application', () => {
@@ -570,13 +532,11 @@ describe('CalendarWidgetComponent', () => {
             fixture.componentRef.setInput('widget', widgetWithFilters);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                expect(mockDataService.getData).toHaveBeenCalled();
-                const query: DataQuery = vi.mocked(mockDataService.getData).mock.lastCall[0];
-                expect(query.filters).toBeDefined();
-                expect(query.filters?.some((f: FilterCriteria) => f.column === 'status' && f.operator === 'neq' && f.value === 'cancelled')).toBe(true);
-                ;
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockDataService.getData).toHaveBeenCalled();
+            const query: DataQuery = vi.mocked(mockDataService.getData).mock.lastCall[0];
+            expect(query.filters).toBeDefined();
+            expect(query.filters?.some((f: FilterCriteria) => f.column === 'status' && f.operator === 'neq' && f.value === 'cancelled')).toBe(true);
         });
 
         it('should combine static filters with date range filter', async () => {
@@ -591,20 +551,17 @@ describe('CalendarWidgetComponent', () => {
             fixture.componentRef.setInput('widget', widgetWithFilters);
             fixture.detectChanges();
 
-            setTimeout(() => {
-                component.onDateRangeChange({
-                    start: new Date('2025-03-10T00:00:00Z'),
-                    end: new Date('2025-03-17T00:00:00Z')
-                });
+            await new Promise(resolve => setTimeout(resolve, 10));
+            component.onDateRangeChange({
+                start: new Date('2025-03-10T00:00:00Z'),
+                end: new Date('2025-03-17T00:00:00Z')
+            });
 
-                setTimeout(() => {
-                    const query: DataQuery = vi.mocked(mockDataService.getData).mock.lastCall[0];
-                    expect(query.filters?.length).toBe(2); // static + date range
-                    expect(query.filters?.some((f: FilterCriteria) => f.column === 'resource_id' && f.operator === 'eq' && f.value === 5)).toBe(true);
-                    expect(query.filters?.some((f: FilterCriteria) => f.column === 'time_slot' && f.operator === 'ov')).toBe(true);
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const query: DataQuery = vi.mocked(mockDataService.getData).mock.lastCall[0];
+            expect(query.filters?.length).toBe(2); // static + date range
+            expect(query.filters?.some((f: FilterCriteria) => f.column === 'resource_id' && f.operator === 'eq' && f.value === 5)).toBe(true);
+            expect(query.filters?.some((f: FilterCriteria) => f.column === 'time_slot' && f.operator === 'ov')).toBe(true);
         });
     });
 
@@ -612,42 +569,33 @@ describe('CalendarWidgetComponent', () => {
         it('should prevent duplicate requests with same params', async () => {
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
-                // Trigger same request (no change to config or dateRange)
-                const currentRange = component.dateRange();
-                if (currentRange) {
-                    component.onDateRangeChange(currentRange);
+            // Trigger same request (no change to config or dateRange)
+            const currentRange = component.dateRange();
+            if (currentRange) {
+                component.onDateRangeChange(currentRange);
 
-                    setTimeout(() => {
-                        expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialCallCount);
-                        ;
-                    }, 10);
-                }
-                else {
-                    ;
-                }
-            }, 10);
+                await new Promise(resolve => setTimeout(resolve, 10));
+                expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialCallCount);
+            }
         });
 
         it('should allow new request when params change', async () => {
             fixture.detectChanges();
 
-            setTimeout(() => {
-                const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
+            await new Promise(resolve => setTimeout(resolve, 10));
+            const initialCallCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
-                // Change date range
-                component.onDateRangeChange({
-                    start: new Date('2025-04-01T00:00:00Z'),
-                    end: new Date('2025-04-08T00:00:00Z')
-                });
+            // Change date range
+            component.onDateRangeChange({
+                start: new Date('2025-04-01T00:00:00Z'),
+                end: new Date('2025-04-08T00:00:00Z')
+            });
 
-                setTimeout(() => {
-                    expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
-                    ;
-                }, 10);
-            }, 10);
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(vi.mocked(mockDataService.getData).mock.calls.length).toBeGreaterThan(initialCallCount);
         });
     });
 });
