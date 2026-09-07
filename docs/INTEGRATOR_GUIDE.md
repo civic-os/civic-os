@@ -474,6 +474,8 @@ Civic OS provides a complete file upload workflow using **Go microservices** wit
 
 **Implementation Guide**: See `docs/development/FILE_STORAGE.md` for complete setup instructions including adding file properties to your schema, validation configuration, and deployment examples.
 
+**Signed File Access URLs** (designed, ready to build): Currently, S3 files use `public-read` ACL and access relies on UUID obscurity. A planned upgrade will generate SigV4 presigned URLs directly in the `public.files` VIEW using `pgcrypto`, enforcing RLS before granting file access with 15-minute URL expiry. Private-by-default with opt-in `is_public` flag per file. Phase 2 will also move upload URL signing into PostgreSQL, eliminating the async polling workflow. See `docs/notes/SIGNED_FILE_URLS_DESIGN.md` for the full design and `docs/notes/SIGV4_SIGNING_REFERENCE.md` for the signing algorithm reference.
+
 ---
 
 ### User System
@@ -6483,13 +6485,15 @@ Two companion features for instance onboarding:
 - **Instance Config Store** (`metadata.instance_config`): A named key:value table for application-level configuration (organization name, default timezone, support email, branding). Module builders can depend on named keys via `get_config('agency_name')` in RPCs, VIEWs, and notification templates. Admin page at `/admin/config`.
 - **Setup Task Checklist** (`metadata.setup_tasks`): A metadata-driven admin page at `/setup` that guides the first admin through required configuration. Automatic completion detection via live checks (`record_count`, `config_set`, `rpc_check`, `manual`), `returnTo`-based walkthrough flow, regression warnings when completed data is deleted, and a database-driven guard that activates only when tasks exist.
 
-**Instance design impact**: If your instance needs first-run configuration (naming the org, adding staff, setting up locations), wait for this rather than building a custom onboarding flow. Seed `metadata.setup_tasks` rows in your init script to define the checklist.
+**Hybrid Config Architecture**: Frontend runtime configuration splits into two tiers. **Tier 1** (ENV-only): values needed before the app can reach the database or baked into static artifacts — `postgrestUrl`, `keycloak.*`, `s3.*`, `faviconUrl`, `pwa.*`, `map.tileUrl`. **Tier 2** (DB-backed, admin-editable): values Angular reads after bootstrap — `app_title`, `default_theme`, `default_locale`, `supported_locales`, `sms_configured`, `matomo_enabled`, `map_default_center/zoom`, `stripe_publishable_key`. Tier 2 values are seeded from ENV on first boot (seed-once semantics) and editable by admins at `/admin/config` thereafter. Changes propagate to all users on next navigation via the schema cache-busting system. A three-layer caching strategy (entrypoint HTML → localStorage → DB) eliminates flash-of-default-content.
+
+**Instance design impact**: If your instance needs first-run configuration (naming the org, adding staff, setting up locations), wait for this rather than building a custom onboarding flow. Seed `metadata.setup_tasks` rows in your init script to define the checklist. For Tier 2 config values, set ENV vars in `docker-compose.yml` for initial deployment — they'll be seeded into the database on first boot and become admin-editable.
 
 See `docs/notes/INSTANCE_SETUP_DESIGN.md` for the full design.
 
 ### Custom Pages — Designed
 
-Mixed read/write pages that load from a context RPC and submit to a target RPC. A Custom Page is an entity backed by a VIEW (for shape) with `is_readonly` per-property flags controlling which fields are display vs. input. The submit payload is auto-discovered via RPC parameter introspection.
+Mixed read/write pages that load from a context RPC and submit to a target RPC. Custom page configuration lives in a dedicated `metadata.custom_pages` table (separate from `metadata.entities`). A VIEW defines the page shape with `is_readonly` per-property flags controlling which fields are display vs. input. The submit payload is auto-discovered via RPC parameter introspection. Custom pages use short, human-friendly URLs at `/p/:slug` (and `/p/:slug/:id`), where the slug is configured via `page_slug` on `metadata.custom_pages`.
 
 **Instance design impact**: If you need pages that show read-only context alongside editable inputs (e.g., a check-in tablet showing child info while recording attendance, or a work order form displaying client history), this will handle it natively. Currently requires a standalone Angular component or a Virtual Entity with INSTEAD OF triggers.
 

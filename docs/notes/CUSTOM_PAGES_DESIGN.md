@@ -24,6 +24,7 @@
 - [Permissions](#permissions)
 - [Edge Cases & Constraints](#edge-cases--constraints)
 - [Future Enhancements](#future-enhancements)
+- [Appendix: Inline Alternative](#appendix-inline-alternative)
 
 ---
 
@@ -41,7 +42,7 @@ Dashboards provide multi-source reads but are read-only. Virtual Entities (VIEWs
 
 ### Solution
 
-**Custom Pages** are a new entity variant where:
+**Custom Pages** are a new first-class concept, stored in a dedicated `metadata.custom_pages` table, where:
 
 - A PostgreSQL **VIEW defines the page shape** (columns = fields), reusing the entire `schema_properties` pipeline
 - A **context RPC** replaces the standard PostgREST GET for data loading, enabling multi-source assembly
@@ -49,7 +50,7 @@ Dashboards provide multi-source reads but are read-only. Virtual Entities (VIEWs
 - The `is_readonly` flag on `metadata.properties` controls whether each field renders as display or input
 - **RPC parameter introspection** via a new `schema_rpc_parameters` VIEW determines which form fields are included in the submit payload
 
-The key insight: a custom page IS an entity in the schema system. It gets property type detection, display name overrides, validation rules, static text blocks, translations, and admin page configuration — all for free.
+The key insight: a custom page's VIEW is registered in `metadata.entities` (a thin row with just `table_name`) so it passes the `schema_properties` filter. All custom-page-specific configuration lives in `metadata.custom_pages`. This gives custom pages the full property pipeline (type detection, display names, validation, translations) without polluting the entity table with unrelated columns.
 
 **Key architectural decisions:**
 
@@ -57,16 +58,17 @@ The key insight: a custom page IS an entity in the schema system. It gets proper
 - **`is_readonly` is a property-level flag, not a section concept.** Fields can freely interleave readonly context and writable inputs. No nested section/field metadata hierarchy.
 - **RPC parameter introspection is the submit contract.** The frontend auto-discovers which writable fields to POST by matching column names to the submit RPC's function signature. The RPC signature is the source of truth.
 - **No lookup phase.** Multi-step workflows (lookup → context → submit) are modeled as separate custom pages linked by `navigate_to`. Each page does one thing.
+- **Separate table, shared property pipeline.** Custom page config lives in `metadata.custom_pages`, not on `metadata.entities`. A thin entity registration row gives the VIEW access to `schema_properties`; a pre-v1.0 audit may eliminate even that.
 
 ---
 
 ## Design Goals
 
-1. **Minimal new surface area**: Three new columns on `metadata.entities`, one on `metadata.properties`, one new VIEW, one junction table for permissions. (See [Appendix: Separate Table Alternative](#appendix-separate-table-alternative) for a cleaner separation to reconsider before v1.0.)
-2. **Reuse the schema pipeline**: Property types, validation, static text, translations, admin pages — all work unchanged.
+1. **Minimal new surface area**: One new table (`metadata.custom_pages`), one new column on `metadata.properties` (`is_readonly`), two new VIEWs (`schema_custom_pages`, `schema_rpc_parameters`), one junction table for permissions. A thin `metadata.entities` row registers the VIEW for property pipeline access.
+2. **Reuse the schema pipeline**: Property types, validation, static text, translations, admin pages — all work unchanged via `schema_properties`.
 3. **RPC is the controller**: All data assembly and business logic stays in PostgreSQL. The frontend is a generic renderer.
 4. **Integrator familiarity**: Configuring a custom page uses the same tools as configuring any entity — VIEWs, metadata overrides, RPCs.
-5. **Incremental adoption**: Custom pages coexist with entity pages. Adding `context_rpc` to an entity opts it into the custom page system; everything else is optional.
+5. **Clean separation**: Custom page config lives in its own table, not mixed into entity columns. Detection is explicit (row exists in `metadata.custom_pages`), not implicit.
 
 ---
 
@@ -85,28 +87,30 @@ Route params → SchemaService.getEntity()
 
 **Custom Page**:
 ```
-Route params → SchemaService.getEntity()
-             → SchemaService.getProps() [all properties, no filter]
-             → DataService.executeRpc(context_rpc) [RPC GET]
-             → DisplayPropertyComponent (is_readonly = true)
-               EditPropertyComponent   (is_readonly = false)
-             → Introspect schema_rpc_parameters for submit_rpc
-             → DataService.executeRpc(submit_rpc) [matched params only]
+Route params (slug) → SchemaService.getCustomPageBySlug()
+                    → SchemaService.getPropsForEntity(page_key) [all properties, no filter]
+                    → DataService.executeRpc(context_rpc) [RPC GET]
+                    → DisplayPropertyComponent (is_readonly = true)
+                      EditPropertyComponent   (is_readonly = false)
+                    → Introspect schema_rpc_parameters for submit_rpc
+                    → DataService.executeRpc(submit_rpc) [matched params only]
 ```
 
 ### Detection & Routing
 
-An entity is a custom page when `context_rpc IS NOT NULL` on `metadata.entities`.
+A table is a custom page when it has a row in `metadata.custom_pages`.
+
+Custom pages use a short `/p/` route prefix with a human-friendly slug (stored in `metadata.custom_pages.page_slug`) instead of the `table_name`. This keeps URLs clean for kiosk/tablet bookmarks (e.g., `/p/checkin/42` instead of `/page/child_checkin_context_view/42`). The frontend resolves slugs to custom page metadata via the cached `schema_custom_pages` response.
 
 | Route | Behavior |
 |-------|----------|
-| `/page/:entityKey` | Custom page, no ID (pure form or user-context page) |
-| `/page/:entityKey/:id` | Custom page with ID (context loaded for specific record) |
-| `/view/:entityKey` on a custom page entity | **Redirects** to `/page/:entityKey` |
-| `/edit/:entityKey/:id` on a custom page entity | **Redirects** to `/page/:entityKey/:id` |
-| `/create/:entityKey` on a custom page entity | **Redirects** to `/page/:entityKey` |
+| `/p/:slug` | Custom page, no ID (pure form or user-context page) |
+| `/p/:slug/:id` | Custom page with ID (context loaded for specific record) |
+| `/view/:entityKey` on a custom page entity | **Redirects** to `/p/:slug` |
+| `/edit/:entityKey/:id` on a custom page entity | **Redirects** to `/p/:slug/:id` |
+| `/create/:entityKey` on a custom page entity | **Redirects** to `/p/:slug` |
 
-The sidebar uses the same detection: if `context_rpc IS NOT NULL`, the nav link points to `/page/:entityKey` instead of `/view/:entityKey`.
+The sidebar renders custom pages from `schema_custom_pages` (with `/p/:slug` links) alongside entities from `schema_entities` (with `/view/:table_name` links), merged by `sort_order`.
 
 ---
 
@@ -209,19 +213,97 @@ This enhancement benefits both custom pages and entity actions.
 
 ## Database Schema
 
-### New Columns on `metadata.entities`
+### New Table: `metadata.custom_pages`
 
 ```sql
-ALTER TABLE metadata.entities ADD COLUMN context_rpc TEXT;
-ALTER TABLE metadata.entities ADD COLUMN submit_rpc TEXT;
-ALTER TABLE metadata.entities ADD COLUMN submit_label TEXT;
+CREATE TABLE metadata.custom_pages (
+    page_key        NAME PRIMARY KEY,       -- VIEW name (matches table_name in schema_properties)
+    page_slug       TEXT NOT NULL UNIQUE,    -- URL slug for /p/:slug route
+    display_name    TEXT NOT NULL,
+    description     TEXT,
+    icon            TEXT,                    -- Sidebar icon (same convention as entity_group icons)
+    context_rpc     TEXT NOT NULL,           -- RPC for loading page data
+    submit_rpc      TEXT,                    -- RPC for form submission (NULL = read-only page)
+    submit_label    TEXT DEFAULT 'Submit',   -- Submit button text
+    show_in_sidebar BOOLEAN DEFAULT TRUE,
+    sort_order      INT DEFAULT 100,
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    updated_at      TIMESTAMPTZ DEFAULT now(),
+
+    CONSTRAINT chk_page_slug_format
+        CHECK (page_slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
+);
 ```
 
 | Column | Type | Purpose |
 |--------|------|---------|
-| `context_rpc` | `TEXT` | RPC function name for loading page data. **When NOT NULL, identifies entity as a custom page.** |
+| `page_key` | `NAME` | VIEW name — matches `table_name` in `schema_properties` and `metadata.properties`. |
+| `page_slug` | `TEXT` | URL-friendly slug for the `/p/:slug` route. Lowercase alphanumeric with hyphens (e.g., `checkin`, `work-order`). |
+| `display_name` | `TEXT` | Page title shown in sidebar and page header. |
+| `context_rpc` | `TEXT` | RPC function name for loading page data. Required — this is what makes it a custom page. |
 | `submit_rpc` | `TEXT` | RPC function name for form submission. NULL for read-only custom pages. |
 | `submit_label` | `TEXT` | Submit button text (e.g., "Check In", "Submit Report"). Defaults to "Submit" in frontend. |
+
+### Thin Entity Registration Row
+
+Custom page VIEWs need a row in `metadata.entities` so their columns appear in `schema_properties` (which filters on `SELECT table_name FROM schema_entities`). This is a minimal registration — no custom-page-specific columns on the entity:
+
+```sql
+-- The only purpose of this row is property pipeline access.
+-- All custom page config lives in metadata.custom_pages.
+INSERT INTO metadata.entities (table_name, show_in_sidebar)
+VALUES ('child_checkin', false);  -- sidebar handled by custom_pages, not entities
+```
+
+**Why `show_in_sidebar = false`?** The sidebar link for custom pages is driven by `metadata.custom_pages.show_in_sidebar` (which uses `/p/:slug` routing). The entities row must not also produce a `/view/` sidebar link.
+
+**Pre-v1.0 audit note**: This thin-registration pattern exists because `schema_properties` is gated by `schema_entities`. A future core schema audit should evaluate widening the `schema_properties` filter to include `metadata.custom_pages` directly (a one-line `UNION ALL`), which would eliminate the need for this dummy row. See [Appendix: Inline Alternative](#appendix-inline-alternative) for context.
+
+### Helper Function: `register_custom_page()`
+
+A convenience function (following the `register_guided_form()` pattern) that handles both the thin entity registration and the custom page row in one call:
+
+```sql
+CREATE FUNCTION public.register_custom_page(
+    p_page_key      NAME,
+    p_page_slug     TEXT,
+    p_display_name  TEXT,
+    p_context_rpc   TEXT,
+    p_submit_rpc    TEXT DEFAULT NULL,
+    p_submit_label  TEXT DEFAULT 'Submit',
+    p_icon          TEXT DEFAULT NULL,
+    p_show_in_sidebar BOOLEAN DEFAULT TRUE,
+    p_sort_order    INT DEFAULT 100
+)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = metadata, public, pg_catalog AS $$
+BEGIN
+    -- 1. Thin entity registration for schema_properties pipeline
+    INSERT INTO metadata.entities (table_name, show_in_sidebar)
+    VALUES (p_page_key, false)
+    ON CONFLICT (table_name) DO NOTHING;
+
+    -- 2. Custom page configuration
+    INSERT INTO metadata.custom_pages
+        (page_key, page_slug, display_name, context_rpc, submit_rpc,
+         submit_label, icon, show_in_sidebar, sort_order)
+    VALUES
+        (p_page_key, p_page_slug, p_display_name, p_context_rpc, p_submit_rpc,
+         p_submit_label, p_icon, p_show_in_sidebar, p_sort_order);
+
+    RETURN jsonb_build_object('success', true, 'page_key', p_page_key);
+END;
+$$;
+```
+
+**Integrator usage** (replaces the two-step INSERT):
+```sql
+SELECT register_custom_page(
+    'child_checkin', 'checkin', 'Check In / Out',
+    'get_checkin_context', 'submit_checkin', 'Confirm'
+);
+```
 
 ### New Column on `metadata.properties`
 
@@ -230,6 +312,32 @@ ALTER TABLE metadata.properties ADD COLUMN is_readonly BOOLEAN DEFAULT FALSE;
 ```
 
 Used by custom pages to distinguish context (display) fields from form (input) fields. Also respected on standard entity Edit pages.
+
+### New VIEW: `schema_custom_pages`
+
+```sql
+CREATE VIEW public.schema_custom_pages
+WITH (security_invoker = true) AS
+SELECT
+    cp.page_key,
+    cp.page_slug,
+    metadata.t('custom_page', cp.page_key::text || '.display_name', cp.display_name) AS display_name,
+    metadata.t('custom_page', cp.page_key::text || '.description', cp.description) AS description,
+    cp.icon,
+    cp.context_rpc,
+    cp.submit_rpc,
+    metadata.t('custom_page', cp.page_key::text || '.submit_label', cp.submit_label) AS submit_label,
+    cp.show_in_sidebar,
+    cp.sort_order,
+    has_custom_page_permission(cp.page_key::TEXT, 'navigate') AS can_navigate,
+    has_custom_page_permission(cp.page_key::TEXT, 'submit') AS can_submit
+FROM metadata.custom_pages cp
+ORDER BY cp.sort_order, cp.display_name;
+
+GRANT SELECT ON public.schema_custom_pages TO web_anon, authenticated;
+```
+
+Follows the same pattern as `schema_entities` — a VIEW that wraps metadata with permission checks and i18n via `metadata.t()`.
 
 ### New VIEW: `schema_rpc_parameters`
 
@@ -260,15 +368,15 @@ One new junction table for RBAC permissions (see [Permissions](#permissions) sec
 
 ```sql
 CREATE TABLE metadata.custom_page_roles (
-    custom_page_entity NAME NOT NULL,
+    page_key NAME NOT NULL REFERENCES metadata.custom_pages(page_key) ON DELETE CASCADE,
     role_id SMALLINT NOT NULL REFERENCES metadata.roles(id) ON DELETE CASCADE,
     permission TEXT NOT NULL CHECK (permission IN ('navigate', 'submit')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (custom_page_entity, role_id, permission)
+    PRIMARY KEY (page_key, role_id, permission)
 );
 ```
 
-All other configuration uses existing metadata infrastructure — custom pages are registered in `metadata.entities`, fields come from `schema_properties` + `metadata.properties`, and RPC parameter discovery comes from `schema_rpc_parameters`.
+Configuration lives in three places: page-level config in `metadata.custom_pages`, field-level config in `metadata.properties` (keyed by `page_key` = VIEW name), and RPC parameter discovery in `schema_rpc_parameters`.
 
 ---
 
@@ -276,12 +384,12 @@ All other configuration uses existing metadata infrastructure — custom pages a
 
 ### Custom Page Component
 
-A new Angular page component at route `/page/:entityKey/:id?`.
+A new Angular page component at route `/p/:slug/:id?`.
 
 **Responsibilities:**
-1. Load entity metadata via `SchemaService.getEntity(entityKey)`
-2. Detect custom page (`context_rpc` present) — if not, redirect to `/view/`
-3. Load all properties via `SchemaService` (no `show_on_*` filtering)
+1. Resolve slug to custom page metadata via `SchemaService.getCustomPageBySlug(slug)` (cached from `schema_custom_pages`)
+2. If slug not found → 404
+3. Load all properties via `SchemaService.getPropsForEntity(page_key)` (no `show_on_*` filtering)
 4. Call context RPC via `DataService.executeRpc(context_rpc, { p_id })` — omit `p_id` when not in route
 5. Build form controls for writable properties (`is_readonly = false`)
 6. Render mixed layout: `DisplayPropertyComponent` for readonly, `EditPropertyComponent` for writable
@@ -310,29 +418,52 @@ These could be added incrementally if use cases arise.
 
 ### Route Guard & Redirect
 
-A route guard (or logic within existing guards) handles the redirect:
+A route guard (or logic within existing guards) handles redirects when users navigate to CRUD routes for custom page VIEWs:
 
-- If entity has `context_rpc IS NOT NULL` and route is `/view/` or `/edit/` → redirect to `/page/`
-- If entity does NOT have `context_rpc` and route is `/page/` → redirect to `/view/`
+- If table has a row in `metadata.custom_pages` and route is `/view/` or `/edit/` → redirect to `/p/:slug`
+- If slug doesn't match any custom page and route is `/p/` → 404
 
 This ensures users always land on the correct page type regardless of how they navigated.
 
 ### Sidebar Integration
 
-The sidebar already iterates entities with `show_in_sidebar = true`. The template adds a condition:
+The sidebar merges two data sources, both sorted by `sort_order`:
 
-```
-routerLink = entity.context_rpc ? '/page/' + entity.table_name
-                                : '/view/' + entity.table_name
-```
+1. **Entities**: `schema_entities` where `show_in_sidebar = true` → links to `/view/:table_name`
+2. **Custom pages**: `schema_custom_pages` where `show_in_sidebar = true AND can_navigate = true` → links to `/p/:slug`
 
-No new sidebar section — custom pages appear alongside regular entities, sorted by `sort_order`.
+Both lists are concatenated and sorted by `sort_order` to produce a unified sidebar. Custom pages can interleave freely with entity links.
+
+### Slug Resolution
+
+The frontend resolves slugs to custom page metadata via a `Map<string, CustomPage>` built from the cached `schema_custom_pages` response on first load. This avoids any extra API call — the slug is resolved client-side from already-cached data.
 
 ### SchemaService Changes
 
-**New method**: `getRpcParams(functionName: string)` — fetches and caches `schema_rpc_parameters` for a given function. Returns parameter names, types, and default info.
+**New methods**:
+- `getCustomPages()` — fetches and caches `schema_custom_pages`. Returns the full list.
+- `getCustomPageBySlug(slug: string)` — resolves a `page_slug` to a `CustomPage` from the cached map. Returns `undefined` if no match (triggers 404).
+- `getRpcParams(functionName: string)` — fetches and caches `schema_rpc_parameters` for a given function. Returns parameter names, types, and default info.
 
-**Existing method changes**: None. `getEntity()`, `getProps*()`, property type detection, and metadata caching all work unchanged on custom page entities.
+**New TypeScript interface**:
+```typescript
+interface CustomPage {
+    page_key: string;       // VIEW name
+    page_slug: string;      // URL slug
+    display_name: string;
+    description?: string;
+    icon?: string;
+    context_rpc: string;
+    submit_rpc?: string;
+    submit_label: string;
+    show_in_sidebar: boolean;
+    sort_order: number;
+    can_navigate: boolean;
+    can_submit: boolean;
+}
+```
+
+**Existing method changes**: None. `getEntity()`, `getProps*()`, property type detection, and metadata caching all work unchanged — the property pipeline uses `page_key` (= VIEW name = `table_name` in `schema_properties`).
 
 ---
 
@@ -425,7 +556,7 @@ BEGIN
 
     RETURN json_build_object(
         'success', true,
-        'navigate_to', '/page/child-checkin/' || v_child_id
+        'navigate_to', '/p/checkin/' || v_child_id
     );
 END;
 $$ LANGUAGE plpgsql SECURITY INVOKER;
@@ -433,8 +564,11 @@ $$ LANGUAGE plpgsql SECURITY INVOKER;
 
 **Metadata configuration:**
 ```sql
-INSERT INTO metadata.entities (table_name, display_name, context_rpc, submit_rpc, submit_label, show_in_sidebar)
-VALUES ('student_lookup', 'Student Lookup', 'get_student_lookup_context', 'submit_student_lookup', 'Look Up', true);
+-- Register custom page (handles thin entity row + custom_pages row)
+SELECT register_custom_page(
+    'student_lookup', 'student-lookup', 'Student Lookup',
+    'get_student_lookup_context', 'submit_student_lookup', 'Look Up'
+);
 
 -- today is readonly context, pin is the form input
 UPDATE metadata.properties SET is_readonly = true
@@ -488,7 +622,7 @@ BEGIN
         'success', true,
         'message', v_child.display_name || ' has been ' ||
                    CASE p_action WHEN 'check_in' THEN 'checked in' ELSE 'checked out' END,
-        'navigate_to', '/page/student-lookup'
+        'navigate_to', '/p/student-lookup'
     );
 END;
 $$ LANGUAGE plpgsql SECURITY INVOKER;
@@ -496,8 +630,11 @@ $$ LANGUAGE plpgsql SECURITY INVOKER;
 
 **Metadata configuration:**
 ```sql
-INSERT INTO metadata.entities (table_name, display_name, context_rpc, submit_rpc, submit_label)
-VALUES ('child_checkin', 'Check In / Out', 'get_checkin_context', 'submit_checkin', 'Confirm');
+-- Register custom page (handles thin entity row + custom_pages row)
+SELECT register_custom_page(
+    'child_checkin', 'checkin', 'Check In / Out',
+    'get_checkin_context', 'submit_checkin', 'Confirm'
+);
 
 -- Mark context fields as readonly
 UPDATE metadata.properties SET is_readonly = true
@@ -547,13 +684,13 @@ GRANT EXECUTE ON FUNCTION submit_checkin TO check_in_operator;
 ### User Flow
 
 ```
-1. Parent navigates to /page/student-lookup
+1. Parent navigates to /p/student-lookup
 2. Page shows: today's date (readonly) + PIN input field
 3. Parent types PIN → submits
-4. Submit RPC validates → navigates to /page/child-checkin/42
+4. Submit RPC validates → navigates to /p/checkin/42
 5. Page shows: child name, classroom, allergies (readonly) + action dropdown, notes (writable)
 6. Parent selects "Check In" → submits
-7. Submit RPC creates attendance record → navigates to /page/student-lookup
+7. Submit RPC creates attendance record → navigates to /p/student-lookup
 8. Page resets for next child
 ```
 
@@ -591,11 +728,11 @@ This mirrors entity pages where RBAC gates the CRUD buttons but RLS filters the 
 **Junction table:**
 ```sql
 CREATE TABLE metadata.custom_page_roles (
-    custom_page_entity NAME NOT NULL,  -- table_name of the custom page VIEW
+    page_key NAME NOT NULL REFERENCES metadata.custom_pages(page_key) ON DELETE CASCADE,
     role_id SMALLINT NOT NULL REFERENCES metadata.roles(id) ON DELETE CASCADE,
     permission TEXT NOT NULL CHECK (permission IN ('navigate', 'submit')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (custom_page_entity, role_id, permission)
+    PRIMARY KEY (page_key, role_id, permission)
 );
 
 CREATE INDEX idx_custom_page_roles_role ON metadata.custom_page_roles(role_id);
@@ -603,7 +740,7 @@ CREATE INDEX idx_custom_page_roles_role ON metadata.custom_page_roles(role_id);
 
 **Permission check function:**
 ```sql
-CREATE FUNCTION has_custom_page_permission(p_table_name TEXT, p_permission TEXT)
+CREATE FUNCTION has_custom_page_permission(p_page_key TEXT, p_permission TEXT)
 RETURNS BOOLEAN
 LANGUAGE sql STABLE SECURITY DEFINER AS $$
     SELECT
@@ -612,37 +749,26 @@ LANGUAGE sql STABLE SECURITY DEFINER AS $$
             SELECT 1
             FROM metadata.custom_page_roles cpr
             JOIN metadata.roles r ON r.id = cpr.role_id
-            WHERE cpr.custom_page_entity = p_table_name
+            WHERE cpr.page_key = p_page_key
               AND cpr.permission = p_permission
               AND r.role_key = ANY(public.get_user_roles())
         )
 $$;
 ```
 
-**Computed columns in `schema_entities`:**
-```sql
--- Added to schema_entities VIEW definition
-CASE WHEN me.context_rpc IS NOT NULL
-     THEN has_custom_page_permission(tables.table_name::TEXT, 'navigate')
-     END AS can_navigate,
-CASE WHEN me.submit_rpc IS NOT NULL
-     THEN has_custom_page_permission(tables.table_name::TEXT, 'submit')
-     END AS can_submit
-```
-
-These are cached by the frontend alongside existing entity metadata — no extra queries.
+**Computed columns**: `can_navigate` and `can_submit` are computed in the `schema_custom_pages` VIEW (see above), not in `schema_entities`. They are cached by the frontend alongside the custom page metadata — no extra queries.
 
 ### Admin UI Integration
 
 **Admin RPCs** (following the `grant_entity_action_permission` / `revoke_entity_action_permission` pattern):
 ```sql
 get_custom_page_roles(p_role_id INT)
-    → TABLE(custom_page_entity NAME, permission TEXT)
+    → TABLE(page_key NAME, permission TEXT)
 
-grant_custom_page_permission(p_table_name TEXT, p_role_id INT, p_permission TEXT)
+grant_custom_page_permission(p_page_key TEXT, p_role_id INT, p_permission TEXT)
     → JSONB {success}
 
-revoke_custom_page_permission(p_table_name TEXT, p_role_id INT, p_permission TEXT)
+revoke_custom_page_permission(p_page_key TEXT, p_role_id INT, p_permission TEXT)
     → JSONB {success}
 ```
 
@@ -664,11 +790,7 @@ revoke_custom_page_permission(p_table_name TEXT, p_role_id INT, p_permission TEX
 
 **Submit button visibility**: `entity.can_submit`
 
-**`SchemaEntityTable` additions:**
-```typescript
-can_navigate?: boolean;  // Has 'navigate' permission for this custom page
-can_submit?: boolean;    // Has 'submit' permission for this custom page
-```
+Custom page permission fields live on the `CustomPage` interface (see [SchemaService Changes](#schemaservice-changes)), not on `SchemaEntityTable`. No changes to `SchemaEntityTable` are needed.
 
 ### SECURITY INVOKER Convention
 
@@ -754,67 +876,55 @@ Allowing `metadata.entity_actions` to target custom page entities, rendering act
 ### Multiple Submit Actions
 Supporting multiple submit RPCs on one page (e.g., "Approve" and "Reject" buttons). Could be modeled as entity actions rather than multiple submit RPCs.
 
+### MCP Server Integration
+The MCP server currently discovers entities from `schema_entities`. Consider at build time whether custom pages need MCP tool support (e.g., `list_custom_pages`, invoking context/submit RPCs). Custom pages are primarily a UI concern, so this may not be needed — but if LLM agents need to drive custom page workflows (e.g., submitting a check-in via the MCP API), tool coverage would be required.
+
 ---
 
-## Appendix: Separate Table Alternative
+## Appendix: Inline Alternative
 
-**Status**: Deferred — reconsider before v1.0
+**Status**: Rejected in favor of separate table
 
-The current design stores custom page configuration on `metadata.entities` (Approach A). An alternative is a dedicated `metadata.custom_pages` table (Approach B). This appendix documents the tradeoffs for future review.
+An alternative considered was storing custom page columns directly on `metadata.entities` (adding `context_rpc`, `submit_rpc`, `submit_label`, `page_slug` columns). This appendix documents why that approach was rejected.
 
-### Why This Matters
-
-Custom pages share ~5 columns with entities (`display_name`, `description`, `sort_order`, `show_in_sidebar`, `table_name`) but don't use ~15 entity-specific columns (map, calendar, payment, notes, recurring, guided form, search, etc.). Placing custom pages on the entities table means those ~15 columns sit NULL on every custom page row, and the `SchemaEntityTable` interface carries fields that are meaningless for custom pages.
-
-### What Approach B Looks Like
+### What the Inline Approach Looks Like
 
 ```sql
-CREATE TABLE metadata.custom_pages (
-    page_key     NAME PRIMARY KEY,       -- VIEW name
-    display_name TEXT NOT NULL,
-    description  TEXT,
-    icon         TEXT,
-    context_rpc  TEXT NOT NULL,
-    submit_rpc   TEXT,
-    submit_label TEXT DEFAULT 'Submit',
-    show_in_sidebar BOOLEAN DEFAULT TRUE,
-    sort_order   INT DEFAULT 100,
-    created_at   TIMESTAMPTZ DEFAULT now(),
-    updated_at   TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE VIEW schema_custom_pages
-WITH (security_invoker = true) AS
-SELECT
-    cp.*,
-    has_custom_page_permission(cp.page_key::TEXT, 'navigate') AS can_navigate,
-    has_custom_page_permission(cp.page_key::TEXT, 'submit') AS can_submit
-FROM metadata.custom_pages cp;
+ALTER TABLE metadata.entities ADD COLUMN context_rpc TEXT;
+ALTER TABLE metadata.entities ADD COLUMN submit_rpc TEXT;
+ALTER TABLE metadata.entities ADD COLUMN submit_label TEXT;
+ALTER TABLE metadata.entities ADD COLUMN page_slug TEXT UNIQUE;
 ```
 
-The property pipeline (`schema_properties`, `metadata.properties`) is unaffected — it's keyed by `table_name`/`page_key` regardless.
+Detection: entity is a custom page when `context_rpc IS NOT NULL`.
 
-### Comparison
+### Why We Chose the Separate Table
 
-| Dimension | A: On `metadata.entities` | B: Separate table |
-|-----------|--------------------------|-------------------|
-| New schema objects | 3 columns | 1 table + 1 VIEW |
-| NULL noise | ~15 irrelevant columns per row | None |
+| Dimension | Inline (on `metadata.entities`) | Separate table (chosen) |
+|-----------|--------------------------------|------------------------|
+| NULL noise | ~15 irrelevant entity columns per custom page row | None |
 | Detection | Implicit (`context_rpc IS NOT NULL`) | Explicit (row exists in `custom_pages`) |
-| Property pipeline | Works unchanged | Works unchanged |
+| Property pipeline | Works unchanged | Works via thin entity registration row |
 | Sidebar | Single data source | Merge two sources (concat + sort) |
-| Admin UI | Entity Management page covers it | Needs separate admin page |
-| TypeScript interface | Reuses `SchemaEntityTable` (growing) | Clean `CustomPage` interface |
-| Code volume | Less | More |
-| Conceptual clarity | Custom page = entity variant | Custom page = peer of entities |
+| TypeScript interface | Overloads `SchemaEntityTable` with optional fields | Clean `CustomPage` interface |
+| Conceptual clarity | Custom page = entity variant (~30% column overlap) | Custom page = peer of entities |
 
-### Decision
+Custom pages share only ~30% of columns with entities (vs Virtual Entities at ~90%). The "entity variant" framing doesn't hold — custom pages have their own routing (`/p/:slug`), their own permission model (`navigate`/`submit` vs CRUD), and their own data flow (context RPC + submit RPC vs PostgREST GET/PATCH).
 
-Approach A chosen for initial implementation because it requires less code and follows the Virtual Entity precedent. However, custom pages share much less with entities (~30%) than Virtual Entities do (~90%), which makes the "entity variant" framing weaker.
+### Pre-v1.0 Audit: Eliminating the Thin Registration Row
 
-**Revisit trigger**: If `metadata.entities` or `SchemaEntityTable` accumulates more entity-specific columns before v1.0, or if the implicit detection causes integrator confusion, migrate to Approach B. The migration would be:
-1. Create `metadata.custom_pages` table
-2. Copy rows where `context_rpc IS NOT NULL` from `metadata.entities`
-3. Remove `context_rpc`/`submit_rpc`/`submit_label` columns from `metadata.entities`
-4. Update frontend to load from `schema_custom_pages`
-5. Property pipeline unchanged (keyed by VIEW name either way)
+The thin `metadata.entities` registration row exists solely because `schema_properties` filters on:
+```sql
+WHERE columns.table_name::name IN (SELECT table_name FROM schema_entities)
+```
+
+A future core schema audit (recommended before v1.0, given how much `schema_entities` and `schema_properties` have expanded) should evaluate widening this filter:
+```sql
+WHERE columns.table_name::name IN (
+    SELECT table_name FROM schema_entities
+    UNION ALL
+    SELECT page_key::text FROM metadata.custom_pages
+)
+```
+
+This one-line change would eliminate the dummy entities row entirely, making the separation fully clean. Deferred for now to avoid touching the heavily-evolved `schema_properties` VIEW during initial custom pages implementation.
