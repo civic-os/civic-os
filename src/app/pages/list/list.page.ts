@@ -27,6 +27,7 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
+import { MaintenanceService } from '../../services/maintenance.service';
 import { GuidedFormService } from '../../services/guided-form.service';
 import { TranslationService } from '../../services/translation.service';
 import { EntityPropertyType, MapPolygon, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
@@ -87,6 +88,7 @@ export class ListPage implements OnInit, OnDestroy {
   /** Polite announcement for sort changes (aria-sort changes alone are not reliably spoken). */
   public listAnnouncement = signal('');
   public auth = inject(AuthService);
+  public maintenance = inject(MaintenanceService);
 
   // Set the document title once entity metadata resolves (e.g. "Issues – Civic OS").
   private _titleEffect = effect(() => {

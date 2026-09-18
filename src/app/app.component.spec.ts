@@ -22,6 +22,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
 import { AuthService } from './services/auth.service';
+import { MaintenanceService } from './services/maintenance.service';
 import { ThemeService } from './services/theme.service';
 import { AnalyticsService } from './services/analytics.service';
 import { ImpersonationService } from './services/impersonation.service';
@@ -31,6 +32,7 @@ import { Subject } from 'rxjs';
 
 describe('AppComponent', () => {
     let mockAuthService: any;
+    let mockMaintenanceService: any;
     let mockThemeService: any;
     let mockAnalyticsService: any;
     let mockImpersonationService: any;
@@ -76,6 +78,18 @@ describe('AppComponent', () => {
             impersonatedRoles: signal<string[]>([])
         };
 
+        // Mock MaintenanceService with signals
+        mockMaintenanceService = {
+            mode: signal('off'),
+            message: signal(null),
+            isReadOnly: signal(false),
+            isFullMaintenance: signal(false),
+            isActive: signal(false),
+            isAdminBypassing: signal(false),
+            updateFromHeader: vi.fn(),
+            updateFromError: vi.fn()
+        };
+
         await TestBed.configureTestingModule({
             imports: [AppComponent],
             providers: [
@@ -84,6 +98,7 @@ describe('AppComponent', () => {
                 provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
                 { provide: AuthService, useValue: mockAuthService },
+                { provide: MaintenanceService, useValue: mockMaintenanceService },
                 { provide: ThemeService, useValue: mockThemeService },
                 { provide: AnalyticsService, useValue: mockAnalyticsService },
                 { provide: ImpersonationService, useValue: mockImpersonationService },

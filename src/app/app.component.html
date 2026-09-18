@@ -1,4 +1,5 @@
-<!-- PWA: Offline banner + Install banner (above all content) -->
+<!-- Banners (above all content): Maintenance > Offline > PWA Install -->
+<app-maintenance-banner />
 <app-offline-banner />
 <app-pwa-install-banner />
 
@@ -339,6 +340,17 @@
 
 <!-- PWA: Update toast (fixed position, bottom-right) -->
 <app-pwa-update-toast />
+
+<!-- Full Maintenance Overlay (blocks all interaction for non-admins) -->
+@if (maintenance.isFullMaintenance() && !maintenance.isAdminBypassing()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-base-100">
+    <div class="text-center p-8">
+      <span class="material-symbols-outlined text-6xl mb-4 block">construction</span>
+      <h1 class="text-2xl font-bold mb-2">{{ 'maintenance.full_title' | translate }}</h1>
+      <p class="text-base-content/70">{{ maintenance.message() || ('maintenance.full_message' | translate) }}</p>
+    </div>
+  </div>
+}
 
 <!-- Profile Incomplete Prompt (shown globally when guard detects missing required extensions) -->
 @if (profileService.incompleteRequired().length > 0) {

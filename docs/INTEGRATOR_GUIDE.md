@@ -6295,6 +6295,112 @@ See `docs/notes/PWA_DESIGN.md` for detailed architecture, security consideration
 
 ---
 
+## Maintenance Mode
+
+> **Version**: v0.76.0+
+
+Civic OS supports two maintenance modes to protect data integrity during deployments and database migrations. A single `MAINTENANCE_MODE` environment variable controls enforcement across all services.
+
+### Modes
+
+| Mode | User Experience | API Behavior | Use Case |
+|------|----------------|-------------|----------|
+| `off` (default) | Normal operation | All requests allowed | -- |
+| `readonly` | Warning banner, write controls hidden | GET allowed, POST/PATCH/PUT/DELETE return 503 | Schema migration, DB maintenance |
+| `full` | Full-screen maintenance overlay | All requests return 503 | Database transition, major migration |
+
+### Enabling Maintenance Mode
+
+Set the `MAINTENANCE_MODE` environment variable and restart affected services:
+
+```bash
+# In your .env file
+MAINTENANCE_MODE=readonly
+MAINTENANCE_MESSAGE="Scheduled maintenance in progress"
+
+# Restart PostgREST to enforce at API level
+docker compose up -d postgrest
+
+# Optionally restart frontend for immediate static detection
+docker compose up -d frontend
+```
+
+### Disabling Maintenance Mode
+
+```bash
+# In your .env file
+MAINTENANCE_MODE=off
+
+# Restart services
+docker compose up -d postgrest frontend
+```
+
+### Admin Bypass
+
+Users with the `admin` role can access the system normally during maintenance. They see a distinctive info banner indicating maintenance is active but are not restricted. This allows administrators to verify the system works after a migration before opening it to all users.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MAINTENANCE_MODE` | `off` | Maintenance mode: `off`, `readonly`, or `full` |
+| `MAINTENANCE_MESSAGE` | (none) | Optional message displayed in banners and overlay |
+
+Both variables are consumed by PostgREST (via `PGRST_APP_SETTINGS_MAINTENANCE_MODE`), the frontend container (via `docker-entrypoint.sh`), and the consolidated worker.
+
+### VPS Deployment with Maintenance
+
+The deploy script supports automatic maintenance wrapping:
+
+```bash
+./deploy.sh --maintenance          # Enables readonly during migration
+./deploy.sh --maintenance --payments  # With payment worker
+```
+
+### How Detection Works
+
+The frontend uses two complementary detection mechanisms:
+
+- **Active users**: Detected instantly via PostgREST response headers on every API call (HTTP interceptor reads `X-Maintenance-Mode` header and 503 status)
+- **Idle users**: Detected within 30 seconds via `/maintenance.json` polling (static file written by `docker-entrypoint.sh`)
+- **Fresh page loads**: Detected immediately if the frontend container was restarted with the env var (first poll fires on app init)
+
+### Worker Behavior
+
+The consolidated worker reads `MAINTENANCE_MODE` at startup. In `readonly` or `full` mode, it blocks and waits for a restart signal instead of starting the River job queue. This prevents background jobs (notifications, file processing, user provisioning) from running while the database schema may be in flux.
+
+Restart the worker after clearing the maintenance env var to resume processing.
+
+### Custom Maintenance Messages
+
+The optional `MAINTENANCE_MESSAGE` env var allows operators to provide context:
+
+```bash
+MAINTENANCE_MODE=readonly
+MAINTENANCE_MESSAGE="Upgrading to v0.77.0 — estimated 15 minutes"
+```
+
+The message appears in the maintenance banner (readonly mode) and full-screen overlay (full mode). The message is displayed as-is and is not translated, since it is operator-provided per-deployment context.
+
+### Recommended Deployment Sequence
+
+```
+1. Set MAINTENANCE_MODE=readonly in .env
+2. Restart PostgREST (enforces API restrictions)
+3. Restart frontend (updates /maintenance.json for idle users)
+4. Stop worker (prevents background processing)
+5. Run database migrations
+6. Verify migrations succeeded
+7. Set MAINTENANCE_MODE=off in .env
+8. Restart PostgREST, frontend, worker
+```
+
+### Architecture
+
+See `docs/notes/MAINTENANCE_MODE_DESIGN.md` for detailed architecture, dual detection mechanisms, security considerations, and design decisions.
+
+---
+
 ## MCP Server
 
 The MCP (Model Context Protocol) server lets LLMs interact with a Civic OS instance through structured tools — browsing entities, querying records, creating/updating data, and executing entity actions. It acts as a semantic API adapter over PostgREST, using the same JWT auth and RLS permissions as the web frontend.

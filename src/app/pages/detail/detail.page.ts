@@ -63,6 +63,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SchemaService } from '../../services/schema.service';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { MaintenanceService } from '../../services/maintenance.service';
 import { NavigationService } from '../../services/navigation.service';
 import { getAppTitle } from '../../config/runtime';
 
@@ -129,6 +130,7 @@ export class DetailPage {
   private navigation = inject(NavigationService);
   private titleService = inject(Title);
   public auth = inject(AuthService);
+  public maintenance = inject(MaintenanceService);
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;
@@ -510,8 +512,10 @@ export class DetailPage {
 
       if (!entity || !data) return buttons;
 
-      // Edit button (hidden for guided forms — review section has per-step Edit buttons)
-      if (entity.update && !entity.guided_form_key) {
+      const inMaintenance = this.maintenance.isActive() && !this.maintenance.isAdminBypassing();
+
+      // Edit button (hidden for guided forms and during maintenance mode)
+      if (entity.update && !entity.guided_form_key && !inMaintenance) {
         buttons.push({
           id: 'edit',
           label: 'Edit',
@@ -521,8 +525,8 @@ export class DetailPage {
         });
       }
 
-      // Delete button
-      if (entity.delete) {
+      // Delete button (hidden during maintenance mode)
+      if (entity.delete && !inMaintenance) {
         buttons.push({
           id: 'delete',
           label: 'Delete',

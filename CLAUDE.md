@@ -102,6 +102,8 @@ The `EntityPropertyType` enum maps PostgreSQL types to UI components:
 
 **PWA Support** (v0.69.0+): Optional thin PWA via `PWA_ENABLED` Docker env var (default: false). App shell caching only (no API data caching). Features offline banner, install prompt (first-visit + Settings), and auto-update toast. Dynamic `<meta name="theme-color">` syncs with DaisyUI theme via ThemeService. See `docs/notes/PWA_DESIGN.md` for architecture.
 
+**Maintenance Mode** (v0.76.0+): Two modes (`readonly`, `full`) toggled via `MAINTENANCE_MODE` env var. Enforced at API level in `check_jwt()` via PostgREST GUC. Frontend detects via response headers (instant) and `/maintenance.json` polling (30s for idle users). Admin bypass via `is_admin()`. Workers pause when maintenance is active. See `docs/notes/MAINTENANCE_MODE_DESIGN.md` for architecture and `docs/INTEGRATOR_GUIDE.md` (Maintenance Mode section) for operator guide.
+
 ## Custom Dashboards
 
 **Status**: Phase 2 complete, plus calendar widgets and chart widgets (grouped bar, v0.61.0)

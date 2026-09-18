@@ -141,6 +141,20 @@ func main() {
 		log.Printf("[Init]   Tracking Server: disabled")
 	}
 
+	// Maintenance mode check
+	maintenanceMode := getEnv("MAINTENANCE_MODE", "off")
+	log.Printf("[Init]   Maintenance Mode: %s", maintenanceMode)
+	if maintenanceMode != "off" {
+		log.Printf("[Init] ⚠ Maintenance mode active: %s — worker will not start job processing", maintenanceMode)
+		log.Println("[Init] Waiting for maintenance mode to end (restart worker when ready)...")
+		// Block until signal received
+		maintSigChan := make(chan os.Signal, 1)
+		signal.Notify(maintSigChan, syscall.SIGINT, syscall.SIGTERM)
+		<-maintSigChan
+		log.Println("[Shutdown] Signal received during maintenance mode, exiting.")
+		os.Exit(0)
+	}
+
 	// Load timezone for notification worker
 	timezone, err := time.LoadLocation(notificationTimezone)
 	if err != nil {

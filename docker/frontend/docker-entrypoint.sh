@@ -31,6 +31,8 @@ echo "  DEFAULT_LOCALE: $DEFAULT_LOCALE"
 echo "  SUPPORTED_LOCALES: $SUPPORTED_LOCALES"
 echo "  PWA_ENABLED: $PWA_ENABLED"
 echo "  PWA_APP_NAME: $PWA_APP_NAME"
+echo "  MAINTENANCE_MODE: $MAINTENANCE_MODE"
+echo "  MAINTENANCE_MESSAGE: $MAINTENANCE_MESSAGE"
 echo ""
 
 # Generate inline config script
@@ -124,6 +126,17 @@ fi
 INDEX_HASH=$(sha1sum /usr/share/nginx/html/index.html | cut -d' ' -f1)
 sed -i "s|\"\/index.html\": \"[a-f0-9]*\"|\"\/index.html\": \"$INDEX_HASH\"|" /usr/share/nginx/html/ngsw.json
 echo "✓ Updated ngsw.json index.html hash"
+
+# Maintenance mode: write or remove static signal file
+if [ -n "$MAINTENANCE_MODE" ] && [ "$MAINTENANCE_MODE" != "off" ]; then
+  echo "Maintenance mode: $MAINTENANCE_MODE"
+  cat > /usr/share/nginx/html/maintenance.json <<MEOF
+{"mode":"${MAINTENANCE_MODE}","message":"$(echo "${MAINTENANCE_MESSAGE}" | sed 's/"/\\"/g')"}
+MEOF
+  echo "✓ Maintenance mode signal file written"
+else
+  rm -f /usr/share/nginx/html/maintenance.json
+fi
 
 echo ""
 

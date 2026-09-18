@@ -24,6 +24,7 @@ import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/ht
 import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { impersonationInterceptor } from './interceptors/impersonation.interceptor';
 import { localeInterceptor } from './interceptors/locale.interceptor';
+import { maintenanceInterceptor } from './interceptors/maintenance.interceptor';
 import { authErrorInterceptor } from './interceptors/auth-error.interceptor';
 import { errorTrackingInterceptor } from './interceptors/error-tracking.interceptor';
 import { WidgetComponentRegistry } from './services/widget-component-registry.service';
@@ -42,6 +43,7 @@ import { markdownSanitize } from './markdown/markdown-sanitize';
 import { getKeycloakConfig, getPostgrestUrl, getMatomoConfig, getPwaConfig } from './config/runtime';
 import { TranslationService } from './services/translation.service';
 import { PwaService } from './services/pwa.service';
+import { MaintenanceService } from './services/maintenance.service';
 import { provideMatomo, withRouter } from 'ngx-matomo-client';
 
 export const appConfig: ApplicationConfig = {
@@ -83,6 +85,7 @@ export const appConfig: ApplicationConfig = {
       includeBearerTokenInterceptor,
       impersonationInterceptor,   // Adds X-Impersonate-Roles header when admin is impersonating
       localeInterceptor,          // Adds Accept-Language header for i18n translation lookup
+      maintenanceInterceptor,     // Detects maintenance mode from PostgREST response headers / 503
       authErrorInterceptor,       // Safety net: redirects to login on 401 for authenticated users
       errorTrackingInterceptor    // Logs all HTTP errors to Matomo analytics
     ])),
@@ -127,6 +130,11 @@ export const appConfig: ApplicationConfig = {
     // Eagerly initialize PwaService for install prompt capture and SW update monitoring
     provideAppInitializer(() => {
       inject(PwaService);
+    }),
+
+    // Eagerly initialize MaintenanceService for maintenance.json polling
+    provideAppInitializer(() => {
+      inject(MaintenanceService);
     }),
 
     // Register widget components at startup (Phase 1 + Phase 2)

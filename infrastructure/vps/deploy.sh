@@ -6,8 +6,10 @@
 # Zero-downtime deployment using docker-rollout
 #
 # Usage:
-#   ./deploy.sh              # Deploy without payments
-#   ./deploy.sh --payments   # Deploy with payment-worker
+#   ./deploy.sh                        # Deploy without payments
+#   ./deploy.sh --payments             # Deploy with payment-worker
+#   ./deploy.sh --maintenance          # Deploy with readonly maintenance mode during migration
+#   ./deploy.sh --payments --maintenance  # Both flags
 #
 # Prerequisites:
 #   - Docker and Docker Compose installed
@@ -65,10 +67,21 @@ fi
 
 # Parse arguments
 PROFILE_ARGS=""
-if [ "$1" = "--payments" ]; then
-    PROFILE_ARGS="--profile payments"
-    log_info "Deploying WITH payment-worker"
-else
+USE_MAINTENANCE=false
+for arg in "$@"; do
+    case "$arg" in
+        --payments)
+            PROFILE_ARGS="--profile payments"
+            log_info "Deploying WITH payment-worker"
+            ;;
+        --maintenance)
+            USE_MAINTENANCE=true
+            log_info "Deploying WITH maintenance mode (readonly during migration)"
+            ;;
+    esac
+done
+
+if [ -z "$PROFILE_ARGS" ]; then
     log_info "Deploying WITHOUT payment-worker (use --payments to enable)"
 fi
 
@@ -77,6 +90,15 @@ COMPOSE_CMD="docker compose -f docker-compose.vps.yml $PROFILE_ARGS"
 # Step 1: Pull latest images
 log_info "Pulling latest images..."
 $COMPOSE_CMD pull
+
+# Step 1b: Enter maintenance mode (if requested)
+if [ "$USE_MAINTENANCE" = true ]; then
+    log_info "Entering read-only maintenance mode..."
+    export MAINTENANCE_MODE=readonly
+    $COMPOSE_CMD up -d postgrest
+    sleep 2
+    log_info "PostgREST restarted in read-only mode"
+fi
 
 # Step 2: Run database migrations
 log_info "Running database migrations..."
@@ -108,10 +130,19 @@ else
     docker rollout -f docker-compose.vps.yml $PROFILE_ARGS consolidated-worker
 
     # Payment worker (if enabled)
-    if [ "$1" = "--payments" ]; then
+    if [ -n "$PROFILE_ARGS" ]; then
         log_info "Rolling out Payment Worker..."
         docker rollout -f docker-compose.vps.yml $PROFILE_ARGS payment-worker
     fi
+fi
+
+# Step 3b: Exit maintenance mode (if it was enabled)
+if [ "$USE_MAINTENANCE" = true ]; then
+    log_info "Exiting maintenance mode..."
+    export MAINTENANCE_MODE=off
+    $COMPOSE_CMD up -d postgrest frontend
+    sleep 2
+    log_info "Maintenance mode disabled"
 fi
 
 # Step 4: Verify health

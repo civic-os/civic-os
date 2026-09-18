@@ -42,8 +42,10 @@ import { CosModalComponent } from './components/cos-modal/cos-modal.component';
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslationService } from './services/translation.service';
 import { OfflineBannerComponent } from './components/offline-banner/offline-banner.component';
+import { MaintenanceBannerComponent } from './components/maintenance-banner/maintenance-banner.component';
 import { PwaInstallBannerComponent } from './components/pwa-install-banner/pwa-install-banner.component';
 import { PwaUpdateToastComponent } from './components/pwa-update-toast/pwa-update-toast.component';
+import { MaintenanceService } from './services/maintenance.service';
 import { ContrastTextDirective } from './directives/contrast-text.directive';
 
 @Component({
@@ -59,6 +61,7 @@ import { ContrastTextDirective } from './directives/contrast-text.directive';
     CosModalComponent,
     TranslatePipe,
     OfflineBannerComponent,
+    MaintenanceBannerComponent,
     PwaInstallBannerComponent,
     PwaUpdateToastComponent,
     ContrastTextDirective
@@ -75,6 +78,7 @@ export class AppComponent implements AfterViewInit {
   private titleService = inject(Title);
   private translation = inject(TranslationService);
   public auth = inject(AuthService);
+  public maintenance = inject(MaintenanceService);
   public themeService = inject(ThemeService);
   private localeService = inject(LocaleService);
   public profileService = inject(ProfileService);

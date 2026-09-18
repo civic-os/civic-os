@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, ViewChildren, QueryList, effect } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Observable, forkJoin, from, mergeMap, of, tap, map, take, catchError } from 'rxjs';
 import {
@@ -45,6 +45,7 @@ import { DataService } from '../../services/data.service';
 import { GalleryService } from '../../services/gallery.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { GuidedFormService } from '../../services/guided-form.service';
+import { MaintenanceService } from '../../services/maintenance.service';
 import { ProfileService } from '../../services/profile.service';
 import { CosModalComponent } from '../../components/cos-modal/cos-modal.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -85,6 +86,15 @@ export class CreatePage {
   private titleService = inject(Title);
   private translation = inject(TranslationService);
   public auth = inject(AuthService);
+  private maintenanceService = inject(MaintenanceService);
+
+  // Redirect away from create page during maintenance mode
+  private _maintenanceGuard = effect(() => {
+    if (this.maintenanceService.isActive() && !this.maintenanceService.isAdminBypassing()) {
+      const target = this.entityKey ? ['/view', this.entityKey] : ['/'];
+      this.router.navigate(target);
+    }
+  });
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;

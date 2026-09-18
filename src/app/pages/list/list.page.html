@@ -65,8 +65,8 @@
           (importComplete)="onImportComplete($event)">
         </app-import-export-buttons>
 
-        <!-- Add Button -->
-        @if (entity.insert) {
+        <!-- Add Button (hidden during maintenance mode) -->
+        @if (entity.insert && (!maintenance.isActive() || maintenance.isAdminBypassing())) {
           @if (entity.guided_form_key) {
             <button type="button" class="btn btn-primary btn-sm" (click)="startGuidedForm(entity)" [attr.aria-label]="('guided_form.start_new' | translate) + ' ' + entity.display_name">
               <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>

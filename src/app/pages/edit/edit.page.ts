@@ -16,7 +16,7 @@
  */
 
 
-import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy, untracked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { SchemaService } from '../../services/schema.service';
 import { Observable, forkJoin, from, map, mergeMap, of, tap, take, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -53,6 +53,7 @@ import { InlineM2mEditorComponent } from '../../components/inline-m2m-editor/inl
 import { RichM2mDiff } from '../../components/fk-search-modal/fk-search-modal.component';
 import { SaveProgressComponent, SaveStep } from '../../components/save-progress/save-progress.component';
 import { AnalyticsService } from '../../services/analytics.service';
+import { MaintenanceService } from '../../services/maintenance.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
 import { getAppTitle } from '../../config/runtime';
@@ -95,6 +96,17 @@ export class EditPage implements OnDestroy {
   private titleService = inject(Title);
   private translation = inject(TranslationService);
   public auth = inject(AuthService);
+  private maintenanceService = inject(MaintenanceService);
+
+  // Redirect away from edit page during maintenance mode
+  private _maintenanceGuard = effect(() => {
+    if (this.maintenanceService.isActive() && !this.maintenanceService.isAdminBypassing()) {
+      const entityKey = untracked(() => this.entityKey);
+      const entityId = untracked(() => this.entityId);
+      const target = entityKey && entityId ? ['/view', entityKey, entityId] : ['/'];
+      this.router.navigate(target);
+    }
+  });
 
   // Expose Math and SchemaService to template
   protected readonly Math = Math;

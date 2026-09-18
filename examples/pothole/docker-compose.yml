@@ -47,6 +47,7 @@ services:
       PGRST_ADMIN_SERVER_PORT: 3001
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: civic-os-dev
+      PGRST_APP_SETTINGS_MAINTENANCE_MODE: "${MAINTENANCE_MODE:-off}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -180,6 +181,8 @@ services:
       - KEYCLOAK_SERVICE_CLIENT_SECRET=civic-os-service-secret
       # Recurring Series Configuration
       - RECURRING_SERIES_HORIZON_DAYS=${RECURRING_SERIES_HORIZON_DAYS:-90}
+      # Maintenance mode (optional, default: off)
+      - MAINTENANCE_MODE=${MAINTENANCE_MODE:-off}
     networks:
       - postgrest-network
     depends_on:
