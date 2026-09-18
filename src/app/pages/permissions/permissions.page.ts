@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -385,6 +385,34 @@ export class PermissionsPage {
         this.entityActionLoading.set(false);
       }
     });
+  }
+
+  private readonly TAB_ORDER: PermissionTab[] = ['tables', 'actions', 'delegation'];
+
+  /**
+   * Handle arrow-key navigation within the tablist (WCAG 2.1.1).
+   * Left/Right arrows move focus to adjacent tabs and activate them.
+   */
+  onTablistKeydown(event: KeyboardEvent): void {
+    const currentIndex = this.TAB_ORDER.indexOf(this.activeTab());
+    let nextIndex = currentIndex;
+
+    if (event.key === 'ArrowRight') {
+      nextIndex = (currentIndex + 1) % this.TAB_ORDER.length;
+    } else if (event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + this.TAB_ORDER.length) % this.TAB_ORDER.length;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const nextTab = this.TAB_ORDER[nextIndex];
+    this.switchTab(nextTab);
+
+    // Move DOM focus to the newly active tab button
+    const tablist = (event.currentTarget as HTMLElement);
+    const tabButtons = tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabButtons[nextIndex]?.focus();
   }
 
   /**

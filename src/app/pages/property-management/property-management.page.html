@@ -22,10 +22,11 @@
   @if (!adminLoading() && isAdmin()) {
     <!-- Entity Selector -->
     <div class="mb-6">
-      <div class="label me-2">
+      <label class="label me-2" for="property-entity-select">
         <span class="label-text font-semibold">Select Entity</span>
-      </div>
+      </label>
       <select
+        id="property-entity-select"
         class="select select-bordered w-full max-w-md"
         [(ngModel)]="selectedEntity"
         [compareWith]="compareEntities"
@@ -261,10 +262,11 @@
 
                       <!-- Display Name (editable) -->
                       <div>
-                        <div class="label label-text text-xs">Display Name</div>
+                        <label class="label label-text text-xs" [for]="'display-name-' + item.column_name">Display Name</label>
                         <input
                           type="text"
                           class="input input-sm input-bordered w-full"
+                          [id]="'display-name-' + item.column_name"
                           [(ngModel)]="item.customDisplayName"
                           (ngModelChange)="onDisplayNameChange(item)"
                           (blur)="onFieldBlur(item)"
@@ -324,9 +326,10 @@
                       <div class="grid grid-cols-1 gap-4">
                         <!-- Description -->
                         <div>
-                          <div class="label label-text text-xs">Description</div>
+                          <label class="label label-text text-xs" [for]="'description-' + item.column_name">Description</label>
                           <textarea
                             class="textarea textarea-bordered w-full"
+                            [id]="'description-' + item.column_name"
                             rows="3"
                             [(ngModel)]="item.customDescription"
                             (ngModelChange)="onDescriptionChange(item)"

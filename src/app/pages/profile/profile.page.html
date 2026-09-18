@@ -174,7 +174,7 @@
       <!-- ================================================================ -->
       @if (isOwnProfile()) {
         <div class="collapse collapse-arrow bg-base-200">
-          <input type="checkbox" checked />
+          <input type="checkbox" checked [attr.aria-label]="'profile.notifications' | translate" />
           <div class="collapse-title font-medium">
             {{ 'profile.notifications' | translate }}
           </div>
@@ -260,7 +260,7 @@
       <!-- ================================================================ -->
       @for (ext of extensions(); track ext.table_name) {
         <div class="collapse collapse-arrow bg-base-200" [id]="'ext-' + ext.table_name">
-          <input type="checkbox" [checked]="ext.has_record" />
+          <input type="checkbox" [checked]="ext.has_record" [attr.aria-label]="ext.display_name" />
           <div class="collapse-title font-medium">
             {{ ext.display_name }}
             @if (ext.has_record) {
@@ -319,7 +319,7 @@
       <!-- ================================================================ -->
       @if (relatedRecords().length > 0) {
         <div class="collapse collapse-arrow bg-base-200">
-          <input type="checkbox" />
+          <input type="checkbox" [attr.aria-label]="'detail.related' | translate" />
           <div class="collapse-title font-medium">
             {{ 'detail.related' | translate }}
           </div>

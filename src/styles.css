@@ -131,3 +131,12 @@ select.ng-invalid.ng-touched:focus {
     border: none;
     border-radius: 0.5rem;
 }
+
+/* Leaflet attribution contrast (WCAG 1.4.3 — AA requires 4.5:1).
+   Leaflet's default attribution uses ~3.62:1; this override enforces a
+   dark neutral that passes in all 35 DaisyUI themes. Scoped to
+   .map-wrapper to avoid affecting other Leaflet instances. */
+.map-wrapper .leaflet-control-attribution,
+.map-wrapper .leaflet-control-attribution a {
+    color: oklch(30% 0 0) !important;
+}

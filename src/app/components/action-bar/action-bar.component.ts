@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -118,7 +118,7 @@ export interface ActionButton {
     <!-- Hidden measurement container for calculating button widths -->
     <div class="absolute opacity-0 pointer-events-none flex gap-2" #measureContainer aria-hidden="true">
       @for (btn of buttons(); track btn.id) {
-        <button type="button" [class]="'btn btn-sm ' + btn.style">
+        <button type="button" tabindex="-1" [class]="'btn btn-sm ' + btn.style">
           @if (btn.icon) {
             <span class="material-symbols-outlined text-lg" aria-hidden="true">{{btn.icon}}</span>
           }

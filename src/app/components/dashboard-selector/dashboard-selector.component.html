@@ -1,7 +1,7 @@
 <!-- Dashboard Selector Dropdown (DaisyUI) -->
 <div class="dropdown dropdown-end">
   <!-- Dropdown Button -->
-  <button type="button" class="btn btn-ghost" [attr.aria-label]="'a11y.select_dashboard' | translate">
+  <button type="button" class="btn btn-ghost" [attr.aria-label]="('a11y.select_dashboard' | translate) + ': ' + getCurrentDashboardName()">
     <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
     <span class="hidden sm:inline ms-2">{{ getCurrentDashboardName() }}</span>
     <span class="material-symbols-outlined ms-1" aria-hidden="true">expand_more</span>

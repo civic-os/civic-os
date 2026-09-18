@@ -13,6 +13,8 @@
        toggle <button> below (aria-expanded/aria-controls). -->
   <input id="main-drawer" [(ngModel)]="drawerOpen" type="checkbox" class="drawer-toggle" tabindex="-1" aria-hidden="true" />
   <div class="drawer-content">
+    <header>
+      <nav aria-label="Primary">
     <div class="navbar bg-base-300">
       <div class="flex-none">
         <button type="button" class="btn btn-square btn-ghost drawer-button" (click)="drawerOpen = !drawerOpen"
@@ -82,6 +84,8 @@
         </details>
       </div>
     </div>
+      </nav>
+    </header>
     <main id="main-content" tabindex="-1" class="outline-none container mx-auto px-4">
       <router-outlet></router-outlet>
     </main>
@@ -91,6 +95,7 @@
          the toggle button's aria-expanded are the keyboard/AT interface. -->
     <label for="main-drawer" aria-hidden="true" class="drawer-overlay"></label>
     @if (menuItems$ | async; as menuItems) {
+      <nav aria-label="Sidebar">
       <div class="w-80 min-h-full bg-base-200 text-base-content flex flex-col">
         <div class="navbar bg-base-300">
           <div class="flex-none">
@@ -314,6 +319,7 @@
           }
         </ul>
       </div>
+      </nav>
     }
   </div>
 </div>

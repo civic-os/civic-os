@@ -457,6 +457,8 @@ Based on codebase analysis, here's the current state of Civic OS accessibility:
 
 ## Testing Tools & Workflow
 
+**Automated Scanning**: Use IBM Equal Access engine via Playwright for comprehensive WCAG 2.2 AA scanning. See `docs/development/ACCESSIBILITY_AUDIT_RUNBOOK.md` for the complete procedure, known false positives, and scan cadence.
+
 ### Automated Testing Tools
 
 Automated tools can find **~35% of accessibility issues**. Manual testing is essential for complete compliance.

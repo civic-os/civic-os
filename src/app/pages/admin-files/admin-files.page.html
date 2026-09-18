@@ -41,6 +41,7 @@
         <select
           #entitySelect
           class="select select-bordered select-sm"
+          aria-label="View"
           (change)="onEntitySelectedByValue(entitySelect.value)">
           <option value="all" [selected]="currentEntityType() === 'all'">All Files</option>
           @for (entity of entityOptions(); track entity.value) {
@@ -57,6 +58,7 @@
         </div>
         <select
           class="select select-bordered select-sm"
+          aria-label="File Type"
           [ngModel]="currentFileTypeFilter()"
           (ngModelChange)="onFileTypeFilterChange($event)">
           @for (option of fileTypeOptions; track option.value) {
@@ -92,15 +94,16 @@
         <div class="label py-1">
           <span class="label-text font-semibold">&nbsp;</span>
         </div>
-        <label class="input input-bordered input-sm flex items-center gap-2">
+        <div class="input input-bordered input-sm flex items-center gap-2">
           <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
           <input
             type="text"
             placeholder="Search filename..."
             class="grow bg-transparent border-none outline-none"
+            aria-label="Search filename"
             [ngModel]="currentSearch()"
             (ngModelChange)="onSearchChange($event)" />
-        </label>
+        </div>
       </div>
 
       <!-- Spacer pushes filter button + refresh to the right -->
@@ -150,9 +153,10 @@
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th>
+              <th scope="col">
                 <input type="checkbox"
                   class="checkbox checkbox-sm"
+                  aria-label="Select all files"
                   [checked]="isAllSelected()"
                   (change)="toggleSelectAll()" />
               </th>
@@ -198,6 +202,7 @@
                 <td>
                   <input type="checkbox"
                     class="checkbox checkbox-sm"
+                    [attr.aria-label]="'Select file ' + file.file_name"
                     [checked]="selectedFileIds().has(file.id)"
                     (change)="toggleFileSelection(file.id)" />
                 </td>

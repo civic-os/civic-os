@@ -154,7 +154,8 @@ export class EditPropertyComponent {
         || t === EntityPropertyType.GeoPolygon
         || t === EntityPropertyType.PhotoGallery
         || t === EntityPropertyType.Payment
-        || t === EntityPropertyType.Markdown;
+        || t === EntityPropertyType.Markdown
+        || t === EntityPropertyType.ManyToMany;
   });
 
   // File upload state

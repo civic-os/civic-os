@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -43,6 +43,8 @@ export class PaginationComponent {
   @Input() loading = false;
   /** Only one pagination instance per page should announce results (pages render top+bottom copies). */
   @Input() announceResults = true;
+  /** Override the nav aria-label for uniqueness when multiple instances appear on one page. */
+  @Input() ariaLabel?: string;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() pageSizeChange = new EventEmitter<number>();

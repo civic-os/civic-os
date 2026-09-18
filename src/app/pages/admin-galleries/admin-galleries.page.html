@@ -44,6 +44,7 @@
         </div>
         <select
           class="select select-bordered select-sm"
+          aria-label="View"
           [ngModel]="filterEntityType()"
           (ngModelChange)="onEntityTypeFilterChange($event)">
           <option value="">All Galleries</option>
@@ -60,6 +61,7 @@
         </div>
         <select
           class="select select-bordered select-sm"
+          aria-label="Status"
           [ngModel]="filterStatus()"
           (ngModelChange)="onStatusFilterChange($event)">
           <option value="all">All</option>
@@ -95,15 +97,16 @@
         <div class="label py-1">
           <span class="label-text font-semibold">&nbsp;</span>
         </div>
-        <label class="input input-bordered input-sm flex items-center gap-2">
+        <div class="input input-bordered input-sm flex items-center gap-2">
           <span class="material-symbols-outlined text-base text-base-content/50" aria-hidden="true">search</span>
           <input
             type="text"
             placeholder="Search entity ID..."
             class="grow bg-transparent border-none outline-none"
+            aria-label="Search entity ID"
             [ngModel]="filterSearch()"
             (ngModelChange)="onSearchChange($event)" />
-        </label>
+        </div>
       </div>
 
       <!-- Spacer -->

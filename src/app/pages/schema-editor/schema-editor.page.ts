@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -301,6 +301,16 @@ export class SchemaEditorPage implements OnDestroy {
 
       // Auto-arrange on initial load (includes zoom to fit)
       await this.autoArrange();
+
+      // WCAG 1.1.1: label the canvas SVG and hide JointJS measurement SVGs
+      const paperSvg = this.paper.el.querySelector('svg');
+      if (paperSvg) {
+        paperSvg.setAttribute('role', 'img');
+        paperSvg.setAttribute('aria-label', 'Entity relationship diagram');
+      }
+      document.querySelectorAll<SVGElement>('svg[style*="z-index: -9999"]').forEach(svg => {
+        svg.setAttribute('aria-hidden', 'true');
+      });
     } catch (err) {
       console.error('[SchemaEditorPage] Failed to initialize canvas:', err);
       this.error.set('Failed to initialize JointJS. Check console for details.');

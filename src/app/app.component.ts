@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, inject, signal, computed, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ElementRef, ChangeDetectionStrategy, AfterViewInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet, RouterLink, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
@@ -67,7 +67,7 @@ import { ContrastTextDirective } from './directives/contrast-text.directive';
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
   private schema = inject(SchemaService);
   private version = inject(VersionService);
   private router = inject(Router);
@@ -223,6 +223,15 @@ export class AppComponent {
       // freshly rendered content instead of silently swapped page content.
       const main = this.elementRef.nativeElement.querySelector('#main-content') as HTMLElement | null;
       main?.focus();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // JointJS injects a hidden measurement SVG (position: fixed; z-index: -99999999)
+    // into the document body. It has no accessible name, triggering svg_graphics_labelled
+    // violations on every page. Mark it aria-hidden since it's purely for internal measurement.
+    document.querySelectorAll<SVGElement>('svg[style*="z-index: -9999"]').forEach(svg => {
+      svg.setAttribute('aria-hidden', 'true');
     });
   }
 

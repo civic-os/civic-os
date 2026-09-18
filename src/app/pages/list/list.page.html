@@ -20,7 +20,7 @@
     <div class="flex gap-2 items-start mb-2">
         @if (entity.fulltext_search_column || entity.substring_search_column || (entity.search_fields && entity.search_fields.length > 0)) {
           <div class="form-control flex-1">
-            <label class="input input-bordered flex items-center gap-2">
+            <div class="input input-bordered flex items-center gap-2">
               <span class="material-symbols-outlined text-base-content/50" aria-hidden="true">search</span>
               <input
                 type="text"
@@ -35,7 +35,7 @@
                   <span class="material-symbols-outlined text-base" aria-hidden="true">close</span>
                 </button>
               }
-            </label>
+            </div>
           </div>
         } @else {
           <!-- Spacer to push buttons to the right when no search bar -->
@@ -102,6 +102,7 @@
   <!-- Pagination controls (top) -->
   <div class="not-prose mb-4">
       <app-pagination
+        [ariaLabel]="'a11y.pagination_top' | translate"
         [currentPage]="currentPage()"
         [pageSize]="pageSize()"
         [totalCount]="totalCount()"
@@ -284,6 +285,7 @@
   <div class="not-prose mt-6">
     <app-pagination
       [announceResults]="false"
+      [ariaLabel]="'a11y.pagination_bottom' | translate"
       [currentPage]="currentPage()"
       [pageSize]="pageSize()"
       [totalCount]="totalCount()"

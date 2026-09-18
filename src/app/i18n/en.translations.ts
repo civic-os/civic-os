@@ -94,6 +94,8 @@ export const EN_TRANSLATIONS: Record<string, string> = {
   'a11y.filter_min': '{{field}} minimum',
   'a11y.filter_max': '{{field}} maximum',
   'a11y.pagination': 'Pagination',
+  'a11y.pagination_top': 'Pagination (top)',
+  'a11y.pagination_bottom': 'Pagination (bottom)',
   'a11y.previous_page': 'Previous page',
   'a11y.next_page': 'Next page',
   'a11y.zoom_in': 'Zoom in',

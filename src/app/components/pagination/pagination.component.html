@@ -1,6 +1,6 @@
 <div class="pagination-container">
   <!-- Single compact row with all pagination controls -->
-  <nav class="flex flex-col md:flex-row justify-between items-center gap-4" [attr.aria-label]="'a11y.pagination' | translate">
+  <nav class="flex flex-col md:flex-row justify-between items-center gap-4" [attr.aria-label]="ariaLabel || ('a11y.pagination' | translate)">
     <!-- Results summary (always shown to prevent layout shift) -->
     <div class="text-sm flex items-center gap-2" [attr.aria-live]="announceResults ? 'polite' : null">
       @if (totalCountSignal() > 0) {
