@@ -395,7 +395,7 @@ export class PermissionsPage {
    */
   onTablistKeydown(event: KeyboardEvent): void {
     const currentIndex = this.TAB_ORDER.indexOf(this.activeTab());
-    let nextIndex = currentIndex;
+    let nextIndex: number;
 
     if (event.key === 'ArrowRight') {
       nextIndex = (currentIndex + 1) % this.TAB_ORDER.length;
@@ -410,9 +410,9 @@ export class PermissionsPage {
     this.switchTab(nextTab);
 
     // Move DOM focus to the newly active tab button
-    const tablist = (event.currentTarget as HTMLElement);
-    const tabButtons = tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]');
-    tabButtons[nextIndex]?.focus();
+    const tablist = (event.currentTarget as HTMLElement).closest('[role="tablist"]');
+    const tabButtons = tablist?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    tabButtons?.[nextIndex]?.focus();
   }
 
   /**

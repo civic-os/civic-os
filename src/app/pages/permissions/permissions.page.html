@@ -57,14 +57,15 @@
       </div>
 
       <!-- Tabs (DaisyUI 5 syntax) -->
-      <div role="tablist" class="tabs tabs-lift tabs-lg mb-6" (keydown)="onTablistKeydown($event)">
+      <div role="tablist" class="tabs tabs-lift tabs-lg mb-6">
         <button type="button"
           role="tab"
           class="tab"
           [class.tab-active]="activeTab() === 'tables'"
           [attr.aria-selected]="activeTab() === 'tables'"
           [attr.tabindex]="activeTab() === 'tables' ? 0 : -1"
-          (click)="switchTab('tables')">
+          (click)="switchTab('tables')"
+          (keydown)="onTablistKeydown($event)">
           Table Permissions
         </button>
         <button type="button"
@@ -73,7 +74,8 @@
           [class.tab-active]="activeTab() === 'actions'"
           [attr.aria-selected]="activeTab() === 'actions'"
           [attr.tabindex]="activeTab() === 'actions' ? 0 : -1"
-          (click)="switchTab('actions')">
+          (click)="switchTab('actions')"
+          (keydown)="onTablistKeydown($event)">
           Entity Actions
         </button>
         <button type="button"
@@ -82,7 +84,8 @@
           [class.tab-active]="activeTab() === 'delegation'"
           [attr.aria-selected]="activeTab() === 'delegation'"
           [attr.tabindex]="activeTab() === 'delegation' ? 0 : -1"
-          (click)="switchTab('delegation')">
+          (click)="switchTab('delegation')"
+          (keydown)="onTablistKeydown($event)">
           Role Delegation
         </button>
       </div>
