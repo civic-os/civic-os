@@ -10,6 +10,13 @@
 
 FROM postgis/postgis:17-3.5
 
+# The base image uses Debian 11 (bullseye), which reached EOL June 2026.
+# Packages have been removed from the main mirrors, so we must point apt
+# at the archive mirror to install Sqitch dependencies.
+# We only need the main archive (not security or updates) since this is a
+# dev/CI image and Sqitch + libdbd-pg-perl are in the main component.
+RUN echo "deb [trusted=yes] http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list
+
 # Install sqitch and PostgreSQL engine from Debian repositories
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sqitch \
