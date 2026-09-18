@@ -239,6 +239,8 @@ Civic OS provides helper functions for JWT data extraction (`current_user_id()`,
 
 **Keycloak Authentication**: See `docs/AUTHENTICATION.md` for complete setup instructions. Local dev: `http://localhost:8082` (admin/admin), realm `civic-os-dev`, client `civic-os-dev-client`. Test users: `testuser`, `testeditor`, `testmanager`, `testadmin` (password = username). All example docker-compose files include a pre-configured Keycloak service.
 
+**Custom Login Theme** (v0.75.0+): Social-first login layout via custom Keycloak theme (`civic-os`). Shows social login buttons prominently with email/password below. Hides password form when `loginWithEmailAllowed` is off. See `docs/AUTHENTICATION.md` (Custom Login Theme section). Theme files in `docker/keycloak/themes/civic-os/`.
+
 **Permissions Model** (v0.48.0+): Three-layer access control (database GRANTs → RBAC → RLS ownership). Database-driven RBAC via `metadata.roles`, `metadata.permissions`, and `metadata.permission_roles` with `role_key`-based lookups. Sidebar visibility is controlled by `show_in_sidebar`, not `read` permission. Frontend does NOT gate data rendering on `entity.select` — RLS alone controls row visibility. See `docs/development/PERMISSIONS_MODEL.md` for complete architecture and anti-patterns.
 
 **Default Roles** (by `role_key`): `anonymous` (unauthenticated), `user` (authenticated), `editor` (create/edit), `manager` (manage records), `admin` (full access + permissions UI)

@@ -862,6 +862,47 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ---
 
+## Browser Compatibility
+
+### Third-Party Cookie Blocking
+
+Keycloak's `checkLoginIframe` feature (enabled by default) creates a hidden iframe to monitor session state via cookies. Privacy-focused browsers block these iframe cookies as third-party tracking:
+
+| Browser | Policy | Affected? |
+|---------|--------|-----------|
+| **Brave** | Blocks all third-party cookies in iframes (Shields) | **Yes** |
+| **Safari** | ITP blocks all third-party cookies since 13.1 (2020) | **Yes** |
+| **Edge** | Blocks in "Strict" tracking prevention mode | **Yes** |
+| **Firefox** | Partitions cookies (Total Cookie Protection) | Possibly |
+| **Chrome** | Does not block (Google abandoned deprecation) | No |
+
+**Symptom**: After a successful login, the browser shows a blank page. The console logs 400 errors with `invalid_grant` / "Invalid refresh token" on the Keycloak token endpoint.
+
+**Root cause**: The session iframe cannot read its cookies, falsely reports "session changed," and triggers a token refresh that fails because the grant is already consumed.
+
+### How Civic OS Handles This
+
+Civic OS disables `checkLoginIframe` and relies on three redundant session-monitoring mechanisms:
+
+1. **`visibilitychange` listener** (`AuthService`) — validates the token when the user switches back to the tab
+2. **`withAutoRefreshToken`** (`app.config.ts`) — proactively refreshes the token before expiry
+3. **`authErrorInterceptor`** — safety net that redirects to login on any 401 response
+
+Configuration in `app.config.ts`:
+
+```typescript
+initOptions: {
+  onLoad: 'check-sso',
+  pkceMethod: 'S256',
+  checkLoginIframe: false,  // Disabled: uses third-party cookies blocked by Brave/Safari/ITP
+  silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
+},
+```
+
+**Note**: With `checkLoginIframe` disabled, the `AuthLogout` Keycloak event will not fire for external logouts (e.g., session terminated in another tab). This is safe because `logout()` clears state synchronously before redirecting, and the `AuthError` handler catches authentication failures.
+
+---
+
 ## User Registration Model
 
 > **Deployment Decision:** When setting up a new Civic OS instance, ask the deployer: *"Should new accounts be created only by admins, or can anyone sign up (defaulting to a basic user role)?"*
@@ -953,6 +994,107 @@ Keycloak can delegate authentication to Microsoft Azure AD, letting users sign i
 **Client Authentication method**: Under the provider's **Advanced** settings, set **Client Authentication** to "Client secret sent as post" (`client_secret_post`). Azure AD's v2.0 token endpoint may reject Basic auth headers.
 
 **Debugging "Unexpected error when authenticating with identity provider"**: This generic error means the token exchange failed server-side. The Keycloak admin UI Events tab won't show it — check container logs (`docker compose logs keycloak`) for the Java stack trace. Also check browser DevTools Network tab for error parameters in the redirect URL.
+
+---
+
+## Custom Login Theme
+
+Civic OS ships a custom Keycloak login theme (`civic-os`) that prioritizes social login buttons over the email/password form. This is the recommended layout for deployments where social identity providers (Microsoft, Google, etc.) are the primary authentication method.
+
+### What It Does
+
+- **Social buttons first**: Social login buttons render prominently at the top of the login page
+- **Email/password below**: The traditional email/password form appears below a divider
+- **Toggle email login off**: When "Login with email" is disabled in Keycloak realm settings (`Realm Settings → Login → Login with email`), the password form hides entirely — only social buttons remain
+
+### Enabling the Theme
+
+The theme is enabled by default in all example docker-compose files and the realm template. It loads automatically when:
+
+1. The theme volume mount exists in your `docker-compose.yml`:
+   ```yaml
+   keycloak:
+     volumes:
+       - path/to/docker/keycloak/themes/civic-os:/opt/keycloak/themes/civic-os:ro
+   ```
+2. The realm config sets `"loginTheme": "civic-os"`
+
+### Deploying to Hosted / Bare-Metal Keycloak
+
+For Keycloak instances running outside Docker (e.g., bare-metal with systemd), deploy the theme as a **JAR in `providers/`** (recommended) or as a filesystem copy in `themes/`.
+
+#### Option A: JAR deployment (recommended)
+
+The JAR method is preferred for production — it's versioned, atomic, and survives Keycloak upgrades if `providers/` is preserved during the binary swap (see `docs/deployment/KEYCLOAK_UPGRADES.md`).
+
+1. Build the theme JAR:
+   ```bash
+   cd docker/keycloak
+   ./build-theme-jar.sh
+   ```
+2. Copy the JAR to the Keycloak server:
+   ```bash
+   scp civic-os-theme.jar user@keycloak-host:/opt/keycloak/providers/
+   ```
+3. Rebuild Keycloak's provider registry and restart:
+   ```bash
+   sudo -u keycloak /opt/keycloak/bin/kc.sh build
+   sudo systemctl restart keycloak
+   ```
+4. Set the login theme via Keycloak Admin Console:
+   **Realm Settings → Themes → Login Theme → `civic-os`**
+
+#### Option B: Filesystem copy (for validation/testing)
+
+Useful for quick iteration, but the theme directory is lost when the Keycloak binary is swapped during upgrades.
+
+1. Copy the theme directory to the Keycloak themes folder:
+   ```bash
+   scp -r docker/keycloak/themes/civic-os user@keycloak-host:/opt/keycloak/themes/civic-os
+   ```
+2. Restart Keycloak to pick up the new theme:
+   ```bash
+   sudo systemctl restart keycloak
+   ```
+3. Set the login theme via Keycloak Admin Console:
+   **Realm Settings → Themes → Login Theme → `civic-os`**
+
+### Hiding the Email/Password Form
+
+To show **only** social login buttons (no email/password option):
+
+1. Go to **Keycloak Admin Console → Realm Settings → Login**
+2. Toggle **"Login with email"** to **OFF**
+3. The password form disappears; only social buttons remain
+
+Toggle it back **ON** to restore the email/password form.
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Login page shows old layout | Theme not loaded | Verify volume mount exists and container was restarted |
+| "civic-os" not in theme dropdown | Theme directory not found | Check that `/opt/keycloak/themes/civic-os/` exists inside the container |
+| Social buttons not visible | No social IdPs configured | Configure social identity providers in Keycloak first (see Social Login section above) |
+| Theme loads but CSS missing | CSS path wrong | Verify `resources/css/login.css` exists in the theme directory |
+
+### Theme File Structure
+
+```
+docker/keycloak/
+├── build-theme-jar.sh              # Builds civic-os-theme.jar for production
+└── themes/civic-os/
+    ├── META-INF/
+    │   └── keycloak-themes.json    # JAR manifest (theme name + types)
+    └── login/
+        ├── theme.properties        # Extends keycloak.v2, adds custom CSS
+        ├── login.ftl               # Reordered login template
+        ├── messages/
+        │   └── messages_en.properties  # Custom i18n strings
+        └── resources/
+            └── css/
+                └── login.css       # Divider and de-emphasis styles
+```
 
 ---
 

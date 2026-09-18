@@ -1,0 +1,41 @@
+/* Civic OS Custom Login Theme
+ * Social-first layout: social login buttons above email/password form.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ * Copyright (C) 2023-2026 Civic OS, L3C
+ */
+
+/* Realm name in login header — parent template renders a <div>, not a heading.
+   Style it to match h2 visual weight so it doesn't look like plain text. */
+#kc-header-wrapper {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Divider between social providers and email/password form */
+.civic-os-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--pf-v5-global--Color--200, #6a6e73);
+  font-size: var(--pf-v5-global--FontSize--sm, 0.875rem);
+}
+
+.civic-os-divider::before,
+.civic-os-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--pf-v5-global--BorderColor--100, #d2d2d2);
+}
+
+/* Subtle visual de-emphasis of the password form when social is primary */
+.civic-os-password-section {
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.civic-os-password-section:focus-within {
+  opacity: 1;
+}

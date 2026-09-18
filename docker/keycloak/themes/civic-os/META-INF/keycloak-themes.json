@@ -1,0 +1,8 @@
+{
+  "themes": [
+    {
+      "name": "civic-os",
+      "types": ["login"]
+    }
+  ]
+}

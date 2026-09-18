@@ -142,6 +142,60 @@ describe('AuthService', () => {
         });
     });
 
+    describe('AuthError handler', () => {
+        beforeEach(() => {
+            // Authenticate the user via Ready event
+            keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
+            TestBed.flushEffects();
+            expect(service.authenticated()).toBe(true);
+        });
+
+        it('should set authenticated to false on AuthError', () => {
+            keycloakEventSignal.set({ type: KeycloakEventType.AuthError, args: { error: 'invalid_grant', error_description: 'Code not valid' } });
+            TestBed.flushEffects();
+
+            expect(service.authenticated()).toBe(false);
+        });
+
+        it('should clear realUserRoles on AuthError', () => {
+            expect(service.realUserRoles().length).toBeGreaterThan(0);
+
+            keycloakEventSignal.set({ type: KeycloakEventType.AuthError, args: { error: 'invalid_grant', error_description: 'Code not valid' } });
+            TestBed.flushEffects();
+
+            expect(service.realUserRoles()).toEqual([]);
+        });
+
+        it('should track AuthError analytics event', () => {
+            keycloakEventSignal.set({ type: KeycloakEventType.AuthError, args: { error: 'invalid_grant', error_description: 'Code not valid' } });
+            TestBed.flushEffects();
+
+            expect(mockAnalytics.trackEvent).toHaveBeenCalledWith('Auth', 'AuthError');
+        });
+
+        it('should clear impersonation on AuthError', () => {
+            mockImpersonation.stopImpersonation.mockClear();
+
+            keycloakEventSignal.set({ type: KeycloakEventType.AuthError, args: { error: 'invalid_grant', error_description: 'Code not valid' } });
+            TestBed.flushEffects();
+
+            expect(mockImpersonation.stopImpersonation).toHaveBeenCalled();
+        });
+
+        it('should handle AuthError when user is not yet authenticated', () => {
+            // Reset to unauthenticated state
+            service.authenticated.set(false);
+            service.realUserRoles.set([]);
+
+            keycloakEventSignal.set({ type: KeycloakEventType.AuthError, args: { error: 'invalid_grant', error_description: 'Code not valid' } });
+            TestBed.flushEffects();
+
+            expect(service.authenticated()).toBe(false);
+            expect(service.realUserRoles()).toEqual([]);
+            expect(mockAnalytics.trackEvent).toHaveBeenCalledWith('Auth', 'AuthError');
+        });
+    });
+
     describe('visibility change listener', () => {
         beforeEach(() => {
             // Authenticate the user

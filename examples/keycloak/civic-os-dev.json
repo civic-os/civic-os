@@ -890,7 +890,7 @@
   "clientAuthenticationFlow": "clients",
   "firstBrokerLoginFlow": "auto-link first broker login",
 
-  "loginTheme": "keycloak.v2",
+  "loginTheme": "civic-os",
   "internationalizationEnabled": true,
   "supportedLocales": ["en", "es"],
   "defaultLocale": "en",

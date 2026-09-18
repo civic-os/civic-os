@@ -54,6 +54,7 @@ export const appConfig: ApplicationConfig = {
       initOptions: {
         onLoad: 'check-sso',
         pkceMethod: 'S256',
+        checkLoginIframe: false,  // Disabled: uses third-party cookies blocked by Brave/Safari/ITP
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
       },
       providers: [UserActivityService, AutoRefreshTokenService],  // Bug workaround: keycloak-angular@20 doesn't register these

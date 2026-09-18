@@ -81,6 +81,7 @@ services:
     command: start-dev --import-realm
     volumes:
       - ../../examples/keycloak:/opt/keycloak/data/import:ro
+      - ../keycloak/themes/civic-os:/opt/keycloak/themes/civic-os:ro
     networks:
       - ci-a11y
     healthcheck:

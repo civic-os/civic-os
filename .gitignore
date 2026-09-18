@@ -49,6 +49,9 @@ examples/*/.env
 # Instance configs (managed in private deployments repo)
 instances/
 
+# Keycloak theme build artifacts
+docker/keycloak/*.jar
+
 # Accessibility testing artifacts
 backstop_data/
 baseline-lighthouse.html

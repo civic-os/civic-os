@@ -202,6 +202,7 @@ services:
     command: start-dev --import-realm
     volumes:
       - ../keycloak:/opt/keycloak/data/import:ro
+      - ../../docker/keycloak/themes/civic-os:/opt/keycloak/themes/civic-os:ro
     networks:
       - mottpark-network
     healthcheck:

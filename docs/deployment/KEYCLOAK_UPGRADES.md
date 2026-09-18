@@ -13,7 +13,7 @@ Before upgrading, understand what Civic OS depends on in Keycloak:
 | **Go Worker** | Admin REST API (client credentials grant) | User provisioning, role sync |
 | **Database** | JWT claims (`sub`, `email`, `realm_access.roles`) via `request.jwt.claims` | RLS policies, `current_user_id()` |
 
-**Key resilience factor:** Civic OS uses only standard OIDC protocols and the Admin REST API — no custom Keycloak SPIs, custom authenticators, or theme overrides. This makes upgrades within a major version (e.g., 26.x) generally safe.
+**Key resilience factor:** Civic OS uses only standard OIDC protocols and the Admin REST API — no custom Keycloak SPIs or custom authenticators. This makes upgrades within a major version (e.g., 26.x) generally safe.
 
 ## Pre-Upgrade Checklist
 
@@ -367,6 +367,21 @@ The frontend reads roles from `realm_access.roles` in the JWT (with fallbacks to
 
 ### PKCE Requirement
 The frontend uses PKCE with S256. If a future Keycloak version changes PKCE defaults or requirements for public clients, verify `keycloak-angular`'s `initOptions.pkceMethod` still works.
+
+### Custom Login Theme
+
+Civic OS overrides the `keycloak.v2` login template with a social-first layout (`docker/keycloak/themes/civic-os/`). On major Keycloak version upgrades:
+
+1. **Check if `keycloak.v2` still exists** — if Keycloak renames or removes the parent theme, update `theme.properties` to reference the new name
+2. **Compare the default `login.ftl`** — extract the updated template from the Keycloak themes JAR and diff against our override:
+   ```bash
+   # Extract from the running container
+   docker cp keycloak:/opt/keycloak/lib/lib/main/org.keycloak.keycloak-themes-*.jar /tmp/themes.jar
+   unzip -p /tmp/themes.jar theme/keycloak.v2/login/login.ftl > /tmp/default-login.ftl
+   diff docker/keycloak/themes/civic-os/login/login.ftl /tmp/default-login.ftl
+   ```
+3. **Verify field macros** — our template uses `@field.input`, `@field.password`, `@field.checkbox`, and `@buttons.loginButton` from the parent theme. Confirm these macros still exist with the same signatures.
+4. **Test the login page** after upgrade — social buttons, email/password form, and the hide-on-toggle behavior should all work.
 
 ## Rollback
 

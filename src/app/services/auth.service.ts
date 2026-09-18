@@ -16,7 +16,7 @@
  */
 
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakService, ReadyArgs, typeEventArgs } from 'keycloak-angular';
+import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakService, ReadyArgs, AuthErrorArgs, typeEventArgs } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { DataService } from './data.service';
 import { SchemaService } from './schema.service';
@@ -115,6 +115,9 @@ export class AuthService {
         }
 
         if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
+          // Note: With checkLoginIframe disabled, AuthLogout only fires if
+          // keycloak-js detects logout through other means. The logout() method
+          // clears state synchronously before redirecting, so this is a safety net.
           this.authenticated.set(false);
           this.realUserRoles.set([]);
           this.clearPermissionsCache();
@@ -129,6 +132,18 @@ export class AuthService {
 
           // Refresh schema cache when user logs out
           this.schema.refreshCache();
+        }
+
+        if (keycloakEvent.type === KeycloakEventType.AuthError) {
+          // Authentication callback failed (e.g., invalid authorization code, PKCE mismatch).
+          // Clear auth state so the UI reflects the unauthenticated state.
+          const errorArgs = typeEventArgs<AuthErrorArgs>(keycloakEvent.args);
+          console.error('Keycloak AuthError:', errorArgs);
+          this.authenticated.set(false);
+          this.realUserRoles.set([]);
+          this.clearPermissionsCache();
+          this.impersonation.stopImpersonation().subscribe();
+          this.analytics.trackEvent('Auth', 'AuthError');
         }
 
         if (keycloakEvent.type === KeycloakEventType.AuthRefreshError) {
