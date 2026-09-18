@@ -181,7 +181,10 @@ jobs:
       - name: Serve build and run pa11y gate
         # `serve -s` provides the SPA history-API fallback; http-server would
         # 404 deep links like /create/Issue and pa11y would scan a 404 page.
+        # cleanUrls must be disabled so silent-check-sso.html is served directly
+        # (not 301-redirected to /silent-check-sso which hits SPA fallback).
         run: |
+          echo '{"cleanUrls":false}' > dist/frontend/browser/serve.json
           npx --yes serve -s dist/frontend/browser -l 4200 &
           SERVER_PID=$!
           npx --yes wait-on http://localhost:4200 --timeout 60000
