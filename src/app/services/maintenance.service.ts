@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Injectable, Injector, inject, signal, computed, DestroyRef, effect } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { interval, of, switchMap, catchError, EMPTY } from 'rxjs';
@@ -87,6 +87,7 @@ export class MaintenanceService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
   private readonly locale = inject(LocaleService);
+  private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
 
   // Private writable signals
@@ -161,6 +162,19 @@ export class MaintenanceService {
       ),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(data => this.applyPollData(data));
+
+    // Recovery: when maintenance ends, reload schema data that was blocked by 503s.
+    // Uses Injector to lazily resolve SchemaService, avoiding circular dependency.
+    let wasActive = false;
+    effect(() => {
+      const active = this.isActive();
+      if (wasActive && !active) {
+        import('./schema.service').then(m =>
+          this.injector.get(m.SchemaService).refreshCache()
+        );
+      }
+      wasActive = active;
+    });
   }
 
   private fetchMaintenanceJson() {
