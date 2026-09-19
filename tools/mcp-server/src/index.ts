@@ -17,7 +17,7 @@
 
 import { createRequire } from 'node:module';
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/server';
-import { PostgRESTClient } from './postgrest-client.js';
+import { PostgRESTClient, MaintenanceError } from './postgrest-client.js';
 import { SchemaCache } from './schema-cache.js';
 import { NameResolver } from './name-resolver.js';
 import { extractUserCacheKey, extractUserId } from './jwt-utils.js';
@@ -207,6 +207,33 @@ function instrumentToolHandlers(server: McpServer, userId?: string): void {
         return result;
       } catch (err) {
         const durationMs = Math.round(performance.now() - start);
+
+        // Maintenance mode: return LLM-friendly message instead of crashing
+        if (err instanceof MaintenanceError) {
+          const toolConfig = args.length >= 2 ? args[1] as Record<string, unknown> : undefined;
+          const annotations = toolConfig?.annotations as { readOnlyHint?: boolean } | undefined;
+          const isReadTool = annotations?.readOnlyHint === true;
+
+          let text: string;
+          if (err.mode === 'full') {
+            text = 'The system is temporarily undergoing scheduled maintenance. All operations (reads and writes) are unavailable during this window. This is a temporary status — normal access will be restored shortly. Please inform the user and try again later.';
+          } else if (isReadTool) {
+            // Shouldn't normally happen (reads succeed in readonly), but handle gracefully
+            text = 'The system is temporarily in maintenance mode and this read operation was unexpectedly blocked. This is a temporary status — please try again shortly.';
+          } else {
+            text = 'The system is temporarily in read-only maintenance mode. You can still read data (list_records, get_record, search, etc.) but writes are blocked during this maintenance window. This is a temporary status — write access will be restored shortly. Please inform the user and try again later.';
+          }
+
+          toolLogger.warn('tool_maintenance', {
+            tool: toolName,
+            user_id: userId,
+            duration_ms: durationMs,
+            maintenance_mode: err.mode,
+          });
+
+          return { content: [{ type: 'text' as const, text }], isError: true };
+        }
+
         toolLogger.error('tool_exception', {
           tool: toolName,
           user_id: userId,

@@ -9,6 +9,7 @@
  */
 
 import type { PostgRESTClient } from './postgrest-client.js';
+import { MaintenanceError } from './postgrest-client.js';
 import {
   EntityPropertyType,
   type CategoryOption,
@@ -213,7 +214,8 @@ export class SchemaCache {
         entitiesVersion,
         propertiesVersion,
       });
-    } catch {
+    } catch (err) {
+      if (err instanceof MaintenanceError) throw err;
       // If per-user fetch fails, tools will fall back to shared cache via accessors
     }
   }
@@ -274,7 +276,8 @@ export class SchemaCache {
       if (needsRebuild) {
         this.buildDerivedLookups();
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof MaintenanceError) throw err;
       // If version check fails (e.g., view doesn't exist), skip
       // Schema will be refreshed on next force initialize
     }

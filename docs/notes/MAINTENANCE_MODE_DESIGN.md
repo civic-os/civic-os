@@ -6,7 +6,7 @@
 
 ## Overview
 
-Civic OS supports two maintenance modes (`readonly` and `full`) to protect data integrity during deployments and database migrations. A single `MAINTENANCE_MODE` environment variable controls enforcement across all services: PostgREST (API), the Angular frontend, and the consolidated worker.
+Civic OS supports two maintenance modes (`readonly` and `full`) to protect data integrity during deployments and database migrations. A single `MAINTENANCE_MODE` environment variable controls enforcement across all services: PostgREST (API), the Angular frontend, the MCP server, and the consolidated worker.
 
 The system uses **dual detection with single enforcement** -- the API layer enforces restrictions while the frontend detects maintenance state through two complementary mechanisms for instant and idle-user coverage.
 
@@ -49,7 +49,10 @@ PostgreSQL 17 blocks `SET LOCAL ROLE` inside `SECURITY DEFINER` functions. Since
     |       |       -> docker-entrypoint.sh injects window.civicOsConfig.maintenance
     |       |
     |       +---> Worker: MAINTENANCE_MODE=${MAINTENANCE_MODE}
-    |               -> Blocks startup when active
+    |       |       -> Blocks startup when active
+    |       |
+    |       +---> MCP Server: (no env var needed)
+    |               -> Detects maintenance from PostgREST 503+PT503 responses
     |
     +---> Optional: MAINTENANCE_MESSAGE="Upgrading to v0.77.0"
             -> Included in /maintenance.json and 503 error responses
@@ -166,6 +169,17 @@ This prevents background jobs (notifications, file processing, user provisioning
 
 **Resume workflow**: After clearing `MAINTENANCE_MODE`, restart the worker container. It reads the updated env var and starts normally.
 
+### MCP Server Behavior
+
+The MCP server is a PostgREST client and detects maintenance mode purely from API responses — no env var needed. When `check_jwt()` raises `PT503`, the MCP server's `PostgRESTClient.request()` throws a typed `MaintenanceError` (distinct from `PostgRESTRequestError`), and the tool handler wrapper (`instrumentToolHandlers`) catches it to return an LLM-friendly message instead of a cryptic error:
+
+- **`readonly` mode**: Read tools (`list_records`, `get_record`, `search`, etc.) succeed normally. Write tools (`create_record`, `update_record`, `execute_action`, `add_note`) return an `isError: true` response explaining that writes are blocked but reads still work.
+- **`full` mode**: All tools return an `isError: true` response explaining that the system is undergoing maintenance.
+
+Detection distinguishes readonly from full by checking the `message` field of the PostgREST error body for "read-only" (matching the exact text from `check_jwt()`). The `SchemaCache` re-throws `MaintenanceError` from its `ensureFresh()` and `ensureFreshForUser()` methods instead of swallowing it, so maintenance errors propagate correctly even when triggered by a cache refresh.
+
+**No instruction changes**: Maintenance information only appears in tool call error responses, not in the static MCP server `instructions` string. The LLM learns about maintenance on its first failed tool call and can adjust behavior (e.g., switching to read-only queries in readonly mode).
+
 ### Deployment Workflow
 
 The recommended sequence for a maintenance deployment:
@@ -251,6 +265,6 @@ Three bugs were discovered and fixed during end-to-end verification:
 
 ## Testing
 
-- **Unit tests**: `MaintenanceService` signal behavior, interceptor header/503 parsing, UI component visibility based on maintenance signals.
+- **Unit tests**: `MaintenanceService` signal behavior, interceptor header/503 parsing, UI component visibility based on maintenance signals. MCP server: `MaintenanceError` throw on 503+PT503, schema cache re-throw, non-maintenance 503 passthrough.
 - **Functional tests**: `check_jwt()` enforcement for each mode/role combination via PostgREST curl tests.
 - **E2E tests**: Playwright tests verifying banner visibility, control hiding, route redirects, and admin bypass.

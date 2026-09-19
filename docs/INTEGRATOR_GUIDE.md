@@ -6299,7 +6299,7 @@ See `docs/notes/PWA_DESIGN.md` for detailed architecture, security consideration
 
 > **Version**: v0.76.0+
 
-Civic OS supports two maintenance modes to protect data integrity during deployments and database migrations. A single `MAINTENANCE_MODE` environment variable controls enforcement across all services.
+Civic OS supports two maintenance modes to protect data integrity during deployments and database migrations. A single `MAINTENANCE_MODE` environment variable controls enforcement across all services (PostgREST, frontend, MCP server, and worker).
 
 ### Modes
 
@@ -6346,7 +6346,7 @@ Users with the `admin` role can access the system normally during maintenance. T
 | `MAINTENANCE_MODE` | `off` | Maintenance mode: `off`, `readonly`, or `full` |
 | `MAINTENANCE_MESSAGE` | (none) | Optional message displayed in banners and overlay |
 
-Both variables are consumed by PostgREST (via `PGRST_APP_SETTINGS_MAINTENANCE_MODE`), the frontend container (via `docker-entrypoint.sh`), and the consolidated worker.
+`MAINTENANCE_MODE` is consumed by PostgREST (via `PGRST_APP_SETTINGS_MAINTENANCE_MODE`), the frontend container (via `docker-entrypoint.sh`), and the consolidated worker. The MCP server does not need an env var — it detects maintenance from PostgREST responses. `MAINTENANCE_MESSAGE` is consumed by the frontend only.
 
 ### VPS Deployment with Maintenance
 
@@ -6359,17 +6359,22 @@ The deploy script supports automatic maintenance wrapping:
 
 ### How Detection Works
 
-The frontend uses two complementary detection mechanisms:
+Each client detects maintenance through PostgREST responses:
 
-- **Active users**: Detected instantly via PostgREST response headers on every API call (HTTP interceptor reads `X-Maintenance-Mode` header and 503 status)
-- **Idle users**: Detected within 30 seconds via `/maintenance.json` polling (static file written by `docker-entrypoint.sh`)
-- **Fresh page loads**: Detected immediately if the frontend container was restarted with the env var (first poll fires on app init)
+- **Frontend (active users)**: Detected instantly via PostgREST response headers on every API call (HTTP interceptor reads `X-Maintenance-Mode` header and 503 status)
+- **Frontend (idle users)**: Detected within 30 seconds via `/maintenance.json` polling (static file written by `docker-entrypoint.sh`)
+- **Frontend (fresh page loads)**: Detected immediately if the frontend container was restarted with the env var (first poll fires on app init)
+- **MCP server**: Detected on any tool call that hits PostgREST — 503 with `PT503` error code triggers a typed `MaintenanceError` that produces an LLM-friendly tool response
 
 ### Worker Behavior
 
 The consolidated worker reads `MAINTENANCE_MODE` at startup. In `readonly` or `full` mode, it blocks and waits for a restart signal instead of starting the River job queue. This prevents background jobs (notifications, file processing, user provisioning) from running while the database schema may be in flux.
 
 Restart the worker after clearing the maintenance env var to resume processing.
+
+### MCP Server Behavior
+
+The MCP server detects maintenance mode from PostgREST 503 responses (no env var needed). In `readonly` mode, read tools (`list_records`, `get_record`, `search`) work normally while write tools (`create_record`, `update_record`, etc.) return clear error messages explaining that reads still work but writes are blocked. In `full` mode, all tools return a maintenance message. The LLM client can then adjust its behavior — e.g., switching to read-only queries during readonly maintenance.
 
 ### Custom Maintenance Messages
 

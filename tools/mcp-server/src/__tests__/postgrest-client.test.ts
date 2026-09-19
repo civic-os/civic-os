@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { PostgRESTClient, PostgRESTRequestError } from '../postgrest-client.js';
+import { PostgRESTClient, PostgRESTRequestError, MaintenanceError } from '../postgrest-client.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -306,6 +306,76 @@ describe('PostgRESTClient', () => {
         const e = err as PostgRESTRequestError;
         expect(e.details).toBe('Key (email)=(a@b.com) already exists.');
         expect(e.hint).toBeNull();
+      }
+    });
+
+    it('throws MaintenanceError with mode "readonly" for 503+PT503 with read-only message', async () => {
+      fetchMock.mockResolvedValue(
+        mockResponse(
+          {
+            message: 'System is in read-only maintenance mode',
+            code: 'PT503',
+            details: null,
+            hint: null,
+          },
+          503,
+        ),
+      );
+
+      try {
+        await client.post('entities', { name: 'Test' });
+        expect.fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(MaintenanceError);
+        const e = err as MaintenanceError;
+        expect(e.mode).toBe('readonly');
+      }
+    });
+
+    it('throws MaintenanceError with mode "full" for 503+PT503 without read-only in message', async () => {
+      fetchMock.mockResolvedValue(
+        mockResponse(
+          {
+            message: 'System is undergoing maintenance',
+            code: 'PT503',
+            details: null,
+            hint: null,
+          },
+          503,
+        ),
+      );
+
+      try {
+        await client.get('entities');
+        expect.fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(MaintenanceError);
+        const e = err as MaintenanceError;
+        expect(e.mode).toBe('full');
+      }
+    });
+
+    it('throws PostgRESTRequestError (not MaintenanceError) for 503 without PT503 code', async () => {
+      fetchMock.mockResolvedValue(
+        mockResponse(
+          {
+            message: 'Service Unavailable',
+            code: null,
+            details: null,
+            hint: null,
+          },
+          503,
+        ),
+      );
+
+      try {
+        await client.get('entities');
+        expect.fail('Should have thrown');
+      } catch (err) {
+        expect(err).toBeInstanceOf(PostgRESTRequestError);
+        expect(err).not.toBeInstanceOf(MaintenanceError);
+        const e = err as PostgRESTRequestError;
+        expect(e.httpCode).toBe(503);
       }
     });
   });

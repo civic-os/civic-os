@@ -131,6 +131,15 @@ export class PostgRESTClient {
       } catch {
         // Response body wasn't JSON
       }
+
+      // Maintenance mode detection: PT503 is the specific SQLSTATE set by check_jwt()
+      // check_jwt() puts the mode description in `message` (hint is null)
+      if (response.status === 503 && errorBody?.code === 'PT503') {
+        const msg = errorBody.message ?? '';
+        const mode = msg.includes('read-only') ? 'readonly' : 'full';
+        throw new MaintenanceError(mode, errorBody.hint);
+      }
+
       throw new PostgRESTRequestError(
         errorBody?.message ?? `PostgREST returned ${response.status}`,
         response.status,
@@ -162,6 +171,19 @@ export class PostgRESTClient {
       to: parseInt(match[2], 10),
       total: match[3] === '*' ? null : parseInt(match[3], 10),
     };
+  }
+}
+
+/** Maintenance mode error — thrown when PostgREST returns 503 with PT503 SQLSTATE */
+export class MaintenanceError extends Error {
+  constructor(
+    public readonly mode: 'readonly' | 'full',
+    public readonly hint?: string | null,
+  ) {
+    super(mode === 'full'
+      ? 'System is in full maintenance mode. All operations are temporarily unavailable.'
+      : 'System is in read-only maintenance mode. Read operations work but writes are blocked.');
+    this.name = 'MaintenanceError';
   }
 }
 

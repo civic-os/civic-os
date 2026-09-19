@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SchemaCache, detectPropertyType } from '../schema-cache.js';
 import { EntityPropertyType } from '../interfaces.js';
 import type { PostgRESTClient } from '../postgrest-client.js';
+import { MaintenanceError } from '../postgrest-client.js';
 import type {
   SchemaEntity,
   SchemaProperty,
@@ -295,6 +296,17 @@ describe('SchemaCache.ensureFresh()', () => {
     (client.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('DB down'));
 
     await expect(cache.ensureFresh()).resolves.not.toThrow();
+  });
+
+  it('re-throws MaintenanceError instead of swallowing it', async () => {
+    const client = makeMockClient();
+    const cache = new SchemaCache(client, 'http://localhost:3000');
+    await cache.initialize();
+
+    const maintenanceErr = new MaintenanceError('full');
+    (client.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(maintenanceErr);
+
+    await expect(cache.ensureFresh()).rejects.toThrow(MaintenanceError);
   });
 });
 
