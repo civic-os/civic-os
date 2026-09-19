@@ -19,7 +19,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { MaintenanceBannerComponent } from './maintenance-banner.component';
 import { MaintenanceService } from '../../services/maintenance.service';
-import { TranslationService } from '../../services/translation.service';
 
 describe('MaintenanceBannerComponent', () => {
   let component: MaintenanceBannerComponent;
@@ -31,7 +30,9 @@ describe('MaintenanceBannerComponent', () => {
   const isFullMaintenance = signal(false);
   const isActive = signal(false);
   const isAdminBypassing = signal(false);
-  const message = signal<string | null>(null);
+  const readonlyMessage = signal('The system is in read-only mode for scheduled maintenance. You can view data but cannot make changes.');
+  const fullMessage = signal('The system is temporarily unavailable for scheduled maintenance. Please check back shortly.');
+  const adminBypassMessage = signal('Admin access active — system is in maintenance mode');
 
   let mockMaintenanceService: any;
 
@@ -42,7 +43,9 @@ describe('MaintenanceBannerComponent', () => {
     isFullMaintenance.set(false);
     isActive.set(false);
     isAdminBypassing.set(false);
-    message.set(null);
+    readonlyMessage.set('The system is in read-only mode for scheduled maintenance. You can view data but cannot make changes.');
+    fullMessage.set('The system is temporarily unavailable for scheduled maintenance. Please check back shortly.');
+    adminBypassMessage.set('Admin access active — system is in maintenance mode');
 
     mockMaintenanceService = {
       mode,
@@ -50,20 +53,16 @@ describe('MaintenanceBannerComponent', () => {
       isFullMaintenance,
       isActive,
       isAdminBypassing,
-      message
-    };
-
-    const mockTranslation = {
-      get: vi.fn().mockImplementation((key: string) => key),
-      version: signal(0)
+      readonlyMessage,
+      fullMessage,
+      adminBypassMessage
     };
 
     await TestBed.configureTestingModule({
       imports: [MaintenanceBannerComponent],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: MaintenanceService, useValue: mockMaintenanceService },
-        { provide: TranslationService, useValue: mockTranslation }
+        { provide: MaintenanceService, useValue: mockMaintenanceService }
       ]
     }).compileComponents();
 
@@ -88,7 +87,7 @@ describe('MaintenanceBannerComponent', () => {
 
     const el = fixture.nativeElement.querySelector('.alert-warning');
     expect(el).toBeTruthy();
-    expect(el.textContent).toContain('maintenance.readonly_message');
+    expect(el.textContent).toContain('read-only mode');
   });
 
   it('should show error banner for full maintenance mode (non-admin)', () => {
@@ -98,7 +97,7 @@ describe('MaintenanceBannerComponent', () => {
 
     const el = fixture.nativeElement.querySelector('.alert-error');
     expect(el).toBeTruthy();
-    expect(el.textContent).toContain('maintenance.full_message');
+    expect(el.textContent).toContain('temporarily unavailable');
   });
 
   it('should show info banner for admin bypass', () => {
@@ -110,13 +109,13 @@ describe('MaintenanceBannerComponent', () => {
 
     const el = fixture.nativeElement.querySelector('.alert-info');
     expect(el).toBeTruthy();
-    expect(el.textContent).toContain('maintenance.admin_bypass');
+    expect(el.textContent).toContain('Admin access active');
   });
 
   it('should display custom message when present', () => {
     isReadOnly.set(true);
     isActive.set(true);
-    message.set('Scheduled downtime at 2am');
+    readonlyMessage.set('Scheduled downtime at 2am');
     fixture.detectChanges();
 
     const el = fixture.nativeElement.querySelector('.alert-warning');
@@ -133,7 +132,7 @@ describe('MaintenanceBannerComponent', () => {
 
     const el = fixture.nativeElement.querySelector('.alert-info');
     expect(el).toBeTruthy();
-    expect(el.textContent).toContain('maintenance.admin_bypass');
+    expect(el.textContent).toContain('Admin access active');
   });
 
   it('admin bypass banner should take priority over readonly banner', () => {

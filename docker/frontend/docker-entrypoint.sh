@@ -127,15 +127,19 @@ INDEX_HASH=$(sha1sum /usr/share/nginx/html/index.html | cut -d' ' -f1)
 sed -i "s|\"\/index.html\": \"[a-f0-9]*\"|\"\/index.html\": \"$INDEX_HASH\"|" /usr/share/nginx/html/ngsw.json
 echo "✓ Updated ngsw.json index.html hash"
 
-# Maintenance mode: write or remove static signal file
+# Maintenance mode: always write maintenance.json so the frontend can detect
+# both activation and deactivation via polling (404 is a no-op in the frontend)
 if [ -n "$MAINTENANCE_MODE" ] && [ "$MAINTENANCE_MODE" != "off" ]; then
   echo "Maintenance mode: $MAINTENANCE_MODE"
   cat > /usr/share/nginx/html/maintenance.json <<MEOF
 {"mode":"${MAINTENANCE_MODE}","message":"$(echo "${MAINTENANCE_MESSAGE}" | sed 's/"/\\"/g')"}
 MEOF
-  echo "✓ Maintenance mode signal file written"
+  echo "✓ Maintenance mode signal file written (mode: $MAINTENANCE_MODE)"
 else
-  rm -f /usr/share/nginx/html/maintenance.json
+  cat > /usr/share/nginx/html/maintenance.json <<MEOF
+{"mode":"off"}
+MEOF
+  echo "✓ Maintenance mode signal file written (mode: off)"
 fi
 
 echo ""

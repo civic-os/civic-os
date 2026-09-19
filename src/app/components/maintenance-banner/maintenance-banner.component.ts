@@ -17,27 +17,25 @@
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MaintenanceService } from '../../services/maintenance.service';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-maintenance-banner',
-  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (maintenance.isAdminBypassing()) {
       <div class="alert alert-info gap-2 rounded-none" role="alert">
         <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
-        <span>{{ 'maintenance.admin_bypass' | translate }} ({{ maintenance.mode() }})</span>
+        <span>{{ maintenance.adminBypassMessage() }} ({{ maintenance.mode() }})</span>
       </div>
     } @else if (maintenance.isReadOnly()) {
       <div class="alert alert-warning gap-2 rounded-none" role="alert">
         <span class="material-symbols-outlined" aria-hidden="true">construction</span>
-        <span>{{ maintenance.message() || ('maintenance.readonly_message' | translate) }}</span>
+        <span>{{ maintenance.readonlyMessage() }}</span>
       </div>
     } @else if (maintenance.isFullMaintenance()) {
       <div class="alert alert-error gap-2 rounded-none" role="alert">
         <span class="material-symbols-outlined" aria-hidden="true">error</span>
-        <span>{{ maintenance.message() || ('maintenance.full_message' | translate) }}</span>
+        <span>{{ maintenance.fullMessage() }}</span>
       </div>
     }
   `

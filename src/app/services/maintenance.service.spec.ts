@@ -16,18 +16,23 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MaintenanceService } from './maintenance.service';
 import { AuthService } from './auth.service';
+import { LocaleService } from './locale.service';
 
 describe('MaintenanceService', () => {
   let service: MaintenanceService;
   let httpMock: HttpTestingController;
   let mockAuthService: any;
+  const localeSignal = signal('en');
+  let mockLocaleService: any;
 
   beforeEach(() => {
+    localeSignal.set('en');
+
     mockAuthService = {
       isAdmin: vi.fn().mockReturnValue(false),
       authenticated: vi.fn().mockReturnValue(true),
@@ -35,19 +40,27 @@ describe('MaintenanceService', () => {
       userRoles: vi.fn().mockReturnValue([])
     };
 
+    mockLocaleService = {
+      locale: localeSignal,
+      isRtl: signal(false),
+      supportedLocales: [{ code: 'en', name: 'English' }],
+      setLocale: vi.fn()
+    };
+
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: AuthService, useValue: mockAuthService }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: LocaleService, useValue: mockLocaleService }
       ]
     });
 
     httpMock = TestBed.inject(HttpTestingController);
     service = TestBed.inject(MaintenanceService);
 
-    // Flush the initial poll request (startWith(0) fires immediately)
+    // Flush the one-shot init check (fires immediately on construction)
     const req = httpMock.expectOne('/maintenance.json');
     req.flush(null, { status: 404, statusText: 'Not Found' });
   });
@@ -157,26 +170,27 @@ describe('MaintenanceService', () => {
     });
   });
 
-  describe('polling (initial request)', () => {
-    // The initial poll fires in beforeEach via startWith(0). We test
+  describe('init check (one-shot maintenance.json fetch)', () => {
+    // The init check fires immediately on service construction. We test
     // its behavior by creating a fresh service and flushing different responses.
 
     it('should set mode from maintenance.json when it returns a mode', () => {
-      // Create a fresh TestBed to get a new initial poll
+      // Create a fresh TestBed to get a new init check
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
           provideZonelessChangeDetection(),
           provideHttpClient(),
           provideHttpClientTesting(),
-          { provide: AuthService, useValue: mockAuthService }
+          { provide: AuthService, useValue: mockAuthService },
+          { provide: LocaleService, useValue: mockLocaleService }
         ]
       });
 
       const freshHttp = TestBed.inject(HttpTestingController);
       const freshService = TestBed.inject(MaintenanceService);
 
-      // Flush the initial poll with a maintenance response
+      // Flush the init check with a maintenance response
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'readonly', message: 'Scheduled maintenance' });
 
@@ -187,7 +201,7 @@ describe('MaintenanceService', () => {
     });
 
     it('should keep current state when maintenance.json returns 404 (no-op)', () => {
-      // The initial poll returned 404 in beforeEach — mode stays 'off'
+      // The init check returned 404 in beforeEach — mode stays 'off'
       expect(service.mode()).toBe('off');
 
       // Set mode via interceptor, then verify 404 poll does NOT clear it
@@ -204,14 +218,15 @@ describe('MaintenanceService', () => {
           provideZonelessChangeDetection(),
           provideHttpClient(),
           provideHttpClientTesting(),
-          { provide: AuthService, useValue: mockAuthService }
+          { provide: AuthService, useValue: mockAuthService },
+          { provide: LocaleService, useValue: mockLocaleService }
         ]
       });
 
       const freshHttp = TestBed.inject(HttpTestingController);
       const freshService = TestBed.inject(MaintenanceService);
 
-      // Flush the initial poll with an explicit 'off' mode
+      // Flush the init check with an explicit 'off' mode
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'off' });
 
@@ -228,7 +243,8 @@ describe('MaintenanceService', () => {
           provideZonelessChangeDetection(),
           provideHttpClient(),
           provideHttpClientTesting(),
-          { provide: AuthService, useValue: mockAuthService }
+          { provide: AuthService, useValue: mockAuthService },
+          { provide: LocaleService, useValue: mockLocaleService }
         ]
       });
 
@@ -241,6 +257,80 @@ describe('MaintenanceService', () => {
       expect(freshService.mode()).toBe('full');
       expect(freshService.message()).toBe('System upgrade in progress');
 
+      freshHttp.verify();
+    });
+  });
+
+  describe('hardcoded display strings', () => {
+    it('should return English strings by default', () => {
+      expect(service.fullTitle()).toBe('System Maintenance');
+      expect(service.adminBypassMessage()).toBe('Admin access active — system is in maintenance mode');
+    });
+
+    it('should return Spanish strings when locale is es', () => {
+      localeSignal.set('es');
+      expect(service.fullTitle()).toBe('Mantenimiento del sistema');
+      expect(service.readonlyMessage()).toContain('solo lectura');
+    });
+
+    it('should return Arabic strings when locale is ar', () => {
+      localeSignal.set('ar');
+      expect(service.fullTitle()).toBe('صيانة النظام');
+    });
+
+    it('should fall back to English for unknown locales', () => {
+      localeSignal.set('zh');
+      expect(service.fullTitle()).toBe('System Maintenance');
+    });
+
+    it('fullMessage should prefer custom message over hardcoded string', () => {
+      service.updateFromHeader('full');
+      // No custom message set — uses hardcoded
+      expect(service.fullMessage()).toContain('temporarily unavailable');
+
+      // Simulate maintenance.json with custom message
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: AuthService, useValue: mockAuthService },
+          { provide: LocaleService, useValue: mockLocaleService }
+        ]
+      });
+
+      const freshHttp = TestBed.inject(HttpTestingController);
+      const freshService = TestBed.inject(MaintenanceService);
+
+      const req = freshHttp.expectOne('/maintenance.json');
+      req.flush({ mode: 'full', message: 'Custom downtime message' });
+
+      expect(freshService.fullMessage()).toBe('Custom downtime message');
+      freshHttp.verify();
+    });
+
+    it('readonlyMessage should prefer custom message over hardcoded string', () => {
+      expect(service.readonlyMessage()).toContain('read-only mode');
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: AuthService, useValue: mockAuthService },
+          { provide: LocaleService, useValue: mockLocaleService }
+        ]
+      });
+
+      const freshHttp = TestBed.inject(HttpTestingController);
+      const freshService = TestBed.inject(MaintenanceService);
+
+      const req = freshHttp.expectOne('/maintenance.json');
+      req.flush({ mode: 'readonly', message: 'Brief maintenance window' });
+
+      expect(freshService.readonlyMessage()).toBe('Brief maintenance window');
       freshHttp.verify();
     });
   });

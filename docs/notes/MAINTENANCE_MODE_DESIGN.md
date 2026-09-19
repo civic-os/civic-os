@@ -98,9 +98,11 @@ The Docker entrypoint writes `/maintenance.json` based on the `MAINTENANCE_MODE`
 { "mode": "off" }
 ```
 
+The Docker entrypoint **always** writes `maintenance.json`, even when maintenance is off (`{"mode":"off"}`). This ensures the polling path can detect both activation and deactivation of maintenance mode for idle users.
+
 `MaintenanceService` polls this file every 30 seconds. The poll uses a simple HTTP GET outside the PostgREST interceptor chain (direct `fetch` or dedicated `HttpClient` call to avoid circular detection).
 
-**404 = no-op**: When `/maintenance.json` returns 404 (file does not exist), the poll does nothing — it preserves the current state from the interceptor. Only an explicit JSON response with `"mode": "off"` or a successful PostgREST response without the `X-Maintenance-Mode` header will clear the maintenance state. This prevents the poll from overriding interceptor-detected maintenance mode during local development where the Docker entrypoint (and hence `maintenance.json`) is not used.
+**404 = no-op**: When `/maintenance.json` returns 404 (local dev without Docker), the poll preserves the current state from the interceptor. In production, the file always exists.
 
 **nginx cache control**: `/maintenance.json` is served with `Cache-Control: no-store` to prevent CDN, proxy, or service worker caching. The PWA service worker's ngsw-config.json does not include `maintenance.json` in any asset group.
 
@@ -204,17 +206,13 @@ For the VPS deploy script (`deploy.sh --maintenance`):
 - When offline, the `/maintenance.json` poll fails gracefully via `catchError` in the Observable chain, preserving the last known state.
 - The offline banner (from `PwaService`) and the maintenance banner are independent -- both can be visible simultaneously if the network drops during maintenance.
 
-### i18n
+### Hardcoded UI Strings (Not i18n)
 
-Translation keys for maintenance UI strings:
+Maintenance UI strings are **hardcoded** in `MaintenanceService`, not loaded via the `TranslationService`. This is intentional: in full maintenance mode, `check_jwt()` blocks all requests including `get_translations`, so the translate pipe would show raw keys. The strings are baked into the build for 6 locales (en, es, ar, fr, de, ps) and selected based on `LocaleService.locale`.
 
-- `maintenance.readonly_message` -- Warning banner text for readonly mode
-- `maintenance.full_message` -- Full-screen overlay body text
-- `maintenance.full_title` -- Full-screen overlay heading
-- `maintenance.admin_bypass` -- Info banner text for admin bypass
-- `maintenance.write_blocked` -- Toast/error message when write is blocked
+The `MAINTENANCE_MESSAGE` env var (set via Docker `maintenance.json`) overrides the hardcoded body text, allowing operators to provide deployment-specific context like "Deploying v0.77.0 — back in 10 minutes."
 
-The `MAINTENANCE_MESSAGE` env var content is displayed as-is (not translated) since it is operator-provided per-deployment context.
+Database translation rows for these keys still exist in the migration (inserted for completeness) but are not used by the frontend.
 
 ## Security Considerations
 
@@ -244,6 +242,12 @@ Three bugs were discovered and fixed during end-to-end verification:
 **Problem**: The `X-Maintenance-Mode` header was present in PostgREST responses (visible in Network inspector) but `HttpResponse.headers.get('X-Maintenance-Mode')` returned null. In cross-origin requests (dev: port 4200 → port 3000), browsers hide non-safelisted response headers from JavaScript unless the server includes them in `Access-Control-Expose-Headers`.
 
 **Fix**: Added `{"Access-Control-Expose-Headers": "X-Maintenance-Mode"}` to the `response.headers` JSON array in both the admin bypass and readonly code paths of `check_jwt()`. This is primarily a local dev issue — in production, PostgREST is reverse-proxied through the same origin.
+
+### 4. Translation Keys Showing as Raw Text in Full Mode
+
+**Problem**: In full maintenance mode, `check_jwt()` blocks ALL requests — including the `get_translations` RPC. The Angular `TranslatePipe` returned raw keys like `maintenance.full_title` on the overlay page because the translations never loaded.
+
+**Fix**: Removed i18n dependency from maintenance UI entirely. All maintenance display strings are now hardcoded in `MaintenanceService` for 6 locales (en, es, ar, fr, de, ps), selected by `LocaleService.locale`. The `TranslatePipe` is not used for any maintenance-related text. Custom operator messages via `MAINTENANCE_MESSAGE` env var still work as before.
 
 ## Testing
 
