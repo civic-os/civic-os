@@ -15,7 +15,10 @@ FROM postgis/postgis:17-3.5
 # at the archive mirror to install Sqitch dependencies.
 # We only need the main archive (not security or updates) since this is a
 # dev/CI image and Sqitch + libdbd-pg-perl are in the main component.
-RUN echo "deb [trusted=yes] http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list
+# Also remove the pgdg apt source (inherited from the postgres base image)
+# since apt.postgresql.org has dropped Bullseye as well.
+RUN echo "deb [trusted=yes] http://archive.debian.org/debian bullseye main" > /etc/apt/sources.list \
+    && rm -f /etc/apt/sources.list.d/pgdg.list
 
 # Install sqitch and PostgreSQL engine from Debian repositories
 RUN apt-get update && apt-get install -y --no-install-recommends \
