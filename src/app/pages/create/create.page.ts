@@ -561,6 +561,10 @@ export class CreatePage {
       this.createForm.reset(defaults);
     }
 
+    // Defer scroll-to-top so it runs after the modal's unlockBodyScroll()
+    // restores the previous scroll position (driven by signal effect).
+    setTimeout(() => window.scrollTo({ top: 0 }));
+
     if (key) {
       this.router.navigate(['create', key]);
     } else {
