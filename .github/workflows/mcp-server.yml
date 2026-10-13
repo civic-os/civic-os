@@ -9,12 +9,20 @@ on:
     paths:
       - 'tools/mcp-server/**'
       - 'docker/mcp-server/**'
+      # @civic-os/core is a file: dependency; `npm run build` (tsc -b) builds it
+      # through the project reference and the Docker image copies its source.
+      - 'packages/core/**'
+      - 'tsconfig.base.json'
       - '.github/workflows/mcp-server.yml'
   pull_request:
     branches: [main, develop]
     paths:
       - 'tools/mcp-server/**'
       - 'docker/mcp-server/**'
+      # @civic-os/core is a file: dependency; `npm run build` (tsc -b) builds it
+      # through the project reference and the Docker image copies its source.
+      - 'packages/core/**'
+      - 'tsconfig.base.json'
       - '.github/workflows/mcp-server.yml'
   # Manual trigger with optional container publish
   workflow_dispatch:
@@ -53,6 +61,8 @@ jobs:
         run: npm ci
 
       - name: Build TypeScript
+        # tsc -b builds the file: dependency packages/core (project reference)
+        # into packages/core/dist first, then the server.
         run: npm run build
 
       - name: Run tests
