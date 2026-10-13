@@ -18,6 +18,12 @@
 /// <reference lib="webworker" />
 
 import * as chrono from 'chrono-node';
+import { CORE_CANARY } from '@civic-os/core';
+
+// @civic-os/core resolution canary (SDK P1.0; removed in P1.1a). The worker
+// bundle resolves the core through tsconfig paths (tsconfig.worker.json extends
+// tsconfig.json); the global assignment keeps the import in the bundle.
+(self as unknown as { civicOsCoreCanary?: string }).civicOsCoreCanary = CORE_CANARY;
 
 /**
  * CRITICAL: EntityPropertyType Enum Duplication
