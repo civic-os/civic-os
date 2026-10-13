@@ -136,6 +136,12 @@ export default tseslint.config(
       // undeclared, license-crossing dependency.
       'import-x/no-relative-packages': 'error',
       'no-restricted-imports': ['error', { patterns: AGPL_IMPORT_PATTERNS }],
+      // Packages are consumed from source by isolatedModules transpilers
+      // (esbuild, Vite, Bun), which cannot inline const enums across files.
+      'no-restricted-syntax': ['error', {
+        selector: 'TSEnumDeclaration[const=true]',
+        message: 'No const enums in workspace packages; use a regular enum or an `as const` object.',
+      }],
     },
   },
   {
