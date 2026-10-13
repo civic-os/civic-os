@@ -10,6 +10,7 @@
  *   node scripts/test-ledger.mjs                 run suite, compare to baseline
  *   node scripts/test-ledger.mjs --update        run suite N times (--runs N, default 5),
  *                                                rewrite baseline with per-test minimum
+ *   node scripts/test-ledger.mjs --update --reset-unstable   rebuild unstable/leaker marks from scratch
  *   node scripts/test-ledger.mjs --from <file>   use an existing raw ledger JSON
  *                                                (written by the vitest reporter
  *                                                when SDK_LEDGER_OUT is set)
@@ -22,11 +23,15 @@
  *   - skipped + todo count increased
  * New tests are reported but allowed.
  *
- * Why several runs on --update: a few specs have assertions that fire after
- * their own test ended (so vitest counts them against whichever test is
- * running then). Those counts wobble by run. The baseline stores the minimum
- * observed count and flags such tests `unstable` (with `maxAssertions`), so
- * the check stays free of false positives while a real loss still trips it.
+ * Unstable vs leakers: some specs assert after their own test ended (inside
+ * async subscribe callbacks). Vitest's global assertion counter charges those
+ * late assertions to whichever test is running at that moment. The tests that
+ * receive them are `unstable` (counts inflated by assertions leaking from other
+ * tests); the tests that leak are listed in the baseline's `leakers` array
+ * (heuristic, a checklist for repairing them). Hence --update runs the suite
+ * several times and stores the minimum count plus `maxAssertions`; flags only
+ * widen on later updates (reproducible) until --reset-unstable is passed
+ * (use after the leakers are fixed).
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -110,6 +115,38 @@ function mergeRuns(rawRuns) {
   return merged;
 }
 
+// Leakers: tests that assert after they ended (typically inside an async
+// subscribe callback). Detected heuristically from source: a passing test whose
+// recorded count is 0 although its body contains expect(, or whose body both
+// subscribes and expects and asserts less than its expect( occurrences.
+// Merged with any previously recorded leakers (never dropped without
+// --reset-unstable). Checklist for the repair lane; not used for pass/fail.
+function findLeakers(tests, previous) {
+  const found = new Set(previous);
+  const cache = new Map();
+  for (const [k, t] of Object.entries(tests)) {
+    if (t.state !== 'passed') continue;
+    const [file, full] = k.split(' :: ');
+    const name = full.replace(/ #\d+$/, '').split(' > ').pop();
+    if (!cache.has(file)) {
+      const p = join(root, file);
+      cache.set(file, existsSync(p) ? readFileSync(p, 'utf8').split('\n') : []);
+    }
+    const lines = cache.get(file);
+    const idx = lines.findIndex(
+      (l) => /^\s*(it|test)\(/.test(l) && (l.includes(`'${name}'`) || l.includes(`"${name}"`) || l.includes('`' + name + '`')),
+    );
+    if (idx < 0) continue;
+    let end = idx + 1;
+    while (end < lines.length && !/^\s*(it|test|describe|xit|beforeEach|afterEach)\(/.test(lines[end])) end++;
+    const body = lines.slice(idx, end).join('\n');
+    const expects = (body.match(/\bexpect\(/g) ?? []).length;
+    const subscribes = /\.subscribe\(/.test(body);
+    if (expects > 0 && (t.assertions === 0 || (subscribes && t.assertions < expects))) found.add(k);
+  }
+  return [...found].sort();
+}
+
 let raw, runExit;
 if (update && !fromFile) {
   const rawRuns = [];
@@ -131,7 +168,24 @@ if (update) {
     console.error('ledger: refusing to update baseline from a failing run.');
     process.exit(1);
   }
-  const doc = { version: 1, totals: totals(current), tests: current };
+  const resetUnstable = args.includes('--reset-unstable');
+  const existing = !resetUnstable && existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
+  if (existing) {
+    // Reproducibility: once flagged unstable, a test stays unstable and its
+    // range only widens (min of mins, max of maxes), regardless of what this
+    // particular set of runs happened to observe.
+    for (const [k, e] of Object.entries(existing.tests)) {
+      const c = current[k];
+      if (!e.unstable || !c) continue;
+      const lo = Math.min(e.assertions, c.assertions);
+      const hi = Math.max(e.maxAssertions, c.maxAssertions ?? c.assertions);
+      c.assertions = lo;
+      c.unstable = true;
+      c.maxAssertions = hi;
+    }
+  }
+  const leakers = findLeakers(current, existing?.leakers ?? []);
+  const doc = { version: 1, totals: totals(current), leakers, tests: sortedTests(current) };
   mkdirSync(dirname(BASELINE), { recursive: true });
   writeFileSync(BASELINE, JSON.stringify(doc, null, 2) + '\n');
   console.log(`ledger: baseline written (${doc.totals.tests} tests, ${doc.totals.assertions} assertions).`);
