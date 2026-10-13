@@ -20,10 +20,7 @@
     "a11y:pa11y": "pa11y-ci --config .pa11yci.json",
     "a11y:lighthouse": "lhci autorun",
     "a11y:audit": "lighthouse http://localhost:4200 --only-categories=accessibility --output=html --output-path=./baseline-lighthouse.html",
-    "visual:reference": "backstop reference",
-    "visual:test": "backstop test",
-    "visual:approve": "backstop approve",
-    "test:a11y-full": "npm run a11y:pa11y && npm run visual:test"
+    "test:a11y-full": "npm run a11y:pa11y && npm run a11y:lighthouse"
   },
   "private": true,
   "dependencies": {
@@ -93,13 +90,13 @@
     "@vitest/coverage-v8": "^5.0.0",
     "angular-eslint": "^22.2.0",
     "autoprefixer": "^10.5.4",
-    "backstopjs": "^6.3.25",
     "daisyui": "^5.7.27",
     "eslint": "^10.10.0",
     "happy-dom": "^20.14.0",
     "istanbul-lib-instrument": "^6.0.3",
     "pa11y-ci": "^4.1.1",
     "pg": "^8.23.0",
+    "playwright-core": "~1.59.1",
     "postcss": "^8.5.27",
     "tailwindcss": "^4.3.3",
     "ts-node": "^10.9.2",
