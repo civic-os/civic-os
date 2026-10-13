@@ -920,3 +920,19 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/my_table
 
 **Last Updated**: 2026-09-04
 **Maintainer**: Development Team
+
+## Assertion ledger (SDK program)
+
+A pass/fail count cannot tell a test that asserts from one that silently asserts nothing. This matters when service logic moves behind Promise-based clients: specs that assert inside `subscribe()` and then `flush()` synchronously keep passing even if emission becomes asynchronous, because the assertions run after the test ended (or never). The ledger records, per test, how many `expect()` calls ran during that test's lifecycle, so any later change can prove no test lost assertions.
+
+**How it works**: an `afterEach` in `src/test-setup.ts` stores `expect.getState().assertionCalls` in the test's `meta`; `scripts/vitest-ledger-reporter.mjs` (registered in the `test` target's `reporters`) writes a per-test JSON when `SDK_LEDGER_OUT` is set, and is inert otherwise. Assertions that fire after the test finished are deliberately not counted.
+
+```bash
+node scripts/test-ledger.mjs                  # run suite, compare with tests/baselines/unit-ledger.json
+node scripts/test-ledger.mjs --from raw.json  # compare an existing raw ledger instead of running
+node scripts/test-ledger.mjs --update         # re-baseline (runs the suite 5 times; --runs N to change)
+```
+
+The check fails if any test's assertion count decreased, a baseline test disappeared (a rename shows as disappeared plus new, and needs approval), a passing test stopped passing, the total test count dropped, or skipped/todo count rose. New tests are reported and allowed.
+
+Tests marked `unstable` in the baseline have assertions that fire after their own test ended, so vitest attributes them to whichever test is running then. The baseline stores the minimum observed count for those. Update the baseline only for intentional, reviewed changes.
