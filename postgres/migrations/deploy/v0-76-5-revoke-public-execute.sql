@@ -534,7 +534,7 @@ DECLARE
     v_user_id UUID;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -543,7 +543,7 @@ BEGIN
     WHERE entity_table = p_entity_table AND entity_id = p_entity_id;
 
     IF NOT FOUND THEN
-        IF NOT has_permission(p_entity_table::text, 'delete') THEN
+        IF NOT has_permission(p_entity_table::text, 'delete') AND NOT metadata._is_db_admin() THEN
             RAISE EXCEPTION 'Permission denied'
                 USING HINT = format('Requires %s:delete permission', p_entity_table);
         END IF;
@@ -556,7 +556,7 @@ BEGIN
         SELECT 1 FROM metadata.time_slot_series s
         JOIN metadata.time_slot_series_groups g ON g.id = s.group_id
         WHERE s.id = v_instance.series_id
-          AND (g.created_by = v_user_id OR is_admin())
+          AND (g.created_by = v_user_id OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';
@@ -605,7 +605,7 @@ DECLARE
     v_user_id UUID;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -614,7 +614,7 @@ BEGIN
     IF p_dtstart IS NULL THEN RAISE EXCEPTION 'dtstart is required'; END IF;
     IF p_duration IS NULL THEN RAISE EXCEPTION 'duration is required'; END IF;
 
-    IF NOT has_permission(p_entity_table::text, 'create') THEN
+    IF NOT has_permission(p_entity_table::text, 'create') AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = format('Requires %s:create permission', p_entity_table);
     END IF;
@@ -674,7 +674,7 @@ BEGIN
         RETURN jsonb_build_object('success', FALSE, 'message', format('Group %s not found', p_group_id), 'group_id', p_group_id);
     END IF;
 
-    IF NOT (v_group.created_by = current_user_id() OR is_admin()) THEN
+    IF NOT (v_group.created_by = current_user_id() OR is_admin() OR metadata._is_db_admin()) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series group owner or an admin';
     END IF;
@@ -713,7 +713,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM metadata.time_slot_series_groups
         WHERE id = v_series.group_id
-          AND (created_by = current_user_id() OR is_admin())
+          AND (created_by = current_user_id() OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';
@@ -757,7 +757,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM metadata.time_slot_series_groups
         WHERE id = v_series.group_id
-          AND (created_by = current_user_id() OR is_admin())
+          AND (created_by = current_user_id() OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';
@@ -795,7 +795,7 @@ DECLARE
     v_user_id UUID;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -804,7 +804,7 @@ BEGIN
     WHERE entity_table = p_entity_table AND entity_id = p_entity_id;
 
     IF NOT FOUND THEN
-        IF NOT has_permission(p_entity_table::text, 'update') THEN
+        IF NOT has_permission(p_entity_table::text, 'update') AND NOT metadata._is_db_admin() THEN
             RAISE EXCEPTION 'Permission denied'
                 USING HINT = format('Requires %s:update permission', p_entity_table);
         END IF;
@@ -817,7 +817,7 @@ BEGIN
         SELECT 1 FROM metadata.time_slot_series s
         JOIN metadata.time_slot_series_groups g ON g.id = s.group_id
         WHERE s.id = v_instance.series_id
-          AND (g.created_by = v_user_id OR is_admin())
+          AND (g.created_by = v_user_id OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';
@@ -867,11 +867,11 @@ DECLARE
     v_conflict RECORD;
     v_scope_type TEXT;
 BEGIN
-    IF current_user_id() IS NULL THEN
+    IF current_user_id() IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
-    IF NOT has_permission(p_entity_table::text, 'read') THEN
+    IF NOT has_permission(p_entity_table::text, 'read') AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = format('Requires %s:read permission', p_entity_table);
     END IF;
@@ -942,7 +942,7 @@ DECLARE
     v_user_id UUID;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -956,13 +956,13 @@ BEGIN
         IF NOT EXISTS (
             SELECT 1 FROM metadata.time_slot_series_groups
             WHERE id = v_original.group_id
-              AND (created_by = v_user_id OR is_admin())
+              AND (created_by = v_user_id OR is_admin() OR metadata._is_db_admin())
         ) THEN
             RAISE EXCEPTION 'Permission denied'
                 USING HINT = 'Must be the series owner or an admin';
         END IF;
     ELSE
-        IF NOT (v_original.created_by = v_user_id OR is_admin()) THEN
+        IF NOT (v_original.created_by = v_user_id OR is_admin() OR metadata._is_db_admin()) THEN
             RAISE EXCEPTION 'Permission denied'
                 USING HINT = 'Must be the series owner or an admin';
         END IF;
@@ -1029,7 +1029,7 @@ DECLARE
     v_user_id UUID;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -1038,7 +1038,7 @@ BEGIN
         RETURN jsonb_build_object('success', FALSE, 'message', 'Group not found');
     END IF;
 
-    IF NOT (v_group.created_by = v_user_id OR is_admin()) THEN
+    IF NOT (v_group.created_by = v_user_id OR is_admin() OR metadata._is_db_admin()) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series group owner or an admin';
     END IF;
@@ -1073,7 +1073,7 @@ DECLARE
     v_expand_until DATE;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -1085,7 +1085,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM metadata.time_slot_series_groups
         WHERE id = v_series.group_id
-          AND (created_by = v_user_id OR is_admin())
+          AND (created_by = v_user_id OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';
@@ -1146,7 +1146,7 @@ DECLARE
     v_value JSONB;
 BEGIN
     v_user_id := current_user_id();
-    IF v_user_id IS NULL THEN
+    IF v_user_id IS NULL AND NOT metadata._is_db_admin() THEN
         RAISE EXCEPTION 'Authentication required';
     END IF;
 
@@ -1158,7 +1158,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM metadata.time_slot_series_groups
         WHERE id = v_series.group_id
-          AND (created_by = v_user_id OR is_admin())
+          AND (created_by = v_user_id OR is_admin() OR metadata._is_db_admin())
     ) THEN
         RAISE EXCEPTION 'Permission denied'
             USING HINT = 'Must be the series owner or an admin';
