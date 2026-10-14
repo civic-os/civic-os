@@ -1,0 +1,471 @@
+{
+  "signatureOf": {
+    "holiday_rules.created_at": "nullable=false;rules=[]",
+    "holiday_rules.day": "nullable=true;rules=[]",
+    "holiday_rules.description": "nullable=true;rules=[]",
+    "holiday_rules.display_name": "nullable=false;rules=[]",
+    "holiday_rules.id": "nullable=false;rules=[]",
+    "holiday_rules.is_active": "nullable=false;rules=[]",
+    "holiday_rules.month": "nullable=true;rules=[]",
+    "holiday_rules.nth": "nullable=true;rules=[]",
+    "holiday_rules.relative_days": "nullable=true;rules=[]",
+    "holiday_rules.relative_to_rule_id": "nullable=true;rules=[]",
+    "holiday_rules.rule_type": "nullable=false;rules=[]",
+    "holiday_rules.sort_order": "nullable=false;rules=[]",
+    "holiday_rules.updated_at": "nullable=false;rules=[]",
+    "holiday_rules.weekday": "nullable=true;rules=[]",
+    "manager_events.attendee_ages": "nullable=true;rules=[]",
+    "manager_events.attendee_count": "nullable=true;rules=[required=\"\",min=\"1\",max=\"75\"]",
+    "manager_events.contact_name": "nullable=true;rules=[required=\"\"]",
+    "manager_events.contact_phone": "nullable=true;rules=[required=\"\"]",
+    "manager_events.created_at": "nullable=true;rules=[]",
+    "manager_events.display_name": "nullable=true;rules=[]",
+    "manager_events.event_type": "nullable=true;rules=[required=\"\"]",
+    "manager_events.id": "nullable=true;rules=[]",
+    "manager_events.is_food_served": "nullable=true;rules=[]",
+    "manager_events.is_public_event": "nullable=true;rules=[]",
+    "manager_events.organization_name": "nullable=true;rules=[]",
+    "manager_events.status_id": "nullable=true;rules=[]",
+    "manager_events.time_slot": "nullable=true;rules=[min=\"10\",required=\"\"]",
+    "manager_events.updated_at": "nullable=true;rules=[]",
+    "public_calendar_events.attendee_ages": "nullable=true;rules=[]",
+    "public_calendar_events.contact_name": "nullable=true;rules=[]",
+    "public_calendar_events.contact_phone": "nullable=true;rules=[]",
+    "public_calendar_events.display_name": "nullable=false;rules=[]",
+    "public_calendar_events.event_type": "nullable=false;rules=[]",
+    "public_calendar_events.id": "nullable=false;rules=[]",
+    "public_calendar_events.is_admission_charged": "nullable=true;rules=[]",
+    "public_calendar_events.is_public_event": "nullable=false;rules=[]",
+    "public_calendar_events.organization_name": "nullable=true;rules=[]",
+    "public_calendar_events.synced_at": "nullable=false;rules=[]",
+    "public_calendar_events.time_slot": "nullable=false;rules=[]",
+    "reservation_payment_types.base_amount": "nullable=false;rules=[]",
+    "reservation_payment_types.code": "nullable=false;rules=[]",
+    "reservation_payment_types.description": "nullable=true;rules=[]",
+    "reservation_payment_types.display_name": "nullable=false;rules=[]",
+    "reservation_payment_types.id": "nullable=false;rules=[]",
+    "reservation_payment_types.is_refundable": "nullable=false;rules=[]",
+    "reservation_payment_types.sort_order": "nullable=false;rules=[]",
+    "reservation_payments.amount": "nullable=false;rules=[]",
+    "reservation_payments.can_record_payment": "nullable=true;rules=[]",
+    "reservation_payments.created_at": "nullable=false;rules=[]",
+    "reservation_payments.days_until_due": "nullable=true;rules=[]",
+    "reservation_payments.display_name": "nullable=true;rules=[]",
+    "reservation_payments.due_date": "nullable=true;rules=[]",
+    "reservation_payments.id": "nullable=false;rules=[]",
+    "reservation_payments.is_overdue": "nullable=false;rules=[]",
+    "reservation_payments.paid_amount": "nullable=true;rules=[]",
+    "reservation_payments.payment_date": "nullable=true;rules=[]",
+    "reservation_payments.payment_method_id": "nullable=true;rules=[]",
+    "reservation_payments.payment_transaction_id": "nullable=true;rules=[]",
+    "reservation_payments.payment_type_id": "nullable=false;rules=[]",
+    "reservation_payments.reservation_request_id": "nullable=false;rules=[]",
+    "reservation_payments.status_id": "nullable=false;rules=[]",
+    "reservation_payments.updated_at": "nullable=false;rules=[]",
+    "reservation_requests.attendee_ages": "nullable=true;rules=[]",
+    "reservation_requests.attendee_count": "nullable=false;rules=[required=\"\",min=\"1\",max=\"75\"]",
+    "reservation_requests.can_waive_fees": "nullable=true;rules=[]",
+    "reservation_requests.cancellation_reason": "nullable=true;rules=[]",
+    "reservation_requests.cancelled_at": "nullable=true;rules=[]",
+    "reservation_requests.cancelled_by": "nullable=true;rules=[]",
+    "reservation_requests.color": "nullable=true;rules=[]",
+    "reservation_requests.created_at": "nullable=false;rules=[]",
+    "reservation_requests.days_until_event": "nullable=true;rules=[]",
+    "reservation_requests.denial_reason": "nullable=true;rules=[]",
+    "reservation_requests.display_name": "nullable=true;rules=[]",
+    "reservation_requests.event_type": "nullable=false;rules=[required=\"\"]",
+    "reservation_requests.facility_fee_amount": "nullable=true;rules=[]",
+    "reservation_requests.id": "nullable=false;rules=[]",
+    "reservation_requests.is_admission_charged": "nullable=false;rules=[]",
+    "reservation_requests.is_food_served": "nullable=false;rules=[]",
+    "reservation_requests.is_fundraiser": "nullable=false;rules=[]",
+    "reservation_requests.is_holiday_or_weekend": "nullable=true;rules=[]",
+    "reservation_requests.is_public_event": "nullable=false;rules=[]",
+    "reservation_requests.needs_attention": "nullable=false;rules=[]",
+    "reservation_requests.organization_name": "nullable=true;rules=[]",
+    "reservation_requests.policy_agreed": "nullable=false;rules=[required=\"\"]",
+    "reservation_requests.policy_agreed_at": "nullable=true;rules=[]",
+    "reservation_requests.request_age_days": "nullable=true;rules=[]",
+    "reservation_requests.requestor_address": "nullable=false;rules=[required=\"\"]",
+    "reservation_requests.requestor_id": "nullable=false;rules=[]",
+    "reservation_requests.requestor_name": "nullable=false;rules=[required=\"\"]",
+    "reservation_requests.requestor_phone": "nullable=false;rules=[required=\"\"]",
+    "reservation_requests.reviewed_at": "nullable=true;rules=[]",
+    "reservation_requests.reviewed_by": "nullable=true;rules=[]",
+    "reservation_requests.status_id": "nullable=false;rules=[]",
+    "reservation_requests.time_slot": "nullable=false;rules=[min=\"10\",required=\"\"]",
+    "reservation_requests.updated_at": "nullable=false;rules=[]"
+  },
+  "signatures": {
+    "nullable=false;rules=[]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 1
+    },
+    "nullable=false;rules=[min=\"10\",required=\"\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": {
+          "min": {
+            "actual": [1],
+            "min": 10
+          }
+        },
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": {
+          "min": {"actual": -1, "min": 10}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 10}
+        },
+        "number:0.5": {
+          "min": {"actual": 0.5, "min": 10}
+        },
+        "number:1": {
+          "min": {"actual": 1, "min": 10}
+        },
+        "number:10": null,
+        "number:10.01": null,
+        "number:100": null,
+        "number:11": null,
+        "number:9": {
+          "min": {"actual": 9, "min": 10}
+        },
+        "number:9.99": {
+          "min": {"actual": 9.99, "min": 10}
+        },
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 10}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 10}
+        },
+        "string:\"1\"": {
+          "min": {"actual": "1", "min": 10}
+        },
+        "string:\"10\"": null,
+        "string:\"10.01\"": null,
+        "string:\"11\"": null,
+        "string:\"9\"": {
+          "min": {"actual": "9", "min": 10}
+        },
+        "string:\"9.99\"": {
+          "min": {"actual": "9.99", "min": 10}
+        },
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 3
+    },
+    "nullable=false;rules=[required=\"\",min=\"1\",max=\"75\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": {
+          "min": {"actual": -1, "min": 1}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 1}
+        },
+        "number:0.5": {
+          "min": {"actual": 0.5, "min": 1}
+        },
+        "number:0.99": {
+          "min": {"actual": 0.99, "min": 1}
+        },
+        "number:1": null,
+        "number:1.01": null,
+        "number:100": {
+          "max": {"actual": 100, "max": 75}
+        },
+        "number:2": null,
+        "number:74": null,
+        "number:74.99": null,
+        "number:75": null,
+        "number:75.01": {
+          "max": {"actual": 75.01, "max": 75}
+        },
+        "number:76": {
+          "max": {"actual": 76, "max": 75}
+        },
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 1}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 1}
+        },
+        "string:\"0.99\"": {
+          "min": {"actual": "0.99", "min": 1}
+        },
+        "string:\"1\"": null,
+        "string:\"1.01\"": null,
+        "string:\"2\"": null,
+        "string:\"74\"": null,
+        "string:\"74.99\"": null,
+        "string:\"75\"": null,
+        "string:\"75.01\"": {
+          "max": {"actual": "75.01", "max": 75}
+        },
+        "string:\"76\"": {
+          "max": {"actual": "76", "max": 75}
+        },
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 4
+    },
+    "nullable=false;rules=[required=\"\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 2
+    },
+    "nullable=true;rules=[]": {
+      "results": {
+        "array:0": null,
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": null,
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": null,
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": null
+      },
+      "validatorCount": 0
+    },
+    "nullable=true;rules=[min=\"10\",required=\"\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": {
+          "min": {
+            "actual": [1],
+            "min": 10
+          }
+        },
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": {
+          "min": {"actual": -1, "min": 10}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 10}
+        },
+        "number:0.5": {
+          "min": {"actual": 0.5, "min": 10}
+        },
+        "number:1": {
+          "min": {"actual": 1, "min": 10}
+        },
+        "number:10": null,
+        "number:10.01": null,
+        "number:100": null,
+        "number:11": null,
+        "number:9": {
+          "min": {"actual": 9, "min": 10}
+        },
+        "number:9.99": {
+          "min": {"actual": 9.99, "min": 10}
+        },
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 10}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 10}
+        },
+        "string:\"1\"": {
+          "min": {"actual": "1", "min": 10}
+        },
+        "string:\"10\"": null,
+        "string:\"10.01\"": null,
+        "string:\"11\"": null,
+        "string:\"9\"": {
+          "min": {"actual": "9", "min": 10}
+        },
+        "string:\"9.99\"": {
+          "min": {"actual": "9.99", "min": 10}
+        },
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 2
+    },
+    "nullable=true;rules=[required=\"\",min=\"1\",max=\"75\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": {
+          "min": {"actual": -1, "min": 1}
+        },
+        "number:0": {
+          "min": {"actual": 0, "min": 1}
+        },
+        "number:0.5": {
+          "min": {"actual": 0.5, "min": 1}
+        },
+        "number:0.99": {
+          "min": {"actual": 0.99, "min": 1}
+        },
+        "number:1": null,
+        "number:1.01": null,
+        "number:100": {
+          "max": {"actual": 100, "max": 75}
+        },
+        "number:2": null,
+        "number:74": null,
+        "number:74.99": null,
+        "number:75": null,
+        "number:75.01": {
+          "max": {"actual": 75.01, "max": 75}
+        },
+        "number:76": {
+          "max": {"actual": 76, "max": 75}
+        },
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": {
+          "min": {"actual": "-1", "min": 1}
+        },
+        "string:\"0\"": {
+          "min": {"actual": "0", "min": 1}
+        },
+        "string:\"0.99\"": {
+          "min": {"actual": "0.99", "min": 1}
+        },
+        "string:\"1\"": null,
+        "string:\"1.01\"": null,
+        "string:\"2\"": null,
+        "string:\"74\"": null,
+        "string:\"74.99\"": null,
+        "string:\"75\"": null,
+        "string:\"75.01\"": {
+          "max": {"actual": "75.01", "max": 75}
+        },
+        "string:\"76\"": {
+          "max": {"actual": "76", "max": 75}
+        },
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 3
+    },
+    "nullable=true;rules=[required=\"\"]": {
+      "results": {
+        "array:0": {"required": true},
+        "array:1": null,
+        "boolean:false": null,
+        "boolean:true": null,
+        "null": {"required": true},
+        "number:-1": null,
+        "number:0": null,
+        "number:0.5": null,
+        "number:1": null,
+        "number:100": null,
+        "number:NaN": null,
+        "object": null,
+        "string:\"   \"": null,
+        "string:\"  x  \"": null,
+        "string:\" \"": null,
+        "string:\"\"": {"required": true},
+        "string:\"-1\"": null,
+        "string:\"0\"": null,
+        "string:\"1\"": null,
+        "string:\"abc\"": null,
+        "string:\"true\"": null,
+        "undefined": {"required": true}
+      },
+      "validatorCount": 1
+    }
+  }
+}

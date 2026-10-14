@@ -1,0 +1,31 @@
+{
+  "inverse": {
+    "newsletters": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "partner_service_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "partners": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "referrals_per_week": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "service_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": ["newsletters", "partners", "referrals_per_week", "service_categories"],
+  "menu": ["newsletters", "partners", "service_categories"]
+}

@@ -1,0 +1,56 @@
+{
+  "inverse": {
+    "broader_impact_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "contact_broader_impact_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "contact_projects": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "contacts": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "interest_centers": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "interest_center_id", "sourceColumnDisplayName": "Interest Center", "sourceTable": "projects", "sourceTableDisplayName": "Projects"}
+      ],
+      "excluding": ["projects"]
+    },
+    "organization_broader_impact_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "organizations": {
+      "afterExclude": ["contacts"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "organization_id", "sourceColumnDisplayName": "Organization", "sourceTable": "projects", "sourceTableDisplayName": "Projects"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "organization_id", "sourceColumnDisplayName": "Organization", "sourceTable": "contacts", "sourceTableDisplayName": "Contacts"}
+      ],
+      "excluding": ["projects"]
+    },
+    "project_broader_impact_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "projects": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": ["broader_impact_categories", "contacts", "interest_centers", "organizations", "projects"],
+  "menu": ["broader_impact_categories", "contacts", "interest_centers", "organizations", "projects"]
+}

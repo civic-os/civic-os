@@ -1,0 +1,30 @@
+{
+  "inverse": {
+    "participants": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "participant_id", "sourceColumnDisplayName": "Player", "sourceTable": "team_rosters", "sourceTableDisplayName": "Team Rosters"}
+      ],
+      "excluding": ["team_rosters"]
+    },
+    "sponsors": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "team_rosters": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "teams": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "id", "showOnDetail": true, "sortOrder": 1, "sourceColumn": "team_id", "sourceColumnDisplayName": "Team", "sourceTable": "team_rosters", "sourceTableDisplayName": "Team Rosters"}
+      ],
+      "excluding": ["team_rosters"]
+    }
+  },
+  "management": ["participants", "sponsors", "team_rosters", "teams"],
+  "menu": ["participants", "sponsors", "team_rosters", "teams"]
+}

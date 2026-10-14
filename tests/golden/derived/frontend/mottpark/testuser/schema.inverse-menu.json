@@ -1,0 +1,69 @@
+{
+  "inverse": {
+    "holiday_rules": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 9,
+          "sourceColumn": "relative_to_rule_id",
+          "sourceColumnDisplayName": "Relative To Rule Id",
+          "sourceTable": "holiday_rules",
+          "sourceTableDisplayName": "Holiday Rules"
+        }
+      ],
+      "excluding": ["holiday_rules"]
+    },
+    "manager_events": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "public_calendar_events": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reservation_payment_types": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "payment_type_id",
+          "sourceColumnDisplayName": "Payment Type Id",
+          "sourceTable": "reservation_payments",
+          "sourceTableDisplayName": "Reservation Payments"
+        }
+      ],
+      "excluding": ["reservation_payments"]
+    },
+    "reservation_payments": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reservation_requests": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "reservation_request_id",
+          "sourceColumnDisplayName": "Reservation Request Id",
+          "sourceTable": "reservation_payments",
+          "sourceTableDisplayName": "Reservation Payments"
+        }
+      ],
+      "excluding": ["reservation_payments"]
+    }
+  },
+  "management": ["holiday_rules", "manager_events", "public_calendar_events", "reservation_payment_types", "reservation_payments", "reservation_requests"],
+  "menu": ["holiday_rules", "manager_events", "public_calendar_events", "reservation_payment_types", "reservation_payments", "reservation_requests"]
+}

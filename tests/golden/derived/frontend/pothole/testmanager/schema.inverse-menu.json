@@ -1,0 +1,46 @@
+{
+  "inverse": {
+    "Bid": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "Issue": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"}
+      ],
+      "excluding": ["WorkDetail"]
+    },
+    "Tag": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "WorkDetail": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "WorkPackage": {
+      "afterExclude": ["Bid"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 7, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Issue", "sourceTableDisplayName": "Issues"},
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 8, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Bid", "sourceTableDisplayName": "Bid"}
+      ],
+      "excluding": ["Issue"]
+    },
+    "issue_status_summary": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "issue_tags": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": ["Bid", "Issue", "Tag", "WorkDetail", "WorkPackage", "issue_status_summary"],
+  "menu": ["Bid", "Issue", "Tag", "WorkDetail", "WorkPackage", "issue_status_summary"]
+}

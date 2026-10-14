@@ -1,0 +1,37 @@
+{
+  "inverse": {
+    "holiday_rules": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 9,
+          "sourceColumn": "relative_to_rule_id",
+          "sourceColumnDisplayName": "Relative To Rule Id",
+          "sourceTable": "holiday_rules",
+          "sourceTableDisplayName": "Holiday Rules"
+        }
+      ],
+      "excluding": ["holiday_rules"]
+    },
+    "public_calendar_events": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reservation_payment_types": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "reservation_requests": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": ["holiday_rules", "public_calendar_events", "reservation_payment_types", "reservation_requests"],
+  "menu": ["holiday_rules", "public_calendar_events", "reservation_payment_types", "reservation_requests"]
+}

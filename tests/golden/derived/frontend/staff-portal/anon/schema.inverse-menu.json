@@ -1,0 +1,26 @@
+{
+  "inverse": {
+    "document_requirement_roles": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "document_requirements": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "sites": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "staff_roles": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": ["document_requirements", "sites", "staff_roles"],
+  "menu": ["document_requirements", "sites", "staff_roles"]
+}

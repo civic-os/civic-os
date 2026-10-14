@@ -1,0 +1,153 @@
+{
+  "inverse": {
+    "client_consents": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "client_contact_summary": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "client_current_consents": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "client_service_needs": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "clients": {
+      "afterExclude": ["client_current_consents", "consents_expiring_soon", "client_consents"],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "client_id", "sourceColumnDisplayName": "Client", "sourceTable": "referrals", "sourceTableDisplayName": "Referral"},
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "client_id",
+          "sourceColumnDisplayName": "Client Id",
+          "sourceTable": "client_current_consents",
+          "sourceTableDisplayName": "Current Consents"
+        },
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "client_id",
+          "sourceColumnDisplayName": "Client Id",
+          "sourceTable": "consents_expiring_soon",
+          "sourceTableDisplayName": "Consents Expiring Soon"
+        },
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 10, "sourceColumn": "client_id", "sourceColumnDisplayName": "Client", "sourceTable": "client_consents", "sourceTableDisplayName": "Client Consents"}
+      ],
+      "excluding": ["referrals"]
+    },
+    "consents_expiring_soon": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "follow_up_surveys": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "monthly_referral_summary": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "newsletter_recipients": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "newsletters": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "partner_service_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "partner_utilization_report": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "partners": {
+      "afterExclude": [],
+      "all": [
+        {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "partner_id", "sourceColumnDisplayName": "Partner", "sourceTable": "referrals", "sourceTableDisplayName": "Referral"}
+      ],
+      "excluding": ["referrals"]
+    },
+    "referral_service_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "referrals": {
+      "afterExclude": [],
+      "all": [
+        {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "referral_id",
+          "sourceColumnDisplayName": "Referral",
+          "sourceTable": "follow_up_surveys",
+          "sourceTableDisplayName": "Follow-Up Survey"
+        }
+      ],
+      "excluding": ["follow_up_surveys"]
+    },
+    "referrals_per_week": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "service_categories": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "time_lag_report": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    },
+    "top_needs_report": {
+      "afterExclude": [],
+      "all": [],
+      "excluding": []
+    }
+  },
+  "management": [
+    "client_consents",
+    "client_contact_summary",
+    "client_current_consents",
+    "clients",
+    "consents_expiring_soon",
+    "follow_up_surveys",
+    "monthly_referral_summary",
+    "newsletters",
+    "partner_utilization_report",
+    "partners",
+    "referrals",
+    "referrals_per_week",
+    "service_categories",
+    "time_lag_report",
+    "top_needs_report"
+  ],
+  "menu": ["client_consents", "client_contact_summary", "clients", "follow_up_surveys", "monthly_referral_summary", "newsletters", "partner_utilization_report", "partners", "referrals", "service_categories", "time_lag_report", "top_needs_report"]
+}

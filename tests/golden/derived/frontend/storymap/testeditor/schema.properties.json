@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "participants": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "birth_date", "columnSpan": 1, "defaultValue": null, "select": "birth_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "home_location", "columnSpan": 2, "defaultValue": null, "select": "home_location:home_location_text", "selectForEdit": "=", "selectForList": "=", "type": "GeoPoint", "typeId": 12},
+      {"column": "enrolled_date", "columnSpan": 1, "defaultValue": null, "select": "enrolled_date", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "status", "columnSpan": 1, "defaultValue": null, "select": "status", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "parent_email", "columnSpan": 1, "defaultValue": null, "select": "parent_email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "parent_phone", "columnSpan": 1, "defaultValue": null, "select": "parent_phone", "selectForEdit": "=", "selectForList": "=", "type": "Telephone", "typeId": 15},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "home_location_text", "columnSpan": 2, "defaultValue": null, "select": "home_location_text", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2}
+    ],
+    "sponsors": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "sponsor_type", "columnSpan": 1, "defaultValue": null, "select": "sponsor_type", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "total_contribution", "columnSpan": 1, "defaultValue": null, "select": "total_contribution", "selectForEdit": "=", "selectForList": "=", "type": "Money", "typeId": 7},
+      {"column": "partnership_start", "columnSpan": 1, "defaultValue": null, "select": "partnership_start", "selectForEdit": "=", "selectForList": "=", "type": "Date", "typeId": 4},
+      {"column": "contact_email", "columnSpan": 1, "defaultValue": null, "select": "contact_email", "selectForEdit": "=", "selectForList": "=", "type": "Email", "typeId": 14},
+      {"column": "location", "columnSpan": 2, "defaultValue": null, "select": "location:location_text", "selectForEdit": "=", "selectForList": "=", "type": "GeoPoint", "typeId": 12},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "location_text", "columnSpan": 2, "defaultValue": null, "select": "location_text", "selectForEdit": "=", "selectForList": "=", "type": "TextLong", "typeId": 2}
+    ],
+    "team_rosters": [
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "team_id", "columnSpan": 1, "defaultValue": null, "select": "team_id:teams!team_id(id,display_name)", "selectForEdit": "team_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "participant_id", "columnSpan": 1, "defaultValue": null, "select": "participant_id:participants!participant_id(id,display_name)", "selectForEdit": "participant_id", "selectForList": "=", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "season_year", "columnSpan": 1, "defaultValue": null, "select": "season_year", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "jersey_number", "columnSpan": 1, "defaultValue": null, "select": "jersey_number", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "teams": [
+      {"column": "display_name", "columnSpan": 1, "defaultValue": null, "select": "display_name", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "id", "columnSpan": 1, "defaultValue": null, "select": "id", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "age_group", "columnSpan": 1, "defaultValue": null, "select": "age_group", "selectForEdit": "=", "selectForList": "=", "type": "TextShort", "typeId": 1},
+      {"column": "season_year", "columnSpan": 1, "defaultValue": null, "select": "season_year", "selectForEdit": "=", "selectForList": "=", "type": "IntegerNumber", "typeId": 8},
+      {"column": "color", "columnSpan": 1, "defaultValue": null, "select": "color", "selectForEdit": "=", "selectForList": "=", "type": "Color", "typeId": 13},
+      {"column": "created_at", "columnSpan": 1, "defaultValue": null, "select": "created_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "updated_at", "columnSpan": 1, "defaultValue": null, "select": "updated_at", "selectForEdit": "=", "selectForList": "=", "type": "DateTimeLocal", "typeId": 6}
+    ]
+  },
+  "freshTypes": {
+    "participants": [
+      "birth_date:Date",
+      "created_at:DateTimeLocal",
+      "display_name:TextShort",
+      "enrolled_date:Date",
+      "home_location:GeoPoint",
+      "home_location_text:TextLong",
+      "id:IntegerNumber",
+      "parent_email:Email",
+      "parent_phone:Telephone",
+      "status:TextShort",
+      "updated_at:DateTimeLocal"
+    ],
+    "sponsors": [
+      "contact_email:Email",
+      "created_at:DateTimeLocal",
+      "display_name:TextShort",
+      "id:IntegerNumber",
+      "location:GeoPoint",
+      "location_text:TextLong",
+      "partnership_start:Date",
+      "sponsor_type:TextShort",
+      "total_contribution:Money",
+      "updated_at:DateTimeLocal"
+    ],
+    "team_rosters": ["created_at:DateTimeLocal", "id:IntegerNumber", "jersey_number:IntegerNumber", "participant_id:ForeignKeyName", "season_year:IntegerNumber", "team_id:ForeignKeyName"],
+    "teams": ["age_group:TextShort", "color:Color", "created_at:DateTimeLocal", "display_name:TextShort", "id:IntegerNumber", "season_year:IntegerNumber", "updated_at:DateTimeLocal"]
+  }
+}
