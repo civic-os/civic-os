@@ -40,7 +40,9 @@
     "a11y:pa11y": "pa11y-ci --config .pa11yci.json",
     "a11y:lighthouse": "lhci autorun",
     "a11y:audit": "lighthouse http://localhost:4200 --only-categories=accessibility --output=html --output-path=./baseline-lighthouse.html",
-    "test:a11y-full": "npm run a11y:pa11y && npm run a11y:lighthouse"
+    "test:a11y-full": "npm run a11y:pa11y && npm run a11y:lighthouse",
+    "test:ledger": "node scripts/test-ledger.mjs",
+    "test:ledger:update": "node scripts/test-ledger.mjs --update"
   },
   "private": true,
   "dependencies": {
