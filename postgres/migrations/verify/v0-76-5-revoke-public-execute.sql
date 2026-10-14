@@ -2,17 +2,17 @@
 
 BEGIN;
 
--- 1. Verify ALTER DEFAULT PRIVILEGES is set
+-- 1. Verify ALTER DEFAULT PRIVILEGES is set for the migration-runner role
 DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_default_acl da
         JOIN pg_roles r ON r.oid = da.defaclrole
-        WHERE r.rolname = 'postgres'
+        WHERE r.rolname = current_user
           AND da.defaclobjtype = 'f'
           AND da.defaclnamespace = 0
     ) THEN
-        RAISE EXCEPTION 'ALTER DEFAULT PRIVILEGES not set for postgres';
+        RAISE EXCEPTION 'ALTER DEFAULT PRIVILEGES not set for %', current_user;
     END IF;
 END;
 $$;

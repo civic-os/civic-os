@@ -10,13 +10,24 @@ BEGIN;
 -- ===========================================================================
 -- 1. ALTER DEFAULT PRIVILEGES
 -- ===========================================================================
--- Functions created by 'postgres' from now on will NOT receive PUBLIC EXECUTE.
--- CREATE OR REPLACE on existing functions keeps their current ACL.
--- Caveat: extension functions created after this also lose PUBLIC; document
--- that CREATE EXTENSION should be followed by an explicit GRANT if needed.
+-- Functions created by the migration-runner role from now on will NOT receive
+-- PUBLIC EXECUTE.  CREATE OR REPLACE on existing functions keeps their current
+-- ACL.  Caveat: extension functions created after this also lose PUBLIC;
+-- document that CREATE EXTENSION should be followed by an explicit GRANT if
+-- needed.
+--
+-- Uses current_user so the statement works for both superuser (postgres) and
+-- managed-database admin roles (doadmin, rdsadmin, etc.) that cannot ALTER
+-- DEFAULT PRIVILEGES FOR ROLE postgres.
 
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres
-  REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+DO $$
+BEGIN
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC',
+    current_user
+  );
+END;
+$$;
 
 -- ===========================================================================
 -- 2. REVOKE EXECUTE FROM PUBLIC — authenticated-only functions

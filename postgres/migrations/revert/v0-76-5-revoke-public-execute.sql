@@ -6,9 +6,17 @@
 
 BEGIN;
 
--- Remove the ALTER DEFAULT PRIVILEGES restriction
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres
-  GRANT EXECUTE ON FUNCTIONS TO PUBLIC;
+-- Remove the ALTER DEFAULT PRIVILEGES restriction.
+-- Uses current_user so the revert works for managed-database admin roles
+-- (doadmin, rdsadmin) that cannot ALTER DEFAULT PRIVILEGES FOR ROLE postgres.
+DO $$
+BEGIN
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I GRANT EXECUTE ON FUNCTIONS TO PUBLIC',
+    current_user
+  );
+END;
+$$;
 
 -- Restore PUBLIC EXECUTE on all non-extension public functions
 DO $$
