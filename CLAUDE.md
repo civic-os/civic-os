@@ -237,7 +237,7 @@ All API calls use PostgREST conventions (select, filter, order, embed). `SchemaS
 
 **PostgREST Version** (v0.73.0+): PostgREST v16.2. Upgraded from custom Docker image (`docker/postgrest/Dockerfile`). Admin server healthchecks on port 3001 in all production compose files. See `docs/development/POSTGREST_UPGRADE_RUNBOOK.md` for the upgrade verification procedure and `tests/functional/postgrest-api-regression-test.sh` for the API regression test.
 
-**API Testing with JWT Generation**: Generate JWTs from the example `.env` secret to test RLS policies, permissions, and multi-tenant scenarios. See `docs/development/TESTING.md` (PostgREST API Testing section) for workflow.
+**API Testing with JWTs**: Get real tokens from the example Keycloak via the password grant (test users `testuser`/`testeditor`/`testmanager`/`testadmin`) to test RLS policies and permissions; PostgREST validates Keycloak's JWKS, so self-signed tokens are rejected. See `docs/development/TESTING.md` (PostgREST API Testing section) for the recipe.
 
 ## Built-in PostgreSQL Functions
 
