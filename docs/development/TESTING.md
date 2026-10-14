@@ -980,3 +980,14 @@ Anything that reads service state populated by the emission (signal caches, `ens
 ### Shared fixtures are frozen
 
 The exported fixtures in `src/app/testing/mock-schema.ts` and `mock-dashboard.ts` (`MOCK_PROPERTIES`, `MOCK_ENTITIES`, `MOCK_DATA`, `MOCK_M2M_PROPERTY`, `MOCK_WIDGETS`, ...) are deep-frozen with `deepFreeze()`, so an in-place mutation throws at the mutation site. Angular's vitest runner shares module instances across spec files in a worker, so an unfrozen mutation (for example `SchemaService.getProperties()` setting `type` on a response object) silently corrupts later specs. Clone before passing a fixture through code that mutates its input: `structuredClone(MOCK_PROPERTIES.integer)`. The `createMock*` factories return fresh unfrozen objects.
+
+### Golden outputs (SDK program)
+
+`src/app/testing/golden/*.golden.spec.ts` feed the committed raw metadata fixtures (`tests/golden/raw/<example>/<role>[.es]/*.json`) through the real frontend services (SchemaService, DataService, ErrorService, GuidedFormService, the condition evaluator, the CreatePage / EditPage transform methods) and compare the result with committed JSON under `tests/golden/derived/frontend/`. They characterize the code as it is, quirks included, so the logic can move into `@civic-os/core` with byte-equal output. `tests/golden/derived/frontend/COVERAGE.md` maps every pure function to its artifact and lists what is deliberately not covered.
+
+```bash
+scripts/golden/derive-frontend.sh           # regenerate every artifact (sets GOLDEN_UPDATE=1; review the git diff)
+scripts/golden/derive-frontend.sh --check   # compare only, same as the golden specs in test:headless
+```
+
+A normal run only compares. A changed, missing or orphan artifact fails the spec and names the file with the first differing lines; nothing is written without `GOLDEN_UPDATE=1`. Writes are deterministic (sorted keys, stable ordering, trailing newline). Time zones (UTC, America/New_York, Asia/Kolkata, Australia/Lord_Howe) are switched in-process with `process.env.TZ` and restored in `finally`, so every run covers the whole matrix whatever the machine's zone; derive under a different `TZ=` to prove it (the output must not change). The golden specs import page classes and call their private transform methods from the prototype with a stand-in `this` (`currentProps` only), so no component is instantiated.
