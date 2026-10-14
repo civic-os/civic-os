@@ -115,8 +115,11 @@ function orderFor(file) {
   if (file.startsWith('rpc.get_statuses_for_entity.') || file.startsWith('rpc.get_categories_for_entity.')) {
     return { server: ['sort_order', 'display_name'], tie: ['id'] };
   }
-  // function: ORDER BY st.sort_order, fs.sort_order, ts.sort_order (the latter two are not output columns)
-  if (file.startsWith('rpc.get_status_transitions_for_entity.')) return { server: ['sort_order'], tie: ['id'] };
+  // function: ORDER BY st.sort_order, fs.sort_order, ts.sort_order. The last two are not output columns,
+  // so ties cannot be recognized from the rows: the server order is kept verbatim (no canonicalization).
+  if (file.startsWith('rpc.get_status_transitions_for_entity.')) {
+    return { verbatim: true, server: ['st.sort_order', 'fs.sort_order', 'ts.sort_order'], tie: [] };
+  }
   return null;
 }
 /** Row-creation/modification timestamps are boot-time values on every metadata row. */
@@ -235,7 +238,10 @@ function normalize(file, body) {
     });
     if (REDACTED_FILES.has(file)) body = redactStrings(body, redacted);
     const spec = orderFor(file);
-    if (spec) {
+    if (spec?.verbatim) {
+      sorted = { orderSource: 'server', serverKeys: spec.server, tieKeys: [],
+        note: 'server ORDER BY includes non-output columns; row order kept verbatim, no canonicalization' };
+    } else if (spec) {
       const cmpTie = (x, y) => {
         for (const k of spec.tie) { const c = cmpValues(x?.[k], y?.[k]); if (c) return c; }
         const xs = canonical(x), ys = canonical(y);
