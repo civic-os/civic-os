@@ -95,6 +95,11 @@ describe('ChartWidgetComponent', () => {
     fixture.componentRef.setInput('widget', mockWidget);
   });
 
+  afterEach(() => {
+    // Undo console.error and download stubs so they cannot affect later tests.
+    vi.restoreAllMocks();
+  });
+
   it('should create', () => {
     fixture.detectChanges();
     expect(component).toBeTruthy();
@@ -346,17 +351,30 @@ describe('ChartWidgetComponent', () => {
   });
 
   it('should have downloadCsv method callable without error', async () => {
+    // Stub the download side effects. Unstubbed, happy-dom follows the
+    // <a download href="blob:..."> click as a navigation and leaves
+    // window.location on the blob URL for every later spec file in the worker.
+    const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:chart-widget-test');
+    const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     fixture.detectChanges();
 
     await settle();
     expect(() => component.downloadCsv()).not.toThrow();
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect((createObjectURL.mock.lastCall![0] as Blob).type).toBe('text/csv;charset=utf-8;');
+    expect(anchorClick).toHaveBeenCalledTimes(1);
+    const anchor = anchorClick.mock.contexts[0] as HTMLAnchorElement;
+    expect(anchor.download).toMatch(/^Referrals_Per_Week_\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:chart-widget-test');
   });
 
   it('should have downloadPng method callable without error', async () => {
     fixture.detectChanges();
 
     await settle();
-    expect(() => component.downloadPng()).not.toThrow();
+    await expect(component.downloadPng()).resolves.toBeUndefined();
   });
 
   it('should render an sr-only data table with a caption and one column per series', async () => {

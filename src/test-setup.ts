@@ -36,6 +36,56 @@ if (typeof HTMLCanvasElement !== 'undefined' && !HTMLCanvasElement.prototype.get
 }
 
 // ---------------------------------------------------------------------------
+// Shared-window guard. Angular's Vitest builder runs with isolate: false, so
+// every spec file in a worker shares one happy-dom window. A test that
+// navigates it (an un-stubbed <a download href="blob:..."> click is followed
+// as a navigation) changes window.location for every later file and fails
+// some unrelated spec later. This guard fails the test that left the window
+// on a different URL, names it, and restores the base URL so the failure
+// does not cascade. It only ever adds failures, it never passes a test.
+// The end-of-test check runs in onTestFinished, i.e. after every afterEach
+// (the spec's own restores and Angular's TestBed teardown), and an error
+// there fails the test without skipping any other cleanup.
+// ---------------------------------------------------------------------------
+{
+  const shared = globalThis as any;
+  shared.__civicOsBaseHref ??= window.location.href;
+  const baseHref: string = shared.__civicOsBaseHref;
+  const label = (task: any): string => {
+    const names: string[] = [];
+    for (let t = task; t && t.suite; t = t.suite) names.unshift(t.name);
+    return `${task.file?.name ?? '?'} > ${names.join(' > ')}`;
+  };
+  const resetTo = (href: string) => (window as any).happyDOM?.setURL(href);
+
+  beforeEach((ctx: any) => {
+    ctx.onTestFinished(() => {
+      shared.__civicOsLastTest = label(ctx.task);
+      const href = window.location.href;
+      if (href !== baseHref) {
+        resetTo(baseHref);
+        throw new Error(
+          `This test left window.location at ${href} (expected ${baseHref}). The happy-dom window is ` +
+          `shared by all spec files in a worker, so stub the navigation (for downloads: ` +
+          `URL.createObjectURL and HTMLAnchorElement.prototype.click) or restore the URL. ` +
+          `The URL has been reset.`,
+        );
+      }
+    });
+
+    const href = window.location.href;
+    if (href !== baseHref) {
+      resetTo(baseHref);
+      throw new Error(
+        `window.location was ${href} when this test started (expected ${baseHref}). ` +
+        `It changed after "${shared.__civicOsLastTest ?? '(no earlier test)'}" ended: async work from ` +
+        `that test navigated the shared happy-dom window. The URL has been reset.`,
+      );
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Assertion ledger (SDK program). Records, per test, how many expect() calls
 // ran during the test lifecycle (body + hooks) so a vitest reporter
 // (scripts/vitest-ledger-reporter.mjs) can emit a ledger. Assertions that run
@@ -54,5 +104,5 @@ afterEach((ctx: any) => {
   }
 });
 
-// Async-emission probe (inert unless SDK_ASYNC_FLUSH=microtask).
+// Async-emission probe (inert unless SDK_ASYNC_FLUSH is set; see async-flush-probe.ts).
 import './app/testing/async-flush-probe';
