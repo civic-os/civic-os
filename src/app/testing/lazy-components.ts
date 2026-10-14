@@ -106,3 +106,18 @@ export async function settleLazyComponents(fixture: ComponentFixture<unknown> | 
   );
   await new Promise((resolve) => realSetTimeout(resolve, 0));
 }
+
+/**
+ * FkSearchModalComponent re-arms a 60 ms focus-retention timer on every render
+ * of its results while open (fk-search-modal.component.ts constructor) and
+ * never cancels it, so the last one can still be pending when a spec file that
+ * opened a modal ends. Specs of components that host the modal call this from
+ * a file-level afterAll: Node fires timers of equal duration in creation order,
+ * so waiting the same 60 ms outlasts it.
+ */
+export const FK_SEARCH_FOCUS_RETENTION_MS = 60;
+
+export function waitOutFkSearchFocusRetention(): Promise<void> {
+  return new Promise((resolve) => realSetTimeout(resolve, FK_SEARCH_FOCUS_RETENTION_MS));
+}
+

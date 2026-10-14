@@ -347,6 +347,15 @@ describe('EditPage', () => {
             mockDataService.getData.mockReturnValue(of([{ id: 42, name: '' }] as any));
 
             fixture.detectChanges();
+            // An invalid submit scrolls to the first error 100 ms later
+            // (scrollToFirstError). Run that timer inside each test instead of
+            // letting it fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+        });
+
+        afterEach(() => {
+            vi.runOnlyPendingTimers();
+            vi.useRealTimers();
         });
 
         it('should not submit when form is invalid', async () => {

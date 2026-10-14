@@ -28,9 +28,13 @@ import { EntityPropertyType } from '../../interfaces/entity';
 import { MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
-import { settleLazyComponents } from '../../testing/lazy-components';
+import { settleLazyComponents, waitOutFkSearchFocusRetention } from '../../testing/lazy-components';
 
 describe('EditPropertyComponent', () => {
+    // A hosted FkSearchModal may leave its 60 ms focus-retention timer pending
+    // (testing/lazy-components.ts).
+    afterAll(waitOutFkSearchFocusRetention);
+
     let component: EditPropertyComponent;
     let fixture: ComponentFixture<EditPropertyComponent>;
     let mockDataService: any;

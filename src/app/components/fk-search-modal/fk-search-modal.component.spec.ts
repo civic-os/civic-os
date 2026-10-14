@@ -69,9 +69,14 @@ describe('FkSearchModalComponent', () => {
         { id: 3, display_name: 'Carol White', email: 'carol@example.com' }
     ];
 
-    // Helper to wait for async effects and data loading
+    // Helper to wait for async effects and data loading. Reloads go through
+    // debounceTime(50) and every render while open schedules a 60 ms
+    // focus-retention timer, so the spec runs on fake timers (installed in
+    // beforeEach) and advances them: a real 100 ms wait raced the debounce when
+    // the machine was loaded (getDataPaginated not yet called) and left the
+    // focus timer running into the next spec file.
     async function waitForData() {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await vi.advanceTimersByTimeAsync(100);
         fixture.detectChanges();
         await fixture.whenStable();
     }
@@ -111,15 +116,16 @@ describe('FkSearchModalComponent', () => {
 
         fixture = TestBed.createComponent(FkSearchModalComponent);
         component = fixture.componentInstance;
+        // Timers and the clock RxJS's debounceTime reads; animation frames stay
+        // real, so Angular's change detection scheduling is unaffected.
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
     });
 
-    afterAll(async () => {
-        // While the modal is open, every results re-render schedules a 60 ms
-        // focus-retention timer (fk-search-modal.component.ts constructor) that
-        // destroying the component does not cancel. Let the last one run here
-        // rather than during the next spec file in this worker. Node fires timers
-        // of equal duration in creation order, so this wait outlasts it.
-        await new Promise(resolve => setTimeout(resolve, 60));
+    afterEach(() => {
+        // Drop what the last render left pending (the focus-retention timer,
+        // which destroying the component does not cancel) before restoring.
+        vi.clearAllTimers();
+        vi.useRealTimers();
     });
 
     it('should create', () => {
