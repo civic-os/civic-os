@@ -69,6 +69,13 @@ export function actionParam(dialog: Locator, label: string): Locator {
   return dialog.getByRole('group').filter({ has: dialog.page().getByText(new RegExp(`^\\s*${escapeRe(label)}\\s*\\*?\\s*$`)) });
 }
 
+/** The record id in an app route such as /edit/<table>/<id>. */
+export function routeId(url: string, table: string): string {
+  const m = new RegExp(`/(?:view|edit)/${escapeRe(table)}/(\\d+)`).exec(new URL(url).pathname);
+  if (!m) throw new Error(`no ${table} id in ${url}`);
+  return m[1];
+}
+
 /** A data row of the main list table, located by a cell's text. */
 export function listRow(page: Page, text: string): Locator {
   return page.getByRole('row').filter({ has: page.getByRole('cell', { name: text, exact: true }) });

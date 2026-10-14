@@ -115,8 +115,9 @@ export class MaskContext {
    * @param {Array<{table: string, id: string}>} opts.registered  ids created by the run, with their table
    * @param {Array<[number, number]>} opts.windows                runtime clock windows (epoch ms)
    * @param {Array<{table_name: string, column_name: string, join_table: string}>} [opts.foreignKeys]
+   * @param {Array<{guided_form_key: string, parent_table: string}>} [opts.guidedForms]
    */
-  constructor({ registered, windows, foreignKeys = [] }) {
+  constructor({ registered, windows, foreignKeys = [], guidedForms = [] }) {
     this.registered = new Map();
     for (const { table, id } of registered) {
       if (!this.registered.has(table)) this.registered.set(table, new Set());
@@ -127,6 +128,7 @@ export class MaskContext {
       if (!this.fk.has(table_name)) this.fk.set(table_name, new Map());
       this.fk.get(table_name).set(column_name, join_table);
     }
+    this.guidedFormTables = new Map(guidedForms.map((g) => [g.guided_form_key, g.parent_table]));
     this.windows = windows;
     this.uuidTokens = new Map();
     this.idTokens = new Map();
@@ -180,6 +182,7 @@ export class MaskContext {
       if (typeof args?.[p] === 'string' && /(_id|_ids)$/.test(key)) return args[p];
     }
     if (RPC_PARAM_TABLES[key]) return RPC_PARAM_TABLES[key];
+    if (key === 'p_parent_id' && typeof args?.p_guided_form_key === 'string') return this.guidedFormTables.get(args.p_guided_form_key) ?? null;
     if (RPC_PAGE_ID_PARAMS.has(key) && page && String(value) === page.id) return page.table;
     return null;
   }
@@ -377,10 +380,22 @@ export function normalizePostgrestRequest(req, mctx) {
     rawBody = body;
   }
 
-  const status = req.failure ? `failed:${req.failure}` : req.status ?? null;
+  const status = statusClass(req);
   const entry = { method: req.method, path, query, headers, body, status };
   const rawUrl = path + mctx.maskRawQuery(rawSearch(req.url), ctx);
   return { entry, raw: { url: rawUrl, body: rawBody } };
+}
+
+/**
+ * Response status as compared. A 2xx response and a request the app cancelled
+ * (net::ERR_ABORTED, e.g. switchMap or a navigation) share one class: whether a
+ * cancelled request's response arrived first is timing, while the request
+ * itself was sent either way. Every other status stays exact.
+ */
+export function statusClass(req) {
+  if (req.failure) return /ERR_ABORTED/.test(req.failure) ? '2xx|cancelled' : `failed:${req.failure}`;
+  if (req.status == null) return null;
+  return req.status >= 200 && req.status < 300 ? '2xx|cancelled' : req.status;
 }
 
 /** The query string exactly as sent. */
@@ -418,8 +433,9 @@ function compareStr(a, b) {
  *
  * @param rawFlows   raw recordings in run order
  * @param foreignKeys schema_properties rows with join_table (FK map), captured during the run
+ * @param guidedForms schema_guided_forms rows (guided_form_key -> parent_table), captured during the run
  */
-export function normalizeRun(rawFlows, foreignKeys = []) {
+export function normalizeRun(rawFlows, foreignKeys = [], guidedForms = []) {
   const windows = [];
   const registered = [];
   for (const f of rawFlows) {
@@ -430,7 +446,7 @@ export function normalizeRun(rawFlows, foreignKeys = []) {
     for (const r of f.requests) for (const c of r.createdIds || []) registered.push(c);
     for (const reg of f.registered || []) for (const id of reg.ids) registered.push({ table: reg.table, id: String(id) });
   }
-  const mctx = new MaskContext({ registered, windows, foreignKeys });
+  const mctx = new MaskContext({ registered, windows, foreignKeys, guidedForms });
 
   return rawFlows.map((f) => {
     const steps = [];

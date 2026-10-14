@@ -56,7 +56,8 @@ function escapeRe(s: string): string {
 
 /**
  * Screenshot masks for text that differs between two runs of identical code:
- *   - dates of the real wall clock (server created_at/updated_at; ±1 day for midnight);
+ *   - dates of the real wall clock (server created_at/updated_at, display names stamped with
+ *     CURRENT_DATE; ±1 day for midnight and UTC);
  *   - date-times with seconds within ±60 days of the real date (seed rows stamped
  *     NOW() ± an interval at stack start, which differs between two stacks);
  *   - date-times on the fake clock's day (its time of day advances in real time);
@@ -69,7 +70,8 @@ export function runtimeTextMasks(page: Page) {
   const opts = { timeZone: TIMEZONE } as const;
   const longFmt = (d: Date) => d.toLocaleDateString('en-US', { ...opts, month: 'short', day: 'numeric', year: 'numeric' });
   const numFmt = (d: Date) => d.toLocaleDateString('en-US', opts);
-  const realDates = [now - day, now, now + day].map((t) => new Date(t)).flatMap((d) => [longFmt(d), numFmt(d)]).map(escapeRe);
+  const isoFmt = (d: Date) => d.toLocaleDateString('en-CA', opts); // YYYY-MM-DD
+  const realDates = [now - day, now, now + day].map((t) => new Date(t)).flatMap((d) => [longFmt(d), numFmt(d), isoFmt(d)]).map(escapeRe);
   const nearDates = Array.from({ length: 121 }, (_, i) => new Date(now + (i - 60) * day)).map((d) => escapeRe(longFmt(d)));
   const fakeDay = new Date(Date.parse(CLOCK_T0));
   const fakeDateTimes = [longFmt(fakeDay), numFmt(fakeDay)].map((s) => `${escapeRe(s)},? \\d{1,2}:\\d{2}`);
@@ -239,7 +241,10 @@ export class Harness {
     this.recorder.realEnd = Date.now();
     fs.mkdirSync(RAW_DIR, { recursive: true });
     fs.writeFileSync(path.join(RAW_DIR, `${slug(this.flowTitle)}.json`), JSON.stringify(this.recorder.toJSON(), null, 1));
-    for (const c of this.contexts) await c.close();
+    for (const c of this.contexts) {
+      // Never let a stuck renderer hold the run hostage after a failure.
+      await Promise.race([c.close(), new Promise((r) => setTimeout(r, 15_000))]);
+    }
   }
 }
 

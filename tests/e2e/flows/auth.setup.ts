@@ -51,15 +51,20 @@ for (const role of roles) {
 }
 
 /**
- * Foreign-key map of the instance (schema_properties.join_table), used by the
- * normalizer to know which table an id in a filter or body refers to.
+ * Id-reference metadata of the instance, used by the normalizer to know which
+ * table an id refers to: the FK map (schema_properties.join_table) and each
+ * guided form's parent table (for p_parent_id arguments).
  */
 setup('capture foreign-key map', async () => {
   const api = await Api.forRole('testadmin');
   const rows = await api.get<Array<{ table_name: string; column_name: string; join_table: string }>>(
     'schema_properties?select=table_name,column_name,join_table&join_table=not.is.null&order=table_name,column_name',
   );
+  const forms = await api.get<Array<{ guided_form_key: string; parent_table: string }>>(
+    'schema_guided_forms?select=guided_form_key,parent_table&order=guided_form_key',
+  );
   fs.mkdirSync(RAW_DIR, { recursive: true });
   fs.writeFileSync(path.join(RAW_DIR, '_foreign-keys.json'), JSON.stringify(rows, null, 1));
+  fs.writeFileSync(path.join(RAW_DIR, '_guided-forms.json'), JSON.stringify(forms, null, 1));
   expect(rows.length).toBeGreaterThan(0);
 });

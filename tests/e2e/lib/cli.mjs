@@ -50,12 +50,14 @@ if (cmd === 'normalize') {
   const fkFile = path.join(a.raw, '_foreign-keys.json');
   const foreignKeys = fs.existsSync(fkFile) ? JSON.parse(fs.readFileSync(fkFile, 'utf8')) : [];
   if (!foreignKeys.length) console.warn('warning: no _foreign-keys.json in raw dir; created ids in FK columns will not be masked');
+  const gfFile = path.join(a.raw, '_guided-forms.json');
+  const guidedForms = fs.existsSync(gfFile) ? JSON.parse(fs.readFileSync(gfFile, 'utf8')) : [];
   if (!rawFiles.length) {
     console.error(`no raw recordings in ${a.raw}`);
     process.exit(2);
   }
   const raws = rawFiles.map((f) => JSON.parse(fs.readFileSync(path.join(a.raw, f), 'utf8')));
-  const docs = normalizeRun(raws, foreignKeys);
+  const docs = normalizeRun(raws, foreignKeys, guidedForms);
   fs.mkdirSync(a.out, { recursive: true });
   for (const f of fs.readdirSync(a.out).filter((x) => x.endsWith('.json'))) fs.rmSync(path.join(a.out, f));
   docs.forEach((doc, i) => writeJson(path.join(a.out, rawFiles[i]), doc));

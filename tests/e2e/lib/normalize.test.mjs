@@ -139,6 +139,17 @@ test('zone-less wall clock values near the fake clock are treated as runtime', (
   assert.ok(!ctx.inWindow(timestampInstants('2031-03-14T14:30')));
 });
 
+test('2xx and app-cancelled requests share a status class; errors stay exact', () => {
+  const doc = run([
+    { url: 'http://localhost:3000/a', status: 200 },
+    { url: 'http://localhost:3000/b', status: null, failure: 'net::ERR_ABORTED' },
+    { url: 'http://localhost:3000/c', status: 404 },
+    { url: 'http://localhost:3000/d', status: 206 },
+  ]);
+  const st = Object.fromEntries(doc.steps[0].postgrest.map((e) => [e.path, e.status]));
+  assert.deepEqual(st, { '/a': '2xx|cancelled', '/b': '2xx|cancelled', '/c': 404, '/d': '2xx|cancelled' });
+});
+
 test('polling allowlist collapses to >=1 and JWT/authorization are reduced to presence', () => {
   const doc = run([
     { url: 'http://localhost:3000/schema_cache_versions' },
