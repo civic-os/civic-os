@@ -1,0 +1,2729 @@
+{
+  "entities": {
+    "borrowers": {
+      "createProps": [],
+      "editProps": [
+        "status_id:Status",
+        "borrower_type:Category",
+        "phone_verified:Boolean",
+        "street:TextShort",
+        "city:TextShort",
+        "state:TextShort",
+        "zip:TextShort",
+        "photo_id:FileImage",
+        "address_proof:FileImage",
+        "liability_waiver:FileImage",
+        "display_name:TextLong"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {"address_proof": "", "borrower_type": "", "city": null, "display_name": null, "liability_waiver": null, "phone_verified": null, "photo_id": null, "state": "", "status_id": "", "street": null, "zip": ""},
+          "outputs": {
+            "*": {
+              "control": {"address_proof": null, "borrower_type": null, "state": null, "status_id": null, "zip": null},
+              "createApi": {},
+              "editApi": {"address_proof": "", "borrower_type": "", "city": null, "display_name": null, "liability_waiver": null, "phone_verified": null, "photo_id": null, "state": "", "status_id": "", "street": null, "zip": ""}
+            }
+          },
+          "rawRow": {"address_proof": null, "borrower_type": null, "state": null, "status_id": null, "zip": null}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {
+            "address_proof": "11111111-1111-4111-8111-111111111111",
+            "borrower_type": {"display_name": "x", "id": 3},
+            "city": 42,
+            "display_name": 42,
+            "liability_waiver": "11111111-1111-4111-8111-111111111111",
+            "phone_verified": false,
+            "photo_id": "11111111-1111-4111-8111-111111111111",
+            "state": 42,
+            "status_id": {"display_name": "x", "id": 3},
+            "street": 42,
+            "zip": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "borrower_type": 3,
+                "city": "text",
+                "display_name": "text",
+                "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "phone_verified": true,
+                "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "state": "text",
+                "status_id": 3,
+                "street": "text",
+                "zip": "text"
+              },
+              "createApi": {},
+              "editApi": {
+                "address_proof": "11111111-1111-4111-8111-111111111111",
+                "borrower_type": {"display_name": "x", "id": 3},
+                "city": 42,
+                "display_name": 42,
+                "liability_waiver": "11111111-1111-4111-8111-111111111111",
+                "phone_verified": false,
+                "photo_id": "11111111-1111-4111-8111-111111111111",
+                "state": 42,
+                "status_id": {"display_name": "x", "id": 3},
+                "street": 42,
+                "zip": 42
+              }
+            }
+          },
+          "rawRow": {
+            "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "borrower_type": 3,
+            "city": "text",
+            "display_name": "text",
+            "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "phone_verified": true,
+            "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "state": "text",
+            "status_id": 3,
+            "street": "text",
+            "zip": "text"
+          }
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "borrower_type": 3,
+            "city": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "phone_verified": true,
+            "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "state": "text",
+            "status_id": 3,
+            "street": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "zip": "text"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "borrower_type": 3,
+                "city": "text",
+                "display_name": "text",
+                "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "phone_verified": true,
+                "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "state": "text",
+                "status_id": 3,
+                "street": "text",
+                "zip": "text"
+              },
+              "createApi": {"extra_key": "kept"},
+              "editApi": {
+                "address_proof": "11111111-1111-4111-8111-111111111111",
+                "borrower_type": 3,
+                "city": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "liability_waiver": "11111111-1111-4111-8111-111111111111",
+                "phone_verified": true,
+                "photo_id": "11111111-1111-4111-8111-111111111111",
+                "state": "text",
+                "status_id": 3,
+                "street": "text",
+                "zip": "text"
+              }
+            }
+          },
+          "rawRow": {
+            "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "borrower_type": 3,
+            "city": "text",
+            "display_name": "text",
+            "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "phone_verified": true,
+            "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "state": "text",
+            "status_id": 3,
+            "street": "text",
+            "zip": "text"
+          }
+        }
+      }
+    },
+    "building_use_event_details": {
+      "createProps": [
+        "event_title:TextShort",
+        "event_description:TextLong",
+        "event_scope:Category",
+        "charges_fee:Category",
+        "frequency_of_use:TextShort",
+        "equipment_needs:TextLong",
+        "setup_needs:TextLong",
+        "needs_av_equipment:Boolean",
+        "accessibility_needs:TextLong"
+      ],
+      "editProps": [
+        "event_title:TextShort",
+        "event_description:TextLong",
+        "event_scope:Category",
+        "charges_fee:Category",
+        "frequency_of_use:TextShort",
+        "equipment_needs:TextLong",
+        "setup_needs:TextLong",
+        "needs_av_equipment:Boolean",
+        "accessibility_needs:TextLong"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"accessibility_needs": "", "charges_fee": "", "equipment_needs": "", "event_description": "", "event_scope": "", "event_title": "", "frequency_of_use": null, "needs_av_equipment": null, "setup_needs": ""},
+          "editFormInput": {"accessibility_needs": "", "charges_fee": "", "equipment_needs": "", "event_description": "", "event_scope": "", "event_title": "", "frequency_of_use": null, "needs_av_equipment": null, "setup_needs": ""},
+          "outputs": {
+            "*": {
+              "control": {"accessibility_needs": null, "charges_fee": null, "equipment_needs": null, "event_description": null, "event_scope": null, "event_title": null, "setup_needs": null},
+              "createApi": {"accessibility_needs": "", "charges_fee": "", "equipment_needs": "", "event_description": "", "event_scope": "", "event_title": "", "frequency_of_use": null, "needs_av_equipment": null, "setup_needs": ""},
+              "editApi": {"accessibility_needs": "", "charges_fee": "", "equipment_needs": "", "event_description": "", "event_scope": "", "event_title": "", "frequency_of_use": null, "needs_av_equipment": null, "setup_needs": ""}
+            }
+          },
+          "rawRow": {"accessibility_needs": null, "charges_fee": null, "equipment_needs": null, "event_description": null, "event_scope": null, "event_title": null, "setup_needs": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "accessibility_needs": 42,
+            "charges_fee": {"display_name": "x", "id": 3},
+            "equipment_needs": 42,
+            "event_description": 42,
+            "event_scope": {"display_name": "x", "id": 3},
+            "event_title": 42,
+            "frequency_of_use": 42,
+            "needs_av_equipment": false,
+            "setup_needs": 42
+          },
+          "editFormInput": {
+            "accessibility_needs": 42,
+            "charges_fee": {"display_name": "x", "id": 3},
+            "equipment_needs": 42,
+            "event_description": 42,
+            "event_scope": {"display_name": "x", "id": 3},
+            "event_title": 42,
+            "frequency_of_use": 42,
+            "needs_av_equipment": false,
+            "setup_needs": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {"accessibility_needs": "text", "charges_fee": 3, "equipment_needs": "text", "event_description": "text", "event_scope": 3, "event_title": "text", "frequency_of_use": "text", "needs_av_equipment": true, "setup_needs": "text"},
+              "createApi": {
+                "accessibility_needs": 42,
+                "charges_fee": {"display_name": "x", "id": 3},
+                "equipment_needs": 42,
+                "event_description": 42,
+                "event_scope": {"display_name": "x", "id": 3},
+                "event_title": 42,
+                "frequency_of_use": 42,
+                "needs_av_equipment": false,
+                "setup_needs": 42
+              },
+              "editApi": {
+                "accessibility_needs": 42,
+                "charges_fee": {"display_name": "x", "id": 3},
+                "equipment_needs": 42,
+                "event_description": 42,
+                "event_scope": {"display_name": "x", "id": 3},
+                "event_title": 42,
+                "frequency_of_use": 42,
+                "needs_av_equipment": false,
+                "setup_needs": 42
+              }
+            }
+          },
+          "rawRow": {"accessibility_needs": "text", "charges_fee": 3, "equipment_needs": "text", "event_description": "text", "event_scope": 3, "event_title": "text", "frequency_of_use": "text", "needs_av_equipment": true, "setup_needs": "text"}
+        },
+        "typical": {
+          "createFormInput": {
+            "accessibility_needs": "text",
+            "charges_fee": 3,
+            "created_at": "2026-01-01T00:00:00Z",
+            "equipment_needs": "text",
+            "event_description": "text",
+            "event_scope": 3,
+            "event_title": "text",
+            "extra_key": "kept",
+            "frequency_of_use": "text",
+            "needs_av_equipment": true,
+            "setup_needs": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "accessibility_needs": "text",
+            "charges_fee": 3,
+            "created_at": "2026-01-01T00:00:00Z",
+            "equipment_needs": "text",
+            "event_description": "text",
+            "event_scope": 3,
+            "event_title": "text",
+            "extra_key": "kept",
+            "frequency_of_use": "text",
+            "needs_av_equipment": true,
+            "setup_needs": "text",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"accessibility_needs": "text", "charges_fee": 3, "equipment_needs": "text", "event_description": "text", "event_scope": 3, "event_title": "text", "frequency_of_use": "text", "needs_av_equipment": true, "setup_needs": "text"},
+              "createApi": {
+                "accessibility_needs": "text",
+                "charges_fee": 3,
+                "equipment_needs": "text",
+                "event_description": "text",
+                "event_scope": 3,
+                "event_title": "text",
+                "extra_key": "kept",
+                "frequency_of_use": "text",
+                "needs_av_equipment": true,
+                "setup_needs": "text"
+              },
+              "editApi": {
+                "accessibility_needs": "text",
+                "charges_fee": 3,
+                "equipment_needs": "text",
+                "event_description": "text",
+                "event_scope": 3,
+                "event_title": "text",
+                "extra_key": "kept",
+                "frequency_of_use": "text",
+                "needs_av_equipment": true,
+                "setup_needs": "text"
+              }
+            }
+          },
+          "rawRow": {"accessibility_needs": "text", "charges_fee": 3, "equipment_needs": "text", "event_description": "text", "event_scope": 3, "event_title": "text", "frequency_of_use": "text", "needs_av_equipment": true, "setup_needs": "text"}
+        }
+      }
+    },
+    "building_use_request_rooms": {
+      "createProps": ["building_use_request_id:ForeignKeyName", "room_id:ForeignKeyName"],
+      "editProps": ["building_use_request_id:ForeignKeyName", "room_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"building_use_request_id": "", "room_id": ""},
+          "editFormInput": {"building_use_request_id": "", "room_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"building_use_request_id": null, "room_id": null},
+              "createApi": {"building_use_request_id": "", "room_id": ""},
+              "editApi": {"building_use_request_id": "", "room_id": ""}
+            }
+          },
+          "rawRow": {"building_use_request_id": null, "room_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "building_use_request_id": {"display_name": "x", "id": 3},
+            "room_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "building_use_request_id": {"display_name": "x", "id": 3},
+            "room_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"building_use_request_id": 3, "room_id": 3},
+              "createApi": {
+                "building_use_request_id": {"display_name": "x", "id": 3},
+                "room_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "building_use_request_id": {"display_name": "x", "id": 3},
+                "room_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"building_use_request_id": 3, "room_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"building_use_request_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "room_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"building_use_request_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "room_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"building_use_request_id": 3, "room_id": 3},
+              "createApi": {"building_use_request_id": 3, "extra_key": "kept", "room_id": 3},
+              "editApi": {"building_use_request_id": 3, "extra_key": "kept", "room_id": 3}
+            }
+          },
+          "rawRow": {"building_use_request_id": 3, "room_id": 3}
+        }
+      }
+    },
+    "building_use_requests": {
+      "createProps": [
+        "group_name:TextShort",
+        "group_type:Category",
+        "borrower_id:ForeignKeyName",
+        "contact_name:TextShort",
+        "contact_title:TextShort",
+        "contact_phone:Telephone",
+        "contact_email:Email",
+        "website:TextShort",
+        "mission_description:TextLong",
+        "time_slot:TimeSlot",
+        "estimated_attendees:IntegerNumber",
+        "hold_harmless_accepted:Boolean",
+        "photo_release_accepted:Boolean",
+        "building_use_request_rooms_m2m:ManyToMany"
+      ],
+      "editProps": [
+        "group_name:TextShort",
+        "group_type:Category",
+        "borrower_id:ForeignKeyName",
+        "contact_name:TextShort",
+        "contact_title:TextShort",
+        "contact_phone:Telephone",
+        "contact_email:Email",
+        "website:TextShort",
+        "mission_description:TextLong",
+        "time_slot:TimeSlot",
+        "estimated_attendees:IntegerNumber",
+        "building_use_request_rooms_m2m:ManyToMany",
+        "display_name:TextShort",
+        "status_id:Status",
+        "submitted_at:DateTimeLocal"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {
+            "borrower_id": "",
+            "building_use_request_rooms_m2m": null,
+            "contact_email": "",
+            "contact_name": null,
+            "contact_phone": "",
+            "contact_title": "",
+            "estimated_attendees": "",
+            "group_name": null,
+            "group_type": null,
+            "hold_harmless_accepted": null,
+            "mission_description": "",
+            "photo_release_accepted": null,
+            "time_slot": "",
+            "website": ""
+          },
+          "editFormInput": {
+            "borrower_id": "",
+            "building_use_request_rooms_m2m": null,
+            "contact_email": "",
+            "contact_name": null,
+            "contact_phone": "",
+            "contact_title": "",
+            "display_name": null,
+            "estimated_attendees": "",
+            "group_name": null,
+            "group_type": null,
+            "mission_description": "",
+            "status_id": "",
+            "submitted_at": null,
+            "time_slot": "",
+            "website": ""
+          },
+          "outputs": {
+            "*": {
+              "control": {"borrower_id": null, "contact_email": null, "contact_phone": null, "contact_title": null, "estimated_attendees": null, "mission_description": null, "status_id": null, "time_slot": null, "website": null},
+              "createApi": {
+                "borrower_id": "",
+                "building_use_request_rooms_m2m": null,
+                "contact_email": "",
+                "contact_name": null,
+                "contact_phone": "",
+                "contact_title": "",
+                "estimated_attendees": "",
+                "group_name": null,
+                "group_type": null,
+                "hold_harmless_accepted": null,
+                "mission_description": "",
+                "photo_release_accepted": null,
+                "time_slot": "",
+                "website": ""
+              },
+              "editApi": {
+                "borrower_id": "",
+                "building_use_request_rooms_m2m": null,
+                "contact_email": "",
+                "contact_name": null,
+                "contact_phone": "",
+                "contact_title": "",
+                "display_name": null,
+                "estimated_attendees": "",
+                "group_name": null,
+                "group_type": null,
+                "mission_description": "",
+                "status_id": "",
+                "submitted_at": null,
+                "time_slot": "",
+                "website": ""
+              }
+            }
+          },
+          "rawRow": {"borrower_id": null, "contact_email": null, "contact_phone": null, "contact_title": null, "estimated_attendees": null, "mission_description": null, "status_id": null, "time_slot": null, "website": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "borrower_id": {"display_name": "x", "id": 3},
+            "building_use_request_rooms_m2m": [1, 2],
+            "contact_email": 42,
+            "contact_name": 42,
+            "contact_phone": 42,
+            "contact_title": 42,
+            "estimated_attendees": 7,
+            "group_name": 42,
+            "group_type": {"display_name": "x", "id": 3},
+            "hold_harmless_accepted": false,
+            "mission_description": 42,
+            "photo_release_accepted": false,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "website": 42
+          },
+          "editFormInput": {
+            "borrower_id": {"display_name": "x", "id": 3},
+            "building_use_request_rooms_m2m": [1, 2],
+            "contact_email": 42,
+            "contact_name": 42,
+            "contact_phone": 42,
+            "contact_title": 42,
+            "display_name": 42,
+            "estimated_attendees": 7,
+            "group_name": 42,
+            "group_type": {"display_name": "x", "id": 3},
+            "mission_description": 42,
+            "status_id": {"display_name": "x", "id": 3},
+            "submitted_at": "abcdefghijklmnop",
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "website": 42
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "NaN-NaN-NaNTNaN:NaN",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "createApi": {
+                "borrower_id": {"display_name": "x", "id": 3},
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": 42,
+                "contact_name": 42,
+                "contact_phone": 42,
+                "contact_title": 42,
+                "estimated_attendees": 7,
+                "group_name": 42,
+                "group_type": {"display_name": "x", "id": 3},
+                "hold_harmless_accepted": false,
+                "mission_description": 42,
+                "photo_release_accepted": false,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": 42
+              },
+              "editApi": {
+                "borrower_id": {"display_name": "x", "id": 3},
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": 42,
+                "contact_name": 42,
+                "contact_phone": 42,
+                "contact_title": 42,
+                "display_name": 42,
+                "estimated_attendees": 7,
+                "group_name": 42,
+                "group_type": {"display_name": "x", "id": 3},
+                "mission_description": 42,
+                "status_id": {"display_name": "x", "id": 3},
+                "submitted_at": "abcdefghijklmnop",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": 42
+              }
+            }
+          },
+          "rawRow": {
+            "borrower_id": 3,
+            "building_use_request_rooms_m2m": [1, 2],
+            "contact_email": "text",
+            "contact_name": "text",
+            "contact_phone": "text",
+            "contact_title": "text",
+            "display_name": "text",
+            "estimated_attendees": 7,
+            "group_name": "text",
+            "group_type": 3,
+            "mission_description": "text",
+            "status_id": 3,
+            "submitted_at": "garbage",
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "website": "text"
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "borrower_id": 3,
+            "building_use_request_rooms_m2m": [1, 2],
+            "contact_email": "text",
+            "contact_name": "text",
+            "contact_phone": "text",
+            "contact_title": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "estimated_attendees": 7,
+            "extra_key": "kept",
+            "group_name": "text",
+            "group_type": 3,
+            "hold_harmless_accepted": true,
+            "mission_description": "text",
+            "photo_release_accepted": true,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "website": "text"
+          },
+          "editFormInput": {
+            "borrower_id": 3,
+            "building_use_request_rooms_m2m": [1, 2],
+            "contact_email": "text",
+            "contact_name": "text",
+            "contact_phone": "text",
+            "contact_title": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "estimated_attendees": 7,
+            "extra_key": "kept",
+            "group_name": "text",
+            "group_type": 3,
+            "mission_description": "text",
+            "status_id": 3,
+            "submitted_at": "2026-07-04T17:30",
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "website": "text"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T13:30",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "hold_harmless_accepted": true,
+                "mission_description": "text",
+                "photo_release_accepted": true,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "editApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T21:30:00.000Z",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T23:00",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "hold_harmless_accepted": true,
+                "mission_description": "text",
+                "photo_release_accepted": true,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "editApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T12:00:00.000Z",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-05T04:00",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "hold_harmless_accepted": true,
+                "mission_description": "text",
+                "photo_release_accepted": true,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "editApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T07:00:00.000Z",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              }
+            },
+            "UTC": {
+              "control": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T17:30",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "hold_harmless_accepted": true,
+                "mission_description": "text",
+                "photo_release_accepted": true,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              },
+              "editApi": {
+                "borrower_id": 3,
+                "building_use_request_rooms_m2m": [1, 2],
+                "contact_email": "text",
+                "contact_name": "text",
+                "contact_phone": "text",
+                "contact_title": "text",
+                "display_name": "text",
+                "estimated_attendees": 7,
+                "extra_key": "kept",
+                "group_name": "text",
+                "group_type": 3,
+                "mission_description": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T17:30:00.000Z",
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+                "website": "text"
+              }
+            }
+          },
+          "rawRow": {
+            "borrower_id": 3,
+            "building_use_request_rooms_m2m": [1, 2],
+            "contact_email": "text",
+            "contact_name": "text",
+            "contact_phone": "text",
+            "contact_title": "text",
+            "display_name": "text",
+            "estimated_attendees": 7,
+            "group_name": "text",
+            "group_type": 3,
+            "mission_description": "text",
+            "status_id": 3,
+            "submitted_at": "2026-07-04T17:30:00+00:00",
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "website": "text"
+          }
+        }
+      }
+    },
+    "building_use_rooms": {
+      "createProps": ["display_name:TextShort", "capacity:IntegerNumber", "has_av:Boolean", "description:TextLong", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextShort", "capacity:IntegerNumber", "has_av:Boolean", "description:TextLong", "sort_order:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"capacity": null, "description": "", "display_name": null, "has_av": null, "sort_order": null},
+          "editFormInput": {"capacity": null, "description": "", "display_name": null, "has_av": null, "sort_order": null},
+          "outputs": {
+            "*": {
+              "control": {"description": null},
+              "createApi": {"capacity": null, "description": "", "display_name": null, "has_av": null, "sort_order": null},
+              "editApi": {"capacity": null, "description": "", "display_name": null, "has_av": null, "sort_order": null}
+            }
+          },
+          "rawRow": {"description": null}
+        },
+        "odd": {
+          "createFormInput": {"capacity": 7, "description": 42, "display_name": 42, "has_av": false, "sort_order": 7},
+          "editFormInput": {"capacity": 7, "description": 42, "display_name": 42, "has_av": false, "sort_order": 7},
+          "outputs": {
+            "*": {
+              "control": {"capacity": 7, "description": "text", "display_name": "text", "has_av": true, "sort_order": 7},
+              "createApi": {"capacity": 7, "description": 42, "display_name": 42, "has_av": false, "sort_order": 7},
+              "editApi": {"capacity": 7, "description": 42, "display_name": 42, "has_av": false, "sort_order": 7}
+            }
+          },
+          "rawRow": {"capacity": 7, "description": "text", "display_name": "text", "has_av": true, "sort_order": 7}
+        },
+        "typical": {
+          "createFormInput": {"capacity": 7, "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "has_av": true, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"capacity": 7, "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "has_av": true, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"capacity": 7, "description": "text", "display_name": "text", "has_av": true, "sort_order": 7},
+              "createApi": {"capacity": 7, "description": "text", "display_name": "text", "extra_key": "kept", "has_av": true, "sort_order": 7},
+              "editApi": {"capacity": 7, "description": "text", "display_name": "text", "extra_key": "kept", "has_av": true, "sort_order": 7}
+            }
+          },
+          "rawRow": {"capacity": 7, "description": "text", "display_name": "text", "has_av": true, "sort_order": 7}
+        }
+      }
+    },
+    "census_block_groups": {
+      "createProps": ["display_name:TextShort", "lmi_status:Category", "boundary:GeoPolygon", "geoid:TextShort", "lowmod_pct:DecimalNumber", "lowmod:IntegerNumber", "lowmod_universe:IntegerNumber", "low:IntegerNumber"],
+      "editProps": ["display_name:TextShort", "lmi_status:Category", "boundary:GeoPolygon", "geoid:TextShort", "lowmod_pct:DecimalNumber", "lowmod:IntegerNumber", "lowmod_universe:IntegerNumber", "low:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"boundary": null, "display_name": null, "geoid": "", "lmi_status": null, "low": "", "lowmod": null, "lowmod_pct": null, "lowmod_universe": ""},
+          "editFormInput": {"boundary": null, "display_name": null, "geoid": "", "lmi_status": null, "low": "", "lowmod": null, "lowmod_pct": null, "lowmod_universe": ""},
+          "outputs": {
+            "*": {
+              "control": {"geoid": null, "low": null, "lowmod_universe": null},
+              "createApi": {"boundary": null, "display_name": null, "geoid": "", "lmi_status": null, "low": "", "lowmod": null, "lowmod_pct": null, "lowmod_universe": ""},
+              "editApi": {"boundary": null, "display_name": null, "geoid": "", "lmi_status": null, "low": "", "lowmod": null, "lowmod_pct": null, "lowmod_universe": ""}
+            }
+          },
+          "rawRow": {"geoid": null, "low": null, "lowmod_universe": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "display_name": 42,
+            "geoid": 42,
+            "lmi_status": {"display_name": "x", "id": 3},
+            "low": 7,
+            "lowmod": 7,
+            "lowmod_pct": 1.5,
+            "lowmod_universe": 7
+          },
+          "editFormInput": {
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "display_name": 42,
+            "geoid": 42,
+            "lmi_status": {"display_name": "x", "id": 3},
+            "low": 7,
+            "lowmod": 7,
+            "lowmod_pct": 1.5,
+            "lowmod_universe": 7
+          },
+          "outputs": {
+            "*": {
+              "control": {"boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))", "display_name": "text", "geoid": "text", "lmi_status": 3, "low": 7, "lowmod": 7, "lowmod_pct": 1.5, "lowmod_universe": 7},
+              "createApi": {
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "display_name": 42,
+                "geoid": 42,
+                "lmi_status": {"display_name": "x", "id": 3},
+                "low": 7,
+                "lowmod": 7,
+                "lowmod_pct": 1.5,
+                "lowmod_universe": 7
+              },
+              "editApi": {
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "display_name": 42,
+                "geoid": 42,
+                "lmi_status": {"display_name": "x", "id": 3},
+                "low": 7,
+                "lowmod": 7,
+                "lowmod_pct": 1.5,
+                "lowmod_universe": 7
+              }
+            }
+          },
+          "rawRow": {"boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))", "display_name": "text", "geoid": "text", "lmi_status": 3, "low": 7, "lowmod": 7, "lowmod_pct": 1.5, "lowmod_universe": 7}
+        },
+        "typical": {
+          "createFormInput": {
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "geoid": "text",
+            "lmi_status": 3,
+            "low": 7,
+            "lowmod": 7,
+            "lowmod_pct": 1.5,
+            "lowmod_universe": 7,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "geoid": "text",
+            "lmi_status": 3,
+            "low": 7,
+            "lowmod": 7,
+            "lowmod_pct": 1.5,
+            "lowmod_universe": 7,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))", "display_name": "text", "geoid": "text", "lmi_status": 3, "low": 7, "lowmod": 7, "lowmod_pct": 1.5, "lowmod_universe": 7},
+              "createApi": {"boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))", "display_name": "text", "extra_key": "kept", "geoid": "text", "lmi_status": 3, "low": 7, "lowmod": 7, "lowmod_pct": 1.5, "lowmod_universe": 7},
+              "editApi": {"boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))", "display_name": "text", "extra_key": "kept", "geoid": "text", "lmi_status": 3, "low": 7, "lowmod": 7, "lowmod_pct": 1.5, "lowmod_universe": 7}
+            }
+          },
+          "rawRow": {"boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))", "display_name": "text", "geoid": "text", "lmi_status": 3, "low": 7, "lowmod": 7, "lowmod_pct": 1.5, "lowmod_universe": 7}
+        }
+      }
+    },
+    "mek_checkouts": {
+      "createProps": ["display_name:TextLong"],
+      "editProps": ["display_name:TextLong", "checkout_photos:Unknown", "return_photos:Unknown", "checkout_notes:TextLong", "return_notes:TextLong", "status_id:Status"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null},
+          "editFormInput": {"checkout_notes": null, "checkout_photos": "", "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"checkout_photos": null, "return_photos": null, "status_id": null},
+              "createApi": {"display_name": null},
+              "editApi": {"checkout_notes": null, "checkout_photos": "", "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""}
+            }
+          },
+          "rawRow": {"checkout_photos": null, "return_photos": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {"display_name": 42},
+          "editFormInput": {
+            "checkout_notes": 42,
+            "checkout_photos": 42,
+            "display_name": 42,
+            "return_notes": 42,
+            "return_photos": 42,
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3},
+              "createApi": {"display_name": 42},
+              "editApi": {
+                "checkout_notes": 42,
+                "checkout_photos": 42,
+                "display_name": 42,
+                "return_notes": 42,
+                "return_photos": 42,
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "checkout_notes": "text",
+            "checkout_photos": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "return_notes": "text",
+            "return_photos": "text",
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3},
+              "createApi": {"display_name": "text", "extra_key": "kept"},
+              "editApi": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "extra_key": "kept", "return_notes": "text", "return_photos": "text", "status_id": 3}
+            }
+          },
+          "rawRow": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3}
+        }
+      }
+    },
+    "mek_request_equipment": {
+      "createProps": ["mek_request_equipment_items_m2m:ManyToMany", "equipment_notes:TextLong"],
+      "editProps": ["mek_request_equipment_items_m2m:ManyToMany", "equipment_notes:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"equipment_notes": "", "mek_request_equipment_items_m2m": ""},
+          "editFormInput": {"equipment_notes": "", "mek_request_equipment_items_m2m": ""},
+          "outputs": {
+            "*": {
+              "control": {"equipment_notes": null, "mek_request_equipment_items_m2m": null},
+              "createApi": {"equipment_notes": "", "mek_request_equipment_items_m2m": ""},
+              "editApi": {"equipment_notes": "", "mek_request_equipment_items_m2m": ""}
+            }
+          },
+          "rawRow": {"equipment_notes": null, "mek_request_equipment_items_m2m": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "equipment_notes": 42,
+            "mek_request_equipment_items_m2m": [1, 2]
+          },
+          "editFormInput": {
+            "equipment_notes": 42,
+            "mek_request_equipment_items_m2m": [1, 2]
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "equipment_notes": "text",
+                "mek_request_equipment_items_m2m": [1, 2]
+              },
+              "createApi": {
+                "equipment_notes": 42,
+                "mek_request_equipment_items_m2m": [1, 2]
+              },
+              "editApi": {
+                "equipment_notes": 42,
+                "mek_request_equipment_items_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "equipment_notes": "text",
+            "mek_request_equipment_items_m2m": [1, 2]
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "equipment_notes": "text",
+            "extra_key": "kept",
+            "mek_request_equipment_items_m2m": [1, 2],
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "equipment_notes": "text",
+            "extra_key": "kept",
+            "mek_request_equipment_items_m2m": [1, 2],
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "equipment_notes": "text",
+                "mek_request_equipment_items_m2m": [1, 2]
+              },
+              "createApi": {
+                "equipment_notes": "text",
+                "extra_key": "kept",
+                "mek_request_equipment_items_m2m": [1, 2]
+              },
+              "editApi": {
+                "equipment_notes": "text",
+                "extra_key": "kept",
+                "mek_request_equipment_items_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "equipment_notes": "text",
+            "mek_request_equipment_items_m2m": [1, 2]
+          }
+        }
+      }
+    },
+    "mek_request_equipment_items": {
+      "createProps": ["mek_request_equipment_id:ForeignKeyName", "quantity:IntegerNumber", "tool_type_id:ForeignKeyName"],
+      "editProps": ["mek_request_equipment_id:ForeignKeyName", "quantity:IntegerNumber", "tool_type_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"mek_request_equipment_id": null, "quantity": null, "tool_type_id": null},
+          "editFormInput": {"mek_request_equipment_id": null, "quantity": null, "tool_type_id": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {"mek_request_equipment_id": null, "quantity": null, "tool_type_id": null},
+              "editApi": {"mek_request_equipment_id": null, "quantity": null, "tool_type_id": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {
+            "mek_request_equipment_id": {"display_name": "x", "id": 3},
+            "quantity": 7,
+            "tool_type_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "mek_request_equipment_id": {"display_name": "x", "id": 3},
+            "quantity": 7,
+            "tool_type_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3},
+              "createApi": {
+                "mek_request_equipment_id": {"display_name": "x", "id": 3},
+                "quantity": 7,
+                "tool_type_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "mek_request_equipment_id": {"display_name": "x", "id": 3},
+                "quantity": 7,
+                "tool_type_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3},
+              "createApi": {"extra_key": "kept", "mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3},
+              "editApi": {"extra_key": "kept", "mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3}
+            }
+          },
+          "rawRow": {"mek_request_equipment_id": 3, "quantity": 7, "tool_type_id": 3}
+        }
+      }
+    },
+    "mek_requests": {
+      "createProps": ["borrower_id:ForeignKeyName", "organization_name:TextShort", "event_type:Category", "event_location:TextShort", "event_dates:TextLong", "timeslot:TimeSlot", "responsibility_acknowledged:Boolean", "notes:TextLong"],
+      "editProps": ["organization_name:TextShort", "event_type:Category", "event_location:TextShort", "event_dates:TextLong", "timeslot:TimeSlot", "notes:TextLong", "display_name:TextShort", "status_id:Status", "submitted_at:DateTimeLocal"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"borrower_id": "", "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "responsibility_acknowledged": null, "timeslot": null},
+          "editFormInput": {"display_name": null, "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "status_id": "", "submitted_at": null, "timeslot": null},
+          "outputs": {
+            "*": {
+              "control": {"event_dates": null, "notes": null, "organization_name": null, "status_id": null},
+              "createApi": {"borrower_id": "", "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "responsibility_acknowledged": null, "timeslot": null},
+              "editApi": {"display_name": null, "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "status_id": "", "submitted_at": null, "timeslot": null}
+            }
+          },
+          "rawRow": {"event_dates": null, "notes": null, "organization_name": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "borrower_id": {"display_name": "x", "id": 3},
+            "event_dates": 42,
+            "event_location": 42,
+            "event_type": {"display_name": "x", "id": 3},
+            "notes": 42,
+            "organization_name": 42,
+            "responsibility_acknowledged": false,
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "event_dates": 42,
+            "event_location": 42,
+            "event_type": {"display_name": "x", "id": 3},
+            "notes": 42,
+            "organization_name": 42,
+            "status_id": {"display_name": "x", "id": 3},
+            "submitted_at": "abcdefghijklmnop",
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "NaN-NaN-NaNTNaN:NaN",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "borrower_id": {"display_name": "x", "id": 3},
+                "event_dates": 42,
+                "event_location": 42,
+                "event_type": {"display_name": "x", "id": 3},
+                "notes": 42,
+                "organization_name": 42,
+                "responsibility_acknowledged": false,
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "display_name": 42,
+                "event_dates": 42,
+                "event_location": 42,
+                "event_type": {"display_name": "x", "id": 3},
+                "notes": 42,
+                "organization_name": 42,
+                "status_id": {"display_name": "x", "id": 3},
+                "submitted_at": "abcdefghijklmnop",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "event_dates": "text", "event_location": "text", "event_type": 3, "notes": "text", "organization_name": "text", "status_id": 3, "submitted_at": "garbage", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+        },
+        "typical": {
+          "createFormInput": {
+            "borrower_id": 3,
+            "created_at": "2026-01-01T00:00:00Z",
+            "event_dates": "text",
+            "event_location": "text",
+            "event_type": 3,
+            "extra_key": "kept",
+            "notes": "text",
+            "organization_name": "text",
+            "responsibility_acknowledged": true,
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "event_dates": "text",
+            "event_location": "text",
+            "event_type": 3,
+            "extra_key": "kept",
+            "notes": "text",
+            "organization_name": "text",
+            "status_id": 3,
+            "submitted_at": "2026-07-04T17:30",
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T13:30",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "responsibility_acknowledged": true,
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T21:30:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T23:00",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "responsibility_acknowledged": true,
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T12:00:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-05T04:00",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "responsibility_acknowledged": true,
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T07:00:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "UTC": {
+              "control": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T17:30",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "borrower_id": 3,
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "responsibility_acknowledged": true,
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "display_name": "text",
+                "event_dates": "text",
+                "event_location": "text",
+                "event_type": 3,
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "status_id": 3,
+                "submitted_at": "2026-07-04T17:30:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "event_dates": "text",
+            "event_location": "text",
+            "event_type": 3,
+            "notes": "text",
+            "organization_name": "text",
+            "status_id": 3,
+            "submitted_at": "2026-07-04T17:30:00+00:00",
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          }
+        }
+      }
+    },
+    "parcels": {
+      "createProps": ["parcel_number:Unknown", "prop_num:TextShort", "prop_dir:TextShort", "prop_street:TextShort", "prop_city:TextShort", "prop_zip:TextShort", "acreage:DecimalNumber", "property_class:Category", "eligibility:Category", "boundary:GeoPolygon"],
+      "editProps": [
+        "parcel_number:Unknown",
+        "prop_num:TextShort",
+        "prop_dir:TextShort",
+        "prop_street:TextShort",
+        "prop_city:TextShort",
+        "prop_zip:TextShort",
+        "acreage:DecimalNumber",
+        "property_class:Category",
+        "eligibility:Category",
+        "boundary:GeoPolygon",
+        "display_name:TextShort"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"acreage": "", "boundary": null, "eligibility": "", "parcel_number": "", "prop_city": "", "prop_dir": null, "prop_num": null, "prop_street": "", "prop_zip": null, "property_class": null},
+          "editFormInput": {"acreage": "", "boundary": null, "display_name": null, "eligibility": "", "parcel_number": "", "prop_city": "", "prop_dir": null, "prop_num": null, "prop_street": "", "prop_zip": null, "property_class": null},
+          "outputs": {
+            "*": {
+              "control": {"acreage": null, "eligibility": null, "parcel_number": null, "prop_city": null, "prop_street": null},
+              "createApi": {"acreage": "", "boundary": null, "eligibility": "", "parcel_number": "", "prop_city": "", "prop_dir": null, "prop_num": null, "prop_street": "", "prop_zip": null, "property_class": null},
+              "editApi": {"acreage": "", "boundary": null, "display_name": null, "eligibility": "", "parcel_number": "", "prop_city": "", "prop_dir": null, "prop_num": null, "prop_street": "", "prop_zip": null, "property_class": null}
+            }
+          },
+          "rawRow": {"acreage": null, "eligibility": null, "parcel_number": null, "prop_city": null, "prop_street": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "acreage": 1.5,
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "eligibility": {"display_name": "x", "id": 3},
+            "parcel_number": 42,
+            "prop_city": 42,
+            "prop_dir": 42,
+            "prop_num": 42,
+            "prop_street": 42,
+            "prop_zip": 42,
+            "property_class": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "acreage": 1.5,
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "display_name": 42,
+            "eligibility": {"display_name": "x", "id": 3},
+            "parcel_number": 42,
+            "prop_city": 42,
+            "prop_dir": 42,
+            "prop_num": 42,
+            "prop_street": 42,
+            "prop_zip": 42,
+            "property_class": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "acreage": 1.5,
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "display_name": "text",
+                "eligibility": 3,
+                "parcel_number": "text",
+                "prop_city": "text",
+                "prop_dir": "text",
+                "prop_num": "text",
+                "prop_street": "text",
+                "prop_zip": "text",
+                "property_class": 3
+              },
+              "createApi": {
+                "acreage": 1.5,
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "eligibility": {"display_name": "x", "id": 3},
+                "parcel_number": 42,
+                "prop_city": 42,
+                "prop_dir": 42,
+                "prop_num": 42,
+                "prop_street": 42,
+                "prop_zip": 42,
+                "property_class": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "acreage": 1.5,
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "display_name": 42,
+                "eligibility": {"display_name": "x", "id": 3},
+                "parcel_number": 42,
+                "prop_city": 42,
+                "prop_dir": 42,
+                "prop_num": 42,
+                "prop_street": 42,
+                "prop_zip": 42,
+                "property_class": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {
+            "acreage": 1.5,
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "display_name": "text",
+            "eligibility": 3,
+            "parcel_number": "text",
+            "prop_city": "text",
+            "prop_dir": "text",
+            "prop_num": "text",
+            "prop_street": "text",
+            "prop_zip": "text",
+            "property_class": 3
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "acreage": 1.5,
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "created_at": "2026-01-01T00:00:00Z",
+            "eligibility": 3,
+            "extra_key": "kept",
+            "parcel_number": "text",
+            "prop_city": "text",
+            "prop_dir": "text",
+            "prop_num": "text",
+            "prop_street": "text",
+            "prop_zip": "text",
+            "property_class": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "acreage": 1.5,
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "eligibility": 3,
+            "extra_key": "kept",
+            "parcel_number": "text",
+            "prop_city": "text",
+            "prop_dir": "text",
+            "prop_num": "text",
+            "prop_street": "text",
+            "prop_zip": "text",
+            "property_class": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "acreage": 1.5,
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "display_name": "text",
+                "eligibility": 3,
+                "parcel_number": "text",
+                "prop_city": "text",
+                "prop_dir": "text",
+                "prop_num": "text",
+                "prop_street": "text",
+                "prop_zip": "text",
+                "property_class": 3
+              },
+              "createApi": {
+                "acreage": 1.5,
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "eligibility": 3,
+                "extra_key": "kept",
+                "parcel_number": "text",
+                "prop_city": "text",
+                "prop_dir": "text",
+                "prop_num": "text",
+                "prop_street": "text",
+                "prop_zip": "text",
+                "property_class": 3
+              },
+              "editApi": {
+                "acreage": 1.5,
+                "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+                "display_name": "text",
+                "eligibility": 3,
+                "extra_key": "kept",
+                "parcel_number": "text",
+                "prop_city": "text",
+                "prop_dir": "text",
+                "prop_num": "text",
+                "prop_street": "text",
+                "prop_zip": "text",
+                "property_class": 3
+              }
+            }
+          },
+          "rawRow": {
+            "acreage": 1.5,
+            "boundary": "SRID=4326;POLYGON((0 0,1 0,1 1,0 0))",
+            "display_name": "text",
+            "eligibility": 3,
+            "parcel_number": "text",
+            "prop_city": "text",
+            "prop_dir": "text",
+            "prop_num": "text",
+            "prop_street": "text",
+            "prop_zip": "text",
+            "property_class": 3
+          }
+        }
+      }
+    },
+    "project_parcels": {
+      "createProps": ["project_id:ForeignKeyName", "parcel_id:ForeignKeyName"],
+      "editProps": ["project_id:ForeignKeyName", "parcel_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"parcel_id": "", "project_id": null},
+          "editFormInput": {"parcel_id": "", "project_id": null},
+          "outputs": {
+            "*": {
+              "control": {"parcel_id": null},
+              "createApi": {"parcel_id": "", "project_id": null},
+              "editApi": {"parcel_id": "", "project_id": null}
+            }
+          },
+          "rawRow": {"parcel_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "parcel_id": {"display_name": "x", "id": 3},
+            "project_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "parcel_id": {"display_name": "x", "id": 3},
+            "project_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"parcel_id": 3, "project_id": 3},
+              "createApi": {
+                "parcel_id": {"display_name": "x", "id": 3},
+                "project_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "parcel_id": {"display_name": "x", "id": 3},
+                "project_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"parcel_id": 3, "project_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "parcel_id": 3, "project_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "parcel_id": 3, "project_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"parcel_id": 3, "project_id": 3},
+              "createApi": {"extra_key": "kept", "parcel_id": 3, "project_id": 3},
+              "editApi": {"extra_key": "kept", "parcel_id": 3, "project_id": 3}
+            }
+          },
+          "rawRow": {"parcel_id": 3, "project_id": 3}
+        }
+      }
+    },
+    "projects": {
+      "createProps": ["display_name:TextShort", "description:TextLong", "photos:PhotoGallery", "project_parcels_m2m:ManyToMany"],
+      "editProps": ["display_name:TextShort", "description:TextLong", "photos:PhotoGallery", "project_parcels_m2m:ManyToMany"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "display_name": null, "photos": null, "project_parcels_m2m": ""},
+          "editFormInput": {"description": "", "display_name": null, "photos": null, "project_parcels_m2m": ""},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "project_parcels_m2m": null},
+              "createApi": {"description": "", "display_name": null, "photos": null, "project_parcels_m2m": ""},
+              "editApi": {"description": "", "display_name": null, "photos": null, "project_parcels_m2m": ""}
+            }
+          },
+          "rawRow": {"description": null, "project_parcels_m2m": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "description": 42,
+            "display_name": 42,
+            "photos": "22222222-2222-4222-8222-222222222222",
+            "project_parcels_m2m": [1, 2]
+          },
+          "editFormInput": {
+            "description": 42,
+            "display_name": 42,
+            "photos": "22222222-2222-4222-8222-222222222222",
+            "project_parcels_m2m": [1, 2]
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "description": "text",
+                "display_name": "text",
+                "photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "project_parcels_m2m": [1, 2]
+              },
+              "createApi": {
+                "description": 42,
+                "display_name": 42,
+                "project_parcels_m2m": [1, 2]
+              },
+              "editApi": {
+                "description": 42,
+                "display_name": 42,
+                "photos": "22222222-2222-4222-8222-222222222222",
+                "project_parcels_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "description": "text",
+            "display_name": "text",
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "project_parcels_m2m": [1, 2]
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "project_parcels_m2m": [1, 2],
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "project_parcels_m2m": [1, 2],
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "description": "text",
+                "display_name": "text",
+                "photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "project_parcels_m2m": [1, 2]
+              },
+              "createApi": {
+                "description": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "project_parcels_m2m": [1, 2]
+              },
+              "editApi": {
+                "description": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "photos": "22222222-2222-4222-8222-222222222222",
+                "project_parcels_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "description": "text",
+            "display_name": "text",
+            "photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "project_parcels_m2m": [1, 2]
+          }
+        }
+      }
+    },
+    "tool_instances": {
+      "createProps": ["display_name:TextShort", "tool_type_id:ForeignKeyName", "instance_number:IntegerNumber", "status_id:Status"],
+      "editProps": ["display_name:TextShort", "tool_type_id:ForeignKeyName", "instance_number:IntegerNumber", "status_id:Status"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"display_name": null, "instance_number": "", "status_id": "", "tool_type_id": null},
+          "editFormInput": {"display_name": null, "instance_number": "", "status_id": "", "tool_type_id": null},
+          "outputs": {
+            "*": {
+              "control": {"instance_number": null, "status_id": null},
+              "createApi": {"display_name": null, "instance_number": "", "status_id": "", "tool_type_id": null},
+              "editApi": {"display_name": null, "instance_number": "", "status_id": "", "tool_type_id": null}
+            }
+          },
+          "rawRow": {"instance_number": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "display_name": 42,
+            "instance_number": 7,
+            "status_id": {"display_name": "x", "id": 3},
+            "tool_type_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "instance_number": 7,
+            "status_id": {"display_name": "x", "id": 3},
+            "tool_type_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "instance_number": 7, "status_id": 3, "tool_type_id": 3},
+              "createApi": {
+                "display_name": 42,
+                "instance_number": 7,
+                "status_id": {"display_name": "x", "id": 3},
+                "tool_type_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "display_name": 42,
+                "instance_number": 7,
+                "status_id": {"display_name": "x", "id": 3},
+                "tool_type_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "instance_number": 7, "status_id": 3, "tool_type_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "instance_number": 7, "status_id": 3, "tool_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "instance_number": 7, "status_id": 3, "tool_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "instance_number": 7, "status_id": 3, "tool_type_id": 3},
+              "createApi": {"display_name": "text", "extra_key": "kept", "instance_number": 7, "status_id": 3, "tool_type_id": 3},
+              "editApi": {"display_name": "text", "extra_key": "kept", "instance_number": 7, "status_id": 3, "tool_type_id": 3}
+            }
+          },
+          "rawRow": {"display_name": "text", "instance_number": 7, "status_id": 3, "tool_type_id": 3}
+        }
+      }
+    },
+    "tool_reservation_checkouts": {
+      "createProps": ["checkout_notes:TextLong", "return_notes:TextLong", "damage_reported:Boolean", "status_id:Status", "display_name:TextLong", "checkout_photos:PhotoGallery", "return_photos:PhotoGallery"],
+      "editProps": ["checkout_notes:TextLong", "return_notes:TextLong", "damage_reported:Boolean", "status_id:Status", "display_name:TextLong", "checkout_photos:PhotoGallery", "return_photos:PhotoGallery"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"checkout_notes": null, "checkout_photos": "", "damage_reported": null, "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""},
+          "editFormInput": {"checkout_notes": null, "checkout_photos": "", "damage_reported": null, "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"checkout_photos": null, "damage_reported": null, "return_photos": null, "status_id": null},
+              "createApi": {"checkout_notes": null, "damage_reported": null, "display_name": null, "return_notes": null, "status_id": ""},
+              "editApi": {"checkout_notes": null, "checkout_photos": "", "damage_reported": null, "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""}
+            }
+          },
+          "rawRow": {"checkout_photos": null, "damage_reported": null, "return_photos": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "checkout_notes": 42,
+            "checkout_photos": "22222222-2222-4222-8222-222222222222",
+            "damage_reported": false,
+            "display_name": 42,
+            "return_notes": 42,
+            "return_photos": "22222222-2222-4222-8222-222222222222",
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "checkout_notes": 42,
+            "checkout_photos": "22222222-2222-4222-8222-222222222222",
+            "damage_reported": false,
+            "display_name": 42,
+            "return_notes": 42,
+            "return_photos": "22222222-2222-4222-8222-222222222222",
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "checkout_notes": "text",
+                "checkout_photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "damage_reported": true,
+                "display_name": "text",
+                "return_notes": "text",
+                "return_photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "status_id": 3
+              },
+              "createApi": {
+                "checkout_notes": 42,
+                "damage_reported": false,
+                "display_name": 42,
+                "return_notes": 42,
+                "status_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "checkout_notes": 42,
+                "checkout_photos": "22222222-2222-4222-8222-222222222222",
+                "damage_reported": false,
+                "display_name": 42,
+                "return_notes": 42,
+                "return_photos": "22222222-2222-4222-8222-222222222222",
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {
+            "checkout_notes": "text",
+            "checkout_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "damage_reported": true,
+            "display_name": "text",
+            "return_notes": "text",
+            "return_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "status_id": 3
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "checkout_notes": "text",
+            "checkout_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "created_at": "2026-01-01T00:00:00Z",
+            "damage_reported": true,
+            "display_name": "text",
+            "extra_key": "kept",
+            "return_notes": "text",
+            "return_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "checkout_notes": "text",
+            "checkout_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "created_at": "2026-01-01T00:00:00Z",
+            "damage_reported": true,
+            "display_name": "text",
+            "extra_key": "kept",
+            "return_notes": "text",
+            "return_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "checkout_notes": "text",
+                "checkout_photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "damage_reported": true,
+                "display_name": "text",
+                "return_notes": "text",
+                "return_photos": {
+                  "id": "22222222-2222-4222-8222-222222222222",
+                  "photo_gallery_files": []
+                },
+                "status_id": 3
+              },
+              "createApi": {"checkout_notes": "text", "damage_reported": true, "display_name": "text", "extra_key": "kept", "return_notes": "text", "status_id": 3},
+              "editApi": {
+                "checkout_notes": "text",
+                "checkout_photos": "22222222-2222-4222-8222-222222222222",
+                "damage_reported": true,
+                "display_name": "text",
+                "extra_key": "kept",
+                "return_notes": "text",
+                "return_photos": "22222222-2222-4222-8222-222222222222",
+                "status_id": 3
+              }
+            }
+          },
+          "rawRow": {
+            "checkout_notes": "text",
+            "checkout_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "damage_reported": true,
+            "display_name": "text",
+            "return_notes": "text",
+            "return_photos": {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "photo_gallery_files": []
+            },
+            "status_id": 3
+          }
+        }
+      }
+    },
+    "tool_reservation_tool_items": {
+      "createProps": ["quantity:IntegerNumber", "tool_reservation_tools_id:ForeignKeyName", "tool_type_id:ForeignKeyName"],
+      "editProps": ["quantity:IntegerNumber", "tool_reservation_tools_id:ForeignKeyName", "tool_type_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"quantity": null, "tool_reservation_tools_id": "", "tool_type_id": null},
+          "editFormInput": {"quantity": null, "tool_reservation_tools_id": "", "tool_type_id": null},
+          "outputs": {
+            "*": {
+              "control": {"tool_reservation_tools_id": null},
+              "createApi": {"quantity": null, "tool_reservation_tools_id": "", "tool_type_id": null},
+              "editApi": {"quantity": null, "tool_reservation_tools_id": "", "tool_type_id": null}
+            }
+          },
+          "rawRow": {"tool_reservation_tools_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "quantity": 7,
+            "tool_reservation_tools_id": {"display_name": "x", "id": 3},
+            "tool_type_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "quantity": 7,
+            "tool_reservation_tools_id": {"display_name": "x", "id": 3},
+            "tool_type_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3},
+              "createApi": {
+                "quantity": 7,
+                "tool_reservation_tools_id": {"display_name": "x", "id": 3},
+                "tool_type_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "quantity": 7,
+                "tool_reservation_tools_id": {"display_name": "x", "id": 3},
+                "tool_type_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3},
+              "createApi": {"extra_key": "kept", "quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3},
+              "editApi": {"extra_key": "kept", "quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3}
+            }
+          },
+          "rawRow": {"quantity": 7, "tool_reservation_tools_id": 3, "tool_type_id": 3}
+        }
+      }
+    },
+    "tool_reservation_tools": {
+      "createProps": ["tool_reservation_tool_items_m2m:ManyToMany", "tool_notes:TextLong"],
+      "editProps": ["tool_reservation_tool_items_m2m:ManyToMany", "tool_notes:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"tool_notes": null, "tool_reservation_tool_items_m2m": ""},
+          "editFormInput": {"tool_notes": null, "tool_reservation_tool_items_m2m": ""},
+          "outputs": {
+            "*": {
+              "control": {"tool_reservation_tool_items_m2m": null},
+              "createApi": {"tool_notes": null, "tool_reservation_tool_items_m2m": ""},
+              "editApi": {"tool_notes": null, "tool_reservation_tool_items_m2m": ""}
+            }
+          },
+          "rawRow": {"tool_reservation_tool_items_m2m": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "tool_notes": 42,
+            "tool_reservation_tool_items_m2m": [1, 2]
+          },
+          "editFormInput": {
+            "tool_notes": 42,
+            "tool_reservation_tool_items_m2m": [1, 2]
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "tool_notes": "text",
+                "tool_reservation_tool_items_m2m": [1, 2]
+              },
+              "createApi": {
+                "tool_notes": 42,
+                "tool_reservation_tool_items_m2m": [1, 2]
+              },
+              "editApi": {
+                "tool_notes": 42,
+                "tool_reservation_tool_items_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "tool_notes": "text",
+            "tool_reservation_tool_items_m2m": [1, 2]
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "extra_key": "kept",
+            "tool_notes": "text",
+            "tool_reservation_tool_items_m2m": [1, 2],
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "extra_key": "kept",
+            "tool_notes": "text",
+            "tool_reservation_tool_items_m2m": [1, 2],
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "tool_notes": "text",
+                "tool_reservation_tool_items_m2m": [1, 2]
+              },
+              "createApi": {
+                "extra_key": "kept",
+                "tool_notes": "text",
+                "tool_reservation_tool_items_m2m": [1, 2]
+              },
+              "editApi": {
+                "extra_key": "kept",
+                "tool_notes": "text",
+                "tool_reservation_tool_items_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "tool_notes": "text",
+            "tool_reservation_tool_items_m2m": [1, 2]
+          }
+        }
+      }
+    },
+    "tool_reservation_work_site": {
+      "createProps": ["work_site_parcels_m2m:ManyToMany", "site_description:TextLong"],
+      "editProps": ["work_site_parcels_m2m:ManyToMany", "site_description:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"site_description": null, "work_site_parcels_m2m": ""},
+          "editFormInput": {"site_description": null, "work_site_parcels_m2m": ""},
+          "outputs": {
+            "*": {
+              "control": {"work_site_parcels_m2m": null},
+              "createApi": {"site_description": null, "work_site_parcels_m2m": ""},
+              "editApi": {"site_description": null, "work_site_parcels_m2m": ""}
+            }
+          },
+          "rawRow": {"work_site_parcels_m2m": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "site_description": 42,
+            "work_site_parcels_m2m": [1, 2]
+          },
+          "editFormInput": {
+            "site_description": 42,
+            "work_site_parcels_m2m": [1, 2]
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "site_description": "text",
+                "work_site_parcels_m2m": [1, 2]
+              },
+              "createApi": {
+                "site_description": 42,
+                "work_site_parcels_m2m": [1, 2]
+              },
+              "editApi": {
+                "site_description": 42,
+                "work_site_parcels_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "site_description": "text",
+            "work_site_parcels_m2m": [1, 2]
+          }
+        },
+        "typical": {
+          "createFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "extra_key": "kept",
+            "site_description": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "work_site_parcels_m2m": [1, 2]
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "extra_key": "kept",
+            "site_description": "text",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "work_site_parcels_m2m": [1, 2]
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "site_description": "text",
+                "work_site_parcels_m2m": [1, 2]
+              },
+              "createApi": {
+                "extra_key": "kept",
+                "site_description": "text",
+                "work_site_parcels_m2m": [1, 2]
+              },
+              "editApi": {
+                "extra_key": "kept",
+                "site_description": "text",
+                "work_site_parcels_m2m": [1, 2]
+              }
+            }
+          },
+          "rawRow": {
+            "site_description": "text",
+            "work_site_parcels_m2m": [1, 2]
+          }
+        }
+      }
+    },
+    "tool_reservations": {
+      "createProps": ["borrower_id:ForeignKeyName", "organization_name:TextShort", "timeslot:TimeSlot", "delivery_required:Boolean"],
+      "editProps": ["borrower_id:ForeignKeyName", "organization_name:TextShort", "timeslot:TimeSlot", "delivery_required:Boolean", "notes:TextLong", "site_review_completed:Boolean", "display_name:TextShort", "submitted_at:DateTimeLocal"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"borrower_id": "", "delivery_required": null, "organization_name": "", "timeslot": null},
+          "editFormInput": {"borrower_id": "", "delivery_required": null, "display_name": null, "notes": "", "organization_name": "", "site_review_completed": null, "submitted_at": null, "timeslot": null},
+          "outputs": {
+            "*": {
+              "control": {"borrower_id": null, "delivery_required": null, "notes": null, "organization_name": null, "site_review_completed": null},
+              "createApi": {"borrower_id": "", "delivery_required": null, "organization_name": "", "timeslot": null},
+              "editApi": {"borrower_id": "", "delivery_required": null, "display_name": null, "notes": "", "organization_name": "", "site_review_completed": null, "submitted_at": null, "timeslot": null}
+            }
+          },
+          "rawRow": {"borrower_id": null, "delivery_required": null, "notes": null, "organization_name": null, "site_review_completed": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "borrower_id": {"display_name": "x", "id": 3},
+            "delivery_required": false,
+            "organization_name": 42,
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "editFormInput": {
+            "borrower_id": {"display_name": "x", "id": 3},
+            "delivery_required": false,
+            "display_name": 42,
+            "notes": 42,
+            "organization_name": 42,
+            "site_review_completed": false,
+            "submitted_at": "abcdefghijklmnop",
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "NaN-NaN-NaNTNaN:NaN",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "borrower_id": {"display_name": "x", "id": 3},
+                "delivery_required": false,
+                "organization_name": 42,
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "borrower_id": {"display_name": "x", "id": 3},
+                "delivery_required": false,
+                "display_name": 42,
+                "notes": 42,
+                "organization_name": 42,
+                "site_review_completed": false,
+                "submitted_at": "abcdefghijklmnop",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {"borrower_id": 3, "delivery_required": true, "display_name": "text", "notes": "text", "organization_name": "text", "site_review_completed": true, "submitted_at": "garbage", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+        },
+        "typical": {
+          "createFormInput": {"borrower_id": 3, "created_at": "2026-01-01T00:00:00Z", "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "borrower_id": 3,
+            "created_at": "2026-01-01T00:00:00Z",
+            "delivery_required": true,
+            "display_name": "text",
+            "extra_key": "kept",
+            "notes": "text",
+            "organization_name": "text",
+            "site_review_completed": true,
+            "submitted_at": "2026-07-04T17:30",
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T13:30",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T21:30:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T23:00",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T12:00:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-05T04:00",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T07:00:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "UTC": {
+              "control": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T17:30",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "borrower_id": 3,
+                "delivery_required": true,
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "organization_name": "text",
+                "site_review_completed": true,
+                "submitted_at": "2026-07-04T17:30:00.000Z",
+                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {
+            "borrower_id": 3,
+            "delivery_required": true,
+            "display_name": "text",
+            "notes": "text",
+            "organization_name": "text",
+            "site_review_completed": true,
+            "submitted_at": "2026-07-04T17:30:00+00:00",
+            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          }
+        }
+      }
+    },
+    "tool_types": {
+      "createProps": ["display_name:TextShort", "category_id:Category", "inventory_module_id:Category", "description:TextLong", "is_qty_managed:Boolean", "total_quantity:IntegerNumber"],
+      "editProps": ["display_name:TextShort", "category_id:Category", "inventory_module_id:Category", "description:TextLong", "is_qty_managed:Boolean", "total_quantity:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"category_id": "", "description": "", "display_name": null, "inventory_module_id": "", "is_qty_managed": null, "total_quantity": null},
+          "editFormInput": {"category_id": "", "description": "", "display_name": null, "inventory_module_id": "", "is_qty_managed": null, "total_quantity": null},
+          "outputs": {
+            "*": {
+              "control": {"category_id": null, "description": null, "inventory_module_id": null},
+              "createApi": {"category_id": "", "description": "", "display_name": null, "inventory_module_id": "", "is_qty_managed": null, "total_quantity": null},
+              "editApi": {"category_id": "", "description": "", "display_name": null, "inventory_module_id": "", "is_qty_managed": null, "total_quantity": null}
+            }
+          },
+          "rawRow": {"category_id": null, "description": null, "inventory_module_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "category_id": {"display_name": "x", "id": 3},
+            "description": 42,
+            "display_name": 42,
+            "inventory_module_id": {"display_name": "x", "id": 3},
+            "is_qty_managed": false,
+            "total_quantity": 7
+          },
+          "editFormInput": {
+            "category_id": {"display_name": "x", "id": 3},
+            "description": 42,
+            "display_name": 42,
+            "inventory_module_id": {"display_name": "x", "id": 3},
+            "is_qty_managed": false,
+            "total_quantity": 7
+          },
+          "outputs": {
+            "*": {
+              "control": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
+              "createApi": {
+                "category_id": {"display_name": "x", "id": 3},
+                "description": 42,
+                "display_name": 42,
+                "inventory_module_id": {"display_name": "x", "id": 3},
+                "is_qty_managed": false,
+                "total_quantity": 7
+              },
+              "editApi": {
+                "category_id": {"display_name": "x", "id": 3},
+                "description": 42,
+                "display_name": 42,
+                "inventory_module_id": {"display_name": "x", "id": 3},
+                "is_qty_managed": false,
+                "total_quantity": 7
+              }
+            }
+          },
+          "rawRow": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
+        },
+        "typical": {
+          "createFormInput": {"category_id": 3, "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"category_id": 3, "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
+              "createApi": {"category_id": 3, "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7},
+              "editApi": {"category_id": 3, "description": "text", "display_name": "text", "extra_key": "kept", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
+            }
+          },
+          "rawRow": {"category_id": 3, "description": "text", "display_name": "text", "inventory_module_id": 3, "is_qty_managed": true, "total_quantity": 7}
+        }
+      }
+    },
+    "training_records": {
+      "createProps": ["display_name:TextShort", "borrower_id:ForeignKeyName", "training_type:Category", "date_earned:Date", "expiry_date:Date", "trainer:TextShort", "notes:TextLong"],
+      "editProps": ["display_name:TextShort", "training_type:Category", "status_id:Status", "date_earned:Date", "expiry_date:Date", "trainer:TextShort", "notes:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"borrower_id": "", "date_earned": "", "display_name": null, "expiry_date": "", "notes": "", "trainer": "", "training_type": ""},
+          "editFormInput": {"date_earned": "", "display_name": null, "expiry_date": "", "notes": "", "status_id": "", "trainer": "", "training_type": ""},
+          "outputs": {
+            "*": {
+              "control": {"date_earned": null, "expiry_date": null, "notes": null, "status_id": null, "trainer": null, "training_type": null},
+              "createApi": {"borrower_id": "", "date_earned": "", "display_name": null, "expiry_date": "", "notes": "", "trainer": "", "training_type": ""},
+              "editApi": {"date_earned": "", "display_name": null, "expiry_date": "", "notes": "", "status_id": "", "trainer": "", "training_type": ""}
+            }
+          },
+          "rawRow": {"date_earned": null, "expiry_date": null, "notes": null, "status_id": null, "trainer": null, "training_type": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "borrower_id": {"display_name": "x", "id": 3},
+            "date_earned": "2026-07-04",
+            "display_name": 42,
+            "expiry_date": "2026-07-04",
+            "notes": 42,
+            "trainer": 42,
+            "training_type": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "date_earned": "2026-07-04",
+            "display_name": 42,
+            "expiry_date": "2026-07-04",
+            "notes": 42,
+            "status_id": {"display_name": "x", "id": 3},
+            "trainer": 42,
+            "training_type": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"date_earned": "2026-07-04", "display_name": "text", "expiry_date": "2026-07-04", "notes": "text", "status_id": 3, "trainer": "text", "training_type": 3},
+              "createApi": {
+                "borrower_id": {"display_name": "x", "id": 3},
+                "date_earned": "2026-07-04",
+                "display_name": 42,
+                "expiry_date": "2026-07-04",
+                "notes": 42,
+                "trainer": 42,
+                "training_type": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "date_earned": "2026-07-04",
+                "display_name": 42,
+                "expiry_date": "2026-07-04",
+                "notes": 42,
+                "status_id": {"display_name": "x", "id": 3},
+                "trainer": 42,
+                "training_type": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"date_earned": "2026-07-04", "display_name": "text", "expiry_date": "2026-07-04", "notes": "text", "status_id": 3, "trainer": "text", "training_type": 3}
+        },
+        "typical": {
+          "createFormInput": {
+            "borrower_id": 3,
+            "created_at": "2026-01-01T00:00:00Z",
+            "date_earned": "2026-07-04",
+            "display_name": "text",
+            "expiry_date": "2026-07-04",
+            "extra_key": "kept",
+            "notes": "text",
+            "trainer": "text",
+            "training_type": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "date_earned": "2026-07-04",
+            "display_name": "text",
+            "expiry_date": "2026-07-04",
+            "extra_key": "kept",
+            "notes": "text",
+            "status_id": 3,
+            "trainer": "text",
+            "training_type": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"date_earned": "2026-07-04", "display_name": "text", "expiry_date": "2026-07-04", "notes": "text", "status_id": 3, "trainer": "text", "training_type": 3},
+              "createApi": {"borrower_id": 3, "date_earned": "2026-07-04", "display_name": "text", "expiry_date": "2026-07-04", "extra_key": "kept", "notes": "text", "trainer": "text", "training_type": 3},
+              "editApi": {"date_earned": "2026-07-04", "display_name": "text", "expiry_date": "2026-07-04", "extra_key": "kept", "notes": "text", "status_id": 3, "trainer": "text", "training_type": 3}
+            }
+          },
+          "rawRow": {"date_earned": "2026-07-04", "display_name": "text", "expiry_date": "2026-07-04", "notes": "text", "status_id": 3, "trainer": "text", "training_type": 3}
+        }
+      }
+    },
+    "work_site_parcels": {
+      "createProps": ["work_site_id:ForeignKeyName", "parcel_id:ForeignKeyName"],
+      "editProps": ["work_site_id:ForeignKeyName", "parcel_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"parcel_id": "", "work_site_id": null},
+          "editFormInput": {"parcel_id": "", "work_site_id": null},
+          "outputs": {
+            "*": {
+              "control": {"parcel_id": null},
+              "createApi": {"parcel_id": "", "work_site_id": null},
+              "editApi": {"parcel_id": "", "work_site_id": null}
+            }
+          },
+          "rawRow": {"parcel_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "parcel_id": {"display_name": "x", "id": 3},
+            "work_site_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "parcel_id": {"display_name": "x", "id": 3},
+            "work_site_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"parcel_id": 3, "work_site_id": 3},
+              "createApi": {
+                "parcel_id": {"display_name": "x", "id": 3},
+                "work_site_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "parcel_id": {"display_name": "x", "id": 3},
+                "work_site_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"parcel_id": 3, "work_site_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "parcel_id": 3, "updated_at": "2026-01-02T00:00:00Z", "work_site_id": 3},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "parcel_id": 3, "updated_at": "2026-01-02T00:00:00Z", "work_site_id": 3},
+          "outputs": {
+            "*": {
+              "control": {"parcel_id": 3, "work_site_id": 3},
+              "createApi": {"extra_key": "kept", "parcel_id": 3, "work_site_id": 3},
+              "editApi": {"extra_key": "kept", "parcel_id": 3, "work_site_id": 3}
+            }
+          },
+          "rawRow": {"parcel_id": 3, "work_site_id": 3}
+        }
+      }
+    }
+  }
+}

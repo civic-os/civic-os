@@ -1,0 +1,892 @@
+{
+  "entities": {
+    "document_requirement_roles": {
+      "createProps": ["document_requirement_id:ForeignKeyName", "staff_role_id:ForeignKeyName"],
+      "editProps": ["document_requirement_id:ForeignKeyName", "staff_role_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"document_requirement_id": "", "staff_role_id": ""},
+          "editFormInput": {"document_requirement_id": "", "staff_role_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"document_requirement_id": null, "staff_role_id": null},
+              "createApi": {"document_requirement_id": "", "staff_role_id": ""},
+              "editApi": {"document_requirement_id": "", "staff_role_id": ""}
+            }
+          },
+          "rawRow": {"document_requirement_id": null, "staff_role_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "document_requirement_id": {"display_name": "x", "id": 3},
+            "staff_role_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "document_requirement_id": {"display_name": "x", "id": 3},
+            "staff_role_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"document_requirement_id": 3, "staff_role_id": 3},
+              "createApi": {
+                "document_requirement_id": {"display_name": "x", "id": 3},
+                "staff_role_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "document_requirement_id": {"display_name": "x", "id": 3},
+                "staff_role_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"document_requirement_id": 3, "staff_role_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "document_requirement_id": 3, "extra_key": "kept", "staff_role_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "document_requirement_id": 3, "extra_key": "kept", "staff_role_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"document_requirement_id": 3, "staff_role_id": 3},
+              "createApi": {"document_requirement_id": 3, "extra_key": "kept", "staff_role_id": 3},
+              "editApi": {"document_requirement_id": 3, "extra_key": "kept", "staff_role_id": 3}
+            }
+          },
+          "rawRow": {"document_requirement_id": 3, "staff_role_id": 3}
+        }
+      }
+    },
+    "document_requirements": {
+      "createProps": ["display_name:TextLong", "description:TextLong", "requires_approval:Boolean", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextLong", "description:TextLong", "requires_approval:Boolean", "sort_order:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "display_name": null, "requires_approval": null, "sort_order": null},
+          "editFormInput": {"description": "", "display_name": null, "requires_approval": null, "sort_order": null},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "requires_approval": null},
+              "createApi": {"description": "", "display_name": null, "requires_approval": null, "sort_order": null},
+              "editApi": {"description": "", "display_name": null, "requires_approval": null, "sort_order": null}
+            }
+          },
+          "rawRow": {"description": null, "requires_approval": null}
+        },
+        "odd": {
+          "createFormInput": {"description": 42, "display_name": 42, "requires_approval": false, "sort_order": 7},
+          "editFormInput": {"description": 42, "display_name": 42, "requires_approval": false, "sort_order": 7},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "requires_approval": true, "sort_order": 7},
+              "createApi": {"description": 42, "display_name": 42, "requires_approval": false, "sort_order": 7},
+              "editApi": {"description": 42, "display_name": 42, "requires_approval": false, "sort_order": 7}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "requires_approval": true, "sort_order": 7}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "requires_approval": true, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "requires_approval": true, "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "requires_approval": true, "sort_order": 7},
+              "createApi": {"description": "text", "display_name": "text", "extra_key": "kept", "requires_approval": true, "sort_order": 7},
+              "editApi": {"description": "text", "display_name": "text", "extra_key": "kept", "requires_approval": true, "sort_order": 7}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "requires_approval": true, "sort_order": 7}
+        }
+      }
+    },
+    "incident_reports": {
+      "createProps": ["site_id:ForeignKeyName", "incident_date:Date", "description:TextLong", "people_involved:TextLong", "action_taken:TextLong", "follow_up_needed:Boolean"],
+      "editProps": ["site_id:ForeignKeyName", "incident_date:Date", "description:TextLong", "people_involved:TextLong", "action_taken:TextLong", "follow_up_needed:Boolean", "follow_up_notes:TextLong", "display_name:TextLong", "status_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"action_taken": null, "description": "", "follow_up_needed": null, "incident_date": "", "people_involved": "", "site_id": ""},
+          "editFormInput": {"action_taken": null, "description": "", "display_name": null, "follow_up_needed": null, "follow_up_notes": "", "incident_date": "", "people_involved": "", "site_id": "", "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "follow_up_notes": null, "incident_date": null, "people_involved": null, "site_id": null, "status_id": null},
+              "createApi": {"action_taken": null, "description": "", "follow_up_needed": null, "incident_date": "", "people_involved": "", "site_id": ""},
+              "editApi": {"action_taken": null, "description": "", "display_name": null, "follow_up_needed": null, "follow_up_notes": "", "incident_date": "", "people_involved": "", "site_id": "", "status_id": ""}
+            }
+          },
+          "rawRow": {"description": null, "follow_up_notes": null, "incident_date": null, "people_involved": null, "site_id": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "action_taken": 42,
+            "description": 42,
+            "follow_up_needed": false,
+            "incident_date": "2026-07-04",
+            "people_involved": 42,
+            "site_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "action_taken": 42,
+            "description": 42,
+            "display_name": 42,
+            "follow_up_needed": false,
+            "follow_up_notes": 42,
+            "incident_date": "2026-07-04",
+            "people_involved": 42,
+            "site_id": {"display_name": "x", "id": 3},
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"action_taken": "text", "description": "text", "display_name": "text", "follow_up_needed": true, "follow_up_notes": "text", "incident_date": "2026-07-04", "people_involved": "text", "site_id": 3, "status_id": 3},
+              "createApi": {
+                "action_taken": 42,
+                "description": 42,
+                "follow_up_needed": false,
+                "incident_date": "2026-07-04",
+                "people_involved": 42,
+                "site_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "action_taken": 42,
+                "description": 42,
+                "display_name": 42,
+                "follow_up_needed": false,
+                "follow_up_notes": 42,
+                "incident_date": "2026-07-04",
+                "people_involved": 42,
+                "site_id": {"display_name": "x", "id": 3},
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"action_taken": "text", "description": "text", "display_name": "text", "follow_up_needed": true, "follow_up_notes": "text", "incident_date": "2026-07-04", "people_involved": "text", "site_id": 3, "status_id": 3}
+        },
+        "typical": {
+          "createFormInput": {
+            "action_taken": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "extra_key": "kept",
+            "follow_up_needed": true,
+            "incident_date": "2026-07-04",
+            "people_involved": "text",
+            "site_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "action_taken": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "follow_up_needed": true,
+            "follow_up_notes": "text",
+            "incident_date": "2026-07-04",
+            "people_involved": "text",
+            "site_id": 3,
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"action_taken": "text", "description": "text", "display_name": "text", "follow_up_needed": true, "follow_up_notes": "text", "incident_date": "2026-07-04", "people_involved": "text", "site_id": 3, "status_id": 3},
+              "createApi": {"action_taken": "text", "description": "text", "extra_key": "kept", "follow_up_needed": true, "incident_date": "2026-07-04", "people_involved": "text", "site_id": 3},
+              "editApi": {"action_taken": "text", "description": "text", "display_name": "text", "extra_key": "kept", "follow_up_needed": true, "follow_up_notes": "text", "incident_date": "2026-07-04", "people_involved": "text", "site_id": 3, "status_id": 3}
+            }
+          },
+          "rawRow": {"action_taken": "text", "description": "text", "display_name": "text", "follow_up_needed": true, "follow_up_notes": "text", "incident_date": "2026-07-04", "people_involved": "text", "site_id": 3, "status_id": 3}
+        }
+      }
+    },
+    "offboarding_feedback": {
+      "createProps": ["staff_member_id:ForeignKeyName", "overall_rating:IntegerNumber", "what_went_well:TextLong", "what_could_improve:TextLong", "would_return:Boolean", "additional_comments:TextLong"],
+      "editProps": ["overall_rating:IntegerNumber", "what_went_well:TextLong", "what_could_improve:TextLong", "would_return:Boolean", "additional_comments:TextLong", "display_name:TextLong", "submitted_at:DateTimeLocal"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"additional_comments": "", "overall_rating": null, "staff_member_id": "", "what_could_improve": null, "what_went_well": null, "would_return": null},
+          "editFormInput": {"additional_comments": "", "display_name": null, "overall_rating": null, "submitted_at": null, "what_could_improve": null, "what_went_well": null, "would_return": null},
+          "outputs": {
+            "*": {
+              "control": {"additional_comments": null},
+              "createApi": {"additional_comments": "", "overall_rating": null, "staff_member_id": "", "what_could_improve": null, "what_went_well": null, "would_return": null},
+              "editApi": {"additional_comments": "", "display_name": null, "overall_rating": null, "submitted_at": null, "what_could_improve": null, "what_went_well": null, "would_return": null}
+            }
+          },
+          "rawRow": {"additional_comments": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "additional_comments": 42,
+            "overall_rating": 7,
+            "staff_member_id": {"display_name": "x", "id": 3},
+            "what_could_improve": 42,
+            "what_went_well": 42,
+            "would_return": false
+          },
+          "editFormInput": {"additional_comments": 42, "display_name": 42, "overall_rating": 7, "submitted_at": "abcdefghijklmnop", "what_could_improve": 42, "what_went_well": 42, "would_return": false},
+          "outputs": {
+            "*": {
+              "control": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "NaN-NaN-NaNTNaN:NaN", "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "createApi": {
+                "additional_comments": 42,
+                "overall_rating": 7,
+                "staff_member_id": {"display_name": "x", "id": 3},
+                "what_could_improve": 42,
+                "what_went_well": 42,
+                "would_return": false
+              },
+              "editApi": {"additional_comments": 42, "display_name": 42, "overall_rating": 7, "submitted_at": "abcdefghijklmnop", "what_could_improve": 42, "what_went_well": 42, "would_return": false}
+            }
+          },
+          "rawRow": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "garbage", "what_could_improve": "text", "what_went_well": "text", "would_return": true}
+        },
+        "typical": {
+          "createFormInput": {
+            "additional_comments": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "extra_key": "kept",
+            "overall_rating": 7,
+            "staff_member_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z",
+            "what_could_improve": "text",
+            "what_went_well": "text",
+            "would_return": true
+          },
+          "editFormInput": {
+            "additional_comments": "text",
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "overall_rating": 7,
+            "submitted_at": "2026-07-04T17:30",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "what_could_improve": "text",
+            "what_went_well": "text",
+            "would_return": true
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "2026-07-04T13:30", "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "createApi": {"additional_comments": "text", "extra_key": "kept", "overall_rating": 7, "staff_member_id": 3, "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "editApi": {"additional_comments": "text", "display_name": "text", "extra_key": "kept", "overall_rating": 7, "submitted_at": "2026-07-04T21:30:00.000Z", "what_could_improve": "text", "what_went_well": "text", "would_return": true}
+            },
+            "Asia/Kolkata": {
+              "control": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "2026-07-04T23:00", "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "createApi": {"additional_comments": "text", "extra_key": "kept", "overall_rating": 7, "staff_member_id": 3, "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "editApi": {"additional_comments": "text", "display_name": "text", "extra_key": "kept", "overall_rating": 7, "submitted_at": "2026-07-04T12:00:00.000Z", "what_could_improve": "text", "what_went_well": "text", "would_return": true}
+            },
+            "Australia/Lord_Howe": {
+              "control": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "2026-07-05T04:00", "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "createApi": {"additional_comments": "text", "extra_key": "kept", "overall_rating": 7, "staff_member_id": 3, "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "editApi": {"additional_comments": "text", "display_name": "text", "extra_key": "kept", "overall_rating": 7, "submitted_at": "2026-07-04T07:00:00.000Z", "what_could_improve": "text", "what_went_well": "text", "would_return": true}
+            },
+            "UTC": {
+              "control": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "2026-07-04T17:30", "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "createApi": {"additional_comments": "text", "extra_key": "kept", "overall_rating": 7, "staff_member_id": 3, "what_could_improve": "text", "what_went_well": "text", "would_return": true},
+              "editApi": {"additional_comments": "text", "display_name": "text", "extra_key": "kept", "overall_rating": 7, "submitted_at": "2026-07-04T17:30:00.000Z", "what_could_improve": "text", "what_went_well": "text", "would_return": true}
+            }
+          },
+          "rawRow": {"additional_comments": "text", "display_name": "text", "overall_rating": 7, "submitted_at": "2026-07-04T17:30:00+00:00", "what_could_improve": "text", "what_went_well": "text", "would_return": true}
+        }
+      }
+    },
+    "reimbursements": {
+      "createProps": ["amount:Money", "description:TextLong"],
+      "editProps": ["amount:Money", "description:TextLong", "receipt:File", "response_notes:TextLong", "display_name:TextLong", "status_id:Status"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"amount": null, "description": ""},
+          "editFormInput": {"amount": null, "description": "", "display_name": null, "receipt": "", "response_notes": null, "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "receipt": null, "status_id": null},
+              "createApi": {"amount": null, "description": ""},
+              "editApi": {"amount": null, "description": "", "display_name": null, "receipt": "", "response_notes": null, "status_id": ""}
+            }
+          },
+          "rawRow": {"description": null, "receipt": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {"amount": "$1,234.50", "description": 42},
+          "editFormInput": {
+            "amount": "$1,234.50",
+            "description": 42,
+            "display_name": 42,
+            "receipt": "11111111-1111-4111-8111-111111111111",
+            "response_notes": 42,
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "amount": "abc",
+                "description": "text",
+                "display_name": "text",
+                "receipt": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "response_notes": "text",
+                "status_id": 3
+              },
+              "createApi": {"amount": "$1,234.50", "description": 42},
+              "editApi": {
+                "amount": "$1,234.50",
+                "description": 42,
+                "display_name": 42,
+                "receipt": "11111111-1111-4111-8111-111111111111",
+                "response_notes": 42,
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {
+            "amount": "abc",
+            "description": "text",
+            "display_name": "text",
+            "receipt": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "response_notes": "text",
+            "status_id": 3
+          }
+        },
+        "typical": {
+          "createFormInput": {"amount": 1234.5, "created_at": "2026-01-01T00:00:00Z", "description": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "amount": 1234.5,
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "receipt": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "response_notes": "text",
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "amount": 1234.5,
+                "description": "text",
+                "display_name": "text",
+                "receipt": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "response_notes": "text",
+                "status_id": 3
+              },
+              "createApi": {"amount": 1234.5, "description": "text", "extra_key": "kept"},
+              "editApi": {"amount": 1234.5, "description": "text", "display_name": "text", "extra_key": "kept", "receipt": "11111111-1111-4111-8111-111111111111", "response_notes": "text", "status_id": 3}
+            }
+          },
+          "rawRow": {
+            "amount": "$1,234.50",
+            "description": "text",
+            "display_name": "text",
+            "receipt": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "response_notes": "text",
+            "status_id": 3
+          }
+        }
+      }
+    },
+    "sites": {
+      "createProps": ["display_name:TextLong", "address:TextLong"],
+      "editProps": ["display_name:TextLong", "lead_id:ForeignKeyName", "address:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"address": "", "display_name": null},
+          "editFormInput": {"address": "", "display_name": null, "lead_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"address": null, "lead_id": null},
+              "createApi": {"address": "", "display_name": null},
+              "editApi": {"address": "", "display_name": null, "lead_id": ""}
+            }
+          },
+          "rawRow": {"address": null, "lead_id": null}
+        },
+        "odd": {
+          "createFormInput": {"address": 42, "display_name": 42},
+          "editFormInput": {
+            "address": 42,
+            "display_name": 42,
+            "lead_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"address": "text", "display_name": "text", "lead_id": 3},
+              "createApi": {"address": 42, "display_name": 42},
+              "editApi": {
+                "address": 42,
+                "display_name": 42,
+                "lead_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"address": "text", "display_name": "text", "lead_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"address": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"address": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "lead_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"address": "text", "display_name": "text", "lead_id": 3},
+              "createApi": {"address": "text", "display_name": "text", "extra_key": "kept"},
+              "editApi": {"address": "text", "display_name": "text", "extra_key": "kept", "lead_id": 3}
+            }
+          },
+          "rawRow": {"address": "text", "display_name": "text", "lead_id": 3}
+        }
+      }
+    },
+    "staff_directory": {
+      "createProps": [],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "staff_documents": {
+      "createProps": [],
+      "editProps": ["file:File", "reviewer_notes:TextLong", "display_name:TextLong", "status_id:Status"],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": null, "file": null, "reviewer_notes": null, "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"status_id": null},
+              "createApi": {},
+              "editApi": {"display_name": null, "file": null, "reviewer_notes": null, "status_id": ""}
+            }
+          },
+          "rawRow": {"status_id": null}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {
+            "display_name": 42,
+            "file": "11111111-1111-4111-8111-111111111111",
+            "reviewer_notes": 42,
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "display_name": "text",
+                "file": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "reviewer_notes": "text",
+                "status_id": 3
+              },
+              "createApi": {},
+              "editApi": {
+                "display_name": 42,
+                "file": "11111111-1111-4111-8111-111111111111",
+                "reviewer_notes": 42,
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "file": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "reviewer_notes": "text",
+            "status_id": 3
+          }
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "file": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "reviewer_notes": "text",
+            "status_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "display_name": "text",
+                "file": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+                "reviewer_notes": "text",
+                "status_id": 3
+              },
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept", "file": "11111111-1111-4111-8111-111111111111", "reviewer_notes": "text", "status_id": 3}
+            }
+          },
+          "rawRow": {
+            "display_name": "text",
+            "file": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
+            "reviewer_notes": "text",
+            "status_id": 3
+          }
+        }
+      }
+    },
+    "staff_members": {
+      "createProps": ["user_id:User", "site_id:ForeignKeyName", "role_id:ForeignKeyName", "pay_rate:Money", "start_date:Date"],
+      "editProps": ["user_id:User", "site_id:ForeignKeyName", "role_id:ForeignKeyName", "pay_rate:Money", "start_date:Date", "display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"pay_rate": null, "role_id": "", "site_id": "", "start_date": null, "user_id": ""},
+          "editFormInput": {"display_name": null, "pay_rate": null, "role_id": "", "site_id": "", "start_date": null, "user_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"role_id": null, "site_id": null, "user_id": null},
+              "createApi": {"pay_rate": null, "role_id": "", "site_id": "", "start_date": null, "user_id": ""},
+              "editApi": {"display_name": null, "pay_rate": null, "role_id": "", "site_id": "", "start_date": null, "user_id": ""}
+            }
+          },
+          "rawRow": {"role_id": null, "site_id": null, "user_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "pay_rate": "$1,234.50",
+            "role_id": {"display_name": "x", "id": 3},
+            "site_id": {"display_name": "x", "id": 3},
+            "start_date": "2026-07-04",
+            "user_id": "33333333-3333-4333-8333-333333333333"
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "pay_rate": "$1,234.50",
+            "role_id": {"display_name": "x", "id": 3},
+            "site_id": {"display_name": "x", "id": 3},
+            "start_date": "2026-07-04",
+            "user_id": "33333333-3333-4333-8333-333333333333"
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "pay_rate": "abc", "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"},
+              "createApi": {
+                "pay_rate": "$1,234.50",
+                "role_id": {"display_name": "x", "id": 3},
+                "site_id": {"display_name": "x", "id": 3},
+                "start_date": "2026-07-04",
+                "user_id": "33333333-3333-4333-8333-333333333333"
+              },
+              "editApi": {
+                "display_name": 42,
+                "pay_rate": "$1,234.50",
+                "role_id": {"display_name": "x", "id": 3},
+                "site_id": {"display_name": "x", "id": 3},
+                "start_date": "2026-07-04",
+                "user_id": "33333333-3333-4333-8333-333333333333"
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "pay_rate": "abc", "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "pay_rate": 1234.5, "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "updated_at": "2026-01-02T00:00:00Z", "user_id": "33333333-3333-4333-8333-333333333333"},
+          "editFormInput": {
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "extra_key": "kept",
+            "pay_rate": 1234.5,
+            "role_id": 3,
+            "site_id": 3,
+            "start_date": "2026-07-04",
+            "updated_at": "2026-01-02T00:00:00Z",
+            "user_id": "33333333-3333-4333-8333-333333333333"
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "pay_rate": 1234.5, "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"},
+              "createApi": {"extra_key": "kept", "pay_rate": 1234.5, "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"},
+              "editApi": {"display_name": "text", "extra_key": "kept", "pay_rate": 1234.5, "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"}
+            }
+          },
+          "rawRow": {"display_name": "text", "pay_rate": "$1,234.50", "role_id": 3, "site_id": 3, "start_date": "2026-07-04", "user_id": "33333333-3333-4333-8333-333333333333"}
+        }
+      }
+    },
+    "staff_roles": {
+      "createProps": ["display_name:TextLong", "description:TextLong", "sort_order:IntegerNumber"],
+      "editProps": ["display_name:TextLong", "description:TextLong", "sort_order:IntegerNumber"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"description": "", "display_name": null, "sort_order": null},
+          "editFormInput": {"description": "", "display_name": null, "sort_order": null},
+          "outputs": {
+            "*": {
+              "control": {"description": null},
+              "createApi": {"description": "", "display_name": null, "sort_order": null},
+              "editApi": {"description": "", "display_name": null, "sort_order": null}
+            }
+          },
+          "rawRow": {"description": null}
+        },
+        "odd": {
+          "createFormInput": {"description": 42, "display_name": 42, "sort_order": 7},
+          "editFormInput": {"description": 42, "display_name": 42, "sort_order": 7},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "sort_order": 7},
+              "createApi": {"description": 42, "display_name": 42, "sort_order": 7},
+              "editApi": {"description": 42, "display_name": 42, "sort_order": 7}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "sort_order": 7}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "sort_order": 7},
+              "createApi": {"description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7},
+              "editApi": {"description": "text", "display_name": "text", "extra_key": "kept", "sort_order": 7}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "sort_order": 7}
+        }
+      }
+    },
+    "staff_tasks": {
+      "createProps": ["display_name:TextLong", "description:TextLong", "priority_id:Category", "assigned_to_id:ForeignKeyName", "assigned_to_site_id:ForeignKeyName", "assigned_to_role_id:ForeignKeyName", "site_id:ForeignKeyName", "due_date:Date"],
+      "editProps": ["display_name:TextLong", "description:TextLong", "priority_id:Category", "site_id:ForeignKeyName", "due_date:Date", "status_id:ForeignKeyName"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"assigned_to_id": null, "assigned_to_role_id": "", "assigned_to_site_id": "", "description": "", "display_name": null, "due_date": null, "priority_id": "", "site_id": ""},
+          "editFormInput": {"description": "", "display_name": null, "due_date": null, "priority_id": "", "site_id": "", "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"description": null, "priority_id": null, "site_id": null, "status_id": null},
+              "createApi": {"assigned_to_id": null, "assigned_to_role_id": "", "assigned_to_site_id": "", "description": "", "display_name": null, "due_date": null, "priority_id": "", "site_id": ""},
+              "editApi": {"description": "", "display_name": null, "due_date": null, "priority_id": "", "site_id": "", "status_id": ""}
+            }
+          },
+          "rawRow": {"description": null, "priority_id": null, "site_id": null, "status_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "assigned_to_id": {"display_name": "x", "id": 3},
+            "assigned_to_role_id": {"display_name": "x", "id": 3},
+            "assigned_to_site_id": {"display_name": "x", "id": 3},
+            "description": 42,
+            "display_name": 42,
+            "due_date": "2026-07-04",
+            "priority_id": {"display_name": "x", "id": 3},
+            "site_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "description": 42,
+            "display_name": 42,
+            "due_date": "2026-07-04",
+            "priority_id": {"display_name": "x", "id": 3},
+            "site_id": {"display_name": "x", "id": 3},
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "due_date": "2026-07-04", "priority_id": 3, "site_id": 3, "status_id": 3},
+              "createApi": {
+                "assigned_to_id": {"display_name": "x", "id": 3},
+                "assigned_to_role_id": {"display_name": "x", "id": 3},
+                "assigned_to_site_id": {"display_name": "x", "id": 3},
+                "description": 42,
+                "display_name": 42,
+                "due_date": "2026-07-04",
+                "priority_id": {"display_name": "x", "id": 3},
+                "site_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "description": 42,
+                "display_name": 42,
+                "due_date": "2026-07-04",
+                "priority_id": {"display_name": "x", "id": 3},
+                "site_id": {"display_name": "x", "id": 3},
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "due_date": "2026-07-04", "priority_id": 3, "site_id": 3, "status_id": 3}
+        },
+        "typical": {
+          "createFormInput": {
+            "assigned_to_id": 3,
+            "assigned_to_role_id": 3,
+            "assigned_to_site_id": 3,
+            "created_at": "2026-01-01T00:00:00Z",
+            "description": "text",
+            "display_name": "text",
+            "due_date": "2026-07-04",
+            "extra_key": "kept",
+            "priority_id": 3,
+            "site_id": 3,
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "due_date": "2026-07-04", "extra_key": "kept", "priority_id": 3, "site_id": 3, "status_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"description": "text", "display_name": "text", "due_date": "2026-07-04", "priority_id": 3, "site_id": 3, "status_id": 3},
+              "createApi": {"assigned_to_id": 3, "assigned_to_role_id": 3, "assigned_to_site_id": 3, "description": "text", "display_name": "text", "due_date": "2026-07-04", "extra_key": "kept", "priority_id": 3, "site_id": 3},
+              "editApi": {"description": "text", "display_name": "text", "due_date": "2026-07-04", "extra_key": "kept", "priority_id": 3, "site_id": 3, "status_id": 3}
+            }
+          },
+          "rawRow": {"description": "text", "display_name": "text", "due_date": "2026-07-04", "priority_id": 3, "site_id": 3, "status_id": 3}
+        }
+      }
+    },
+    "time_entries": {
+      "createProps": ["entry_type_id:Category", "edit_reason:TextLong"],
+      "editProps": ["entry_type_id:Category", "entry_time:DateTimeLocal", "edit_reason:TextLong", "display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"edit_reason": "", "entry_type_id": ""},
+          "editFormInput": {"display_name": null, "edit_reason": "", "entry_time": null, "entry_type_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"edit_reason": null, "entry_type_id": null},
+              "createApi": {"edit_reason": "", "entry_type_id": ""},
+              "editApi": {"display_name": null, "edit_reason": "", "entry_time": null, "entry_type_id": ""}
+            }
+          },
+          "rawRow": {"edit_reason": null, "entry_type_id": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "edit_reason": 42,
+            "entry_type_id": {"display_name": "x", "id": 3}
+          },
+          "editFormInput": {
+            "display_name": 42,
+            "edit_reason": 42,
+            "entry_time": "abcdefghijklmnop",
+            "entry_type_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "edit_reason": "text", "entry_time": "NaN-NaN-NaNTNaN:NaN", "entry_type_id": 3},
+              "createApi": {
+                "edit_reason": 42,
+                "entry_type_id": {"display_name": "x", "id": 3}
+              },
+              "editApi": {
+                "display_name": 42,
+                "edit_reason": 42,
+                "entry_time": "abcdefghijklmnop",
+                "entry_type_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "edit_reason": "text", "entry_time": "garbage", "entry_type_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "edit_reason": "text", "entry_type_id": 3, "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T17:30", "entry_type_id": 3, "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "America/New_York": {
+              "control": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T13:30", "entry_type_id": 3},
+              "createApi": {"edit_reason": "text", "entry_type_id": 3, "extra_key": "kept"},
+              "editApi": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T21:30:00.000Z", "entry_type_id": 3, "extra_key": "kept"}
+            },
+            "Asia/Kolkata": {
+              "control": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T23:00", "entry_type_id": 3},
+              "createApi": {"edit_reason": "text", "entry_type_id": 3, "extra_key": "kept"},
+              "editApi": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T12:00:00.000Z", "entry_type_id": 3, "extra_key": "kept"}
+            },
+            "Australia/Lord_Howe": {
+              "control": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-05T04:00", "entry_type_id": 3},
+              "createApi": {"edit_reason": "text", "entry_type_id": 3, "extra_key": "kept"},
+              "editApi": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T07:00:00.000Z", "entry_type_id": 3, "extra_key": "kept"}
+            },
+            "UTC": {
+              "control": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T17:30", "entry_type_id": 3},
+              "createApi": {"edit_reason": "text", "entry_type_id": 3, "extra_key": "kept"},
+              "editApi": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T17:30:00.000Z", "entry_type_id": 3, "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text", "edit_reason": "text", "entry_time": "2026-07-04T17:30:00+00:00", "entry_type_id": 3}
+        }
+      }
+    },
+    "time_off_requests": {
+      "createProps": ["start_date:Date", "end_date:Date", "reason:TextLong"],
+      "editProps": ["start_date:Date", "end_date:Date", "reason:TextLong", "response_notes:TextLong", "display_name:TextLong", "status_id:Status"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"end_date": null, "reason": null, "start_date": null},
+          "editFormInput": {"display_name": null, "end_date": null, "reason": null, "response_notes": null, "start_date": null, "status_id": ""},
+          "outputs": {
+            "*": {
+              "control": {"status_id": null},
+              "createApi": {"end_date": null, "reason": null, "start_date": null},
+              "editApi": {"display_name": null, "end_date": null, "reason": null, "response_notes": null, "start_date": null, "status_id": ""}
+            }
+          },
+          "rawRow": {"status_id": null}
+        },
+        "odd": {
+          "createFormInput": {"end_date": "2026-07-04", "reason": 42, "start_date": "2026-07-04"},
+          "editFormInput": {
+            "display_name": 42,
+            "end_date": "2026-07-04",
+            "reason": 42,
+            "response_notes": 42,
+            "start_date": "2026-07-04",
+            "status_id": {"display_name": "x", "id": 3}
+          },
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "end_date": "2026-07-04", "reason": "text", "response_notes": "text", "start_date": "2026-07-04", "status_id": 3},
+              "createApi": {"end_date": "2026-07-04", "reason": 42, "start_date": "2026-07-04"},
+              "editApi": {
+                "display_name": 42,
+                "end_date": "2026-07-04",
+                "reason": 42,
+                "response_notes": 42,
+                "start_date": "2026-07-04",
+                "status_id": {"display_name": "x", "id": 3}
+              }
+            }
+          },
+          "rawRow": {"display_name": "text", "end_date": "2026-07-04", "reason": "text", "response_notes": "text", "start_date": "2026-07-04", "status_id": 3}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "end_date": "2026-07-04", "extra_key": "kept", "reason": "text", "start_date": "2026-07-04", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "end_date": "2026-07-04", "extra_key": "kept", "reason": "text", "response_notes": "text", "start_date": "2026-07-04", "status_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text", "end_date": "2026-07-04", "reason": "text", "response_notes": "text", "start_date": "2026-07-04", "status_id": 3},
+              "createApi": {"end_date": "2026-07-04", "extra_key": "kept", "reason": "text", "start_date": "2026-07-04"},
+              "editApi": {"display_name": "text", "end_date": "2026-07-04", "extra_key": "kept", "reason": "text", "response_notes": "text", "start_date": "2026-07-04", "status_id": 3}
+            }
+          },
+          "rawRow": {"display_name": "text", "end_date": "2026-07-04", "reason": "text", "response_notes": "text", "start_date": "2026-07-04", "status_id": 3}
+        }
+      }
+    }
+  }
+}

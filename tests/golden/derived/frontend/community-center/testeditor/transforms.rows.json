@@ -1,0 +1,437 @@
+{
+  "entities": {
+    "payment_transactions": {
+      "createProps": [],
+      "editProps": ["display_name:TextLong"],
+      "rows": {
+        "empty": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": null},
+          "outputs": {
+            "*": {
+              "control": {},
+              "createApi": {},
+              "editApi": {"display_name": null}
+            }
+          },
+          "rawRow": {}
+        },
+        "odd": {
+          "createFormInput": {},
+          "editFormInput": {"display_name": 42},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {},
+              "editApi": {"display_name": 42}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        },
+        "typical": {
+          "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"display_name": "text"},
+              "createApi": {"extra_key": "kept"},
+              "editApi": {"display_name": "text", "extra_key": "kept"}
+            }
+          },
+          "rawRow": {"display_name": "text"}
+        }
+      }
+    },
+    "reservation_requests": {
+      "createProps": ["resource_id:ForeignKeyName", "time_slot:TimeSlot", "purpose:TextLong", "attendee_count:IntegerNumber", "notes:TextLong"],
+      "editProps": [
+        "status_id:Status",
+        "resource_id:ForeignKeyName",
+        "time_slot:TimeSlot",
+        "purpose:TextLong",
+        "attendee_count:IntegerNumber",
+        "notes:TextLong",
+        "requested_by:User",
+        "reviewed_by:User",
+        "reviewed_at:DateTimeLocal",
+        "denial_reason:TextLong",
+        "display_name:TextShort"
+      ],
+      "rows": {
+        "empty": {
+          "createFormInput": {"attendee_count": null, "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
+          "editFormInput": {"attendee_count": null, "denial_reason": "", "display_name": null, "notes": "", "purpose": "", "requested_by": null, "resource_id": "", "reviewed_at": "", "reviewed_by": "", "status_id": "", "time_slot": ""},
+          "outputs": {
+            "*": {
+              "control": {"denial_reason": null, "notes": null, "purpose": null, "resource_id": null, "reviewed_at": null, "reviewed_by": null, "status_id": null, "time_slot": null},
+              "createApi": {"attendee_count": null, "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
+              "editApi": {"attendee_count": null, "denial_reason": "", "display_name": null, "notes": "", "purpose": "", "requested_by": null, "resource_id": "", "reviewed_at": "", "reviewed_by": "", "status_id": "", "time_slot": ""}
+            }
+          },
+          "rawRow": {"denial_reason": null, "notes": null, "purpose": null, "resource_id": null, "reviewed_at": null, "reviewed_by": null, "status_id": null, "time_slot": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "attendee_count": 7,
+            "notes": 42,
+            "purpose": 42,
+            "resource_id": {"display_name": "x", "id": 3},
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "editFormInput": {
+            "attendee_count": 7,
+            "denial_reason": 42,
+            "display_name": 42,
+            "notes": 42,
+            "purpose": 42,
+            "requested_by": "33333333-3333-4333-8333-333333333333",
+            "resource_id": {"display_name": "x", "id": 3},
+            "reviewed_at": "abcdefghijklmnop",
+            "reviewed_by": "33333333-3333-4333-8333-333333333333",
+            "status_id": {"display_name": "x", "id": 3},
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "outputs": {
+            "*": {
+              "control": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "NaN-NaN-NaNTNaN:NaN",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {
+                "attendee_count": 7,
+                "notes": 42,
+                "purpose": 42,
+                "resource_id": {"display_name": "x", "id": 3},
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "attendee_count": 7,
+                "denial_reason": 42,
+                "display_name": 42,
+                "notes": 42,
+                "purpose": 42,
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": {"display_name": "x", "id": 3},
+                "reviewed_at": "abcdefghijklmnop",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": {"display_name": "x", "id": 3},
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {
+            "attendee_count": 7,
+            "denial_reason": "text",
+            "display_name": "text",
+            "notes": "text",
+            "purpose": "text",
+            "requested_by": "33333333-3333-4333-8333-333333333333",
+            "resource_id": 3,
+            "reviewed_at": "garbage",
+            "reviewed_by": "33333333-3333-4333-8333-333333333333",
+            "status_id": 3,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          }
+        },
+        "typical": {
+          "createFormInput": {"attendee_count": 7, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {
+            "attendee_count": 7,
+            "created_at": "2026-01-01T00:00:00Z",
+            "denial_reason": "text",
+            "display_name": "text",
+            "extra_key": "kept",
+            "notes": "text",
+            "purpose": "text",
+            "requested_by": "33333333-3333-4333-8333-333333333333",
+            "resource_id": 3,
+            "reviewed_at": "2026-07-04T17:30",
+            "reviewed_by": "33333333-3333-4333-8333-333333333333",
+            "status_id": 3,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "America/New_York": {
+              "control": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T13:30",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"attendee_count": 7, "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T21:30:00.000Z",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "Asia/Kolkata": {
+              "control": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T23:00",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"attendee_count": 7, "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T12:00:00.000Z",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "Australia/Lord_Howe": {
+              "control": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-05T04:00",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"attendee_count": 7, "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T07:00:00.000Z",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            },
+            "UTC": {
+              "control": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T17:30",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "createApi": {"attendee_count": 7, "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {
+                "attendee_count": 7,
+                "denial_reason": "text",
+                "display_name": "text",
+                "extra_key": "kept",
+                "notes": "text",
+                "purpose": "text",
+                "requested_by": "33333333-3333-4333-8333-333333333333",
+                "resource_id": 3,
+                "reviewed_at": "2026-07-04T17:30:00.000Z",
+                "reviewed_by": "33333333-3333-4333-8333-333333333333",
+                "status_id": 3,
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {
+            "attendee_count": 7,
+            "denial_reason": "text",
+            "display_name": "text",
+            "notes": "text",
+            "purpose": "text",
+            "requested_by": "33333333-3333-4333-8333-333333333333",
+            "resource_id": 3,
+            "reviewed_at": "2026-07-04T17:30:00+00:00",
+            "reviewed_by": "33333333-3333-4333-8333-333333333333",
+            "status_id": 3,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          }
+        }
+      }
+    },
+    "reservations": {
+      "createProps": ["resource_id:ForeignKeyName", "time_slot:TimeSlot", "purpose:TextLong", "attendee_count:IntegerNumber", "notes:TextLong", "event_color:Color"],
+      "editProps": ["resource_id:ForeignKeyName", "time_slot:TimeSlot", "purpose:TextLong", "attendee_count:IntegerNumber", "notes:TextLong", "event_color:Color", "display_name:TextShort"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"attendee_count": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
+          "editFormInput": {"attendee_count": null, "display_name": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
+          "outputs": {
+            "*": {
+              "control": {"event_color": null, "notes": null, "purpose": null, "resource_id": null, "time_slot": null},
+              "createApi": {"attendee_count": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
+              "editApi": {"attendee_count": null, "display_name": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""}
+            }
+          },
+          "rawRow": {"event_color": null, "notes": null, "purpose": null, "resource_id": null, "time_slot": null}
+        },
+        "odd": {
+          "createFormInput": {
+            "attendee_count": 7,
+            "event_color": 42,
+            "notes": 42,
+            "purpose": 42,
+            "resource_id": {"display_name": "x", "id": 3},
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "editFormInput": {
+            "attendee_count": 7,
+            "display_name": 42,
+            "event_color": 42,
+            "notes": 42,
+            "purpose": 42,
+            "resource_id": {"display_name": "x", "id": 3},
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+          },
+          "outputs": {
+            "*": {
+              "control": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "createApi": {
+                "attendee_count": 7,
+                "event_color": 42,
+                "notes": 42,
+                "purpose": 42,
+                "resource_id": {"display_name": "x", "id": 3},
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              },
+              "editApi": {
+                "attendee_count": 7,
+                "display_name": 42,
+                "event_color": 42,
+                "notes": 42,
+                "purpose": 42,
+                "resource_id": {"display_name": "x", "id": 3},
+                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
+              }
+            }
+          },
+          "rawRow": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+        },
+        "typical": {
+          "createFormInput": {
+            "attendee_count": 7,
+            "created_at": "2026-01-01T00:00:00Z",
+            "event_color": "text",
+            "extra_key": "kept",
+            "notes": "text",
+            "purpose": "text",
+            "resource_id": 3,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "editFormInput": {
+            "attendee_count": 7,
+            "created_at": "2026-01-01T00:00:00Z",
+            "display_name": "text",
+            "event_color": "text",
+            "extra_key": "kept",
+            "notes": "text",
+            "purpose": "text",
+            "resource_id": 3,
+            "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
+            "updated_at": "2026-01-02T00:00:00Z"
+          },
+          "outputs": {
+            "*": {
+              "control": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "createApi": {"attendee_count": 7, "event_color": "text", "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "editApi": {"attendee_count": 7, "display_name": "text", "event_color": "text", "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+            }
+          },
+          "rawRow": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+        }
+      }
+    },
+    "resources": {
+      "createProps": ["display_name:TextShort", "description:TextLong", "color:Color", "capacity:IntegerNumber", "hourly_rate:Money", "active:Boolean"],
+      "editProps": ["display_name:TextShort", "description:TextLong", "color:Color", "capacity:IntegerNumber", "hourly_rate:Money", "active:Boolean"],
+      "rows": {
+        "empty": {
+          "createFormInput": {"active": null, "capacity": null, "color": "", "description": "", "display_name": null, "hourly_rate": ""},
+          "editFormInput": {"active": null, "capacity": null, "color": "", "description": "", "display_name": null, "hourly_rate": ""},
+          "outputs": {
+            "*": {
+              "control": {"color": null, "description": null, "hourly_rate": null},
+              "createApi": {"active": null, "capacity": null, "color": "", "description": "", "display_name": null, "hourly_rate": ""},
+              "editApi": {"active": null, "capacity": null, "color": "", "description": "", "display_name": null, "hourly_rate": ""}
+            }
+          },
+          "rawRow": {"color": null, "description": null, "hourly_rate": null}
+        },
+        "odd": {
+          "createFormInput": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"},
+          "editFormInput": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"},
+          "outputs": {
+            "*": {
+              "control": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "hourly_rate": "abc"},
+              "createApi": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"},
+              "editApi": {"active": false, "capacity": 7, "color": 42, "description": 42, "display_name": 42, "hourly_rate": "$1,234.50"}
+            }
+          },
+          "rawRow": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "hourly_rate": "abc"}
+        },
+        "typical": {
+          "createFormInput": {"active": true, "capacity": 7, "color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "hourly_rate": 1234.5, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"active": true, "capacity": 7, "color": "text", "created_at": "2026-01-01T00:00:00Z", "description": "text", "display_name": "text", "extra_key": "kept", "hourly_rate": 1234.5, "updated_at": "2026-01-02T00:00:00Z"},
+          "outputs": {
+            "*": {
+              "control": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "hourly_rate": 1234.5},
+              "createApi": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "extra_key": "kept", "hourly_rate": 1234.5},
+              "editApi": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "extra_key": "kept", "hourly_rate": 1234.5}
+            }
+          },
+          "rawRow": {"active": true, "capacity": 7, "color": "text", "description": "text", "display_name": "text", "hourly_rate": "$1,234.50"}
+        }
+      }
+    }
+  }
+}
