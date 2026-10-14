@@ -52,9 +52,13 @@ if (typeof HTMLCanvasElement !== 'undefined' && !HTMLCanvasElement.prototype.get
   shared.__civicOsBaseHref ??= window.location.href;
   const baseHref: string = shared.__civicOsBaseHref;
   const label = (task: any): string => {
-    const names: string[] = [];
-    for (let t = task; t && t.suite; t = t.suite) names.unshift(t.name);
-    return `${task.file?.name ?? '?'} > ${names.join(' > ')}`;
+    let name: string | undefined = task.fullTestName;
+    if (!name) {
+      const names: string[] = [];
+      for (let t = task; t && !('filepath' in t); t = t.suite) names.unshift(t.name);
+      name = names.join(' > ');
+    }
+    return `${task.file?.name ?? '?'} > ${name}`;
   };
   const resetTo = (href: string) => (window as any).happyDOM?.setURL(href);
 
@@ -78,8 +82,9 @@ if (typeof HTMLCanvasElement !== 'undefined' && !HTMLCanvasElement.prototype.get
       resetTo(baseHref);
       throw new Error(
         `window.location was ${href} when this test started (expected ${baseHref}). ` +
-        `It changed after "${shared.__civicOsLastTest ?? '(no earlier test)'}" ended: async work from ` +
-        `that test navigated the shared happy-dom window. The URL has been reset.`,
+        `It changed after "${shared.__civicOsLastTest ?? '(no earlier test)'}" ended: async work that ` +
+        `outlived that test, or an afterAll hook that ran after it, navigated the shared happy-dom window. ` +
+        `The URL has been reset.`,
       );
     }
   });
