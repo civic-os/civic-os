@@ -868,7 +868,7 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - `HTMLDialogElement.showModal()` / `.close()` (basic attribute-based implementation)
 - `HTMLCanvasElement.getContext()` (stub returning a mock 2D context)
 
-It also installs the shared-window guard (see "One happy-dom window per worker" below), the assertion-ledger hook and the async-emission probe.
+It also installs the shared-window guard (see "One happy-dom window per worker" below), the async-leak guard (see "Async work must not outlive its spec file"), the assertion-ledger hook and the async-emission probe.
 
 ## Resources
 
@@ -931,7 +931,7 @@ const { access_token } = await res.json();
 
 ---
 
-**Last Updated**: 2026-10-13
+**Last Updated**: 2026-10-14
 **Maintainer**: Development Team
 
 ## Assertion ledger (SDK program)
@@ -1012,3 +1012,19 @@ ORDER=chart-widget.component.spec.ts,runtime.spec.ts npx ng test --watch=false \
 ```
 
 `detectAsyncLeaks: true` in such a config makes Vitest list timers and promises that outlive their spec file.
+
+### Async work must not outlive its spec file
+
+With `isolate: false`, a timer, interval, animation frame or pending dynamic import started by one spec file keeps running while later files in the same worker execute, and can fire after the worker has begun shutting down. A late `console.*` call then fails the whole run with `EnvironmentTeardownError: [vitest-worker]: Closing rpc while "onUserConsoleLog" was pending`, attributed to whichever file ran last (a passing file such as `analytics.service.spec.ts`), even though every test passed.
+
+**Async-leak guard** (`src/app/testing/async-leak-guard.ts`, installed by `src/test-setup.ts`): a `node:async_hooks` hook records every Timeout (`setTimeout`, `setInterval`) and Immediate (`setImmediate`, and happy-dom's `requestAnimationFrame`, which is built on it) created while a spec file runs. A setup-level `afterAll`, which runs after the file's own `afterAll` hooks and every TestBed teardown, waits one macrotask and then fails the file, by name, if a timer is still pending (not cleared, not fired, not unref'd) whose own creation stack has a frame in `src/`. A polling loop re-arms itself from app code, so its current timer qualifies. The error lists each timer (`setTimeout(1500 ms)`, `setInterval(...)`) with the spec and app frames that created it, and where its chain of timer callbacks started; the timers are then cancelled so the failure does not cascade. Timers created only by Vitest, happy-dom or Angular internals (task-update throttling, `AsyncTaskManager` bookkeeping after an animation frame, the zoneless scheduler) are ignored even when app code started their chain. Cost is negligible (timer stacks are captured unformatted and formatted only for leaks). It does not see work that is pending only as a promise (an unawaited dynamic import) or a loop driven purely by library code; see the gate below.
+
+How to fix what it reports in the spec (application code that does not clean up on destroy is a bug of its own; fix or report it separately rather than hiding it):
+
+- **Timers the code under test starts** (auto-close after 1.5 s, save checkmark fades, polling): install fake timers just before the call that starts them and drive them inside the test, asserting what they do: `vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })`, then `vi.advanceTimersByTime(1500)`, plus `afterEach(() => vi.useRealTimers())`. Install them after any `await fixture.whenStable()`; replace real waits that follow (`await new Promise(r => setTimeout(r, 10))`) with `await vi.advanceTimersByTimeAsync(10)`. A describe whose tests all trigger the same timer can flush in its `afterEach` with `vi.runOnlyPendingTimers()` before `vi.useRealTimers()` (the hook runs before TestBed teardown, so the callback sees a live fixture).
+- **Components that finish initializing after a dynamic import** (`GeoPointMapComponent`, `GeoPolygonMapComponent`, `MarkdownEditorComponent`, `BlocklyViewerComponent`): add `afterEach(async () => { await settleLazyComponents(fixture); })` from `src/app/testing/lazy-components.ts`, before anything destroys the fixture. It waits until every such component in the fixture whose view initialized has finished, so `ngOnDestroy` disposes what it built. Specs that only host one and do not test it can swap it for a stub instead (`src/app/testing/blockly-viewer.stub.ts` via `TestBed.overrideComponent`).
+- **A short UI timer the app never cancels** (e.g. the 60 ms focus-retention timer in `fk-search-modal`): wait it out once in the spec's `afterAll`; Node fires timers of equal duration in creation order, so `await new Promise(r => setTimeout(r, 60))` outlasts the last one.
+- **Teardown that requests an animation frame** (FullCalendar's destroy): `await new Promise<void>(r => requestAnimationFrame(() => r()))` after `fixture.destroy()`; frames run in request order.
+
+**Gate for promise leaks**: `node scripts/detect-async-leaks.mjs [--runs N] [--include=...]` runs the suite with Vitest's `detectAsyncLeaks` (which tracks promises too, at roughly twice the run time) and exits 1 on any reported leak or failed run. Detection of an unawaited dynamic import depends on timing (it leaks only if still pending when its file ends), so use `--runs 3` before declaring a change leak-free. To find such leaks deterministically, temporarily put `await new Promise(r => setTimeout(r, 2000));` in front of the component's `await import(...)`: the guard then names every spec file that would leave that initialization running.
+

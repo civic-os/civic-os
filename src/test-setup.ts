@@ -111,3 +111,9 @@ afterEach((ctx: any) => {
 
 // Async-emission probe (inert unless SDK_ASYNC_FLUSH is set; see async-flush-probe.ts).
 import './app/testing/async-flush-probe';
+
+// Async-leak guard: fails a spec file that leaves timers, intervals or
+// animation frames running after it finished (see async-leak-guard.ts). Its
+// afterAll is registered here, before the spec's own hooks, so it runs last.
+import { installAsyncLeakGuard } from './app/testing/async-leak-guard';
+installAsyncLeakGuard();
