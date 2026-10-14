@@ -26,7 +26,9 @@
  * Both wrong orders fail loudly by name: a later file calling markdownSanitize()
  * gets an error from the fake (outside this file it refuses to work), and if an
  * earlier file loaded the module with the real dompurify, every test here fails
- * with an explanation instead of running against the wrong DOMPurify.
+ * with an explanation instead of running against the wrong DOMPurify. The same
+ * binding probe tells that case apart from markdownSanitize() switching to the
+ * shared global DOMPurify instance, which fails every test with its own message.
  */
 
 type Hook = (node: unknown, data: { tagName: string; allowedTags?: unknown }) => void;
@@ -118,24 +120,42 @@ function installedHook(): Hook {
 }
 
 describe('markdownSanitize', () => {
-    // The reverse case: another spec file loaded markdown-sanitize.ts first, so
-    // it is bound to the real dompurify and vi.mock cannot reach it.
-    let boundToFake = false;
+    // Which DOMPurify markdownSanitize() reached when probed:
+    //   'instance': a fresh DOMPurify(window) from this spec's fake (expected);
+    //   'global':   this spec's fake, but its shared default instance instead of
+    //               DOMPurify(window), i.e. markdownSanitize() itself changed;
+    //   'none':     neither, i.e. markdown-sanitize.ts is bound to the real
+    //               dompurify because another spec file loaded it first in this
+    //               worker (vi.mock cannot reach it), or it no longer calls
+    //               DOMPurify at all.
+    let binding: 'instance' | 'global' | 'none' = 'none';
 
     beforeAll(() => {
         fake.active = true;
-        const before = fake.instances.length;
-        markdownSanitize('');
-        boundToFake = fake.instances.length > before;
+        const instancesBefore = fake.instances.length;
+        const globalCallsBefore = fake.globalCalls.length;
+        markdownSanitize('<p>binding probe</p>');
+        if (fake.instances.length > instancesBefore) binding = 'instance';
+        else if (fake.globalCalls.length > globalCallsBefore) binding = 'global';
     });
 
     beforeEach(() => {
-        if (!boundToFake) {
+        if (binding === 'global') {
             throw new Error(
-                'markdown-sanitize.ts was already loaded with the real dompurify by an earlier spec file in this '
-                + 'worker (isolate: false keeps the module cached), so vi.mock(\'dompurify\') cannot reach it and '
-                + 'these tests cannot run. Only markdown-sanitize.spec.ts may import markdown-sanitize.ts; stub '
-                + 'markdownSanitize in other unit specs.',
+                'markdownSanitize() called the shared global DOMPurify instance (DOMPurify.addHook / '
+                + 'DOMPurify.sanitize on the default export) instead of creating a fresh DOMPurify(window). '
+                + 'The global instance is shared with the template editor, so hooks and config added there leak '
+                + 'into every other sanitize call. markdown-sanitize.ts is correctly bound to this spec\'s fake; '
+                + 'the module itself changed.',
+            );
+        }
+        if (binding === 'none') {
+            throw new Error(
+                'markdownSanitize() did not reach this spec\'s DOMPurify fake. Usually markdown-sanitize.ts was '
+                + 'already loaded with the real dompurify by an earlier spec file in this worker (isolate: false '
+                + 'keeps the module cached), so vi.mock(\'dompurify\') cannot reach it and these tests cannot run: '
+                + 'only markdown-sanitize.spec.ts may import markdown-sanitize.ts; stub markdownSanitize in other '
+                + 'unit specs. Otherwise markdownSanitize() no longer calls DOMPurify at all.',
             );
         }
         fake.instances.length = 0;
