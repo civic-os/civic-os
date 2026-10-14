@@ -31,6 +31,9 @@ jobs:
       - name: Run unit tests
         run: npm run test:ci
 
+      - name: Run markdown sanitizer browser test (real DOMPurify in headless Chrome)
+        run: npm run test:sanitize-browser
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v7
         if: always()
@@ -43,6 +46,10 @@ jobs:
   test-migrations:
     name: Test Database Migrations
     runs-on: ubuntu-latest
+    env:
+      # The runner's apt postgresql-client is older than the PostgreSQL 17 service and pg_dump
+      # refuses newer servers, so schema dumps use the service image's own pg_dump.
+      PG_DUMP: docker run --rm --network host postgis/postgis:17-3.5 pg_dump
 
     services:
       postgres:
@@ -110,23 +117,16 @@ jobs:
         env:
           PGPASSWORD: postgres
 
-      - name: Run full schema verification
+      - name: Verify each recent revert restores the prior schema
         run: |
-          # Get the latest migration name
-          LATEST_MIGRATION=$(sqitch plan --format '%n' | tail -1)
-
-          if [ -n "$LATEST_MIGRATION" ]; then
-            echo "Testing full verification for: $LATEST_MIGRATION"
-
-            # Check if verify-full script exists
-            if [ -f "postgres/migrations/scripts/verify-full.sh" ]; then
-              CIVIC_OS_VERIFY_FULL=true \
-              SQITCH_TARGET="db:pg://postgres:postgres@localhost:5432/civic_os_test" \
-              ./postgres/migrations/scripts/verify-full.sh "$LATEST_MIGRATION"
-            else
-              echo "Full verification script not found, skipping"
-            fi
-          fi
+          set -euo pipefail
+          # Uses a fresh database so the legacy revert residue left in civic_os_test by the
+          # revert-to-baseline above cannot mask or cause differences. Deploys and reverts one
+          # change at a time, diffing normalized schema dumps. Changes up to v0-71-0-ical-http-caching predate
+          # this check and have known-inexact reverts; every later change must revert exactly.
+          # Any tool or diff error fails the step.
+          psql -h localhost -U postgres -d civic_os_test -v ON_ERROR_STOP=1 -c "CREATE DATABASE civic_os_stepwise;"
+          ./postgres/migrations/scripts/schema-roundtrip.sh stepwise db:pg://postgres:postgres@localhost:5432/civic_os_stepwise "$RUNNER_TEMP/stepwise" v0-71-0-ical-http-caching
         env:
           PGPASSWORD: postgres
 
