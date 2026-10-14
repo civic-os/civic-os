@@ -549,6 +549,15 @@ describe('ListPage', () => {
     });
 
     describe('Map Display Logic', () => {
+        // The data path ends in debounceTime(0) on the real async scheduler.
+        // Wait for the result instead of a fixed real-time delay: a 100 ms wait
+        // saw no markers once while the machine was heavily loaded.
+        async function waitUntil(condition: () => boolean): Promise<void> {
+            await vi.waitFor(() => {
+                if (!condition()) throw new Error('list data not loaded yet');
+            });
+        }
+
         it('should show map when entity has show_map=true', async () => {
             const entityWithMap = {
                 ...MOCK_ENTITIES.issue,
@@ -564,7 +573,7 @@ describe('ListPage', () => {
             // Trigger route params to emit with new mocked entity
             routeParams.next({ entityKey: 'Issue' });
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await waitUntil(() => !!component.showMap());
             expect(component.showMap()).toBeTruthy();
         });
 
@@ -610,7 +619,7 @@ describe('ListPage', () => {
             // Trigger data load
             routeParams.next({ entityKey: 'Issue' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await waitUntil(() => component.mapMarkers().length > 0);
             const markers = component.mapMarkers();
             expect(markers.length).toBe(2);
             expect(markers[0]).toEqual({ id: 1, name: 'Issue 1', wkt: 'POINT(-83.5 43.0)' });
@@ -635,7 +644,7 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'Issue' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await waitUntil(() => component.mapMarkers().length > 0);
             const markers = component.mapMarkers();
             // Should only include non-null locations
             expect(markers.length).toBe(1);
