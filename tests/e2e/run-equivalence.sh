@@ -12,6 +12,7 @@
 #   --keep-stack     leave the Docker stack and dev server running afterwards (development)
 #   --reuse-stack    skip the fresh stack and use one left by --keep-stack (development; not with --record)
 #   --grep <re>      run only matching flows (development; not with --record)
+#   --keep-base      keep (and reuse) the --visual-base worktree and its node_modules
 #
 # Environment:
 #   E2E_STD_LOCK     lock directory guarding the standard ports and :4200
@@ -23,7 +24,7 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,20p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,21p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
@@ -43,7 +44,7 @@ stop_dev_server() {
 }
 
 # Globals the EXIT trap relies on; main() fills in the rest.
-KEEP_STACK=0; STACK_STARTED=0; LOCK_ACQUIRED=0; DEV_PID=""; BASE_WT=""; T_START=$(date +%s)
+KEEP_STACK=0; KEEP_BASE=0; STACK_STARTED=0; LOCK_ACQUIRED=0; DEV_PID=""; BASE_WT=""; T_START=$(date +%s)
 
 cleanup() {
   local rc=$?
@@ -57,7 +58,7 @@ cleanup() {
   elif [[ -n "$DEV_PID" ]]; then
     log "leaving dev server (pid $DEV_PID) and stack $PROJECT running (--keep-stack)"
   fi
-  if [[ -n "$BASE_WT" ]]; then
+  if [[ -n "$BASE_WT" && $KEEP_BASE == 0 ]]; then
     git -C "$ROOT" worktree remove --force "$BASE_WT" >/dev/null 2>&1
   fi
   if [[ $LOCK_ACQUIRED == 1 ]]; then rm -rf "$LOCK"; fi
@@ -184,6 +185,7 @@ main() {
       --keep-stack) KEEP_STACK=1 ;;
       --reuse-stack) REUSE_STACK=1 ;;
       --grep) GREP="${2:?--grep needs a pattern}"; shift ;;
+      --keep-base) KEEP_BASE=1 ;;
       *) usage ;;
     esac
     shift
@@ -231,10 +233,14 @@ main() {
     visual)
       BASE_SHA=$(git -C "$ROOT" rev-parse --verify "$VISUAL_REF^{commit}")
       BASE_WT="${E2E_TMPDIR:-${TMPDIR:-/tmp}}/civic-os-visual-base-$BASE_SHA"
-      rm -rf "$BASE_WT"
-      git -C "$ROOT" worktree add --detach "$BASE_WT" "$BASE_SHA" >/dev/null
-      log "npm ci in base worktree ($BASE_SHA)"
-      ( cd "$BASE_WT" && npm ci --no-audit --no-fund > "$ART/visual-base-npm-ci.log" 2>&1 ) || { tail -30 "$ART/visual-base-npm-ci.log" >&2; exit 1; }
+      if [[ -d "$BASE_WT/node_modules" && "$(git -C "$BASE_WT" rev-parse HEAD 2>/dev/null)" == "$BASE_SHA" ]]; then
+        log "reusing base worktree $BASE_WT"
+      else
+        git -C "$ROOT" worktree remove --force "$BASE_WT" >/dev/null 2>&1 || rm -rf "$BASE_WT"
+        git -C "$ROOT" worktree add --detach "$BASE_WT" "$BASE_SHA" >/dev/null
+        log "npm ci in base worktree ($BASE_SHA)"
+        ( cd "$BASE_WT" && npm ci --no-audit --no-fund > "$ART/visual-base-npm-ci.log" 2>&1 ) || { tail -30 "$ART/visual-base-npm-ci.log" >&2; exit 1; }
+      fi
       rm -rf "$ART/visual"
       capture "$BASE_WT" "$ART/visual/base"
       capture "$ROOT" "$ART/visual/current"
@@ -243,5 +249,4 @@ main() {
   esac
 }
 
-main "$@"
-exit $?
+main "$@"; exit $?

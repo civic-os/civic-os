@@ -162,6 +162,18 @@ export class MaskContext {
     return this.fk.get(table)?.get(column) ?? null;
   }
 
+  /**
+   * Polymorphic references: `<prefix>_id` next to `<prefix>_type` (e.g. entity_id + entity_type
+   * on entity_notes) refers to the table named by the type value ('eq.' prefix allowed).
+   */
+  polymorphicTable(key, siblings) {
+    const m = /^(.*)_id$/.exec(key);
+    if (!m || !siblings) return null;
+    const t = siblings[`${m[1]}_type`];
+    if (typeof t !== 'string') return null;
+    return t.replace(/^eq\./, '');
+  }
+
   /** Table of an RPC id parameter, from a sibling table parameter, the page's record, or a fixed map. */
   rpcParamTable(key, value, args, page) {
     for (const p of RPC_TABLE_PARAMS) {
@@ -219,7 +231,9 @@ export class MaskContext {
     if (/(^|\.)(or|and)$/.test(name)) {
       v = this.maskConditions(name.includes('.') ? null : ctx.table, v);
     } else if (!name.includes('.')) {
-      const t = ctx.rpc ? this.rpcParamTable(name, v.replace(/^[a-z]+\./, ''), {}, ctx.page) : this.columnTable(ctx.table, name);
+      const t = ctx.rpc
+        ? this.rpcParamTable(name, v.replace(/^[a-z]+\./, ''), ctx.params, ctx.page)
+        : this.columnTable(ctx.table, name) ?? this.polymorphicTable(name, ctx.params);
       v = this.maskIdDigits(t, v);
     }
     return v;
@@ -250,7 +264,7 @@ export class MaskContext {
         if (ctx.rpc) {
           if (depth === 1) table = this.rpcParamTable(key, v, parent, ctx.page);
         } else if (depth <= 1) {
-          table = this.columnTable(ctx.table, key);
+          table = this.columnTable(ctx.table, key) ?? this.polymorphicTable(key, parent);
         }
         const masked = this.maskScalarId(table, v);
         if (masked !== null) return masked;
@@ -277,7 +291,9 @@ export class MaskContext {
         }
       } else if (!name.includes('.')) {
         const decoded = safeDecode(v.replace(/\+/g, ' '));
-        const t = ctx.rpc ? this.rpcParamTable(name, decoded.replace(/^[a-z]+\./, ''), {}, ctx.page) : this.columnTable(ctx.table, name);
+        const t = ctx.rpc
+          ? this.rpcParamTable(name, decoded.replace(/^[a-z]+\./, ''), ctx.params, ctx.page)
+          : this.columnTable(ctx.table, name) ?? this.polymorphicTable(name, ctx.params);
         v = this.maskIdDigits(t, v, true);
       }
       return rawName + '=' + v;
@@ -317,10 +333,12 @@ function parseBody(postData, contentType) {
 
 /** Request context used to resolve which table an id position refers to. */
 function requestContext(req) {
-  const pathname = new URL(req.url).pathname;
+  const url = new URL(req.url);
+  const pathname = url.pathname;
   const page = pageRecord(req.frameUrl);
-  if (pathname.startsWith('/rpc/')) return { rpc: pathname.slice('/rpc/'.length), page };
-  return { table: safeDecode(pathname.replace(/^\//, '')), page };
+  const params = Object.fromEntries(url.searchParams);
+  if (pathname.startsWith('/rpc/')) return { rpc: pathname.slice('/rpc/'.length), page, params };
+  return { table: safeDecode(pathname.replace(/^\//, '')), page, params };
 }
 
 /**

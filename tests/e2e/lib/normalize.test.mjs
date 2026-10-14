@@ -88,6 +88,18 @@ test('created ids are tokenized only where the position refers to their table', 
   assert.match(s, /\/rpc\/other.*"p_entity_id":13/);
 });
 
+test('polymorphic entity_id follows its entity_type sibling', () => {
+  const doc = run([
+    { url: 'http://localhost:3000/entity_notes?entity_id=eq.9&entity_type=eq.Issue&select=id' },
+    { url: 'http://localhost:3000/entity_notes?entity_id=eq.9&entity_type=eq.Tag&select=id' },
+    { method: 'POST', url: 'http://localhost:3000/entity_notes', postData: '{"entity_type":"Issue","entity_id":9}' },
+  ], { registered: [{ step: 's1', table: 'Issue', ids: ['9'] }] });
+  const s = JSON.stringify(doc.steps[0].postgrest);
+  assert.match(s, /"entity_id":"eq.<Issue:1>","entity_type":"eq.Issue"/);
+  assert.match(s, /"entity_id":"eq.9","entity_type":"eq.Tag"/);
+  assert.match(s, /"entity_id":"<Issue:1>","entity_type":"Issue"/);
+});
+
 test('in-lists and or-filters mask registered ids of the right table', () => {
   const doc = run([
     { url: 'http://localhost:3000/Issue?id=in.(7,8,99)' },

@@ -56,22 +56,26 @@ function escapeRe(s: string): string {
 
 /**
  * Screenshot masks for text that differs between two runs of identical code:
- * dates of the real wall clock (server created_at/updated_at, ±1 day for
- * midnight), date-times on the fake clock's day (its time of day advances in
- * real time), and relative times ("3 minutes ago").
+ *   - dates of the real wall clock (server created_at/updated_at; ±1 day for midnight);
+ *   - date-times with seconds within ±60 days of the real date (seed rows stamped
+ *     NOW() ± an interval at stack start, which differs between two stacks);
+ *   - date-times on the fake clock's day (its time of day advances in real time);
+ *   - relative times ("3 minutes ago").
+ * Typed values (2031) and seed values pinned to CURRENT_DATE + n at a fixed hour stay visible.
  */
 export function runtimeTextMasks(page: Page) {
   const day = 86_400_000;
   const now = Date.now();
-  const realDays = [now - day, now, now + day].map((t) => new Date(t));
   const opts = { timeZone: TIMEZONE } as const;
   const longFmt = (d: Date) => d.toLocaleDateString('en-US', { ...opts, month: 'short', day: 'numeric', year: 'numeric' });
   const numFmt = (d: Date) => d.toLocaleDateString('en-US', opts);
-  const realDates = realDays.flatMap((d) => [longFmt(d), numFmt(d)]).map(escapeRe);
+  const realDates = [now - day, now, now + day].map((t) => new Date(t)).flatMap((d) => [longFmt(d), numFmt(d)]).map(escapeRe);
+  const nearDates = Array.from({ length: 121 }, (_, i) => new Date(now + (i - 60) * day)).map((d) => escapeRe(longFmt(d)));
   const fakeDay = new Date(Date.parse(CLOCK_T0));
   const fakeDateTimes = [longFmt(fakeDay), numFmt(fakeDay)].map((s) => `${escapeRe(s)},? \\d{1,2}:\\d{2}`);
   return [
     page.getByText(new RegExp(realDates.join('|'))),
+    page.getByText(new RegExp(`(?:${nearDates.join('|')}),? \\d{1,2}:\\d{2}:\\d{2}`)),
     page.getByText(new RegExp(fakeDateTimes.join('|'))),
     page.getByText(/\b(just now|an? (few seconds|second|minute|hour) ago|\d+ (seconds?|minutes?|hours?) ago|in \d+ (seconds?|minutes?|hours?))\b/i),
   ];
