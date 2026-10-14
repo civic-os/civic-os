@@ -535,8 +535,8 @@ if [ "$RESULT" = "401" ] || [ "$RESULT" = "403" ]; then
   echo -e "  ${GREEN}PASS${NC} 3d. Anonymous blocked from storage stats (HTTP $RESULT)"
   PASS=$((PASS + 1))
 else
-  echo -e "  ${YELLOW}SKIP${NC} 3d. Anonymous access returned HTTP $RESULT (may be allowed via web_anon)"
-  SKIP=$((SKIP + 1))
+  echo -e "  ${RED}FAIL${NC} 3d. Anonymous should be blocked from storage stats (HTTP $RESULT)"
+  FAIL=$((FAIL + 1))
 fi
 
 # =============================================================================
@@ -938,7 +938,8 @@ if [ "$ANON_RESULT" = "401" ] || [ "$ANON_RESULT" = "403" ]; then
   echo -e "  ${GREEN}PASS${NC} 7e. Anonymous blocked from presigned URL (HTTP $ANON_RESULT)"
   PASS=$((PASS + 1))
 else
-  skip_test "7e. Anonymous presigned URL (HTTP $ANON_RESULT)" "Pre-existing: EXECUTE granted to PUBLIC in v0-5-0"
+  echo -e "  ${RED}FAIL${NC} 7e. Anonymous should be blocked from presigned URL (HTTP $ANON_RESULT)"
+  FAIL=$((FAIL + 1))
 fi
 
 # =============================================================================

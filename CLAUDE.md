@@ -203,6 +203,8 @@ sqitch deploy dev --verify      # Re-deploy
 
 Use templates in `postgres/migrations/templates/` as starting points for common operations (`add_metadata_table`, `add_rpc_function`, `add_domain`, `modify_metadata_view`). **Migrations change schema shape, never instance content** — never UPDATE/replace dashboard widgets, display names, translations, or other metadata rows that integrators customize per deployment. See `postgres/migrations/README.md` for comprehensive documentation and the "Instance-Specific Data Is Off-Limits" policy.
 
+**Function Security** (v0.76.5+): All non-anonymous functions have PUBLIC EXECUTE revoked; `ALTER DEFAULT PRIVILEGES` prevents regression. New migrations must `REVOKE EXECUTE ... FROM PUBLIC` (not `FROM web_anon`, which is a no-op). SECURITY DEFINER functions must include in-body authorization guards. See `docs/notes/SECURITY_DEFINER_AUDIT_2026-10.md` for the full audit, `docs/INTEGRATOR_GUIDE.md` (Securing RPC Functions) for the integrator rules, and `postgres/migrations/templates/add_rpc_function.sql` for the corrected template.
+
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 
 ## Production Deployment & Containerization
