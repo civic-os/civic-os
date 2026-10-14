@@ -1,0 +1,317 @@
+{
+  "constraintMessages": [
+    {"column_name": "total_cost", "constraint_name": "bid_total_cost_positive", "error_message": "Bid total cost must be greater than zero", "table_name": "Bid"},
+    {"column_name": "total_cost", "constraint_name": "bid_total_cost_reasonable", "error_message": "Bid total cost cannot exceed $100,000", "table_name": "Bid"},
+    {"column_name": "cost", "constraint_name": "cost_positive", "error_message": "Cost must be greater than zero", "table_name": "WorkPackage"},
+    {"column_name": "description", "constraint_name": "description_min_length", "error_message": "Description must be at least 10 characters", "table_name": "Issue"},
+    {"column_name": "severity_level", "constraint_name": "severity_valid_range", "error_message": "Severity must be between 1 (low) and 5 (critical)", "table_name": "Issue"},
+    {"column_name": "display_name", "constraint_name": "tag_name_max_length", "error_message": "Tag name cannot exceed 50 characters", "table_name": "Tag"}
+  ],
+  "results": [
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"httpCode": 0, "humanMessage": "", "message": "Http failure response for http://x: 0 Unknown Error"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "JWT expired"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"httpCode": 401, "humanMessage": "", "message": "Unauthorized"}
+    },
+    {
+      "parseToHuman": "Resource not found",
+      "parseToHumanWithLookup": "Resource not found",
+      "payload": {"httpCode": 404, "humanMessage": "", "message": "Not Found"}
+    },
+    {
+      "parseToHuman": "Permissions error",
+      "parseToHumanWithLookup": "Permissions error",
+      "payload": {"code": "42501", "httpCode": 403, "humanMessage": "", "message": "permission denied for table x"}
+    },
+    {
+      "parseToHuman": "Record must be unique",
+      "parseToHumanWithLookup": "Record must be unique",
+      "payload": {"code": "23505", "details": "Key (a)=(1) already exists.", "httpCode": 409, "humanMessage": "", "message": "duplicate key value violates unique constraint \"x_key\""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "23503", "details": "Key (b)=(9) is not present in table \"y\".", "httpCode": 409, "humanMessage": "", "message": "insert or update on table \"x\" violates foreign key constraint \"x_fk\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "check violation"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record.",
+      "payload": {"code": "23P01", "httpCode": 409, "humanMessage": "", "message": "conflicting key value"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "23502", "httpCode": 400, "humanMessage": "", "message": "null value in column \"c\" violates not-null constraint"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "22P02", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type integer: \"abc\""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "22007", "httpCode": 400, "humanMessage": "", "message": "invalid input syntax for type date: \"x\""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "PGRST116", "details": "The result contains 0 rows", "httpCode": 406, "humanMessage": "", "message": "The result contains 0 rows"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "PGRST301", "httpCode": 401, "humanMessage": "", "message": "No suitable key or wrong key type"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"code": "PT503", "httpCode": 503, "humanMessage": "", "message": "Maintenance mode"}
+    },
+    {
+      "parseToHuman": "Custom RAISE EXCEPTION text",
+      "parseToHumanWithLookup": "Custom RAISE EXCEPTION text",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": "Custom RAISE EXCEPTION text"}
+    },
+    {
+      "parseToHuman": "",
+      "parseToHumanWithLookup": "",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"httpCode": 400, "humanMessage": "", "message": "Bad Request"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"httpCode": 500, "humanMessage": "", "message": "Internal Server Error"}
+    },
+    {
+      "parseToHuman": "System Error",
+      "parseToHumanWithLookup": "System Error",
+      "payload": {"humanMessage": "", "message": "no http code, no code"}
+    },
+    {
+      "parseToHuman": "Network error. Please check your connection.",
+      "parseToHumanWithLookup": "Network error. Please check your connection.",
+      "payload": {"code": "42501", "httpCode": 0, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Permissions error",
+      "parseToHumanWithLookup": "Permissions error",
+      "payload": {"code": "42501", "httpCode": 404, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Record must be unique",
+      "parseToHumanWithLookup": "Record must be unique",
+      "payload": {"code": "23505", "httpCode": 401, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "Resource not found",
+      "parseToHumanWithLookup": "Resource not found",
+      "payload": {"code": "P0001", "httpCode": 404, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Your session has expired. Please refresh the page to log in again.",
+      "parseToHumanWithLookup": "Your session has expired. Please refresh the page to log in again.",
+      "payload": {"code": "P0001", "httpCode": 401, "humanMessage": "", "message": "raise"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Bid total cost must be greater than zero",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"bid_total_cost_positive\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Bid total cost must be greater than zero",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"bid_total_cost_positive\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Bid total cost cannot exceed $100,000",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"bid_total_cost_reasonable\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Bid total cost cannot exceed $100,000",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"bid_total_cost_reasonable\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Cost must be greater than zero",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"cost_positive\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Cost must be greater than zero",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"cost_positive\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Description must be at least 10 characters",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"description_min_length\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Description must be at least 10 characters",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"description_min_length\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Severity must be between 1 (low) and 5 (critical)",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"severity_valid_range\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Severity must be between 1 (low) and 5 (critical)",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"severity_valid_range\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Tag name cannot exceed 50 characters",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tag_name_max_length\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Tag name cannot exceed 50 characters",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"tag_name_max_length\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: no_such_constraint",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: no_such_constraint",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: from_details",
+      "payload": {"code": "23514", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "Validation failed",
+      "parseToHumanWithLookup": "Validation failed: only_details",
+      "payload": {"code": "23514", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Bid total cost must be greater than zero",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"bid_total_cost_positive\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Bid total cost must be greater than zero",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"bid_total_cost_positive\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Bid total cost cannot exceed $100,000",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"bid_total_cost_reasonable\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Bid total cost cannot exceed $100,000",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"bid_total_cost_reasonable\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Cost must be greater than zero",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"cost_positive\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Cost must be greater than zero",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"cost_positive\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Description must be at least 10 characters",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"description_min_length\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Description must be at least 10 characters",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"description_min_length\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Severity must be between 1 (low) and 5 (critical)",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"severity_valid_range\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Severity must be between 1 (low) and 5 (critical)",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"severity_valid_range\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Tag name cannot exceed 50 characters",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"tag_name_max_length\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "Tag name cannot exceed 50 characters",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"tag_name_max_length\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"no_such_constraint\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "details": "Failing row violates constraint \"no_such_constraint\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "details": "constraint \"from_details\"", "httpCode": 400, "humanMessage": "", "message": "constraint \"from_message\""}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record.",
+      "payload": {"code": "23P01", "httpCode": 400, "humanMessage": "", "message": "constraint \"\" (empty name)"}
+    },
+    {
+      "parseToHuman": "This conflicts with an existing record.",
+      "parseToHumanWithLookup": "This conflicts with an existing record. Please check your input and try again.",
+      "payload": {"code": "23P01", "details": "constraint \"only_details\"", "httpCode": 400, "humanMessage": "", "message": ""}
+    }
+  ],
+  "unloaded": [
+    {
+      "parseToHumanWithLookup": "Validation failed: bid_total_cost_positive",
+      "payload": {"code": "23514", "httpCode": 400, "humanMessage": "", "message": "violates constraint \"bid_total_cost_positive\""}
+    },
+    {
+      "parseToHumanWithLookup": "Validation failed: bid_total_cost_positive",
+      "payload": {"code": "23514", "details": "Failing row violates constraint \"bid_total_cost_positive\".", "httpCode": 400, "humanMessage": "", "message": "generic message"}
+    }
+  ]
+}
