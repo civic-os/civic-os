@@ -1,0 +1,4201 @@
+{
+  "coverage": {
+    "comparisons": {
+      "action-case": 151,
+      "condition": 2749,
+      "content-range": 11,
+      "error": 883,
+      "name": 576,
+      "property": 4237,
+      "query": 1696,
+      "type-probe": 21,
+      "view": 1752
+    },
+    "tieOrderArtifacts": 39,
+    "unattributed": 0
+  },
+  "generatedBy": "scripts/golden/ledger.mjs",
+  "inputs": {
+    "frontend": "tests/golden/derived/frontend",
+    "mcp": "tests/golden/derived/mcp",
+    "raw": "tests/golden/raw"
+  },
+  "latentNondeterminism": [
+    {
+      "computed": {
+        "examples": [
+          "broader-impacts: 14 tied groups, e.g. broader_impact_categories {display_name, id} at 1; broader_impact_categories {created_at, description} at 2",
+          "client-intake: 7 tied groups, e.g. clients {first_name, id} at 1; clients {last_name, user_id} at 2",
+          "community-center: 3 tied groups, e.g. reservation_requests {display_name, id} at 1; reservations {display_name, id} at 1",
+          "mottpark: 4 tied groups, e.g. public_calendar_events {id, time_slot} at 1; reservation_payments {amount, status_id} at 5",
+          "neighborhood-hub: 19 tied groups, e.g. borrowers {civic_os_text_search, email} at 16; borrowers {created_at, phone_verified} at 17",
+          "pothole: 5 tied groups, e.g. Bid {company_email, owner} at 5; Bid {contact_phone, work_start_date} at 6",
+          "staff-portal: 12 tied groups, e.g. document_requirements {display_name, id} at 1; incident_reports {display_name, id} at 1",
+          "storymap: 4 tied groups, e.g. participants {display_name, id} at 1; sponsors {display_name, id} at 1"
+        ],
+        "summary": "68 tied (table, sort_order) groups across 8/8 examples (testadmin fixtures)"
+      },
+      "effect": "Tied fields render in query-plan-dependent order on list, detail and form pages, and in MCP tables.",
+      "evidence": "`schema_properties` has no ORDER BY; the frontend's stable sort by `sort_order` keeps arrival order (`schema.service.ts` getProperties), the MCP orders by `table_name, sort_order` only (`schema-cache.ts` fetchProperties).",
+      "title": "Properties tied on sort_order within a table"
+    },
+    {
+      "computed": {
+        "examples": [
+          "client-intake: clients {activate, reactivate} at 10",
+          "mottpark: reservation_requests {close, waive_all_fees} at 50",
+          "neighborhood-hub: tool_reservations {approve, check_out, complete, mark_returned} at 10"
+        ],
+        "summary": "3 tied (table, sort_order) action groups"
+      },
+      "effect": "Button order is plan-dependent where tied actions can be visible together: mottpark `close` vs `waive_all_fees` (both at 50). The client-intake `clients` and neighborhood-hub `tool_reservations` ties at 10 are mutually exclusive by condition, so harmless (lead analysis).",
+      "evidence": "`schema_entity_actions` is read without a tie-break (frontend unordered, MCP `order=table_name,sort_order`).",
+      "title": "Actions tied on sort_order within a table"
+    }
+  ],
+  "remedy": "add a deterministic tie-breaker (`column_name` for properties, `id` for actions) to the `schema_properties` / `schema_entity_actions` views, or to the consumers' sorts (the core).",
+  "rows": [
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:636",
+        "src/app/services/schema.service.ts:673",
+        "tools/mcp-server/src/schema-cache.ts:439"
+      ],
+      "frontend": "Status, Category and ForeignKeyName need `join_column != null` and an int4/int8 udt; `join_table` is not checked.",
+      "id": "T-01",
+      "impact": {
+        "adoptFrontend": "No generic-app change; the MCP would type a join_column-only property as a foreign key it cannot embed (no join_table for the select).",
+        "adoptMcp": "Generic app stops treating a join_column-only property as an FK; it would otherwise build a select and dropdown with no target table."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP IntegerNumber (select col); frontend (from code) ForeignKeyName",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "int4 join_column only"
+          },
+          {
+            "detail": "MCP IntegerNumber (select col); frontend (from code) Status",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "status int4 join_column only"
+          }
+        ],
+        "occurrences": 2,
+        "synthetic": 2
+      },
+      "latent": "schema_properties always reports join_table with join_column in every example; demonstrated by the type probes",
+      "mcp": "`hasFK = !!join_table && !!join_column` gates Status, Category, the system types and ForeignKeyName.",
+      "probes": {
+        "int4 join_column only": "ForeignKeyName",
+        "status int4 join_column only": "Status"
+      },
+      "reason": "Strictly safer: an FK without join_table cannot be embedded or offered as options, so typing it as a plain integer is the correct fallback.",
+      "recommendation": "adopt-mcp",
+      "rule": "Foreign key presence: MCP requires join_table AND join_column; frontend requires join_column != null (int4/int8 only)"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:636-645",
+        "tools/mcp-server/src/schema-cache.ts:442-449"
+      ],
+      "frontend": "Status/Category only for int4/int8 columns with `status_entity_type`/`category_entity_type` and a join_column.",
+      "id": "T-02",
+      "impact": {
+        "adoptFrontend": "No generic-app change; the MCP stops embedding `statuses!col` on non-integer columns (an embed PostgREST would reject unless the FK targets statuses).",
+        "adoptMcp": "Generic app would show status badges for non-integer status columns, whose ids cannot match `metadata.statuses.id`."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 3
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP Category (select col:categories!col(id,display_name,color)); frontend (from code) TextShort",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "category varchar fk"
+          },
+          {
+            "detail": "MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (from code) TextLong",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "status text fk"
+          },
+          {
+            "detail": "MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "status uuid fk"
+          }
+        ],
+        "occurrences": 3,
+        "synthetic": 3
+      },
+      "latent": "every Status/Category column in the examples is int4; demonstrated by the type probes",
+      "mcp": "Any FK (join_table + join_column) with `status_entity_type`/`category_entity_type`, whatever the udt (uuid, text, varchar).",
+      "probes": {
+        "category varchar fk": "TextShort",
+        "status text fk": "TextLong",
+        "status uuid fk": "Unknown"
+      },
+      "reason": "Statuses and categories have integer ids; a non-integer column carrying status_entity_type is a misconfiguration, not a status.",
+      "recommendation": "adopt-frontend",
+      "rule": "Status / Category detection: MCP accepts any FK udt; frontend requires int4/int8"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "staff-portal": 1
+        },
+        "count": 1,
+        "examples": [
+          {
+            "detail": "frontend id | MCP id:civic_os_users!id(id,display_name,full_name)",
+            "entity": "staff_directory",
+            "example": "staff-portal",
+            "subject": "id (select)",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 4,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:648",
+        "tools/mcp-server/src/schema-cache.ts:452-469"
+      ],
+      "frontend": "System types only for `udt_name = uuid` with a system join_table; an int FK to a system table is a ForeignKeyName (select falls back to the plain column because join_schema is not public, see S-02).",
+      "id": "T-03",
+      "impact": {
+        "adoptFrontend": "No generic-app change; the MCP shows the raw id for these columns instead of a user / file embed.",
+        "adoptMcp": "Generic app renders the instances below as User / File components; correct only if the column really holds the system table's key."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 3,
+          "staff-portal": 1
+        },
+        "count": 1,
+        "examples": [
+          {
+            "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (from code) ForeignKeyName",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "civic_os_users int8"
+          },
+          {
+            "detail": "frontend ForeignKeyName, MCP User",
+            "entity": "staff_directory",
+            "example": "staff-portal",
+            "subject": "id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (from code) ForeignKeyName",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "files int8 fk"
+          }
+        ],
+        "occurrences": 7,
+        "synthetic": 3
+      },
+      "mcp": "Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.",
+      "probes": {
+        "civic_os_users int8": "ForeignKeyName",
+        "files int8 fk": "ForeignKeyName",
+        "photo_galleries int4": "ForeignKeyName"
+      },
+      "reason": "The one real instance (staff-portal staff_directory.id, int8 FK to civic_os_users) looks like a metadata error; decide whether the contract allows non-uuid system FKs before choosing a side.",
+      "recommendation": "needs-decision",
+      "rule": "System types (File, User, Payment, PhotoGallery): MCP accepts any FK udt; frontend requires uuid"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:661",
+        "tools/mcp-server/src/schema-cache.ts:460",
+        "tools/mcp-server/src/select-builder.ts:26-27"
+      ],
+      "frontend": "User only when join_table is `civic_os_users`; an FK to `civic_os_users_private` is Unknown.",
+      "id": "T-04",
+      "impact": {
+        "adoptFrontend": "No generic-app change; the MCP stops emitting an embed whose FK hint points at the wrong table.",
+        "adoptMcp": "Generic app would render such columns as users, with a select that PostgREST cannot resolve."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "civic_os_users_private uuid"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "latent": "no example has an FK to civic_os_users_private",
+      "mcp": "User for `civic_os_users` or `civic_os_users_private`, but the select still embeds `civic_os_users!col`, which does not match an FK to the private table.",
+      "probes": {
+        "civic_os_users_private uuid": "Unknown"
+      },
+      "reason": "The MCP half-supports it: the type says User but the embed targets civic_os_users, so the request would fail.",
+      "recommendation": "adopt-frontend",
+      "rule": "User type also for civic_os_users_private (MCP only)"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:663-664",
+        "tools/mcp-server/src/schema-cache.ts:463"
+      ],
+      "frontend": "Payment for `payment_transactions`, or `transactions` only when `join_schema = payments`.",
+      "id": "T-05",
+      "impact": {
+        "adoptFrontend": "No generic-app change; an integrator table named public.transactions stops being misread as a payment by the MCP.",
+        "adoptMcp": "Generic app would show a Pay badge for any uuid FK to a table called transactions."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP Payment (select col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "transactions uuid public schema"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "latent": "both payment examples point at payments.transactions",
+      "mcp": "Payment for `payment_transactions` or any `transactions`, schema ignored.",
+      "probes": {
+        "transactions uuid public schema": "Unknown"
+      },
+      "reason": "Schema-qualified detection avoids a name collision with integrator tables.",
+      "recommendation": "adopt-frontend",
+      "rule": "Payment type: MCP accepts any table named transactions; frontend requires join_schema payments"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:654",
+        "tools/mcp-server/src/schema-cache.ts:456"
+      ],
+      "frontend": "`fileType` validation value must start with `image/`.",
+      "id": "T-06",
+      "impact": {
+        "adoptFrontend": "No generic-app change; a malformed fileType `image` makes the MCP report File instead of FileImage.",
+        "adoptMcp": "Generic app shows image previews for `image`-prefixed non-MIME values."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP FileImage (select col:files!col(id,file_name,file_type,file_size)); frontend (from code) File",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "files uuid \"image\" (no slash)"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "latent": "every example uses MIME patterns with a slash",
+      "mcp": "`fileType` value starting with `image` (no slash) is enough.",
+      "probes": {
+        "files uuid \"image\" (no slash)": "File"
+      },
+      "reason": "fileType values are MIME patterns; the slash check is the precise one.",
+      "recommendation": "adopt-frontend",
+      "rule": "FileImage: MCP matches fileType values starting with \"image\"; frontend requires \"image/\""
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:674-675",
+        "tools/mcp-server/src/schema-cache.ts:472-477"
+      ],
+      "frontend": "GeoPolygon only for `geography_type = Polygon`, GeoPoint only for `Point`; anything else is Unknown. data_type is not checked.",
+      "id": "T-07",
+      "impact": {
+        "adoptFrontend": "No generic-app change; MultiPolygon columns become Unknown in the MCP too.",
+        "adoptMcp": "Generic app renders MultiPolygon with the polygon map (good) but LineString and untyped geography as a point map (wrong)."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 4
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP GeoPoint (select col:col_text); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "geography LineString"
+          },
+          {
+            "detail": "MCP GeoPolygon (select col:col_text); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "geography MultiPolygon"
+          },
+          {
+            "detail": "MCP Unknown (select col); frontend (from code) GeoPoint",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "geography Point data_type not USER-DEFINED"
+          }
+        ],
+        "occurrences": 4,
+        "synthetic": 4
+      },
+      "latent": "the examples only use Point and Polygon",
+      "mcp": "Requires `data_type = USER-DEFINED`; Polygon or MultiPolygon is GeoPolygon; LineString, null and anything else is GeoPoint.",
+      "probes": {
+        "geography LineString": "Unknown",
+        "geography MultiPolygon": "Unknown",
+        "geography Point data_type not USER-DEFINED": "GeoPoint",
+        "geography null geography_type": "Unknown"
+      },
+      "reason": "Split: MultiPolygon to GeoPolygon is strictly better (frontend shows Unknown); \"everything else is a point\" is wrong. Suggested core rule: Point, Polygon, MultiPolygon supported, rest Unknown.",
+      "recommendation": "needs-decision",
+      "rule": "Geography: MCP maps MultiPolygon to GeoPolygon and every other geography to GeoPoint, and requires data_type USER-DEFINED"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:673-681",
+        "tools/mcp-server/src/schema-cache.ts:500-502"
+      ],
+      "frontend": "int2 is not in any branch: Unknown (rendered as raw text, no number input or FK dropdown).",
+      "id": "T-08",
+      "impact": {
+        "adoptFrontend": "MCP loses typing for smallint columns (no FK name resolution).",
+        "adoptMcp": "Generic app gains number inputs, validation and FK dropdowns for smallint columns."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP ForeignKeyName (select col:parents!col(id,display_name)); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "int2 fk"
+          },
+          {
+            "detail": "MCP IntegerNumber (select col); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "int2 plain"
+          }
+        ],
+        "occurrences": 2,
+        "synthetic": 2
+      },
+      "latent": "no example has a smallint column",
+      "mcp": "`int2` is IntegerNumber, or ForeignKeyName with join info.",
+      "probes": {
+        "int2 fk": "Unknown",
+        "int2 plain": "Unknown"
+      },
+      "reason": "Strictly better: smallint is an integer; Unknown is a gap, not a choice.",
+      "recommendation": "adopt-mcp",
+      "rule": "int2 (smallint): MCP types it IntegerNumber (ForeignKeyName with an FK); frontend Unknown"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:648-691",
+        "tools/mcp-server/src/schema-cache.ts:503-505"
+      ],
+      "frontend": "uuid is only typed for system-table FKs; any other uuid (plain or FK to an integrator table) is Unknown.",
+      "id": "T-09",
+      "impact": {
+        "adoptFrontend": "MCP shows these columns untyped (it already renders unknowns as text, so output barely changes).",
+        "adoptMcp": "Generic app renders plain uuids as short text (instances below: ids and created_by uuids on views) and would offer FK dropdowns for uuid FKs to integrator tables."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2,
+          "community-center": 1,
+          "neighborhood-hub": 5
+        },
+        "count": 6,
+        "examples": [
+          {
+            "detail": "MCP ForeignKeyName (select col:documents!col(id,display_name)); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "uuid fk public non-system"
+          },
+          {
+            "detail": "frontend Unknown, MCP TextShort",
+            "entity": "payment_transactions",
+            "example": "community-center",
+            "subject": "id",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend Unknown, MCP TextShort",
+            "entity": "building_use_requests",
+            "example": "neighborhood-hub",
+            "subject": "created_by",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 32,
+        "synthetic": 2
+      },
+      "mcp": "uuid with FK info is ForeignKeyName (embed `(id,display_name)`); a plain uuid is TextShort.",
+      "probes": {
+        "uuid fk public non-system": "Unknown",
+        "uuid plain": "Unknown"
+      },
+      "reason": "Strictly better for display; verify the edit component handles uuid FK values before enabling uuid FK dropdowns.",
+      "recommendation": "adopt-mcp",
+      "rule": "uuid outside the system tables: MCP types a uuid FK as ForeignKeyName and a plain uuid as TextShort; frontend Unknown"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:689-690",
+        "tools/mcp-server/src/schema-cache.ts:507"
+      ],
+      "frontend": "Only `varchar` and `text` are text types; `bpchar` is Unknown.",
+      "id": "T-10",
+      "impact": {
+        "adoptFrontend": "MCP loses text typing for char(n).",
+        "adoptMcp": "Generic app gets a text input and length validation for char(n) columns."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP TextShort (select col); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "bpchar"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "latent": "no example has a char(n) column",
+      "mcp": "`bpchar` is TextShort.",
+      "probes": {
+        "bpchar": "Unknown"
+      },
+      "reason": "Strictly better: char(n) is text.",
+      "recommendation": "adopt-mcp",
+      "rule": "bpchar (char(n)): MCP TextShort; frontend Unknown"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:673",
+        "tools/mcp-server/src/schema-cache.ts:511-512"
+      ],
+      "frontend": "FK typing only for int4/int8; a domain or citext FK is Unknown.",
+      "id": "T-11",
+      "impact": {
+        "adoptFrontend": "MCP stops resolving display names for such FKs.",
+        "adoptMcp": "Generic app offers FK dropdowns for text-keyed FKs; the edit control and embed must then use join_column as the key (see S-01)."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "MCP ForeignKeyName (select col:codes!col(id,display_name)); frontend (from code) Unknown",
+            "entity": "mcp.type-probes",
+            "example": "_shared",
+            "subject": "citext fk (unknown udt)"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "latent": "no example has an FK on a non-integer, non-uuid domain",
+      "mcp": "Step 6 fallback: any remaining property with join_table and join_column is ForeignKeyName.",
+      "probes": {
+        "citext fk (unknown udt)": "Unknown"
+      },
+      "reason": "Better in principle, but depends on S-01 (embed by join_column) and on the FK editor supporting non-integer keys.",
+      "recommendation": "needs-decision",
+      "rule": "Unknown udt with FK info: MCP falls back to ForeignKeyName; frontend Unknown"
+    },
+    {
+      "area": "Type detection",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "broader-impacts": 24,
+          "client-intake": 24,
+          "neighborhood-hub": 24,
+          "pothole": 6,
+          "staff-portal": 6
+        },
+        "count": 84,
+        "examples": [
+          {
+            "detail": "frontend only",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "create: contact_broader_impact_categories_m2m",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend only",
+            "entity": "clients",
+            "example": "client-intake",
+            "subject": "create: client_service_needs_m2m",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend only",
+            "entity": "building_use_requests",
+            "example": "neighborhood-hub",
+            "subject": "create: building_use_request_rooms_m2m",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 467,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:1160-1388",
+        "tools/mcp-server/src/schema-cache.ts:437-515",
+        "tests/golden/derived/frontend/<variant>/schema.m2m.json"
+      ],
+      "frontend": "Detects junction tables and adds virtual ManyToMany properties (with parent hops and rich junction columns) to both sides of each relation; they appear in selects, views and edit forms.",
+      "id": "T-12",
+      "impact": {
+        "adoptFrontend": "No generic-app change; MCP list/get output gains M:M columns (related display names) and M:M select embeds.",
+        "adoptMcp": "Not viable: the generic app would lose every M:M editor."
+      },
+      "instances": {
+        "byExample": {
+          "broader-impacts": 8,
+          "client-intake": 8,
+          "neighborhood-hub": 10,
+          "pothole": 2,
+          "staff-portal": 2
+        },
+        "count": 30,
+        "examples": [
+          {
+            "detail": "contact_broader_impact_categories_m2m:contact_broader_impact_categories!broader_impact_category_id(contacts!contact_id(id,display_name))",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "contact_broader_impact_categories_m2m",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "client_service_needs_m2m:client_service_needs!client_id(service_categories!service_category_id(id,display_name,color))",
+            "entity": "clients",
+            "example": "client-intake",
+            "subject": "client_service_needs_m2m",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "building_use_request_rooms_m2m:building_use_request_rooms!building_use_request_id(building_use_rooms!room_id(id,display_name))",
+            "entity": "building_use_requests",
+            "example": "neighborhood-hub",
+            "subject": "building_use_request_rooms_m2m",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 154,
+        "synthetic": 0
+      },
+      "mcp": "No junction detection; M:M relations are invisible except as the junction table itself.",
+      "reason": "The core owns junction detection; the MCP gains M:M for free (it may still choose not to render them).",
+      "recommendation": "adopt-frontend",
+      "rule": "Many-to-many: the MCP has no M:M detection or virtual properties"
+    },
+    {
+      "area": "Select strings",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "staff-portal": 12
+        },
+        "count": 12,
+        "examples": [
+          {
+            "detail": "frontend role_id:staff_roles!role_id(display_name,display_name) | MCP role_id:staff_roles!role_id(id,display_name)",
+            "entity": "staff_members",
+            "example": "staff-portal",
+            "subject": "detail: role_id"
+          },
+          {
+            "detail": "frontend role_id:staff_roles!role_id(display_name,display_name) | MCP role_id:staff_roles!role_id(id,display_name)",
+            "entity": "staff_members",
+            "example": "staff-portal",
+            "subject": "filters (one per filterable property): role_id"
+          },
+          {
+            "detail": "frontend role_id:staff_roles!role_id(display_name,display_name) | MCP role_id:staff_roles!role_id(id,display_name)",
+            "entity": "staff_members",
+            "example": "staff-portal",
+            "subject": "list page 1/1: role_id"
+          }
+        ],
+        "occurrences": 12,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:752",
+        "tools/mcp-server/src/select-builder.ts:21-24"
+      ],
+      "frontend": "`col:join_table!col(<join_column>,display_name)`; with join_column = display_name this yields `(display_name,display_name)`.",
+      "id": "S-01",
+      "impact": {
+        "adoptFrontend": "No generic-app change; the MCP stops requesting `id` from target tables that are referenced by another column (and may have no id).",
+        "adoptMcp": "Generic app requests `id` instead of the referenced key; breaks FKs whose target key is not id."
+      },
+      "instances": {
+        "byExample": {
+          "staff-portal": 4
+        },
+        "count": 4,
+        "examples": [
+          {
+            "detail": "frontend role_id:staff_roles!role_id(display_name,display_name) | MCP role_id:staff_roles!role_id(id,display_name)",
+            "entity": "staff_directory",
+            "example": "staff-portal",
+            "subject": "role_id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend site_id:sites!site_id(display_name,display_name) | MCP site_id:sites!site_id(id,display_name)",
+            "entity": "staff_directory",
+            "example": "staff-portal",
+            "subject": "site_id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend role_id:staff_roles!role_id(display_name,display_name) | MCP role_id:staff_roles!role_id(id,display_name)",
+            "entity": "staff_members",
+            "example": "staff-portal",
+            "subject": "role_id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 16,
+        "synthetic": 0
+      },
+      "mcp": "`col:join_table!col(id,display_name)` regardless of join_column.",
+      "reason": "The embed must select the referenced key. Fix the frontend duplicate `(display_name,display_name)` in the core while moving it.",
+      "recommendation": "adopt-frontend",
+      "rule": "FK embed column: frontend selects the referenced column (join_column); MCP always selects id"
+    },
+    {
+      "area": "Select strings",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "client-intake": 10,
+          "staff-portal": 12
+        },
+        "count": 22,
+        "examples": [
+          {
+            "detail": "frontend method_id | MCP method_id:categories!method_id(id,display_name)",
+            "entity": "client_current_consents",
+            "example": "client-intake",
+            "subject": "detail: method_id"
+          },
+          {
+            "detail": "frontend status_id | MCP status_id:statuses!status_id(id,display_name)",
+            "entity": "incident_reports",
+            "example": "staff-portal",
+            "subject": "detail: status_id"
+          },
+          {
+            "detail": "frontend status_id | MCP status_id:statuses!status_id(id,display_name)",
+            "entity": "client_current_consents",
+            "example": "client-intake",
+            "subject": "detail: status_id"
+          }
+        ],
+        "occurrences": 22,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:752",
+        "tools/mcp-server/src/select-builder.ts:21-24"
+      ],
+      "frontend": "Only `join_schema = public` FKs are embedded; FKs into metadata (statuses / categories without an entity type, int civic_os_users) select the raw id.",
+      "id": "S-02",
+      "impact": {
+        "adoptFrontend": "MCP shows raw ids for these columns instead of names.",
+        "adoptMcp": "Generic app shows names for metadata FKs, provided a public view of the same name exists and exposes the FK relationship to PostgREST."
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 2,
+          "neighborhood-hub": 4,
+          "staff-portal": 2
+        },
+        "count": 8,
+        "examples": [
+          {
+            "detail": "frontend method_id | MCP method_id:categories!method_id(id,display_name)",
+            "entity": "client_current_consents",
+            "example": "client-intake",
+            "subject": "method_id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend guided_form_status_id | MCP guided_form_status_id:statuses!guided_form_status_id(id,display_name)",
+            "entity": "building_use_event_details",
+            "example": "neighborhood-hub",
+            "subject": "guided_form_status_id",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend status_id | MCP status_id:statuses!status_id(id,display_name)",
+            "entity": "incident_reports",
+            "example": "staff-portal",
+            "subject": "status_id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 36,
+        "synthetic": 0
+      },
+      "mcp": "Embeds `col:<join_table>!col(id,display_name)` for every FK, relying on a public view with the same name.",
+      "reason": "The MCP output is more useful, but embedding through metadata views depends on PostgREST resolving the relationship through a view; verify on the instances below (P0.4 harness) before adopting.",
+      "recommendation": "needs-decision",
+      "rule": "FK to a non-public schema: frontend selects the plain column; MCP embeds"
+    },
+    {
+      "area": "Select strings",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "client-intake": 19,
+          "community-center": 8,
+          "mottpark": 7,
+          "neighborhood-hub": 6,
+          "pothole": 15,
+          "staff-portal": 11
+        },
+        "count": 66,
+        "examples": [
+          {
+            "detail": "frontend captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email) | MCP captured_by:civic_os_users!captured_by(id,display_name,full_name)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "detail: captured_by"
+          },
+          {
+            "detail": "frontend user_id:civic_os_users!user_id(id,display_name,full_name,phone,email) | MCP user_id:civic_os_users!user_id(id,display_name,full_name)",
+            "entity": "payment_transactions",
+            "example": "community-center",
+            "subject": "detail: user_id"
+          },
+          {
+            "detail": "frontend cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email) | MCP cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name)",
+            "entity": "reservation_requests",
+            "example": "mottpark",
+            "subject": "detail: cancelled_by"
+          }
+        ],
+        "occurrences": 66,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:751",
+        "tools/mcp-server/src/select-builder.ts:26-27",
+        "tools/mcp-server/src/formatters/value.ts:104-110",
+        "docs/notes/MCP_SERVER_DESIGN.md (FK Embedding Depth)"
+      ],
+      "frontend": "`(id,display_name,full_name,phone,email)`.",
+      "id": "S-03",
+      "impact": {
+        "adoptFrontend": "MCP requests phone/email (RLS still applies); its formatter already renders only display_name/full_name, so LLM output does not change.",
+        "adoptMcp": "Generic app loses phone/email in user popovers."
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 6,
+          "community-center": 4,
+          "mottpark": 3,
+          "neighborhood-hub": 1,
+          "pothole": 3,
+          "staff-portal": 6
+        },
+        "count": 23,
+        "examples": [
+          {
+            "detail": "frontend captured_by:civic_os_users!captured_by(id,display_name,full_name,phone,email) | MCP captured_by:civic_os_users!captured_by(id,display_name,full_name)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "captured_by",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend user_id:civic_os_users!user_id(id,display_name,full_name,phone,email) | MCP user_id:civic_os_users!user_id(id,display_name,full_name)",
+            "entity": "payment_transactions",
+            "example": "community-center",
+            "subject": "user_id",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email) | MCP cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name)",
+            "entity": "reservation_requests",
+            "example": "mottpark",
+            "subject": "cancelled_by",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 119,
+        "synthetic": 0
+      },
+      "mcp": "`(id,display_name,full_name)`.",
+      "reason": "No evidence the slimmer shape is intentional: select-builder.ts says it \"mirrors\" the frontend, the design doc only sets embed depth, and the select has not changed since the MCP was added (09627bb). The formatter (value.ts formatUser) already trims to display_name, so data minimization toward the LLM is preserved by trimming there, not in the select.",
+      "recommendation": "adopt-frontend",
+      "rule": "User embed: MCP omits phone and email"
+    },
+    {
+      "area": "Select strings",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "client-intake": 1,
+          "neighborhood-hub": 3,
+          "pothole": 15,
+          "staff-portal": 2
+        },
+        "count": 21,
+        "examples": [
+          {
+            "detail": "frontend evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at) | MCP evidence_file:files!evidence_file(id,file_name,file_type,file_size)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "detail: evidence_file"
+          },
+          {
+            "detail": "frontend address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at) | MCP address_proof:files!address_proof(id,file_name,file_type,file_size)",
+            "entity": "borrowers",
+            "example": "neighborhood-hub",
+            "subject": "detail: address_proof"
+          },
+          {
+            "detail": "frontend photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at) | MCP photo:files!photo(id,file_name,file_type,file_size)",
+            "entity": "Issue",
+            "example": "pothole",
+            "subject": "detail: photo"
+          }
+        ],
+        "occurrences": 21,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:717-719",
+        "tools/mcp-server/src/select-builder.ts:35-38"
+      ],
+      "frontend": "`(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_*_key,thumbnail_status,thumbnail_error,created_at)`.",
+      "id": "S-04",
+      "impact": {
+        "adoptFrontend": "MCP fetches S3 keys it does not render (formatter shows file name / type).",
+        "adoptMcp": "Generic app loses thumbnails and download links."
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 1,
+          "neighborhood-hub": 3,
+          "pothole": 3,
+          "staff-portal": 2
+        },
+        "count": 9,
+        "examples": [
+          {
+            "detail": "frontend evidence_file:files!evidence_file(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at) | MCP evidence_file:files!evidence_file(id,file_name,file_type,file_size)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "evidence_file",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend address_proof:files!address_proof(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at) | MCP address_proof:files!address_proof(id,file_name,file_type,file_size)",
+            "entity": "borrowers",
+            "example": "neighborhood-hub",
+            "subject": "address_proof",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend photo:files!photo(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status,thumbnail_error,created_at) | MCP photo:files!photo(id,file_name,file_type,file_size)",
+            "entity": "Issue",
+            "example": "pothole",
+            "subject": "photo",
+            "variants": [
+              "anon",
+              "anon.es",
+              "testuser",
+              "testuser.es",
+              "testeditor",
+              "testeditor.es",
+              "testmanager",
+              "testmanager.es",
+              "testadmin",
+              "testadmin.es"
+            ]
+          }
+        ],
+        "occurrences": 57,
+        "synthetic": 0
+      },
+      "mcp": "`(id,file_name,file_type,file_size)`.",
+      "reason": "One embed definition in the core; the MCP formatter keeps its compact rendering.",
+      "recommendation": "adopt-frontend",
+      "rule": "File embed: MCP selects 4 file fields, frontend 12"
+    },
+    {
+      "area": "Select strings",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "community-center": 5,
+          "mottpark": 6
+        },
+        "count": 11,
+        "examples": [
+          {
+            "detail": "frontend payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at) | MCP payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "detail: payment_transaction_id"
+          },
+          {
+            "detail": "frontend payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at) | MCP payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+            "entity": "reservation_payments",
+            "example": "mottpark",
+            "subject": "detail: payment_transaction_id"
+          },
+          {
+            "detail": "frontend payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at) | MCP payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "list page 1/1: payment_transaction_id"
+          }
+        ],
+        "occurrences": 11,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:724-726",
+        "tools/mcp-server/src/select-builder.ts:40-41"
+      ],
+      "frontend": "`(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)`.",
+      "id": "S-05",
+      "impact": {
+        "adoptFrontend": "MCP can report refunds and payment errors (currently invisible to the LLM).",
+        "adoptMcp": "Generic app loses the refund tooltip and error display."
+      },
+      "instances": {
+        "byExample": {
+          "community-center": 1,
+          "mottpark": 1
+        },
+        "count": 2,
+        "examples": [
+          {
+            "detail": "frontend payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at) | MCP payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "payment_transaction_id",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at) | MCP payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,display_name)",
+            "entity": "reservation_payments",
+            "example": "mottpark",
+            "subject": "payment_transaction_id",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 9,
+        "synthetic": 0
+      },
+      "mcp": "`(id,amount,currency,status,effective_status,display_name)`.",
+      "reason": "Refund state is decision-relevant for an LLM answering payment questions.",
+      "recommendation": "adopt-frontend",
+      "rule": "Payment embed: MCP omits refund aggregates, error_message and created_at"
+    },
+    {
+      "area": "Select strings",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "neighborhood-hub": 4,
+          "pothole": 1
+        },
+        "count": 5,
+        "examples": [
+          {
+            "detail": "frontend photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))) | MCP photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "entity": "projects",
+            "example": "neighborhood-hub",
+            "subject": "detail: photos"
+          },
+          {
+            "detail": "frontend photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))) | MCP photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "entity": "Issue",
+            "example": "pothole",
+            "subject": "detail: photos"
+          },
+          {
+            "detail": "frontend photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))) | MCP photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "entity": "projects",
+            "example": "neighborhood-hub",
+            "subject": "edit: photos"
+          }
+        ],
+        "occurrences": 5,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:740-742",
+        "src/app/services/schema.service.ts:827-831",
+        "tools/mcp-server/src/select-builder.ts:43-45"
+      ],
+      "frontend": "Detail/edit embed gallery files with captions and file metadata; list uses `(id,photo_gallery_files(file_id))`.",
+      "id": "S-06",
+      "impact": {
+        "adoptFrontend": "get_record could list photo captions / file names.",
+        "adoptMcp": "Generic app detail pages could not show photos."
+      },
+      "instances": {
+        "byExample": {
+          "neighborhood-hub": 3,
+          "pothole": 1
+        },
+        "count": 4,
+        "examples": [
+          {
+            "detail": "frontend photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))) | MCP photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "entity": "projects",
+            "example": "neighborhood-hub",
+            "subject": "photos",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend photos:photo_galleries!photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))) | MCP photos:photo_galleries!photos(id,photo_gallery_files(file_id))",
+            "entity": "Issue",
+            "example": "pothole",
+            "subject": "photos",
+            "variants": [
+              "anon",
+              "anon.es",
+              "testuser",
+              "testuser.es",
+              "testeditor",
+              "testeditor.es",
+              "testmanager",
+              "testmanager.es",
+              "testadmin",
+              "testadmin.es"
+            ]
+          },
+          {
+            "detail": "frontend checkout_photos:photo_galleries!checkout_photos(id,created_at,photo_gallery_files(file_id,sort_order,caption,alt_text,file:files!file_id(id,file_name,file_type,file_size,s3_key_prefix,s3_original_key,s3_thumbnail_small_key,s3_thumbnail_medium_key,s3_thumbnail_large_key,thumbnail_status))) | MCP checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id))",
+            "entity": "tool_reservation_checkouts",
+            "example": "neighborhood-hub",
+            "subject": "checkout_photos",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 25,
+        "synthetic": 0
+      },
+      "mcp": "Always `(id,photo_gallery_files(file_id))`.",
+      "reason": "The core exposes the context-specific variants; the MCP picks list for list_records and detail for get_record.",
+      "recommendation": "adopt-frontend",
+      "rule": "PhotoGallery: the MCP uses the list variant (file ids only) everywhere, including get_record"
+    },
+    {
+      "area": "View property lists",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:888-897",
+        "tools/mcp-server/src/select-builder.ts:104-123"
+      ],
+      "frontend": "getPropsForCreate/Edit drop `created_at` and `updated_at` explicitly.",
+      "id": "V-01",
+      "impact": {
+        "adoptFrontend": "MCP describe/create guidance stops listing timestamps as writable.",
+        "adoptMcp": "Generic forms would show timestamp inputs."
+      },
+      "instances": {
+        "byExample": {},
+        "count": 0,
+        "examples": [],
+        "occurrences": 0,
+        "synthetic": 0
+      },
+      "latent": "every example hides or marks the timestamps non-updatable, so V-02 covers them",
+      "mcp": "`filterProperties` only drops identity/generated columns and `show_on_create/edit = false`.",
+      "reason": "Trigger-managed columns are never user input.",
+      "recommendation": "adopt-frontend",
+      "rule": "Create/edit views: the MCP does not exclude created_at / updated_at"
+    },
+    {
+      "area": "View property lists",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:895",
+        "tools/mcp-server/src/select-builder.ts:104-123"
+      ],
+      "frontend": "Create/edit require `is_updatable`.",
+      "id": "V-02",
+      "impact": {
+        "adoptFrontend": "MCP stops presenting read-only columns as writable (fewer failed create/update calls).",
+        "adoptMcp": "Generic forms would render read-only columns as inputs."
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 31,
+          "community-center": 51,
+          "pothole": 9,
+          "staff-portal": 7
+        },
+        "count": 98,
+        "examples": [
+          {
+            "detail": "MCP only",
+            "entity": "client_current_consents",
+            "example": "client-intake",
+            "subject": "create: captured_by",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "MCP only",
+            "entity": "payment_transactions",
+            "example": "community-center",
+            "subject": "create: amount",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "MCP only",
+            "entity": "issue_status_summary",
+            "example": "pothole",
+            "subject": "create: display_name",
+            "variants": [
+              "anon",
+              "anon.es",
+              "testuser",
+              "testuser.es",
+              "testeditor",
+              "testeditor.es",
+              "testmanager",
+              "testmanager.es",
+              "testadmin",
+              "testadmin.es"
+            ]
+          }
+        ],
+        "occurrences": 505,
+        "synthetic": 0
+      },
+      "mcp": "Non-updatable columns (views, computed columns) stay in the create/edit lists.",
+      "reason": "is_updatable is the database's own answer.",
+      "recommendation": "adopt-frontend",
+      "rule": "Create/edit views: the MCP ignores is_updatable"
+    },
+    {
+      "area": "View property lists",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "community-center": 8,
+          "neighborhood-hub": 15
+        },
+        "count": 23,
+        "examples": [
+          {
+            "detail": "display_name",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "list page 1/1: display_name"
+          },
+          {
+            "detail": "submitted_at",
+            "entity": "building_use_requests",
+            "example": "neighborhood-hub",
+            "subject": "filters (one per filterable property): submitted_at"
+          },
+          {
+            "detail": "display_name",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "list page 2/100: display_name"
+          }
+        ],
+        "occurrences": 23,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:838-846",
+        "tools/mcp-server/src/select-builder.ts:104-123"
+      ],
+      "frontend": "`ensureStructuralProps` appends them when hidden, for page headers, map markers, calendars and guided forms.",
+      "id": "V-03",
+      "impact": {
+        "adoptFrontend": "MCP list/get output gains display_name (helps the LLM identify records) and status columns.",
+        "adoptMcp": "Generic app loses page headers and status badges for entities that hide them."
+      },
+      "instances": {
+        "byExample": {
+          "broader-impacts": 1,
+          "client-intake": 9,
+          "community-center": 4,
+          "mottpark": 4,
+          "neighborhood-hub": 20,
+          "staff-portal": 13
+        },
+        "count": 51,
+        "examples": [
+          {
+            "detail": "frontend only",
+            "entity": "contacts",
+            "example": "broader-impacts",
+            "subject": "edit: display_name",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend only",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "edit: display_name",
+            "variants": [
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend only",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "edit: display_name",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 232,
+        "synthetic": 0
+      },
+      "mcp": "Only visibility flags count.",
+      "reason": "The core's fetch plan includes structural columns; the MCP renders them.",
+      "recommendation": "adopt-frontend",
+      "rule": "Structural columns (display_name, status_id, submitted_at): the frontend always adds them to list/detail/edit; the MCP does not"
+    },
+    {
+      "area": "View property lists",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "neighborhood-hub": 11
+        },
+        "count": 11,
+        "examples": [
+          {
+            "detail": "boundary:boundary_text",
+            "entity": "census_block_groups",
+            "example": "neighborhood-hub",
+            "subject": "hybrid search rawQueryParams: boundary"
+          },
+          {
+            "detail": "boundary:boundary_text",
+            "entity": "census_block_groups",
+            "example": "neighborhood-hub",
+            "subject": "list page 1/1: boundary"
+          },
+          {
+            "detail": "boundary:boundary_text",
+            "entity": "census_block_groups",
+            "example": "neighborhood-hub",
+            "subject": "list page 2/100: boundary"
+          }
+        ],
+        "occurrences": 11,
+        "synthetic": 0
+      },
+      "evidence": [
+        "src/app/services/schema.service.ts:855-863"
+      ],
+      "frontend": "`getPropsForList` appends `map_property_name` when `show_map` is on.",
+      "id": "V-04",
+      "impact": {
+        "adoptFrontend": "MCP list output gains a WKT column on map entities.",
+        "adoptMcp": "Generic list maps lose their markers."
+      },
+      "instances": {
+        "byExample": {
+          "neighborhood-hub": 2
+        },
+        "count": 2,
+        "examples": [
+          {
+            "detail": "frontend only",
+            "entity": "census_block_groups",
+            "example": "neighborhood-hub",
+            "subject": "list: boundary",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "frontend only",
+            "entity": "parcels",
+            "example": "neighborhood-hub",
+            "subject": "list: boundary",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 10,
+        "synthetic": 0
+      },
+      "mcp": "Not considered.",
+      "reason": "Part of the core fetch plan; the MCP may drop the column when rendering.",
+      "recommendation": "adopt-frontend",
+      "rule": "List view: the frontend adds the map property when the entity shows a map; the MCP does not"
+    },
+    {
+      "area": "Condition evaluation",
+      "decision": null,
+      "evidence": [
+        "src/app/utils/condition-evaluator.ts:55-59",
+        "tools/mcp-server/src/tools/execute-action.ts:236-283",
+        "tools/mcp-server/src/tools/execute-action.ts:68",
+        "tools/mcp-server/src/tools/get-record.ts:66"
+      ],
+      "frontend": "For a field without a dot, an embedded object with an `id` is replaced by its id before comparing.",
+      "id": "C-01",
+      "impact": {
+        "adoptFrontend": "Fixes every action in A-01 for MCP users.",
+        "adoptMcp": "Breaks the generic app's status-gated actions the same way."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 167,
+          "client-intake": 2,
+          "community-center": 5,
+          "mottpark": 6,
+          "neighborhood-hub": 9,
+          "staff-portal": 13
+        },
+        "count": 35,
+        "examples": [
+          {
+            "detail": "frontend true, MCP false",
+            "entity": "conditions.dotted",
+            "example": "_shared",
+            "subject": "a @ {\"a\":{\"b\":1,\"id\":1}}"
+          },
+          {
+            "detail": "frontend true, MCP false",
+            "entity": "clients.refer:enabled_condition",
+            "example": "client-intake",
+            "subject": "{\"field\":\"consent_active\",\"operator\":\"eq\",\"value\":true} @ {\"consent_active\":{\"display_name\":\"N\",\"id\":true,\"status_key\":\"k\"}}"
+          },
+          {
+            "detail": "frontend true, MCP false",
+            "entity": "reservation_requests.approve:enabled_condition, reservation_requests.deny:enabled_condition",
+            "example": "community-center",
+            "subject": "{\"field\":\"status_id\",\"operator\":\"eq\",\"value\":5} @ {\"status_id\":{\"display_name\":\"N\",\"id\":5,\"status_key\":\"k\"}}"
+          }
+        ],
+        "occurrences": 202,
+        "synthetic": 167
+      },
+      "mcp": "`resolveFieldValue` returns the object; `eq` then compares `{id:5,...} == 5` (false), `ne` is always true, `in` always false.",
+      "reason": "The MCP fetches records with FK embeds (`buildSelectString(allProperties)` in execute-action.ts:68 and get-record.ts:66) but evaluates plain fields without unwrapping, so status-id conditions never match. Confirmed end to end in A-01.",
+      "recommendation": "mcp-bug",
+      "rule": "Plain condition field on an FK-embedded value: the frontend compares its .id; the MCP compares the object"
+    },
+    {
+      "area": "Condition evaluation",
+      "decision": null,
+      "evidence": [
+        "src/app/utils/condition-evaluator.ts:113",
+        "tools/mcp-server/src/tools/execute-action.ts:254-255"
+      ],
+      "frontend": "Strict equality.",
+      "id": "C-02",
+      "impact": {
+        "adoptFrontend": "MCP stops matching string-typed values against numeric conditions (and vice versa).",
+        "adoptMcp": "Generic app would match \"5\" against 5, hiding type mismatches in metadata."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 22,
+          "community-center": 4,
+          "mottpark": 3,
+          "neighborhood-hub": 7,
+          "staff-portal": 12
+        },
+        "count": 26,
+        "examples": [
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "eq \"1\" @ 1"
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "reservation_requests.approve:enabled_condition, reservation_requests.deny:enabled_condition",
+            "example": "community-center",
+            "subject": "{\"field\":\"status_id\",\"operator\":\"eq\",\"value\":5} @ {\"status_id\":\"5\"}"
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "reservation_requests.approve:enabled_condition, reservation_requests.approve:visibility_condition, reservation_requests.deny:enabled_condition, reservation_requests.deny:visibility_condition",
+            "example": "mottpark",
+            "subject": "{\"field\":\"status_id\",\"operator\":\"eq\",\"value\":5} @ {\"status_id\":\"5\"}"
+          }
+        ],
+        "occurrences": 48,
+        "synthetic": 22
+      },
+      "mcp": "`recordValue == value` (\"5\" equals 5, false equals 0, [1,2] equals \"1,2\").",
+      "reason": "PostgREST returns typed JSON; strict equality is predictable and the frontend behavior is what integrators test against.",
+      "recommendation": "adopt-frontend",
+      "rule": "Equality: the MCP uses loose == / !=; the frontend strict === / !=="
+    },
+    {
+      "area": "Condition evaluation",
+      "decision": null,
+      "evidence": [
+        "src/app/utils/condition-evaluator.ts:118-136",
+        "tools/mcp-server/src/tools/execute-action.ts:256-259"
+      ],
+      "frontend": "`gt/lt/gte/lte` are false unless both sides are numbers.",
+      "id": "C-03",
+      "impact": {
+        "adoptFrontend": "MCP stops enabling actions on string comparisons such as \"a\" > \"1\".",
+        "adoptMcp": "Generic app would compare strings lexically."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 150
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "gt \"1\" @ \"a\""
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "gt \"1\" @ \"x\""
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "gt \"1\" @ 1.5"
+          }
+        ],
+        "occurrences": 150,
+        "synthetic": 150
+      },
+      "latent": "no example action uses gt/lt/gte/lte; shown by the synthetic matrix",
+      "mcp": "Applies `>`/`<` to whatever is there (string comparison, null coerced to 0).",
+      "reason": "Numeric operators on non-numbers are a metadata error; failing closed is safer.",
+      "recommendation": "adopt-frontend",
+      "rule": "Ordering operators: the MCP has no numeric guard"
+    },
+    {
+      "area": "Condition evaluation",
+      "decision": null,
+      "evidence": [
+        "src/app/utils/condition-evaluator.ts:147-151",
+        "tools/mcp-server/src/tools/execute-action.ts:263"
+      ],
+      "frontend": "Warns and returns false.",
+      "id": "C-04",
+      "impact": {
+        "adoptFrontend": "MCP stops showing/enabling actions whose condition it cannot evaluate.",
+        "adoptMcp": "Generic app would expose actions on typos in operator names."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 462
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "<empty> \"1\" @ \"1\""
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "<empty> \"1\" @ \"a\""
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "conditions.matrix",
+            "example": "_shared",
+            "subject": "<empty> \"1\" @ \"x\""
+          }
+        ],
+        "occurrences": 462,
+        "synthetic": 462
+      },
+      "latent": "no example uses an unsupported operator; shown by the synthetic matrix (between, EQ, empty)",
+      "mcp": "`default: return true`.",
+      "reason": "Fail-open on an unknown operator exposes actions the integrator meant to gate.",
+      "recommendation": "mcp-bug",
+      "rule": "Unknown operator: the MCP returns true (fail open); the frontend false"
+    },
+    {
+      "area": "Condition evaluation",
+      "decision": null,
+      "evidence": [
+        "src/app/utils/condition-evaluator.ts:88-90",
+        "tools/mcp-server/src/tools/execute-action.ts:62-76"
+      ],
+      "frontend": "`if (!data) return false`.",
+      "id": "C-05",
+      "impact": {
+        "adoptFrontend": "MCP blocks actions it cannot verify.",
+        "adoptMcp": "Generic app would show `ne` actions before the record loads."
+      },
+      "instances": {
+        "byExample": {
+          "community-center": 6,
+          "staff-portal": 12
+        },
+        "count": 18,
+        "examples": [
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "reservation_requests.approve:visibility_condition",
+            "example": "community-center",
+            "subject": "{\"field\":\"status_id\",\"operator\":\"ne\",\"value\":6} @ <null data>"
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "reimbursements.approve:visibility_condition",
+            "example": "staff-portal",
+            "subject": "{\"field\":\"status_id\",\"operator\":\"ne\",\"value\":16} @ <null data>"
+          },
+          {
+            "detail": "frontend false, MCP true",
+            "entity": "reservation_requests.approve:visibility_condition",
+            "example": "community-center",
+            "subject": "{\"field\":\"status_id\",\"operator\":\"ne\",\"value\":6} @ <undefined data>"
+          }
+        ],
+        "occurrences": 18,
+        "synthetic": 0
+      },
+      "mcp": "No guard: `ne`, `is_null` and OR-branches can pass with no record; execute_action also skips conditions entirely when the record fetch fails.",
+      "reason": "Fail closed. The MCP should also stop proceeding to the RPC when the condition fetch fails (execute-action.ts:65-75 swallows the error).",
+      "recommendation": "adopt-frontend",
+      "rule": "Missing record (null/undefined): the frontend returns false; the MCP evaluates every field as undefined"
+    },
+    {
+      "area": "Condition evaluation",
+      "decision": null,
+      "evidence": [
+        "src/app/utils/condition-evaluator.ts:83-86",
+        "tools/mcp-server/src/tools/execute-action.ts:240"
+      ],
+      "frontend": "`if (!condition) return true`.",
+      "id": "C-06",
+      "impact": {
+        "adoptFrontend": "Core evaluator is total; no MCP output change.",
+        "adoptMcp": "Generic app would crash on actions without conditions."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend true, MCP __throws:TypeError__",
+            "entity": "conditions.compound",
+            "example": "_shared",
+            "subject": "nullCondition"
+          },
+          {
+            "detail": "frontend true, MCP __throws:TypeError__",
+            "entity": "conditions.compound",
+            "example": "_shared",
+            "subject": "undefinedConditionNullData"
+          }
+        ],
+        "occurrences": 2,
+        "synthetic": 2
+      },
+      "latent": "unreachable through current MCP callers; shown by the synthetic compound cases",
+      "mcp": "`'or' in condition` throws a TypeError on null/undefined; callers guard with `if (action.visibility_condition)`.",
+      "reason": "A total function is the right core contract.",
+      "recommendation": "adopt-frontend",
+      "rule": "Missing condition (null/undefined): the frontend returns true; the MCP throws"
+    },
+    {
+      "area": "Actions end to end",
+      "decision": null,
+      "evidence": [
+        "tests/golden/derived/mcp/<example>/_example/mcp.actions-execute.json",
+        "tools/mcp-server/src/tools/execute-action.ts:62-110",
+        "tools/mcp-server/src/tools/get-record.ts:96-123"
+      ],
+      "frontend": "Detail page evaluates conditions with .id extraction against its embedded record; actions behave as configured.",
+      "id": "A-01",
+      "impact": {
+        "adoptFrontend": "MCP users can run approve/deny/cancel/check-out actions again.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "community-center": 3,
+          "mottpark": 5,
+          "neighborhood-hub": 11,
+          "staff-portal": 10
+        },
+        "count": 29,
+        "examples": [
+          {
+            "detail": "satisfies all conditions: execute_action disabled, get_record listed-disabled (plain condition field on an FK-embedded column)",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "approve"
+          },
+          {
+            "detail": "satisfies all conditions: execute_action not-available, get_record hidden (plain condition field on an FK-embedded column)",
+            "entity": "reservation_requests",
+            "example": "mottpark",
+            "subject": "approve"
+          },
+          {
+            "detail": "satisfies all conditions: execute_action not-available, get_record hidden (plain condition field on an FK-embedded column)",
+            "entity": "mek_requests",
+            "example": "neighborhood-hub",
+            "subject": "approve"
+          }
+        ],
+        "occurrences": 38,
+        "synthetic": 0
+      },
+      "mcp": "With the record the MCP actually fetches (Status/FK columns embedded), `status_id eq 5` never holds (execute_action says disabled / not available, get_record hides or greys the action) and `status_id ne 6` always holds (visible in the wrong state).",
+      "reason": "Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions are unusable through the MCP in community-center, mottpark, neighborhood-hub and staff-portal.",
+      "recommendation": "mcp-bug",
+      "rule": "Status-gated actions are wrongly blocked (or wrongly allowed) through the MCP"
+    },
+    {
+      "area": "Actions end to end",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/profile/profile.page.html:28-33",
+        "tools/mcp-server/src/name-resolver.ts:31-75",
+        "tests/golden/derived/mcp/client-intake/_example/mcp.actions-execute.json"
+      ],
+      "frontend": "`ProfilePage` renders `<app-entity-action-panel tableName=\"civic_os_users\">`, so these actions run from the profile page.",
+      "id": "A-02",
+      "impact": {
+        "adoptFrontend": "MCP would need a user-scoped entry point (e.g. resolve civic_os_users as a system entity).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 4
+        },
+        "count": 4,
+        "examples": [
+          {
+            "detail": "NameResolutionError: Entity \"civic_os_users\" not found. Available entitie",
+            "entity": "civic_os_users",
+            "example": "client-intake",
+            "subject": "activate_client"
+          },
+          {
+            "detail": "NameResolutionError: Entity \"civic_os_users\" not found. Available entitie",
+            "entity": "civic_os_users",
+            "example": "client-intake",
+            "subject": "deactivate_client"
+          },
+          {
+            "detail": "NameResolutionError: Entity \"civic_os_users\" not found. Available entitie",
+            "entity": "civic_os_users",
+            "example": "client-intake",
+            "subject": "reactivate_client"
+          }
+        ],
+        "occurrences": 8,
+        "synthetic": 0
+      },
+      "mcp": "`resolveEntity` only knows schema_entities, which does not list civic_os_users, so execute_action / get_record fail with \"Entity not found\".",
+      "reason": "Not an interpretation difference: decide whether the MCP should expose profile actions at all.",
+      "recommendation": "needs-decision",
+      "rule": "Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP"
+    },
+    {
+      "area": "Actions end to end",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/schema-cache.ts:299-307",
+        "src/app/services/status-admin.service.ts:152",
+        "tests/golden/raw/<example>/<role>/status_transitions.json",
+        "tools/mcp-server/src/tools/get-status-workflow.ts:58"
+      ],
+      "frontend": "Admin and workflow UIs read transitions through `rpc/get_status_transitions_for_entity`.",
+      "id": "A-03",
+      "impact": {
+        "adoptFrontend": "MCP reports the real allowed transitions and on-transition RPCs.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 1,
+          "community-center": 1,
+          "mottpark": 1,
+          "staff-portal": 1
+        },
+        "count": 4,
+        "examples": [
+          {
+            "detail": "view returns 404 for the MCP; transitions defined: 3 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)",
+            "entity": "status_transitions",
+            "example": "client-intake",
+            "subject": "get_status_workflow"
+          },
+          {
+            "detail": "view returns 404 for the MCP; transitions defined: 1 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)",
+            "entity": "status_transitions",
+            "example": "community-center",
+            "subject": "get_status_workflow"
+          },
+          {
+            "detail": "view returns 404 for the MCP; transitions defined: 2 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)",
+            "entity": "status_transitions",
+            "example": "mottpark",
+            "subject": "get_status_workflow"
+          }
+        ],
+        "occurrences": 4,
+        "synthetic": 0
+      },
+      "mcp": "`fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallows the error and uses an empty list, so get_status_workflow reports no transition restrictions.",
+      "reason": "The MCP should call the same RPC as the frontend (the core's status client).",
+      "recommendation": "mcp-bug",
+      "rule": "Status transitions: the MCP reads a status_transitions view that does not exist"
+    },
+    {
+      "area": "Error messages",
+      "decision": null,
+      "evidence": [
+        "src/app/services/error.service.ts:106-126",
+        "tools/mcp-server/src/postgrest-client.ts:204-255"
+      ],
+      "frontend": "Short UI strings: \"Permissions error\", \"Record must be unique\", \"Resource not found\", \"Your session has expired. Please refresh the page to log in again.\"",
+      "id": "E-01",
+      "impact": {
+        "adoptFrontend": "MCP messages get terser and lose action hints for the LLM.",
+        "adoptMcp": "Generic app messages change wording (user-visible, untranslated today)."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 24
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend \"Your session has expired. Please refresh the page to log in again.\", MCP \"Authentication required. Your session may have expired.\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "401 empty"
+          },
+          {
+            "detail": "frontend \"Resource not found\", MCP \"Record not found.\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "null body"
+          },
+          {
+            "detail": "frontend \"Record must be unique\", MCP \"A record with these values already exists (duplicate).\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "postgrest 23505"
+          }
+        ],
+        "occurrences": 164,
+        "synthetic": 24
+      },
+      "mcp": "LLM-oriented sentences: \"Permission denied. You do not have access to perform this action.\", \"A record with these values already exists (duplicate).\", \"Record not found.\", \"Authentication required. Your session may have expired.\"",
+      "reason": "Suggested: the core returns an error kind plus parameters (code, constraint, column); each consumer owns its wording (the frontend through i18n keys).",
+      "recommendation": "needs-decision",
+      "rule": "Different wording for errors both sides recognize (network, 42501, 23505, 401, 404, 23P01 without a name)"
+    },
+    {
+      "area": "Error messages",
+      "decision": null,
+      "evidence": [
+        "src/app/services/error.service.ts:61-95",
+        "tools/mcp-server/src/postgrest-client.ts:205-221"
+      ],
+      "frontend": "\"Validation failed: <constraint_name>\" (23514, name found), \"Validation failed\" (no name), \"This conflicts with an existing record. Please check your input and try again.\" (23P01).",
+      "id": "E-03",
+      "impact": {
+        "adoptFrontend": "MCP shows raw constraint names to the LLM.",
+        "adoptMcp": "Generic app shows humanized constraint names instead of raw ones."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 9,
+          "broader-impacts": 12,
+          "client-intake": 18,
+          "community-center": 22,
+          "mottpark": 46,
+          "neighborhood-hub": 74,
+          "pothole": 38,
+          "staff-portal": 34,
+          "storymap": 12
+        },
+        "count": 256,
+        "examples": [
+          {
+            "detail": "frontend \"Validation failed: c1\", MCP \"Invalid c1. Check the value and try again.\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "postgrest 23514 constraint"
+          },
+          {
+            "detail": "frontend \"Validation failed\", MCP \"Invalid no such constraint. Check the value and try again.\"",
+            "entity": "parseToHuman",
+            "example": "broader-impacts",
+            "subject": "{\"code\":\"23514\",\"details\":\"Failing row violates constraint \\\"no_such_constraint\\\".\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"generic message\"}"
+          },
+          {
+            "detail": "frontend \"Validation failed\", MCP \"Invalid clients user id unique. Check the value and try again.\"",
+            "entity": "parseToHuman",
+            "example": "client-intake",
+            "subject": "{\"code\":\"23514\",\"details\":\"Failing row violates constraint \\\"clients_user_id_unique\\\".\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"generic message\"}"
+          }
+        ],
+        "occurrences": 325,
+        "synthetic": 9
+      },
+      "mcp": "\"Invalid <constraint name without _check, underscores as spaces>. Check the value and try again.\"; static parseToHuman (no lookup) differs the same way.",
+      "reason": "Lookups that hit constraint_messages agree on both sides; only the miss path differs. The MCP humanization is friendlier; decide as part of E-01.",
+      "recommendation": "needs-decision",
+      "rule": "Constraint violations without a configured message: different fallback text"
+    },
+    {
+      "area": "Error messages",
+      "decision": null,
+      "evidence": [
+        "src/app/services/error.service.ts:125",
+        "tools/mcp-server/src/postgrest-client.ts:254"
+      ],
+      "frontend": "Generic \"System Error\".",
+      "id": "E-04",
+      "impact": {
+        "adoptFrontend": "LLM loses the raw database message it can often act on.",
+        "adoptMcp": "Generic app shows raw database text (may expose SQL details) to end users."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 9
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend \"System Error\", MCP \"Error: PostgREST returned 400\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "postgrest no message"
+          },
+          {
+            "detail": "frontend \"System Error\", MCP \"Error: PostgREST returned 500\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "postgrest no message no statusText"
+          },
+          {
+            "detail": "frontend \"System Error\", MCP \"Error: PostgREST returned 502\"",
+            "entity": "client humanMessage",
+            "example": "_shared",
+            "subject": "string body"
+          }
+        ],
+        "occurrences": 51,
+        "synthetic": 9
+      },
+      "mcp": "Returns the PostgREST message verbatim, prefixed with \"Error: \".",
+      "reason": "Raw text is useful to an LLM and risky in a UI; keep it a per-consumer choice over a shared error kind.",
+      "recommendation": "needs-decision",
+      "rule": "Unrecognized error: frontend \"System Error\"; MCP \"Error: <raw message>\""
+    },
+    {
+      "area": "Error messages",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:662-700",
+        "tools/mcp-server/src/postgrest-client.ts:110-147"
+      ],
+      "frontend": "Uses the HTTP status text (\"Bad Request\", \"Unknown Error\").",
+      "id": "E-06",
+      "impact": {
+        "adoptFrontend": "Cosmetic for the MCP.",
+        "adoptMcp": "Cosmetic for the frontend (only surfaces through E-04 / logs)."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 6
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend \"Unauthorized\", MCP \"PostgREST returned 401\"",
+            "entity": "client message",
+            "example": "_shared",
+            "subject": "401 empty"
+          },
+          {
+            "detail": "frontend \"Unknown Error\", MCP \"Network error: unable to reach PostgREST. Check your connection and PostgREST URL.\"",
+            "entity": "client message",
+            "example": "_shared",
+            "subject": "network error status 0"
+          },
+          {
+            "detail": "frontend \"Not Found\", MCP \"PostgREST returned 404\"",
+            "entity": "client message",
+            "example": "_shared",
+            "subject": "null body"
+          }
+        ],
+        "occurrences": 6,
+        "synthetic": 6
+      },
+      "mcp": "\"PostgREST returned <status>\"; network failure: \"Network error: unable to reach PostgREST...\".",
+      "reason": "Cosmetic; settle together with E-01.",
+      "recommendation": "needs-decision",
+      "rule": "Error body without a message: different fallback for the raw message"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:52-54",
+        "tools/mcp-server/src/tools/list-records.ts:232-247"
+      ],
+      "frontend": "Without a user sort, list and inverse queries have no `order`, so PostgREST returns rows in plan order and pagination is not stable.",
+      "id": "Q-01",
+      "impact": {
+        "adoptFrontend": "MCP pages become unstable across calls.",
+        "adoptMcp": "Generic list pages get a deterministic default order (display_name), which changes what users see first."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 80,
+          "broader-impacts": 46,
+          "client-intake": 99,
+          "community-center": 23,
+          "mottpark": 38,
+          "neighborhood-hub": 141,
+          "pothole": 38,
+          "staff-portal": 86,
+          "storymap": 30
+        },
+        "count": 501,
+        "examples": [
+          {
+            "detail": "MCP order=id.asc",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "empty fields"
+          },
+          {
+            "detail": "MCP order=display_name.asc",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "limit and rawQueryParams"
+          },
+          {
+            "detail": "MCP order=display_name.asc",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "limit and rawQueryParams"
+          }
+        ],
+        "occurrences": 581,
+        "synthetic": 80
+      },
+      "mcp": "`order=display_name.asc`, else `id.asc`, else the first property.",
+      "reason": "Strictly better: paging without ORDER BY can skip or repeat rows. The core query builder should add a deterministic tie-breaker (id) as well.",
+      "recommendation": "adopt-mcp",
+      "rule": "Default order: the MCP always orders (display_name, else id, else first column); the frontend sends no order"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:71-73",
+        "src/app/services/data.service.ts:136-143",
+        "tools/mcp-server/src/tools/list-records.ts:249-258"
+      ],
+      "frontend": "getData sends no Range; `limit` becomes `limit=N`. getDataPaginated sends Range + Prefer.",
+      "id": "Q-02",
+      "impact": {
+        "adoptFrontend": "MCP could issue unbounded reads.",
+        "adoptMcp": "Generic app adds a count(*) to every read (cost on large tables)."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 76,
+          "broader-impacts": 10,
+          "client-intake": 17,
+          "community-center": 8,
+          "mottpark": 11,
+          "neighborhood-hub": 38,
+          "pothole": 10,
+          "staff-portal": 24,
+          "storymap": 11
+        },
+        "count": 129,
+        "examples": [
+          {
+            "detail": "frontend no Range, MCP Range 0-24",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "empty fields"
+          },
+          {
+            "detail": "frontend limit=5, MCP Range 0-4",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "limit and rawQueryParams"
+          },
+          {
+            "detail": "frontend limit=5, MCP Range 0-4",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "limit and rawQueryParams"
+          }
+        ],
+        "occurrences": 205,
+        "synthetic": 76
+      },
+      "mcp": "Every list_records call sends `Range: offset-(offset+limit-1)`, `Range-Unit: items`, `Prefer: count=exact`; never `limit=`.",
+      "reason": "Transport policy, not semantics: the core query object carries limit/offset and each transport chooses Range vs limit; count=exact only when the caller needs a total.",
+      "recommendation": "needs-decision",
+      "rule": "Pagination transport: the MCP always sends Range (default 0-24) and Prefer count=exact; the frontend only for paginated calls and uses `limit=` otherwise"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:43-45",
+        "tools/mcp-server/src/select-builder.ts:72-77",
+        "tools/mcp-server/src/tools/list-records.ts:77-81"
+      ],
+      "frontend": "Pushes `id` to the end of the field list (unless already present or a summary view).",
+      "id": "Q-03",
+      "impact": {
+        "adoptFrontend": "Select order changes for the MCP (no semantic effect).",
+        "adoptMcp": "Same for the frontend."
+      },
+      "instances": {
+        "byExample": {
+          "broader-impacts": 26,
+          "client-intake": 33,
+          "community-center": 7,
+          "mottpark": 24,
+          "neighborhood-hub": 69,
+          "pothole": 9,
+          "staff-portal": 52,
+          "storymap": 26
+        },
+        "count": 246,
+        "examples": [
+          {
+            "detail": "frontend display_name,description,id | MCP id,display_name,description",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "list"
+          },
+          {
+            "detail": "frontend display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date,id | MCP id,display_name,client_id:clients!client_id(id,display_name),status_id:statuses!status_id(id,display_name,color,status_key),method_id:categories!method_id(id,display_name,color),granted_date,expires_date",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "list"
+          },
+          {
+            "detail": "frontend display_name,id | MCP id,display_name",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "list without pagination arg"
+          }
+        ],
+        "occurrences": 246,
+        "synthetic": 0
+      },
+      "mcp": "`buildSelectString` starts with `id` when the entity has one; list_records prepends `id,` when the display columns lack it.",
+      "reason": "Semantically equivalent; pick the frontend order so the request-equivalence harness stays byte-equal.",
+      "recommendation": "adopt-frontend",
+      "rule": "id placement in the select: frontend appends `,id`; MCP prepends `id,`"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:43-45",
+        "tools/mcp-server/src/select-builder.ts:72-77"
+      ],
+      "frontend": "Junction tables (composite keys) and updatable views without id still get `id` appended, which PostgREST rejects.",
+      "id": "Q-11",
+      "impact": {
+        "adoptFrontend": "MCP requests id on tables that have none (errors on junction tables).",
+        "adoptMcp": "Generic app stops requesting a nonexistent id on junction tables and id-less views."
+      },
+      "instances": {
+        "byExample": {
+          "broader-impacts": 20,
+          "client-intake": 34,
+          "community-center": 4,
+          "neighborhood-hub": 25,
+          "pothole": 6,
+          "staff-portal": 9
+        },
+        "count": 98,
+        "examples": [
+          {
+            "detail": "frontend appends id, MCP does not (entity has no id property): MCP select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at",
+            "entity": "contact_broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "detail"
+          },
+          {
+            "detail": "frontend appends id, MCP does not (entity has no id property): MCP select=month,new_clients,intake_pending,active_clients,created_at,updated_at",
+            "entity": "client_contact_summary",
+            "example": "client-intake",
+            "subject": "detail"
+          },
+          {
+            "detail": "MCP adds id, frontend does not: frontend select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),user_display_name,user_full_name,user_email,amount,processing_fee,total_amount,max_refundable,fee_percent,fee_flat_cents,fee_refundable,currency,status,provider_payment_id,total_refunded,refund_count,pending_refund_count,effective_status,error_message,provider,provider_client_secret,description,display_name,entity_type,entity_id,entity_display_name",
+            "entity": "payment_transactions",
+            "example": "community-center",
+            "subject": "list"
+          }
+        ],
+        "occurrences": 98,
+        "synthetic": 0
+      },
+      "mcp": "Checks the properties for `id` / identity.",
+      "reason": "Strictly better: derive id inclusion from the schema, not from an is_view/insert proxy.",
+      "recommendation": "adopt-mcp",
+      "rule": "id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/list/list.page.ts:859",
+        "tools/mcp-server/src/tools/list-records.ts:228-231"
+      ],
+      "frontend": "`order=col(display_name).asc` for FK/User/Status/Category columns.",
+      "id": "Q-04",
+      "impact": {
+        "adoptFrontend": "MCP sorts FK columns alphabetically by name (what an LLM asked to \"sort by client\" expects).",
+        "adoptMcp": "Generic app sorts FK columns by id."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1,
+          "broader-impacts": 4,
+          "client-intake": 17,
+          "community-center": 6,
+          "mottpark": 6,
+          "neighborhood-hub": 17,
+          "pothole": 7,
+          "staff-portal": 26
+        },
+        "count": 83,
+        "examples": [
+          {
+            "detail": "frontend order=owner(display_name).desc; MCP NameResolutionError: Column \"owner(display_name)\" not found in items. Available columns: \"",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "order with FK embed"
+          },
+          {
+            "detail": "frontend order=organization_id(display_name).asc, MCP order=organization_id.asc",
+            "entity": "contacts",
+            "example": "broader-impacts",
+            "subject": "order organization_id asc [ForeignKeyName]"
+          },
+          {
+            "detail": "frontend order=client_id(display_name).asc, MCP order=client_id.asc",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "order client_id asc [ForeignKeyName]"
+          }
+        ],
+        "occurrences": 84,
+        "synthetic": 1
+      },
+      "mcp": "Sort must resolve to a column; `owner(display_name)` is rejected, so FK sorts are by id.",
+      "reason": "Name order is the expected meaning of sorting by a reference column.",
+      "recommendation": "adopt-frontend",
+      "rule": "Sorting by an FK: the frontend orders by the embedded display_name; the MCP only by the raw column"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:49-51",
+        "src/app/utils/search.utils.ts:20-45",
+        "tools/mcp-server/src/tools/list-records.ts:216-225"
+      ],
+      "frontend": "DataService searchQuery always targets `civic_os_text_search` with `wfts` and the server's default text-search config; the list page instead sends hybrid `or=(fts.wfts.x,col.ilike.*x*)` built from the entity config, URL-encoded.",
+      "id": "Q-05",
+      "impact": {
+        "adoptFrontend": "MCP search uses the hybrid fts+substring strategy the list page uses.",
+        "adoptMcp": "Generic app switches to the simple config (no stemming) and loses hybrid OR search."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 23,
+          "broader-impacts": 5,
+          "client-intake": 11,
+          "community-center": 4,
+          "mottpark": 6,
+          "neighborhood-hub": 17,
+          "pothole": 5,
+          "staff-portal": 12,
+          "storymap": 3
+        },
+        "count": 63,
+        "examples": [
+          {
+            "detail": "civic_os_text_search: frontend wfts.a b, MCP wfts(simple).a b",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "everything at once"
+          },
+          {
+            "detail": "civic_os_text_search: frontend wfts.pot hole & co, MCP (none)",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "legacy search ignores order"
+          },
+          {
+            "detail": "civic_os_text_search: frontend wfts.pot hole & co, MCP (none)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "legacy search ignores order"
+          }
+        ],
+        "occurrences": 146,
+        "synthetic": 23
+      },
+      "mcp": "Uses `fulltext_search_column` with `wfts(simple)`; else `substring_search_column` ilike; else falls back to `display_name=ilike.*term*` even when the entity has no such search configured. The term is not trimmed or escaped.",
+      "reason": "Pick one search builder for the core (the hybrid one is the newest). Verify against a live instance whether `wfts.` (default config) and `wfts(simple).` return the same rows for the simple-config tsvectors; if not, the frontend legacy path is a bug.",
+      "recommendation": "needs-decision",
+      "rule": "Search mapping: frontend legacy `civic_os_text_search=wfts.` (or hybrid `or=(...)`); MCP `<fulltext_search_column>=wfts(simple).`, else substring ilike, else display_name ilike"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:49-54",
+        "tools/mcp-server/src/tools/list-records.ts:216-247"
+      ],
+      "frontend": "When searchQuery is set, `order` is not sent.",
+      "id": "Q-06",
+      "impact": {
+        "adoptFrontend": "MCP search results lose the requested order.",
+        "adoptMcp": "Generic app keeps the user's sort while searching."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1,
+          "broader-impacts": 5,
+          "client-intake": 9,
+          "community-center": 4,
+          "mottpark": 6,
+          "neighborhood-hub": 15,
+          "pothole": 5,
+          "staff-portal": 12,
+          "storymap": 3
+        },
+        "count": 59,
+        "examples": [
+          {
+            "detail": "frontend drops order while searching, MCP order=name.asc",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "everything at once"
+          },
+          {
+            "detail": "frontend drops order while searching, MCP order=display_name.desc",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "legacy search ignores order"
+          },
+          {
+            "detail": "frontend drops order while searching, MCP order=display_name.desc",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "legacy search ignores order"
+          }
+        ],
+        "occurrences": 60,
+        "synthetic": 1
+      },
+      "mcp": "Search and sort are independent.",
+      "reason": "Dropping an explicit sort is surprising; `wfts` does not rank results, so there is no relevance order to preserve.",
+      "recommendation": "adopt-mcp",
+      "rule": "Searching with a sort: the frontend drops the sort; the MCP keeps it"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:49-51",
+        "tools/mcp-server/src/tools/list-records.ts:216-225"
+      ],
+      "frontend": "`searchQuery.trim()`; blank terms send no search parameter.",
+      "id": "Q-07",
+      "impact": {
+        "adoptFrontend": "MCP ignores empty searches instead of returning nothing.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1,
+          "broader-impacts": 5,
+          "client-intake": 9,
+          "community-center": 4,
+          "mottpark": 6,
+          "neighborhood-hub": 15,
+          "pothole": 5,
+          "staff-portal": 12,
+          "storymap": 3
+        },
+        "count": 59,
+        "examples": [
+          {
+            "detail": "civic_os_text_search: frontend (none), MCP wfts(simple).\n",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "search \"\\n\""
+          },
+          {
+            "detail": "display_name: frontend (none), MCP ilike.*   *",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "blank search falls through to order"
+          },
+          {
+            "detail": "display_name: frontend (none), MCP ilike.*   *",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "blank search falls through to order"
+          }
+        ],
+        "occurrences": 60,
+        "synthetic": 1
+      },
+      "mcp": "Sends `wfts(simple).   ` or `ilike.*   *`, matching only values containing the spaces.",
+      "reason": "A whitespace-only search should mean \"no search\".",
+      "recommendation": "mcp-bug",
+      "rule": "Blank or padded search terms: the frontend trims and skips blank terms; the MCP sends them as-is"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:61",
+        "tools/mcp-server/src/tools/list-records.ts:110-191"
+      ],
+      "frontend": "Filters whose value is `''`, null or undefined are dropped.",
+      "id": "Q-08",
+      "impact": {
+        "adoptFrontend": "MCP ignores empty filter values (an LLM wanting IS NULL must use the `is` operator).",
+        "adoptMcp": "Generic app would filter on empty strings."
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 4,
+          "mottpark": 2,
+          "neighborhood-hub": 3,
+          "staff-portal": 9,
+          "storymap": 1
+        },
+        "count": 19,
+        "examples": [
+          {
+            "detail": "frontend skips the empty filter value; MCP resolves \"\" as a name: Category \"\" not found for entity type \"gender\". Available: \"Male\", \"Female\", \"Non-Binary\", \"Prefer N",
+            "entity": "clients",
+            "example": "client-intake",
+            "subject": "filters with in-array, empty and null values"
+          },
+          {
+            "detail": "frontend skips the empty filter value; MCP resolves \"\" as a name: Status \"\" not found for entity type \"reservation_request\". Available: \"Pending\", \"Approved\", \"Secure",
+            "entity": "manager_events",
+            "example": "mottpark",
+            "subject": "filters with in-array, empty and null values"
+          },
+          {
+            "detail": "frontend skips the empty filter value; MCP resolves \"\" as a name: Status \"\" not found for entity type \"building_use_requests\". Available: \"Pending\", \"Approved\", \"Deni",
+            "entity": "building_use_requests",
+            "example": "neighborhood-hub",
+            "subject": "filters with in-array, empty and null values"
+          }
+        ],
+        "occurrences": 19,
+        "synthetic": 0
+      },
+      "mcp": "Sends `eq.` and `eq.null` for scalar columns; for FK / Status / Category columns tries to resolve `\"\"` as a display name and fails the whole call.",
+      "reason": "For the MCP an explicit null is arguably intentional; suggested core rule: null maps to `is.null`, empty string is dropped.",
+      "recommendation": "needs-decision",
+      "rule": "Empty / null filter values: the frontend skips them; the MCP sends or resolves them"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:59-69",
+        "tools/mcp-server/src/tools/list-records.ts:193-212",
+        "docs/notes/MCP_SERVER_DESIGN.md (Same-Column Multi-Condition Filters)"
+      ],
+      "frontend": "`col=gte.a&col=lt.b`.",
+      "id": "Q-09",
+      "impact": {
+        "adoptFrontend": "Equivalent for PostgREST; changes MCP URLs only.",
+        "adoptMcp": "Equivalent; changes frontend URLs only."
+      },
+      "instances": {
+        "byExample": {
+          "mottpark": 1,
+          "staff-portal": 1,
+          "storymap": 3
+        },
+        "count": 5,
+        "examples": [
+          {
+            "detail": "MCP and=(needs_attention.in.(1,2,3),needs_attention.eq.,needs_attention.eq.null,needs_attention.in.(),needs_attention.in.not-an-array,needs_attention.eq.0,needs_attention.eq.false), frontend repeats the column parameter",
+            "entity": "reservation_requests",
+            "example": "mottpark",
+            "subject": "filters with in-array, empty and null values"
+          },
+          {
+            "detail": "MCP and=(requires_approval.in.(1,2,3),requires_approval.eq.,requires_approval.eq.null,requires_approval.in.(),requires_approval.in.not-an-array,requires_approval.eq.0,requires_approval.eq.false), frontend repeats the column parameter",
+            "entity": "document_requirements",
+            "example": "staff-portal",
+            "subject": "filters with in-array, empty and null values"
+          },
+          {
+            "detail": "MCP and=(birth_date.in.(1,2,3),birth_date.eq.,birth_date.eq.null,birth_date.in.(),birth_date.in.not-an-array,birth_date.eq.0,birth_date.eq.false), frontend repeats the column parameter",
+            "entity": "participants",
+            "example": "storymap",
+            "subject": "filters with in-array, empty and null values"
+          }
+        ],
+        "occurrences": 5,
+        "synthetic": 0
+      },
+      "mcp": "`and=(col.gte.a,col.lt.b)`.",
+      "reason": "Both are valid PostgREST; the MCP needed `and=()` only because its params are a Record. Pick one canonical form for byte equality.",
+      "recommendation": "needs-decision",
+      "rule": "Several filters on one column: the MCP groups them into `and=(...)`; the frontend repeats the parameter"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/tools/list-records.ts:51-56",
+        "src/app/pages/list/list.page.ts:~297"
+      ],
+      "frontend": "No bounds (see F-02 for negative ranges); calendar range fetches use page size 1000.",
+      "id": "Q-10",
+      "impact": {
+        "adoptFrontend": "MCP could request 1000-row pages.",
+        "adoptMcp": "Generic app gets input validation (fixes F-02) but calendar views need a higher cap."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1,
+          "community-center": 2,
+          "mottpark": 3,
+          "neighborhood-hub": 3
+        },
+        "count": 8,
+        "examples": [
+          {
+            "detail": "frontend drops limit 0; MCP rejects (limit: too_small)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "limit 0 is dropped"
+          },
+          {
+            "detail": "MCP rejects input: limit: too_big",
+            "entity": "reservation_requests",
+            "example": "community-center",
+            "subject": "calendar overlap filter"
+          },
+          {
+            "detail": "MCP rejects input: limit: too_big",
+            "entity": "manager_events",
+            "example": "mottpark",
+            "subject": "calendar overlap filter"
+          }
+        ],
+        "occurrences": 9,
+        "synthetic": 1
+      },
+      "mcp": "Zod rejects limit 0, limit > 100 and negative offsets before any request.",
+      "reason": "Validation belongs in the core query builder; the maximum page size is consumer policy (MCP 100 for token economy, app 1000 for calendars).",
+      "recommendation": "needs-decision",
+      "rule": "Limit bounds: list_records accepts limit 1..100 and offset >= 0; the frontend accepts anything"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/tools/get-record.ts:66",
+        "tools/mcp-server/src/select-builder.ts:85-88"
+      ],
+      "frontend": "Detail selects only existing properties.",
+      "id": "Q-12",
+      "impact": {
+        "adoptFrontend": "get_record works on every entity.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2,
+          "broader-impacts": 4,
+          "client-intake": 22,
+          "mottpark": 6,
+          "neighborhood-hub": 7,
+          "pothole": 3,
+          "staff-portal": 4,
+          "storymap": 1
+        },
+        "count": 47,
+        "examples": [
+          {
+            "detail": "created_at",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "entityId with specials: created_at"
+          },
+          {
+            "detail": "updated_at",
+            "entity": "contact_broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "detail: updated_at"
+          },
+          {
+            "detail": "created_at",
+            "entity": "client_contact_summary",
+            "example": "client-intake",
+            "subject": "detail: created_at"
+          }
+        ],
+        "occurrences": 49,
+        "synthetic": 2
+      },
+      "mcp": "`buildSelectString(allProperties, { includeTimestamps: true })` appends both unconditionally, so get_record fails on entities that lack them.",
+      "reason": "Append timestamps only when the entity has them.",
+      "recommendation": "mcp-bug",
+      "rule": "get_record always selects created_at and updated_at, even on entities without those columns"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/tools/get-record.ts:62-66",
+        "tools/mcp-server/src/tools/execute-action.ts:62-70",
+        "docs/notes/MCP_SERVER_DESIGN.md (Dot-Notation and FK Embedding)"
+      ],
+      "frontend": "getPropsForDetail (show_on_detail + structural); condition fields come in through the same select.",
+      "id": "Q-13",
+      "impact": {
+        "adoptFrontend": "MCP would need extractConditionFieldNames to add condition fields (as the frontend does).",
+        "adoptMcp": "Generic app fetches hidden columns it never shows."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 6,
+          "broader-impacts": 5,
+          "client-intake": 6,
+          "community-center": 3,
+          "mottpark": 5,
+          "neighborhood-hub": 72,
+          "pothole": 1,
+          "staff-portal": 5,
+          "storymap": 2
+        },
+        "count": 99,
+        "examples": [
+          {
+            "detail": "c",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "entityId with specials: c"
+          },
+          {
+            "detail": "civic_os_text_search",
+            "entity": "contacts",
+            "example": "broader-impacts",
+            "subject": "detail: civic_os_text_search"
+          },
+          {
+            "detail": "consent_active",
+            "entity": "clients",
+            "example": "client-intake",
+            "subject": "detail: consent_active"
+          }
+        ],
+        "occurrences": 105,
+        "synthetic": 6
+      },
+      "mcp": "get_record and the execute_action condition fetch select all properties so any condition field is present.",
+      "reason": "Intentional on the MCP side (documented). Core option: detail plan = visible props + condition field roots, which serves both.",
+      "recommendation": "needs-decision",
+      "rule": "Detail read: the MCP selects every property; the frontend only detail-visible ones"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/tools/list-records.ts:77-81",
+        "tools/mcp-server/src/select-builder.ts:66-91"
+      ],
+      "frontend": "`select=id` for an empty field list; no select at all when fields is absent (every column).",
+      "id": "Q-14",
+      "impact": {
+        "adoptFrontend": "list_records works for entities whose columns are all hidden from lists.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2,
+          "neighborhood-hub": 4
+        },
+        "count": 4,
+        "examples": [
+          {
+            "detail": "MCP select=id,",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "empty fields"
+          },
+          {
+            "detail": "MCP select=id,",
+            "entity": "building_use_event_details",
+            "example": "neighborhood-hub",
+            "subject": "list"
+          },
+          {
+            "detail": "frontend sends no select (every column), MCP select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "no fields"
+          }
+        ],
+        "occurrences": 6,
+        "synthetic": 2
+      },
+      "mcp": "`buildSelectString([])` is empty and list_records prepends `id,`, producing a trailing comma; also happens when an entity has no list-visible column.",
+      "reason": "PostgREST rejects a trailing comma in select; the neighborhood-hub instances below fail today.",
+      "recommendation": "mcp-bug",
+      "rule": "Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select)"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "effects": {
+        "byExample": {
+          "_shared": 2,
+          "broader-impacts": 5,
+          "client-intake": 9,
+          "community-center": 4,
+          "mottpark": 6,
+          "neighborhood-hub": 19,
+          "pothole": 5,
+          "staff-portal": 12,
+          "storymap": 4
+        },
+        "count": 64,
+        "examples": [
+          {
+            "detail": "id=eq.9 dropped (rawQueryParams)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "everything at once"
+          },
+          {
+            "detail": "or=(a.eq.1,b.eq.2) dropped (rawQueryParams)",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "limit and rawQueryParams"
+          },
+          {
+            "detail": "or=(a.eq.1,b.eq.2) dropped (rawQueryParams)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "limit and rawQueryParams"
+          }
+        ],
+        "occurrences": 67,
+        "synthetic": 2
+      },
+      "evidence": [
+        "tests/golden/derived/mcp/<example>/_example/data.queries.json (inexpressible)",
+        "tests/golden/derived/frontend/<example>/_example/data.queries.json (inversePreviews)"
+      ],
+      "frontend": "Edit pages read raw FK ids; list pages pass rawQueryParams (hybrid search, calendar ranges); detail pages fetch inverse-relationship previews.",
+      "id": "Q-15",
+      "impact": {
+        "adoptFrontend": "n/a (capabilities, not interpretation).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "broader-impacts": 8,
+          "client-intake": 20,
+          "community-center": 5,
+          "mottpark": 6,
+          "neighborhood-hub": 19,
+          "pothole": 8,
+          "staff-portal": 14,
+          "storymap": 3
+        },
+        "count": 83,
+        "examples": [
+          {
+            "detail": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)",
+            "entity": "broader_impact_categories",
+            "example": "broader-impacts",
+            "subject": "edit"
+          },
+          {
+            "detail": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "edit"
+          },
+          {
+            "detail": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)",
+            "entity": "payment_transactions",
+            "example": "community-center",
+            "subject": "edit"
+          }
+        ],
+        "occurrences": 83,
+        "synthetic": 0
+      },
+      "mcp": "update_record PATCHes without reading; list_records has no raw parameter passthrough; there is no inverse-relationship tool.",
+      "reason": "Informational: these are MCP feature gaps, not divergences. They do not block parity for the shared functions.",
+      "recommendation": "needs-decision",
+      "rule": "Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews)"
+    },
+    {
+      "area": "Request building",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:148-161",
+        "tools/mcp-server/src/postgrest-client.ts:164-173",
+        "tests/golden/derived/frontend/_shared/data.content-range.json"
+      ],
+      "frontend": "`/\\/(\\d+|\\*)$/`; unknown or missing totals fall back to the number of rows (0 for `*/0`).",
+      "id": "Q-16",
+      "impact": {
+        "adoptFrontend": "MCP reports totals for empty results.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 9
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend totalCount 2, MCP total (none)",
+            "entity": "data.content-range",
+            "example": "_shared",
+            "subject": "\"\""
+          },
+          {
+            "detail": "frontend totalCount 0, MCP total (none)",
+            "entity": "data.content-range",
+            "example": "_shared",
+            "subject": "\"*/0\""
+          },
+          {
+            "detail": "frontend totalCount 5, MCP total (none)",
+            "entity": "data.content-range",
+            "example": "_shared",
+            "subject": "\"*/5\""
+          }
+        ],
+        "occurrences": 9,
+        "synthetic": 9
+      },
+      "mcp": "`/^(\\d+)-(\\d+)\\/(\\d+|\\*)/` (anchored start, unanchored end): `*/0` (empty result) yields no total, so list_records omits \"0 total records\"; `0-9/12abc` parses as 12.",
+      "reason": "PostgREST sends `*/0` for empty ranges; the core should parse it (see F-14 for the frontend's own two parsers).",
+      "recommendation": "mcp-bug",
+      "rule": "Content-Range parsing: the MCP reports no total for `*/0`, prefixed or malformed headers, and accepts trailing garbage"
+    },
+    {
+      "area": "Name resolution",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/name-resolver.ts:34-38",
+        "tests/golden/derived/mcp/pothole/<variant>/mcp.names.json"
+      ],
+      "frontend": "n/a (routes use the exact table name).",
+      "id": "N-01",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "pothole": 4
+        },
+        "count": 4,
+        "examples": [
+          {
+            "detail": "\"Bid\" -> ERR Entity \"Bid\" not found. Available entities include: \"Ofertas\", \"Paquetes de Trabajo\", \"WorkDetail\", \"issue_tags\", \"P",
+            "entity": "Bid",
+            "example": "pothole",
+            "subject": "by table name",
+            "variants": [
+              "anon.es",
+              "testuser.es",
+              "testeditor.es",
+              "testmanager.es",
+              "testadmin.es"
+            ]
+          },
+          {
+            "detail": "\"Issue\" -> ERR Ambiguous entity name \"Issue\". Did you mean one of: \"issue_tags\" (issue_tags), \"Issues\" (Issue)?",
+            "entity": "Issue",
+            "example": "pothole",
+            "subject": "by table name",
+            "variants": [
+              "anon",
+              "anon.es",
+              "testuser",
+              "testuser.es",
+              "testeditor",
+              "testeditor.es",
+              "testmanager",
+              "testmanager.es",
+              "testadmin",
+              "testadmin.es"
+            ]
+          },
+          {
+            "detail": "\"Tag\" -> ERR Ambiguous entity name \"Tag\". Did you mean one of: \"issue_tags\" (issue_tags), \"Tags\" (Tag)?",
+            "entity": "Tag",
+            "example": "pothole",
+            "subject": "by table name",
+            "variants": [
+              "anon",
+              "anon.es",
+              "testuser",
+              "testuser.es",
+              "testeditor",
+              "testeditor.es",
+              "testmanager",
+              "testmanager.es",
+              "testadmin",
+              "testadmin.es"
+            ]
+          }
+        ],
+        "occurrences": 30,
+        "synthetic": 0
+      },
+      "mcp": "`resolveEntity` lowercases the input before comparing it with `table_name`, so `Issue`, `Bid`, `Tag` fall through to display-name and substring matching (ambiguous or not found).",
+      "reason": "Compare table names case-sensitively first (or case-insensitively on both sides).",
+      "recommendation": "mcp-bug",
+      "rule": "Mixed-case table names never resolve by table name in the MCP"
+    },
+    {
+      "area": "Name resolution",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/name-resolver.ts:211-226",
+        "src/app/services/import-export.service.ts:660-700",
+        "src/app/workers/import-validation.worker.ts:856-922"
+      ],
+      "frontend": "Excel import builds `status_<entity_type>` lookups from `statuses` display names (lowercased, trimmed); status keys are not accepted.",
+      "id": "N-02",
+      "impact": {
+        "adoptFrontend": "MCP stops accepting status keys (LLMs often use them).",
+        "adoptMcp": "Import accepts status keys too; a key equal to another status's display name would change which status a cell maps to."
+      },
+      "instances": {
+        "byExample": {
+          "broader-impacts": 8,
+          "client-intake": 21,
+          "community-center": 7,
+          "mottpark": 20,
+          "neighborhood-hub": 41,
+          "pothole": 15,
+          "staff-portal": 23,
+          "storymap": 3
+        },
+        "count": 138,
+        "examples": [
+          {
+            "detail": "status_key \"draft\" resolves (MCP); the import worker matches display names only",
+            "entity": "guided_form",
+            "example": "broader-impacts",
+            "subject": "2 Draft"
+          },
+          {
+            "detail": "status_key \"intake_pending\" resolves (MCP); the import worker matches display names only",
+            "entity": "client",
+            "example": "client-intake",
+            "subject": "5 Intake Pending"
+          },
+          {
+            "detail": "status_key \"draft\" resolves (MCP); the import worker matches display names only",
+            "entity": "guided_form",
+            "example": "community-center",
+            "subject": "2 Draft"
+          }
+        ],
+        "occurrences": 138,
+        "synthetic": 0
+      },
+      "mcp": "`resolveStatus` tries `status_key`, then display name, case-insensitive.",
+      "reason": "Both are name resolution over the same data; a single core resolver (key first) is the natural target, but it changes import semantics. Instances count statuses whose key the MCP resolves.",
+      "recommendation": "needs-decision",
+      "rule": "Status names: the MCP resolves status_key first, then display name; the import worker matches display names only"
+    },
+    {
+      "area": "Name resolution",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/name-resolver.ts:150-198",
+        "tests/golden/derived/mcp/_shared/mcp.names-fk-requests.json"
+      ],
+      "frontend": "Import preloads `(id, display_name)` and matches lowercased, trimmed names exactly; ambiguous names are rejected.",
+      "id": "N-03",
+      "impact": {
+        "adoptFrontend": "MCP name resolution becomes exact (case-insensitive) and cannot match unintended rows.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 3
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "requests select=id,display_name&display_name=eq.100%&limit=5 then select=id,display_name&display_name=ilike.100%&limit=5 -> 8",
+            "entity": "resolveForeignKeyValue",
+            "example": "_shared",
+            "subject": "\"100%\""
+          },
+          {
+            "detail": "requests select=id,display_name&display_name=eq.a*b&limit=5 then select=id,display_name&display_name=ilike.a*b&limit=5 -> 8",
+            "entity": "resolveForeignKeyValue",
+            "example": "_shared",
+            "subject": "\"a*b\""
+          },
+          {
+            "detail": "requests select=id,display_name&display_name=eq.a_b&limit=5 then select=id,display_name&display_name=ilike.a_b&limit=5 -> 8",
+            "entity": "resolveForeignKeyValue",
+            "example": "_shared",
+            "subject": "\"a_b\""
+          }
+        ],
+        "occurrences": 3,
+        "synthetic": 3
+      },
+      "mcp": "`display_name=eq.<name>` then `display_name=ilike.<name>`; `*`, `%` and `_` in the name act as wildcards in the fallback.",
+      "reason": "Escape LIKE wildcards in the fallback (or use the exact case-insensitive comparison the import uses).",
+      "recommendation": "mcp-bug",
+      "rule": "FK display-name lookup: the MCP falls back to an unescaped ilike; the import worker requires an exact case-insensitive match"
+    },
+    {
+      "area": "Name resolution",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/tools/list-records.ts:153-170",
+        "tools/mcp-server/src/name-resolver.ts:335-341"
+      ],
+      "frontend": "User filters send the uuid (`col=eq.<uuid>`).",
+      "id": "N-04",
+      "impact": {
+        "adoptFrontend": "MCP can filter by user id.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "mottpark": 1
+        },
+        "count": 1,
+        "examples": [
+          {
+            "detail": "\"33333333-3333-4333-8333-333333333333\" not found in civic_os_users. Check the name and try again.",
+            "entity": "reservation_requests",
+            "example": "mottpark",
+            "subject": "filters (one per filterable property)"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 0
+      },
+      "mcp": "list_records resolves every string on an FK column as a display name (no uuid shortcut, unlike resolveData), so a uuid filter ends in \"not found in civic_os_users\".",
+      "reason": "Share resolveValueForType's id/uuid shortcut with the filter path.",
+      "recommendation": "mcp-bug",
+      "rule": "Filtering a User column by UUID fails in list_records"
+    },
+    {
+      "area": "Name resolution",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/postgrest-client.ts:100-106",
+        "tests/golden/raw/pothole/<role>.es/schema_entities.json"
+      ],
+      "frontend": "The locale interceptor sends the user's language; schema_entities / schema_properties return translated display names.",
+      "id": "N-05",
+      "impact": {
+        "adoptFrontend": "MCP answers in the user's language when a locale is known.",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "pothole": 5
+        },
+        "count": 5,
+        "examples": [
+          {
+            "detail": "en \"Bid\", es \"Ofertas\"",
+            "entity": "Bid",
+            "example": "pothole",
+            "subject": "display_name",
+            "variants": [
+              "anon.es",
+              "testuser.es",
+              "testeditor.es",
+              "testmanager.es",
+              "testadmin.es"
+            ]
+          },
+          {
+            "detail": "en \"Issues\", es \"Problemas\"",
+            "entity": "Issue",
+            "example": "pothole",
+            "subject": "display_name",
+            "variants": [
+              "anon.es",
+              "testuser.es",
+              "testeditor.es",
+              "testmanager.es",
+              "testadmin.es"
+            ]
+          },
+          {
+            "detail": "en \"Tags\", es \"Etiquetas\"",
+            "entity": "Tag",
+            "example": "pothole",
+            "subject": "display_name",
+            "variants": [
+              "anon.es",
+              "testuser.es",
+              "testeditor.es",
+              "testmanager.es",
+              "testadmin.es"
+            ]
+          }
+        ],
+        "occurrences": 25,
+        "synthetic": 0
+      },
+      "mcp": "Always default-language display names; name resolution against translated names is impossible.",
+      "reason": "Product choice: an MCP session has no UI locale; a per-session locale option would be needed.",
+      "recommendation": "needs-decision",
+      "rule": "Locale: the MCP never sends Accept-Language"
+    },
+    {
+      "area": "Name resolution",
+      "decision": null,
+      "evidence": [
+        "tools/mcp-server/src/name-resolver.ts:86-128",
+        "tests/golden/derived/mcp/<variant>/mcp.names.json"
+      ],
+      "frontend": "n/a (no free-text column names).",
+      "id": "N-06",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "neighborhood-hub": 2
+        },
+        "count": 2,
+        "examples": [
+          {
+            "detail": "\"Parcel Number\" -> parcel_number",
+            "entity": "parcels",
+            "example": "neighborhood-hub",
+            "subject": "column parcel_number_formatted byDisplayName",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          },
+          {
+            "detail": "\"PARCEL NUMBER\" -> parcel_number",
+            "entity": "parcels",
+            "example": "neighborhood-hub",
+            "subject": "column parcel_number_formatted byUpperDisplayName",
+            "variants": [
+              "anon",
+              "testuser",
+              "testeditor",
+              "testmanager",
+              "testadmin"
+            ]
+          }
+        ],
+        "occurrences": 10,
+        "synthetic": 0
+      },
+      "mcp": "Exact column name, then exact display name (first match wins on duplicates), then substring.",
+      "reason": "MCP-only behavior that moves to the core with the resolver; decide whether duplicates should be reported as ambiguous.",
+      "recommendation": "needs-decision",
+      "rule": "MCP-only fuzzy matching: duplicate column display names resolve to the first match"
+    },
+    {
+      "area": "Other MCP behavior",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/create/create.page.ts:657-713",
+        "src/app/pages/edit/edit.page.ts:912-978",
+        "tools/mcp-server/src/tools/create-record.ts:60-81",
+        "tools/mcp-server/src/name-resolver.ts:288-344"
+      ],
+      "frontend": "`transformValuesForApi`: DateTimeLocal wall time to UTC ISO, DateTime seconds appended, Money parsed, File/Gallery objects to ids, timestamps dropped.",
+      "id": "X-01",
+      "impact": {
+        "adoptFrontend": "MCP writes get the same normalization (an LLM writing \"2026-07-04T10:30\" to a timestamptz would be stored in the server zone today).",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "client-intake": 1,
+          "community-center": 1,
+          "mottpark": 3,
+          "neighborhood-hub": 3,
+          "pothole": 7,
+          "staff-portal": 3,
+          "storymap": 1
+        },
+        "count": 19,
+        "examples": [
+          {
+            "detail": "File on the create form; the MCP passes the LLM's value through unchanged",
+            "entity": "client_consents",
+            "example": "client-intake",
+            "subject": "evidence_file"
+          },
+          {
+            "detail": "Money on the create form; the MCP passes the LLM's value through unchanged",
+            "entity": "resources",
+            "example": "community-center",
+            "subject": "hourly_rate"
+          },
+          {
+            "detail": "Money on the create form; the MCP passes the LLM's value through unchanged",
+            "entity": "reservation_payment_types",
+            "example": "mottpark",
+            "subject": "base_amount"
+          }
+        ],
+        "occurrences": 19,
+        "synthetic": 0
+      },
+      "mcp": "Only display-name to id resolution (`resolveData`); dates, money and files go to PostgREST exactly as the LLM wrote them.",
+      "reason": "The frontend transforms assume a browser time zone; the MCP has none. The core should expose the transforms with an explicit zone parameter; the MCP must decide which zone an LLM-supplied wall time means.",
+      "recommendation": "needs-decision",
+      "rule": "create_record / update_record send values verbatim (no value transforms)"
+    },
+    {
+      "area": "Other MCP behavior",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/admin-files/admin-files.page.ts:207-225",
+        "src/app/pages/admin-files/admin-files.page.ts:464-505",
+        "src/app/pages/admin-galleries/admin-galleries.page.ts:151-180",
+        "src/app/pages/admin-payments/admin-payments.page.ts:227-270"
+      ],
+      "frontend": "admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\\/(\\d+|\\*)/`, and a raw `%` is sent in `like` patterns.",
+      "id": "X-02",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "app": 3
+        },
+        "count": 3,
+        "examples": [
+          {
+            "detail": "unencoded file name search and entity filters; limit/offset; own Content-Range regex",
+            "entity": "admin-files",
+            "example": "app",
+            "subject": "files / entity queries"
+          },
+          {
+            "detail": "unencoded entity_id search; limit/offset; own Content-Range regex",
+            "entity": "admin-galleries",
+            "example": "app",
+            "subject": "gallery_admin query"
+          },
+          {
+            "detail": "unencoded search inside or=(...) (a comma or parenthesis breaks the expression); limit/offset; own Content-Range regex",
+            "entity": "admin-payments",
+            "example": "app",
+            "subject": "payment_transactions query"
+          }
+        ],
+        "occurrences": 3,
+        "synthetic": 0
+      },
+      "mcp": "n/a (no admin tools).",
+      "reason": "Porting admin pages is out of SDK scope, but the encoding hazard (a search containing `&`, `,` or `)` corrupts the query) should be fixed separately, ideally by building these queries with the core query builder once it exists.",
+      "recommendation": "frontend-bug",
+      "rule": "Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core)"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:55-69",
+        "tests/golden/derived/frontend/_shared/data.query-matrix.json",
+        "tests/golden/derived/mcp/_shared/data.query-matrix.json"
+      ],
+      "frontend": "Concatenates `col=op.value` and `id=eq.<id>` unencoded: `&`, `#`, `+`, `%`, `=` and `?` split or corrupt the query.",
+      "id": "F-01",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "Generic app sends filter values intact (approved golden diff on the encoded cases)."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 7
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "intended id=eq.a&b=c; frontend sends select=id & id=eq.a & b=c; MCP sends it intact",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "entityId with specials"
+          },
+          {
+            "detail": "intended name=eq.50%25; frontend sends select=id & name=eq.50%; MCP sends it intact",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "filter eq \"50%25\""
+          },
+          {
+            "detail": "intended name=eq.a&b; frontend sends select=id & name=eq.a & b=; MCP sends it intact",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "filter eq \"a&b\""
+          }
+        ],
+        "occurrences": 7,
+        "synthetic": 7
+      },
+      "mcp": "URLSearchParams encodes every parameter; the same inputs arrive intact (`<PGRST>/items?name=eq.a%26b`).",
+      "reason": "Encode values in the core query builder; the MCP already does.",
+      "recommendation": "frontend-bug",
+      "rule": "Filter values and entityId are not URL-encoded (only the search term is)"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:131-143",
+        "tests/golden/derived/frontend/_shared/data.query-matrix.json"
+      ],
+      "frontend": "`Range: -25--1` (page 0), `-50--26` (page -1), `0--1` (pageSize 0), `15-24` (page 2.5).",
+      "id": "F-02",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "Generic app validates pagination input."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 3
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend Range -50--26; MCP rejects (offset: too_small)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "pagination -1/25"
+          },
+          {
+            "detail": "frontend Range -25--1; MCP rejects (offset: too_small)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "pagination 0/25"
+          },
+          {
+            "detail": "frontend Range 0--1; MCP rejects (limit: too_small)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "pagination 1/0"
+          }
+        ],
+        "occurrences": 3,
+        "synthetic": 3
+      },
+      "mcp": "The equivalent offset/limit is rejected by list_records input validation (negative offset, limit 0); page 2.5 maps to offset 15, limit 10, the same Range.",
+      "reason": "Validate page >= 1 and pageSize >= 1 (integers) in the core.",
+      "recommendation": "frontend-bug",
+      "rule": "page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24`"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/edit/edit.page.ts:839-880",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json",
+        "tests/golden/derived/frontend/<variant>/transforms.rows.json"
+      ],
+      "frontend": "Invalid Date is formatted field by field without a validity check.",
+      "id": "F-03",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1,
+          "client-intake": 1,
+          "community-center": 1,
+          "neighborhood-hub": 1,
+          "pothole": 1,
+          "staff-portal": 1
+        },
+        "count": 5,
+        "examples": [
+          {
+            "detail": "8 occurrence(s) of NaN-NaN-NaNTNaN:NaN",
+            "entity": "transforms.dst-edges.json",
+            "example": "_shared",
+            "subject": "NaN control value"
+          },
+          {
+            "detail": "1 occurrence(s) of NaN-NaN-NaNTNaN:NaN",
+            "entity": "transforms.rows.json",
+            "example": "client-intake",
+            "subject": "NaN control value"
+          },
+          {
+            "detail": "1 occurrence(s) of NaN-NaN-NaNTNaN:NaN",
+            "entity": "transforms.rows.json",
+            "example": "community-center",
+            "subject": "NaN control value"
+          }
+        ],
+        "occurrences": 6,
+        "synthetic": 1
+      },
+      "mcp": "No counterpart (the MCP has no form controls).",
+      "reason": "Return empty (or the raw value) for invalid dates.",
+      "recommendation": "frontend-bug",
+      "rule": "Garbage or empty DateTimeLocal becomes \"NaN-NaN-NaNTNaN:NaN\" in transformValueForControl"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/error.service.ts:106-126",
+        "tools/mcp-server/src/postgrest-client.ts:225-251",
+        "tools/mcp-server/src/index.ts:215-231",
+        "tests/golden/derived/frontend/<example>/_example/errors.lookup.json"
+      ],
+      "frontend": "\"System Error\" for all of these.",
+      "id": "F-04",
+      "impact": {
+        "adoptFrontend": "MCP loses its friendlier messages.",
+        "adoptMcp": "Generic app explains missing required fields, bad numbers and bad dates instead of \"System Error\"."
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 13
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend \"System Error\", MCP throws MaintenanceError (full)",
+            "entity": "client",
+            "example": "_shared",
+            "subject": "503 PT503"
+          },
+          {
+            "detail": "frontend \"System Error\", MCP \"Invalid date format. Use YYYY-MM-DD for dates or YYYY-MM-DDTHH:MM:SS for timestamps.\"",
+            "entity": "parseToHuman",
+            "example": "_shared",
+            "subject": "{\"code\":\"22007\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"invalid input syntax for type date: \\\"x\\\"\"}"
+          },
+          {
+            "detail": "frontend \"System Error\", MCP \"Invalid value — expected a whole number. Check the value and try again.\"",
+            "entity": "parseToHuman",
+            "example": "_shared",
+            "subject": "{\"code\":\"22P02\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"invalid input syntax for type integer: \\\"abc\\\"\"}"
+          }
+        ],
+        "occurrences": 97,
+        "synthetic": 13
+      },
+      "mcp": "23502 \"Required field \\\"c\\\" is missing.\", 22P02 names the expected type (\"a whole number\", \"a date (YYYY-MM-DD)\", ...),22007/22008 \"Invalid date format...\", 412 handled; 23503 and PGRST116 fall back to \"Error: <raw message>\"; PT503 throws MaintenanceError at the client and index.ts returns a maintenance explanation.",
+      "reason": "Strictly better for 23502 / 22P02 / 22007 / 22008 / 412. 23503 (FK violation) and PGRST116 need a message on both sides; PT503 is handled by the frontend's maintenance interceptor, so its parseToHuman text rarely shows.",
+      "recommendation": "adopt-mcp",
+      "rule": "parseToHuman returns \"System Error\" for 23503, 23502, 22P02, 22007, PGRST116 and PT503 (PGRST301 only via HTTP 401)"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json",
+        "src/app/utils/date.utils.ts"
+      ],
+      "frontend": "A nonexistent local time is shifted forward by the Date constructor and stored as 03:30 EDT.",
+      "id": "F-05",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "stored as 2026-03-08T07:30:00.000Z (03:30 EDT)",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "America/New_York 2026-03-08T02:30"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "mcp": "No counterpart (values are sent verbatim, see X-01).",
+      "reason": "Forward-shift is a defensible policy; the alternative is rejecting nonexistent local times. Decide before the core fixes the semantics in its transforms.",
+      "recommendation": "needs-decision",
+      "rule": "New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift)"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/create/create.page.ts:657-713",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
+      ],
+      "frontend": "Only 16-character values are converted; `2026-07-04T10:30:00` is sent unchanged, so a DateTimeLocal with seconds reaches PostgreSQL without an offset and is read in the server zone.",
+      "id": "F-06",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "DateTimeLocal sent without conversion in every zone",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "2026-07-04T10:30:00"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "mcp": "No counterpart (values verbatim, X-01).",
+      "reason": "Data-integrity risk for any input that carries seconds (programmatic or pasted values).",
+      "recommendation": "frontend-bug",
+      "rule": "DateTime / DateTimeLocal transforms ignore 19-character strings (with seconds)"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/schema.service.ts:762-774",
+        "tests/golden/derived/frontend/neighborhood-hub/<variant>/schema.properties.json",
+        "tests/golden/derived/frontend/neighborhood-hub/<variant>/schema.m2m.json"
+      ],
+      "frontend": "The edit variant ignores `parentHops` and builds `junction!col(target!target_col(...))` with the wrong related table.",
+      "id": "F-07",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "neighborhood-hub": 3
+        },
+        "count": 3,
+        "examples": [
+          {
+            "detail": "edit select work_site_parcels_m2m:work_site_parcels!parcel_id(tool_reservations!work_site_id(id,display_name))",
+            "entity": "parcels",
+            "example": "neighborhood-hub",
+            "subject": "work_site_parcels_m2m"
+          },
+          {
+            "detail": "edit select mek_request_equipment_items_m2m:mek_request_equipment_items!tool_type_id(mek_requests!mek_request_equipment_id(id,display_name))",
+            "entity": "tool_types",
+            "example": "neighborhood-hub",
+            "subject": "mek_request_equipment_items_m2m"
+          },
+          {
+            "detail": "edit select tool_reservation_tool_items_m2m:tool_reservation_tool_items!tool_type_id(tool_reservations!tool_reservation_tools_id(id,display_name))",
+            "entity": "tool_types",
+            "example": "neighborhood-hub",
+            "subject": "tool_reservation_tool_items_m2m"
+          }
+        ],
+        "occurrences": 3,
+        "synthetic": 0
+      },
+      "latent": "latent in the app: parent-hop M:M fields are not on the edit form",
+      "mcp": "No counterpart (no M:M, T-12).",
+      "reason": "Build the edit variant from the same parent-hop logic, or exclude parent-hop M:M from edit selects explicitly.",
+      "recommendation": "frontend-bug",
+      "rule": "propertyToSelectStringForEdit drops parent hops and emits an invalid embed for parent-hop M:M"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/create/create.page.ts:657-713",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
+      ],
+      "frontend": "`2026-02-30T10:00` becomes `2026-02-30T10:00:00`; any 16-character text is accepted.",
+      "id": "F-08",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "DateTime sent as 2026-02-30T10:00:00 (PostgreSQL rejects it, the user sees a generic error)",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "2026-02-30T10:00"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "mcp": "No counterpart (X-01).",
+      "reason": "Validate before appending seconds.",
+      "recommendation": "frontend-bug",
+      "rule": "DateTime appends \":00\" to ANY 16-character string, including garbage and impossible dates"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/create/create.page.ts:657-713",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
+      ],
+      "frontend": "Invalid day, month 13, hour 24 or garbage of length 16 is sent as the raw local string, so PostgreSQL either rejects it or reads it in the server zone.",
+      "id": "F-09",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 3
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "DateTimeLocal sent as 2026-02-30T10:00 (no zone)",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "2026-02-30T10:00"
+          },
+          {
+            "detail": "DateTimeLocal sent as 2026-07-04T24:00 (no zone)",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "2026-07-04T24:00"
+          },
+          {
+            "detail": "DateTimeLocal sent as 2026-13-01T10:00 (no zone)",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "2026-13-01T10:00"
+          }
+        ],
+        "occurrences": 3,
+        "synthetic": 3
+      },
+      "mcp": "No counterpart (X-01).",
+      "reason": "Reject invalid local times in the transform instead of passing them through.",
+      "recommendation": "frontend-bug",
+      "rule": "A 16-character DateTimeLocal that parseDatetimeLocal rejects is sent unconverted"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/edit/edit.page.ts:839-880",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
+      ],
+      "frontend": "transformValueForControl for DateTimeLocal shows `2026-07-04` as 2026-07-03T20:00 in New York; `2026-07-04T17:30:00` (no offset) is treated as local.",
+      "id": "F-10",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "DateTimeLocal control shows 2026-07-03T20:00",
+            "entity": "transforms.dst-edges",
+            "example": "_shared",
+            "subject": "control 2026-07-04 (America/New_York)"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "mcp": "No counterpart.",
+      "reason": "JavaScript Date parsing rules leak into the UI; the core transform should parse with explicit rules.",
+      "recommendation": "frontend-bug",
+      "rule": "Date-only control values parse as UTC midnight; offset-less timestamps parse as local time"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/edit/edit.page.ts:839-880",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
+      ],
+      "frontend": "Strips `$` and `,` then parses; anything else passes through as a string.",
+      "id": "F-11",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 4
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "control value 123",
+            "entity": "transforms.dst-edges money",
+            "example": "_shared",
+            "subject": "$1,2,3"
+          },
+          {
+            "detail": "control value \"(1.00)\"",
+            "entity": "transforms.dst-edges money",
+            "example": "_shared",
+            "subject": "(1.00)"
+          },
+          {
+            "detail": "control value \"abc\"",
+            "entity": "transforms.dst-edges money",
+            "example": "_shared",
+            "subject": "abc"
+          }
+        ],
+        "occurrences": 4,
+        "synthetic": 4
+      },
+      "mcp": "No counterpart (money is sent verbatim, X-01).",
+      "reason": "Parse PostgreSQL money output (negative parentheses, locale symbols) explicitly or reject.",
+      "recommendation": "frontend-bug",
+      "rule": "Money control returns raw strings for (1.00), €10.00 and abc; \"$1,2,3\" becomes 123"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/pages/create/create.page.ts:657-713",
+        "tests/golden/derived/frontend/_shared/transforms.dst-edges.json"
+      ],
+      "frontend": "A null gallery is posted as `gallery: null` instead of being omitted (galleries are linked after insert).",
+      "id": "F-12",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "create payload keeps gallery: null",
+            "entity": "transforms.dst-edges shapes",
+            "example": "_shared",
+            "subject": "gallery null"
+          }
+        ],
+        "occurrences": 1,
+        "synthetic": 1
+      },
+      "mcp": "No counterpart.",
+      "reason": "Omit the key consistently (null is harmless today only because the column is nullable).",
+      "recommendation": "frontend-bug",
+      "rule": "CreatePage deletes the PhotoGallery key only when the value is non-null, so null is sent"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:61-66",
+        "tools/mcp-server/src/tools/list-records.ts:180-191",
+        "tests/golden/derived/frontend/_shared/data.query-matrix.json",
+        "tests/golden/derived/frontend/<example>/_example/data.queries.json"
+      ],
+      "frontend": "`in.(a,b,c d,(e),1,,)` for values containing commas or parentheses, which PostgREST splits.",
+      "id": "F-13",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 1,
+          "client-intake": 4,
+          "mottpark": 3,
+          "neighborhood-hub": 3,
+          "staff-portal": 10,
+          "storymap": 4
+        },
+        "count": 24,
+        "examples": [
+          {
+            "detail": "frontend c=in.(a,b,c d,(e),1,,); MCP rejects a null array item (filters.0.value: invalid_union)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "in array with specials"
+          },
+          {
+            "detail": "frontend sends in.() and in.not-an-array; MCP fails: Category \"\" not found for entity type \"gender\". Available: \"",
+            "entity": "clients",
+            "example": "client-intake",
+            "subject": "filters with in-array, empty and null values"
+          },
+          {
+            "detail": "frontend sends in.() and in.not-an-array; MCP fails: Status \"\" not found for entity type \"reservation_request\". A",
+            "entity": "manager_events",
+            "example": "mottpark",
+            "subject": "filters with in-array, empty and null values"
+          }
+        ],
+        "occurrences": 25,
+        "synthetic": 1
+      },
+      "mcp": "Same `in.()` / `in.not-an-array` / unquoted items for the inputs it accepts (`and=(...)` in the per-entity cases, Q-09); rejects null items at input validation.",
+      "reason": "Both sides share the quoting gap (a value with a comma is split). Suggested core rule: drop empty in-lists, quote items, keep `eq.false` / `eq.0` (valid).",
+      "recommendation": "needs-decision",
+      "rule": "The in filter emits `in.()`, `in.not-an-array` and empty items (`1,,`); `eq.false` and `eq.0` are emitted; in-list items are never quoted"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/data.service.ts:148-161",
+        "src/app/services/data.service.ts:723-728",
+        "tests/golden/derived/frontend/_shared/data.content-range.json"
+      ],
+      "frontend": "getDataPaginated uses `/\\/(\\d+|\\*)$/` and falls back to the row count; the inverse preview uses `/\\/(\\d+)$/` and falls back to 0 when the header is missing.",
+      "id": "F-14",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 2
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "paginated 2, preview 0",
+            "entity": "data.content-range",
+            "example": "_shared",
+            "subject": "\"\""
+          },
+          {
+            "detail": "paginated 2, preview 0",
+            "entity": "data.content-range",
+            "example": "_shared",
+            "subject": "\"null\""
+          }
+        ],
+        "occurrences": 2,
+        "synthetic": 2
+      },
+      "mcp": "A third parser (Q-16).",
+      "reason": "One parser in the core.",
+      "recommendation": "frontend-bug",
+      "rule": "The two frontend Content-Range parsers disagree on missing, empty or unknown totals"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/error.service.ts:106-126",
+        "tools/mcp-server/src/postgrest-client.ts:247-252",
+        "tests/golden/derived/frontend/<example>/_example/errors.lookup.json"
+      ],
+      "frontend": "Empty RAISE message gives an empty error text; `{401, P0001}` reads \"session expired\", `{404, P0001}` \"Resource not found\".",
+      "id": "F-15",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 4
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "frontend \"\", MCP \"\"",
+            "entity": "errors.lookup",
+            "example": "_shared",
+            "subject": "{\"code\":\"P0001\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"\"}"
+          },
+          {
+            "detail": "frontend \"Custom RAISE EXCEPTION text\", MCP \"Custom RAISE EXCEPTION text\"",
+            "entity": "errors.lookup",
+            "example": "_shared",
+            "subject": "{\"code\":\"P0001\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"Custom RAISE EXCEPTION text\"}"
+          },
+          {
+            "detail": "frontend \"Your session has expired. Please refresh the page to log in again.\", MCP \"Authentication required. Your session may have expired.\"",
+            "entity": "errors.lookup",
+            "example": "_shared",
+            "subject": "{\"code\":\"P0001\",\"httpCode\":401,\"humanMessage\":\"\",\"message\":\"raise\"}"
+          }
+        ],
+        "occurrences": 4,
+        "synthetic": 4
+      },
+      "mcp": "Identical outcome classes: empty P0001 returns \"\", 401/404 are checked before P0001 (only the wording differs, E-01).",
+      "reason": "An empty RAISE message should fall back to a generic text; status-over-code precedence is reasonable but should be explicit in the core.",
+      "recommendation": "needs-decision",
+      "rule": "P0001 with an empty message returns \"\"; under HTTP 401/404 the status wins over the code"
+    },
+    {
+      "area": "Frontend quirks",
+      "decision": null,
+      "evidence": [
+        "src/app/services/guided-form.service.ts:262-279",
+        "src/app/utils/condition-evaluator.ts",
+        "tests/golden/derived/frontend/_shared/conditions.matrix.json",
+        "tests/golden/derived/frontend/_shared/conditions.guided-form-matrix.json"
+      ],
+      "frontend": "GuidedFormService compares `String(value) === condition.value` and returns true for `neq null` on a null field; the action evaluator is strict and returns false for `ne null` on null.",
+      "id": "F-16",
+      "impact": {
+        "adoptFrontend": "n/a",
+        "adoptMcp": "n/a"
+      },
+      "instances": {
+        "byExample": {
+          "_shared": 4
+        },
+        "count": 0,
+        "examples": [
+          {
+            "detail": "guided form false, action true",
+            "entity": "conditions matrices",
+            "example": "_shared",
+            "subject": "eq null / eq null @ null"
+          },
+          {
+            "detail": "guided form false, action true",
+            "entity": "conditions matrices",
+            "example": "_shared",
+            "subject": "eq null / eq null @ {\"id\":null}"
+          },
+          {
+            "detail": "guided form true, action false",
+            "entity": "conditions matrices",
+            "example": "_shared",
+            "subject": "neq null / ne null @ null"
+          }
+        ],
+        "occurrences": 4,
+        "synthetic": 4
+      },
+      "mcp": "No guided forms; its action evaluator is a third behavior (C-02).",
+      "reason": "One condition evaluator in the core; guided-form conditions store string values, so the core needs an explicit coercion rule for them.",
+      "recommendation": "needs-decision",
+      "rule": "The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null)"
+    }
+  ]
+}

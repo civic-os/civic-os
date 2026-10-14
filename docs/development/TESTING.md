@@ -991,3 +991,11 @@ scripts/golden/derive-frontend.sh --check   # compare only, same as the golden s
 ```
 
 A normal run only compares. A changed, missing or orphan artifact fails the spec and names the file with the first differing lines; nothing is written without `GOLDEN_UPDATE=1`. Writes are deterministic (sorted keys, stable ordering, trailing newline). Time zones (UTC, America/New_York, Asia/Kolkata, Australia/Lord_Howe) are switched in-process with `process.env.TZ` and restored in `finally`, so every run covers the whole matrix whatever the machine's zone; derive under a different `TZ=` to prove it (the output must not change). The golden specs import page classes and call their private transform methods from the prototype with a stand-in `this` (`currentProps` only), so no component is instantiated.
+
+The MCP server has the same kind of goldens: `tools/mcp-server/src/__tests__/golden/*.golden.test.ts` run the real MCP code (SchemaCache over a fixture-backed `fetch` stub, select builder, name resolver, the `list_records` / `get_record` / `execute_action` tools) and compare with `tests/golden/derived/mcp/` (`COVERAGE.md` there maps each MCP function to its artifact). Where a frontend artifact exists, the MCP artifact has the same name and shape and takes its inputs from the frontend file, so derive the frontend goldens first when both change. `node scripts/golden/ledger.mjs` then diffs the two trees into the divergence ledger (`docs/notes/SDK_DIVERGENCE_LEDGER.md`, `tests/golden/ledger.json`); `--check` fails when the committed ledger is stale.
+
+```bash
+scripts/golden/derive-mcp.sh                # regenerate (GOLDEN_UPDATE=1); a normal `npm test` in tools/mcp-server compares
+scripts/golden/derive-mcp.sh --check        # compare only
+node scripts/golden/ledger.mjs [--check]    # rewrite (or verify) the divergence ledger from both golden trees
+```
