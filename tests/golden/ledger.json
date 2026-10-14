@@ -2,14 +2,18 @@
   "coverage": {
     "bothReject": 251,
     "comparisons": {
-      "action-case": 151,
+      "action-case": 158,
       "condition": 3239,
+      "condition-describe": 46,
       "content-range": 11,
       "error": 883,
+      "es-model": 415,
+      "fe-hybrid-model": 130,
+      "fe-view-model": 2015,
       "name": 469,
       "property": 3952,
       "query": 1696,
-      "type-probe": 21,
+      "type-probe": 64,
       "view": 1612
     },
     "mappingArtifacts": 1,
@@ -79,13 +83,13 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP IntegerNumber (select col); frontend (from code) ForeignKeyName",
+            "detail": "MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) ForeignKeyName",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "int4 join_column only"
           },
           {
-            "detail": "MCP IntegerNumber (select col); frontend (from code) Status",
+            "detail": "MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) Status",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "status int4 join_column only"
@@ -121,19 +125,19 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP Category (select col:categories!col(id,display_name,color)); frontend (from code) TextShort",
+            "detail": "MCP Category (select col:categories!col(id,display_name,color)); frontend (model of schema.service.ts:633-692) TextShort",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "category varchar fk"
           },
           {
-            "detail": "MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (from code) TextLong",
+            "detail": "MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (model of schema.service.ts:633-692) TextLong",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "status text fk"
           },
           {
-            "detail": "MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (from code) Unknown",
+            "detail": "MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "status uuid fk"
@@ -193,7 +197,7 @@
         "entities": 1,
         "examples": [
           {
-            "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (from code) ForeignKeyName",
+            "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) ForeignKeyName",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "civic_os_users int8"
@@ -211,7 +215,7 @@
             ]
           },
           {
-            "detail": "MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (from code) ForeignKeyName",
+            "detail": "MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) ForeignKeyName",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "files int8 fk"
@@ -247,7 +251,7 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (from code) Unknown",
+            "detail": "MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "civic_os_users_private uuid"
@@ -283,7 +287,7 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP Payment (select col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)); frontend (from code) Unknown",
+            "detail": "MCP Payment (select col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "transactions uuid public schema"
@@ -319,7 +323,7 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP FileImage (select col:files!col(id,file_name,file_type,file_size)); frontend (from code) File",
+            "detail": "MCP FileImage (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) File",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "files uuid \"image\" (no slash)"
@@ -355,19 +359,19 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP GeoPoint (select col:col_text); frontend (from code) Unknown",
+            "detail": "MCP GeoPoint (select col:col_text); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "geography LineString"
           },
           {
-            "detail": "MCP GeoPolygon (select col:col_text); frontend (from code) Unknown",
+            "detail": "MCP GeoPolygon (select col:col_text); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "geography MultiPolygon"
           },
           {
-            "detail": "MCP Unknown (select col); frontend (from code) GeoPoint",
+            "detail": "MCP Unknown (select col); frontend (model of schema.service.ts:633-692) GeoPoint",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "geography Point data_type not USER-DEFINED"
@@ -403,13 +407,13 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP ForeignKeyName (select col:parents!col(id,display_name)); frontend (from code) Unknown",
+            "detail": "MCP ForeignKeyName (select col:parents!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "int2 fk"
           },
           {
-            "detail": "MCP IntegerNumber (select col); frontend (from code) Unknown",
+            "detail": "MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "int2 plain"
@@ -447,7 +451,7 @@
         "entities": 5,
         "examples": [
           {
-            "detail": "MCP ForeignKeyName (select col:documents!col(id,display_name)); frontend (from code) Unknown",
+            "detail": "MCP ForeignKeyName (select col:documents!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "uuid fk public non-system"
@@ -508,7 +512,7 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP TextShort (select col); frontend (from code) Unknown",
+            "detail": "MCP TextShort (select col); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "bpchar"
@@ -544,7 +548,7 @@
         "entities": 0,
         "examples": [
           {
-            "detail": "MCP ForeignKeyName (select col:codes!col(id,display_name)); frontend (from code) Unknown",
+            "detail": "MCP ForeignKeyName (select col:codes!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown",
             "entity": "mcp.type-probes",
             "example": "_shared",
             "subject": "citext fk (unknown udt)"
@@ -1874,7 +1878,7 @@
         "src/app/utils/condition-evaluator.ts:83-86",
         "tools/mcp-server/src/tools/execute-action.ts:240"
       ],
-      "frontend": "`if (!condition) return true`.",
+      "frontend": "`if (!condition) return true`; `or` / `and` count as compounds only when they are arrays (`'or' in c && Array.isArray(c.or)`), so `{or: 'x'}` or `{and: 5}` is evaluated as a simple condition.",
       "id": "C-06",
       "impact": {
         "adoptFrontend": "Core evaluator is total; no MCP output change.",
@@ -1904,15 +1908,15 @@
         "synthetic": 2
       },
       "latent": "unreachable through current MCP callers; shown by the synthetic compound cases",
-      "mcp": "`'or' in condition` throws a TypeError on null/undefined; callers guard with `if (action.visibility_condition)`.",
+      "mcp": "`'or' in condition` throws a TypeError on null/undefined, and `condition.or.some` / `condition.and.every` throw on a non-array value; callers guard only against a missing condition (`if (action.visibility_condition)`).",
       "reason": "A total function is the right core contract.",
       "recommendation": "adopt-frontend",
-      "rule": "Missing condition (null/undefined): the frontend returns true; the MCP throws"
+      "rule": "Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws"
     },
     {
       "area": "Actions end to end",
       "computedNotes": [
-        "38 (action, case) pairs disagree with the frontend evaluator; in 0 of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused)."
+        "38 (action, case) pairs in the examples disagree with the frontend evaluator; in 0 of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused)."
       ],
       "decision": null,
       "evidence": [
@@ -1929,6 +1933,7 @@
       },
       "instances": {
         "byExample": {
+          "_shared": 2,
           "community-center": 3,
           "mottpark": 5,
           "neighborhood-hub": 11,
@@ -1937,6 +1942,12 @@
         "count": 29,
         "entities": 8,
         "examples": [
+          {
+            "detail": "satisfies all conditions: MCP disabled / get_record listed-disabled; correct executed / listed",
+            "entity": "tasks",
+            "example": "_shared",
+            "subject": "close"
+          },
           {
             "detail": "satisfies all conditions: MCP disabled / get_record listed-disabled; correct executed / listed",
             "entity": "reservation_requests",
@@ -1948,16 +1959,10 @@
             "entity": "reservation_requests",
             "example": "mottpark",
             "subject": "approve"
-          },
-          {
-            "detail": "satisfies all conditions: MCP not-available / get_record hidden; correct executed / listed",
-            "entity": "mek_requests",
-            "example": "neighborhood-hub",
-            "subject": "approve"
           }
         ],
-        "occurrences": 38,
-        "synthetic": 0
+        "occurrences": 40,
+        "synthetic": 2
       },
       "mcp": "With the record the MCP fetches (Status/FK columns embedded), `status_id eq 5` never holds, so execute_action refuses the action (disabled / not available) and get_record hides or greys it; `status_id ne 6` always holds, so an action stays listed in the wrong state, but its `eq` enabled condition still refuses it. Evidence confidence 4/5: the golden stub cannot reject a select, so the record shape is the one the MCP's select requests (one embed per FK), not one PostgREST returned.",
       "reason": "Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions cannot be run through the MCP in community-center, mottpark, neighborhood-hub and staff-portal.",

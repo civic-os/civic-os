@@ -37,7 +37,7 @@ const FEG = 'tests/golden/derived/frontend';
 const MCG = 'tests/golden/derived/mcp';
 
 export const AREAS = [
-  { name: 'Type detection', intro: '`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`.' },
+  { name: 'Type detection', intro: '`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`. Every probe is compared: its frontend type comes from the transcription of `getPropertyType` in `scripts/golden/ledger-models.mjs` (`feType`), which is checked against the frontend type of every fixture property; branches no fixture exercises (int2, bpchar, MultiPolygon, non-uuid system FKs, timestamp until P0.5 adds a real column) are anchored by that transcription only (follow-up: run the probe inputs through the frontend golden harness).' },
   { name: 'Select strings', intro: '`SchemaService.propertyToSelectString[ForList]` vs MCP `propertyToSelectString`. Artifacts: `<variant>/schema.properties.json` `select`. Differences caused by a type rule are counted as that rule\'s effects.' },
   { name: 'View property lists', intro: '`getPropsForList/Detail/Create/Edit` vs MCP `filterProperties`. Artifacts: `<variant>/schema.views.json`. Order differences confined to `sort_order` ties are capture artifacts and not counted.' },
   { name: 'Condition evaluation', intro: '`utils/condition-evaluator.ts` vs MCP `evaluateCondition` over identical condition / record inputs. Artifacts: `_example/conditions.actions.json`, `_shared/conditions.matrix.json`. Counts are (condition, record) pairs; `_shared` matrix cells are reported as synthetic.' },
@@ -424,9 +424,9 @@ export const RULES = [
   },
   {
     id: 'C-06', area: C,
-    rule: 'Missing condition (null/undefined): the frontend returns true; the MCP throws',
-    frontend: '`if (!condition) return true`.',
-    mcp: '`\'or\' in condition` throws a TypeError on null/undefined; callers guard with `if (action.visibility_condition)`.',
+    rule: 'Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws',
+    frontend: '`if (!condition) return true`; `or` / `and` count as compounds only when they are arrays (`\'or\' in c && Array.isArray(c.or)`), so `{or: \'x\'}` or `{and: 5}` is evaluated as a simple condition.',
+    mcp: '`\'or\' in condition` throws a TypeError on null/undefined, and `condition.or.some` / `condition.and.every` throw on a non-array value; callers guard only against a missing condition (`if (action.visibility_condition)`).',
     evidence: [`${CE}:83-86`, `${EA}:240`],
     checks: [{ file: EA, contains: ["if ('or' in condition) {"] }],
     latent: 'unreachable through current MCP callers; shown by the synthetic compound cases',

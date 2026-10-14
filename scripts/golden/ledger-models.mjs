@@ -90,6 +90,132 @@ export function feBase(view, p) {
 export const STRUCTURAL = ['display_name', 'status_id', 'submitted_at'];
 
 // ---------------------------------------------------------------------------
+// Type detection (both sides, transcribed)
+// ---------------------------------------------------------------------------
+
+const FE_SYSTEM = ['files', 'civic_os_users', 'payment_transactions', 'transactions', 'statuses', 'photo_galleries'];
+/** constants/system-types.ts isSystemType. */
+function feIsSystemType(t) {
+  if (t.includes('.')) {
+    const [schema, table] = t.split('.');
+    return schema === 'metadata' && FE_SYSTEM.includes(table);
+  }
+  return FE_SYSTEM.includes(t);
+}
+
+/** SchemaService.getPropertyType (schema.service.ts:633-692), as a type name. */
+export function feType(v) {
+  const udt = v.udt_name;
+  if (v.status_entity_type && INT.includes(udt) && v.join_column != null) return 'Status';
+  if (v.category_entity_type && INT.includes(udt) && v.join_column != null) return 'Category';
+  if (udt === 'uuid' && v.join_table && feIsSystemType(v.join_table)) {
+    if (v.join_table === 'files') {
+      const fv = (v.validation_rules ?? []).find(r => r.type === 'fileType');
+      if (fv?.value) {
+        if (fv.value.startsWith('image/')) return 'FileImage';
+        if (fv.value === 'application/pdf') return 'FilePDF';
+      }
+      return 'File';
+    } else if (v.join_table === 'civic_os_users') {
+      return 'User';
+    } else if (v.join_table === 'payment_transactions' || (v.join_table === 'transactions' && v.join_schema === 'payments')) {
+      return 'Payment';
+    } else if (v.join_table === 'photo_galleries') {
+      return 'PhotoGallery';
+    }
+  }
+  /* eslint-disable eqeqeq */
+  return (INT.includes(udt) && v.join_column != null) ? 'ForeignKeyName'
+    : (udt === 'geography' && v.geography_type == 'Polygon') ? 'GeoPolygon'
+    : (udt === 'geography' && v.geography_type == 'Point') ? 'GeoPoint'
+    : udt === 'timestamp' ? 'DateTime'
+    : udt === 'timestamptz' ? 'DateTimeLocal'
+    : udt === 'date' ? 'Date'
+    : udt === 'bool' ? 'Boolean'
+    : INT.includes(udt) ? 'IntegerNumber'
+    : udt === 'money' ? 'Money'
+    : ['numeric', 'float4', 'float8'].includes(udt) ? 'DecimalNumber'
+    : udt === 'hex_color' ? 'Color'
+    : udt === 'email_address' ? 'Email'
+    : udt === 'phone_number' ? 'Telephone'
+    : (udt === 'time_slot' && v.is_recurring) ? 'RecurringTimeSlot'
+    : udt === 'time_slot' ? 'TimeSlot'
+    : udt === 'markdown' ? 'Markdown'
+    : udt === 'varchar' ? 'TextShort'
+    : udt === 'text' ? 'TextLong'
+    : 'Unknown';
+  /* eslint-enable eqeqeq */
+}
+
+/** MCP schema-cache.ts detectPropertyType (437-515), as a type name. */
+export function mcpType(p) {
+  const { udt_name: udt, join_table: jt, join_column: jc, data_type: dt, geography_type: gt } = p;
+  const hasFK = !!jt && !!jc;
+  if (p.status_entity_type && hasFK) return 'Status';
+  if (p.category_entity_type && hasFK) return 'Category';
+  if (hasFK) {
+    if (jt === 'files') {
+      const r = (p.validation_rules ?? []).find(x => x.type === 'fileType');
+      if (r?.value?.startsWith('image')) return 'FileImage';
+      if (r?.value === 'application/pdf') return 'FilePDF';
+      return 'File';
+    }
+    if (jt === 'civic_os_users' || jt === 'civic_os_users_private') return 'User';
+    if (jt === 'payment_transactions' || jt === 'transactions') return 'Payment';
+    if (jt === 'photo_galleries') return 'PhotoGallery';
+  }
+  if (dt === 'USER-DEFINED' && udt === 'geography') return gt === 'Polygon' || gt === 'MultiPolygon' ? 'GeoPolygon' : 'GeoPoint';
+  switch (udt) {
+    case 'timestamp': return 'DateTime';
+    case 'timestamptz': return 'DateTimeLocal';
+    case 'date': return 'Date';
+    case 'bool': return 'Boolean';
+    case 'money': return 'Money';
+    case 'numeric': case 'float4': case 'float8': return 'DecimalNumber';
+    case 'hex_color': return 'Color';
+    case 'email_address': return 'Email';
+    case 'phone_number': return 'Telephone';
+    case 'markdown': return 'Markdown';
+    case 'time_slot': return p.is_recurring ? 'RecurringTimeSlot' : 'TimeSlot';
+    case 'int4': case 'int8': case 'int2': return hasFK ? 'ForeignKeyName' : 'IntegerNumber';
+    case 'uuid': return hasFK ? 'ForeignKeyName' : 'TextShort';
+    case 'varchar': case 'bpchar': return 'TextShort';
+    case 'text': return 'TextLong';
+    default: return hasFK ? 'ForeignKeyName' : 'Unknown';
+  }
+}
+
+/**
+ * SchemaService.getPropsForList/Detail/Create/Edit/Filter (schema.service.ts:848-948)
+ * as column sets, over the entity's properties including M:M virtual ones (each with `.type`).
+ */
+export function feViews(props, ent) {
+  const cols = arr => arr.map(p => p.column_name);
+  const add = (base, view) => {
+    const out = [...base];
+    for (const c of STRUCTURAL) {
+      const p = props.find(x => x.column_name === c);
+      if (p && !out.includes(p)) out.push(p);
+    }
+    void view;
+    return out;
+  };
+  const list = props.filter(p => p.show_on_list !== false);
+  if (ent?.show_map && ent.map_property_name) {
+    const mp = props.find(p => p.column_name === ent.map_property_name);
+    if (mp && !list.includes(mp)) list.push(mp);
+  }
+  const filterTypes = ['ForeignKeyName', 'DateTime', 'DateTimeLocal', 'Date', 'Boolean', 'IntegerNumber', 'Money', 'User', 'Status', 'Category'];
+  return {
+    list: cols(add(list, 'list')),
+    detail: cols(add(props.filter(p => p.show_on_detail !== false), 'detail')),
+    create: cols(props.filter(p => feBase('create', p))),
+    edit: cols(add(props.filter(p => feBase('edit', p)), 'edit')),
+    filter: cols(props.filter(p => p.filterable === true && filterTypes.includes(p.type))),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Type-detection rules (exact frontend / MCP pairs)
 // ---------------------------------------------------------------------------
 
@@ -202,8 +328,8 @@ export function evaluate(cond, data, f = {}) {
     } else {
       if (!cond) return true;
       if (!f.noDataGuard && !data) return false;
-      if (Array.isArray(cond.or)) return cond.or.some(c => evaluate(c, data, f));
-      if (Array.isArray(cond.and)) return cond.and.every(c => evaluate(c, data, f));
+      if ('or' in cond && Array.isArray(cond.or)) return cond.or.some(c => evaluate(c, data, f));
+      if ('and' in cond && Array.isArray(cond.and)) return cond.and.every(c => evaluate(c, data, f));
     }
     if (f.noConditionGuard && !f.noDataGuard && !data) return false;
     const { field, operator, value } = cond;
@@ -297,7 +423,8 @@ export function feParseLookup(e, messages) {
 }
 /** PostgRESTRequestError.toHumanMessage (postgrest-client.ts:204-255) -> [kind, text]. */
 export function mcpParse(e, messages) {
-  const msg = e.message;
+  // new Error(undefined).message is '' (PostgRESTRequestError passes the message to super()).
+  const msg = e.message === undefined ? '' : String(e.message);
   if (e.code === '23514' || e.code === '23P01') {
     const m = e.details?.match(/constraint "([^"]+)"/) ?? msg.match(/constraint "([^"]+)"/);
     if (m?.[1] && messages) {
@@ -663,14 +790,148 @@ export function splitSelect(s) {
 }
 export const selectAlias = item => item.split(':')[0].split('!')[0].split('(')[0];
 
-/** ListPage.buildSearchParams via buildHybridSearchParams (search.utils.ts:20-45), as decoded parameters. */
-export function feHybridSearch(term, ent) {
+/** buildHybridSearchParams (search.utils.ts:20-45): the raw (encoded) query-param strings. */
+export function feHybridSearchParams(term, fulltextColumn, substringColumns = []) {
   const safe = term.replace(/[(),]/g, '').trim();
   if (!safe) return [];
+  const encoded = encodeURIComponent(safe);
   const clauses = [];
-  if (ent.fulltext_search_column) clauses.push([ent.fulltext_search_column, `wfts.${safe}`]);
-  if (ent.substring_search_column) clauses.push([ent.substring_search_column, `ilike.*${safe}*`]);
+  if (fulltextColumn) clauses.push(`${fulltextColumn}.wfts.${encoded}`);
+  for (const col of substringColumns) clauses.push(`${col}.ilike.*${encoded}*`);
   if (clauses.length === 0) return [];
-  if (clauses.length === 1) return clauses;
-  return [['or', `(${clauses.map(([c, v]) => `${c}.${v}`).join(',')})`]];
+  if (clauses.length === 1) {
+    const dot = clauses[0].indexOf('.');
+    return [`${clauses[0].slice(0, dot)}=${clauses[0].slice(dot + 1)}`];
+  }
+  return [`or=(${clauses.join(',')})`];
+}
+/** ListPage.buildSearchParams (list.page.ts:881-889). */
+export function feListSearchParams(term, ent) {
+  return feHybridSearchParams(term, ent.fulltext_search_column, ent.substring_search_column ? [ent.substring_search_column] : []);
+}
+/** Raw param strings -> decoded [key, value] pairs, as PostgREST reads them. */
+export const decodeParams = raws => raws.flatMap(r => [...new URLSearchParams(r)]);
+
+// ---------------------------------------------------------------------------
+// execute_action / get_record (tools/execute-action.ts, tools/get-record.ts)
+// ---------------------------------------------------------------------------
+
+function mcpFieldValue(record, field) {
+  let cur = record;
+  for (const part of String(field).split('.')) {
+    if (cur === null || cur === undefined || typeof cur !== 'object') return undefined;
+    cur = cur[part];
+  }
+  return cur;
+}
+
+/** describeConditionFailure (execute-action.ts:285-320); a thrown error becomes THROWS. */
+export function mcpDescribe(cond, record) {
+  const run = c => {
+    if ('or' in c) {
+      const parts = c.or.map(x => run(x));
+      return `None of these conditions are met:\n${parts.map(p => `  - ${p}`).join('\n')}`;
+    }
+    if ('and' in c) {
+      const failing = c.and.filter(x => !evaluate(x, record, MCP_FLAGS));
+      return failing.map(x => run(x)).join('; ');
+    }
+    const { field, operator, value } = c;
+    const actual = mcpFieldValue(record, field);
+    const fmt = v => (v === null || v === undefined ? 'null' : JSON.stringify(v));
+    switch (operator) {
+      case 'eq': return `${field} is ${fmt(actual)}, expected ${fmt(value)}`;
+      case 'ne': return `${field} is ${fmt(actual)}, must not be ${fmt(value)}`;
+      case 'gt': return `${field} is ${fmt(actual)}, must be > ${fmt(value)}`;
+      case 'lt': return `${field} is ${fmt(actual)}, must be < ${fmt(value)}`;
+      case 'gte': return `${field} is ${fmt(actual)}, must be >= ${fmt(value)}`;
+      case 'lte': return `${field} is ${fmt(actual)}, must be <= ${fmt(value)}`;
+      case 'in': return `${field} is ${fmt(actual)}, must be one of ${fmt(value)}`;
+      case 'is_null': return `${field} is ${fmt(actual)}, must be null`;
+      case 'is_not_null': return `${field} is null, must have a value`;
+      default: return `${field} failed condition "${operator}"`;
+    }
+  };
+  try {
+    return run(cond);
+  } catch {
+    return THROWS;
+  }
+}
+
+const NEXT = '\n\nUse `get_record` to see the current state and available actions.';
+
+/**
+ * Field order of an embed select, as the golden harness builds embedded
+ * objects (conditions.golden.test.ts embedFields). The golden file stores
+ * records with sorted keys, but the MCP saw (and JSON-stringifies in its
+ * messages) the objects in select order, so the model restores that order.
+ */
+function embedFieldOrder(select) {
+  const open = select.indexOf('(');
+  if (open < 0 || !select.endsWith(')')) return null;
+  return splitSelect(select.slice(open + 1, -1)).map(f => f.replace(/\(.*$/, '').replace(/^[^:]*:/, '').replace(/!.*$/, ''));
+}
+function inSelectOrder(record, props) {
+  if (!record || typeof record !== 'object') return record;
+  const out = {};
+  for (const [k, v] of Object.entries(record)) {
+    const p = props.find(x => x.column_name === k);
+    const order = p && v && typeof v === 'object' && !Array.isArray(v) ? embedFieldOrder(mcpSelect(p.type, p)) : null;
+    if (!order) { out[k] = v; continue; }
+    const o = {};
+    for (const f of order) if (f in v) o[f] = v[f];
+    for (const [fk, fv] of Object.entries(v)) if (!(fk in o)) o[fk] = fv;
+    out[k] = o;
+  }
+  return out;
+}
+
+/**
+ * execute_action over one record (the stub serves the row, the RPC and the
+ * notes exactly; anything else is a 404). Returns the outcome class, the
+ * tool-error text, and the requests in order.
+ */
+export function mcpExecuteAction(action, sortedRecord, S) {
+  const record = inSelectOrder(sortedRecord, S.props(action.table_name));
+  let ent;
+  try { ent = resolveEntity(S.entities, action.table_name); } catch (e) {
+    if (e instanceof NameError) return { outcome: `other: NameResolutionError: ${e.message}`, requests: [] };
+    throw e;
+  }
+  const resolved = resolveAction(S.actions.filter(a => a.table_name === ent.table_name), ent.table_name, action.action_name);
+  if (!resolved.can_execute) return { outcome: 'no-permission', text: `You do not have permission to execute "${resolved.display_name}" on ${ent.display_name}.`, requests: [] };
+  const requests = [];
+  if (resolved.visibility_condition || resolved.enabled_condition) {
+    requests.push({ method: 'GET', path: ent.table_name, decoded: [`select=${mcpBuildSelect(S.props(ent.table_name))}`, 'id=eq.1'], headers: {} });
+    if (resolved.visibility_condition && !evaluate(resolved.visibility_condition, record, MCP_FLAGS)) {
+      return { outcome: 'not-available', text: `Action "${resolved.display_name}" is not available for this record.\n\n${mcpDescribe(resolved.visibility_condition, record)}${NEXT}`, requests };
+    }
+    if (resolved.enabled_condition && !evaluate(resolved.enabled_condition, record, MCP_FLAGS)) {
+      const reason = resolved.disabled_tooltip ?? mcpDescribe(resolved.enabled_condition, record);
+      return { outcome: 'disabled', text: `Action "${resolved.display_name}" is disabled: ${reason}${NEXT}`, requests };
+    }
+  }
+  const missing = (resolved.parameters ?? []).find(p => p.required);
+  if (missing) return { outcome: 'passed-conditions (missing required parameter)', requests };
+  requests.push({ method: 'POST', path: `rpc/${resolved.rpc_function}`, decoded: [], headers: {}, body: { p_entity_id: 1 } });
+  return { outcome: 'executed', requests };
+}
+
+/** get_record requests for id 1 with the row served (tools/get-record.ts:52-150). */
+export function mcpGetRecordRequests(table, S) {
+  let ent;
+  try { ent = resolveEntity(S.entities, table); } catch (e) {
+    if (e instanceof NameError) return [];
+    throw e;
+  }
+  const out = [{ method: 'GET', path: ent.table_name, decoded: [`select=${mcpBuildSelect(S.props(ent.table_name), true)}`, 'id=eq.1'], headers: {} }];
+  if (ent.enable_notes) {
+    out.push({
+      method: 'GET', path: 'entity_notes',
+      decoded: ['select=id,content,note_type,created_at,author_id:civic_os_users!author_id(id,display_name,full_name)', `entity_type=eq.${ent.table_name}`, 'entity_id=eq.1', 'order=created_at.desc', 'limit=1'],
+      headers: { 'Prefer': 'count=exact', 'Range': '0-0', 'Range-Unit': 'items' },
+    });
+  }
+  return out;
 }

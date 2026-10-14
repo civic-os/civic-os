@@ -4,7 +4,7 @@
 
 ## How to decide
 
-Each row is one rule on which the generic app (frontend) and the MCP server interpret the metadata contract differently, or a frontend quirk the golden outputs captured. Attribution is exact: a difference is counted for a row only when both golden values equal the reference models of the cited code and the row's transformation turns one into the other; any other difference fails the ledger run, so the rows account for every computed divergence. `scripts/golden/ledger-mutation-check.sh` proves this by mutating the MCP code and requiring the run to fail.
+Each row is one rule on which the generic app (frontend) and the MCP server interpret the metadata contract differently, or a frontend quirk the golden outputs captured. Attribution is exact: a difference is counted for a row only when both golden values equal the reference models of the cited code and the row's transformation turns one into the other; any other difference fails the ledger run, so the rows account for every computed divergence. `scripts/golden/ledger-mutation-check.sh` proves this by mutating the MCP and the frontend code and requiring the run to fail.
 
 Counting: an instance is one distinct example / entity / subject (property, view entry, condition and record, payload, query case and aspect, action); `occurrences` counts it once per role variant. `synthetic` instances come from fixed input sets (the `_shared` matrices, payload sets and type probes) rather than from example metadata. `effects` are downstream differences a rule causes elsewhere (a select string that differs because the type differs). `harness-only` instances arise only from the golden harness's inputs, not from the real app. Rows with 0 instances in examples are latent: the evidence is the cited code plus synthetic inputs. The `.es` variants are excluded: the MCP never receives translated metadata (N-05).
 
@@ -51,8 +51,8 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 | [C-03](#c-03) | Condition evaluation | Ordering operators: the MCP has no numeric guard | `adopt-frontend` | 0 (latent), +226 synthetic |
 | [C-04](#c-04) | Condition evaluation | Unknown operator: the MCP returns true (fail open); the frontend false | `mcp-bug` | 0 (latent), +561 synthetic |
 | [C-05](#c-05) | Condition evaluation | Missing record (null/undefined): the frontend returns false; the MCP evaluates every field as undefined | `adopt-frontend` | 18 |
-| [C-06](#c-06) | Condition evaluation | Missing condition (null/undefined): the frontend returns true; the MCP throws | `adopt-frontend` | 0 (latent), +2 synthetic |
-| [A-01](#a-01) | Actions end to end | Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed) | `mcp-bug` | 29 |
+| [C-06](#c-06) | Condition evaluation | Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws | `adopt-frontend` | 0 (latent), +2 synthetic |
+| [A-01](#a-01) | Actions end to end | Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed) | `mcp-bug` | 29, +2 synthetic |
 | [A-02](#a-02) | Actions end to end | Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP | `needs-decision` | 4 |
 | [A-03](#a-03) | Actions end to end | Status transitions: the MCP reads a status_transitions view that does not exist | `mcp-bug` | 4 |
 | [E-01](#e-01) | Error messages | Different wording for errors both sides recognize (42501, 23505, 401, 404) | `needs-decision` | 24 synthetic |
@@ -103,7 +103,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 ## Type detection
 
-`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`.
+`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`. Every probe is compared: its frontend type comes from the transcription of `getPropertyType` in `scripts/golden/ledger-models.mjs` (`feType`), which is checked against the frontend type of every fixture property; branches no fixture exercises (int2, bpchar, MultiPolygon, non-uuid system FKs, timestamp until P0.5 adds a real column) are anchored by that transcription only (follow-up: run the probe inputs through the frontend golden harness).
 
 ### T-01
 
@@ -113,8 +113,8 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: `hasFK = !!join_table && !!join_column` gates Status, Category, the system types and ForeignKeyName.
 - Evidence: `src/app/services/schema.service.ts:636`, `src/app/services/schema.service.ts:673`, `tools/mcp-server/src/schema-cache.ts:439`
 - Instances: 0 in examples (latent: schema_properties always reports join_table with join_column in every example; demonstrated by the type probes); 2 synthetic; 2 occurrences; by example: _shared 2
-  - _shared · mcp.type-probes · int4 join_column only: MCP IntegerNumber (select col); frontend (from code) ForeignKeyName
-  - _shared · mcp.type-probes · status int4 join_column only: MCP IntegerNumber (select col); frontend (from code) Status
+  - _shared · mcp.type-probes · int4 join_column only: MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) ForeignKeyName
+  - _shared · mcp.type-probes · status int4 join_column only: MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) Status
 - If the frontend behavior is adopted: No generic-app change; the MCP would type a join_column-only property as a foreign key it cannot embed (no join_table for the select).
 - If the MCP behavior is adopted: Generic app stops treating a join_column-only integer as an FK, and a join_column-only column carrying status_entity_type / category_entity_type stops rendering as a Status / Category badge (latent: no example has such a column); today the frontend would build a select and dropdown with no target table for it.
 - Recommendation: `adopt-mcp`. Strictly safer: an FK without join_table cannot be embedded or offered as options, so typing it as a plain integer is the correct fallback.
@@ -127,9 +127,9 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: Any FK (join_table + join_column) with `status_entity_type`/`category_entity_type`, whatever the udt (uuid, text, varchar).
 - Evidence: `src/app/services/schema.service.ts:636-645`, `tools/mcp-server/src/schema-cache.ts:442-449`
 - Instances: 0 in examples (latent: every Status/Category column in the examples is int4; demonstrated by the type probes); 3 synthetic; 3 occurrences; by example: _shared 3
-  - _shared · mcp.type-probes · category varchar fk: MCP Category (select col:categories!col(id,display_name,color)); frontend (from code) TextShort
-  - _shared · mcp.type-probes · status text fk: MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (from code) TextLong
-  - _shared · mcp.type-probes · status uuid fk: MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (from code) Unknown
+  - _shared · mcp.type-probes · category varchar fk: MCP Category (select col:categories!col(id,display_name,color)); frontend (model of schema.service.ts:633-692) TextShort
+  - _shared · mcp.type-probes · status text fk: MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (model of schema.service.ts:633-692) TextLong
+  - _shared · mcp.type-probes · status uuid fk: MCP Status (select col:statuses!col(id,display_name,color,status_key)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: No generic-app change; the MCP stops embedding `statuses!col` on non-integer columns (an embed PostgREST would reject unless the FK targets statuses).
 - If the MCP behavior is adopted: Generic app would show status badges for non-integer status columns, whose ids cannot match `metadata.statuses.id`.
 - Recommendation: `adopt-frontend`. Statuses and categories have integer ids; a non-integer column carrying status_entity_type is a misconfiguration, not a status.
@@ -142,9 +142,9 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: Any FK to files / civic_os_users / payment_transactions / transactions / photo_galleries becomes the system type, whatever the udt.
 - Evidence: `src/app/services/schema.service.ts:648`, `tools/mcp-server/src/schema-cache.ts:452-469`
 - Instances: 1 in examples (1 entities); 3 synthetic; 7 occurrences; by example: _shared 3, staff-portal 1
-  - _shared · mcp.type-probes · civic_os_users int8: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (from code) ForeignKeyName
+  - _shared · mcp.type-probes · civic_os_users int8: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) ForeignKeyName
   - staff-portal · staff_directory · id [testuser, testeditor, testmanager, testadmin]: frontend ForeignKeyName, MCP User
-  - _shared · mcp.type-probes · files int8 fk: MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (from code) ForeignKeyName
+  - _shared · mcp.type-probes · files int8 fk: MCP File (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) ForeignKeyName
 - Effects: 1 downstream differences (4 occurrences); by example: staff-portal 1
   - staff-portal · staff_directory · id (select) [testuser, testeditor, testmanager, testadmin]: frontend id | MCP id:civic_os_users!id(id,display_name,full_name)
 - If the frontend behavior is adopted: No generic-app change; the MCP shows the raw id for these columns instead of a user / file embed.
@@ -159,7 +159,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: User for `civic_os_users` or `civic_os_users_private`, but the select still embeds `civic_os_users!col`, which does not match an FK to the private table.
 - Evidence: `src/app/services/schema.service.ts:661`, `tools/mcp-server/src/schema-cache.ts:460`, `tools/mcp-server/src/select-builder.ts:26-27`
 - Instances: 0 in examples (latent: no example has an FK to civic_os_users_private); 1 synthetic; 1 occurrences; by example: _shared 1
-  - _shared · mcp.type-probes · civic_os_users_private uuid: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (from code) Unknown
+  - _shared · mcp.type-probes · civic_os_users_private uuid: MCP User (select col:civic_os_users!col(id,display_name,full_name)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: No generic-app change; the MCP stops emitting an embed whose FK hint points at the wrong table.
 - If the MCP behavior is adopted: Generic app would render such columns as users, with a select that PostgREST cannot resolve.
 - Recommendation: `adopt-frontend`. The MCP half-supports it: the type says User but the embed targets civic_os_users, so the request would fail.
@@ -172,7 +172,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: Payment for `payment_transactions` or any `transactions`, schema ignored.
 - Evidence: `src/app/services/schema.service.ts:663-664`, `tools/mcp-server/src/schema-cache.ts:463`
 - Instances: 0 in examples (latent: both payment examples point at payments.transactions); 1 synthetic; 1 occurrences; by example: _shared 1
-  - _shared · mcp.type-probes · transactions uuid public schema: MCP Payment (select col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)); frontend (from code) Unknown
+  - _shared · mcp.type-probes · transactions uuid public schema: MCP Payment (select col:payment_transactions!col(id,amount,currency,status,effective_status,display_name)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: No generic-app change; an integrator table named public.transactions stops being misread as a payment by the MCP.
 - If the MCP behavior is adopted: Generic app would show a Pay badge for any uuid FK to a table called transactions.
 - Recommendation: `adopt-frontend`. Schema-qualified detection avoids a name collision with integrator tables.
@@ -185,7 +185,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: `fileType` value starting with `image` (no slash) is enough.
 - Evidence: `src/app/services/schema.service.ts:654`, `tools/mcp-server/src/schema-cache.ts:456`
 - Instances: 0 in examples (latent: every example uses MIME patterns with a slash); 1 synthetic; 1 occurrences; by example: _shared 1
-  - _shared · mcp.type-probes · files uuid "image" (no slash): MCP FileImage (select col:files!col(id,file_name,file_type,file_size)); frontend (from code) File
+  - _shared · mcp.type-probes · files uuid "image" (no slash): MCP FileImage (select col:files!col(id,file_name,file_type,file_size)); frontend (model of schema.service.ts:633-692) File
 - If the frontend behavior is adopted: No generic-app change; a malformed fileType `image` makes the MCP report File instead of FileImage.
 - If the MCP behavior is adopted: Generic app shows image previews for `image`-prefixed non-MIME values.
 - Recommendation: `adopt-frontend`. fileType values are MIME patterns; the slash check is the precise one.
@@ -198,9 +198,9 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: Requires `data_type = USER-DEFINED`; Polygon or MultiPolygon is GeoPolygon; LineString, null and anything else is GeoPoint.
 - Evidence: `src/app/services/schema.service.ts:674-675`, `tools/mcp-server/src/schema-cache.ts:472-477`
 - Instances: 0 in examples (latent: the examples only use Point and Polygon); 4 synthetic; 4 occurrences; by example: _shared 4
-  - _shared · mcp.type-probes · geography LineString: MCP GeoPoint (select col:col_text); frontend (from code) Unknown
-  - _shared · mcp.type-probes · geography MultiPolygon: MCP GeoPolygon (select col:col_text); frontend (from code) Unknown
-  - _shared · mcp.type-probes · geography Point data_type not USER-DEFINED: MCP Unknown (select col); frontend (from code) GeoPoint
+  - _shared · mcp.type-probes · geography LineString: MCP GeoPoint (select col:col_text); frontend (model of schema.service.ts:633-692) Unknown
+  - _shared · mcp.type-probes · geography MultiPolygon: MCP GeoPolygon (select col:col_text); frontend (model of schema.service.ts:633-692) Unknown
+  - _shared · mcp.type-probes · geography Point data_type not USER-DEFINED: MCP Unknown (select col); frontend (model of schema.service.ts:633-692) GeoPoint
 - If the frontend behavior is adopted: No generic-app change; MultiPolygon columns become Unknown in the MCP too.
 - If the MCP behavior is adopted: Generic app renders MultiPolygon with the polygon map (good) but LineString and untyped geography as a point map (wrong).
 - Recommendation: `needs-decision`. Split: MultiPolygon to GeoPolygon is strictly better (frontend shows Unknown); "everything else is a point" is wrong. Suggested core rule: Point, Polygon, MultiPolygon supported, rest Unknown.
@@ -213,8 +213,8 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: `int2` is IntegerNumber, or ForeignKeyName with join info.
 - Evidence: `src/app/services/schema.service.ts:673-681`, `tools/mcp-server/src/schema-cache.ts:500-502`
 - Instances: 0 in examples (latent: no example has a smallint column); 2 synthetic; 2 occurrences; by example: _shared 2
-  - _shared · mcp.type-probes · int2 fk: MCP ForeignKeyName (select col:parents!col(id,display_name)); frontend (from code) Unknown
-  - _shared · mcp.type-probes · int2 plain: MCP IntegerNumber (select col); frontend (from code) Unknown
+  - _shared · mcp.type-probes · int2 fk: MCP ForeignKeyName (select col:parents!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown
+  - _shared · mcp.type-probes · int2 plain: MCP IntegerNumber (select col); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: MCP loses typing for smallint columns (no FK name resolution).
 - If the MCP behavior is adopted: Generic app gains number inputs, validation and FK dropdowns for smallint columns.
 - Recommendation: `adopt-mcp`. Strictly better: smallint is an integer; Unknown is a gap, not a choice.
@@ -227,7 +227,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: uuid with FK info is ForeignKeyName (embed `(id,display_name)`); a plain uuid is TextShort.
 - Evidence: `src/app/services/schema.service.ts:648-691`, `tools/mcp-server/src/schema-cache.ts:503-505`
 - Instances: 6 in examples (5 entities); 2 synthetic; 32 occurrences; by example: _shared 2, community-center 1, neighborhood-hub 5
-  - _shared · mcp.type-probes · uuid fk public non-system: MCP ForeignKeyName (select col:documents!col(id,display_name)); frontend (from code) Unknown
+  - _shared · mcp.type-probes · uuid fk public non-system: MCP ForeignKeyName (select col:documents!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown
   - community-center · payment_transactions · id [anon, testuser, testeditor, testmanager, testadmin]: frontend Unknown, MCP TextShort
   - neighborhood-hub · building_use_requests · created_by [anon, testuser, testeditor, testmanager, testadmin]: frontend Unknown, MCP TextShort
 - If the frontend behavior is adopted: MCP shows these columns untyped (it already renders unknowns as text, so output barely changes).
@@ -242,7 +242,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: `bpchar` is TextShort.
 - Evidence: `src/app/services/schema.service.ts:689-690`, `tools/mcp-server/src/schema-cache.ts:507`
 - Instances: 0 in examples (latent: no example has a char(n) column); 1 synthetic; 1 occurrences; by example: _shared 1
-  - _shared · mcp.type-probes · bpchar: MCP TextShort (select col); frontend (from code) Unknown
+  - _shared · mcp.type-probes · bpchar: MCP TextShort (select col); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: MCP loses text typing for char(n).
 - If the MCP behavior is adopted: Generic app gets a text input and length validation for char(n) columns.
 - Recommendation: `adopt-mcp`. Strictly better: char(n) is text.
@@ -255,7 +255,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 - MCP: Step 6 fallback: any remaining property with join_table and join_column is ForeignKeyName.
 - Evidence: `src/app/services/schema.service.ts:673`, `tools/mcp-server/src/schema-cache.ts:511-512`
 - Instances: 0 in examples (latent: no example has an FK on a non-integer, non-uuid domain); 1 synthetic; 1 occurrences; by example: _shared 1
-  - _shared · mcp.type-probes · citext fk (unknown udt): MCP ForeignKeyName (select col:codes!col(id,display_name)); frontend (from code) Unknown
+  - _shared · mcp.type-probes · citext fk (unknown udt): MCP ForeignKeyName (select col:codes!col(id,display_name)); frontend (model of schema.service.ts:633-692) Unknown
 - If the frontend behavior is adopted: MCP stops resolving display names for such FKs.
 - If the MCP behavior is adopted: Generic app offers FK dropdowns for text-keyed FKs; the edit control and embed must then use join_column as the key (see S-01).
 - Recommendation: `needs-decision`. Better in principle, but depends on S-01 (embed by join_column) and on the FK editor supporting non-integer keys.
@@ -560,10 +560,10 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 
 ### C-06
 
-**Missing condition (null/undefined): the frontend returns true; the MCP throws**
+**Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws**
 
-- Frontend: `if (!condition) return true`.
-- MCP: `'or' in condition` throws a TypeError on null/undefined; callers guard with `if (action.visibility_condition)`.
+- Frontend: `if (!condition) return true`; `or` / `and` count as compounds only when they are arrays (`'or' in c && Array.isArray(c.or)`), so `{or: 'x'}` or `{and: 5}` is evaluated as a simple condition.
+- MCP: `'or' in condition` throws a TypeError on null/undefined, and `condition.or.some` / `condition.and.every` throw on a non-array value; callers guard only against a missing condition (`if (action.visibility_condition)`).
 - Evidence: `src/app/utils/condition-evaluator.ts:83-86`, `tools/mcp-server/src/tools/execute-action.ts:240`
 - Instances: 0 in examples (latent: unreachable through current MCP callers; shown by the synthetic compound cases); 2 synthetic; 2 occurrences; by example: _shared 2
   - _shared · conditions.compound · nullCondition: frontend true, MCP __throws:TypeError__
@@ -583,11 +583,11 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - Frontend: Detail page evaluates conditions with .id extraction against its embedded record; actions behave as configured.
 - MCP: With the record the MCP fetches (Status/FK columns embedded), `status_id eq 5` never holds, so execute_action refuses the action (disabled / not available) and get_record hides or greys it; `status_id ne 6` always holds, so an action stays listed in the wrong state, but its `eq` enabled condition still refuses it. Evidence confidence 4/5: the golden stub cannot reject a select, so the record shape is the one the MCP's select requests (one embed per FK), not one PostgREST returned.
 - Evidence: `tests/golden/derived/mcp/<example>/_example/mcp.actions-execute.json`, `tools/mcp-server/src/tools/execute-action.ts:62-110`, `tools/mcp-server/src/tools/get-record.ts:96-123`, `stub limit: tests/golden/derived/mcp/COVERAGE.md`
-- Instances: 29 in examples (8 entities); 38 occurrences; by example: community-center 3, mottpark 5, neighborhood-hub 11, staff-portal 10
+- Instances: 29 in examples (8 entities); 2 synthetic; 40 occurrences; by example: _shared 2, community-center 3, mottpark 5, neighborhood-hub 11, staff-portal 10
+  - _shared · tasks · close: satisfies all conditions: MCP disabled / get_record listed-disabled; correct executed / listed
   - community-center · reservation_requests · approve: satisfies all conditions: MCP disabled / get_record listed-disabled; correct executed / listed
   - mottpark · reservation_requests · approve: satisfies all conditions: MCP not-available / get_record hidden; correct executed / listed
-  - neighborhood-hub · mek_requests · approve: satisfies all conditions: MCP not-available / get_record hidden; correct executed / listed
-- Computed: 38 (action, case) pairs disagree with the frontend evaluator; in 0 of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).
+- Computed: 38 (action, case) pairs in the examples disagree with the frontend evaluator; in 0 of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).
 - If the frontend behavior is adopted: MCP users can run approve/deny/cancel/check-out actions again, and get_record lists them in the right states.
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions cannot be run through the MCP in community-center, mottpark, neighborhood-hub and staff-portal.
@@ -1343,7 +1343,7 @@ Suggested remedy (for Daniel to decide, not implemented): add a deterministic ti
 
 ## Coverage
 
-Comparisons made: action-case 151, condition 3239, content-range 11, error 883, name 469, property 3952, query 1696, type-probe 21, view 1612. Unattributed differences: 0.
+Comparisons made: action-case 158, condition 3239, condition-describe 46, content-range 11, error 883, es-model 415, fe-hybrid-model 130, fe-view-model 2015, name 469, property 3952, query 1696, type-probe 64, view 1612. Unattributed differences: 0.
 
 Not rows: 39 view-order differences confined to `sort_order` ties (capture artifacts); 251 frontend queries that name a column the entity lacks, which both sides reject (PostgREST on the frontend side, name resolution on the MCP side); 1 select difference caused by a hand-written embed in a frontend matrix input.
 

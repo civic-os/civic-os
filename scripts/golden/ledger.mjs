@@ -30,9 +30,10 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RULES, AREAS, NONDETERMINISM } from './ledger-rules.mjs';
 import {
-  STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULE_FLAGS, attempt, conditionRules, decodeFeUrl, evaluate, feBase, feHybridSearch,
+  STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULE_FLAGS, attempt, conditionRules, decodeFeUrl, decodeParams, evaluate, feBase,
+  feHybridSearchParams, feListSearchParams, feType, feViews, mcpDescribe, mcpExecuteAction, mcpGetRecordRequests, mcpType,
   feParse, feParseLookup, feRequest, feSelect, feSelectForList, feTotalPaginated, feTotalPreview, mcpClientError, mcpContentRange,
-  mcpFilter, mcpGetRecord, mcpListRecords, mcpParse, mcpSelect, resolveAction, resolveCategory, resolveColumn, resolveEntity,
+  mcpBuildSelect, mcpFilter, mcpGetRecord, mcpListRecords, mcpParse, mcpSelect, resolveAction, resolveCategory, resolveColumn, resolveEntity,
   resolveFk, resolveStatus, selectAlias, selectRule, splitSelect, typeRule, NameError,
 } from './ledger-models.mjs';
 
@@ -148,6 +149,8 @@ function propertyEngine() {
             continue;
           }
           if (!p) { miss('properties', { ...base, detail: 'no raw property' }); continue; }
+          if (e.type !== feType(p)) { miss('fe-model', { ...base, detail: `frontend type ${e.type}, model ${feType(p)}` }); continue; }
+          if (m.type !== mcpType(p)) { miss('mcp-model', { ...base, detail: `MCP type ${m.type}, model ${mcpType(p)}` }); continue; }
           const feList = e.selectForList === '=' ? e.select : e.selectForList;
           if (e.select !== feSelect(e.type, p) || feList !== feSelectForList(e.type, p)) { miss('fe-model', { ...base, detail: `frontend select ${e.select} differs from the model` }); continue; }
           if (m.select !== mcpSelect(m.type, p)) { miss('mcp-model', { ...base, detail: `MCP select ${m.select} differs from the model ${mcpSelect(m.type, p)}` }); continue; }
@@ -171,6 +174,34 @@ function propertyEngine() {
   }
 }
 
+/**
+ * The `.es` variants are non-production for the MCP (it never sends
+ * Accept-Language) and are not attributed, but their MCP artifacts are still
+ * produced: check them against the MCP models so they cannot drift unseen.
+ */
+function esModelEngine() {
+  for (const ex of examples()) {
+    for (const v of allVariants(ex).filter(x => x.includes('.'))) {
+      const raw = new Map(readJson(path.join(RAW, ex, v, 'schema_properties.mcp.json')).map(p => [`${p.table_name}.${p.column_name}`, p]));
+      for (const [table, list] of Object.entries(readJson(path.join(MCP, ex, v, 'schema.properties.json')).entities)) {
+        for (const m of list) {
+          count('es-model');
+          const p = raw.get(`${table}.${m.column}`);
+          if (!p || m.type !== mcpType(p) || m.select !== mcpSelect(m.type, p)) miss('mcp-model', { example: ex, variant: v, entity: table, subject: m.column, detail: 'MCP type/select differs from the model' });
+        }
+      }
+      const props = readJson(path.join(RAW, ex, v, 'schema_properties.mcp.json'));
+      for (const [table, views] of Object.entries(readJson(path.join(MCP, ex, v, 'schema.views.json')).entities)) {
+        for (const view of ['list', 'detail', 'create', 'edit']) {
+          count('es-model');
+          const expected = mcpFilter(props.filter(x => x.table_name === table), view).map(x => x.column_name);
+          if (!same(expected, views[view])) miss('mcp-model', { example: ex, variant: v, entity: table, subject: view, detail: 'MCP view differs from the model' });
+        }
+      }
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Engine 2: view property lists
 // ---------------------------------------------------------------------------
@@ -185,6 +216,20 @@ function viewEngine() {
       const raw = new Map(readJson(path.join(RAW, ex, v, 'schema_properties.json')).map(p => [`${p.table_name}.${p.column_name}`, p]));
       const ents = new Map(readJson(path.join(RAW, ex, v, 'schema_entities.json')).map(e => [e.table_name, e]));
       const S = mcpSchema(ex, v);
+      // Frontend model: raw properties plus the M:M virtual properties, each with its frontend type.
+      const virtual = readJson(path.join(FE, ex, v, 'schema.m2m.json')).virtualProperties ?? [];
+      const feProps = new Map();
+      for (const rp of readJson(path.join(RAW, ex, v, 'schema_properties.json'))) {
+        feProps.set(rp.table_name, [...(feProps.get(rp.table_name) ?? []), { ...rp, type: feTypes.get(`${rp.table_name}.${rp.column_name}`) }]);
+      }
+      for (const vp of virtual) feProps.set(vp.table_name, [...(feProps.get(vp.table_name) ?? []), { ...vp, type: 'ManyToMany' }]);
+      for (const [table, views] of Object.entries(fe)) {
+        const model = feViews(feProps.get(table) ?? [], ents.get(table));
+        for (const view of ['list', 'detail', 'create', 'edit', 'filter']) {
+          count('fe-view-model');
+          if (!same([...model[view]].sort(), [...views[view]].sort())) miss('fe-model', { example: ex, variant: v, entity: table, subject: view, detail: `frontend ${views[view].join()} | model ${model[view].join()}` });
+        }
+      }
       for (const [table, views] of Object.entries(mc)) {
         for (const view of ['list', 'detail', 'create', 'edit']) {
           const expected = mcpFilter(S.props(table), view).map(p => p.column_name);
@@ -268,6 +313,7 @@ function conditionEngine() {
     for (const c of fe) {
       const m = mIndex.get(canon(c.condition));
       if (!m) { miss('conditions', { example: ex, subject: canon(c.condition), detail: 'condition missing in MCP' }); continue; }
+      if (!same(m.usedBy, c.usedBy) || Object.keys(m.results).length !== Object.keys(c.results).length) miss('mcp-model', { example: ex, subject: canon(c.condition), detail: 'usedBy or record set differs' });
       for (const [label, r] of Object.entries(c.results)) {
         conditionCell(c.condition, recordOf(label), r, m.results[label], { example: ex, entity: c.usedBy.join(', '), subject: `${canon(c.condition)} @ ${label}` }, false);
       }
@@ -275,6 +321,7 @@ function conditionEngine() {
   }
   const fe = readJson(path.join(FE, '_shared/conditions.matrix.json'));
   const mc = readJson(path.join(MCP, '_shared/conditions.matrix.json'));
+  if (!same(mc.operators, fe.operators) || Object.keys(mc.matrix).length !== Object.keys(fe.matrix).length || Object.keys(mc.dotted).length !== Object.keys(fe.dotted).length) miss('mcp-model', { example: '_shared', subject: 'conditions.matrix', detail: 'operators or case set differs' });
   for (const [key, row] of Object.entries(fe.matrix)) {
     const sp = key.indexOf(' ');
     const op = key.slice(0, sp) === '<empty>' ? '' : key.slice(0, sp);
@@ -301,6 +348,24 @@ function conditionEngine() {
     if (!(key in compoundInputs)) { miss('conditions', { example: '_shared', subject: key, detail: 'compound case not modeled' }); continue; }
     const [cond, rec] = compoundInputs[key];
     conditionCell(cond, rec, r, mc.compound[key], { example: '_shared', entity: 'conditions.compound', subject: key }, true);
+  }
+  // describeConditionFailure for every record the MCP evaluator rejects (MCP-only artifact).
+  for (const ex of examples()) {
+    const fe = readJson(path.join(FE, ex, '_example/conditions.actions.json')).conditions;
+    const desc = readJson(path.join(MCP, ex, '_example/mcp.conditions-describe.json')).conditions;
+    if (desc.length !== fe.length) miss('mcp-model', { example: ex, detail: 'describe artifact condition count differs' });
+    fe.forEach((c, i) => {
+      count('condition-describe');
+      const d = desc[i];
+      const model = {};
+      for (const label of Object.keys(c.results)) {
+        const rec = recordOf(label);
+        if (evaluate(c.condition, rec, MCP_FLAGS) !== true) model[label] = mcpDescribe(c.condition, rec);
+      }
+      if (!d || canon(d.condition) !== canon(c.condition) || !same(d.usedBy, c.usedBy) || canon(d.failures) !== canon(model)) {
+        miss('mcp-model', { example: ex, subject: canon(c.condition), detail: 'describeConditionFailure output differs from the model' });
+      }
+    });
   }
   // MCP-only extra cells (empty strings, falsy values): the frontend side is the anchored model.
   const extra = readJson(path.join(MCP, '_shared/mcp.conditions-extra.json')).matrix;
@@ -341,15 +406,44 @@ function predictAction(action, rec, flags, entities) {
 function actionEngine() {
   let wronglyExecuted = 0;
   let wrongCases = 0;
-  for (const ex of examples()) {
-    const S = mcpSchema(ex, 'testadmin');
-    const art = readJson(path.join(MCP, ex, '_example/mcp.actions-execute.json'));
+  for (const ex of [...examples(), '_shared']) {
+    let S;
+    let art;
+    if (ex === '_shared') {
+      // Synthetic entity without timestamp columns (MCP-only inputs, model-checked only).
+      art = readJson(path.join(MCP, '_shared/mcp.actions-execute.json'));
+      const props = art.synthetic.properties.map(p => ({ ...p, type: art.syntheticTypes[`${p.table_name}.${p.column_name}`] }));
+      S = { entities: art.synthetic.entities, props: t => props.filter(p => p.table_name === t), actions: art.synthetic.actions, statuses: art.synthetic.statuses, categories: [] };
+      for (const p of props) if (p.type !== mcpType(p)) miss('mcp-model', { example: ex, subject: p.column_name, detail: `synthetic type ${p.type} vs model ${mcpType(p)}` });
+    } else {
+      S = mcpSchema(ex, 'testadmin');
+      art = readJson(path.join(MCP, ex, '_example/mcp.actions-execute.json'));
+    }
     for (const [name, a] of Object.entries(art.actions)) {
       const action = S.actions.find(x => `${x.table_name}.${x.action_name}` === name);
       if (!action) { miss('actions', { example: ex, subject: name, detail: 'action not in fixtures' }); continue; }
       const base = { example: ex, entity: action.table_name, subject: action.action_name };
+      const kinds = ['visibility_condition', 'enabled_condition'].filter(k => action[k]);
+      if (a.canExecute !== action.can_execute || a.showOnDetail !== action.show_on_detail
+        || canon(a.conditions) !== canon(Object.fromEntries(kinds.map(k => [k, action[k]])))) {
+        miss('mcp-model', { ...base, detail: 'recorded action metadata differs from the fixture' });
+      }
+      const fetchSelect = art.conditionFetchSelect[action.table_name];
+      const modelSelect = mcpBuildSelect(S.props(action.table_name));
+      if (S.entities.some(e => e.table_name === action.table_name) && fetchSelect !== modelSelect) {
+        miss('mcp-model', { ...base, detail: `condition fetch select ${fetchSelect} | model ${modelSelect}` });
+      }
       for (const [kase, out] of Object.entries(a.cases)) {
         count('action-case');
+        const ex1 = mcpExecuteAction(action, out.record, S);
+        const execObs = (out.executeRequests ?? []).map(r => ({ ...parseMcpRequest(r), ...(r.body !== undefined ? { body: r.body } : {}) }));
+        const getObs = (out.getRecordRequests ?? []).map(r => parseMcpRequest(r));
+        const textOk = (out.executeActionText ?? null) === (ex1.text ?? null);
+        if (!same(canon(execObs), canon(ex1.requests)) || !textOk || out.rpcCalled !== ex1.requests.some(r => r.method === 'POST')
+          || !same(canon(getObs), canon(mcpGetRecordRequests(action.table_name, S)))) {
+          miss('mcp-model', { ...base, detail: `${kase}: execute_action / get_record requests or text differ from the model` });
+          continue;
+        }
         const mc = predictAction(action, out.record, MCP_FLAGS, S.entities);
         const obs = { executeAction: out.executeAction.startsWith('other: ') ? out.executeAction.split('\n')[0] : out.executeAction, getRecordListing: out.getRecordListing };
         if (obs.executeAction !== mc.executeAction || obs.getRecordListing !== mc.getRecordListing) {
@@ -366,13 +460,13 @@ function actionEngine() {
         const c01 = predictAction(action, out.record, CONDITION_RULE_FLAGS['C-01'], S.entities);
         if (!same(c01, mc)) { miss('actions', { ...base, detail: `${kase}: no single rule explains ${mc.executeAction}/${mc.getRecordListing}` }); continue; }
         const passed = o => o.executeAction === 'executed' || o.executeAction.startsWith('passed-conditions');
-        if (passed(mc) && !passed(fe)) wronglyExecuted++;
-        wrongCases++;
+        if (ex !== '_shared' && passed(mc) && !passed(fe)) wronglyExecuted++;
+        if (ex !== '_shared') wrongCases++;
         hit('A-01', { ...base, detail: `${kase}: MCP ${mc.executeAction} / get_record ${mc.getRecordListing}; correct ${fe.executeAction} / ${fe.getRecordListing}` });
       }
     }
   }
-  note('A-01', `${wrongCases} (action, case) pairs disagree with the frontend evaluator; in ${wronglyExecuted} of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).`);
+  note('A-01', `${wrongCases} (action, case) pairs in the examples disagree with the frontend evaluator; in ${wronglyExecuted} of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).`);
 }
 
 // ---------------------------------------------------------------------------
@@ -505,6 +599,8 @@ function parseMcpRequest(r) {
 }
 const pairsOf = decoded => decoded.map(d => { const i = d.indexOf('='); return [d.slice(0, i), d.slice(i + 1)]; });
 const stripEmbed = f => String(f).replace(/^([^()]+)\([^()]+\)$/, '$1');
+/** ListPage.buildOrderField (list.page.ts:859-875). */
+const feOrderField = (type, col) => (type === 'ForeignKeyName' || type === 'User' ? `${col}(display_name)` : col);
 
 /** Check an observed MCP outcome against the model. Returns null when equal, else a description. */
 function mcpDiff(obs, model) {
@@ -607,7 +703,7 @@ function compareRequests(c) {
   const mSearchKey = mcInput.search ? (ent.fulltext_search_column || ent.substring_search_column || 'display_name') : null;
   const feSearch = [];
   if (feQuery.searchQuery && feQuery.searchQuery.trim()) feSearch.push(['civic_os_text_search', `wfts.${feQuery.searchQuery.trim()}`]);
-  if (c.name === 'hybrid search rawQueryParams') feSearch.push(...feHybridSearch('pot hole', c.feEnt));
+  if (c.name === 'hybrid search rawQueryParams') feSearch.push(...decodeParams(feListSearchParams('pot hole', c.feEnt)));
   for (const [k] of feSearch) handled.add(k);
   if (mSearchKey) handled.add(mSearchKey);
   const feSearchStr = feSearch.map(([k, v]) => `${k}=${v}`).join('&');
@@ -668,6 +764,15 @@ function compareRequests(c) {
 function queryCase(c) {
   const { base, feGolden, feQuery, paginated, mq, S } = c;
   count('query');
+  if (c.name === 'hybrid search rawQueryParams' && !same(feQuery.rawQueryParams, feListSearchParams('pot hole', c.feEnt))) {
+    miss('fe-model', { ...base, detail: `frontend rawQueryParams ${JSON.stringify(feQuery.rawQueryParams)} | model ${JSON.stringify(feListSearchParams('pot hole', c.feEnt))}` });
+    return;
+  }
+  const om = /^order (\S+) (asc|desc) \[(\w+)\]$/.exec(c.name);
+  if (om && feQuery.orderField !== feOrderField(om[3], om[1])) {
+    miss('fe-model', { ...base, detail: `frontend orderField ${feQuery.orderField} | model ${feOrderField(om[3], om[1])}` });
+    return;
+  }
   const fe = feRequest(feQuery, paginated);
   if (fe.url !== feGolden.url || !same(fe.headers, feGolden.headers ?? {})) {
     miss('fe-model', { ...base, detail: `frontend ${feGolden.url} ${canon(feGolden.headers)} vs model ${fe.url} ${canon(fe.headers)}` });
@@ -768,6 +873,36 @@ function queryEngine() {
       mq, S, ent, feEnt: ent, feTypes: new Map(), viewKey: null, summaryView: false, synthetic: true,
     });
   }
+  // The frontend hybrid-search and order-field builders against their own goldens.
+  const hy = readJson(path.join(FE, '_shared/data.hybrid-search.json'));
+  const HYBRID_CONFIGS = {
+    none: [undefined, undefined], 'fts only': ['civic_os_text_search', []], 'substring only': [null, ['display_name']],
+    both: ['civic_os_text_search', ['display_name']], 'fts + two substring': ['fts', ['a', 'b']], 'two substring': [null, ['a', 'b']], 'empty fts string': ['', ['a']],
+  };
+  for (const [name, row] of Object.entries(hy.buildHybridSearchParams)) {
+    if (!(name in HYBRID_CONFIGS)) { miss('fe-model', { example: '_shared', subject: name, detail: 'hybrid config not modeled' }); continue; }
+    const [fts, cols] = HYBRID_CONFIGS[name];
+    for (const [label, out] of Object.entries(row)) {
+      count('fe-hybrid-model');
+      const got = feHybridSearchParams(JSON.parse(label), fts, cols);
+      if (!same(got, out)) miss('fe-model', { example: '_shared', entity: 'buildHybridSearchParams', subject: `${name} ${label}`, detail: `frontend ${JSON.stringify(out)} | model ${JSON.stringify(got)}` });
+    }
+  }
+  const ENTITY_SEARCH = {
+    fts: { fulltext_search_column: 'civic_os_text_search', substring_search_column: null },
+    substring: { fulltext_search_column: null, substring_search_column: 'display_name' },
+    both: { fulltext_search_column: 'civic_os_text_search', substring_search_column: 'display_name' },
+    'legacy search_fields only': { fulltext_search_column: null, substring_search_column: null },
+  };
+  for (const [name, out] of Object.entries(hy.listPageBuildSearchParams)) {
+    count('fe-hybrid-model');
+    if (!(name in ENTITY_SEARCH) || !same(feListSearchParams('pot hole', ENTITY_SEARCH[name]), out)) miss('fe-model', { example: '_shared', entity: 'ListPage.buildSearchParams', subject: name, detail: JSON.stringify(out) });
+  }
+  for (const { type, order } of hy.listPageBuildOrderField) {
+    count('fe-hybrid-model');
+    if (feOrderField(type, 'col') !== order) miss('fe-model', { example: '_shared', entity: 'ListPage.buildOrderField', subject: type, detail: `frontend ${order} | model ${feOrderField(type, 'col')}` });
+  }
+
   // Content-Range parsing.
   const fcr = readJson(path.join(FE, '_shared/data.content-range.json'));
   const mcr = readJson(path.join(MCP, '_shared/data.content-range.json')).paginated;
@@ -955,19 +1090,25 @@ function evidenceEngine() {
 
 function probeEngine() {
   const art = readJson(path.join(MCP, '_shared/mcp.type-probes.json'));
-  const probes = new Map(art.probes.map(p => [p.name, p]));
-  for (const rule of RULES) {
-    for (const [name, feType] of Object.entries(rule.probes ?? {})) {
-      count('type-probe');
-      const p = probes.get(name);
-      const inst = { example: '_shared', entity: 'mcp.type-probes', subject: name };
-      if (!p) { miss('probes', { ...inst, detail: 'probe missing' }); continue; }
-      const prop = { ...art.base, ...p.input };
-      if (p.select !== mcpSelect(p.type, prop)) { miss('mcp-model', { ...inst, detail: `probe select ${p.select} vs model ${mcpSelect(p.type, prop)}` }); continue; }
-      if (typeRule(prop, feType, p.type) !== rule.id) { miss('probes', { ...inst, detail: `MCP ${p.type}, frontend (from code) ${feType}: not rule ${rule.id}` }); continue; }
-      hit(rule.id, { ...inst, detail: `MCP ${p.type} (select ${p.select}); frontend (from code) ${feType}` });
+  const declared = new Map();
+  for (const rule of RULES) for (const [name, feT] of Object.entries(rule.probes ?? {})) declared.set(name, [rule.id, feT]);
+  for (const p of art.probes) {
+    count('type-probe');
+    const prop = { ...art.base, ...p.input };
+    const inst = { example: '_shared', entity: 'mcp.type-probes', subject: p.name };
+    const feT = feType(prop);
+    if (p.type !== mcpType(prop) || p.select !== mcpSelect(p.type, prop)) { miss('mcp-model', { ...inst, detail: `probe ${p.type} ${p.select} vs model ${mcpType(prop)} ${mcpSelect(mcpType(prop), prop)}` }); continue; }
+    const dec = declared.get(p.name);
+    if (dec && dec[1] !== feT) { miss('probes', { ...inst, detail: `${dec[0]} declares frontend ${dec[1]}, the frontend model gives ${feT}` }); continue; }
+    if (feT === p.type) {
+      if (dec) miss('probes', { ...inst, detail: `${dec[0]} names a probe on which both sides agree (${feT})` });
+      continue;
     }
+    const r = typeRule(prop, feT, p.type);
+    if (!r || (dec && dec[0] !== r)) { miss('probes', { ...inst, detail: `frontend ${feT}, MCP ${p.type}: ${r ? `rule ${r}, catalogue says ${dec?.[0]}` : 'no rule'}` }); continue; }
+    hit(r, { ...inst, detail: `MCP ${p.type} (select ${p.select}); frontend (model of schema.service.ts:633-692) ${feT}` });
   }
+  for (const name of declared.keys()) if (!art.probes.some(p => p.name === name)) miss('probes', { example: '_shared', subject: name, detail: 'declared probe missing' });
 }
 
 function verifyEvidence() {
@@ -1019,6 +1160,7 @@ function summarize(bucket) {
 
 function build() {
   propertyEngine();
+  esModelEngine();
   viewEngine();
   conditionEngine();
   actionEngine();
@@ -1060,7 +1202,7 @@ function renderMarkdown(rows) {
   L.push('');
   L.push('## How to decide');
   L.push('');
-  L.push('Each row is one rule on which the generic app (frontend) and the MCP server interpret the metadata contract differently, or a frontend quirk the golden outputs captured. Attribution is exact: a difference is counted for a row only when both golden values equal the reference models of the cited code and the row\'s transformation turns one into the other; any other difference fails the ledger run, so the rows account for every computed divergence. `scripts/golden/ledger-mutation-check.sh` proves this by mutating the MCP code and requiring the run to fail.');
+  L.push('Each row is one rule on which the generic app (frontend) and the MCP server interpret the metadata contract differently, or a frontend quirk the golden outputs captured. Attribution is exact: a difference is counted for a row only when both golden values equal the reference models of the cited code and the row\'s transformation turns one into the other; any other difference fails the ledger run, so the rows account for every computed divergence. `scripts/golden/ledger-mutation-check.sh` proves this by mutating the MCP and the frontend code and requiring the run to fail.');
   L.push('');
   L.push('Counting: an instance is one distinct example / entity / subject (property, view entry, condition and record, payload, query case and aspect, action); `occurrences` counts it once per role variant. `synthetic` instances come from fixed input sets (the `_shared` matrices, payload sets and type probes) rather than from example metadata. `effects` are downstream differences a rule causes elsewhere (a select string that differs because the type differs). `harness-only` instances arise only from the golden harness\'s inputs, not from the real app. Rows with 0 instances in examples are latent: the evidence is the cited code plus synthetic inputs. The `.es` variants are excluded: the MCP never receives translated metadata (N-05).');
   L.push('');
