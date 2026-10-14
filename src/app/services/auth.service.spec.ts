@@ -27,6 +27,7 @@ import { ImpersonationService } from './impersonation.service';
 import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, KeycloakEvent } from 'keycloak-angular';
 import Keycloak from 'keycloak-js';
 import { of } from 'rxjs';
+import { settle } from '../testing/await-http';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -264,7 +265,7 @@ describe('AuthService', () => {
             httpTesting.verify();
         });
 
-        it('should load permissions on authenticated Ready event', () => {
+        it('should load permissions on authenticated Ready event', async () => {
             keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
             TestBed.flushEffects();
 
@@ -273,6 +274,7 @@ describe('AuthService', () => {
                 { table_name: 'issues', permission: 'read' },
                 { table_name: 'issues', permission: 'create' }
             ]);
+            await settle();
 
             expect(service.hasPermission('issues', 'read')).toBe(true);
             expect(service.hasPermission('issues', 'create')).toBe(true);
@@ -280,12 +282,13 @@ describe('AuthService', () => {
             expect(service.permissionsLoaded()).toBe(true);
         });
 
-        it('should return false for uncached tables', () => {
+        it('should return false for uncached tables', async () => {
             keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
             TestBed.flushEffects();
 
             const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
             req.flush([{ table_name: 'issues', permission: 'read' }]);
+            await settle();
 
             expect(service.hasPermission('nonexistent_table', 'read')).toBe(false);
         });
@@ -295,12 +298,13 @@ describe('AuthService', () => {
             expect(service.permissionsLoaded()).toBe(false);
         });
 
-        it('should clear cache on logout', () => {
+        it('should clear cache on logout', async () => {
             // First authenticate and load permissions
             keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
             TestBed.flushEffects();
             const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
             req.flush([{ table_name: 'issues', permission: 'read' }]);
+            await settle();
             expect(service.hasPermission('issues', 'read')).toBe(true);
 
             // Logout
@@ -311,12 +315,13 @@ describe('AuthService', () => {
             expect(service.permissionsLoaded()).toBe(false);
         });
 
-        it('should refresh permissions when refreshPermissions() is called', () => {
+        it('should refresh permissions when refreshPermissions() is called', async () => {
             // First authenticate and load permissions
             keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
             TestBed.flushEffects();
             const req1 = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
             req1.flush([{ table_name: 'issues', permission: 'read' }]);
+            await settle();
             expect(service.hasPermission('issues', 'read')).toBe(true);
 
             // Refresh
@@ -326,6 +331,7 @@ describe('AuthService', () => {
                 { table_name: 'issues', permission: 'read' },
                 { table_name: 'issues', permission: 'delete' }
             ]);
+            await settle();
 
             expect(service.hasPermission('issues', 'delete')).toBe(true);
         });
@@ -343,7 +349,7 @@ describe('AuthService', () => {
          * Fix: Wrap the entire effect body (after keycloakSignal read) in untracked()
          * so only keycloakSignal changes trigger re-execution.
          */
-        it('should NOT re-fire permissions HTTP request when cache updates (regression: reactive loop)', () => {
+        it('should NOT re-fire permissions HTTP request when cache updates (regression: reactive loop)', async () => {
             // Trigger Ready → authenticated → loadPermissions fires
             keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
             TestBed.flushEffects();
@@ -354,6 +360,7 @@ describe('AuthService', () => {
             // Flush the response — this writes to permissionsCache, permissionsLoaded, permissionsLoading.
             // In the buggy version, these writes re-triggered the effect → second HTTP request.
             req.flush([{ table_name: 'issues', permission: 'read' }]);
+            await settle();
             TestBed.flushEffects();
 
             // Verify: NO additional permissions requests were fired.
@@ -362,12 +369,13 @@ describe('AuthService', () => {
             expect(service.permissionsLoaded()).toBe(true);
         });
 
-        it('hasPermission() should not create reactive dependency when called inside effect()', () => {
+        it('hasPermission() should not create reactive dependency when called inside effect()', async () => {
             // Authenticate and load permissions
             keycloakEventSignal.set({ type: KeycloakEventType.Ready, args: true });
             TestBed.flushEffects();
             const req = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
             req.flush([{ table_name: 'issues', permission: 'read' }]);
+            await settle();
 
             // hasPermission uses untracked() internally, so reading it from within
             // a component's effect() should NOT make permissionsCache a dependency.
@@ -379,6 +387,7 @@ describe('AuthService', () => {
             service.refreshPermissions();
             const req2 = httpTesting.expectOne(r => r.url.includes('rpc/get_current_user_permissions'));
             req2.flush([]);
+            await settle();
 
             // Value changed, but callers holding the old boolean aren't re-notified
             // (that's by design — callers use computed() for reactivity)

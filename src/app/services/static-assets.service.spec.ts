@@ -8,6 +8,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { StaticAssetsService, DEFAULT_BREAKPOINTS, CROP_PRESET_PROFILES } from './static-assets.service';
 import { AuthService } from './auth.service';
+import { firstValueFrom } from 'rxjs';
 
 describe('StaticAssetsService', () => {
     let service: StaticAssetsService;
@@ -41,90 +42,92 @@ describe('StaticAssetsService', () => {
     });
 
     describe('getAll', () => {
-        it('should fetch all static assets', () => {
+        it('should fetch all static assets', async () => {
             const mockAssets = [
                 { id: '1', slug: 'hero', display_name: 'Hero Banner', created_at: '2026-01-01' },
                 { id: '2', slug: 'logo', display_name: 'Logo', created_at: '2026-01-02' }
             ];
 
-            service.getAll().subscribe(assets => {
-                expect(assets.length).toBe(2);
-                expect(assets[0].slug).toBe('hero');
-            });
+            const result$ = firstValueFrom(service.getAll());
 
             const req = httpMock.expectOne(r => r.url.includes('static_assets') && r.url.includes('order=created_at.desc'));
             expect(req.request.method).toBe('GET');
             req.flush(mockAssets);
+            const assets = await result$;
+            expect(assets.length).toBe(2);
+            expect(assets[0].slug).toBe('hero');
         });
 
-        it('should return empty array on error', () => {
-            service.getAll().subscribe(assets => {
-                expect(assets).toEqual([]);
-            });
+        it('should return empty array on error', async () => {
+            const result$ = firstValueFrom(service.getAll());
 
             const req = httpMock.expectOne(r => r.url.includes('static_assets'));
             req.error(new ProgressEvent('error'));
+            const assets = await result$;
+            expect(assets).toEqual([]);
         });
     });
 
     describe('getBySlug', () => {
-        it('should fetch asset by slug', () => {
+        it('should fetch asset by slug', async () => {
             const mockAsset = { id: '1', slug: 'hero', display_name: 'Hero Banner' };
 
-            service.getBySlug('hero').subscribe(asset => {
-                expect(asset).toBeTruthy();
-                expect(asset!.slug).toBe('hero');
-            });
+            const result$ = firstValueFrom(service.getBySlug('hero'));
 
             const req = httpMock.expectOne(r => r.url.includes('slug=eq.hero'));
             expect(req.request.method).toBe('GET');
             req.flush([mockAsset]);
+            const asset = await result$;
+            expect(asset).toBeTruthy();
+            expect(asset!.slug).toBe('hero');
         });
 
-        it('should return null when asset not found', () => {
-            service.getBySlug('nonexistent').subscribe(asset => {
-                expect(asset).toBeNull();
-            });
+        it('should return null when asset not found', async () => {
+            const result$ = firstValueFrom(service.getBySlug('nonexistent'));
 
             const req = httpMock.expectOne(r => r.url.includes('slug=eq.nonexistent'));
             req.flush([]);
+            const asset = await result$;
+            expect(asset).toBeNull();
         });
     });
 
     describe('create', () => {
-        it('should create a static asset', () => {
+        it('should create a static asset', async () => {
             const newAsset = {
                 display_name: 'Hero Banner',
                 original_file_id: 'file-123'
             };
 
-            service.create(newAsset).subscribe(result => {
-                expect(result.slug).toBe('hero-banner');
-            });
+            const result$ = firstValueFrom(service.create(newAsset));
 
             const req = httpMock.expectOne(r => r.url.includes('static_assets') && r.method === 'POST');
             expect(req.request.headers.get('Prefer')).toBe('return=representation');
             req.flush({ id: '1', slug: 'hero-banner', ...newAsset });
+            const result = await result$;
+            expect(result.slug).toBe('hero-banner');
         });
     });
 
     describe('update', () => {
-        it('should update a static asset', () => {
-            service.update('1', { display_name: 'Updated Name' }).subscribe(result => {
-                expect(result.display_name).toBe('Updated Name');
-            });
+        it('should update a static asset', async () => {
+            const result$ = firstValueFrom(service.update('1', { display_name: 'Updated Name' }));
 
             const req = httpMock.expectOne(r => r.url.includes('id=eq.1') && r.method === 'PATCH');
             req.flush([{ id: '1', display_name: 'Updated Name' }]);
+            const result = await result$;
+            expect(result.display_name).toBe('Updated Name');
         });
     });
 
     describe('delete', () => {
-        it('should delete a static asset', () => {
-            service.delete('1').subscribe();
+        it('should delete a static asset', async () => {
+            const result$ = firstValueFrom(service.delete('1'));
 
             const req = httpMock.expectOne(r => r.url.includes('id=eq.1') && r.method === 'DELETE');
             req.flush(null);
+            await result$;
+
         });
     });
 

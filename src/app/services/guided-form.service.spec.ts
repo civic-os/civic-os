@@ -8,6 +8,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GuidedFormService } from './guided-form.service';
 import { GuidedFormDefinition, GuidedFormStep, GuidedFormProgressEntry, GuidedFormCondition, GuidedFormContext } from '../interfaces/guided-form';
+import { firstValueFrom } from 'rxjs';
 
 describe('GuidedFormService', () => {
     let service: GuidedFormService;
@@ -80,16 +81,7 @@ describe('GuidedFormService', () => {
 
     describe('Context Loading', () => {
         it('should load context via RPC and cache result', async () => {
-            service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
-                expect(ctx.definition.guided_form_key).toBe('test_guidedForm');
-                expect(ctx.parent_id).toBe(42);
-                expect(ctx.parent_status_key).toBe('draft');
-
-                // Verify cached
-                const cached = service.getContext('test_guidedForm', 'test_parent', 42);
-                expect(cached).toBeDefined();
-                expect(cached!.parent_id).toBe(42);
-            });
+            const result$ = firstValueFrom(service.loadContext('test_guidedForm', 'test_parent', 42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
             expect(req.request.method).toBe('POST');
@@ -99,19 +91,29 @@ describe('GuidedFormService', () => {
                 p_record_id: 42
             });
             req.flush(mockContext);
+            const ctx = await result$;
+            expect(ctx.definition.guided_form_key).toBe('test_guidedForm');
+            expect(ctx.parent_id).toBe(42);
+            expect(ctx.parent_status_key).toBe('draft');
+
+            // Verify cached
+            const cached = service.getContext('test_guidedForm', 'test_parent', 42);
+            expect(cached).toBeDefined();
+            expect(cached!.parent_id).toBe(42);
         });
 
         it('should return cached context on second call', async () => {
             // First call — triggers HTTP
-            service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(() => {
-                // Second call — should return from cache, no HTTP
-                service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
-                    expect(ctx.parent_id).toBe(42);
-                });
-            });
+            const first$ = firstValueFrom(service.loadContext('test_guidedForm', 'test_parent', 42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
             req.flush(mockContext);
+            await first$;
+
+            // Second call — should return from cache, no HTTP
+            const ctx = await firstValueFrom(service.loadContext('test_guidedForm', 'test_parent', 42));
+            expect(ctx.parent_id).toBe(42);
+            httpMock.expectNone(testPostgrestUrl + 'rpc/get_guided_form_context');
         });
 
         it('should return undefined for uncached context', () => {
@@ -124,91 +126,94 @@ describe('GuidedFormService', () => {
                 steps: mockSteps.map(s => ({ ...s, conditions: undefined as any }))
             };
 
-            service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
-                expect(ctx.steps[0].conditions).toEqual([]);
-                expect(ctx.steps[1].conditions).toEqual([]);
-            });
+            const result$ = firstValueFrom(service.loadContext('test_guidedForm', 'test_parent', 42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
             req.flush(ctxWithoutConditions);
+            const ctx = await result$;
+            expect(ctx.steps[0].conditions).toEqual([]);
+            expect(ctx.steps[1].conditions).toEqual([]);
         });
 
         it('should refresh context without clearing old data', async () => {
             // Prime the cache
-            service.loadContext('test_guidedForm', 'test_parent', 42).subscribe(() => {
-                // Old data still visible
-                expect(service.getContext('test_guidedForm', 'test_parent', 42)?.parent_status_key).toBe('draft');
-
-                // Refresh — old data should remain visible during fetch
-                const updatedContext = { ...mockContext, parent_status_key: 'submitted' as any };
-                service.refreshContext('test_guidedForm', 'test_parent', 42).subscribe(ctx => {
-                    expect(ctx.parent_status_key).toBe('submitted');
-                    expect(service.getContext('test_guidedForm', 'test_parent', 42)?.parent_status_key).toBe('submitted');
-                });
-
-                const refreshReq = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
-                refreshReq.flush(updatedContext);
-            });
+            const load$ = firstValueFrom(service.loadContext('test_guidedForm', 'test_parent', 42));
 
             const loadReq = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
             loadReq.flush(mockContext);
+            await load$;
+
+            // Old data still visible
+            expect(service.getContext('test_guidedForm', 'test_parent', 42)?.parent_status_key).toBe('draft');
+
+            // Refresh — old data should remain visible during fetch
+            const updatedContext = { ...mockContext, parent_status_key: 'submitted' as any };
+            const refresh$ = firstValueFrom(service.refreshContext('test_guidedForm', 'test_parent', 42));
+
+            const refreshReq = httpMock.expectOne(testPostgrestUrl + 'rpc/get_guided_form_context');
+            // Mid-fetch: previously cached data has not been cleared
+            expect(service.getContext('test_guidedForm', 'test_parent', 42)?.parent_status_key).toBe('draft');
+            refreshReq.flush(updatedContext);
+            const ctx = await refresh$;
+            expect(ctx.parent_status_key).toBe('submitted');
+            expect(service.getContext('test_guidedForm', 'test_parent', 42)?.parent_status_key).toBe('submitted');
         });
     });
 
     describe('RPC Wrappers', () => {
         it('should call start_guided_form RPC', async () => {
-            service.startGuidedForm('test_guidedForm').subscribe(result => {
-                expect(result).toEqual(expect.objectContaining({ parent_id: 42, parent_table: 'test_parent' }));
-            });
+            const result$ = firstValueFrom(service.startGuidedForm('test_guidedForm'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/start_guided_form');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_guided_form_key: 'test_guidedForm' });
             req.flush({ parent_id: 42, parent_table: 'test_parent' });
+            const result = await result$;
+            expect(result).toEqual(expect.objectContaining({ parent_id: 42, parent_table: 'test_parent' }));
         });
 
         it('should call complete_guided_form_step RPC', async () => {
-            service.completeStep('test_guidedForm', 42, 'step1').subscribe(result => {
-                expect(result).toEqual({ all_data_steps_complete: false, next_step_key: 'step2', next_step_table: 'test_step2', next_record_id: 99 });
-            });
+            const result$ = firstValueFrom(service.completeStep('test_guidedForm', 42, 'step1'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/complete_guided_form_step');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_guided_form_key: 'test_guidedForm', p_parent_id: 42, p_step_key: 'step1' });
             req.flush({ all_data_steps_complete: false, next_step_key: 'step2', next_step_table: 'test_step2', next_record_id: 99 });
+            const result = await result$;
+            expect(result).toEqual({ all_data_steps_complete: false, next_step_key: 'step2', next_step_table: 'test_step2', next_record_id: 99 });
         });
 
         it('should call submit_guided_form RPC', async () => {
-            service.submitGuidedForm('test_guidedForm', 42).subscribe(result => {
-                expect(result).toEqual(expect.objectContaining({ navigate_to: '/view/test_parent/42' }));
-            });
+            const result$ = firstValueFrom(service.submitGuidedForm('test_guidedForm', 42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/submit_guided_form');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_guided_form_key: 'test_guidedForm', p_parent_id: 42 });
             req.flush({ navigate_to: '/view/test_parent/42' });
+            const result = await result$;
+            expect(result).toEqual(expect.objectContaining({ navigate_to: '/view/test_parent/42' }));
         });
 
         it('should call cancel_guided_form RPC', async () => {
-            service.cancelGuidedForm('test_guidedForm', 42).subscribe(result => {
-                expect(result).toEqual({ cancelled: true });
-            });
+            const result$ = firstValueFrom(service.cancelGuidedForm('test_guidedForm', 42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/cancel_guided_form');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_guided_form_key: 'test_guidedForm', p_parent_id: 42 });
             req.flush({ cancelled: true });
+            const result = await result$;
+            expect(result).toEqual({ cancelled: true });
         });
 
         it('should call ensure_guided_form_step_record RPC', async () => {
-            service.ensureStepRecord('test_guidedForm', 42, 'step1').subscribe(result => {
-                expect(result).toEqual({ record_id: 99, created: true });
-            });
+            const result$ = firstValueFrom(service.ensureStepRecord('test_guidedForm', 42, 'step1'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/ensure_guided_form_step_record');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_guided_form_key: 'test_guidedForm', p_parent_id: 42, p_step_key: 'step1' });
             req.flush({ record_id: 99, created: true });
+            const result = await result$;
+            expect(result).toEqual({ record_id: 99, created: true });
         });
     });
 

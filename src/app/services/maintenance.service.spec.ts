@@ -22,6 +22,7 @@ import { provideHttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MaintenanceService } from './maintenance.service';
 import { AuthService } from './auth.service';
 import { LocaleService } from './locale.service';
+import { settle } from '../testing/await-http';
 
 describe('MaintenanceService', () => {
   let service: MaintenanceService;
@@ -30,7 +31,7 @@ describe('MaintenanceService', () => {
   const localeSignal = signal('en');
   let mockLocaleService: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     localeSignal.set('en');
 
     mockAuthService = {
@@ -63,6 +64,7 @@ describe('MaintenanceService', () => {
     // Flush the one-shot init check (fires immediately on construction)
     const req = httpMock.expectOne('/maintenance.json');
     req.flush(null, { status: 404, statusText: 'Not Found' });
+    await settle();
   });
 
   afterEach(() => {
@@ -174,7 +176,7 @@ describe('MaintenanceService', () => {
     // The init check fires immediately on service construction. We test
     // its behavior by creating a fresh service and flushing different responses.
 
-    it('should set mode from maintenance.json when it returns a mode', () => {
+    it('should set mode from maintenance.json when it returns a mode', async () => {
       // Create a fresh TestBed to get a new init check
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
@@ -193,6 +195,7 @@ describe('MaintenanceService', () => {
       // Flush the init check with a maintenance response
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'readonly', message: 'Scheduled maintenance' });
+      await settle();
 
       expect(freshService.mode()).toBe('readonly');
       expect(freshService.message()).toBe('Scheduled maintenance');
@@ -211,7 +214,7 @@ describe('MaintenanceService', () => {
       // the initial 404 in beforeEach didn't prevent updateFromHeader from working
     });
 
-    it('should set mode to off when maintenance.json returns mode off', () => {
+    it('should set mode to off when maintenance.json returns mode off', async () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
@@ -229,6 +232,7 @@ describe('MaintenanceService', () => {
       // Flush the init check with an explicit 'off' mode
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'off' });
+      await settle();
 
       expect(freshService.mode()).toBe('off');
       expect(freshService.message()).toBeNull();
@@ -236,7 +240,7 @@ describe('MaintenanceService', () => {
       freshHttp.verify();
     });
 
-    it('should set message from maintenance.json response', () => {
+    it('should set message from maintenance.json response', async () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         providers: [
@@ -253,6 +257,7 @@ describe('MaintenanceService', () => {
 
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'full', message: 'System upgrade in progress' });
+      await settle();
 
       expect(freshService.mode()).toBe('full');
       expect(freshService.message()).toBe('System upgrade in progress');
@@ -283,7 +288,7 @@ describe('MaintenanceService', () => {
       expect(service.fullTitle()).toBe('System Maintenance');
     });
 
-    it('fullMessage should prefer custom message over hardcoded string', () => {
+    it('fullMessage should prefer custom message over hardcoded string', async () => {
       service.updateFromHeader('full');
       // No custom message set — uses hardcoded
       expect(service.fullMessage()).toContain('temporarily unavailable');
@@ -305,12 +310,13 @@ describe('MaintenanceService', () => {
 
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'full', message: 'Custom downtime message' });
+      await settle();
 
       expect(freshService.fullMessage()).toBe('Custom downtime message');
       freshHttp.verify();
     });
 
-    it('readonlyMessage should prefer custom message over hardcoded string', () => {
+    it('readonlyMessage should prefer custom message over hardcoded string', async () => {
       expect(service.readonlyMessage()).toContain('read-only mode');
 
       TestBed.resetTestingModule();
@@ -329,6 +335,7 @@ describe('MaintenanceService', () => {
 
       const req = freshHttp.expectOne('/maintenance.json');
       req.flush({ mode: 'readonly', message: 'Brief maintenance window' });
+      await settle();
 
       expect(freshService.readonlyMessage()).toBe('Brief maintenance window');
       freshHttp.verify();

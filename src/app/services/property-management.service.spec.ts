@@ -20,6 +20,7 @@ import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { PropertyManagementService } from './property-management.service';
+import { firstValueFrom } from 'rxjs';
 
 describe('PropertyManagementService', () => {
     let service: PropertyManagementService;
@@ -58,9 +59,7 @@ describe('PropertyManagementService', () => {
 
     describe('upsertPropertyMetadata()', () => {
         it('should call RPC function with correct parameters', async () => {
-            service.upsertPropertyMetadata('Issue', 'title', 'Issue Title', 'The title of the issue', 1, 200, true, true, true, true, true, true).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.upsertPropertyMetadata('Issue', 'title', 'Issue Title', 'The title of the issue', 1, 200, true, true, true, true, true, true));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_property_metadata');
             expect(req.request.method).toBe('POST');
@@ -80,12 +79,12 @@ describe('PropertyManagementService', () => {
                 p_is_recurring: null
             });
             req.flush({});
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle null values', async () => {
-            service.upsertPropertyMetadata('Issue', 'title', null, null, null, null, false, false, false, false, false, false).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.upsertPropertyMetadata('Issue', 'title', null, null, null, null, false, false, false, false, false, false));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_property_metadata');
             expect(req.request.body).toEqual({
@@ -104,16 +103,18 @@ describe('PropertyManagementService', () => {
                 p_is_recurring: null
             });
             req.flush({});
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle errors', async () => {
-            service.upsertPropertyMetadata('Issue', 'title', 'Issue Title', null, 1, null, true, true, true, true, true, true).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Failed to save property metadata');
-            });
+            const result$ = firstValueFrom(service.upsertPropertyMetadata('Issue', 'title', 'Issue Title', null, 1, null, true, true, true, true, true, true));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/upsert_property_metadata');
             req.flush({ message: 'Admin access required' }, { status: 403, statusText: 'Forbidden' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Failed to save property metadata');
         });
     });
 
@@ -141,9 +142,7 @@ describe('PropertyManagementService', () => {
                 { table_name: 'Issue', column_name: 'status', sort_order: 2 }
             ];
 
-            service.updatePropertiesOrder(properties).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.updatePropertiesOrder(properties));
 
             // Expect 3 separate RPC calls - use match to get all requests
             const requests = httpMock.match(testPostgrestUrl + 'rpc/update_property_sort_order');
@@ -154,6 +153,8 @@ describe('PropertyManagementService', () => {
             expect(requests[2].request.body).toEqual({ p_table_name: 'Issue', p_column_name: 'status', p_sort_order: 2 });
 
             requests.forEach(req => req.flush({}));
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle reordering system fields without breaking visibility (regression test)', async () => {
@@ -165,9 +166,7 @@ describe('PropertyManagementService', () => {
                 { table_name: 'Issue', column_name: 'created_at', sort_order: 2 } // System field
             ];
 
-            service.updatePropertiesOrder(properties).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.updatePropertiesOrder(properties));
 
             const requests = httpMock.match(testPostgrestUrl + 'rpc/update_property_sort_order');
             expect(requests.length).toBe(3);
@@ -181,48 +180,50 @@ describe('PropertyManagementService', () => {
             // This test serves as documentation that system fields SHOULD be included in reordering
             // operations, and the database must handle them correctly with smart defaults.
             requests.forEach(req => req.flush({}));
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle empty array', async () => {
-            service.updatePropertiesOrder([]).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.updatePropertiesOrder([]));
 
             httpMock.expectNone(testPostgrestUrl + 'rpc/update_property_sort_order');
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle errors', async () => {
             const properties = [{ table_name: 'Issue', column_name: 'title', sort_order: 0 }];
 
-            service.updatePropertiesOrder(properties).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Failed to update properties order');
-            });
+            const result$ = firstValueFrom(service.updatePropertiesOrder(properties));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_property_sort_order');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Failed to update properties order');
         });
     });
 
     describe('isAdmin()', () => {
         it('should call RPC function', async () => {
-            service.isAdmin().subscribe(result => {
-                expect(result).toBe(true);
-            });
+            const result$ = firstValueFrom(service.isAdmin());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({});
             req.flush(true);
+            const result = await result$;
+            expect(result).toBe(true);
         });
 
         it('should return false on error', async () => {
-            service.isAdmin().subscribe(result => {
-                expect(result).toBe(false);
-            });
+            const result$ = firstValueFrom(service.isAdmin());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/is_admin');
             req.flush({}, { status: 401, statusText: 'Unauthorized' });
+            const result = await result$;
+            expect(result).toBe(false);
         });
     });
 });

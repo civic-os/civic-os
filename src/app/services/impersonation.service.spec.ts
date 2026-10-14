@@ -21,6 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ImpersonationService } from './impersonation.service';
 import { getPostgrestUrl } from '../config/runtime';
+import { firstValueFrom } from 'rxjs';
 
 describe('ImpersonationService', () => {
     let service: ImpersonationService;
@@ -62,12 +63,10 @@ describe('ImpersonationService', () => {
     });
 
     describe('startImpersonation', () => {
-        it('should set active state and roles on success', () => {
+        it('should set active state and roles on success', async () => {
             const roles = ['user', 'editor'];
 
-            service.startImpersonation(roles).subscribe(success => {
-                expect(success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.startImpersonation(roles));
 
             // Respond to the audit log request
             const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`);
@@ -77,6 +76,8 @@ describe('ImpersonationService', () => {
                 p_action: 'start'
             });
             req.flush({ success: true, message: 'Impersonation start logged' });
+            const success = await result$;
+            expect(success).toBe(true);
 
             // Verify state
             expect(service.isActive()).toBe(true);
@@ -84,85 +85,91 @@ describe('ImpersonationService', () => {
             expect(service.headerValue()).toBe('user,editor');
         });
 
-        it('should persist to localStorage', () => {
-            service.startImpersonation(['user']).subscribe();
+        it('should persist to localStorage', async () => {
+            const result$ = firstValueFrom(service.startImpersonation(['user']));
 
             const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`);
             req.flush({ success: true, message: '' });
+            await result$;
 
             const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
             expect(stored.active).toBe(true);
             expect(stored.roles).toEqual(['user']);
         });
 
-        it('should not start with empty roles', () => {
-            service.startImpersonation([]).subscribe(success => {
-                expect(success).toBe(false);
-            });
+        it('should not start with empty roles', async () => {
+            const result$ = firstValueFrom(service.startImpersonation([]));
 
             // No HTTP request should be made
             httpMock.expectNone(`${getPostgrestUrl()}rpc/log_impersonation`);
 
             expect(service.isActive()).toBe(false);
+            const success = await result$;
+            expect(success).toBe(false);
         });
     });
 
     describe('stopImpersonation', () => {
-        it('should clear state on stop', () => {
+        it('should clear state on stop', async () => {
             // First start impersonation
-            service.startImpersonation(['user']).subscribe();
+            const start$ = firstValueFrom(service.startImpersonation(['user']));
             httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`).flush({ success: true, message: '' });
+            await start$;
 
             expect(service.isActive()).toBe(true);
 
             // Now stop
-            service.stopImpersonation().subscribe(success => {
-                expect(success).toBe(true);
-            });
+            const stop$ = firstValueFrom(service.stopImpersonation());
 
             const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`);
             expect(req.request.body.p_action).toBe('stop');
             req.flush({ success: true, message: '' });
+            const success = await stop$;
+            expect(success).toBe(true);
 
             expect(service.isActive()).toBe(false);
             expect(service.impersonatedRoles()).toEqual([]);
             expect(service.headerValue()).toBeNull();
         });
 
-        it('should clear localStorage on stop', () => {
-            service.startImpersonation(['user']).subscribe();
+        it('should clear localStorage on stop', async () => {
+            const start$ = firstValueFrom(service.startImpersonation(['user']));
             httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`).flush({ success: true, message: '' });
+            await start$;
 
-            service.stopImpersonation().subscribe();
+            const stop$ = firstValueFrom(service.stopImpersonation());
             httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`).flush({ success: true, message: '' });
+            await stop$;
 
             expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
         });
 
-        it('should succeed immediately if not active', () => {
-            service.stopImpersonation().subscribe(success => {
-                expect(success).toBe(true);
-            });
+        it('should succeed immediately if not active', async () => {
+            const result$ = firstValueFrom(service.stopImpersonation());
 
             // No HTTP request for stop when not active
             httpMock.expectNone(`${getPostgrestUrl()}rpc/log_impersonation`);
+            const success = await result$;
+            expect(success).toBe(true);
         });
 
-        it('should clear state even when audit logging fails', () => {
+        it('should clear state even when audit logging fails', async () => {
             // First start impersonation
-            service.startImpersonation(['user', 'editor']).subscribe();
+            const start$ = firstValueFrom(service.startImpersonation(['user', 'editor']));
             httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`).flush({ success: true, message: '' });
+            await start$;
 
             expect(service.isActive()).toBe(true);
             expect(service.impersonatedRoles()).toEqual(['user', 'editor']);
 
             // Now stop - but make audit logging fail
-            service.stopImpersonation().subscribe();
+            const stop$ = firstValueFrom(service.stopImpersonation());
 
             const req = httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`);
             expect(req.request.body.p_action).toBe('stop');
             // Simulate HTTP error (e.g., token expired, 401)
             req.error(new ProgressEvent('error'), { status: 401, statusText: 'Unauthorized' });
+            await stop$;
 
             // State should still be cleared despite audit failure
             expect(service.isActive()).toBe(false);
@@ -173,9 +180,10 @@ describe('ImpersonationService', () => {
     });
 
     describe('headerValue', () => {
-        it('should return comma-separated roles when active', () => {
-            service.startImpersonation(['user', 'editor', 'manager']).subscribe();
+        it('should return comma-separated roles when active', async () => {
+            const start$ = firstValueFrom(service.startImpersonation(['user', 'editor', 'manager']));
             httpMock.expectOne(`${getPostgrestUrl()}rpc/log_impersonation`).flush({ success: true, message: '' });
+            await start$;
 
             expect(service.headerValue()).toBe('user,editor,manager');
         });
