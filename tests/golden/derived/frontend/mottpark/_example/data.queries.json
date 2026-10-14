@@ -1,0 +1,3536 @@
+{
+  "entities": {
+    "holiday_rules": {
+      "flags": {"hasHybridSearch": false, "insert": false, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order", "created_at", "updated_at"],
+        "edit": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order"],
+        "list": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "holiday_rules",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "holiday_rules",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "holiday_rules",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "holiday_rules",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "holiday_rules"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=description.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "desc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=description.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "rule_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order rule_type asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=rule_type.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "month",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order month asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=month.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "day",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order day asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=day.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "weekday",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order weekday asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=weekday.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "nth",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order nth asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=nth.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "relative_to_rule_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order relative_to_rule_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=relative_to_rule_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "relative_days",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order relative_days asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=relative_days.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "is_active",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order is_active asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=is_active.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "asc",
+            "orderField": "sort_order",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order sort_order asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&order=sort_order.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "holiday_rules",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "holiday_rules",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "holiday_rules",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name)", "relative_days", "is_active", "sort_order", "created_at", "updated_at", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "holiday_rules"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id:holiday_rules!relative_to_rule_id(id,display_name),relative_days,is_active,sort_order,created_at,updated_at,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "description", "rule_type", "month", "day", "weekday", "nth", "relative_to_rule_id", "relative_days", "is_active", "sort_order", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "holiday_rules"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=display_name,description,rule_type,month,day,weekday,nth,relative_to_rule_id,relative_days,is_active,sort_order,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "holiday_rules",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/holiday_rules?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "manager_events": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": true, "show_calendar": true},
+      "named": {
+        "detail": [
+          "display_name",
+          "event_type",
+          "time_slot",
+          "attendee_count",
+          "is_public_event",
+          "contact_name",
+          "contact_phone",
+          "organization_name",
+          "attendee_ages",
+          "is_food_served",
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "created_at",
+          "updated_at"
+        ],
+        "edit": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "display_name", "status_id"],
+        "list": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "manager_events",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "manager_events",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "manager_events",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "manager_events",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "manager_events"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "event_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order event_type asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=event_type.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "desc",
+            "orderField": "event_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order event_type desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=event_type.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=time_slot.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "attendee_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order attendee_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=attendee_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "is_public_event",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order is_public_event asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=is_public_event.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "organization_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order organization_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=organization_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "asc",
+            "orderField": "status_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_id asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&order=status_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "manager_events",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "status_id", "operator": "eq", "value": 5}
+            ],
+            "key": "manager_events",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&status_id=eq.5"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "status_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "status_id", "operator": "eq", "value": ""},
+              {"column": "status_id", "operator": "eq", "value": null},
+              {"column": "status_id", "operator": "eq"},
+              {
+                "column": "status_id",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "status_id", "operator": "in", "value": "not-an-array"},
+              {"column": "status_id", "operator": "eq", "value": 0},
+              {"column": "status_id", "operator": "eq", "value": false}
+            ],
+            "key": "manager_events"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "manager_events",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "manager_events",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "event_type", "time_slot", "attendee_count", "is_public_event", "organization_name", "status_id:statuses!status_id(id,display_name,color,status_key)", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "key": "manager_events",
+            "pagination": {"page": 1, "pageSize": 1000}
+          },
+          "name": "calendar overlap filter",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-999", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,organization_name,status_id:statuses!status_id(id,display_name,color,status_key),id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "display_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "is_public_event",
+            "contact_name",
+            "contact_phone",
+            "organization_name",
+            "attendee_ages",
+            "is_food_served",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "created_at",
+            "updated_at",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "manager_events"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=display_name,event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,status_id:statuses!status_id(id,display_name,color,status_key),created_at,updated_at,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["event_type", "time_slot", "attendee_count", "is_public_event", "contact_name", "contact_phone", "organization_name", "attendee_ages", "is_food_served", "display_name", "status_id", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "manager_events"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=event_type,time_slot,attendee_count,is_public_event,contact_name,contact_phone,organization_name,attendee_ages,is_food_served,display_name,status_id,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "manager_events",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/manager_events?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "public_calendar_events": {
+      "flags": {"hasHybridSearch": false, "insert": false, "is_view": false, "show_calendar": true},
+      "named": {
+        "detail": ["time_slot", "display_name", "event_type", "organization_name", "contact_name", "contact_phone", "attendee_ages", "is_admission_charged"],
+        "edit": ["display_name"],
+        "list": ["time_slot", "display_name", "event_type"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["time_slot", "display_name", "event_type", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "public_calendar_events",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["time_slot", "display_name", "event_type", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "public_calendar_events",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["time_slot", "display_name", "event_type", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "public_calendar_events",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["time_slot", "display_name", "event_type", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "public_calendar_events",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {"fields": "<edit>", "key": "public_calendar_events"},
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "public_calendar_events",
+            "orderDirection": "asc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=time_slot.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "public_calendar_events",
+            "orderDirection": "desc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot desc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=time_slot.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "public_calendar_events",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "public_calendar_events",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "public_calendar_events",
+            "orderDirection": "asc",
+            "orderField": "event_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order event_type asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&order=event_type.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "public_calendar_events",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "public_calendar_events",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "public_calendar_events",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["time_slot", "display_name", "event_type", "id"],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "key": "public_calendar_events",
+            "pagination": {"page": 1, "pageSize": 1000}
+          },
+          "name": "calendar overlap filter",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-999", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["time_slot", "display_name", "event_type", "organization_name", "contact_name", "contact_phone", "attendee_ages", "is_admission_charged", "id"],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "public_calendar_events"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=time_slot,display_name,event_type,organization_name,contact_name,contact_phone,attendee_ages,is_admission_charged,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "public_calendar_events"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "public_calendar_events",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/public_calendar_events?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "reservation_payment_types": {
+      "flags": {"hasHybridSearch": false, "insert": false, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+        "edit": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"],
+        "list": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order"]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payment_types",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payment_types",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payment_types",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order", "id"],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payment_types",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "reservation_payment_types"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=display_name.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "asc",
+            "orderField": "code",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order code asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=code.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "desc",
+            "orderField": "code",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order code desc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=code.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "asc",
+            "orderField": "base_amount",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order base_amount asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=base_amount.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "asc",
+            "orderField": "is_refundable",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order is_refundable asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=is_refundable.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "asc",
+            "orderField": "description",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order description asc [TextLong]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=description.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "asc",
+            "orderField": "sort_order",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order sort_order asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&order=sort_order.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_payment_types",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payment_types",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_payment_types",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order", "id"],
+          "input": {"entityId": "1", "fields": "<list>", "key": "reservation_payment_types"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["display_name", "code", "base_amount", "is_refundable", "description", "sort_order", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<list>", "key": "reservation_payment_types"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=display_name,code,base_amount,is_refundable,description,sort_order,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_payment_types",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payment_types?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "reservation_payments": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": false},
+      "named": {
+        "detail": [
+          "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+          "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+          "display_name",
+          "amount",
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "due_date",
+          "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+          "payment_date",
+          "paid_amount",
+          "days_until_due",
+          "is_overdue",
+          "created_at",
+          "updated_at",
+          "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)"
+        ],
+        "edit": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "paid_amount"],
+        "list": [
+          "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+          "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+          "display_name",
+          "amount",
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "due_date",
+          "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+          "payment_date",
+          "paid_amount",
+          "days_until_due",
+          "is_overdue",
+          "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)"
+        ]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+            "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+            "display_name",
+            "amount",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "due_date",
+            "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+            "payment_date",
+            "paid_amount",
+            "days_until_due",
+            "is_overdue",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payments",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+            "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+            "display_name",
+            "amount",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "due_date",
+            "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+            "payment_date",
+            "paid_amount",
+            "days_until_due",
+            "is_overdue",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payments",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+            "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+            "display_name",
+            "amount",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "due_date",
+            "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+            "payment_date",
+            "paid_amount",
+            "days_until_due",
+            "is_overdue",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payments",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+            "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+            "display_name",
+            "amount",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "due_date",
+            "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+            "payment_date",
+            "paid_amount",
+            "days_until_due",
+            "is_overdue",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_payments",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "reservation_payments"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "reservation_request_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order reservation_request_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=reservation_request_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "desc",
+            "orderField": "reservation_request_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order reservation_request_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=reservation_request_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "payment_type_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order payment_type_id asc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_type_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "desc",
+            "orderField": "payment_type_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order payment_type_id desc [ForeignKeyName]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_type_id(display_name).desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "amount",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order amount asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=amount.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "status_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_id asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=status_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "due_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order due_date asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=due_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "payment_method_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order payment_method_id asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_method_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "payment_date",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order payment_date asc [Date]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_date.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "paid_amount",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order paid_amount asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=paid_amount.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "days_until_due",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order days_until_due asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=days_until_due.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "is_overdue",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order is_overdue asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=is_overdue.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "asc",
+            "orderField": "payment_transaction_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order payment_transaction_id asc [Payment]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&order=payment_transaction_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_payments",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+            "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+            "display_name",
+            "amount",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "due_date",
+            "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+            "payment_date",
+            "paid_amount",
+            "days_until_due",
+            "is_overdue",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "status_id", "operator": "eq", "value": 5},
+              {"column": "payment_method_id", "operator": "eq", "value": 5},
+              {"column": "is_overdue", "operator": "eq", "value": true}
+            ],
+            "key": "reservation_payments",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&status_id=eq.5&payment_method_id=eq.5&is_overdue=eq.true"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "status_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "status_id", "operator": "eq", "value": ""},
+              {"column": "status_id", "operator": "eq", "value": null},
+              {"column": "status_id", "operator": "eq"},
+              {
+                "column": "status_id",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "status_id", "operator": "in", "value": "not-an-array"},
+              {"column": "status_id", "operator": "eq", "value": 0},
+              {"column": "status_id", "operator": "eq", "value": false}
+            ],
+            "key": "reservation_payments"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id&status_id=in.(1,2,3)&status_id=in.()&status_id=in.not-an-array&status_id=eq.0&status_id=eq.false"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_payments",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_payments",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "reservation_request_id:reservation_requests!reservation_request_id(id,display_name)",
+            "payment_type_id:reservation_payment_types!payment_type_id(id,display_name)",
+            "display_name",
+            "amount",
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "due_date",
+            "payment_method_id:statuses!payment_method_id(id,display_name,color,status_key)",
+            "payment_date",
+            "paid_amount",
+            "days_until_due",
+            "is_overdue",
+            "created_at",
+            "updated_at",
+            "payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at)",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "reservation_payments"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id:reservation_requests!reservation_request_id(id,display_name),payment_type_id:reservation_payment_types!payment_type_id(id,display_name),display_name,amount,status_id:statuses!status_id(id,display_name,color,status_key),due_date,payment_method_id:statuses!payment_method_id(id,display_name,color,status_key),payment_date,paid_amount,days_until_due,is_overdue,created_at,updated_at,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "paid_amount", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "reservation_payments"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=reservation_request_id,payment_type_id,display_name,amount,status_id,due_date,paid_amount,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_payments",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_payments?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    },
+    "reservation_requests": {
+      "flags": {"hasHybridSearch": false, "insert": true, "is_view": false, "show_calendar": true},
+      "named": {
+        "detail": [
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "needs_attention",
+          "requestor_name",
+          "requestor_address",
+          "requestor_phone",
+          "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+          "organization_name",
+          "event_type",
+          "time_slot",
+          "attendee_count",
+          "attendee_ages",
+          "display_name",
+          "is_food_served",
+          "is_public_event",
+          "is_fundraiser",
+          "is_admission_charged",
+          "policy_agreed",
+          "policy_agreed_at",
+          "reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email)",
+          "reviewed_at",
+          "denial_reason",
+          "cancellation_reason",
+          "cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email)",
+          "cancelled_at",
+          "is_holiday_or_weekend",
+          "facility_fee_amount",
+          "created_at",
+          "updated_at",
+          "request_age_days",
+          "days_until_event"
+        ],
+        "edit": ["status_id", "display_name"],
+        "list": [
+          "status_id:statuses!status_id(id,display_name,color,status_key)",
+          "needs_attention",
+          "requestor_name",
+          "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+          "organization_name",
+          "event_type",
+          "time_slot",
+          "attendee_count",
+          "display_name",
+          "is_public_event",
+          "facility_fee_amount",
+          "created_at",
+          "request_age_days",
+          "days_until_event"
+        ]
+      },
+      "queries": [
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "display_name",
+            "is_public_event",
+            "facility_fee_amount",
+            "created_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "list",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "display_name",
+            "is_public_event",
+            "facility_fee_amount",
+            "created_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 3, "pageSize": 10}
+          },
+          "name": "list page 3/10",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "display_name",
+            "is_public_event",
+            "facility_fee_amount",
+            "created_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 2, "pageSize": 100}
+          },
+          "name": "list page 2/100",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "display_name",
+            "is_public_event",
+            "facility_fee_amount",
+            "created_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "isSummaryView": false,
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 1}
+          },
+          "name": "list page 1/1",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": ["display_name", "id"],
+          "input": {
+            "fields": ["display_name"],
+            "key": "reservation_requests"
+          },
+          "name": "list without pagination arg",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=display_name,id"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "status_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_id asc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "desc",
+            "orderField": "status_id",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order status_id desc [Status]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=status_id.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "needs_attention",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order needs_attention asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=needs_attention.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "desc",
+            "orderField": "needs_attention",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order needs_attention desc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=needs_attention.desc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "requestor_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order requestor_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=requestor_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "requestor_id(display_name)",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order requestor_id asc [User]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=requestor_id(display_name).asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "organization_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order organization_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=organization_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "event_type",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order event_type asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=event_type.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "time_slot",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order time_slot asc [TimeSlot]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=time_slot.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "attendee_count",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order attendee_count asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=attendee_count.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order display_name asc [TextShort]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "is_public_event",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order is_public_event asc [Boolean]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=is_public_event.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "facility_fee_amount",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order facility_fee_amount asc [Money]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=facility_fee_amount.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "created_at",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order created_at asc [DateTimeLocal]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=created_at.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "request_age_days",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order request_age_days asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=request_age_days.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "asc",
+            "orderField": "days_until_event",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "order days_until_event asc [IntegerNumber]",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&order=days_until_event.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_requests",
+            "orderField": "created_at"
+          },
+          "name": "order without direction",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&order=created_at.asc"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "display_name",
+            "is_public_event",
+            "facility_fee_amount",
+            "created_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "needs_attention", "operator": "eq", "value": true},
+              {"column": "requestor_id", "operator": "eq", "value": "33333333-3333-4333-8333-333333333333"},
+              {"column": "is_food_served", "operator": "eq", "value": true},
+              {"column": "is_public_event", "operator": "eq", "value": true},
+              {"column": "is_fundraiser", "operator": "eq", "value": true},
+              {"column": "is_holiday_or_weekend", "operator": "eq", "value": true},
+              {"column": "days_until_event", "operator": "gte", "value": 100}
+            ],
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 25}
+          },
+          "name": "filters (one per filterable property)",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&needs_attention=eq.true&requestor_id=eq.33333333-3333-4333-8333-333333333333&is_food_served=eq.true&is_public_event=eq.true&is_fundraiser=eq.true&is_holiday_or_weekend=eq.true&days_until_event=gte.100"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "filters": [
+              {
+                "column": "needs_attention",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"column": "needs_attention", "operator": "eq", "value": ""},
+              {"column": "needs_attention", "operator": "eq", "value": null},
+              {"column": "needs_attention", "operator": "eq"},
+              {
+                "column": "needs_attention",
+                "operator": "in",
+                "value": []
+              },
+              {"column": "needs_attention", "operator": "in", "value": "not-an-array"},
+              {"column": "needs_attention", "operator": "eq", "value": 0},
+              {"column": "needs_attention", "operator": "eq", "value": false}
+            ],
+            "key": "reservation_requests"
+          },
+          "name": "filters with in-array, empty and null values",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&needs_attention=in.(1,2,3)&needs_attention=in.()&needs_attention=in.not-an-array&needs_attention=eq.0&needs_attention=eq.false"
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id", "display_name"],
+            "key": "reservation_requests",
+            "orderDirection": "desc",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "  pot hole & co  "
+          },
+          "name": "legacy search ignores order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id,display_name&civic_os_text_search=wfts.pot%20hole%20%26%20co"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_requests",
+            "orderField": "display_name",
+            "pagination": {"page": 1, "pageSize": 25},
+            "searchQuery": "   "
+          },
+          "name": "blank search falls through to order",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&order=display_name.asc"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getDataPaginated",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "display_name",
+            "is_public_event",
+            "facility_fee_amount",
+            "created_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {
+            "fields": "<list>",
+            "filters": [
+              {"column": "time_slot", "operator": "ov", "value": "[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"}
+            ],
+            "key": "reservation_requests",
+            "pagination": {"page": 1, "pageSize": 1000}
+          },
+          "name": "calendar overlap filter",
+          "request": {
+            "headers": {"Prefer": "count=exact", "Range": "0-999", "Range-Unit": "items"},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,display_name,is_public_event,facility_fee_amount,created_at,request_age_days,days_until_event,id&time_slot=ov.[2026-06-28T00:00:00.000Z,2026-08-09T00:00:00.000Z)"
+          },
+          "result": {
+            "data": [],
+            "totalCount": 237
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": [
+            "status_id:statuses!status_id(id,display_name,color,status_key)",
+            "needs_attention",
+            "requestor_name",
+            "requestor_address",
+            "requestor_phone",
+            "requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email)",
+            "organization_name",
+            "event_type",
+            "time_slot",
+            "attendee_count",
+            "attendee_ages",
+            "display_name",
+            "is_food_served",
+            "is_public_event",
+            "is_fundraiser",
+            "is_admission_charged",
+            "policy_agreed",
+            "policy_agreed_at",
+            "reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email)",
+            "reviewed_at",
+            "denial_reason",
+            "cancellation_reason",
+            "cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email)",
+            "cancelled_at",
+            "is_holiday_or_weekend",
+            "facility_fee_amount",
+            "created_at",
+            "updated_at",
+            "request_age_days",
+            "days_until_event",
+            "id"
+          ],
+          "input": {"entityId": "1", "fields": "<detail>", "key": "reservation_requests"},
+          "name": "detail",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id:statuses!status_id(id,display_name,color,status_key),needs_attention,requestor_name,requestor_address,requestor_phone,requestor_id:civic_os_users!requestor_id(id,display_name,full_name,phone,email),organization_name,event_type,time_slot,attendee_count,attendee_ages,display_name,is_food_served,is_public_event,is_fundraiser,is_admission_charged,policy_agreed,policy_agreed_at,reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,cancellation_reason,cancelled_by:civic_os_users!cancelled_by(id,display_name,full_name,phone,email),cancelled_at,is_holiday_or_weekend,facility_fee_amount,created_at,updated_at,request_age_days,days_until_event,id&id=eq.1"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": ["status_id", "display_name", "id"],
+          "input": {"entityId": "44444444-4444-4444-8444-444444444444", "fields": "<edit>", "key": "reservation_requests"},
+          "name": "edit",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=status_id,display_name,id&id=eq.44444444-4444-4444-8444-444444444444"
+          }
+        },
+        {
+          "call": "getData",
+          "fieldsAfter": "=",
+          "input": {
+            "fields": ["id"],
+            "key": "reservation_requests",
+            "limit": 5,
+            "rawQueryParams": ["or=(a.eq.1,b.eq.2)", "select=ignored"]
+          },
+          "name": "limit and rawQueryParams",
+          "request": {
+            "headers": {},
+            "method": "GET",
+            "reportProgress": false,
+            "responseType": "json",
+            "url": "<PGRST>/reservation_requests?select=id&limit=5&or=(a.eq.1,b.eq.2)&select=ignored"
+          }
+        }
+      ]
+    }
+  },
+  "inversePreviews": [
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 9,
+        "sourceColumn": "relative_to_rule_id",
+        "sourceColumnDisplayName": "Relative To Rule Id",
+        "sourceTable": "holiday_rules",
+        "sourceTableDisplayName": "Holiday Rules"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/holiday_rules?relative_to_rule_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 9,
+          "sourceColumn": "relative_to_rule_id",
+          "sourceColumnDisplayName": "Relative To Rule Id",
+          "sourceTable": "holiday_rules",
+          "sourceTableDisplayName": "Holiday Rules"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "holiday_rules"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 3,
+        "sourceColumn": "payment_type_id",
+        "sourceColumnDisplayName": "Payment Type Id",
+        "sourceTable": "reservation_payments",
+        "sourceTableDisplayName": "Reservation Payments"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/reservation_payments?payment_type_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "payment_type_id",
+          "sourceColumnDisplayName": "Payment Type Id",
+          "sourceTable": "reservation_payments",
+          "sourceTableDisplayName": "Reservation Payments"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "reservation_payment_types"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 2,
+        "sourceColumn": "reservation_request_id",
+        "sourceColumnDisplayName": "Reservation Request Id",
+        "sourceTable": "reservation_payments",
+        "sourceTableDisplayName": "Reservation Payments"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/reservation_payments?reservation_request_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "reservation_request_id",
+          "sourceColumnDisplayName": "Reservation Request Id",
+          "sourceTable": "reservation_payments",
+          "sourceTableDisplayName": "Reservation Payments"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "reservation_requests"
+    }
+  ]
+}

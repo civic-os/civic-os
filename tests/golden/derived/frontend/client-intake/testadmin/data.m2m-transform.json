@@ -1,0 +1,210 @@
+{
+  "clients.client_service_needs_m2m": {
+    "junction": [
+      {
+        "service_categories": {"color": "#ff0000", "display_name": "Item 1", "id": 1}
+      },
+      {
+        "service_categories": {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+      },
+      {"service_categories": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "service_categories",
+      "targetTable": "service_categories"
+    },
+    "withMeta": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ]
+  },
+  "clients.newsletter_recipients_m2m": {
+    "junction": [
+      {
+        "newsletters": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "newsletters": {"display_name": "Item 2", "id": 2}
+      },
+      {"newsletters": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "newsletters",
+      "targetTable": "newsletters"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "newsletters.newsletter_recipients_m2m": {
+    "junction": [
+      {
+        "clients": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "clients": {"display_name": "Item 2", "id": 2}
+      },
+      {"clients": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "clients",
+      "targetTable": "clients"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "partners.partner_service_categories_m2m": {
+    "junction": [
+      {
+        "service_categories": {"color": "#ff0000", "display_name": "Item 1", "id": 1}
+      },
+      {
+        "service_categories": {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+      },
+      {"service_categories": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "service_categories",
+      "targetTable": "service_categories"
+    },
+    "withMeta": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ]
+  },
+  "referrals.referral_service_categories_m2m": {
+    "junction": [
+      {
+        "service_categories": {"color": "#ff0000", "display_name": "Item 1", "id": 1}
+      },
+      {
+        "service_categories": {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+      },
+      {"service_categories": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "service_categories",
+      "targetTable": "service_categories"
+    },
+    "withMeta": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"color": "#ff0000", "display_name": "Item 1", "id": 1},
+      {"color": "#ff0000", "display_name": "Item 2", "id": 2}
+    ]
+  },
+  "service_categories.client_service_needs_m2m": {
+    "junction": [
+      {
+        "clients": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "clients": {"display_name": "Item 2", "id": 2}
+      },
+      {"clients": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "clients",
+      "targetTable": "clients"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "service_categories.partner_service_categories_m2m": {
+    "junction": [
+      {
+        "partners": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "partners": {"display_name": "Item 2", "id": 2}
+      },
+      {"partners": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "partners",
+      "targetTable": "partners"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  },
+  "service_categories.referral_service_categories_m2m": {
+    "junction": [
+      {
+        "referrals": {"display_name": "Item 1", "id": 1}
+      },
+      {
+        "referrals": {"display_name": "Item 2", "id": 2}
+      },
+      {"referrals": null},
+      {}
+    ],
+    "meta": {
+      "extraColumns": [],
+      "parentHops": null,
+      "relatedTable": "referrals",
+      "targetTable": "referrals"
+    },
+    "withMeta": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ],
+    "withoutExtras": [
+      {"display_name": "Item 1", "id": 1},
+      {"display_name": "Item 2", "id": 2}
+    ]
+  }
+}
