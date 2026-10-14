@@ -11,7 +11,8 @@
 import { firstValueFrom } from 'rxjs';
 import { SchemaService } from '../../services/schema.service';
 import { isStaticText, SchemaEntityProperty } from '../../interfaces/entity';
-import { checkGolden, expectNoOrphans, listAllVariants, loadRaw, Variant } from './golden-io';
+import { checkGolden, expectNoOrphans, loadRaw, Variant } from './golden-io';
+import { listGoldenVariants } from './synthetic-fixtures';
 import { flushAll, loadSchema, typeName } from './schema-harness';
 import { fingerprint, validatorSignature } from './validator-fingerprint';
 
@@ -47,7 +48,7 @@ async function propertiesArtifact(v: Variant) {
 }
 
 describe('golden: SchemaService interpretation', () => {
-  for (const v of listAllVariants()) {
+  for (const v of listGoldenVariants()) {
     it(`${v.example}/${v.variant}: properties, selects, spans, defaults`, async () => {
       checkGolden(`${v.example}/${v.variant}/schema.properties.json`, await propertiesArtifact(v));
     });

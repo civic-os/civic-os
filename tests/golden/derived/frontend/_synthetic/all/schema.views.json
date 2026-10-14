@@ -1,0 +1,1309 @@
+{
+  "entities": {
+    "syn_child_count_only": {
+      "create": ["parent_id", "name"],
+      "detail": ["parent_id", "name"],
+      "edit": ["parent_id", "name"],
+      "filter": [],
+      "list": ["parent_id", "name"],
+      "renderables": {
+        "create": [
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "name", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "name", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "name", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_child_display_name": {
+      "create": ["display_name", "parent_id"],
+      "detail": ["id", "display_name", "parent_id"],
+      "edit": ["display_name", "parent_id"],
+      "filter": [],
+      "list": ["id", "display_name", "parent_id"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_child_id_only": {
+      "create": ["parent_id", "name"],
+      "detail": ["id", "parent_id", "name"],
+      "edit": ["parent_id", "name"],
+      "filter": [],
+      "list": ["id", "parent_id", "name"],
+      "renderables": {
+        "create": [
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "name", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "name", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "parent_id", "kind": "property", "span": 1},
+          {"column": "name", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_child_three_fks": {
+      "create": ["display_name", "a_id", "b_id", "c_id"],
+      "detail": ["id", "display_name", "a_id", "b_id", "c_id"],
+      "edit": ["display_name", "a_id", "b_id", "c_id"],
+      "filter": [],
+      "list": ["id", "display_name", "a_id", "b_id", "c_id"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "a_id", "kind": "property", "span": 1},
+          {"column": "b_id", "kind": "property", "span": 1},
+          {"column": "c_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "a_id", "kind": "property", "span": 1},
+          {"column": "b_id", "kind": "property", "span": 1},
+          {"column": "c_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "a_id", "kind": "property", "span": 1},
+          {"column": "b_id", "kind": "property", "span": 1},
+          {"column": "c_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_child_two_fks_one_parent": {
+      "create": ["display_name", "parent_a_id", "parent_b_id", "note"],
+      "detail": ["id", "display_name", "parent_a_id", "parent_b_id", "note"],
+      "edit": ["display_name", "parent_a_id", "parent_b_id", "note"],
+      "filter": [],
+      "list": ["id", "display_name", "parent_a_id", "parent_b_id", "note"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_a_id", "kind": "property", "span": 1},
+          {"column": "parent_b_id", "kind": "property", "span": 1},
+          {"column": "note", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_a_id", "kind": "property", "span": 1},
+          {"column": "parent_b_id", "kind": "property", "span": 1},
+          {"column": "note", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_a_id", "kind": "property", "span": 1},
+          {"column": "parent_b_id", "kind": "property", "span": 1},
+          {"column": "note", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_extra": {
+      "create": ["syn_jn_rich_m2m", "syn_nodn_ambiguous_m2m", "display_name"],
+      "detail": ["syn_jn_rich_m2m", "syn_nodn_ambiguous_m2m", "id", "display_name"],
+      "edit": ["syn_jn_rich_m2m", "syn_nodn_ambiguous_m2m", "display_name"],
+      "filter": [],
+      "list": ["id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
+          {"column": "syn_nodn_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
+          {"column": "syn_nodn_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
+          {"column": "syn_nodn_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_flags": {
+      "create": [
+        "display_name",
+        "hidden_list_only",
+        "hidden_edit_only",
+        "hidden_detail_only",
+        "status_id",
+        "show_flag_null_is_visible",
+        "filter_fk",
+        "filter_user",
+        "filter_category",
+        "filter_datetime",
+        "filter_datetimelocal",
+        "filter_date",
+        "filter_bool",
+        "filter_int",
+        "filter_money",
+        "filter_text_unsupported",
+        "filter_decimal_unsupported",
+        "filter_email_unsupported",
+        "filterable_false_int"
+      ],
+      "detail": [
+        "id",
+        "display_name",
+        "created_at",
+        "updated_at",
+        "hidden_list_only",
+        "hidden_edit_only",
+        "hidden_create_only",
+        "not_updatable",
+        "generated",
+        "identity_col",
+        "show_flag_null_is_visible",
+        "filter_fk",
+        "filter_user",
+        "filter_category",
+        "filter_datetime",
+        "filter_datetimelocal",
+        "filter_date",
+        "filter_bool",
+        "filter_int",
+        "filter_money",
+        "filter_text_unsupported",
+        "filter_decimal_unsupported",
+        "filter_email_unsupported",
+        "filterable_false_int",
+        "status_id",
+        "submitted_at"
+      ],
+      "edit": [
+        "display_name",
+        "hidden_list_only",
+        "hidden_create_only",
+        "hidden_detail_only",
+        "show_flag_null_is_visible",
+        "filter_fk",
+        "filter_user",
+        "filter_category",
+        "filter_datetime",
+        "filter_datetimelocal",
+        "filter_date",
+        "filter_bool",
+        "filter_int",
+        "filter_money",
+        "filter_text_unsupported",
+        "filter_decimal_unsupported",
+        "filter_email_unsupported",
+        "filterable_false_int",
+        "status_id",
+        "submitted_at"
+      ],
+      "filter": ["status_id", "filter_fk", "filter_user", "filter_category", "filter_datetime", "filter_datetimelocal", "filter_date", "filter_bool", "filter_int", "filter_money"],
+      "list": [
+        "id",
+        "display_name",
+        "created_at",
+        "updated_at",
+        "hidden_edit_only",
+        "hidden_create_only",
+        "hidden_detail_only",
+        "not_updatable",
+        "generated",
+        "identity_col",
+        "show_flag_null_is_visible",
+        "filter_fk",
+        "filter_user",
+        "filter_category",
+        "filter_datetime",
+        "filter_datetimelocal",
+        "filter_date",
+        "filter_bool",
+        "filter_int",
+        "filter_money",
+        "filter_text_unsupported",
+        "filter_decimal_unsupported",
+        "filter_email_unsupported",
+        "filterable_false_int",
+        "status_id",
+        "submitted_at"
+      ],
+      "renderables": {
+        "create": [
+          {"id": 5, "kind": "static_text", "sortOrder": 20, "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "hidden_list_only", "kind": "property", "span": 1},
+          {"column": "hidden_edit_only", "kind": "property", "span": 1},
+          {"column": "hidden_detail_only", "kind": "property", "span": 1},
+          {"column": "status_id", "kind": "property", "span": 1},
+          {"column": "show_flag_null_is_visible", "kind": "property", "span": 1},
+          {"column": "filter_fk", "kind": "property", "span": 1},
+          {"column": "filter_user", "kind": "property", "span": 1},
+          {"column": "filter_category", "kind": "property", "span": 1},
+          {"column": "filter_datetime", "kind": "property", "span": 1},
+          {"column": "filter_datetimelocal", "kind": "property", "span": 1},
+          {"column": "filter_date", "kind": "property", "span": 1},
+          {"column": "filter_bool", "kind": "property", "span": 1},
+          {"column": "filter_int", "kind": "property", "span": 1},
+          {"column": "filter_money", "kind": "property", "span": 1},
+          {"column": "filter_text_unsupported", "kind": "property", "span": 2},
+          {"column": "filter_decimal_unsupported", "kind": "property", "span": 1},
+          {"column": "filter_email_unsupported", "kind": "property", "span": 1},
+          {"column": "filterable_false_int", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"id": 5, "kind": "static_text", "sortOrder": 20, "span": 1},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "created_at", "kind": "property", "span": 1},
+          {"column": "updated_at", "kind": "property", "span": 1},
+          {"column": "hidden_list_only", "kind": "property", "span": 1},
+          {"column": "hidden_edit_only", "kind": "property", "span": 1},
+          {"column": "hidden_create_only", "kind": "property", "span": 1},
+          {"column": "not_updatable", "kind": "property", "span": 1},
+          {"column": "generated", "kind": "property", "span": 1},
+          {"column": "identity_col", "kind": "property", "span": 1},
+          {"column": "show_flag_null_is_visible", "kind": "property", "span": 1},
+          {"column": "filter_fk", "kind": "property", "span": 1},
+          {"column": "filter_user", "kind": "property", "span": 1},
+          {"column": "filter_category", "kind": "property", "span": 1},
+          {"column": "filter_datetime", "kind": "property", "span": 1},
+          {"column": "filter_datetimelocal", "kind": "property", "span": 1},
+          {"column": "filter_date", "kind": "property", "span": 1},
+          {"column": "filter_bool", "kind": "property", "span": 1},
+          {"column": "filter_int", "kind": "property", "span": 1},
+          {"column": "filter_money", "kind": "property", "span": 1},
+          {"column": "filter_text_unsupported", "kind": "property", "span": 2},
+          {"column": "filter_decimal_unsupported", "kind": "property", "span": 1},
+          {"column": "filter_email_unsupported", "kind": "property", "span": 1},
+          {"column": "filterable_false_int", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"id": 5, "kind": "static_text", "sortOrder": 20, "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "hidden_list_only", "kind": "property", "span": 1},
+          {"column": "hidden_create_only", "kind": "property", "span": 1},
+          {"column": "hidden_detail_only", "kind": "property", "span": 1},
+          {"column": "show_flag_null_is_visible", "kind": "property", "span": 1},
+          {"column": "filter_fk", "kind": "property", "span": 1},
+          {"column": "filter_user", "kind": "property", "span": 1},
+          {"column": "filter_category", "kind": "property", "span": 1},
+          {"column": "filter_datetime", "kind": "property", "span": 1},
+          {"column": "filter_datetimelocal", "kind": "property", "span": 1},
+          {"column": "filter_date", "kind": "property", "span": 1},
+          {"column": "filter_bool", "kind": "property", "span": 1},
+          {"column": "filter_int", "kind": "property", "span": 1},
+          {"column": "filter_money", "kind": "property", "span": 1},
+          {"column": "filter_text_unsupported", "kind": "property", "span": 2},
+          {"column": "filter_decimal_unsupported", "kind": "property", "span": 1},
+          {"column": "filter_email_unsupported", "kind": "property", "span": 1},
+          {"column": "filterable_false_int", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_grandparent": {
+      "create": ["syn_nodn_ambiguous_m2m", "display_name"],
+      "detail": ["syn_nodn_ambiguous_m2m", "id", "display_name"],
+      "edit": ["syn_nodn_ambiguous_m2m", "display_name"],
+      "filter": [],
+      "list": ["id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "syn_nodn_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "syn_nodn_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "syn_nodn_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_hidden_sidebar": {
+      "create": ["display_name"],
+      "detail": ["id", "display_name"],
+      "edit": ["display_name"],
+      "filter": [],
+      "list": ["id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_jn_dead_end": {
+      "create": ["left_id", "dead_id"],
+      "detail": ["left_id", "dead_id"],
+      "edit": ["left_id", "dead_id"],
+      "filter": [],
+      "list": ["left_id", "dead_id"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "dead_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "dead_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "dead_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_jn_hop": {
+      "create": ["left_id", "nodn_id"],
+      "detail": ["left_id", "nodn_id"],
+      "edit": ["left_id", "nodn_id"],
+      "filter": [],
+      "list": ["left_id", "nodn_id"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "nodn_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "nodn_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "nodn_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_jn_hop_ambiguous": {
+      "create": ["left_id", "nodn_id"],
+      "detail": ["left_id", "nodn_id"],
+      "edit": ["left_id", "nodn_id"],
+      "filter": [],
+      "list": ["left_id", "nodn_id"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "nodn_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "nodn_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "nodn_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_jn_not_flagged_rich": {
+      "create": ["left_id", "extra_id", "quantity"],
+      "detail": ["left_id", "extra_id", "quantity"],
+      "edit": ["left_id", "extra_id", "quantity"],
+      "filter": [],
+      "list": ["left_id", "extra_id", "quantity"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "extra_id", "kind": "property", "span": 1},
+          {"column": "quantity", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "extra_id", "kind": "property", "span": 1},
+          {"column": "quantity", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "extra_id", "kind": "property", "span": 1},
+          {"column": "quantity", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_jn_pure": {
+      "create": ["left_id", "right_id"],
+      "detail": ["left_id", "right_id", "created_at"],
+      "edit": ["left_id", "right_id"],
+      "filter": [],
+      "list": ["left_id", "right_id", "created_at"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "right_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "right_id", "kind": "property", "span": 1},
+          {"column": "created_at", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "right_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_jn_rich": {
+      "create": ["left_id", "extra_id", "quantity"],
+      "detail": ["left_id", "extra_id", "quantity", "hidden_note", "edit_only_note"],
+      "edit": ["left_id", "extra_id", "quantity", "edit_only_note"],
+      "filter": [],
+      "list": ["left_id", "extra_id", "quantity", "hidden_note", "edit_only_note"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "extra_id", "kind": "property", "span": 1},
+          {"column": "quantity", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "extra_id", "kind": "property", "span": 1},
+          {"column": "quantity", "kind": "property", "span": 1},
+          {"column": "hidden_note", "kind": "property", "span": 2},
+          {"column": "edit_only_note", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "extra_id", "kind": "property", "span": 1},
+          {"column": "quantity", "kind": "property", "span": 1},
+          {"column": "edit_only_note", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_jn_user": {
+      "create": ["left_id", "user_id"],
+      "detail": ["left_id", "user_id"],
+      "edit": ["left_id", "user_id"],
+      "filter": [],
+      "list": ["left_id", "user_id"],
+      "renderables": {
+        "create": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "user_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "user_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "left_id", "kind": "property", "span": 1},
+          {"column": "user_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_left": {
+      "create": ["syn_jn_rich_m2m", "display_name"],
+      "detail": ["syn_jn_rich_m2m", "syn_jn_hop_m2m", "id", "display_name"],
+      "edit": ["syn_jn_pure_m2m", "syn_jn_rich_m2m", "display_name"],
+      "filter": [],
+      "list": ["id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
+          {"column": "syn_jn_hop_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "syn_jn_pure_m2m", "kind": "property", "span": 1},
+          {"column": "syn_jn_rich_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_nodn": {
+      "create": ["syn_jn_hop_m2m", "grandparent_id"],
+      "detail": ["syn_jn_hop_m2m", "id", "grandparent_id"],
+      "edit": ["syn_jn_hop_m2m", "grandparent_id"],
+      "filter": [],
+      "list": ["id", "grandparent_id"],
+      "renderables": {
+        "create": [
+          {"column": "syn_jn_hop_m2m", "kind": "property", "span": 2},
+          {"column": "grandparent_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "syn_jn_hop_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "grandparent_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "syn_jn_hop_m2m", "kind": "property", "span": 2},
+          {"column": "grandparent_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_nodn_ambiguous": {
+      "create": ["syn_jn_hop_ambiguous_m2m", "gp1_id", "gp2_id"],
+      "detail": ["syn_jn_hop_ambiguous_m2m", "id", "gp1_id", "gp2_id"],
+      "edit": ["syn_jn_hop_ambiguous_m2m", "gp1_id", "gp2_id"],
+      "filter": [],
+      "list": ["id", "gp1_id", "gp2_id"],
+      "renderables": {
+        "create": [
+          {"column": "syn_jn_hop_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "gp1_id", "kind": "property", "span": 1},
+          {"column": "gp2_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "syn_jn_hop_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "gp1_id", "kind": "property", "span": 1},
+          {"column": "gp2_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "syn_jn_hop_ambiguous_m2m", "kind": "property", "span": 2},
+          {"column": "gp1_id", "kind": "property", "span": 1},
+          {"column": "gp2_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_nodn_dead_end": {
+      "create": ["syn_jn_dead_end_m2m"],
+      "detail": ["syn_jn_dead_end_m2m", "id"],
+      "edit": ["syn_jn_dead_end_m2m"],
+      "filter": [],
+      "list": ["id"],
+      "renderables": {
+        "create": [
+          {"column": "syn_jn_dead_end_m2m", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "syn_jn_dead_end_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "syn_jn_dead_end_m2m", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_parent": {
+      "create": ["display_name"],
+      "detail": ["id", "display_name"],
+      "edit": ["display_name"],
+      "filter": [],
+      "list": ["id", "display_name"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_right": {
+      "create": ["syn_jn_pure_m2m", "display_name", "color"],
+      "detail": ["syn_jn_pure_m2m", "id", "display_name", "color"],
+      "edit": ["syn_jn_pure_m2m", "display_name", "color"],
+      "filter": [],
+      "list": ["id", "display_name", "color"],
+      "renderables": {
+        "create": [
+          {"column": "syn_jn_pure_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "syn_jn_pure_m2m", "kind": "property", "span": 2},
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "syn_jn_pure_m2m", "kind": "property", "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "color", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_self_ref": {
+      "create": ["display_name", "parent_id"],
+      "detail": ["id", "display_name", "parent_id"],
+      "edit": ["display_name", "parent_id"],
+      "filter": [],
+      "list": ["id", "display_name", "parent_id"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_id", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_id", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "parent_id", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_types": {
+      "create": [
+        "display_name",
+        "status_int4",
+        "status_int8",
+        "status_no_join_column_is_integer",
+        "status_text_udt_is_textlong",
+        "category_int4",
+        "category_int8",
+        "category_no_join_column_is_integer",
+        "status_wins_over_category",
+        "file_plain",
+        "file_image",
+        "file_image_png",
+        "file_pdf",
+        "file_other_type",
+        "file_empty_type",
+        "file_max_size_only",
+        "user_fk",
+        "payment_view",
+        "payment_transactions_payments_schema",
+        "transactions_public_schema_is_unknown",
+        "photo_gallery",
+        "system_table_without_branch_is_unknown",
+        "uuid_plain_is_unknown",
+        "uuid_fk_to_entity_is_unknown",
+        "fk_int4",
+        "fk_int8",
+        "fk_non_public_schema",
+        "geo_polygon",
+        "geo_point",
+        "geo_linestring_is_unknown",
+        "geo_null_type_is_unknown",
+        "geo_point_map_only",
+        "timestamp_datetime",
+        "timestamptz_datetimelocal",
+        "date_date",
+        "bool_boolean",
+        "int4_integer",
+        "int8_integer",
+        "int2_is_unknown",
+        "money_money",
+        "numeric_decimal",
+        "float4_decimal",
+        "float8_decimal",
+        "hex_color_color",
+        "email_address_email",
+        "phone_number_telephone",
+        "time_slot_plain",
+        "time_slot_recurring",
+        "markdown_default_span",
+        "markdown_custom_span",
+        "varchar_textshort",
+        "text_textlong",
+        "jsonb_is_unknown",
+        "bpchar_is_unknown",
+        "tsvector_is_unknown",
+        "span_width_1_textlong",
+        "span_width_2_textshort",
+        "span_width_3_custom",
+        "span_width_zero_falls_to_default"
+      ],
+      "detail": [
+        "id",
+        "display_name",
+        "status_int4",
+        "status_int8",
+        "status_no_join_column_is_integer",
+        "status_text_udt_is_textlong",
+        "category_int4",
+        "category_int8",
+        "category_no_join_column_is_integer",
+        "status_wins_over_category",
+        "file_plain",
+        "file_image",
+        "file_image_png",
+        "file_pdf",
+        "file_other_type",
+        "file_empty_type",
+        "file_max_size_only",
+        "user_fk",
+        "payment_view",
+        "payment_transactions_payments_schema",
+        "transactions_public_schema_is_unknown",
+        "photo_gallery",
+        "system_table_without_branch_is_unknown",
+        "uuid_plain_is_unknown",
+        "uuid_fk_to_entity_is_unknown",
+        "fk_int4",
+        "fk_int8",
+        "fk_non_public_schema",
+        "geo_polygon",
+        "geo_point",
+        "geo_linestring_is_unknown",
+        "geo_null_type_is_unknown",
+        "geo_point_map_only",
+        "timestamp_datetime",
+        "timestamptz_datetimelocal",
+        "date_date",
+        "bool_boolean",
+        "int4_integer",
+        "int8_integer",
+        "int2_is_unknown",
+        "money_money",
+        "numeric_decimal",
+        "float4_decimal",
+        "float8_decimal",
+        "hex_color_color",
+        "email_address_email",
+        "phone_number_telephone",
+        "time_slot_plain",
+        "time_slot_recurring",
+        "markdown_default_span",
+        "markdown_custom_span",
+        "varchar_textshort",
+        "text_textlong",
+        "jsonb_is_unknown",
+        "bpchar_is_unknown",
+        "tsvector_is_unknown",
+        "span_width_1_textlong",
+        "span_width_2_textshort",
+        "span_width_3_custom",
+        "span_width_zero_falls_to_default"
+      ],
+      "edit": [
+        "display_name",
+        "status_int4",
+        "status_int8",
+        "status_no_join_column_is_integer",
+        "status_text_udt_is_textlong",
+        "category_int4",
+        "category_int8",
+        "category_no_join_column_is_integer",
+        "status_wins_over_category",
+        "file_plain",
+        "file_image",
+        "file_image_png",
+        "file_pdf",
+        "file_other_type",
+        "file_empty_type",
+        "file_max_size_only",
+        "user_fk",
+        "payment_view",
+        "payment_transactions_payments_schema",
+        "transactions_public_schema_is_unknown",
+        "photo_gallery",
+        "system_table_without_branch_is_unknown",
+        "uuid_plain_is_unknown",
+        "uuid_fk_to_entity_is_unknown",
+        "fk_int4",
+        "fk_int8",
+        "fk_non_public_schema",
+        "geo_polygon",
+        "geo_point",
+        "geo_linestring_is_unknown",
+        "geo_null_type_is_unknown",
+        "geo_point_map_only",
+        "timestamp_datetime",
+        "timestamptz_datetimelocal",
+        "date_date",
+        "bool_boolean",
+        "int4_integer",
+        "int8_integer",
+        "int2_is_unknown",
+        "money_money",
+        "numeric_decimal",
+        "float4_decimal",
+        "float8_decimal",
+        "hex_color_color",
+        "email_address_email",
+        "phone_number_telephone",
+        "time_slot_plain",
+        "time_slot_recurring",
+        "markdown_default_span",
+        "markdown_custom_span",
+        "varchar_textshort",
+        "text_textlong",
+        "jsonb_is_unknown",
+        "bpchar_is_unknown",
+        "tsvector_is_unknown",
+        "span_width_1_textlong",
+        "span_width_2_textshort",
+        "span_width_3_custom",
+        "span_width_zero_falls_to_default"
+      ],
+      "filter": [],
+      "list": [
+        "id",
+        "display_name",
+        "status_int4",
+        "status_int8",
+        "status_no_join_column_is_integer",
+        "status_text_udt_is_textlong",
+        "category_int4",
+        "category_int8",
+        "category_no_join_column_is_integer",
+        "status_wins_over_category",
+        "file_plain",
+        "file_image",
+        "file_image_png",
+        "file_pdf",
+        "file_other_type",
+        "file_empty_type",
+        "file_max_size_only",
+        "user_fk",
+        "payment_view",
+        "payment_transactions_payments_schema",
+        "transactions_public_schema_is_unknown",
+        "photo_gallery",
+        "system_table_without_branch_is_unknown",
+        "uuid_plain_is_unknown",
+        "uuid_fk_to_entity_is_unknown",
+        "fk_int4",
+        "fk_int8",
+        "fk_non_public_schema",
+        "geo_polygon",
+        "geo_point",
+        "geo_linestring_is_unknown",
+        "geo_null_type_is_unknown",
+        "timestamp_datetime",
+        "timestamptz_datetimelocal",
+        "date_date",
+        "bool_boolean",
+        "int4_integer",
+        "int8_integer",
+        "int2_is_unknown",
+        "money_money",
+        "numeric_decimal",
+        "float4_decimal",
+        "float8_decimal",
+        "hex_color_color",
+        "email_address_email",
+        "phone_number_telephone",
+        "time_slot_plain",
+        "time_slot_recurring",
+        "markdown_default_span",
+        "markdown_custom_span",
+        "varchar_textshort",
+        "text_textlong",
+        "jsonb_is_unknown",
+        "bpchar_is_unknown",
+        "tsvector_is_unknown",
+        "span_width_1_textlong",
+        "span_width_2_textshort",
+        "span_width_3_custom",
+        "span_width_zero_falls_to_default",
+        "geo_point_map_only"
+      ],
+      "renderables": {
+        "create": [
+          {"id": 1, "kind": "static_text", "sortOrder": 15, "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"id": 3, "kind": "static_text", "sortOrder": 25, "span": 1},
+          {"column": "status_int4", "kind": "property", "span": 1},
+          {"column": "status_int8", "kind": "property", "span": 1},
+          {"column": "status_no_join_column_is_integer", "kind": "property", "span": 1},
+          {"column": "status_text_udt_is_textlong", "kind": "property", "span": 2},
+          {"column": "category_int4", "kind": "property", "span": 1},
+          {"column": "category_int8", "kind": "property", "span": 1},
+          {"column": "category_no_join_column_is_integer", "kind": "property", "span": 1},
+          {"column": "status_wins_over_category", "kind": "property", "span": 1},
+          {"column": "file_plain", "kind": "property", "span": 2},
+          {"column": "file_image", "kind": "property", "span": 2},
+          {"column": "file_image_png", "kind": "property", "span": 2},
+          {"column": "file_pdf", "kind": "property", "span": 2},
+          {"column": "file_other_type", "kind": "property", "span": 2},
+          {"column": "file_empty_type", "kind": "property", "span": 2},
+          {"column": "file_max_size_only", "kind": "property", "span": 2},
+          {"column": "user_fk", "kind": "property", "span": 1},
+          {"column": "payment_view", "kind": "property", "span": 1},
+          {"column": "payment_transactions_payments_schema", "kind": "property", "span": 1},
+          {"column": "transactions_public_schema_is_unknown", "kind": "property", "span": 1},
+          {"column": "photo_gallery", "kind": "property", "span": 1},
+          {"column": "system_table_without_branch_is_unknown", "kind": "property", "span": 1},
+          {"column": "uuid_plain_is_unknown", "kind": "property", "span": 1},
+          {"column": "uuid_fk_to_entity_is_unknown", "kind": "property", "span": 1},
+          {"column": "fk_int4", "kind": "property", "span": 1},
+          {"column": "fk_int8", "kind": "property", "span": 1},
+          {"column": "fk_non_public_schema", "kind": "property", "span": 1},
+          {"column": "geo_polygon", "kind": "property", "span": 2},
+          {"column": "geo_point", "kind": "property", "span": 2},
+          {"column": "geo_linestring_is_unknown", "kind": "property", "span": 1},
+          {"column": "geo_null_type_is_unknown", "kind": "property", "span": 1},
+          {"column": "geo_point_map_only", "kind": "property", "span": 2},
+          {"column": "timestamp_datetime", "kind": "property", "span": 1},
+          {"column": "timestamptz_datetimelocal", "kind": "property", "span": 1},
+          {"column": "date_date", "kind": "property", "span": 1},
+          {"column": "bool_boolean", "kind": "property", "span": 1},
+          {"column": "int4_integer", "kind": "property", "span": 1},
+          {"column": "int8_integer", "kind": "property", "span": 1},
+          {"column": "int2_is_unknown", "kind": "property", "span": 1},
+          {"column": "money_money", "kind": "property", "span": 1},
+          {"column": "numeric_decimal", "kind": "property", "span": 1},
+          {"column": "float4_decimal", "kind": "property", "span": 1},
+          {"column": "float8_decimal", "kind": "property", "span": 1},
+          {"column": "hex_color_color", "kind": "property", "span": 1},
+          {"column": "email_address_email", "kind": "property", "span": 1},
+          {"column": "phone_number_telephone", "kind": "property", "span": 1},
+          {"column": "time_slot_plain", "kind": "property", "span": 1},
+          {"column": "time_slot_recurring", "kind": "property", "span": 1},
+          {"column": "markdown_default_span", "kind": "property", "span": 4},
+          {"column": "markdown_custom_span", "kind": "property", "span": 1},
+          {"column": "varchar_textshort", "kind": "property", "span": 1},
+          {"column": "text_textlong", "kind": "property", "span": 2},
+          {"column": "jsonb_is_unknown", "kind": "property", "span": 1},
+          {"column": "bpchar_is_unknown", "kind": "property", "span": 1},
+          {"column": "tsvector_is_unknown", "kind": "property", "span": 1},
+          {"column": "span_width_1_textlong", "kind": "property", "span": 1},
+          {"column": "span_width_2_textshort", "kind": "property", "span": 2},
+          {"column": "span_width_3_custom", "kind": "property", "span": 3},
+          {"column": "span_width_zero_falls_to_default", "kind": "property", "span": 2}
+        ],
+        "detail": [
+          {"id": 2, "kind": "static_text", "sortOrder": 5, "span": 1},
+          {"column": "id", "kind": "property", "span": 1},
+          {"id": 1, "kind": "static_text", "sortOrder": 15, "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "status_int4", "kind": "property", "span": 1},
+          {"column": "status_int8", "kind": "property", "span": 1},
+          {"column": "status_no_join_column_is_integer", "kind": "property", "span": 1},
+          {"column": "status_text_udt_is_textlong", "kind": "property", "span": 2},
+          {"column": "category_int4", "kind": "property", "span": 1},
+          {"column": "category_int8", "kind": "property", "span": 1},
+          {"column": "category_no_join_column_is_integer", "kind": "property", "span": 1},
+          {"column": "status_wins_over_category", "kind": "property", "span": 1},
+          {"column": "file_plain", "kind": "property", "span": 2},
+          {"column": "file_image", "kind": "property", "span": 2},
+          {"column": "file_image_png", "kind": "property", "span": 2},
+          {"column": "file_pdf", "kind": "property", "span": 2},
+          {"column": "file_other_type", "kind": "property", "span": 2},
+          {"column": "file_empty_type", "kind": "property", "span": 2},
+          {"column": "file_max_size_only", "kind": "property", "span": 2},
+          {"column": "user_fk", "kind": "property", "span": 1},
+          {"column": "payment_view", "kind": "property", "span": 1},
+          {"column": "payment_transactions_payments_schema", "kind": "property", "span": 1},
+          {"column": "transactions_public_schema_is_unknown", "kind": "property", "span": 1},
+          {"column": "photo_gallery", "kind": "property", "span": 1},
+          {"column": "system_table_without_branch_is_unknown", "kind": "property", "span": 1},
+          {"column": "uuid_plain_is_unknown", "kind": "property", "span": 1},
+          {"column": "uuid_fk_to_entity_is_unknown", "kind": "property", "span": 1},
+          {"column": "fk_int4", "kind": "property", "span": 1},
+          {"column": "fk_int8", "kind": "property", "span": 1},
+          {"column": "fk_non_public_schema", "kind": "property", "span": 1},
+          {"column": "geo_polygon", "kind": "property", "span": 2},
+          {"column": "geo_point", "kind": "property", "span": 2},
+          {"column": "geo_linestring_is_unknown", "kind": "property", "span": 1},
+          {"column": "geo_null_type_is_unknown", "kind": "property", "span": 1},
+          {"column": "geo_point_map_only", "kind": "property", "span": 2},
+          {"column": "timestamp_datetime", "kind": "property", "span": 1},
+          {"column": "timestamptz_datetimelocal", "kind": "property", "span": 1},
+          {"column": "date_date", "kind": "property", "span": 1},
+          {"column": "bool_boolean", "kind": "property", "span": 1},
+          {"column": "int4_integer", "kind": "property", "span": 1},
+          {"column": "int8_integer", "kind": "property", "span": 1},
+          {"column": "int2_is_unknown", "kind": "property", "span": 1},
+          {"column": "money_money", "kind": "property", "span": 1},
+          {"column": "numeric_decimal", "kind": "property", "span": 1},
+          {"column": "float4_decimal", "kind": "property", "span": 1},
+          {"column": "float8_decimal", "kind": "property", "span": 1},
+          {"column": "hex_color_color", "kind": "property", "span": 1},
+          {"column": "email_address_email", "kind": "property", "span": 1},
+          {"column": "phone_number_telephone", "kind": "property", "span": 1},
+          {"column": "time_slot_plain", "kind": "property", "span": 1},
+          {"column": "time_slot_recurring", "kind": "property", "span": 1},
+          {"column": "markdown_default_span", "kind": "property", "span": 4},
+          {"column": "markdown_custom_span", "kind": "property", "span": 1},
+          {"column": "varchar_textshort", "kind": "property", "span": 1},
+          {"column": "text_textlong", "kind": "property", "span": 2},
+          {"column": "jsonb_is_unknown", "kind": "property", "span": 1},
+          {"column": "bpchar_is_unknown", "kind": "property", "span": 1},
+          {"column": "tsvector_is_unknown", "kind": "property", "span": 1},
+          {"column": "span_width_1_textlong", "kind": "property", "span": 1},
+          {"column": "span_width_2_textshort", "kind": "property", "span": 2},
+          {"column": "span_width_3_custom", "kind": "property", "span": 3},
+          {"column": "span_width_zero_falls_to_default", "kind": "property", "span": 2}
+        ],
+        "edit": [
+          {"id": 1, "kind": "static_text", "sortOrder": 15, "span": 2},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "status_int4", "kind": "property", "span": 1},
+          {"id": 4, "kind": "static_text", "sortOrder": 35, "span": 2},
+          {"column": "status_int8", "kind": "property", "span": 1},
+          {"column": "status_no_join_column_is_integer", "kind": "property", "span": 1},
+          {"column": "status_text_udt_is_textlong", "kind": "property", "span": 2},
+          {"column": "category_int4", "kind": "property", "span": 1},
+          {"column": "category_int8", "kind": "property", "span": 1},
+          {"column": "category_no_join_column_is_integer", "kind": "property", "span": 1},
+          {"column": "status_wins_over_category", "kind": "property", "span": 1},
+          {"column": "file_plain", "kind": "property", "span": 2},
+          {"column": "file_image", "kind": "property", "span": 2},
+          {"column": "file_image_png", "kind": "property", "span": 2},
+          {"column": "file_pdf", "kind": "property", "span": 2},
+          {"column": "file_other_type", "kind": "property", "span": 2},
+          {"column": "file_empty_type", "kind": "property", "span": 2},
+          {"column": "file_max_size_only", "kind": "property", "span": 2},
+          {"column": "user_fk", "kind": "property", "span": 1},
+          {"column": "payment_view", "kind": "property", "span": 1},
+          {"column": "payment_transactions_payments_schema", "kind": "property", "span": 1},
+          {"column": "transactions_public_schema_is_unknown", "kind": "property", "span": 1},
+          {"column": "photo_gallery", "kind": "property", "span": 1},
+          {"column": "system_table_without_branch_is_unknown", "kind": "property", "span": 1},
+          {"column": "uuid_plain_is_unknown", "kind": "property", "span": 1},
+          {"column": "uuid_fk_to_entity_is_unknown", "kind": "property", "span": 1},
+          {"column": "fk_int4", "kind": "property", "span": 1},
+          {"column": "fk_int8", "kind": "property", "span": 1},
+          {"column": "fk_non_public_schema", "kind": "property", "span": 1},
+          {"column": "geo_polygon", "kind": "property", "span": 2},
+          {"column": "geo_point", "kind": "property", "span": 2},
+          {"column": "geo_linestring_is_unknown", "kind": "property", "span": 1},
+          {"column": "geo_null_type_is_unknown", "kind": "property", "span": 1},
+          {"column": "geo_point_map_only", "kind": "property", "span": 2},
+          {"column": "timestamp_datetime", "kind": "property", "span": 1},
+          {"column": "timestamptz_datetimelocal", "kind": "property", "span": 1},
+          {"column": "date_date", "kind": "property", "span": 1},
+          {"column": "bool_boolean", "kind": "property", "span": 1},
+          {"column": "int4_integer", "kind": "property", "span": 1},
+          {"column": "int8_integer", "kind": "property", "span": 1},
+          {"column": "int2_is_unknown", "kind": "property", "span": 1},
+          {"column": "money_money", "kind": "property", "span": 1},
+          {"column": "numeric_decimal", "kind": "property", "span": 1},
+          {"column": "float4_decimal", "kind": "property", "span": 1},
+          {"column": "float8_decimal", "kind": "property", "span": 1},
+          {"column": "hex_color_color", "kind": "property", "span": 1},
+          {"column": "email_address_email", "kind": "property", "span": 1},
+          {"column": "phone_number_telephone", "kind": "property", "span": 1},
+          {"column": "time_slot_plain", "kind": "property", "span": 1},
+          {"column": "time_slot_recurring", "kind": "property", "span": 1},
+          {"column": "markdown_default_span", "kind": "property", "span": 4},
+          {"column": "markdown_custom_span", "kind": "property", "span": 1},
+          {"column": "varchar_textshort", "kind": "property", "span": 1},
+          {"column": "text_textlong", "kind": "property", "span": 2},
+          {"column": "jsonb_is_unknown", "kind": "property", "span": 1},
+          {"column": "bpchar_is_unknown", "kind": "property", "span": 1},
+          {"column": "tsvector_is_unknown", "kind": "property", "span": 1},
+          {"column": "span_width_1_textlong", "kind": "property", "span": 1},
+          {"column": "span_width_2_textshort", "kind": "property", "span": 2},
+          {"column": "span_width_3_custom", "kind": "property", "span": 3},
+          {"column": "span_width_zero_falls_to_default", "kind": "property", "span": 2}
+        ]
+      }
+    },
+    "syn_validators": {
+      "create": [
+        "display_name",
+        "required_rule_nullable",
+        "not_nullable_only",
+        "not_nullable_plus_required",
+        "min_max_int",
+        "min_max_decimal",
+        "min_zero_string",
+        "min_zero_number_is_ignored",
+        "min_negative",
+        "min_empty_value_ignored",
+        "min_missing_value_ignored",
+        "min_not_numeric",
+        "minlength_maxlength",
+        "minlength_one",
+        "maxlength_zero_string",
+        "pattern_ten_digits",
+        "pattern_email_like",
+        "pattern_unanchored",
+        "duplicate_min_rules",
+        "everything",
+        "ignored_rule_types_only"
+      ],
+      "detail": [
+        "id",
+        "display_name",
+        "required_rule_nullable",
+        "not_nullable_only",
+        "not_nullable_plus_required",
+        "min_max_int",
+        "min_max_decimal",
+        "min_zero_string",
+        "min_zero_number_is_ignored",
+        "min_negative",
+        "min_empty_value_ignored",
+        "min_missing_value_ignored",
+        "min_not_numeric",
+        "minlength_maxlength",
+        "minlength_one",
+        "maxlength_zero_string",
+        "pattern_ten_digits",
+        "pattern_email_like",
+        "pattern_unanchored",
+        "duplicate_min_rules",
+        "everything",
+        "ignored_rule_types_only"
+      ],
+      "edit": [
+        "display_name",
+        "required_rule_nullable",
+        "not_nullable_only",
+        "not_nullable_plus_required",
+        "min_max_int",
+        "min_max_decimal",
+        "min_zero_string",
+        "min_zero_number_is_ignored",
+        "min_negative",
+        "min_empty_value_ignored",
+        "min_missing_value_ignored",
+        "min_not_numeric",
+        "minlength_maxlength",
+        "minlength_one",
+        "maxlength_zero_string",
+        "pattern_ten_digits",
+        "pattern_email_like",
+        "pattern_unanchored",
+        "duplicate_min_rules",
+        "everything",
+        "ignored_rule_types_only"
+      ],
+      "filter": [],
+      "list": [
+        "id",
+        "display_name",
+        "required_rule_nullable",
+        "not_nullable_only",
+        "not_nullable_plus_required",
+        "min_max_int",
+        "min_max_decimal",
+        "min_zero_string",
+        "min_zero_number_is_ignored",
+        "min_negative",
+        "min_empty_value_ignored",
+        "min_missing_value_ignored",
+        "min_not_numeric",
+        "minlength_maxlength",
+        "minlength_one",
+        "maxlength_zero_string",
+        "pattern_ten_digits",
+        "pattern_email_like",
+        "pattern_unanchored",
+        "duplicate_min_rules",
+        "everything",
+        "ignored_rule_types_only"
+      ],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "required_rule_nullable", "kind": "property", "span": 1},
+          {"column": "not_nullable_only", "kind": "property", "span": 1},
+          {"column": "not_nullable_plus_required", "kind": "property", "span": 1},
+          {"column": "min_max_int", "kind": "property", "span": 1},
+          {"column": "min_max_decimal", "kind": "property", "span": 1},
+          {"column": "min_zero_string", "kind": "property", "span": 1},
+          {"column": "min_zero_number_is_ignored", "kind": "property", "span": 1},
+          {"column": "min_negative", "kind": "property", "span": 1},
+          {"column": "min_empty_value_ignored", "kind": "property", "span": 1},
+          {"column": "min_missing_value_ignored", "kind": "property", "span": 1},
+          {"column": "min_not_numeric", "kind": "property", "span": 1},
+          {"column": "minlength_maxlength", "kind": "property", "span": 1},
+          {"column": "minlength_one", "kind": "property", "span": 1},
+          {"column": "maxlength_zero_string", "kind": "property", "span": 1},
+          {"column": "pattern_ten_digits", "kind": "property", "span": 1},
+          {"column": "pattern_email_like", "kind": "property", "span": 1},
+          {"column": "pattern_unanchored", "kind": "property", "span": 1},
+          {"column": "duplicate_min_rules", "kind": "property", "span": 1},
+          {"column": "everything", "kind": "property", "span": 1},
+          {"column": "ignored_rule_types_only", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "id", "kind": "property", "span": 1},
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "required_rule_nullable", "kind": "property", "span": 1},
+          {"column": "not_nullable_only", "kind": "property", "span": 1},
+          {"column": "not_nullable_plus_required", "kind": "property", "span": 1},
+          {"column": "min_max_int", "kind": "property", "span": 1},
+          {"column": "min_max_decimal", "kind": "property", "span": 1},
+          {"column": "min_zero_string", "kind": "property", "span": 1},
+          {"column": "min_zero_number_is_ignored", "kind": "property", "span": 1},
+          {"column": "min_negative", "kind": "property", "span": 1},
+          {"column": "min_empty_value_ignored", "kind": "property", "span": 1},
+          {"column": "min_missing_value_ignored", "kind": "property", "span": 1},
+          {"column": "min_not_numeric", "kind": "property", "span": 1},
+          {"column": "minlength_maxlength", "kind": "property", "span": 1},
+          {"column": "minlength_one", "kind": "property", "span": 1},
+          {"column": "maxlength_zero_string", "kind": "property", "span": 1},
+          {"column": "pattern_ten_digits", "kind": "property", "span": 1},
+          {"column": "pattern_email_like", "kind": "property", "span": 1},
+          {"column": "pattern_unanchored", "kind": "property", "span": 1},
+          {"column": "duplicate_min_rules", "kind": "property", "span": 1},
+          {"column": "everything", "kind": "property", "span": 1},
+          {"column": "ignored_rule_types_only", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "required_rule_nullable", "kind": "property", "span": 1},
+          {"column": "not_nullable_only", "kind": "property", "span": 1},
+          {"column": "not_nullable_plus_required", "kind": "property", "span": 1},
+          {"column": "min_max_int", "kind": "property", "span": 1},
+          {"column": "min_max_decimal", "kind": "property", "span": 1},
+          {"column": "min_zero_string", "kind": "property", "span": 1},
+          {"column": "min_zero_number_is_ignored", "kind": "property", "span": 1},
+          {"column": "min_negative", "kind": "property", "span": 1},
+          {"column": "min_empty_value_ignored", "kind": "property", "span": 1},
+          {"column": "min_missing_value_ignored", "kind": "property", "span": 1},
+          {"column": "min_not_numeric", "kind": "property", "span": 1},
+          {"column": "minlength_maxlength", "kind": "property", "span": 1},
+          {"column": "minlength_one", "kind": "property", "span": 1},
+          {"column": "maxlength_zero_string", "kind": "property", "span": 1},
+          {"column": "pattern_ten_digits", "kind": "property", "span": 1},
+          {"column": "pattern_email_like", "kind": "property", "span": 1},
+          {"column": "pattern_unanchored", "kind": "property", "span": 1},
+          {"column": "duplicate_min_rules", "kind": "property", "span": 1},
+          {"column": "everything", "kind": "property", "span": 1},
+          {"column": "ignored_rule_types_only", "kind": "property", "span": 1}
+        ]
+      }
+    },
+    "syn_view_summary": {
+      "create": ["display_name", "total"],
+      "detail": ["display_name", "total"],
+      "edit": ["display_name", "total"],
+      "filter": [],
+      "list": ["display_name", "total"],
+      "renderables": {
+        "create": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "total", "kind": "property", "span": 1}
+        ],
+        "detail": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "total", "kind": "property", "span": 1}
+        ],
+        "edit": [
+          {"column": "display_name", "kind": "property", "span": 2},
+          {"column": "total", "kind": "property", "span": 1}
+        ]
+      }
+    }
+  }
+}

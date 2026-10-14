@@ -449,6 +449,7 @@
         "string:\"0\"": {
           "pattern": {"actualValue": "0", "requiredPattern": "^\\d{10}$"}
         },
+        "string:\"0123456789\"": null,
         "string:\"1\"": {
           "pattern": {"actualValue": "1", "requiredPattern": "^\\d{10}$"}
         },
@@ -460,6 +461,13 @@
         },
         "string:\"12345-6789\"": {
           "pattern": {"actualValue": "12345-6789", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"123456789\"": {
+          "pattern": {"actualValue": "123456789", "requiredPattern": "^\\d{10}$"}
+        },
+        "string:\"1234567890\"": null,
+        "string:\"12345678901\"": {
+          "pattern": {"actualValue": "12345678901", "requiredPattern": "^\\d{10}$"}
         },
         "string:\"2026-03-08\"": {
           "pattern": {"actualValue": "2026-03-08", "requiredPattern": "^\\d{10}$"}

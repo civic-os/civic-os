@@ -19,6 +19,9 @@ tests/golden/derived/frontend/
     conditions.guided-forms.json  GuidedFormService.evaluateCondition / getEffectiveSteps / getLockedFields over the example's step conditions
     errors.lookup.json            parseToHuman vs parseToHumanWithLookup over the payload set with the example's constraint_messages
     data.queries.json             getData / getDataPaginated URL + headers per entity (list, order, pagination, filters, search, hybrid, calendar, detail, edit) and inverse-preview requests
+  _synthetic/                     hand-built branch coverage, see below
+    all/schema.*.json, all/transforms.rows.json, all/data.m2m-transform.json   same artifacts as a raw variant, generated through the same loadSchema path
+    conditions.guided-forms.json  synthetic skip_if / require_if steps (multi-condition, every operator, unknown operators)
   _shared/                        example-independent
     transforms.dst-edges.json     DateTime / DateTimeLocal / Money / File / PhotoGallery edge matrix in UTC, America/New_York, Asia/Kolkata, Australia/Lord_Howe
     conditions.matrix.json        operator x condition-value x data-value matrix, dot-path cases, field-name extraction shapes
@@ -41,7 +44,7 @@ Observed quirks recorded as-is (do not "fix" in the move): DataService does not 
 
 | Function | Artifact |
 |---|---|
-| `getPropertyType` (private) | `schema.properties.json` `type`; `freshTypes` re-derives it through `getPropertiesForEntityFresh` |
+| `getPropertyType` (private) | `schema.properties.json` `type`. Real examples cover only the branches their schemas use (no `timestamp`, no recurring `time_slot`, no `float*`, no `int8` Status/Category, no `payment_transactions` FK); the hand-built `_synthetic/all` variant covers every branch, including the Unknown fall-throughs. `freshTypes` re-derives the types through `getPropertiesForEntityFresh` |
 | `propertyToSelectString`, `...ForEdit`, `...ForList` | `schema.properties.json` `select*` |
 | `ensureStructuralProps` | `schema.views.json` (display_name / status_id / submitted_at appended to list, detail, edit) |
 | `getPropsForList/Detail/Create/Edit/Filter` | `schema.views.json` |
@@ -112,3 +115,37 @@ Not covered, with reason: `GuidedFormService` HTTP methods and context loading (
 | `ErrorService.parseToHumanWithLookup` | `_example/errors.lookup.json` (with each example's `constraint_messages` loaded through `SchemaService.getConstraintMessages`, plus the not-yet-loaded fallback) |
 
 Not covered, with reason: `parseToHumanWithTracking` (adds only an analytics side effect around `parseToHumanWithLookup`).
+
+
+## Synthetic variant (`_synthetic/`)
+
+`src/app/testing/golden/synthetic-fixtures.ts` builds `schema_entities`, `schema_properties`, `schema_m2m_properties` and `static_text` rows in memory and flushes them through the same `loadSchema` path as the raw fixtures, so the synthetic entities get every `schema.*`, `transforms.rows` and `data.m2m-transform` artifact. Rows are named after the branch they cover (`status_int8`, `time_slot_recurring`, `transactions_public_schema_is_unknown`, ...). It covers: every `getPropertyType` branch and fall-through (Status / Category on int4 and int8 and the no-join-column cases, all File / User / Payment / PhotoGallery routes, FK, geography Polygon / Point / other, every scalar udt, Unknown udts); `getColumnSpan` (Markdown default and overrides, width 0); view-filter flags (`show_on_*` false and null, generated, identity, not updatable, `created_at` / `updated_at`, structural `status_id` / `submitted_at`, filterable per supported and unsupported type); every validation rule type with numeric, empty, missing and non-numeric values; `getPreviewMode` (`display_name` / `id` / `count`), grouping and self-reference; pure, color, rich, un-flagged rich, User-FK, parent-hop, ambiguous-hop and dead-end junctions with `schema_m2m_properties` overrides; static text per page flag. The synthetic guided-form steps cover `skip_if` / `require_if` with several conditions, all four operators, embedded FK parents, completed-step progress, and unknown operators.
+
+## Validator contract
+
+The fingerprints in `schema.validators.json` (rule signature -> Angular error objects over a fixed value matrix) ARE the contract. In P1.1b the core emits validation rules as data; a parity spec maps those rules through the Angular adapter, and the adapter must reproduce every fingerprint byte for byte. `getFormValidatorsForProperty` itself stays in the app as that adapter.
+
+## Mutation evidence
+
+Each row was a temporary edit of the named source line; the golden check failed with the artifact kinds listed (file counts are across all variants). Reverted afterwards. Re-run recipe: apply the edit, `scripts/golden/derive-frontend.sh --check`.
+
+| Branch | Mutation | Failing artifact kinds |
+|---|---|---|
+| `getPropertyType` timestamp -> DateTime | returns DateTimeLocal | `_synthetic/all/schema.properties.json`, `transforms.rows.json` |
+| time_slot + `is_recurring` -> RecurringTimeSlot | `&& false` | same |
+| `payment_transactions` join table -> Payment | branch removed | same |
+| float4 / float8 -> DecimalNumber | each removed from the list | same |
+| Status on int8 | int8 removed from the Status guard | same |
+| Category on int8 | int8 removed from the Category guard | same |
+| `getColumnSpan` Markdown default 4 | returns 3 | `_synthetic/all/schema.properties.json`, `schema.views.json` |
+| `getPreviewMode` count / id | always `count`; `id` -> `display_name` | `schema.inverse-menu.json` (synthetic and 12 more), `data.queries.json` |
+| `getEffectiveSteps` require_if branch | filter picks skip_if | `_synthetic/conditions.guided-forms.json` |
+| `getEffectiveSteps` multi-condition (first wins) | only the first skip_if / require_if evaluated | `_synthetic/conditions.guided-forms.json` |
+| `compareTimeSlotValues` end bound; local-time parse under the TZ matrix | end ignored; `Z` stripped | `_shared/data.compare-helpers.json` (+ `data.mutation-requests.json` for the local-time case) |
+| `pattern` rule matching `^\d{10}$` | `{10}` -> `{9}` | `schema.validators.json` (11 files; the matching probes `1234567890` / `0123456789` are in the matrix) |
+| `parseToHuman` P0001 with missing message | `err.message || 'System Error'` | `errors.lookup.json` (8 files) |
+| `transformManyToManyData` non-array guard | `!Array.isArray` removed | `_shared/data.compare-helpers.json` (`transformManyToManyGuards`) |
+
+Not detectable by construction: removing the `break` after `isSkipped = true` / `isRequired = true` in `getEffectiveSteps` (the flags are idempotent, so behavior is identical), and stripping milliseconds in `compareTimeSlotValues` (`new Date` parses both forms to the same instant).
+
+Transform inputs follow the real pages: inline M:M properties are in `currentProps` but excluded from the FormGroup, so their keys are never present in the form values, the raw row or the control map.

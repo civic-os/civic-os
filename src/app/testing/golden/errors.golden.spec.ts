@@ -46,6 +46,8 @@ function basePayloads(): ApiError[] {
     err({ httpCode: 503, code: 'PT503', message: 'Maintenance mode' }),
     err({ httpCode: 400, code: 'P0001', message: 'Custom RAISE EXCEPTION text' }),
     err({ httpCode: 400, code: 'P0001' }),
+    { httpCode: 400, code: 'P0001', humanMessage: '' } as ApiError,
+    { httpCode: 400, code: 'P0001', message: '', humanMessage: '' } as ApiError,
     err({ httpCode: 400, message: 'Bad Request' }),
     err({ httpCode: 500, message: 'Internal Server Error' }),
     err({ message: 'no http code, no code' }),
@@ -88,8 +90,8 @@ describe('golden: ErrorService', () => {
       const payloads = [...basePayloads(), ...constraintPayloads([...names, 'no_such_constraint'])];
       const results = payloads.map(p => ({
         payload: p,
-        parseToHuman: ErrorService.parseToHuman(p),
-        parseToHumanWithLookup: svc.parseToHumanWithLookup(p),
+        parseToHuman: ErrorService.parseToHuman(p) ?? '<undefined>',
+        parseToHumanWithLookup: svc.parseToHumanWithLookup(p) ?? '<undefined>',
       }));
       // before constraint messages are loaded the lookup falls back
       (schema as any).constraintMessages = undefined;

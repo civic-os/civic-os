@@ -17,7 +17,8 @@ import { CreatePage } from '../../pages/create/create.page';
 import { EditPage } from '../../pages/edit/edit.page';
 import { EntityPropertyType, SchemaEntityProperty } from '../../interfaces/entity';
 import { createMockProperty } from '../mock-schema';
-import { checkGolden, expectNoOrphans, listAllVariants, stableStringify, TIME_ZONES, withTimeZone } from './golden-io';
+import { acrossZones, checkGolden, expectNoOrphans, stableStringify, TIME_ZONES, withTimeZone } from './golden-io';
+import { listGoldenVariants } from './synthetic-fixtures';
 import { loadSchema, typeName } from './schema-harness';
 
 const createApi = (props: SchemaEntityProperty[], form: any) =>
@@ -56,7 +57,6 @@ function formValue(p: SchemaEntityProperty, kind: RowKind): unknown {
     case EntityPropertyType.Category:
       return odd ? { id: 3, display_name: 'x' } : 3;
     case EntityPropertyType.User: return USER_UUID;
-    case EntityPropertyType.ManyToMany: return [1, 2];
     case EntityPropertyType.TimeSlot:
     case EntityPropertyType.RecurringTimeSlot: return '[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)';
     case EntityPropertyType.GeoPoint: return 'SRID=4326;POINT(-83 43)';
@@ -83,16 +83,8 @@ function auditKeys(kind: RowKind): Record<string, unknown> {
     : {};
 }
 
-/**
- * Run `compute` under every zone; collapse to {"*": out} when identical so
- * zone-independent rows do not repeat four times.
- */
-function acrossZones(compute: () => unknown): Record<string, unknown> {
-  const byZone: Record<string, unknown> = {};
-  for (const tz of TIME_ZONES) byZone[tz] = withTimeZone(tz, compute);
-  const first = stableStringify(byZone[TIME_ZONES[0]]);
-  return TIME_ZONES.every(tz => stableStringify(byZone[tz]) === first) ? { '*': byZone[TIME_ZONES[0]] } : byZone;
-}
+/** M:M properties are in currentProps but excluded from the FormGroup, so their keys never reach the transforms. */
+const inForm = (p: SchemaEntityProperty) => p.type !== EntityPropertyType.ManyToMany;
 
 const pageProps = {
   create: (props: SchemaEntityProperty[]) => props.filter(p =>
@@ -115,7 +107,7 @@ describe('golden: page transforms', () => {
     expect(offsetJan()).toBe(before);
   });
 
-  for (const v of listAllVariants()) {
+  for (const v of listGoldenVariants()) {
     it(`${v.example}/${v.variant}: synthetic rows per entity`, async () => {
       const { service, tables } = await loadSchema(v);
       const entities: Record<string, unknown> = {};
@@ -125,11 +117,11 @@ describe('golden: page transforms', () => {
         const rows: Record<string, unknown> = {};
         for (const kind of ['typical', 'empty', 'odd'] as RowKind[]) {
           const createForm: Record<string, unknown> = { ...auditKeys(kind) };
-          for (const p of createProps) createForm[p.column_name] = formValue(p, kind);
+          for (const p of createProps.filter(inForm)) createForm[p.column_name] = formValue(p, kind);
           const editForm: Record<string, unknown> = { ...auditKeys(kind) };
-          for (const p of editProps) editForm[p.column_name] = formValue(p, kind);
+          for (const p of editProps.filter(inForm)) editForm[p.column_name] = formValue(p, kind);
           const raw: Record<string, unknown> = {};
-          for (const p of editProps) raw[p.column_name] = rawValue(p, kind);
+          for (const p of editProps.filter(inForm)) raw[p.column_name] = rawValue(p, kind);
 
           rows[kind] = {
             createFormInput: createForm,
@@ -138,7 +130,7 @@ describe('golden: page transforms', () => {
             outputs: acrossZones(() => ({
               createApi: createApi(createProps, createForm),
               editApi: editApi(editProps, editForm),
-              control: Object.fromEntries(editProps.map(p => [p.column_name, editControl(p, raw[p.column_name])])),
+              control: Object.fromEntries(editProps.filter(inForm).map(p => [p.column_name, editControl(p, raw[p.column_name])])),
             })),
           };
         }

@@ -87,6 +87,16 @@
       "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
     },
     {
+      "parseToHuman": "<undefined>",
+      "parseToHumanWithLookup": "<undefined>",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": ""}
+    },
+    {
+      "parseToHuman": "",
+      "parseToHumanWithLookup": "",
+      "payload": {"code": "P0001", "httpCode": 400, "humanMessage": "", "message": ""}
+    },
+    {
       "parseToHuman": "System Error",
       "parseToHumanWithLookup": "System Error",
       "payload": {"httpCode": 400, "humanMessage": "", "message": "Bad Request"}

@@ -156,69 +156,13 @@
       ],
       "rows": {
         "empty": {
-          "createFormInput": {
-            "active": null,
-            "address": "",
-            "capacity_notes": null,
-            "contact_name": null,
-            "description": "",
-            "display_name": null,
-            "email": "",
-            "languages_supported": "",
-            "location": null,
-            "partner_service_categories_m2m": null,
-            "partner_type_id": "",
-            "phone": "",
-            "website": ""
-          },
-          "editFormInput": {
-            "active": null,
-            "address": "",
-            "capacity_notes": null,
-            "contact_name": null,
-            "description": "",
-            "display_name": null,
-            "email": "",
-            "languages_supported": "",
-            "location": null,
-            "partner_service_categories_m2m": null,
-            "partner_type_id": "",
-            "phone": "",
-            "website": ""
-          },
+          "createFormInput": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+          "editFormInput": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
           "outputs": {
             "*": {
               "control": {"address": null, "description": null, "email": null, "languages_supported": null, "partner_type_id": null, "phone": null, "website": null},
-              "createApi": {
-                "active": null,
-                "address": "",
-                "capacity_notes": null,
-                "contact_name": null,
-                "description": "",
-                "display_name": null,
-                "email": "",
-                "languages_supported": "",
-                "location": null,
-                "partner_service_categories_m2m": null,
-                "partner_type_id": "",
-                "phone": "",
-                "website": ""
-              },
-              "editApi": {
-                "active": null,
-                "address": "",
-                "capacity_notes": null,
-                "contact_name": null,
-                "description": "",
-                "display_name": null,
-                "email": "",
-                "languages_supported": "",
-                "location": null,
-                "partner_service_categories_m2m": null,
-                "partner_type_id": "",
-                "phone": "",
-                "website": ""
-              }
+              "createApi": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+              "editApi": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""}
             }
           },
           "rawRow": {"address": null, "description": null, "email": null, "languages_supported": null, "partner_type_id": null, "phone": null, "website": null}
@@ -234,7 +178,6 @@
             "email": 42,
             "languages_supported": 42,
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": {"display_name": "x", "id": 3},
             "phone": 42,
             "website": 42
@@ -249,7 +192,6 @@
             "email": 42,
             "languages_supported": 42,
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": {"display_name": "x", "id": 3},
             "phone": 42,
             "website": 42
@@ -266,7 +208,6 @@
                 "email": "text",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -281,7 +222,6 @@
                 "email": 42,
                 "languages_supported": 42,
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": {"display_name": "x", "id": 3},
                 "phone": 42,
                 "website": 42
@@ -296,7 +236,6 @@
                 "email": 42,
                 "languages_supported": 42,
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": {"display_name": "x", "id": 3},
                 "phone": 42,
                 "website": 42
@@ -313,7 +252,6 @@
             "email": "text",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "website": "text"
@@ -332,7 +270,6 @@
             "extra_key": "kept",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "updated_at": "2026-01-02T00:00:00Z",
@@ -350,7 +287,6 @@
             "extra_key": "kept",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "updated_at": "2026-01-02T00:00:00Z",
@@ -368,7 +304,6 @@
                 "email": "text",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -384,7 +319,6 @@
                 "extra_key": "kept",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -400,7 +334,6 @@
                 "extra_key": "kept",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -417,7 +350,6 @@
             "email": "text",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "website": "text"
