@@ -28,7 +28,7 @@ import { DataService } from '../../services/data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AuthService } from '../../services/auth.service';
 import { NotesService } from '../../services/notes.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
@@ -230,9 +230,8 @@ describe('ListPage', () => {
             mockSchemaService.getPropsForList.mockReturnValue(of([]));
             mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
 
-            component.data$.subscribe(data => {
-                expect(data).toEqual({ data: [], totalCount: 0 });
-            });
+            const data = await firstValueFrom(component.data$);
+            expect(data).toEqual({ data: [], totalCount: 0 });
         });
 
         it('should return empty observable when entityKey is undefined', async () => {
