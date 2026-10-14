@@ -331,6 +331,9 @@ jobs:
       - name: Docker images copy every workspace manifest
         run: npm run check:docker-workspaces
 
+      - name: Dogfooding checker self-test (re-exports never count as usage)
+        run: npm run check:dogfood:self-test
+
       - name: Dogfooding report (report only until SDK P1.6)
         run: npm run check:dogfood
 

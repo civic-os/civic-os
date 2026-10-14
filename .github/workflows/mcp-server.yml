@@ -88,7 +88,7 @@ jobs:
           echo "MCP server package.json version: $MCP_VERSION"
 
           if [[ "$ROOT_VERSION" != "$MCP_VERSION" ]]; then
-            echo "::error::MCP server version ($MCP_VERSION) differs from root version ($ROOT_VERSION). Fix: cd tools/mcp-server && npm run sync-version"
+            echo "::error::MCP server version ($MCP_VERSION) differs from root version ($ROOT_VERSION). Fix: npm run sync-versions (from the repo root)"
             exit 1
           fi
 

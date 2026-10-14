@@ -9,8 +9,17 @@
  * packages/** in eslint.config.js; this script is the CI gate and does not
  * depend on lint configuration.
  *
- * 1. Manifests: no workspace package depends on an AGPL package of this repo
- *    (the root app, tools/* such as @civic-os/mcp-server).
+ * 1. Manifests:
+ *    - no workspace package depends on an AGPL package of this repo (the root
+ *      app, tools/* such as @civic-os/mcp-server);
+ *    - @civic-os/core has zero runtime dependencies: `dependencies`,
+ *      `peerDependencies`, and `optionalDependencies` are empty;
+ *    - every runtime dependency of an Apache package (dependencies,
+ *      peerDependencies, optionalDependencies; devDependencies are not
+ *      distributed) carries a permissive license from LICENSE_ALLOWLIST, read
+ *      from the installed package's manifest. AGPL, GPL, LGPL, missing, or
+ *      unresolvable licenses fail. SPDX `OR` passes if any alternative is
+ *      allowed; `AND` needs every part allowed.
  * 2. Imports (every import/export-from/import()/require()/import-type and
  *    triple-slash directive in packages/<name>/src):
  *    - relative imports must stay inside their own package (no reaching into
@@ -25,7 +34,7 @@
  * Usage: node scripts/check-boundaries.mjs   (exit 1 with a per-import report)
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import ts from 'typescript';
 import { DEP_FIELDS, readJson, rel, repoRoot, toolPackages, workspacePackages } from './lib/workspaces.mjs';
@@ -49,14 +58,69 @@ for (const pkg of workspaces) {
 // ---------------------------------------------------------------------------
 // 1. Manifest dependencies
 // ---------------------------------------------------------------------------
+/** Licenses an Apache-2.0 package may depend on at runtime. */
+const LICENSE_ALLOWLIST = new Set(['Apache-2.0', 'MIT', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', '0BSD']);
+/** Dependency fields that ship with (or are required by) a published package. */
+const RUNTIME_DEP_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
+
+/** License expression of an installed dependency, or null if it cannot be found. */
+function dependencyLicense(pkg, name) {
+  const workspace = workspaces.find((w) => w.manifest.name === name);
+  if (workspace) return { license: workspace.manifest.license, from: rel(workspace.manifestPath) };
+  for (const base of [pkg.dir, repoRoot]) {
+    const manifestPath = join(base, 'node_modules', ...name.split('/'), 'package.json');
+    if (!existsSync(manifestPath)) continue;
+    const manifest = readJson(manifestPath);
+    let license = manifest.license;
+    if (license && typeof license === 'object') license = license.type;
+    if (!license && Array.isArray(manifest.licenses)) {
+      license = manifest.licenses.map((l) => (typeof l === 'string' ? l : l?.type)).filter(Boolean).join(' OR ');
+    }
+    return { license: typeof license === 'string' && license.trim() ? license.trim() : null, from: rel(manifestPath) };
+  }
+  return null;
+}
+
+/** Evaluate an SPDX expression against the allowlist (OR: any branch; AND: all parts; WITH ignored). */
+function licenseAllowed(expression) {
+  const cleaned = expression.replace(/[()]/g, ' ').trim();
+  return cleaned.split(/\s+OR\s+/i).some((branch) =>
+    branch.split(/\s+AND\s+/i).every((part) => LICENSE_ALLOWLIST.has(part.replace(/\s+WITH\s+.*$/i, '').trim())));
+}
+
 for (const pkg of workspaces) {
+  const where = rel(pkg.manifestPath);
   if (pkg.manifest.license !== 'Apache-2.0') {
-    problems.push(`${rel(pkg.manifestPath)}: workspace packages are Apache-2.0 (found license ${JSON.stringify(pkg.manifest.license)})`);
+    problems.push(`${where}: workspace packages are Apache-2.0 (found license ${JSON.stringify(pkg.manifest.license)})`);
   }
   for (const field of DEP_FIELDS) {
     for (const name of Object.keys(pkg.manifest[field] ?? {})) {
       if (agplPackages.has(name)) {
-        problems.push(`${rel(pkg.manifestPath)}: ${field} includes ${name} (${agplPackages.get(name)}), an AGPL package; Apache packages must never depend on it`);
+        problems.push(`${where}: ${field} includes ${name} (${agplPackages.get(name)}), an AGPL package; Apache packages must never depend on it`);
+      }
+    }
+  }
+  if (pkg.manifest.name === '@civic-os/core') {
+    for (const field of [...RUNTIME_DEP_FIELDS, 'bundleDependencies', 'bundledDependencies']) {
+      const value = pkg.manifest[field];
+      const names = Array.isArray(value) ? value : Object.keys(value ?? {});
+      if (names.length > 0) {
+        problems.push(`${where}: @civic-os/core has zero runtime dependencies, but ${field} lists ${names.join(', ')}`);
+      }
+    }
+  }
+  if (pkg.manifest.license === 'Apache-2.0') {
+    for (const field of RUNTIME_DEP_FIELDS) {
+      for (const name of Object.keys(pkg.manifest[field] ?? {})) {
+        if (agplPackages.has(name)) continue; // already reported above
+        const found = dependencyLicense(pkg, name);
+        if (!found) {
+          problems.push(`${where}: ${field} ${name} is not installed, so its license is unknown (run npm ci; allowed: ${[...LICENSE_ALLOWLIST].join(', ')})`);
+        } else if (!found.license) {
+          problems.push(`${where}: ${field} ${name} declares no license (${found.from})`);
+        } else if (!licenseAllowed(found.license)) {
+          problems.push(`${where}: ${field} ${name} is licensed ${JSON.stringify(found.license)} (${found.from}); Apache packages may depend only on ${[...LICENSE_ALLOWLIST].join(', ')}`);
+        }
       }
     }
   }
