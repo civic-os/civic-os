@@ -6,7 +6,7 @@ BEGIN;
 -- Verify Civic OS v0.4.0 Baseline Schema
 -- =====================================================
 -- This script performs fast SQL checks to verify all core objects exist.
--- For comprehensive schema verification, use verify-full.sh script.
+-- Revert correctness of newer changes is checked in CI by scripts/schema-roundtrip.sh stepwise.
 
 -- Verify PostGIS extension and schema
 DO $$
