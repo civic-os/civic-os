@@ -26,6 +26,6 @@
       "excluding": []
     }
   },
-  "management": ["newsletters", "partners", "referrals_per_week", "service_categories"],
-  "menu": ["newsletters", "partners", "service_categories"]
+  "management": ["referrals_per_week", "service_categories", "partners", "newsletters"],
+  "menu": ["service_categories", "partners", "newsletters"]
 }

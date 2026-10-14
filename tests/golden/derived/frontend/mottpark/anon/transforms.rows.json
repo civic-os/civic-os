@@ -150,39 +150,39 @@
       "rows": {
         "empty": {
           "createFormInput": {},
-          "editFormInput": {"display_name": null},
+          "editFormInput": {},
           "outputs": {
             "*": {
               "control": {},
               "createApi": {},
-              "editApi": {"display_name": null}
+              "editApi": {}
             }
           },
           "rawRow": {}
         },
         "odd": {
           "createFormInput": {},
-          "editFormInput": {"display_name": 42},
+          "editFormInput": {},
           "outputs": {
             "*": {
-              "control": {"display_name": "text"},
+              "control": {},
               "createApi": {},
-              "editApi": {"display_name": 42}
+              "editApi": {}
             }
           },
-          "rawRow": {"display_name": "text"}
+          "rawRow": {}
         },
         "typical": {
           "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
-          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {"display_name": "text"},
+              "control": {},
               "createApi": {"extra_key": "kept"},
-              "editApi": {"display_name": "text", "extra_key": "kept"}
+              "editApi": {"extra_key": "kept"}
             }
           },
-          "rawRow": {"display_name": "text"}
+          "rawRow": {}
         }
       }
     },
@@ -262,7 +262,7 @@
             "requestor_phone": "",
             "time_slot": ""
           },
-          "editFormInput": {"display_name": null, "status_id": ""},
+          "editFormInput": {"status_id": ""},
           "outputs": {
             "*": {
               "control": {"status_id": null},
@@ -281,7 +281,7 @@
                 "requestor_phone": "",
                 "time_slot": ""
               },
-              "editApi": {"display_name": null, "status_id": ""}
+              "editApi": {"status_id": ""}
             }
           },
           "rawRow": {"status_id": null}
@@ -303,12 +303,11 @@
             "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
           },
           "editFormInput": {
-            "display_name": 42,
             "status_id": {"display_name": "x", "id": 3}
           },
           "outputs": {
             "*": {
-              "control": {"display_name": "text", "status_id": 3},
+              "control": {"status_id": 3},
               "createApi": {
                 "attendee_ages": 42,
                 "attendee_count": 7,
@@ -325,12 +324,11 @@
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               },
               "editApi": {
-                "display_name": 42,
                 "status_id": {"display_name": "x", "id": 3}
               }
             }
           },
-          "rawRow": {"display_name": "text", "status_id": 3}
+          "rawRow": {"status_id": 3}
         },
         "typical": {
           "createFormInput": {
@@ -351,10 +349,10 @@
             "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "updated_at": "2026-01-02T00:00:00Z"
           },
-          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "status_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "status_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {"display_name": "text", "status_id": 3},
+              "control": {"status_id": 3},
               "createApi": {
                 "attendee_ages": "text",
                 "attendee_count": 7,
@@ -371,10 +369,10 @@
                 "requestor_phone": "text",
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               },
-              "editApi": {"display_name": "text", "extra_key": "kept", "status_id": 3}
+              "editApi": {"extra_key": "kept", "status_id": 3}
             }
           },
-          "rawRow": {"display_name": "text", "status_id": 3}
+          "rawRow": {"status_id": 3}
         }
       }
     }

@@ -3325,25 +3325,6 @@
   },
   "inversePreviews": [
     {
-      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "interest_center_id", "sourceColumnDisplayName": "Interest Center", "sourceTable": "projects", "sourceTableDisplayName": "Projects"},
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/projects?interest_center_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "interest_center_id", "sourceColumnDisplayName": "Interest Center", "sourceTable": "projects", "sourceTableDisplayName": "Projects"},
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "interest_centers"
-    },
-    {
       "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 2, "sourceColumn": "organization_id", "sourceColumnDisplayName": "Organization", "sourceTable": "projects", "sourceTableDisplayName": "Projects"},
       "request": {
         "headers": {"Prefer": "count=exact"},
@@ -3380,6 +3361,25 @@
         "totalCount": 15
       },
       "target": "organizations"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "interest_center_id", "sourceColumnDisplayName": "Interest Center", "sourceTable": "projects", "sourceTableDisplayName": "Projects"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/projects?interest_center_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "interest_center_id", "sourceColumnDisplayName": "Interest Center", "sourceTable": "projects", "sourceTableDisplayName": "Projects"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "interest_centers"
     }
   ]
 }

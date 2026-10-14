@@ -11,7 +11,7 @@ import { SchemaService } from '../../services/schema.service';
 const RELEVANT = new Set(['required', 'min', 'max', 'minLength', 'maxLength', 'pattern']);
 
 const PATTERN_PROBES = [
-  'a', 'A', 'abc', '123', 'a1', 'ABC-123', '12345', '12345-6789', 'foo bar', 'xyz!',
+  '1234567890', '0123456789', '12345678901', '123456789', 'a', 'A', 'abc', '123', 'a1', 'ABC-123', '12345', '12345-6789', 'foo bar', 'xyz!',
   'test@example.com', '(555) 123-4567', '555-123-4567', '+15551234567', '#ff00aa', '2026-03-08',
 ];
 

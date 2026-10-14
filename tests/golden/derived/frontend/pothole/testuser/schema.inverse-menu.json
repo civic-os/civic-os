@@ -41,6 +41,6 @@
       "excluding": []
     }
   },
-  "management": ["Bid", "Issue", "Tag", "WorkDetail", "WorkPackage", "issue_status_summary"],
-  "menu": ["Bid", "Issue", "Tag", "WorkDetail", "WorkPackage", "issue_status_summary"]
+  "management": ["Bid", "WorkDetail", "WorkPackage", "Issue", "Tag", "issue_status_summary"],
+  "menu": ["Bid", "WorkDetail", "WorkPackage", "Issue", "Tag", "issue_status_summary"]
 }

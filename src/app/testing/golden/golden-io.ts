@@ -177,6 +177,8 @@ export interface Variant {
   role: string;
   locale: string;
   dir: string;
+  /** In-memory endpoint bodies (the hand-built `_synthetic` variant); takes precedence over `dir`. */
+  inline?: Record<string, unknown>;
 }
 
 const ROLE_ORDER = ['anon', 'testuser', 'testeditor', 'testmanager', 'testadmin'];
@@ -210,10 +212,12 @@ export function listAllVariants(): Variant[] {
 
 /** Fresh deep copy of a raw endpoint fixture (services mutate their inputs). */
 export function loadRaw<T = any>(v: Variant, endpoint: string): T {
+  if (v.inline) return structuredClone(v.inline[endpoint]) as T;
   return JSON.parse(fs.readFileSync(path.join(v.dir, `${endpoint}.json`), 'utf8'));
 }
 
 export function hasRaw(v: Variant, endpoint: string): boolean {
+  if (v.inline) return endpoint in v.inline;
   return fs.existsSync(path.join(v.dir, `${endpoint}.json`));
 }
 
@@ -229,8 +233,8 @@ export const TIME_ZONES = ['UTC', 'America/New_York', 'Asia/Kolkata', 'Australia
 
 /**
  * Run `fn` with process.env.TZ switched to `tz`, restoring the original in a
- * finally block. Node re-reads TZ on assignment (proved by the probe in
- * time-zone.golden.spec.ts), so no test depends on the machine zone.
+ * finally block. Node re-reads TZ on assignment (proved by the first test in
+ * transforms.golden.spec.ts), so no test depends on the machine zone.
  */
 export function withTimeZone<T>(tz: string, fn: () => T): T {
   const original = process.env['TZ'];
@@ -241,6 +245,17 @@ export function withTimeZone<T>(tz: string, fn: () => T): T {
     if (original === undefined) delete process.env['TZ'];
     else process.env['TZ'] = original;
   }
+}
+
+/**
+ * Run `compute` under every zone; collapse to {"*": out} when identical so
+ * zone-independent results are not repeated four times.
+ */
+export function acrossZones(compute: () => unknown): Record<string, unknown> {
+  const byZone: Record<string, unknown> = {};
+  for (const tz of TIME_ZONES) byZone[tz] = withTimeZone(tz, compute);
+  const first = stableStringify(byZone[TIME_ZONES[0]]);
+  return TIME_ZONES.every(tz => stableStringify(byZone[tz]) === first) ? { '*': byZone[TIME_ZONES[0]] } : byZone;
 }
 
 /** Safe file/key segment for a zone name. */

@@ -1,0 +1,62 @@
+[
+  {
+    "description": "Payment received via Stripe webhook (sync_reservation_payment_status) or manual recording (record_cash/check/money_order/cashapp_payment RPCs).",
+    "display_name": "Pay",
+    "entity_type": "reservation_payment",
+    "from_color": "#F59E0B",
+    "from_display_name": "Pending",
+    "from_status_id": 11,
+    "id": 7,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 0,
+    "to_color": "#22C55E",
+    "to_display_name": "Paid",
+    "to_status_id": 12
+  },
+  {
+    "description": "Waive all pending payments for a reservation. Requires manager/admin role and reservation must be Approved.",
+    "display_name": "Waive",
+    "entity_type": "reservation_payment",
+    "from_color": "#F59E0B",
+    "from_display_name": "Pending",
+    "from_status_id": 11,
+    "id": 8,
+    "is_enabled": true,
+    "on_transition_rpc": "waive_all_reservation_payments",
+    "sort_order": 0,
+    "to_color": "#8B5CF6",
+    "to_display_name": "Waived",
+    "to_status_id": 14
+  },
+  {
+    "description": "Auto-cancelled as side effect of cancel_reservation_request. No direct user action.",
+    "display_name": "Cancel",
+    "entity_type": "reservation_payment",
+    "from_color": "#F59E0B",
+    "from_display_name": "Pending",
+    "from_status_id": 11,
+    "id": 9,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 0,
+    "to_color": "#6B7280",
+    "to_display_name": "Cancelled",
+    "to_status_id": 15
+  },
+  {
+    "description": "Payment refunded. Currently a manual process (Stripe refund webhook trigger was removed in v0.18).",
+    "display_name": "Refund",
+    "entity_type": "reservation_payment",
+    "from_color": "#22C55E",
+    "from_display_name": "Paid",
+    "from_status_id": 12,
+    "id": 10,
+    "is_enabled": true,
+    "on_transition_rpc": null,
+    "sort_order": 0,
+    "to_color": "#3B82F6",
+    "to_display_name": "Refunded",
+    "to_status_id": 13
+  }
+]

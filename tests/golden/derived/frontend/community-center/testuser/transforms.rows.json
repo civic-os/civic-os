@@ -60,12 +60,12 @@
       "rows": {
         "empty": {
           "createFormInput": {"attendee_count": null, "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
-          "editFormInput": {"attendee_count": null, "denial_reason": "", "display_name": null, "notes": "", "purpose": "", "requested_by": null, "resource_id": "", "reviewed_at": "", "reviewed_by": "", "status_id": "", "time_slot": ""},
+          "editFormInput": {"attendee_count": null, "denial_reason": "", "notes": "", "purpose": "", "requested_by": null, "resource_id": "", "reviewed_at": "", "reviewed_by": "", "status_id": "", "time_slot": ""},
           "outputs": {
             "*": {
               "control": {"denial_reason": null, "notes": null, "purpose": null, "resource_id": null, "reviewed_at": null, "reviewed_by": null, "status_id": null, "time_slot": null},
               "createApi": {"attendee_count": null, "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
-              "editApi": {"attendee_count": null, "denial_reason": "", "display_name": null, "notes": "", "purpose": "", "requested_by": null, "resource_id": "", "reviewed_at": "", "reviewed_by": "", "status_id": "", "time_slot": ""}
+              "editApi": {"attendee_count": null, "denial_reason": "", "notes": "", "purpose": "", "requested_by": null, "resource_id": "", "reviewed_at": "", "reviewed_by": "", "status_id": "", "time_slot": ""}
             }
           },
           "rawRow": {"denial_reason": null, "notes": null, "purpose": null, "resource_id": null, "reviewed_at": null, "reviewed_by": null, "status_id": null, "time_slot": null}
@@ -81,7 +81,6 @@
           "editFormInput": {
             "attendee_count": 7,
             "denial_reason": 42,
-            "display_name": 42,
             "notes": 42,
             "purpose": 42,
             "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -96,7 +95,6 @@
               "control": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "notes": "text",
                 "purpose": "text",
                 "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -116,7 +114,6 @@
               "editApi": {
                 "attendee_count": 7,
                 "denial_reason": 42,
-                "display_name": 42,
                 "notes": 42,
                 "purpose": 42,
                 "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -131,7 +128,6 @@
           "rawRow": {
             "attendee_count": 7,
             "denial_reason": "text",
-            "display_name": "text",
             "notes": "text",
             "purpose": "text",
             "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -148,7 +144,6 @@
             "attendee_count": 7,
             "created_at": "2026-01-01T00:00:00Z",
             "denial_reason": "text",
-            "display_name": "text",
             "extra_key": "kept",
             "notes": "text",
             "purpose": "text",
@@ -165,7 +160,6 @@
               "control": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "notes": "text",
                 "purpose": "text",
                 "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -179,7 +173,6 @@
               "editApi": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "extra_key": "kept",
                 "notes": "text",
                 "purpose": "text",
@@ -195,7 +188,6 @@
               "control": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "notes": "text",
                 "purpose": "text",
                 "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -209,7 +201,6 @@
               "editApi": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "extra_key": "kept",
                 "notes": "text",
                 "purpose": "text",
@@ -225,7 +216,6 @@
               "control": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "notes": "text",
                 "purpose": "text",
                 "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -239,7 +229,6 @@
               "editApi": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "extra_key": "kept",
                 "notes": "text",
                 "purpose": "text",
@@ -255,7 +244,6 @@
               "control": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "notes": "text",
                 "purpose": "text",
                 "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -269,7 +257,6 @@
               "editApi": {
                 "attendee_count": 7,
                 "denial_reason": "text",
-                "display_name": "text",
                 "extra_key": "kept",
                 "notes": "text",
                 "purpose": "text",
@@ -285,7 +272,6 @@
           "rawRow": {
             "attendee_count": 7,
             "denial_reason": "text",
-            "display_name": "text",
             "notes": "text",
             "purpose": "text",
             "requested_by": "33333333-3333-4333-8333-333333333333",
@@ -304,12 +290,12 @@
       "rows": {
         "empty": {
           "createFormInput": {"attendee_count": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
-          "editFormInput": {"attendee_count": null, "display_name": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
+          "editFormInput": {"attendee_count": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
           "outputs": {
             "*": {
               "control": {"event_color": null, "notes": null, "purpose": null, "resource_id": null, "time_slot": null},
               "createApi": {"attendee_count": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""},
-              "editApi": {"attendee_count": null, "display_name": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""}
+              "editApi": {"attendee_count": null, "event_color": "", "notes": "", "purpose": "", "resource_id": "", "time_slot": ""}
             }
           },
           "rawRow": {"event_color": null, "notes": null, "purpose": null, "resource_id": null, "time_slot": null}
@@ -325,7 +311,6 @@
           },
           "editFormInput": {
             "attendee_count": 7,
-            "display_name": 42,
             "event_color": 42,
             "notes": 42,
             "purpose": 42,
@@ -334,7 +319,7 @@
           },
           "outputs": {
             "*": {
-              "control": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "control": {"attendee_count": 7, "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
               "createApi": {
                 "attendee_count": 7,
                 "event_color": 42,
@@ -345,7 +330,6 @@
               },
               "editApi": {
                 "attendee_count": 7,
-                "display_name": 42,
                 "event_color": 42,
                 "notes": 42,
                 "purpose": 42,
@@ -354,7 +338,7 @@
               }
             }
           },
-          "rawRow": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+          "rawRow": {"attendee_count": 7, "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
         },
         "typical": {
           "createFormInput": {
@@ -371,7 +355,6 @@
           "editFormInput": {
             "attendee_count": 7,
             "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
             "event_color": "text",
             "extra_key": "kept",
             "notes": "text",
@@ -382,12 +365,12 @@
           },
           "outputs": {
             "*": {
-              "control": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
+              "control": {"attendee_count": 7, "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
               "createApi": {"attendee_count": 7, "event_color": "text", "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
-              "editApi": {"attendee_count": 7, "display_name": "text", "event_color": "text", "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+              "editApi": {"attendee_count": 7, "event_color": "text", "extra_key": "kept", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
             }
           },
-          "rawRow": {"attendee_count": 7, "display_name": "text", "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+          "rawRow": {"attendee_count": 7, "event_color": "text", "notes": "text", "purpose": "text", "resource_id": 3, "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
         }
       }
     },

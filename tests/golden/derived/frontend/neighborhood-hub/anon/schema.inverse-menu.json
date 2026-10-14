@@ -200,23 +200,23 @@
     }
   },
   "management": [
-    "borrowers",
     "building_use_event_details",
-    "building_use_requests",
-    "building_use_rooms",
-    "census_block_groups",
     "mek_checkouts",
     "mek_request_equipment",
-    "mek_requests",
-    "parcels",
-    "projects",
-    "tool_instances",
+    "tool_reservations",
+    "borrowers",
+    "training_records",
     "tool_reservation_checkouts",
     "tool_reservation_tools",
     "tool_reservation_work_site",
-    "tool_reservations",
     "tool_types",
-    "training_records"
+    "tool_instances",
+    "building_use_requests",
+    "building_use_rooms",
+    "mek_requests",
+    "projects",
+    "parcels",
+    "census_block_groups"
   ],
-  "menu": ["borrowers", "building_use_requests", "building_use_rooms", "census_block_groups", "mek_requests", "parcels", "projects", "tool_instances", "tool_reservations", "tool_types", "training_records"]
+  "menu": ["tool_reservations", "borrowers", "training_records", "tool_types", "tool_instances", "building_use_requests", "building_use_rooms", "mek_requests", "projects", "parcels", "census_block_groups"]
 }

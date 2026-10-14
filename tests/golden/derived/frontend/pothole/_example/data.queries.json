@@ -2996,25 +2996,6 @@
   },
   "inversePreviews": [
     {
-      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"},
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/WorkDetail?issue=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"},
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "Issue"
-    },
-    {
       "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 7, "sourceColumn": "work_package", "sourceColumnDisplayName": "Work Package", "sourceTable": "Issue", "sourceTableDisplayName": "Issues"},
       "request": {
         "headers": {"Prefer": "count=exact"},
@@ -3051,6 +3032,25 @@
         "totalCount": 15
       },
       "target": "WorkPackage"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/WorkDetail?issue=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "issue", "sourceColumnDisplayName": "Issue", "sourceTable": "WorkDetail", "sourceTableDisplayName": "WorkDetail"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "Issue"
     }
   ]
 }

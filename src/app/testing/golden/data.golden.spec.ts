@@ -25,7 +25,8 @@ import { buildHybridSearchParams } from '../../utils/search.utils';
 import { getPostgrestUrl } from '../../config/runtime';
 import { DataQuery } from '../../interfaces/query';
 import { EntityPropertyType, ManyToManyMeta, SchemaEntityProperty, SchemaEntityTable } from '../../interfaces/entity';
-import { checkGolden, expectNoOrphans, listAllVariants, listExamples, listVariants, compactStringify } from './golden-io';
+import { acrossZones, checkGolden, expectNoOrphans, listExamples, listVariants, compactStringify } from './golden-io';
+import { listGoldenVariants } from './synthetic-fixtures';
 import { configureHttpTesting, loadSchema, typeName } from './schema-harness';
 
 const stubAnalytics = { trackError: () => {}, trackEvent: () => {} };
@@ -209,7 +210,7 @@ describe('golden: DataService requests', () => {
     });
   }
 
-  for (const v of listAllVariants()) {
+  for (const v of listGoldenVariants()) {
     it(`${v.example}/${v.variant}: transformManyToManyData over synthetic junction rows`, async () => {
       const { props } = await loadSchema(v);
       const out: Record<string, unknown> = {};
@@ -364,7 +365,7 @@ describe('golden: DataService requests', () => {
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const pairs = (names: string[], values: Array<[unknown, unknown]>) => names.map(n => ({
       method: n,
-      cases: values.map(([a, b]) => ({ input: a, response: b, result: d[n](a, b) })),
+      cases: values.map(([a, b]) => ({ input: a, response: b, results: acrossZones(() => d[n](a, b)) })),
     }));
     const cases: Array<[unknown, unknown]> = [
       ['2025-10-31T17:00:00', '2025-10-31T17:00:00+00:00'], ['2025-10-31T17:00', '2025-10-31T17:00:00.000Z'], ['2025-10-31 17:00:00', '2025-10-31T17:00:00Z'],
@@ -374,7 +375,18 @@ describe('golden: DataService requests', () => {
       ['[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)', '["2025-11-07 15:00:00+00","2025-11-07 22:00:00+00")'],
       ['[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)', '["2025-11-07 15:00:00+00","2025-11-07 22:00:00+00")'],
       ['[2025-11-07T15:00:00Z,2025-11-07T23:00:00Z)', '["2025-11-07 15:00:00+00","2025-11-07 22:00:00+00")'],
+      ['[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)', '["2025-11-07 15:00:00+00","2025-11-07 22:00:00+00")'],
+      ['[2025-11-07T15:00:00.500Z,2025-11-07T22:00:00.500Z)', '["2025-11-07 15:00:00.500+00","2025-11-07 22:00:00.500+00")'],
       ['[bad', '[also,bad)'],
+      ['[2025-11-07T15:00:00+05:00,2025-11-07T22:00:00+05:00)', '["2025-11-07 15:00:00+05","2025-11-07 22:00:00+05")'],
+      ['[2025-11-07T15:00:00+00:00,2025-11-07T22:00:00+00:00)', '["2025-11-07 15:00:00+00","2025-11-07 22:00:00+00")'],
+      ['[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)', '["2025-11-07 20:00:00+05","2025-11-08 03:00:00+05")'],
+      ['[2026-03-08T07:30:00Z,2026-03-08T09:00:00Z)', '["2026-03-08 02:30:00-05","2026-03-08 04:00:00-04")'],
+      ['[2026-10-03T16:15:00Z,2026-10-03T17:00:00Z)', '["2026-10-03 16:15:00+00","2026-10-03 17:00:00+00")'],
+      ['[2025-11-07T15:00:00.000Z,2025-11-07T22:00:00.000Z)', '[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z)'],
+      ['[2025-11-07T15:00:00Z,2025-11-07T22:00:00Z]', '["2025-11-07 15:00:00+00","2025-11-07 22:00:00+00"]'],
+      ['2025-10-31T17:00:00-05:00', '2025-10-31T22:00:00+00:00'],
+      ['2026-03-08T02:30:00', '2026-03-08T07:30:00Z'],
       ['SRID=4326;POINT(-83 43)', ewkbPoint(-83, 43)], ['POINT(-83 43)', ewkbPoint(-83, 43)], ['SRID=4326;POINT(-83 43.0)', ewkbPoint(-83, 43)], ['SRID=4326;POINT(1 2)', ewkbPoint(-83, 43)],
       ['SRID=4326;POLYGON((0 0))', '0103000020E6100000010000000100000000000000'], ['text', 'text'], [1, 1], [null, null],
     ];
@@ -392,9 +404,22 @@ describe('golden: DataService requests', () => {
       ['mismatch lists fields', { a: 1, b: 'x', c: 2 }, { success: true, body: [{ a: 2, b: 'y', c: 2 }] }],
       ['empty input matches anything', {}, { success: true, body: [{ a: 1 }] }],
     ];
+    const m2mGuards = [
+      ['null', null], ['undefined', undefined], ['object', { a: 1 }], ['string', 'x'], ['number', 3], ['empty array', []],
+    ].map(([name, input]) => ({ name, result: attempt(() => DataService.transformManyToManyData(input as any, 'Tag')) }));
+    const hopGuards = [
+      ['hops without targetTable use the plain path', [{ Tag: { id: 1 } }], 'Tag', undefined, [{ table: 'gp', fkColumn: 'x' }], undefined],
+      ['hops with empty array use the plain path', [{ Tag: { id: 1 } }], 'Tag', undefined, [], 'mid'],
+      ['null intermediate', [{ mid: null }, { mid: { gp: null } }, { mid: { gp: { id: 2 } } }, { mid: { gp: { id: 2 } } }], 'Tag', undefined, [{ table: 'gp', fkColumn: 'x' }], 'mid'],
+      ['two hops', [{ mid: { a: { b: { id: 'u1' } } } }, { mid: { a: { b: { id: 'u1' } } } }, { mid: { a: { b: { id: 'u2' } } } }], 'Tag', undefined, [{ table: 'a', fkColumn: 'x' }, { table: 'b', fkColumn: 'y' }], 'mid'],
+      ['extra columns missing from the row', [{ Tag: { id: 1 }, q: 1 }, { Tag: { id: 2 } }], 'Tag', ['q', 'z'], undefined, undefined],
+      ['empty extras array is not rich', [{ Tag: { id: 1 }, q: 1 }], 'Tag', [], undefined, undefined],
+    ].map(([name, rows, rel, extras, hops, target]) => ({
+      name, result: attempt(() => DataService.transformManyToManyData(rows as any, rel as string, extras as any, hops as any, target as any)),
+    }));
     const check = checkCases.map(([name, input, rep]) => ({ name, input, representation: rep, result: d.checkEditResult(input, rep) }));
     errSpy.mockRestore();
-    checkGolden('_shared/data.compare-helpers.json', { compare, ewkb, checkEditResult: check });
+    checkGolden('_shared/data.compare-helpers.json', { compare, ewkb, checkEditResult: check, transformManyToManyGuards: { m2mGuards, hopGuards } });
   });
 
   it('buildHybridSearchParams matrix', () => {
@@ -427,6 +452,11 @@ describe('golden: DataService requests', () => {
     expectNoOrphans(rel => /\/data\.[a-z0-9-]+\.json$/.test(rel));
   });
 });
+
+/** Record a thrown error as data so a behavior change names its artifact instead of aborting the test. */
+function attempt<T>(fn: () => T): T | { threw: string } {
+  try { return fn(); } catch (e) { return { threw: String(e) }; }
+}
 
 /** Little-endian EWKB hex for POINT(x y) with SRID 4326. */
 function ewkbPoint(x: number, y: number): string {

@@ -326,46 +326,19 @@
       ],
       "rows": {
         "empty": {
-          "createFormInput": {"client_service_needs_m2m": null, "date_of_birth": "", "email": "", "first_name": null, "gender_id": "", "household_size": null, "last_name": "", "phone": "", "preferred_comm_language": "", "user_id": ""},
-          "editFormInput": {
-            "client_service_needs_m2m": null,
-            "date_of_birth": "",
-            "display_name": null,
-            "email": "",
-            "first_name": null,
-            "gender_id": "",
-            "household_size": null,
-            "last_name": "",
-            "phone": "",
-            "preferred_comm_language": "",
-            "status_id": "",
-            "user_id": ""
-          },
+          "createFormInput": {"date_of_birth": "", "email": "", "first_name": null, "gender_id": "", "household_size": null, "last_name": "", "phone": "", "preferred_comm_language": "", "user_id": ""},
+          "editFormInput": {"date_of_birth": "", "email": "", "first_name": null, "gender_id": "", "household_size": null, "last_name": "", "phone": "", "preferred_comm_language": "", "user_id": ""},
           "outputs": {
             "*": {
-              "control": {"date_of_birth": null, "email": null, "gender_id": null, "last_name": null, "phone": null, "preferred_comm_language": null, "status_id": null, "user_id": null},
-              "createApi": {"client_service_needs_m2m": null, "date_of_birth": "", "email": "", "first_name": null, "gender_id": "", "household_size": null, "last_name": "", "phone": "", "preferred_comm_language": "", "user_id": ""},
-              "editApi": {
-                "client_service_needs_m2m": null,
-                "date_of_birth": "",
-                "display_name": null,
-                "email": "",
-                "first_name": null,
-                "gender_id": "",
-                "household_size": null,
-                "last_name": "",
-                "phone": "",
-                "preferred_comm_language": "",
-                "status_id": "",
-                "user_id": ""
-              }
+              "control": {"date_of_birth": null, "email": null, "gender_id": null, "last_name": null, "phone": null, "preferred_comm_language": null, "user_id": null},
+              "createApi": {"date_of_birth": "", "email": "", "first_name": null, "gender_id": "", "household_size": null, "last_name": "", "phone": "", "preferred_comm_language": "", "user_id": ""},
+              "editApi": {"date_of_birth": "", "email": "", "first_name": null, "gender_id": "", "household_size": null, "last_name": "", "phone": "", "preferred_comm_language": "", "user_id": ""}
             }
           },
-          "rawRow": {"date_of_birth": null, "email": null, "gender_id": null, "last_name": null, "phone": null, "preferred_comm_language": null, "status_id": null, "user_id": null}
+          "rawRow": {"date_of_birth": null, "email": null, "gender_id": null, "last_name": null, "phone": null, "preferred_comm_language": null, "user_id": null}
         },
         "odd": {
           "createFormInput": {
-            "client_service_needs_m2m": [1, 2],
             "date_of_birth": "2026-07-04",
             "email": 42,
             "first_name": 42,
@@ -377,9 +350,7 @@
             "user_id": "33333333-3333-4333-8333-333333333333"
           },
           "editFormInput": {
-            "client_service_needs_m2m": [1, 2],
             "date_of_birth": "2026-07-04",
-            "display_name": 42,
             "email": 42,
             "first_name": 42,
             "gender_id": {"display_name": "x", "id": 3},
@@ -387,27 +358,12 @@
             "last_name": 42,
             "phone": 42,
             "preferred_comm_language": 42,
-            "status_id": {"display_name": "x", "id": 3},
             "user_id": "33333333-3333-4333-8333-333333333333"
           },
           "outputs": {
             "*": {
-              "control": {
-                "client_service_needs_m2m": [1, 2],
-                "date_of_birth": "2026-07-04",
-                "display_name": "text",
-                "email": "text",
-                "first_name": "text",
-                "gender_id": 3,
-                "household_size": 7,
-                "last_name": "text",
-                "phone": "text",
-                "preferred_comm_language": "text",
-                "status_id": 3,
-                "user_id": "33333333-3333-4333-8333-333333333333"
-              },
+              "control": {"date_of_birth": "2026-07-04", "email": "text", "first_name": "text", "gender_id": 3, "household_size": 7, "last_name": "text", "phone": "text", "preferred_comm_language": "text", "user_id": "33333333-3333-4333-8333-333333333333"},
               "createApi": {
-                "client_service_needs_m2m": [1, 2],
                 "date_of_birth": "2026-07-04",
                 "email": 42,
                 "first_name": 42,
@@ -419,9 +375,7 @@
                 "user_id": "33333333-3333-4333-8333-333333333333"
               },
               "editApi": {
-                "client_service_needs_m2m": [1, 2],
                 "date_of_birth": "2026-07-04",
-                "display_name": 42,
                 "email": 42,
                 "first_name": 42,
                 "gender_id": {"display_name": "x", "id": 3},
@@ -429,29 +383,14 @@
                 "last_name": 42,
                 "phone": 42,
                 "preferred_comm_language": 42,
-                "status_id": {"display_name": "x", "id": 3},
                 "user_id": "33333333-3333-4333-8333-333333333333"
               }
             }
           },
-          "rawRow": {
-            "client_service_needs_m2m": [1, 2],
-            "date_of_birth": "2026-07-04",
-            "display_name": "text",
-            "email": "text",
-            "first_name": "text",
-            "gender_id": 3,
-            "household_size": 7,
-            "last_name": "text",
-            "phone": "text",
-            "preferred_comm_language": "text",
-            "status_id": 3,
-            "user_id": "33333333-3333-4333-8333-333333333333"
-          }
+          "rawRow": {"date_of_birth": "2026-07-04", "email": "text", "first_name": "text", "gender_id": 3, "household_size": 7, "last_name": "text", "phone": "text", "preferred_comm_language": "text", "user_id": "33333333-3333-4333-8333-333333333333"}
         },
         "typical": {
           "createFormInput": {
-            "client_service_needs_m2m": [1, 2],
             "created_at": "2026-01-01T00:00:00Z",
             "date_of_birth": "2026-07-04",
             "email": "text",
@@ -466,10 +405,8 @@
             "user_id": "33333333-3333-4333-8333-333333333333"
           },
           "editFormInput": {
-            "client_service_needs_m2m": [1, 2],
             "created_at": "2026-01-01T00:00:00Z",
             "date_of_birth": "2026-07-04",
-            "display_name": "text",
             "email": "text",
             "extra_key": "kept",
             "first_name": "text",
@@ -478,28 +415,13 @@
             "last_name": "text",
             "phone": "text",
             "preferred_comm_language": "text",
-            "status_id": 3,
             "updated_at": "2026-01-02T00:00:00Z",
             "user_id": "33333333-3333-4333-8333-333333333333"
           },
           "outputs": {
             "*": {
-              "control": {
-                "client_service_needs_m2m": [1, 2],
-                "date_of_birth": "2026-07-04",
-                "display_name": "text",
-                "email": "text",
-                "first_name": "text",
-                "gender_id": 3,
-                "household_size": 7,
-                "last_name": "text",
-                "phone": "text",
-                "preferred_comm_language": "text",
-                "status_id": 3,
-                "user_id": "33333333-3333-4333-8333-333333333333"
-              },
+              "control": {"date_of_birth": "2026-07-04", "email": "text", "first_name": "text", "gender_id": 3, "household_size": 7, "last_name": "text", "phone": "text", "preferred_comm_language": "text", "user_id": "33333333-3333-4333-8333-333333333333"},
               "createApi": {
-                "client_service_needs_m2m": [1, 2],
                 "date_of_birth": "2026-07-04",
                 "email": "text",
                 "extra_key": "kept",
@@ -512,9 +434,7 @@
                 "user_id": "33333333-3333-4333-8333-333333333333"
               },
               "editApi": {
-                "client_service_needs_m2m": [1, 2],
                 "date_of_birth": "2026-07-04",
-                "display_name": "text",
                 "email": "text",
                 "extra_key": "kept",
                 "first_name": "text",
@@ -523,25 +443,11 @@
                 "last_name": "text",
                 "phone": "text",
                 "preferred_comm_language": "text",
-                "status_id": 3,
                 "user_id": "33333333-3333-4333-8333-333333333333"
               }
             }
           },
-          "rawRow": {
-            "client_service_needs_m2m": [1, 2],
-            "date_of_birth": "2026-07-04",
-            "display_name": "text",
-            "email": "text",
-            "first_name": "text",
-            "gender_id": 3,
-            "household_size": 7,
-            "last_name": "text",
-            "phone": "text",
-            "preferred_comm_language": "text",
-            "status_id": 3,
-            "user_id": "33333333-3333-4333-8333-333333333333"
-          }
+          "rawRow": {"date_of_birth": "2026-07-04", "email": "text", "first_name": "text", "gender_id": 3, "household_size": 7, "last_name": "text", "phone": "text", "preferred_comm_language": "text", "user_id": "33333333-3333-4333-8333-333333333333"}
         }
       }
     },
@@ -593,53 +499,49 @@
       "rows": {
         "empty": {
           "createFormInput": {},
-          "editFormInput": {"display_name": null, "helpfulness_id": null, "open_feedback": "", "outcome_id": null, "status_id": "", "time_to_contact_id": null},
+          "editFormInput": {"helpfulness_id": null, "open_feedback": "", "outcome_id": null, "time_to_contact_id": null},
           "outputs": {
             "*": {
-              "control": {"open_feedback": null, "status_id": null},
+              "control": {"open_feedback": null},
               "createApi": {},
-              "editApi": {"display_name": null, "helpfulness_id": null, "open_feedback": "", "outcome_id": null, "status_id": "", "time_to_contact_id": null}
+              "editApi": {"helpfulness_id": null, "open_feedback": "", "outcome_id": null, "time_to_contact_id": null}
             }
           },
-          "rawRow": {"open_feedback": null, "status_id": null}
+          "rawRow": {"open_feedback": null}
         },
         "odd": {
           "createFormInput": {},
           "editFormInput": {
-            "display_name": 42,
             "helpfulness_id": {"display_name": "x", "id": 3},
             "open_feedback": 42,
             "outcome_id": {"display_name": "x", "id": 3},
-            "status_id": {"display_name": "x", "id": 3},
             "time_to_contact_id": {"display_name": "x", "id": 3}
           },
           "outputs": {
             "*": {
-              "control": {"display_name": "text", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "status_id": 3, "time_to_contact_id": 3},
+              "control": {"helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "time_to_contact_id": 3},
               "createApi": {},
               "editApi": {
-                "display_name": 42,
                 "helpfulness_id": {"display_name": "x", "id": 3},
                 "open_feedback": 42,
                 "outcome_id": {"display_name": "x", "id": 3},
-                "status_id": {"display_name": "x", "id": 3},
                 "time_to_contact_id": {"display_name": "x", "id": 3}
               }
             }
           },
-          "rawRow": {"display_name": "text", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "status_id": 3, "time_to_contact_id": 3}
+          "rawRow": {"helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "time_to_contact_id": 3}
         },
         "typical": {
           "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
-          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "status_id": 3, "time_to_contact_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "time_to_contact_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {"display_name": "text", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "status_id": 3, "time_to_contact_id": 3},
+              "control": {"helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "time_to_contact_id": 3},
               "createApi": {"extra_key": "kept"},
-              "editApi": {"display_name": "text", "extra_key": "kept", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "status_id": 3, "time_to_contact_id": 3}
+              "editApi": {"extra_key": "kept", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "time_to_contact_id": 3}
             }
           },
-          "rawRow": {"display_name": "text", "helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "status_id": 3, "time_to_contact_id": 3}
+          "rawRow": {"helpfulness_id": 3, "open_feedback": "text", "outcome_id": 3, "time_to_contact_id": 3}
         }
       }
     },
@@ -744,202 +646,55 @@
       "editProps": ["display_name:TextShort", "subject:TextShort", "body:Markdown", "scheduled_for:DateTimeLocal", "newsletter_recipients_m2m:ManyToMany", "status_id:Status"],
       "rows": {
         "empty": {
-          "createFormInput": {"body": null, "display_name": null, "newsletter_recipients_m2m": "", "subject": ""},
-          "editFormInput": {"body": null, "display_name": null, "newsletter_recipients_m2m": "", "scheduled_for": "", "status_id": "", "subject": ""},
+          "createFormInput": {"body": null, "display_name": null, "subject": ""},
+          "editFormInput": {"body": null, "display_name": null, "scheduled_for": "", "subject": ""},
           "outputs": {
             "*": {
-              "control": {"newsletter_recipients_m2m": null, "scheduled_for": null, "status_id": null, "subject": null},
-              "createApi": {"body": null, "display_name": null, "newsletter_recipients_m2m": "", "subject": ""},
-              "editApi": {"body": null, "display_name": null, "newsletter_recipients_m2m": "", "scheduled_for": "", "status_id": "", "subject": ""}
+              "control": {"scheduled_for": null, "subject": null},
+              "createApi": {"body": null, "display_name": null, "subject": ""},
+              "editApi": {"body": null, "display_name": null, "scheduled_for": "", "subject": ""}
             }
           },
-          "rawRow": {"newsletter_recipients_m2m": null, "scheduled_for": null, "status_id": null, "subject": null}
+          "rawRow": {"scheduled_for": null, "subject": null}
         },
         "odd": {
-          "createFormInput": {
-            "body": 42,
-            "display_name": 42,
-            "newsletter_recipients_m2m": [1, 2],
-            "subject": 42
-          },
-          "editFormInput": {
-            "body": 42,
-            "display_name": 42,
-            "newsletter_recipients_m2m": [1, 2],
-            "scheduled_for": "abcdefghijklmnop",
-            "status_id": {"display_name": "x", "id": 3},
-            "subject": 42
-          },
+          "createFormInput": {"body": 42, "display_name": 42, "subject": 42},
+          "editFormInput": {"body": 42, "display_name": 42, "scheduled_for": "abcdefghijklmnop", "subject": 42},
           "outputs": {
             "*": {
-              "control": {
-                "body": "text",
-                "display_name": "text",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "NaN-NaN-NaNTNaN:NaN",
-                "status_id": 3,
-                "subject": "text"
-              },
-              "createApi": {
-                "body": 42,
-                "display_name": 42,
-                "newsletter_recipients_m2m": [1, 2],
-                "subject": 42
-              },
-              "editApi": {
-                "body": 42,
-                "display_name": 42,
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "abcdefghijklmnop",
-                "status_id": {"display_name": "x", "id": 3},
-                "subject": 42
-              }
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "NaN-NaN-NaNTNaN:NaN", "subject": "text"},
+              "createApi": {"body": 42, "display_name": 42, "subject": 42},
+              "editApi": {"body": 42, "display_name": 42, "scheduled_for": "abcdefghijklmnop", "subject": 42}
             }
           },
-          "rawRow": {
-            "body": "text",
-            "display_name": "text",
-            "newsletter_recipients_m2m": [1, 2],
-            "scheduled_for": "garbage",
-            "status_id": 3,
-            "subject": "text"
-          }
+          "rawRow": {"body": "text", "display_name": "text", "scheduled_for": "garbage", "subject": "text"}
         },
         "typical": {
-          "createFormInput": {
-            "body": "text",
-            "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
-            "extra_key": "kept",
-            "newsletter_recipients_m2m": [1, 2],
-            "subject": "text",
-            "updated_at": "2026-01-02T00:00:00Z"
-          },
-          "editFormInput": {
-            "body": "text",
-            "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
-            "extra_key": "kept",
-            "newsletter_recipients_m2m": [1, 2],
-            "scheduled_for": "2026-07-04T17:30",
-            "status_id": 3,
-            "subject": "text",
-            "updated_at": "2026-01-02T00:00:00Z"
-          },
+          "createFormInput": {"body": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "subject": "text", "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"body": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T17:30", "subject": "text", "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "America/New_York": {
-              "control": {
-                "body": "text",
-                "display_name": "text",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T13:30",
-                "status_id": 3,
-                "subject": "text"
-              },
-              "createApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "subject": "text"
-              },
-              "editApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T21:30:00.000Z",
-                "status_id": 3,
-                "subject": "text"
-              }
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T13:30", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T21:30:00.000Z", "subject": "text"}
             },
             "Asia/Kolkata": {
-              "control": {
-                "body": "text",
-                "display_name": "text",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T23:00",
-                "status_id": 3,
-                "subject": "text"
-              },
-              "createApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "subject": "text"
-              },
-              "editApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T12:00:00.000Z",
-                "status_id": 3,
-                "subject": "text"
-              }
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T23:00", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T12:00:00.000Z", "subject": "text"}
             },
             "Australia/Lord_Howe": {
-              "control": {
-                "body": "text",
-                "display_name": "text",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-05T04:00",
-                "status_id": 3,
-                "subject": "text"
-              },
-              "createApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "subject": "text"
-              },
-              "editApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T07:00:00.000Z",
-                "status_id": 3,
-                "subject": "text"
-              }
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-05T04:00", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T07:00:00.000Z", "subject": "text"}
             },
             "UTC": {
-              "control": {
-                "body": "text",
-                "display_name": "text",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T17:30",
-                "status_id": 3,
-                "subject": "text"
-              },
-              "createApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "subject": "text"
-              },
-              "editApi": {
-                "body": "text",
-                "display_name": "text",
-                "extra_key": "kept",
-                "newsletter_recipients_m2m": [1, 2],
-                "scheduled_for": "2026-07-04T17:30:00.000Z",
-                "status_id": 3,
-                "subject": "text"
-              }
+              "control": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T17:30", "subject": "text"},
+              "createApi": {"body": "text", "display_name": "text", "extra_key": "kept", "subject": "text"},
+              "editApi": {"body": "text", "display_name": "text", "extra_key": "kept", "scheduled_for": "2026-07-04T17:30:00.000Z", "subject": "text"}
             }
           },
-          "rawRow": {
-            "body": "text",
-            "display_name": "text",
-            "newsletter_recipients_m2m": [1, 2],
-            "scheduled_for": "2026-07-04T17:30:00+00:00",
-            "status_id": 3,
-            "subject": "text"
-          }
+          "rawRow": {"body": "text", "display_name": "text", "scheduled_for": "2026-07-04T17:30:00+00:00", "subject": "text"}
         }
       }
     },
@@ -1072,69 +827,13 @@
       ],
       "rows": {
         "empty": {
-          "createFormInput": {
-            "active": null,
-            "address": "",
-            "capacity_notes": null,
-            "contact_name": null,
-            "description": "",
-            "display_name": null,
-            "email": "",
-            "languages_supported": "",
-            "location": null,
-            "partner_service_categories_m2m": null,
-            "partner_type_id": "",
-            "phone": "",
-            "website": ""
-          },
-          "editFormInput": {
-            "active": null,
-            "address": "",
-            "capacity_notes": null,
-            "contact_name": null,
-            "description": "",
-            "display_name": null,
-            "email": "",
-            "languages_supported": "",
-            "location": null,
-            "partner_service_categories_m2m": null,
-            "partner_type_id": "",
-            "phone": "",
-            "website": ""
-          },
+          "createFormInput": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+          "editFormInput": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
           "outputs": {
             "*": {
               "control": {"address": null, "description": null, "email": null, "languages_supported": null, "partner_type_id": null, "phone": null, "website": null},
-              "createApi": {
-                "active": null,
-                "address": "",
-                "capacity_notes": null,
-                "contact_name": null,
-                "description": "",
-                "display_name": null,
-                "email": "",
-                "languages_supported": "",
-                "location": null,
-                "partner_service_categories_m2m": null,
-                "partner_type_id": "",
-                "phone": "",
-                "website": ""
-              },
-              "editApi": {
-                "active": null,
-                "address": "",
-                "capacity_notes": null,
-                "contact_name": null,
-                "description": "",
-                "display_name": null,
-                "email": "",
-                "languages_supported": "",
-                "location": null,
-                "partner_service_categories_m2m": null,
-                "partner_type_id": "",
-                "phone": "",
-                "website": ""
-              }
+              "createApi": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""},
+              "editApi": {"active": null, "address": "", "capacity_notes": null, "contact_name": null, "description": "", "display_name": null, "email": "", "languages_supported": "", "location": null, "partner_type_id": "", "phone": "", "website": ""}
             }
           },
           "rawRow": {"address": null, "description": null, "email": null, "languages_supported": null, "partner_type_id": null, "phone": null, "website": null}
@@ -1150,7 +849,6 @@
             "email": 42,
             "languages_supported": 42,
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": {"display_name": "x", "id": 3},
             "phone": 42,
             "website": 42
@@ -1165,7 +863,6 @@
             "email": 42,
             "languages_supported": 42,
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": {"display_name": "x", "id": 3},
             "phone": 42,
             "website": 42
@@ -1182,7 +879,6 @@
                 "email": "text",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -1197,7 +893,6 @@
                 "email": 42,
                 "languages_supported": 42,
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": {"display_name": "x", "id": 3},
                 "phone": 42,
                 "website": 42
@@ -1212,7 +907,6 @@
                 "email": 42,
                 "languages_supported": 42,
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": {"display_name": "x", "id": 3},
                 "phone": 42,
                 "website": 42
@@ -1229,7 +923,6 @@
             "email": "text",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "website": "text"
@@ -1248,7 +941,6 @@
             "extra_key": "kept",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "updated_at": "2026-01-02T00:00:00Z",
@@ -1266,7 +958,6 @@
             "extra_key": "kept",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "updated_at": "2026-01-02T00:00:00Z",
@@ -1284,7 +975,6 @@
                 "email": "text",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -1300,7 +990,6 @@
                 "extra_key": "kept",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -1316,7 +1005,6 @@
                 "extra_key": "kept",
                 "languages_supported": "text",
                 "location": "SRID=4326;POINT(-83 43)",
-                "partner_service_categories_m2m": [1, 2],
                 "partner_type_id": 3,
                 "phone": "text",
                 "website": "text"
@@ -1333,7 +1021,6 @@
             "email": "text",
             "languages_supported": "text",
             "location": "SRID=4326;POINT(-83 43)",
-            "partner_service_categories_m2m": [1, 2],
             "partner_type_id": 3,
             "phone": "text",
             "website": "text"
@@ -1400,144 +1087,62 @@
       "editProps": ["partner_id:ForeignKeyName", "referral_type_id:Category", "referral_date:Date", "outcome_notes:TextLong", "completed_date:Date", "referral_service_categories_m2m:ManyToMany", "display_name:TextLong", "status_id:Status"],
       "rows": {
         "empty": {
-          "createFormInput": {"client_id": "", "partner_id": null, "referral_date": "", "referral_service_categories_m2m": "", "referral_type_id": null},
-          "editFormInput": {"completed_date": null, "display_name": null, "outcome_notes": "", "partner_id": null, "referral_date": "", "referral_service_categories_m2m": "", "referral_type_id": null, "status_id": ""},
+          "createFormInput": {"client_id": "", "partner_id": null, "referral_date": "", "referral_type_id": null},
+          "editFormInput": {"completed_date": null, "outcome_notes": "", "partner_id": null, "referral_date": "", "referral_type_id": null},
           "outputs": {
             "*": {
-              "control": {"outcome_notes": null, "referral_date": null, "referral_service_categories_m2m": null, "status_id": null},
-              "createApi": {"client_id": "", "partner_id": null, "referral_date": "", "referral_service_categories_m2m": "", "referral_type_id": null},
-              "editApi": {"completed_date": null, "display_name": null, "outcome_notes": "", "partner_id": null, "referral_date": "", "referral_service_categories_m2m": "", "referral_type_id": null, "status_id": ""}
+              "control": {"outcome_notes": null, "referral_date": null},
+              "createApi": {"client_id": "", "partner_id": null, "referral_date": "", "referral_type_id": null},
+              "editApi": {"completed_date": null, "outcome_notes": "", "partner_id": null, "referral_date": "", "referral_type_id": null}
             }
           },
-          "rawRow": {"outcome_notes": null, "referral_date": null, "referral_service_categories_m2m": null, "status_id": null}
+          "rawRow": {"outcome_notes": null, "referral_date": null}
         },
         "odd": {
           "createFormInput": {
             "client_id": {"display_name": "x", "id": 3},
             "partner_id": {"display_name": "x", "id": 3},
             "referral_date": "2026-07-04",
-            "referral_service_categories_m2m": [1, 2],
             "referral_type_id": {"display_name": "x", "id": 3}
           },
           "editFormInput": {
             "completed_date": "2026-07-04",
-            "display_name": 42,
             "outcome_notes": 42,
             "partner_id": {"display_name": "x", "id": 3},
             "referral_date": "2026-07-04",
-            "referral_service_categories_m2m": [1, 2],
-            "referral_type_id": {"display_name": "x", "id": 3},
-            "status_id": {"display_name": "x", "id": 3}
+            "referral_type_id": {"display_name": "x", "id": 3}
           },
           "outputs": {
             "*": {
-              "control": {
-                "completed_date": "2026-07-04",
-                "display_name": "text",
-                "outcome_notes": "text",
-                "partner_id": 3,
-                "referral_date": "2026-07-04",
-                "referral_service_categories_m2m": [1, 2],
-                "referral_type_id": 3,
-                "status_id": 3
-              },
+              "control": {"completed_date": "2026-07-04", "outcome_notes": "text", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3},
               "createApi": {
                 "client_id": {"display_name": "x", "id": 3},
                 "partner_id": {"display_name": "x", "id": 3},
                 "referral_date": "2026-07-04",
-                "referral_service_categories_m2m": [1, 2],
                 "referral_type_id": {"display_name": "x", "id": 3}
               },
               "editApi": {
                 "completed_date": "2026-07-04",
-                "display_name": 42,
                 "outcome_notes": 42,
                 "partner_id": {"display_name": "x", "id": 3},
                 "referral_date": "2026-07-04",
-                "referral_service_categories_m2m": [1, 2],
-                "referral_type_id": {"display_name": "x", "id": 3},
-                "status_id": {"display_name": "x", "id": 3}
+                "referral_type_id": {"display_name": "x", "id": 3}
               }
             }
           },
-          "rawRow": {
-            "completed_date": "2026-07-04",
-            "display_name": "text",
-            "outcome_notes": "text",
-            "partner_id": 3,
-            "referral_date": "2026-07-04",
-            "referral_service_categories_m2m": [1, 2],
-            "referral_type_id": 3,
-            "status_id": 3
-          }
+          "rawRow": {"completed_date": "2026-07-04", "outcome_notes": "text", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3}
         },
         "typical": {
-          "createFormInput": {
-            "client_id": 3,
-            "created_at": "2026-01-01T00:00:00Z",
-            "extra_key": "kept",
-            "partner_id": 3,
-            "referral_date": "2026-07-04",
-            "referral_service_categories_m2m": [1, 2],
-            "referral_type_id": 3,
-            "updated_at": "2026-01-02T00:00:00Z"
-          },
-          "editFormInput": {
-            "completed_date": "2026-07-04",
-            "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
-            "extra_key": "kept",
-            "outcome_notes": "text",
-            "partner_id": 3,
-            "referral_date": "2026-07-04",
-            "referral_service_categories_m2m": [1, 2],
-            "referral_type_id": 3,
-            "status_id": 3,
-            "updated_at": "2026-01-02T00:00:00Z"
-          },
+          "createFormInput": {"client_id": 3, "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
+          "editFormInput": {"completed_date": "2026-07-04", "created_at": "2026-01-01T00:00:00Z", "extra_key": "kept", "outcome_notes": "text", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3, "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {
-                "completed_date": "2026-07-04",
-                "display_name": "text",
-                "outcome_notes": "text",
-                "partner_id": 3,
-                "referral_date": "2026-07-04",
-                "referral_service_categories_m2m": [1, 2],
-                "referral_type_id": 3,
-                "status_id": 3
-              },
-              "createApi": {
-                "client_id": 3,
-                "extra_key": "kept",
-                "partner_id": 3,
-                "referral_date": "2026-07-04",
-                "referral_service_categories_m2m": [1, 2],
-                "referral_type_id": 3
-              },
-              "editApi": {
-                "completed_date": "2026-07-04",
-                "display_name": "text",
-                "extra_key": "kept",
-                "outcome_notes": "text",
-                "partner_id": 3,
-                "referral_date": "2026-07-04",
-                "referral_service_categories_m2m": [1, 2],
-                "referral_type_id": 3,
-                "status_id": 3
-              }
+              "control": {"completed_date": "2026-07-04", "outcome_notes": "text", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3},
+              "createApi": {"client_id": 3, "extra_key": "kept", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3},
+              "editApi": {"completed_date": "2026-07-04", "extra_key": "kept", "outcome_notes": "text", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3}
             }
           },
-          "rawRow": {
-            "completed_date": "2026-07-04",
-            "display_name": "text",
-            "outcome_notes": "text",
-            "partner_id": 3,
-            "referral_date": "2026-07-04",
-            "referral_service_categories_m2m": [1, 2],
-            "referral_type_id": 3,
-            "status_id": 3
-          }
+          "rawRow": {"completed_date": "2026-07-04", "outcome_notes": "text", "partner_id": 3, "referral_date": "2026-07-04", "referral_type_id": 3}
         }
       }
     },

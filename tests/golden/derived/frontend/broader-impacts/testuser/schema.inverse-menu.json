@@ -51,6 +51,6 @@
       "excluding": []
     }
   },
-  "management": ["broader_impact_categories", "contacts", "interest_centers", "organizations", "projects"],
-  "menu": ["broader_impact_categories", "contacts", "interest_centers", "organizations", "projects"]
+  "management": ["organizations", "contacts", "projects", "interest_centers", "broader_impact_categories"],
+  "menu": ["organizations", "contacts", "projects", "interest_centers", "broader_impact_categories"]
 }

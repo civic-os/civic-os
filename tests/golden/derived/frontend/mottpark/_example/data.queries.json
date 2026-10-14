@@ -3426,6 +3426,43 @@
         "previewLimit": 5,
         "previewMode": "display_name",
         "showOnDetail": true,
+        "sortOrder": 2,
+        "sourceColumn": "reservation_request_id",
+        "sourceColumnDisplayName": "Reservation Request Id",
+        "sourceTable": "reservation_payments",
+        "sourceTableDisplayName": "Reservation Payments"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/reservation_payments?reservation_request_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "reservation_request_id",
+          "sourceColumnDisplayName": "Reservation Request Id",
+          "sourceTable": "reservation_payments",
+          "sourceTableDisplayName": "Reservation Payments"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "reservation_requests"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
         "sortOrder": 9,
         "sourceColumn": "relative_to_rule_id",
         "sourceColumnDisplayName": "Relative To Rule Id",
@@ -3494,43 +3531,6 @@
         "totalCount": 15
       },
       "target": "reservation_payment_types"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
-        "sortOrder": 2,
-        "sourceColumn": "reservation_request_id",
-        "sourceColumnDisplayName": "Reservation Request Id",
-        "sourceTable": "reservation_payments",
-        "sourceTableDisplayName": "Reservation Payments"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/reservation_payments?reservation_request_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 2,
-          "sourceColumn": "reservation_request_id",
-          "sourceColumnDisplayName": "Reservation Request Id",
-          "sourceTable": "reservation_payments",
-          "sourceTableDisplayName": "Reservation Payments"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "reservation_requests"
     }
   ]
 }

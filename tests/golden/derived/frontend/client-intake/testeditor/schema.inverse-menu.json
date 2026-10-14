@@ -133,21 +133,21 @@
     }
   },
   "management": [
-    "client_consents",
-    "client_contact_summary",
-    "client_current_consents",
-    "clients",
-    "consents_expiring_soon",
-    "follow_up_surveys",
-    "monthly_referral_summary",
-    "newsletters",
-    "partner_utilization_report",
-    "partners",
-    "referrals",
     "referrals_per_week",
     "service_categories",
+    "clients",
+    "partners",
+    "referrals",
+    "follow_up_surveys",
+    "client_consents",
+    "monthly_referral_summary",
+    "client_contact_summary",
+    "top_needs_report",
+    "partner_utilization_report",
     "time_lag_report",
-    "top_needs_report"
+    "client_current_consents",
+    "consents_expiring_soon",
+    "newsletters"
   ],
-  "menu": ["client_consents", "client_contact_summary", "clients", "follow_up_surveys", "monthly_referral_summary", "newsletters", "partner_utilization_report", "partners", "referrals", "service_categories", "time_lag_report", "top_needs_report"]
+  "menu": ["service_categories", "clients", "partners", "referrals", "follow_up_surveys", "client_consents", "monthly_referral_summary", "client_contact_summary", "top_needs_report", "partner_utilization_report", "time_lag_report", "newsletters"]
 }

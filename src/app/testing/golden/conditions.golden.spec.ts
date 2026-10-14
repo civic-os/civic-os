@@ -18,6 +18,7 @@ import { ActionCondition } from '../../interfaces/entity';
 import { GuidedFormCondition, GuidedFormStep } from '../../interfaces/guided-form';
 import { checkGolden, expectNoOrphans, listExamples, listVariants, loadRaw, compactStringify } from './golden-io';
 import { configureHttpTesting } from './schema-harness';
+import { syntheticGuidedFormSteps } from './synthetic-fixtures';
 
 const label = (v: unknown) => compactStringify(v);
 
@@ -206,6 +207,39 @@ describe('golden: condition evaluators', () => {
       conditionNullData: evaluateCondition({ field: 'a', operator: 'eq', value: 1 }, null),
     };
     checkGolden('_shared/conditions.matrix.json', { operators: ops, matrix, warnCalls, dotted, extracted, compound });
+  });
+
+  it('GuidedFormService over synthetic skip_if / require_if steps', () => {
+    configureHttpTesting();
+    const svc = TestBed.inject(GuidedFormService);
+    const steps = syntheticGuidedFormSteps() as GuidedFormStep[];
+    const parents: Array<[string, any]> = [
+      ['empty', {}], ['null parent', null], ['kind 1', { kind: 1 }], ['kind "1"', { kind: '1' }], ['kind 2', { kind: 2 }], ['kind 9', { kind: 9 }],
+      ['kind embedded 1', { kind: { id: 1, display_name: 'One' } }], ['kind null', { kind: null }],
+      ['note set', { note: 'x' }], ['note empty string', { note: '' }], ['note null', { note: null }],
+      ['kind 1 + note set', { kind: 1, note: 'x' }], ['kind 2 + note set', { kind: 2, note: 'x' }], ['kind 2 + note null', { kind: 2, note: null }],
+      ['owner embedded 7', { owner_id: { id: 7 } }], ['owner 7', { owner_id: 7 }], ['owner 8', { owner_id: 8 }],
+    ];
+    const progressSets: Array<[string, any[]]> = [
+      ['no progress', []],
+      ['two done', [{ step_key: 'no_conditions' }, { step_key: 'skip_eq' }]],
+      ['unknown step done', [{ step_key: 'ghost' }]],
+    ];
+    const effective: Record<string, unknown> = {};
+    for (const [pn, parent] of parents) {
+      for (const [gn, progress] of progressSets) {
+        effective[`${pn} / ${gn}`] = svc.getEffectiveSteps(steps, parent, progress as any).map(s => ({
+          step: s.step_key, skipped: s.isSkipped, completed: s.isCompleted, required: s.isRequired,
+        }));
+      }
+    }
+    const perCondition = steps.flatMap(s => s.conditions).map(c => ({
+      condition: c, results: Object.fromEntries(parents.map(([n, p]) => [n, svc.evaluateCondition(c, p)])),
+    }));
+    checkGolden('_synthetic/conditions.guided-forms.json', {
+      steps, perCondition, effectiveSteps: effective,
+      lockedFields: [...svc.getLockedFields(steps)].sort(), lockedFieldsEmpty: [...svc.getLockedFields([])],
+    });
   });
 
   it('GuidedFormService.evaluateCondition operator matrix', () => {
