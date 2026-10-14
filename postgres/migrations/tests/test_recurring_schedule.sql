@@ -112,7 +112,7 @@ BEGIN
         p_entity_table := '_test_bookings',
         p_entity_template := '{"room_id": 1, "purpose": "Weekly Meeting", "notes": "Test notes"}'::JSONB,
         p_rrule := 'FREQ=WEEKLY;BYDAY=MO;COUNT=4',
-        p_dtstart := '2026-01-05T10:00:00Z'::TIMESTAMPTZ,
+        p_dtstart := '2026-01-05T10:00:00'::TIMESTAMP,
         p_duration := '01:00:00'::INTERVAL,
         p_timezone := 'America/New_York',
         p_time_slot_property := 'time_slot',
@@ -192,7 +192,7 @@ BEGIN
     v_result := public.split_series_from_date(
         v_series_id,
         '2026-01-19'::DATE,
-        '2026-01-19T14:00:00Z'::TIMESTAMPTZ,
+        '2026-01-19T14:00:00'::TIMESTAMP,
         '01:30:00'::INTERVAL,
         '{"purpose": "Updated Meeting", "notes": "Changed to afternoon"}'::JSONB  -- NO room_id!
     );
@@ -258,7 +258,7 @@ BEGIN
         p_entity_table := '_test_bookings',
         p_entity_template := '{"room_id": 2, "purpose": "Update Test Series", "notes": "Original notes"}'::JSONB,
         p_rrule := 'FREQ=DAILY;COUNT=2',
-        p_dtstart := '2026-03-01T09:00:00Z'::TIMESTAMPTZ,
+        p_dtstart := '2026-03-01T09:00:00'::TIMESTAMP,
         p_duration := '00:30:00'::INTERVAL,
         p_timezone := 'UTC',
         p_time_slot_property := 'time_slot'
@@ -412,7 +412,7 @@ BEGIN
         p_entity_table := '_test_bookings',
         p_entity_template := '{"room_id": 3, "purpose": "Delete Test"}'::JSONB,
         p_rrule := 'FREQ=DAILY;COUNT=1',
-        p_dtstart := '2026-04-01T10:00:00Z'::TIMESTAMPTZ,
+        p_dtstart := '2026-04-01T10:00:00'::TIMESTAMP,
         p_duration := '01:00:00'::INTERVAL,
         p_timezone := 'UTC',
         p_time_slot_property := 'time_slot'
@@ -540,7 +540,7 @@ BEGIN
     -- Update schedule
     v_result := public.update_series_schedule(
         v_series_id,
-        '2026-02-01T11:00:00Z'::TIMESTAMPTZ,
+        '2026-02-01T11:00:00'::TIMESTAMP,
         '01:30:00'::INTERVAL,
         'FREQ=WEEKLY;BYDAY=TU;COUNT=8'
     );

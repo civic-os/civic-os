@@ -144,22 +144,30 @@ describe('errorTrackingInterceptor', () => {
 
     // --- Matomo exclusion ---
 
-    it.skip('should NOT track errors from Matomo URLs', () => {
-        const matomoConfig = getMatomoConfig();
-        // Only test if Matomo is configured; otherwise skip gracefully
-        if (!matomoConfig.url) {
-            // Matomo not configured in test environment — test skipped via it.skip
-            return;
+    it('should NOT track errors from Matomo URLs', () => {
+        // Configure Matomo explicitly so the exclusion branch is exercised
+        // regardless of the test environment's default (unconfigured) config.
+        const previousConfig = window.civicOsConfig;
+        window.civicOsConfig = {
+            ...(previousConfig ?? {}),
+            matomo: { url: 'https://matomo.example.test', siteId: '1', enabled: true }
+        } as typeof window.civicOsConfig;
+
+        try {
+            const matomoConfig = getMatomoConfig();
+            expect(matomoConfig.url).toBe('https://matomo.example.test');
+
+            http.get(`${matomoConfig.url}/matomo.php?action_name=test`).subscribe({
+                error: () => { }
+            });
+
+            const req = httpMock.expectOne(`${matomoConfig.url}/matomo.php?action_name=test`);
+            req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
+
+            expect(mockAnalytics.trackError).not.toHaveBeenCalled();
+        } finally {
+            window.civicOsConfig = previousConfig;
         }
-
-        http.get(`${matomoConfig.url}/matomo.php?action_name=test`).subscribe({
-            error: () => { }
-        });
-
-        const req = httpMock.expectOne(`${matomoConfig.url}/matomo.php?action_name=test`);
-        req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
-
-        expect(mockAnalytics.trackError).not.toHaveBeenCalled();
     });
 
     // --- Successful requests ---

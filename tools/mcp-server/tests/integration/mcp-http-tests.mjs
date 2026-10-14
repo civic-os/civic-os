@@ -392,10 +392,18 @@ try {
   await anonClient.close();
 } catch (err) {
   // Connection failures for anonymous are acceptable if auth is required
-  if (err.message.includes('401') || err.message.includes('Unauthorized') || err.message.includes('auth')) {
-    console.log('PASS:Anonymous connection rejected (auth required for MCP)');
+  // Since 488804c/27fcc12 the server answers unauthenticated MCP requests with
+  // HTTP 401 + {"error":"invalid_token",...} so OAuth clients start the flow.
+  // The MCP client surfaces that as SdkHttpError: the HTTP status is a property
+  // (err.status, from err.data.status) and the response body is err.data.text;
+  // the message only embeds the body. Assert the structured status/code, not
+  // substrings of the message.
+  let body = {};
+  try { body = JSON.parse(err?.data?.text ?? '{}'); } catch { /* non-JSON body */ }
+  if (err?.status === 401 && body.error === 'invalid_token') {
+    console.log('PASS:Anonymous connection rejected with 401 invalid_token (auth required for MCP)');
   } else {
-    console.log(`FAIL:Anonymous MCP via HTTP|${err.message}`);
+    console.log(`FAIL:Anonymous MCP via HTTP|expected 401 invalid_token, got status=${err?.status} body=${err?.data?.text ?? ''} message=${err.message}`);
   }
   if (anonClient) await anonClient.close().catch(() => {});
 }

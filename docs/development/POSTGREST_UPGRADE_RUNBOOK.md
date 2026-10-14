@@ -94,7 +94,7 @@ If any of these fail, the upgrade has introduced a query-level regression that w
 ```bash
 cd tests/functional
 ./v0-71-0-ical-http-caching-test.sh
-./v0-48-0-workflow-system-test.sh
+./v0-48-0-guided-form-system-test.sh
 ./v0-39-0-file-admin-test.sh
 ```
 

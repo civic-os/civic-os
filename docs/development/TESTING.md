@@ -858,7 +858,9 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - **No focus trapping** for `<dialog>` — test open/close lifecycle rather than focus containment
 - **DOMPurify doesn't work** — happy-dom's parser isn't complete enough for sanitization. Wrap those tests in a browser-detection guard.
 - **Inline styles keep raw hex** — happy-dom doesn't convert `#3b82f6` to `rgb(59, 130, 246)` like browsers do
-- **`@unovis/angular`** — uses bare ESM directory imports that Node.js can't resolve. Those tests are skipped with a TODO.
+- **`@unovis/angular`** — uses bare ESM directory imports that Node.js can't resolve, so specs for components that import it substitute the package with `src/app/testing/unovis-angular.stub.ts` via `vi.mock('@unovis/angular', () => import('../../../testing/unovis-angular.stub'))` (see `chart-widget.component.spec.ts`). Component logic is tested; SVG rendering is not.
+- **DOMPurify under happy-dom is a no-op** — it passes `<script>`, `onclick=` and other payloads straight through, so sanitizer behavior cannot be asserted in a unit spec. `tests/functional/markdown-sanitize-browser-test.cjs` bundles the real sanitizer and asserts it in headless Chromium (no Docker stack needed).
+- **No real network in unit specs** — `src/test-setup.ts` disables happy-dom iframe page loading, and any spec that provides `provideHttpClient(...)` must also provide `provideHttpClientTesting()`; otherwise requests escape to the real `localhost:3000` / remote hosts.
 
 ### Test Setup
 
@@ -874,51 +876,61 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - [Marble Testing](https://rxjs.dev/guide/testing/marble-testing)
 - [Schema-Driven UI Patterns](https://medium.com/expedia-group-tech/schema-driven-uis-dd8fdb516120)
 
-## PostgREST API Testing with JWT Generation
+## PostgREST API Testing with Keycloak Tokens
 
-For full-loop API testing with different roles, permissions, and users, you can generate JWTs by reading the secret from the example's `.env` file.
+Example stacks run PostgREST with `PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"` (the realm's JWKS, fetched from Keycloak at container start) and `PGRST_JWT_AUD: "account"`. Locally signed tokens (for example HS256 with a shared secret) are rejected with `PGRST301 No suitable key was found to decode the JWT`. Test against the same tokens the browser gets: Keycloak access tokens obtained with the password grant.
 
 ### Workflow
 
-1. Read `PGRST_JWT_SECRET` from the example `.env` (e.g., `examples/community-center/.env`)
-2. Generate JWT with desired claims:
-   - `sub` - User UUID
-   - `role` - PostgreSQL role (`authenticated` or `web_anon`)
-   - `civic_os_roles` - Application roles array (e.g., `["user", "editor", "admin"]`)
-3. Call PostgREST API with `Authorization: Bearer <token>`
-4. Verify RLS enforcement and permission checks
+1. Start an example stack (for example `cd examples/pothole && docker compose -p sdk-pothole up -d --build`).
+2. Request a token for one of the realm's test users (`testuser`, `testeditor`, `testmanager`, `testadmin`; password equals username):
+
+```bash
+TOKEN=$(curl -s \
+  -d client_id=civic-os-dev-client \
+  -d username=testadmin -d password=testadmin \
+  -d grant_type=password \
+  http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/token | jq -r .access_token)
+```
+
+3. Call PostgREST with `Authorization: Bearer $TOKEN`. Omit the header entirely for the anonymous (`web_anon`) role:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:3000/schema_entities?select=table_name,insert,update&table_name=eq.Issue'
+curl -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{}' http://localhost:3000/rpc/is_admin
+```
+
+### What the token carries
+
+- `aud` is `account` (the claim PostgREST validates) and `azp` is the client, `civic-os-dev-client`.
+- Application roles come from `realm_access.roles` (for `testadmin`: `admin`, `user`, plus Keycloak defaults). `metadata.check_jwt` and `has_permission()` read that claim; there is no `civic_os_roles` claim and no `role` claim to set by hand.
+- Inspect a token: `echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+' | base64 -d | jq` (add `=` padding if `base64` complains).
 
 ### What You Can Test
 
-- **RLS policies** with different user IDs (e.g., users can only see their own records)
-- **Permission checks** for different roles (`user`, `editor`, `admin`)
-- **Anonymous vs authenticated** access (use `web_anon` role for anonymous)
-- **Multi-tenant scenarios** (different user UUIDs)
+- **RLS policies** per user (`testuser` vs `testadmin`, or users you create in the realm)
+- **Permission checks** for different roles (`user`, `editor`, `manager`, `admin`)
+- **Anonymous vs authenticated** access (no `Authorization` header)
+- **Role-dependent metadata**: `schema_entities.insert/update/delete` and `is_admin()` reflect the caller's roles
 
-### Example (using Node.js `jsonwebtoken`)
+### Node example
 
-```bash
-# Read the secret
-PGRST_JWT_SECRET=$(grep PGRST_JWT_SECRET examples/community-center/.env | cut -d= -f2)
-
-# Generate a token (example using node)
-node -e "
-const jwt = require('jsonwebtoken');
-const token = jwt.sign(
-  { sub: 'test-user-uuid', role: 'authenticated', civic_os_roles: ['user', 'admin'] },
-  '$PGRST_JWT_SECRET',
-  { expiresIn: '1h' }
-);
-console.log(token);
-"
-
-# Use the token
-curl -H "Authorization: Bearer <token>" http://localhost:3000/my_table
+```javascript
+const res = await fetch('http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({ client_id: 'civic-os-dev-client', username: 'testadmin', password: 'testadmin', grant_type: 'password' }),
+});
+const { access_token } = await res.json();
 ```
+
+`tests/functional/postgrest-api-regression-test.sh` and the `getToken()` helpers in `tests/functional/*.cjs` follow this recipe. Token lifetime is short (minutes); request a fresh one per test run.
 
 ---
 
-**Last Updated**: 2026-09-04
+**Last Updated**: 2026-10-13
 **Maintainer**: Development Team
 
 ## Assertion ledger (SDK program)

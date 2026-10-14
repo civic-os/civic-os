@@ -46,15 +46,12 @@ This document provides a comprehensive guide to achieving WCAG compliance in Civ
 ### Completed Work (Phases 1-3)
 
 #### Phase 1: Testing Infrastructure ✅ Complete
-- **Installed tools:** pa11y-ci, Lighthouse CI, BackstopJS
-- **Configuration files:** `.pa11yci.json`, `.lighthouserc.json`, `backstop.json`
+- **Installed tools:** pa11y-ci, Lighthouse CI. (BackstopJS was removed; visual regression is now Playwright screenshots inside the SDK request-equivalence harness under `tests/e2e/`. See "Visual Regression Testing" below.)
+- **Configuration files:** `.pa11yci.json`, `.lighthouserc.json`
 - **npm scripts added:**
   - `npm run a11y:pa11y` - Pa11y accessibility audit
   - `npm run a11y:lighthouse` - Lighthouse CI full report
   - `npm run a11y:audit` - Single-page Lighthouse audit
-  - `npm run visual:reference` - Capture baseline screenshots
-  - `npm run visual:test` - Test for visual regressions
-  - `npm run visual:approve` - Approve visual changes
   - `npm run test:a11y-full` - Run pa11y + visual tests
 
 #### Phase 2: Quick Wins - ARIA & Semantics ✅ Complete
@@ -161,7 +158,7 @@ All zero-visual-impact improvements:
 
 #### Testing & Documentation (2-3 hours)
 - [ ] Run Lighthouse audit (target: 90+ score)
-- [ ] Capture BackstopJS visual regression baseline
+- [ ] Capture the Playwright screenshot baseline (SDK request-equivalence harness, `tests/e2e/`)
 - [ ] Create VPAT document (Voluntary Product Accessibility Template)
 - [ ] Create public accessibility statement
 - [x] CI/CD integration (GitHub Actions) — `.github/workflows/accessibility.yml` enforces both the ESLint template a11y rules and an authenticated pa11y-ci gate. The pa11y job boots a real stack (`docker/ci-a11y/docker-compose.yml`), logs in as testadmin through the actual Keycloak form via pa11y actions, and fails PRs on WCAG 2 AA findings. The axe `color-contrast` rule is excluded in `.pa11yci.json` until the Phase 4 theme-wide contrast audit lands; all structural/naming rules are enforced.
@@ -177,7 +174,6 @@ All zero-visual-impact improvements:
 **Configuration Files:**
 - `.pa11yci.json` - Pa11y test configuration
 - `.lighthouserc.json` - Lighthouse CI configuration
-- `backstop.json` - BackstopJS visual regression configuration
 - `package.json` - Added 7 accessibility testing scripts
 - `.gitignore` - Excluded test artifacts
 
@@ -197,7 +193,7 @@ All zero-visual-impact improvements:
 
 #### After
 - ✅ ~60% WCAG AA compliant (verified by audit)
-- ✅ Professional testing infrastructure (pa11y, Lighthouse, BackstopJS)
+- ✅ Professional testing infrastructure (pa11y, Lighthouse, Playwright screenshots)
 - ✅ All interactive elements properly labeled
 - ✅ Full keyboard navigation on tables
 - ✅ Screen reader support throughout app
@@ -569,60 +565,20 @@ npx axe http://localhost:4200 --save results.json
 
 **Purpose**: Ensure accessibility fixes don't break UI appearance
 
-#### BackstopJS ⭐ RECOMMENDED FOR CIVIC OS
+#### Playwright screenshots (current approach)
 
-**Why**: Simple, local, no cloud dependencies
+BackstopJS was removed. Visual regression is covered by Playwright screenshot
+comparison inside the SDK request-equivalence harness (`tests/e2e/`), which
+drives the same pages through a real browser against the example stacks and
+compares screenshots (and the network requests behind them) before and after a
+change. It reuses `playwright-core`, already a direct devDependency.
 
-**Installation**:
-```bash
-npm install --save-dev backstopjs
-```
+Why: one browser-automation stack for functional, request-equivalence and
+visual checks instead of a second, Puppeteer-based runner with its own
+baseline format.
 
-**Setup**:
-```bash
-npx backstop init
-```
-
-**Configuration** (`backstop.json`):
-```json
-{
-  "viewports": [
-    {"label": "phone", "width": 375, "height": 667},
-    {"label": "tablet", "width": 768, "height": 1024},
-    {"label": "desktop", "width": 1920, "height": 1080}
-  ],
-  "scenarios": [
-    {
-      "label": "List Page",
-      "url": "http://localhost:4200/view/issues"
-    },
-    {
-      "label": "Detail Page",
-      "url": "http://localhost:4200/view/issues/1"
-    },
-    {
-      "label": "Create Form",
-      "url": "http://localhost:4200/create/issues"
-    }
-  ]
-}
-```
-
-**Workflow**:
-```bash
-# 1. Capture baseline (before accessibility changes)
-npx backstop reference
-
-# 2. Make accessibility improvements
-
-# 3. Test for visual changes
-npx backstop test
-
-# 4. Review results in browser (opens automatically)
-
-# 5. Approve changes if intentional
-npx backstop approve
-```
+Until the harness lands, run the pa11y and Lighthouse gates for accessibility
+and review UI changes manually in the browser.
 
 ---
 
@@ -657,9 +613,6 @@ npm start
 npx pa11y http://localhost:4200 --runner axe --standard WCAG2AA > baseline-audit.txt
 npx lighthouse http://localhost:4200 --only-categories=accessibility --output=html --output-path=./baseline-lighthouse.html
 
-# 3. Take visual baseline screenshots
-npx backstop reference
-
 # 4. Review baseline reports
 # - Fix any critical issues first
 # - Document known issues
@@ -673,17 +626,11 @@ npx backstop reference
 # 2. Test accessibility improvements
 npx pa11y http://localhost:4200 --runner axe --standard WCAG2AA
 
-# 3. Test for visual regressions
-npx backstop test
+# 3. Review the report: are violations reduced?
 
-# 4. Review both reports:
-#    - Accessibility: Are violations reduced?
-#    - Visual: Are changes intentional?
+# 4. Check the Playwright screenshot comparison (tests/e2e/) for unintended visual changes
 
-# 5. Approve visual changes if intentional
-npx backstop approve
-
-# 6. Commit changes with both reports passing
+# 5. Commit changes with the accessibility gate passing
 ```
 
 #### Phase 3: CI/CD Integration
@@ -694,9 +641,7 @@ Add to `package.json`:
   "scripts": {
     "a11y:test": "pa11y-ci --config .pa11yci.json",
     "a11y:audit": "lighthouse http://localhost:4200 --only-categories=accessibility",
-    "visual:test": "backstop test",
-    "visual:reference": "backstop reference",
-    "test:a11y-full": "npm run a11y:test && npm run visual:test"
+    "test:a11y-full": "npm run a11y:pa11y && npm run a11y:lighthouse"
   }
 }
 ```
@@ -924,13 +869,12 @@ a `MutationObserver` on the `class` attribute for dynamic variant changes
 
 1. Install testing tools
    ```bash
-   npm install --save-dev pa11y-ci @lhci/cli backstopjs
+   npm install --save-dev pa11y-ci @lhci/cli
    ```
 
 2. Create configuration files
    - `.pa11yci.json` (pa11y config)
    - `.lighthouserc.json` (Lighthouse config)
-   - `backstop.json` (visual regression config)
 
 3. Run baseline audits
    - Generate accessibility reports
@@ -973,7 +917,7 @@ a `MutationObserver` on the `class` attribute for dynamic variant changes
    - Loading states
    - Error messages (add `role="alert"`)
 
-**Testing**: After each change, run `npm run a11y:test && npm run visual:test`
+**Testing**: After each change, run `npm run a11y:pa11y`, then re-run the Playwright screenshot comparison (`tests/e2e/`)
 
 **Expected Outcome**: 20-30% reduction in accessibility violations, zero visual changes
 
@@ -1239,7 +1183,6 @@ jobs:
       - run: npm start &
       - run: sleep 10
       - run: npm run a11y:test
-      - run: npm run visual:test
 ```
 
 ### Team Education

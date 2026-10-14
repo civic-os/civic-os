@@ -19,6 +19,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { EditPage } from './edit.page';
@@ -99,6 +100,7 @@ describe('EditPage', () => {
             providers: [
                 provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
                 provideRouter([]),
                 { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
                 { provide: SchemaService, useValue: mockSchemaService },

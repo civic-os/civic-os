@@ -36,7 +36,7 @@ jobs:
         if: always()
         continue-on-error: true
         with:
-          files: ./coverage/civic-os/lcov.info
+          files: ./coverage/frontend/clover.xml
           flags: angular
           fail_ci_if_error: false
 
@@ -416,7 +416,7 @@ jobs:
         run: npm ci
 
       - name: Lint Angular code
-        run: npx ng lint || true  # Don't fail CI on lint warnings for now
+        run: npm run lint  # Fails on lint errors; warnings do not fail the build
 
       - name: Check Go formatting (consolidated-worker)
         working-directory: services/consolidated-worker-go

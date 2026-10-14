@@ -116,7 +116,7 @@ This document outlines the development roadmap for Civic OS, organized by phases
 
 ### General
 - [~] **ADA/WCAG Compatibility** - ~60% complete (Phases 1-3 done)
-  - [x] Testing infrastructure (pa11y, Lighthouse, BackstopJS)
+  - [x] Testing infrastructure (pa11y, Lighthouse; visual regression via Playwright screenshots in `tests/e2e/`, BackstopJS removed)
   - [x] ARIA labels on all icon buttons
   - [x] Skip navigation link
   - [x] Form label associations and validation announcements

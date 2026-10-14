@@ -6,7 +6,7 @@
  * to create draft rows, then navigate to /edit/ (never /create/).
  *
  * Tests:
- * 1. Step zero Save & Continue → lands on /edit/ for step 1 (not /create/)
+ * 1. Step zero Save and continue → lands on /edit/ for step 1 (not /create/)
  * 2. Guided form nav appears on child step edit page
  * 3. Parent ID resolution: progress, nav, completion use parent ID on child steps
  * 4. Step nav click → ensureStepRecord → /edit/ navigation
@@ -21,7 +21,7 @@
  *   - Database with v0.48.0 migration applied
  */
 
-const { chromium } = require('playwright-core');
+const { launchBrowser } = require('./lib/launch-browser.cjs');
 const http = require('http');
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -414,9 +414,28 @@ async function readField(page, fieldId) {
   return null;
 }
 
-/** Click Save & Continue and wait for navigation */
+/**
+ * Read the value shown for a property in completed-step display mode
+ * (<app-display-property> with a visible label), where the edit page renders
+ * saved values as read-only text instead of form controls.
+ */
+async function readDisplayedValue(page, label) {
+  return page.evaluate((lbl) => {
+    for (const el of document.querySelectorAll('app-display-property')) {
+      const labelEl = el.querySelector('.label .font-semibold');
+      if (!labelEl) continue;
+      const labelText = (labelEl.childNodes[0]?.textContent || labelEl.textContent || '').trim();
+      if (labelText === lbl) {
+        return el.textContent.replace(labelEl.textContent, '').trim();
+      }
+    }
+    return null;
+  }, label);
+}
+
+/** Click Save and continue and wait for navigation */
 async function clickSaveAndContinue(page) {
-  const btn = page.locator('button:has-text("Save & Continue")');
+  const btn = page.locator('button:has-text("Save and continue")');
   if (await btn.count() === 0) return false;
   await btn.first().click();
   await settle(page, 3000);
@@ -438,7 +457,7 @@ async function runTests() {
 
   let browser, context, page;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await launchBrowser();
     context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     page = await context.newPage();
 
@@ -497,8 +516,8 @@ async function runTests() {
     assert('1b. Guided form nav on step zero',
       await page.locator('app-guided-form-nav').count() > 0);
 
-    assert('1b. Save & Continue button visible',
-      await page.locator('button:has-text("Save & Continue")').count() > 0);
+    assert('1b. Save and continue button visible',
+      await page.locator('button:has-text("Save and continue")').count() > 0);
 
     // Fill step zero data
     await fillField(page, 'applicant_name', 'Alice Johnson');
@@ -652,13 +671,13 @@ async function runTests() {
         page.url().includes('/edit/draft_flow_step1/'),
         `URL: ${page.url()}`);
 
-      // Verify previously entered data is still in the form
-      const savedNotes = await readField(page, 'notes');
+      // Completed steps open in display mode: verify the saved values are shown
+      const savedNotes = await readDisplayedValue(page, 'Notes');
       assert('2a. Notes field retains saved value',
         savedNotes === 'Detailed notes about the event requirements',
         `Value: "${savedNotes}"`);
 
-      const savedPriority = await readField(page, 'priority');
+      const savedPriority = await readDisplayedValue(page, 'Priority');
       assert('2a. Priority field retains saved value', savedPriority === '5',
         `Value: "${savedPriority}"`);
     }
@@ -676,7 +695,7 @@ async function runTests() {
         `URL: ${page.url()}`);
 
       // Verify parent data still populated
-      const savedApplicant = await readField(page, 'applicant_name');
+      const savedApplicant = await readDisplayedValue(page, 'Applicant Name');
       assert('2b. Applicant name retains saved value',
         savedApplicant === 'Alice Johnson',
         `Value: "${savedApplicant}"`);
@@ -694,7 +713,7 @@ async function runTests() {
         page.url().includes('/edit/draft_flow_step2/'),
         `URL: ${page.url()}`);
 
-      const savedDetails = await readField(page, 'details');
+      const savedDetails = await readDisplayedValue(page, 'Details');
       assert('2c. Details field retains saved value',
         savedDetails === 'Additional information about the space configuration',
         `Value: "${savedDetails}"`);
@@ -771,16 +790,24 @@ async function runTests() {
     await settle(page);
 
     const submitBtn2 = page.locator('app-guided-form-review-section button:has-text("Submit")');
+    // The review section renders only after guided-form context loads (async);
+    // wait for the button instead of sampling it once after a fixed delay.
+    await submitBtn2.first().waitFor({ timeout: 15000 }).catch(() => {});
     assert('3a. Submit button visible', await submitBtn2.count() > 0);
 
     if (await submitBtn2.count() > 0) {
       await submitBtn2.first().click();
       await settle(page, 3000);
 
-      // After submit, review section should be hidden
+      // After submit the review section stays on the page in its submitted
+      // state (detail.page.ts keeps it visible via `|| isSubmitted`): the
+      // heading switches to "Submission Details" and the Submit button is gone.
       const reviewAfterSubmit = page.locator('app-guided-form-review-section');
-      assert('3a. Review section hidden after submit',
-        await reviewAfterSubmit.count() === 0);
+      assert('3a. Review section shows submitted state (Submission Details)',
+        (await reviewAfterSubmit.count()) === 1
+        && ((await reviewAfterSubmit.textContent()) || '').includes('Submission Details'));
+      assert('3a. Submit button removed after submit',
+        await reviewAfterSubmit.locator('button:has-text("Submit")').count() === 0);
 
       // Verify submitted_at is set in database
       const submittedAt = querySql(`SELECT submitted_at FROM public.draft_flow_parent WHERE id = ${parentId}`);
@@ -814,7 +841,7 @@ async function runTests() {
     // ================================================================
     // TEST 5: Auto-Submit Path (all steps condition-skipped)
     //
-    // Select "Skip All" flow type → Save & Continue on step zero
+    // Select "Skip All" flow type → Save and continue on step zero
     // → all steps skipped → auto-submit → lands on view page
     // ================================================================
     console.log('\n  --- Test 5: Auto-Submit (Skip All) ---');

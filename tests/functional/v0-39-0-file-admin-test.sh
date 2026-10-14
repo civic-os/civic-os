@@ -871,9 +871,13 @@ if [ -n "$ADMIN_TOKEN" ]; then
       # 7c. Upload a small test file to S3 via presigned URL
       printf '\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9' > /tmp/test_upload.jpg
 
+      # The worker signs x-amz-acl into the URL (SignedHeaders=host;x-amz-acl),
+      # so the PUT must send the same header or S3 rejects it with AccessDenied.
+      # Mirrors FileUploadService.uploadToS3 (src/app/services/file-upload.service.ts).
       UPLOAD_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
         -X PUT "$PRESIGNED_URL" \
         -H "Content-Type: image/jpeg" \
+        -H "x-amz-acl: public-read" \
         --data-binary @/tmp/test_upload.jpg)
 
       assert_http_status "7c. File uploaded to S3 via presigned URL" "200" "$UPLOAD_STATUS"
