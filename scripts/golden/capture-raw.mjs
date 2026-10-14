@@ -71,45 +71,52 @@ const STATIC_ENDPOINTS = [
 ];
 
 /**
- * Determinism configuration, derived from empirical double-capture and fresh-boot comparisons
- * (see tests/golden/raw/README.md).
+ * Row-order policy per fixture.
  *
- * SORT_KEYS: row order is part of the fixture only where the consumer sends an explicit
- * `order=`; even there ties on the order columns come back in plan order, which changed between
- * boots. Every array is therefore re-sorted by the listed keys (ascending, NULLs last, matching
- * PostgreSQL) with the canonical JSON of the row as final tie-break. For endpoints the consumers
- * request WITHOUT an order, the server order is unspecified and was observed to vary, so the
- * natural key is used. The sort keys per fixture are recorded in meta.json (`sortedBy`).
+ * `server`: the keys the server (view ORDER BY, function ORDER BY, or the consumer's own
+ * `order=`) sorts by. Row order as returned is PRESERVED; only runs of rows that tie on these
+ * keys are canonicalized (by `tie` keys, then the row's JSON), because order within a tie is plan
+ * order, differs between boots, and is not part of the contract. Server order of the non-tied rows
+ * (including collation-dependent text order) is kept exactly, so `--check` catches regressions.
  *
- * MASKS: volatile boot-time values replaced by MASK_VALUE; never fields the frontend interprets.
+ * `server: null`: neither the server nor the consumer defines an order; the array is sorted by the
+ * natural key `tie` (NULLs last, JSON as final tie-break). orderSource in meta.json says which.
  */
-const SORT_KEYS = {
-  schema_entities: ['table_name'],
-  'schema_entities.mcp': ['sort_order', 'display_name'],
-  schema_properties: ['table_name', 'column_name'],
-  'schema_properties.mcp': ['table_name', 'sort_order'],
-  schema_m2m_properties: ['table_name', 'column_name'],
-  schema_entity_actions: ['table_name', 'sort_order', 'id'],
-  'schema_entity_actions.mcp': ['table_name', 'sort_order'],
-  constraint_messages: ['constraint_name', 'table_name', 'column_name'],
-  static_text: ['table_name', 'sort_order', 'id'],
-  schema_guided_forms: ['guided_form_key'],
-  schema_guided_form_steps: ['guided_form_key', 'step_order', 'id'],
-  schema_cache_versions: ['cache_name'],
-  photo_gallery_config: ['table_name', 'column_name', 'id'],
-  user_profile_extensions: ['sort_order', 'table_name'],
-  statuses: ['entity_type', 'sort_order', 'display_name'],
-  categories: ['entity_type', 'sort_order', 'display_name'],
-  status_transitions: [],
-  'rpc.get_current_user_permissions': ['table_name', 'permission'],
-  'rpc.get_translations_for_locale': ['source_type', 'source_key'],
+const ORDER = {
+  // view: ORDER BY COALESCE(sort_order, 0), table_name
+  schema_entities: { server: ['sort_order', 'table_name'], tie: [] },
+  'schema_entities.mcp': { server: ['sort_order', 'display_name'], tie: ['table_name'] },
+  schema_properties: { server: null, tie: ['table_name', 'column_name'] },
+  'schema_properties.mcp': { server: ['table_name', 'sort_order'], tie: ['column_name'] },
+  schema_m2m_properties: { server: null, tie: ['table_name', 'column_name'] },
+  // view: ORDER BY table_name, sort_order
+  schema_entity_actions: { server: ['table_name', 'sort_order'], tie: ['id'] },
+  'schema_entity_actions.mcp': { server: ['table_name', 'sort_order'], tie: ['id'] },
+  constraint_messages: { server: null, tie: ['constraint_name', 'table_name', 'column_name'] },
+  static_text: { server: null, tie: ['table_name', 'sort_order', 'id'] },
+  schema_guided_forms: { server: null, tie: ['guided_form_key'] },
+  // view: ORDER BY guided_form_key, step_order
+  schema_guided_form_steps: { server: ['guided_form_key', 'step_order'], tie: ['id'] },
+  schema_cache_versions: { server: null, tie: ['cache_name'] },
+  photo_gallery_config: { server: null, tie: ['table_name', 'column_name', 'id'] },
+  // consumer: order=sort_order,table_name
+  user_profile_extensions: { server: ['sort_order', 'table_name'], tie: [] },
+  // consumer (mcp): order=entity_type.asc,sort_order.asc,display_name.asc
+  statuses: { server: ['entity_type', 'sort_order', 'display_name'], tie: ['id'] },
+  categories: { server: ['entity_type', 'sort_order', 'display_name'], tie: ['id'] },
+  status_transitions: { server: null, tie: [] },
+  'rpc.get_current_user_permissions': { server: null, tie: ['table_name', 'permission'] },
+  'rpc.get_translations_for_locale': { server: null, tie: ['source_type', 'source_key'] },
 };
-/** Dynamic per-type RPC fixtures. */
-function sortKeysFor(file) {
-  if (file in SORT_KEYS) return SORT_KEYS[file];
+/** Dynamic per-entity-type RPC fixtures. */
+function orderFor(file) {
+  if (file in ORDER) return ORDER[file];
+  // functions: ORDER BY sort_order, display_name
   if (file.startsWith('rpc.get_statuses_for_entity.') || file.startsWith('rpc.get_categories_for_entity.')) {
-    return ['sort_order', 'display_name', 'id'];
+    return { server: ['sort_order', 'display_name'], tie: ['id'] };
   }
+  // function: ORDER BY st.sort_order, fs.sort_order, ts.sort_order (the latter two are not output columns)
+  if (file.startsWith('rpc.get_status_transitions_for_entity.')) return { server: ['sort_order'], tie: ['id'] };
   return null;
 }
 /** Row-creation/modification timestamps are boot-time values on every metadata row. */
@@ -227,15 +234,30 @@ function normalize(file, body) {
       return r;
     });
     if (REDACTED_FILES.has(file)) body = redactStrings(body, redacted);
-    const keys = sortKeysFor(file);
-    if (keys) {
-      const dec = body.map((row) => [row, canonical(row)]);
-      dec.sort(([x, xs], [y, ys]) => {
-        for (const k of keys) { const c = cmpValues(x?.[k], y?.[k]); if (c) return c; }
+    const spec = orderFor(file);
+    if (spec) {
+      const cmpTie = (x, y) => {
+        for (const k of spec.tie) { const c = cmpValues(x?.[k], y?.[k]); if (c) return c; }
+        const xs = canonical(x), ys = canonical(y);
         return xs < ys ? -1 : xs > ys ? 1 : 0;
-      });
-      body = dec.map(([row]) => row);
-      sorted = keys;
+      };
+      if (spec.server) {
+        const kv = (r) => JSON.stringify(spec.server.map((k) => r?.[k] ?? null));
+        const out = [];
+        let run = [];
+        const flush = () => { run.sort(cmpTie); out.push(...run); run = []; };
+        for (const row of body) {
+          if (run.length && kv(run[0]) !== kv(row)) flush();
+          run.push(row);
+        }
+        flush();
+        body = out;
+      } else {
+        body = [...body].sort(cmpTie);
+      }
+      sorted = { orderSource: spec.server ? 'server' : 'natural-key', serverKeys: spec.server, tieKeys: spec.tie,
+        note: spec.server ? 'row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract'
+          : 'no defined order from server or consumer; sorted by tieKeys' };
     }
   }
   return { body, sorted, masked, redacted };
@@ -284,7 +306,7 @@ async function captureVariant(example, role, locale, token, outDir, meta) {
       const n = normalize(ep.file, r.body);
       content = n.body;
       results[ep.file] = n.body;
-      if (n.sorted) meta.sortedBy[ep.file.replace(/^(rpc\.get_(?:statuses|categories)_for_entity)\..*$/, '$1.<entity_type>')] = n.sorted;
+      if (n.sorted) meta.ordering[ep.file.replace(/^(rpc\.get_(?:statuses|categories|status_transitions)_for_entity)\..*$/, '$1.<entity_type>')] = n.sorted;
       for (const [label, count] of Object.entries(n.redacted)) {
         meta.redactions[ep.file] ??= {};
         meta.redactions[ep.file][label] = (meta.redactions[ep.file][label] ?? 0) + count;
@@ -319,6 +341,10 @@ async function captureVariant(example, role, locale, token, outDir, meta) {
   for (const t of record.statusEntityTypes) {
     await run({ file: `rpc.get_statuses_for_entity.${t}`, path: 'rpc/get_statuses_for_entity', body: { p_entity_type: t } });
   }
+  // Admin page's transitions endpoint (the MCP's `status_transitions` view does not exist on these instances).
+  for (const t of record.statusEntityTypes) {
+    await run({ file: `rpc.get_status_transitions_for_entity.${t}`, path: 'rpc/get_status_transitions_for_entity', body: { p_entity_type: t } });
+  }
   for (const t of record.categoryEntityTypes) {
     await run({ file: `rpc.get_categories_for_entity.${t}`, path: 'rpc/get_categories_for_entity', body: { p_entity_type: t } });
   }
@@ -339,7 +365,7 @@ async function captureExample(example, outDir) {
     endpoints: STATIC_ENDPOINTS.map((e) => ({ file: e.file, path: e.path, method: e.body === undefined ? 'GET' : 'POST', consumer: e.consumer })),
     maskValue: MASK_VALUE,
     maskedFields: {},
-    sortedBy: {},
+    ordering: {},
     redactions: {},
     variants: {},
     capturedAt: new Date().toISOString(),

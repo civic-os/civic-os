@@ -15,7 +15,7 @@
 #   DOCKER_HEAVY_LOCK / DOCKER_ALT_LOCK  optional lock dir (mkdir-style mutex). When set, it is acquired
 #                      around each example's boot/capture/teardown and released between
 #                      examples so other Docker users can interleave.
-#   KEEP_UP=1          leave the stack running after capture (debugging)
+#   KEEP_UP=1          leave the stack running after capture (debugging); the lock stays held with it
 #
 # Only postgres, postgrest and keycloak are started: they are all the metadata contract needs.
 set -euo pipefail
@@ -44,6 +44,11 @@ acquire() {
   HELD=1
 }
 release() {
+  # KEEP_UP=1 leaves the stack running, so the lock must stay held with it.
+  if [ "${KEEP_UP:-0}" = 1 ]; then
+    [ "$HELD" = 1 ] && echo "KEEP_UP=1: stack left running and lock $LOCK still held; remove it yourself after teardown" >&2
+    return 0
+  fi
   if [ "$HELD" = 1 ] && [ -n "$LOCK" ]; then rm -rf "$LOCK"; HELD=0; fi
 }
 
@@ -77,24 +82,20 @@ for ex in "${EXAMPLES[@]}"; do
   CURRENT="$ex"
   echo "=== $ex ==="
   cd "$dir"
-  if [ ! -f .env ]; then
-    # Only postgres/postgrest/keycloak are started, so compose needs just these values.
-    # (Copying .env.example is avoided: several ship unquoted SMTP_FROM lines that compose cannot parse.)
-    printf 'POSTGRES_DB=civic_os_db\nPOSTGRES_PASSWORD=securepassword123\n' > .env
-  fi
-  # Idempotent known-good credentials for local capture (the .env is gitignored).
-  grep -q '^POSTGRES_DB=' .env || echo 'POSTGRES_DB=civic_os_db' >> .env
-  grep -q '^POSTGRES_PASSWORD=' .env || echo 'POSTGRES_PASSWORD=securepassword123' >> .env
+  # Known-good local values via a temp --env-file; any .env in the example dir is neither read nor modified.
+  ENVFILE="$(mktemp -t "golden-env-$ex.XXXXXX")"
+  printf 'POSTGRES_DB=civic_os_db\nPOSTGRES_PASSWORD=securepassword123\n' > "$ENVFILE"
+  export ENV_FILE="$ENVFILE"
 
   if [ "$ALT" = 1 ]; then
     PROJECT="sdk-alt-$ex"
     OVERRIDE="$(mktemp -t "golden-alt-$ex.XXXXXX")"
     node "$ROOT/scripts/golden/alt-ports-override.mjs" "$ex" > "$OVERRIDE"
-    DC=(docker compose -p "$PROJECT" -f docker-compose.yml -f "$OVERRIDE")
+    DC=(docker compose --env-file "$ENVFILE" -p "$PROJECT" -f docker-compose.yml -f "$OVERRIDE")
     PG_PORT=33000; KC_PORT=38082
   else
     PROJECT="sdk-$ex"
-    DC=(docker compose -p "$PROJECT")
+    DC=(docker compose --env-file "$ENVFILE" -p "$PROJECT")
     PG_PORT=3000; KC_PORT=8082
   fi
   export POSTGREST_URL="http://localhost:$PG_PORT/"
@@ -121,7 +122,8 @@ for ex in "${EXAMPLES[@]}"; do
 
   cd "$dir"
   if [ "${KEEP_UP:-0}" != 1 ]; then "${DC[@]}" down -v; fi
-  rm -f "$OVERRIDE"; OVERRIDE=""
+  [ "${KEEP_UP:-0}" = 1 ] || rm -f "$OVERRIDE" "$ENVFILE"
+  OVERRIDE=""
   CURRENT=""
   release
 done
