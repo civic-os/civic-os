@@ -53,15 +53,7 @@ docker run --rm \
   ghcr.io/civic-os/migrations:latest
 ```
 
-**`CIVIC_OS_VERIFY_FULL`** - Enable comprehensive schema verification (default: `false`)
-
-Set to `true` for full schema comparison (recommended for production):
-```bash
-docker run --rm \
-  -e PGRST_DB_URI="..." \
-  -e CIVIC_OS_VERIFY_FULL="true" \
-  ghcr.io/civic-os/migrations:latest
-```
+Verification runs `sqitch verify` after deploy. There is no separate full-schema verification option; revert correctness of new migrations is checked in CI by `postgres/migrations/scripts/schema-roundtrip.sh stepwise` (see `postgres/migrations/README.md`).
 
 ## Commands
 
@@ -165,8 +157,6 @@ spec:
                 secretKeyRef:
                   name: database-credentials
                   key: uri
-            - name: CIVIC_OS_VERIFY_FULL
-              value: "true"
 
       containers:
         - name: postgrest
@@ -183,7 +173,6 @@ spec:
     docker run --rm \
       --network host \
       -e PGRST_DB_URI="${{ secrets.DATABASE_URL }}" \
-      -e CIVIC_OS_VERIFY_FULL="true" \
       ghcr.io/civic-os/migrations:${{ github.ref_name }}
 ```
 
@@ -197,7 +186,6 @@ docker pull ghcr.io/civic-os/migrations:latest
 docker run --rm \
   --network host \
   -e PGRST_DB_URI="postgres://user:pass@prod-db:5432/civic_os" \
-  -e CIVIC_OS_VERIFY_FULL="true" \
   ghcr.io/civic-os/migrations:latest
 
 # Verify deployment
@@ -337,8 +325,8 @@ docker run --rm -e PGRST_DB_URI="..." \
 docker run --rm -e PGRST_DB_URI="..." \
   ghcr.io/civic-os/migrations:latest deploy --dry-run
 
-# 3. Deploy with full verification
-docker run --rm -e PGRST_DB_URI="..." -e CIVIC_OS_VERIFY_FULL="true" \
+# 3. Deploy (runs sqitch verify unless SQITCH_VERIFY=false)
+docker run --rm -e PGRST_DB_URI="..." \
   ghcr.io/civic-os/migrations:latest
 ```
 

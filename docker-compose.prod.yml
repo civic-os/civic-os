@@ -37,7 +37,6 @@ services:
     container_name: civic_os_migrations
     environment:
       PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      CIVIC_OS_VERIFY_FULL: ${CIVIC_OS_VERIFY_FULL:-false}
     depends_on:
       postgres:
         condition: service_healthy

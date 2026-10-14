@@ -31,8 +31,6 @@ spec:
             secretKeyRef:
               name: civic-os-secrets
               key: DATABASE_URL
-        - name: CIVIC_OS_VERIFY_FULL
-          value: "false"
 
       containers:
       - name: postgrest

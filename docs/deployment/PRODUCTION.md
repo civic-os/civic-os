@@ -862,10 +862,9 @@ docker run --rm \
   ghcr.io/civic-os/migrations:latest \
   status
 
-# Run with full verification (recommended for production)
+# Deploy (sqitch verify runs after deploy by default)
 docker run --rm \
   -e PGRST_DB_URI="postgres://user:pass@host:5432/civic_os" \
-  -e CIVIC_OS_VERIFY_FULL="true" \
   ghcr.io/civic-os/migrations:latest
 ```
 
@@ -911,8 +910,6 @@ spec:
                 secretKeyRef:
                   name: database-credentials
                   key: uri
-            - name: CIVIC_OS_VERIFY_FULL
-              value: "true"
       containers:
         - name: postgrest
           image: ghcr.io/civic-os/postgrest:latest  # Pin to specific version for reproducible builds
