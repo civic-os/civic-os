@@ -7,6 +7,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { GalleryService } from './gallery.service';
+import { firstValueFrom } from 'rxjs';
 
 describe('GalleryService', () => {
   let service: GalleryService;
@@ -34,10 +35,8 @@ describe('GalleryService', () => {
   });
 
   describe('createDraftGallery', () => {
-    it('should call create_draft_gallery RPC with correct params', () => {
-      service.createDraftGallery('issues', 'photos').subscribe(id => {
-        expect(id).toBe('gallery-uuid-1');
-      });
+    it('should call create_draft_gallery RPC with correct params', async () => {
+      const result$ = firstValueFrom(service.createDraftGallery('issues', 'photos'));
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/create_draft_gallery'));
       expect(req.request.method).toBe('POST');
@@ -46,12 +45,14 @@ describe('GalleryService', () => {
         p_property_name: 'photos'
       });
       req.flush('gallery-uuid-1');
+      const id = await result$;
+      expect(id).toBe('gallery-uuid-1');
     });
   });
 
   describe('linkGalleryToEntity', () => {
-    it('should call link_gallery_to_entity RPC', () => {
-      service.linkGalleryToEntity('gal-1', 'issues', '42', 'photos').subscribe();
+    it('should call link_gallery_to_entity RPC', async () => {
+      const result$ = firstValueFrom(service.linkGalleryToEntity('gal-1', 'issues', '42', 'photos'));
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/link_gallery_to_entity'));
       expect(req.request.method).toBe('POST');
@@ -62,14 +63,14 @@ describe('GalleryService', () => {
         p_column_name: 'photos'
       });
       req.flush(null);
+      await result$;
+
     });
   });
 
   describe('addImage', () => {
-    it('should call add_gallery_image RPC with correct params', () => {
-      service.addImage('issues', '42', 'photos', 'file-uuid-1', 0, 'My caption').subscribe(id => {
-        expect(id).toBe('gallery-uuid-1');
-      });
+    it('should call add_gallery_image RPC with correct params', async () => {
+      const result$ = firstValueFrom(service.addImage('issues', '42', 'photos', 'file-uuid-1', 0, 'My caption'));
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/add_gallery_image'));
       expect(req.request.method).toBe('POST');
@@ -83,12 +84,14 @@ describe('GalleryService', () => {
         p_alt_text: null
       });
       req.flush('gallery-uuid-1');
+      const id = await result$;
+      expect(id).toBe('gallery-uuid-1');
     });
   });
 
   describe('addImageById', () => {
-    it('should call add_gallery_image_by_id RPC', () => {
-      service.addImageById('gal-1', 'file-1', 2).subscribe();
+    it('should call add_gallery_image_by_id RPC', async () => {
+      const result$ = firstValueFrom(service.addImageById('gal-1', 'file-1', 2));
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/add_gallery_image_by_id'));
       expect(req.request.method).toBe('POST');
@@ -100,12 +103,14 @@ describe('GalleryService', () => {
         p_alt_text: null
       });
       req.flush(null);
+      await result$;
+
     });
   });
 
   describe('removeImage', () => {
-    it('should call remove_gallery_image RPC', () => {
-      service.removeImage('gal-1', 'file-1').subscribe();
+    it('should call remove_gallery_image RPC', async () => {
+      const result$ = firstValueFrom(service.removeImage('gal-1', 'file-1'));
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/remove_gallery_image'));
       expect(req.request.method).toBe('POST');
@@ -114,12 +119,14 @@ describe('GalleryService', () => {
         p_file_id: 'file-1'
       });
       req.flush(null);
+      await result$;
+
     });
   });
 
   describe('reorderImages', () => {
-    it('should call reorder_gallery_images RPC with file IDs array', () => {
-      service.reorderImages('gal-1', ['file-3', 'file-1', 'file-2']).subscribe();
+    it('should call reorder_gallery_images RPC with file IDs array', async () => {
+      const result$ = firstValueFrom(service.reorderImages('gal-1', ['file-3', 'file-1', 'file-2']));
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/reorder_gallery_images'));
       expect(req.request.method).toBe('POST');
@@ -128,15 +135,14 @@ describe('GalleryService', () => {
         p_file_ids: ['file-3', 'file-1', 'file-2']
       });
       req.flush(null);
+      await result$;
+
     });
   });
 
   describe('getConfig', () => {
-    it('should fetch config from PostgREST', () => {
-      service.getConfig('issues', 'photos').subscribe(config => {
-        expect(config.max_images).toBe(10);
-        expect(config.allowed_types).toBe('image/jpeg,image/png');
-      });
+    it('should fetch config from PostgREST', async () => {
+      const result$ = firstValueFrom(service.getConfig('issues', 'photos'));
 
       const req = httpMock.expectOne(r => r.url.includes('photo_gallery_config'));
       req.flush([{
@@ -146,25 +152,25 @@ describe('GalleryService', () => {
         allowed_types: 'image/jpeg,image/png',
         max_file_size: null
       }]);
+      const config = await result$;
+      expect(config.max_images).toBe(10);
+      expect(config.allowed_types).toBe('image/jpeg,image/png');
     });
 
-    it('should return default config when no config exists', () => {
-      service.getConfig('issues', 'photos').subscribe(config => {
-        expect(config.max_images).toBe(20);
-        expect(config.allowed_types).toBe('image/*');
-      });
+    it('should return default config when no config exists', async () => {
+      const result$ = firstValueFrom(service.getConfig('issues', 'photos'));
 
       const req = httpMock.expectOne(r => r.url.includes('photo_gallery_config'));
       req.flush([]);
+      const config = await result$;
+      expect(config.max_images).toBe(20);
+      expect(config.allowed_types).toBe('image/*');
     });
   });
 
   describe('getGalleryImages', () => {
-    it('should fetch images with embedded file data', () => {
-      service.getGalleryImages('gal-1').subscribe(images => {
-        expect(images.length).toBe(2);
-        expect(images[0].file_id).toBe('file-1');
-      });
+    it('should fetch images with embedded file data', async () => {
+      const result$ = firstValueFrom(service.getGalleryImages('gal-1'));
 
       const req = httpMock.expectOne(r =>
         r.url.includes('photo_gallery_files') && r.url.includes('gallery_id=eq.gal-1')
@@ -173,18 +179,21 @@ describe('GalleryService', () => {
         { file_id: 'file-1', sort_order: 0, caption: null, alt_text: null, created_at: '2026-01-01', file: { id: 'file-1', file_name: 'test.jpg' } },
         { file_id: 'file-2', sort_order: 1, caption: 'A photo', alt_text: null, created_at: '2026-01-02', file: { id: 'file-2', file_name: 'test2.jpg' } }
       ]);
+      const images = await result$;
+      expect(images.length).toBe(2);
+      expect(images[0].file_id).toBe('file-1');
     });
   });
 
   describe('getStorageStats', () => {
-    it('should call get_gallery_storage_stats RPC', () => {
-      service.getStorageStats().subscribe(stats => {
-        expect(stats.total_galleries).toBe(5);
-      });
+    it('should call get_gallery_storage_stats RPC', async () => {
+      const result$ = firstValueFrom(service.getStorageStats());
 
       const req = httpMock.expectOne(r => r.url.includes('rpc/get_gallery_storage_stats'));
       expect(req.request.method).toBe('POST');
       req.flush({ total_galleries: 5, total_images: 23, total_size: 1048576 });
+      const stats = await result$;
+      expect(stats.total_galleries).toBe(5);
     });
   });
 });

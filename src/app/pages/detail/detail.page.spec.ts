@@ -31,7 +31,7 @@ import { RecurringService } from '../../services/recurring.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { GalleryService } from '../../services/gallery.service';
-import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, of, firstValueFrom, Subscription } from 'rxjs';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { EntityPropertyType, EntityAction, EntityActionParam } from '../../interfaces/entity';
 
@@ -236,9 +236,8 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of(mockData));
 
-            component.data$.subscribe(data => {
-                expect(data).toEqual(expect.objectContaining({ id: 42, name: 'First Item' }));
-            });
+            const data = await firstValueFrom(component.data$);
+            expect(data).toEqual(expect.objectContaining({ id: 42, name: 'First Item' }));
         });
 
         it('should return undefined when no data found', async () => {
@@ -248,9 +247,8 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of([]));
 
-            component.data$.subscribe(data => {
-                expect(data).toBeUndefined();
-            });
+            const data = await firstValueFrom(component.data$);
+            expect(data).toBeUndefined();
         });
 
         it('should handle string entityId values', async () => {
@@ -299,18 +297,35 @@ describe('DetailPage', () => {
                 }
             });
 
-            component.data$.subscribe(data => {
-                callCount++;
-                if (callCount === 1) {
-                    expect(data.id).toBe(42);
-                    // Trigger route change to different record
-                    routeParams.next({ entityKey: 'Issue', entityId: '99' });
-                }
-                else if (callCount === 2) {
-                    expect(data.id).toBe(99);
-                    expect(component.entityId).toBe('99');
-                }
+            const emissions: { data: any; entityId: string | undefined }[] = [];
+            let subscription: Subscription | undefined;
+            const secondEmission = new Promise<void>((resolve, reject) => {
+                subscription = component.data$.subscribe({
+                    next: data => {
+                        callCount++;
+                        emissions.push({ data, entityId: component.entityId });
+                        if (callCount === 1) {
+                            // Trigger route change to different record
+                            routeParams.next({ entityKey: 'Issue', entityId: '99' });
+                        }
+                        else if (callCount === 2) {
+                            resolve();
+                        }
+                    },
+                    error: reject
+                });
             });
+            try {
+                await secondEmission;
+            }
+            finally {
+                subscription?.unsubscribe();
+            }
+
+            expect(emissions.length).toBe(2);
+            expect(emissions[0].data.id).toBe(42);
+            expect(emissions[1].data.id).toBe(99);
+            expect(emissions[1].entityId).toBe('99');
         });
 
         it('should reload data when entityKey changes', async () => {
@@ -1190,19 +1205,18 @@ describe('DetailPage', () => {
             mockSchemaService.getPropsForDetail.mockReturnValue(of(mockProps));
             mockDataService.getData.mockReturnValue(of([{}] as any));
 
-            component.data$.subscribe(() => {
-                const callArgs = vi.mocked(mockDataService.getData).mock.calls[0][0];
-                expect(callArgs.fields).toContain('name');
-                expect(callArgs.fields).toContain('description');
-                expect(callArgs.fields).toContain('is_active');
-                expect(callArgs.fields).toContain('count');
-                expect(callArgs.fields).toContain('amount');
-                expect(callArgs.fields).toContain('due_date');
-                expect(callArgs.fields).toContain('created_at');
-                expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)');
-                expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)');
-                expect(callArgs.fields).toContain('location:location_text');
-            });
+            await firstValueFrom(component.data$);
+            const callArgs = vi.mocked(mockDataService.getData).mock.calls[0][0];
+            expect(callArgs.fields).toContain('name');
+            expect(callArgs.fields).toContain('description');
+            expect(callArgs.fields).toContain('is_active');
+            expect(callArgs.fields).toContain('count');
+            expect(callArgs.fields).toContain('amount');
+            expect(callArgs.fields).toContain('due_date');
+            expect(callArgs.fields).toContain('created_at');
+            expect(callArgs.fields).toContain('status_id:Status!status_id(id,display_name)');
+            expect(callArgs.fields).toContain('assigned_to:civic_os_users!assigned_to(id,display_name,full_name,phone,email)');
+            expect(callArgs.fields).toContain('location:location_text');
         });
     });
 });

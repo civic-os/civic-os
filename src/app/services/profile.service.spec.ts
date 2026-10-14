@@ -10,6 +10,8 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { ProfileService, ProfileExtension, ProfileExtensionMeta } from './profile.service';
 import { AuthService } from './auth.service';
+import { firstValueFrom } from 'rxjs';
+import { awaitRequest } from '../testing/await-http';
 
 describe('ProfileService', () => {
     let service: ProfileService;
@@ -54,12 +56,8 @@ describe('ProfileService', () => {
     });
 
     describe('getProfileExtensions() — own profile (no userId)', () => {
-        it('should fetch metadata from VIEW then check has_record via PostgREST embedding', () => {
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions.length).toBe(1);
-                expect(extensions[0].table_name).toBe('borrowers');
-                expect(extensions[0].has_record).toBe(false);
-            });
+        it('should fetch metadata from VIEW then check has_record via PostgREST embedding', async () => {
+            const result$ = firstValueFrom(service.getProfileExtensions());
 
             // Step 1: metadata from VIEW
             const metaReq = httpMock.expectOne(r => r.url.includes('user_profile_extensions'));
@@ -67,128 +65,139 @@ describe('ProfileService', () => {
             metaReq.flush(mockMetas);
 
             // Step 2: PostgREST embedded query for has_record
-            const embedReq = httpMock.expectOne(r => r.url.includes('civic_os_users') &&
+            const embedReq = await awaitRequest(httpMock, r => r.url.includes('civic_os_users') &&
                 r.url.includes('id=eq.own-user-123') &&
                 r.url.includes('borrowers!borrowers_user_id_fkey(id)'));
             expect(embedReq.request.method).toBe('GET');
             embedReq.flush([{ id: 'own-user-123', borrowers: [] }]);
+            const extensions = await result$;
+            expect(extensions.length).toBe(1);
+            expect(extensions[0].table_name).toBe('borrowers');
+            expect(extensions[0].has_record).toBe(false);
         });
 
-        it('should detect has_record=true when embedded array has items', () => {
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions[0].has_record).toBe(true);
-            });
+        it('should detect has_record=true when embedded array has items', async () => {
+            const result$ = firstValueFrom(service.getProfileExtensions());
 
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users')).flush([
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users'))).flush([
                 { id: 'own-user-123', borrowers: [{ id: 42 }] }
             ]);
+            const extensions = await result$;
+            expect(extensions[0].has_record).toBe(true);
         });
 
-        it('should handle one-to-one FK (object instead of array)', () => {
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions[0].has_record).toBe(true);
-            });
+        it('should handle one-to-one FK (object instead of array)', async () => {
+            const result$ = firstValueFrom(service.getProfileExtensions());
 
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users')).flush([
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users'))).flush([
                 { id: 'own-user-123', borrowers: { id: 42 } }
             ]);
+            const extensions = await result$;
+            expect(extensions[0].has_record).toBe(true);
         });
 
-        it('should return cached result on second call', () => {
+        it('should return cached result on second call', async () => {
             // First call — hits HTTP
-            service.getProfileExtensions().subscribe();
+            const first$ = firstValueFrom(service.getProfileExtensions());
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users')).flush([
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users'))).flush([
                 { id: 'own-user-123', borrowers: [] }
             ]);
+            await first$;
 
             // Second call — should return cached result without HTTP
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions.length).toBe(1);
-            });
+            const second$ = firstValueFrom(service.getProfileExtensions());
+            const extensions = await second$;
+            expect(extensions.length).toBe(1);
             httpMock.expectNone(r => r.url.includes('user_profile_extensions'));
         });
 
-        it('should return empty array when no extensions configured', () => {
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions).toEqual([]);
-            });
+        it('should return empty array when no extensions configured', async () => {
+            const result$ = firstValueFrom(service.getProfileExtensions());
 
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush([]);
+            const extensions = await result$;
+            expect(extensions).toEqual([]);
         });
 
-        it('should return empty array on metadata fetch error', () => {
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions).toEqual([]);
-            });
+        it('should return empty array on metadata fetch error', async () => {
+            const result$ = firstValueFrom(service.getProfileExtensions());
 
             httpMock.expectOne(r => r.url.includes('user_profile_extensions'))
                 .flush('error', { status: 500, statusText: 'Server Error' });
+            const extensions = await result$;
+            expect(extensions).toEqual([]);
         });
 
-        it('should return has_record=false on embedding query error', () => {
-            service.getProfileExtensions().subscribe(extensions => {
-                expect(extensions.length).toBe(1);
-                expect(extensions[0].has_record).toBe(false);
-            });
+        it('should return has_record=false on embedding query error', async () => {
+            const result$ = firstValueFrom(service.getProfileExtensions());
 
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users'))
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users')))
                 .flush('error', { status: 500, statusText: 'Server Error' });
+            const extensions = await result$;
+            expect(extensions.length).toBe(1);
+            expect(extensions[0].has_record).toBe(false);
         });
     });
 
     describe('getProfileExtensions(userId) — other user', () => {
-        it('should use provided userId instead of current user', () => {
+        it('should use provided userId instead of current user', async () => {
             const otherUserId = 'other-user-456';
 
-            service.getProfileExtensions(otherUserId).subscribe(extensions => {
-                expect(extensions.length).toBe(1);
-            });
+            const result$ = firstValueFrom(service.getProfileExtensions(otherUserId));
 
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            const embedReq = httpMock.expectOne(r => r.url.includes('civic_os_users') &&
+            const embedReq = await awaitRequest(httpMock, r => r.url.includes('civic_os_users') &&
                 r.url.includes(`id=eq.${otherUserId}`));
             embedReq.flush([{ id: otherUserId, borrowers: [{ id: 1 }] }]);
+            const extensions = await result$;
+            expect(extensions.length).toBe(1);
         });
 
-        it('should not use cache from own profile when querying other user', () => {
+        it('should not use cache from own profile when querying other user', async () => {
             // First call — own profile
-            service.getProfileExtensions().subscribe();
+            const first$ = firstValueFrom(service.getProfileExtensions());
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users')).flush([
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users'))).flush([
                 { id: 'own-user-123', borrowers: [] }
             ]);
+            await first$;
 
             // Second call — different user should NOT use cache
-            service.getProfileExtensions('other-456').subscribe();
-            httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('id=eq.other-456')).flush([
+            const second$ = firstValueFrom(service.getProfileExtensions('other-456'));
+            (await awaitRequest(httpMock, r => r.url.includes('user_profile_extensions'))).flush(mockMetas);
+            (await awaitRequest(httpMock, r => r.url.includes('id=eq.other-456'))).flush([
                 { id: 'other-456', borrowers: [{ id: 1 }] }
             ]);
+            const extensions = await second$;
+            expect(extensions.length).toBe(1);
+            expect(extensions[0].has_record).toBe(true);
         });
     });
 
     describe('invalidateCache()', () => {
-        it('should force fresh HTTP on next call', () => {
+        it('should force fresh HTTP on next call', async () => {
             // First call
-            service.getProfileExtensions().subscribe();
+            const first$ = firstValueFrom(service.getProfileExtensions());
             httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users')).flush([
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users'))).flush([
                 { id: 'own-user-123', borrowers: [] }
             ]);
+            await first$;
 
             // Invalidate cache
             service.invalidateCache();
 
             // Next call should hit HTTP again
-            service.getProfileExtensions().subscribe();
-            httpMock.expectOne(r => r.url.includes('user_profile_extensions')).flush(mockMetas);
-            httpMock.expectOne(r => r.url.includes('civic_os_users')).flush([
+            const second$ = firstValueFrom(service.getProfileExtensions());
+            (await awaitRequest(httpMock, r => r.url.includes('user_profile_extensions'))).flush(mockMetas);
+            (await awaitRequest(httpMock, r => r.url.includes('civic_os_users'))).flush([
                 { id: 'own-user-123', borrowers: [] }
             ]);
+            await second$;
         });
 
         it('should reset profileComplete flag', () => {
@@ -199,10 +208,8 @@ describe('ProfileService', () => {
     });
 
     describe('updateOwnProfile()', () => {
-        it('should call RPC with name and phone', () => {
-            service.updateOwnProfile('John', 'Doe', '555-0100').subscribe(result => {
-                expect(result.success).toBe(true);
-            });
+        it('should call RPC with name and phone', async () => {
+            const result$ = firstValueFrom(service.updateOwnProfile('John', 'Doe', '555-0100'));
 
             const req = httpMock.expectOne(r => r.url.includes('rpc/update_own_profile'));
             expect(req.request.method).toBe('POST');
@@ -210,44 +217,44 @@ describe('ProfileService', () => {
             expect(req.request.body.p_last_name).toBe('Doe');
             expect(req.request.body.p_phone).toBe('555-0100');
             req.flush({ success: true, message: 'Profile updated' });
+            const result = await result$;
+            expect(result.success).toBe(true);
         });
 
-        it('should handle error response', () => {
-            service.updateOwnProfile('', '').subscribe(result => {
-                expect(result.success).toBe(false);
-            });
+        it('should handle error response', async () => {
+            const result$ = firstValueFrom(service.updateOwnProfile('', ''));
 
             const req = httpMock.expectOne(r => r.url.includes('rpc/update_own_profile'));
             req.flush({ message: 'Validation failed' }, { status: 400, statusText: 'Bad Request' });
+            const result = await result$;
+            expect(result.success).toBe(false);
         });
     });
 
     describe('getExtensionRecord()', () => {
-        it('should build correct PostgREST URL', () => {
-            service.getExtensionRecord('borrowers', 'user_id', 'user-123', 'id,name').subscribe();
+        it('should build correct PostgREST URL', async () => {
+            const result$ = firstValueFrom(service.getExtensionRecord('borrowers', 'user_id', 'user-123', 'id,name'));
 
             const req = httpMock.expectOne(r => r.url.includes('borrowers') &&
                 r.url.includes('user_id=eq.user-123') &&
                 r.url.includes('select=id,name'));
             expect(req.request.method).toBe('GET');
             req.flush([{ id: '1', name: 'Test' }]);
+            expect(await result$).toBeDefined();
         });
 
-        it('should use select=* when no fields specified', () => {
-            service.getExtensionRecord('borrowers', 'user_id', 'user-123').subscribe();
+        it('should use select=* when no fields specified', async () => {
+            const result$ = firstValueFrom(service.getExtensionRecord('borrowers', 'user_id', 'user-123'));
 
             const req = httpMock.expectOne(r => r.url.includes('select=*'));
             req.flush([]);
+            expect(await result$).toBeDefined();
         });
     });
 
     describe('getUserProfileRecord()', () => {
-        it('should query civic_os_users VIEW', () => {
-            service.getUserProfileRecord('target-123').subscribe(result => {
-                expect(result).toBeTruthy();
-                expect(result!.first_name).toBe('Jane');
-                expect(result!.locale).toBe('en');
-            });
+        it('should query civic_os_users VIEW', async () => {
+            const result$ = firstValueFrom(service.getUserProfileRecord('target-123'));
 
             const req = httpMock.expectOne(r => r.url.includes('civic_os_users') &&
                 r.url.includes('id=eq.target-123'));
@@ -261,46 +268,50 @@ describe('ProfileService', () => {
                     phone: '5559876543',
                     locale: 'en'
                 }]);
+            const result = await result$;
+            expect(result).toBeTruthy();
+            expect(result!.first_name).toBe('Jane');
+            expect(result!.locale).toBe('en');
         });
 
-        it('should return null when user not found', () => {
-            service.getUserProfileRecord('nonexistent').subscribe(result => {
-                expect(result).toBeNull();
-            });
+        it('should return null when user not found', async () => {
+            const result$ = firstValueFrom(service.getUserProfileRecord('nonexistent'));
 
             const req = httpMock.expectOne(r => r.url.includes('civic_os_users'));
             req.flush([]);
+            const result = await result$;
+            expect(result).toBeNull();
         });
 
-        it('should return null on error', () => {
-            service.getUserProfileRecord('target-123').subscribe(result => {
-                expect(result).toBeNull();
-            });
+        it('should return null on error', async () => {
+            const result$ = firstValueFrom(service.getUserProfileRecord('target-123'));
 
             const req = httpMock.expectOne(r => r.url.includes('civic_os_users'));
             req.flush('error', { status: 403, statusText: 'Forbidden' });
+            const result = await result$;
+            expect(result).toBeNull();
         });
     });
 
     describe('getCurrentUserPrivateRecord()', () => {
-        it('should return user record from RPC', () => {
-            service.getCurrentUserPrivateRecord().subscribe(result => {
-                expect(result).toBeTruthy();
-                expect(result!.first_name).toBe('John');
-            });
+        it('should return user record from RPC', async () => {
+            const result$ = firstValueFrom(service.getCurrentUserPrivateRecord());
 
             const req = httpMock.expectOne(r => r.url.includes('rpc/get_own_profile'));
             expect(req.request.method).toBe('POST');
             req.flush({ id: 'user-123', display_name: 'John Doe', first_name: 'John', last_name: 'Doe', email: 'john@test.com', phone: null });
+            const result = await result$;
+            expect(result).toBeTruthy();
+            expect(result!.first_name).toBe('John');
         });
 
-        it('should return null when RPC returns null', () => {
-            service.getCurrentUserPrivateRecord().subscribe(result => {
-                expect(result).toBeNull();
-            });
+        it('should return null when RPC returns null', async () => {
+            const result$ = firstValueFrom(service.getCurrentUserPrivateRecord());
 
             const req = httpMock.expectOne(r => r.url.includes('rpc/get_own_profile'));
             req.flush(null);
+            const result = await result$;
+            expect(result).toBeNull();
         });
     });
 });

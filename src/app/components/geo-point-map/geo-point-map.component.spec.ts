@@ -219,13 +219,16 @@ describe('GeoPointMapComponent', () => {
                 }
             });
 
-            component.coordinatesChange.subscribe(coords => {
-                expect(coords).toBeDefined();
-                expect(coords![0]).toBe(-83.6875);
-                expect(coords![1]).toBe(43.0125);
+            const emitted = new Promise<[number, number] | null>(resolve => {
+                component.coordinatesChange.subscribe(coords => resolve(coords));
             });
 
             fixture.detectChanges();
+
+            const coords = await emitted;
+            expect(coords).toBeDefined();
+            expect(coords![0]).toBe(-83.6875);
+            expect(coords![1]).toBe(43.0125);
         });
 
         it('should not emit coordinates for null initial value', async () => {
@@ -499,10 +502,15 @@ describe('GeoPointMapComponent', () => {
 
     describe('Reset View Functionality', () => {
         it('should emit resetView event when onResetView is called', async () => {
-            component.resetView.subscribe(() => {
+            const received: unknown[] = [];
+            component.resetView.subscribe((value) => {
+                received.push(value);
             });
 
             component.onResetView();
+
+            expect(received.length).toBe(1);
+            expect(received[0]).toBeUndefined();
         });
     });
 
