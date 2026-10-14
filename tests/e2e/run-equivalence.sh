@@ -99,10 +99,19 @@ settle_workers() {
   done
 }
 
-wait_postgres() {
-  local timeout="$1" t=0
-  until compose exec -T postgres pg_isready -q -h 127.0.0.1 -U postgres -d civic_os_db 2>/dev/null; do
-    t=$((t + 5)); [[ $t -ge $timeout ]] && { echo "postgres did not become ready within ${timeout}s" >&2; return 1; }
+# Waits until every created container of the project that has a healthcheck reports
+# "healthy" (compose gives up on a dependency the first time it is unhealthy, but the
+# healthcheck keeps running and recovers once a slow init finishes).
+wait_healthy() {
+  local timeout="$1" t=0 id st pending
+  while :; do
+    pending=""
+    for id in $(compose ps -a -q 2>/dev/null); do
+      st=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$id" 2>/dev/null)
+      case "$st" in healthy|none) ;; *) pending="$pending $(docker inspect -f '{{.Name}}' "$id")=$st" ;; esac
+    done
+    [[ -z "$pending" ]] && return 0
+    t=$((t + 5)); [[ $t -ge $timeout ]] && { echo "containers not healthy within ${timeout}s:$pending" >&2; return 1; }
     sleep 5
   done
 }
@@ -153,14 +162,14 @@ fresh_stack() {
       tail -20 "$ART/compose-up.log" >&2
       return 1
     fi
-    # Postgres init (migrations + init scripts, amd64 image) can overrun the compose
-    # healthcheck window on a loaded VM. Show the memory picture, wait for postgres
-    # to finish, then start the remaining services.
+    # Postgres init (migrations + init scripts, amd64 image) or Keycloak startup can
+    # overrun the compose healthcheck window on a loaded VM. Show the memory picture,
+    # wait for the healthchecks to recover, then start the remaining services.
     log "compose up failed (see compose-up.log); VM memory and load:"
     docker info --format 'MemTotal={{.MemTotal}} NCPU={{.NCPU}}' >&2 || true
     docker stats --no-stream --format '  {{.Name}} {{.MemUsage}} {{.CPUPerc}}' >&2 || true
-    wait_postgres 900 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
-    log "postgres ready; retrying compose up"
+    wait_healthy 900 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
+    log "dependencies healthy; retrying compose up"
     # shellcheck disable=SC2086
     compose up -d --quiet-pull $services >> "$ART/compose-up.log" 2>&1 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
   fi

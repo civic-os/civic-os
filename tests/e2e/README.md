@@ -55,9 +55,10 @@ and its named volumes. A container that merely carries the
 from an image this project built, is reported and left alone.
 
 On a loaded Docker VM, Postgres init (migrations plus init scripts on the
-amd64 image) can overrun the compose healthcheck window. The runner then
-prints the VM's memory and per-container usage, waits up to 15 minutes for
-Postgres, and starts the remaining services.
+amd64 image) or Keycloak startup can overrun the compose healthcheck
+window. The runner then prints the VM's memory and per-container usage,
+waits up to 15 minutes for every healthcheck to report healthy, and starts
+the remaining services.
 
 Development options:
 
