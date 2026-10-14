@@ -14,12 +14,24 @@
  *   1. CHROMIUM_EXECUTABLE=/path/to/chrome   explicit binary
  *   2. Playwright's managed Chromium         (npx playwright-core install chromium)
  *   3. The system Google Chrome              (channel "chrome")
+ *
+ * Analytics: the development environment enables Matomo for stats.civic-os.org,
+ * so every browser run would otherwise report test traffic. The host is
+ * unresolvable in every launched browser (all contexts and pages). Set
+ * CIVIC_OS_ALLOW_ANALYTICS=true to opt out.
  */
 
 const { chromium } = require('playwright-core');
 
+const BLOCKED_ANALYTICS_HOSTS = ['stats.civic-os.org'];
+
 async function launchBrowser(options = {}) {
-  const base = { headless: true, ...options };
+  const args = [...(options.args || [])];
+  if (process.env.CIVIC_OS_ALLOW_ANALYTICS !== 'true') {
+    const rules = BLOCKED_ANALYTICS_HOSTS.map(h => `MAP ${h} ~NOTFOUND`).join(', ');
+    args.push(`--host-resolver-rules=${rules}`);
+  }
+  const base = { headless: true, ...options, args };
   if (process.env.CHROMIUM_EXECUTABLE) {
     return chromium.launch({ ...base, executablePath: process.env.CHROMIUM_EXECUTABLE });
   }
