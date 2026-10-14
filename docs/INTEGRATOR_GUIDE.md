@@ -1079,6 +1079,50 @@ SELECT set_role_permission(get_role_id('moderator'), 'submissions', 'READ', TRUE
 SELECT set_role_permission(get_role_id('moderator'), 'submissions', 'UPDATE', TRUE);
 ```
 
+### Securing RPC Functions (v0.76.5+)
+
+**WARNING**: PostgreSQL grants `EXECUTE` on every new function to `PUBLIC`, and PostgREST exposes every function in the `public` schema at `/rpc/<name>`. `GRANT EXECUTE ... TO authenticated` does **not** remove the `PUBLIC` grant, and `REVOKE ... FROM web_anon` does nothing while `PUBLIC` holds it. Without the steps below, anonymous users can call your function, and if it is `SECURITY DEFINER` it runs with the owner's privileges and bypasses table GRANTs and RLS.
+
+**Rules for every RPC function:**
+
+1. **`REVOKE EXECUTE ... FROM PUBLIC`** (never `FROM web_anon`), then `GRANT EXECUTE` explicitly to the roles that need it.
+2. **Add an in-body authorization guard to every `SECURITY DEFINER` function**, even when the GRANT looks sufficient. The GRANT is the outer gate; the guard keeps a future GRANT mistake from becoming an open endpoint.
+3. **Never pass table or column names into dynamic SQL unchecked.** Validate the target and check `has_permission(table, action)` before touching it.
+
+```sql
+CREATE OR REPLACE FUNCTION public.close_request(p_request_id BIGINT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, metadata
+AS $$
+BEGIN
+  IF current_user_id() IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+  IF NOT has_permission('requests', 'update') THEN
+    RAISE EXCEPTION 'Permission denied';
+  END IF;
+  -- ... function logic ...
+  RETURN jsonb_build_object('success', true, 'message', 'Request closed');
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.close_request(BIGINT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.close_request(BIGINT) TO authenticated;
+```
+
+Pick the guard that matches the audience: `current_user_id() IS NOT NULL` for any logged-in user, `has_permission()` for entity-level RBAC, `is_admin()` for admin-only functions. Add ownership checks (`created_by = current_user_id()`) where users act on their own records.
+
+**Default privileges (v0.76.5+):** Civic OS runs `ALTER DEFAULT PRIVILEGES FOR ROLE postgres REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC`, so functions you create as `postgres` start with no `PUBLIC` grant and are uncallable until you GRANT them. This is fail-closed, but it also means:
+- A function meant for anonymous callers (public lookups, helpers evaluated inside RLS policies for `web_anon`) needs an explicit `GRANT EXECUTE ... TO web_anon`.
+- Functions from extensions installed by `postgres` after the migration also start without `PUBLIC`; GRANT explicitly if anonymous callers need them.
+- `CREATE OR REPLACE` keeps a function's existing ACL, but a new overload with a different signature is a new function with default privileges.
+
+**Auditing an existing instance:** list functions in `public` where the ACL still contains `PUBLIC` (`=X/` entry in `proacl`, or a NULL `proacl`), and compare against the intended audience. v0.76.5 revoked `PUBLIC` from the framework's authenticated-only and internal functions; it cannot know about your custom RPCs, so audit those yourself.
+
+**References:** `postgres/migrations/templates/add_rpc_function.sql` (corrected template), `docs/notes/SECURITY_DEFINER_AUDIT_2026-10.md` (audit findings and rationale), `docs/development/PERMISSIONS_MODEL.md` (three-layer access model).
+
 ---
 
 ## Feature Configuration
@@ -2536,7 +2580,7 @@ ON CONFLICT DO NOTHING;
 Your RPC function must:
 - Accept `p_entity_id BIGINT` as the first parameter
 - Return `JSONB` with at least `success` (boolean) and `message` (string)
-- Use `SECURITY DEFINER` if it needs elevated privileges
+- Use `SECURITY DEFINER` if it needs elevated privileges, and then include an in-body authorization guard and `REVOKE EXECUTE ... FROM PUBLIC` (see [Securing RPC Functions](#securing-rpc-functions-v0765))
 
 **Return Object Fields:**
 
