@@ -64,11 +64,12 @@ All 5 layers of the technical test plan passed (2026-04-28):
 
 | Script | Status | Notes |
 |--------|--------|-------|
-| `v0-48-0-workflow-system-test.sh` | PASS | Migration, RPCs, CHECK constraints, skip_if, on_submit_rpc (26 assertions) |
-| `v0-48-0-workflow-browser-test.cjs` | Not recently verified | Playwright: login, start, nav, fill, save & continue |
-| `v0-48-0-workflow-conditions-submit-test.cjs` | Not recently verified | Playwright: skip conditions, review submit |
-| `v0-48-0-workflow-autosave-viewmode-test.cjs` | Not recently verified | Playwright: auto-save, view/edit toggle |
-| `v0-48-0-draft-first-edit-flow-test.cjs` | Not recently verified | Playwright: ensure_step_record, draft-first flow |
+| `v0-48-0-guided-form-system-test.sh` | PASS (neighborhood-hub stack) | Migration, RPCs, CHECK constraints, skip_if, on_submit_rpc (38 assertions) |
+| `v0-48-0-guided-form-conditions-submit-test.cjs` | PASS (needs dev server on :4200) | Playwright: skip conditions in nav, review submit |
+| `v0-48-0-guided-form-autosave-viewmode-test.cjs` | PASS (needs dev server on :4200) | Playwright: auto-save, view/edit toggle |
+| `v0-48-0-draft-first-edit-flow-test.cjs` | PASS (needs dev server on :4200) | Playwright: start, nav, fill, save and continue, ensure_step_record, draft-first flow, submit, auto-submit |
+
+The former `v0-48-0-workflow-browser-test.cjs` (login, start, nav, fill, save and continue) was removed in P0.6: every assertion is covered by the draft-first flow test. See `tests/baselines/STALE_TEST_DECISIONS.md`.
 
 ### Bugs Found & Fixed During Testing
 

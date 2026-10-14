@@ -392,7 +392,11 @@ try {
   await anonClient.close();
 } catch (err) {
   // Connection failures for anonymous are acceptable if auth is required
-  if (err.message.includes('401') || err.message.includes('Unauthorized') || err.message.includes('auth')) {
+  // Since 27fcc12 the server answers unauthenticated MCP requests with
+  // 401 + {"error":"invalid_token","error_description":"Authentication required"}
+  // so OAuth clients start the flow. The SDK surfaces that body in err.message
+  // (capital-A "Authentication"), so match the error code case-insensitively.
+  if (/invalid_token|401|unauthorized|auth/i.test(err.message)) {
     console.log('PASS:Anonymous connection rejected (auth required for MCP)');
   } else {
     console.log(`FAIL:Anonymous MCP via HTTP|${err.message}`);

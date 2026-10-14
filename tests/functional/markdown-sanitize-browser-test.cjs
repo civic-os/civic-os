@@ -19,15 +19,12 @@
  * Usage:
  *   node tests/functional/markdown-sanitize-browser-test.cjs
  *
- * Browser selection (first match wins):
- *   CHROMIUM_EXECUTABLE=/path/to/chrome   explicit binary
- *   Playwright's own managed Chromium (npx playwright-core install chromium)
- *   the system Google Chrome (channel "chrome")
+ * Browser selection: see lib/launch-browser.cjs.
  */
 
 const path = require('path');
 const esbuild = require('esbuild');
-const { chromium } = require('playwright-core');
+const { launchBrowser } = require('./lib/launch-browser.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 
@@ -44,17 +41,6 @@ function assert(name, condition, detail = '') {
   }
 }
 
-async function launch() {
-  if (process.env.CHROMIUM_EXECUTABLE) {
-    return chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_EXECUTABLE });
-  }
-  try {
-    return await chromium.launch({ headless: true });
-  } catch (managedErr) {
-    return chromium.launch({ headless: true, channel: 'chrome' });
-  }
-}
-
 async function main() {
   const bundle = await esbuild.build({
     entryPoints: [path.join(ROOT, 'src/app/markdown/markdown-sanitize.ts')],
@@ -67,7 +53,7 @@ async function main() {
   });
   const script = bundle.outputFiles[0].text;
 
-  const browser = await launch();
+  const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
     await page.setContent('<!doctype html><html><body></body></html>');

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * Browser Test: Workflow Auto-save + View/Edit Mode
+ * Browser Test: Guided Form Auto-save + View/Edit Mode
  *
  * Validates Phase 2 features:
- * 1. Auto-save indicator appears when typing in draft workflow steps
- * 2. Completed workflow steps show Edit button instead of Save button
+ * 1. Auto-save indicator appears when typing in draft guided form steps
+ * 2. Completed guided form steps show Edit button instead of Save button
  * 3. Edit mode toggles back to form with Save + Cancel buttons
  */
 
-const { chromium } = require('playwright-core');
+const { launchBrowser } = require('./lib/launch-browser.cjs');
 const http = require('http');
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -56,7 +56,7 @@ async function getToken(username, password) {
 }
 
 function runSql(sql) {
-  const tmpFile = path.join('/tmp', `workflow_test_${Date.now()}.sql`);
+  const tmpFile = path.join('/tmp', `guided_form_test_${Date.now()}.sql`);
   fs.writeFileSync(tmpFile, sql);
   try {
     const result = execSync(`${PSQL} -f ${tmpFile}`, { encoding: 'utf-8', stdio: 'pipe' });
@@ -68,22 +68,15 @@ function runSql(sql) {
   }
 }
 
-async function seedWorkflowData() {
+const GUIDED_FORM_KEY = 'browser_test_guided_form';
+
+async function seedGuidedFormData() {
   const sql = `
-UPDATE metadata.entities SET workflow_key = NULL WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.workflow_progress WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.workflow_step_conditions WHERE workflow_step_id IN (
-    SELECT id FROM metadata.workflow_steps WHERE workflow_key = 'browser_test_workflow'
-);
-DELETE FROM metadata.workflow_steps WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.workflows WHERE workflow_key = 'browser_test_workflow';
-DROP TABLE IF EXISTS public.browser_test_step CASCADE;
-DROP TABLE IF EXISTS public.browser_test_parent CASCADE;
+${CLEANUP_SQL}
 
 CREATE TABLE public.browser_test_parent (
     id BIGSERIAL PRIMARY KEY,
     display_name VARCHAR(200),
-    workflow_status workflow_step_status DEFAULT 'draft',
     submitted_at TIMESTAMPTZ,
     applicant_name VARCHAR(100),
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -91,9 +84,8 @@ CREATE TABLE public.browser_test_parent (
 
 CREATE TABLE public.browser_test_step (
     id BIGSERIAL PRIMARY KEY,
-    display_name VARCHAR(200),
-    workflow_status workflow_step_status DEFAULT 'draft',
-    parent_id BIGINT REFERENCES public.browser_test_parent(id),
+    display_name VARCHAR(200) NOT NULL DEFAULT 'Step',
+    parent_id BIGINT NOT NULL REFERENCES public.browser_test_parent(id),
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -112,61 +104,65 @@ GRANT USAGE, SELECT ON SEQUENCE public.browser_test_parent_id_seq TO authenticat
 GRANT USAGE, SELECT ON SEQUENCE public.browser_test_step_id_seq TO authenticated;
 
 INSERT INTO metadata.permissions (table_name, permission)
-VALUES ('browser_test_parent', 'read'), ('browser_test_parent', 'create'), ('browser_test_parent', 'update'), ('browser_test_parent', 'delete')
+VALUES ('browser_test_parent', 'read'), ('browser_test_parent', 'create'), ('browser_test_parent', 'update'), ('browser_test_parent', 'delete'),
+       ('browser_test_step', 'read'), ('browser_test_step', 'create'), ('browser_test_step', 'update'), ('browser_test_step', 'delete')
 ON CONFLICT (table_name, permission) DO NOTHING;
 
-INSERT INTO metadata.permissions (table_name, permission)
-VALUES ('browser_test_step', 'read'), ('browser_test_step', 'create'), ('browser_test_step', 'update'), ('browser_test_step', 'delete')
-ON CONFLICT (table_name, permission) DO NOTHING;
-
+-- Assign permissions to the admin role (role_id = 4)
 INSERT INTO metadata.permission_roles (permission_id, role_id)
 SELECT p.id, 4 FROM metadata.permissions p
-WHERE p.table_name = 'browser_test_parent'
+WHERE p.table_name IN ('browser_test_parent', 'browser_test_step')
 ON CONFLICT (permission_id, role_id) DO NOTHING;
 
-INSERT INTO metadata.permission_roles (permission_id, role_id)
-SELECT p.id, 4 FROM metadata.permissions p
-WHERE p.table_name = 'browser_test_step'
-ON CONFLICT (permission_id, role_id) DO NOTHING;
-
+-- Register the guided form. register_guided_form adds status_id to the parent;
+-- NULL ownership column = no ownership RLS (seed rows are inserted as superuser).
 DO $$DECLARE v_result JSONB; BEGIN
-    v_result := public.register_workflow(
-        'browser_test_workflow'::name,
-        'Browser Test Workflow'::varchar,
+    v_result := public.register_guided_form(
+        '${GUIDED_FORM_KEY}'::name,
         'browser_test_parent'::name,
-        'Workflow for browser testing'::text,
-        NULL::name, NULL::text,
-        'Application Details'::varchar,
-        NULL::text, FALSE, NULL::name
+        'Guided form for browser testing'::text,
+        NULL::name,                       -- no on_submit_rpc
+        'Application Details'::varchar,   -- parent step display name
+        NULL::text,                       -- review_intro_text
+        FALSE,                            -- lock_on_submit
+        NULL::name,                       -- no precondition_rpc
+        NULL::name                        -- no ownership column
     );
     IF NOT (v_result->>'success')::boolean THEN
-        RAISE EXCEPTION 'register_workflow failed: %', v_result->>'message';
+        RAISE EXCEPTION 'register_guided_form failed: %', v_result->>'message';
     END IF;
 END $$;
 
-SELECT public.add_workflow_step(
-    'browser_test_workflow'::name,
+SELECT public.add_guided_form_step(
+    '${GUIDED_FORM_KEY}'::name,
     'details'::name,
     'Additional Details'::varchar,
     1,
     'browser_test_step'::name,
     'parent_id'::name,
-    NULL::text, FALSE
+    NULL::text,
+    FALSE
 );
 
--- Seed a draft parent (for auto-save test)
-INSERT INTO public.browser_test_parent (id, display_name, workflow_status)
-VALUES (99901, 'Draft Test', 'draft');
+-- Seed a draft parent (for the auto-save test); status_id defaults to draft
+INSERT INTO public.browser_test_parent (id, display_name)
+VALUES (99901, 'Draft Test');
 
--- Seed a completed parent (for view/edit mode test)
-INSERT INTO public.browser_test_parent (id, display_name, workflow_status)
-VALUES (99902, 'Completed Test', 'complete');
-INSERT INTO public.browser_test_step (id, display_name, workflow_status, parent_id)
-VALUES (99902, 'Step Data', 'complete', 99902);
-INSERT INTO metadata.workflow_progress (workflow_key, parent_id, step_key, completed_at)
-VALUES ('browser_test_workflow', 99902, '__parent__', NOW()),
-       ('browser_test_workflow', 99902, 'details', NOW())
-ON CONFLICT (workflow_key, parent_id, step_key) DO UPDATE SET completed_at = NOW();
+-- Seed a completed parent + step (for the view/edit mode test)
+INSERT INTO public.browser_test_parent (id, display_name)
+VALUES (99902, 'Completed Test');
+INSERT INTO public.browser_test_step (id, display_name, parent_id)
+VALUES (99902, 'Step Data', 99902);
+UPDATE public.browser_test_step
+   SET status_id = (SELECT id FROM metadata.statuses WHERE entity_type = 'guided_form' AND status_key = 'complete')
+ WHERE id = 99902;
+UPDATE public.browser_test_parent
+   SET status_id = (SELECT id FROM metadata.statuses WHERE entity_type = 'guided_form' AND status_key = 'complete')
+ WHERE id = 99902;
+INSERT INTO metadata.guided_form_progress (guided_form_key, parent_id, step_key, completed_at)
+VALUES ('${GUIDED_FORM_KEY}', 99902, '__parent__', NOW()),
+       ('${GUIDED_FORM_KEY}', 99902, 'details', NOW())
+ON CONFLICT (guided_form_key, parent_id, step_key) DO UPDATE SET completed_at = NOW();
 
 NOTIFY pgrst, 'reload schema';
 `;
@@ -175,28 +171,37 @@ NOTIFY pgrst, 'reload schema';
   return result;
 }
 
-async function cleanupWorkflowData() {
-  const sql = `
-UPDATE metadata.entities SET workflow_key = NULL WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.workflow_progress WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.workflow_step_conditions WHERE workflow_step_id IN (
-    SELECT id FROM metadata.workflow_steps WHERE workflow_key = 'browser_test_workflow'
+const CLEANUP_SQL = `
+UPDATE metadata.entities SET guided_form_key = NULL WHERE guided_form_key = '${GUIDED_FORM_KEY}';
+DELETE FROM metadata.guided_form_progress WHERE guided_form_key = '${GUIDED_FORM_KEY}';
+DELETE FROM metadata.guided_form_step_conditions WHERE guided_form_step_id IN (
+    SELECT id FROM metadata.guided_form_steps WHERE guided_form_key = '${GUIDED_FORM_KEY}'
 );
-DELETE FROM metadata.workflow_steps WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.workflows WHERE workflow_key = 'browser_test_workflow';
-DELETE FROM metadata.entities WHERE table_name IN ('browser_test_parent', 'browser_test_step');
+DELETE FROM metadata.guided_form_steps WHERE guided_form_key = '${GUIDED_FORM_KEY}';
+DELETE FROM metadata.guided_forms WHERE guided_form_key = '${GUIDED_FORM_KEY}';
 DROP TABLE IF EXISTS public.browser_test_step CASCADE;
 DROP TABLE IF EXISTS public.browser_test_parent CASCADE;
+`;
+
+async function cleanupGuidedFormData() {
+  const sql = `
+${CLEANUP_SQL}
+DELETE FROM metadata.permission_roles WHERE permission_id IN (
+    SELECT id FROM metadata.permissions WHERE table_name IN ('browser_test_parent', 'browser_test_step')
+);
+DELETE FROM metadata.permissions WHERE table_name IN ('browser_test_parent', 'browser_test_step');
+DELETE FROM metadata.entities WHERE table_name IN ('browser_test_parent', 'browser_test_step');
+NOTIFY pgrst, 'reload schema';
 `;
   runSql(sql);
 }
 
 async function runTests() {
-  console.log('━━━ Workflow Auto-save + View/Edit Mode Tests ━━━');
+  console.log('━━━ Guided Form Auto-save + View/Edit Mode Tests ━━━');
 
   let browser, context, page;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await launchBrowser();
     context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     page = await context.newPage();
 
@@ -204,8 +209,8 @@ async function runTests() {
     assert('Keycloak login token acquired', !!token);
     if (!token) throw new Error('No token');
 
-    const seedResult = await seedWorkflowData();
-    assert('Test workflow data seeded', seedResult.success);
+    const seedResult = await seedGuidedFormData();
+    assert('Test guided form data seeded', seedResult.success);
 
     await new Promise(r => setTimeout(r, 1500));
 
@@ -227,9 +232,9 @@ async function runTests() {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    // Check workflow nav shows draft mode
-    const workflowNav = page.locator('app-workflow-nav');
-    assert('Workflow nav appears on draft parent', await workflowNav.count() > 0);
+    // Check guided form nav shows draft mode
+    const guidedFormNav = page.locator('app-guided-form-nav');
+    assert('Guided form nav appears on draft parent', await guidedFormNav.count() > 0);
 
     // Type in a field to trigger auto-save
     const displayInput = page.locator('#display_name');
@@ -244,16 +249,16 @@ async function runTests() {
       assert('Auto-save test skipped — no display_name input found', false);
     }
 
-    // === TEST 2: Review step appears in nav for completed workflow ===
+    // === TEST 2: Review step appears in nav for completed guided form ===
     console.log('\n  --- Review Step Test ---');
 
     await page.goto(`${BASE_URL}/view/browser_test_parent/99902`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const nav = page.locator('app-workflow-nav');
+    const nav = page.locator('app-guided-form-nav');
     const navText = await nav.textContent();
-    assert('Review step visible in workflow nav', navText?.includes('Review') || false);
+    assert('Review step visible in guided form nav', navText?.includes('Review') || false);
 
     // === TEST 3: View mode for completed step ===
     console.log('\n  --- View/Edit Mode Test ---');
@@ -266,9 +271,9 @@ async function runTests() {
     const editBtn = page.locator('button:has-text("Edit")');
     assert('Edit button visible for completed step', await editBtn.count() > 0);
 
-    // Save & Continue should NOT be visible
-    const saveContinueBtn = page.locator('button:has-text("Save & Continue")');
-    assert('Save & Continue hidden for completed step', await saveContinueBtn.count() === 0);
+    // Save and continue should NOT be visible
+    const saveContinueBtn = page.locator('button:has-text("Save and continue")');
+    assert('Save and continue hidden for completed step', await saveContinueBtn.count() === 0);
 
     if (await editBtn.count() > 0) {
       await editBtn.first().click();
@@ -296,12 +301,12 @@ async function runTests() {
     fail++;
   } finally {
     if (browser) await browser.close();
-    await cleanupWorkflowData();
+    await cleanupGuidedFormData();
   }
 
   console.log('');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('  Workflow Auto-save + View/Edit Mode Test Results');
+  console.log('  Guided Form Auto-save + View/Edit Mode Test Results');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(`  ✓ PASS: ${pass}`);
   console.log(`  ✗ FAIL: ${fail}`);
