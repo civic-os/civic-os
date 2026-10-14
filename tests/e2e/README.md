@@ -58,7 +58,13 @@ On a loaded Docker VM, Postgres init (migrations plus init scripts on the
 amd64 image) or Keycloak startup can overrun the compose healthcheck
 window. The runner then prints the VM's memory and per-container usage,
 waits up to 15 minutes for every healthcheck to report healthy, and starts
-the remaining services.
+the remaining services. If the image build cannot reach the Docker registry
+(base image metadata), the runner prints a WARNING and starts the images
+this project built earlier. Those images may predate local changes under
+`docker/` or `services/`.
+
+If the host loses its network during a run, the app shows its offline
+banner and flows fail. That is an environment failure, not a diff: re-run.
 
 Development options:
 

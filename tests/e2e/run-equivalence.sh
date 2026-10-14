@@ -157,7 +157,18 @@ fresh_stack() {
   local services
   services=$(compose config --services | grep -vxE 'swagger-ui|mcp-server|payment-worker' | tr '\n' ' ')
   # shellcheck disable=SC2086
-  if ! compose up -d --build --quiet-pull $services > "$ART/compose-up.log" 2>&1; then
+  if ! compose build $services > "$ART/compose-build.log" 2>&1; then
+    if grep -qE "no such host|dial tcp|failed to fetch anonymous token|TLS handshake timeout" "$ART/compose-build.log"; then
+      # The registry is unreachable while resolving base images. Use the images this
+      # project built earlier; loud, because they may predate local source changes.
+      log "WARNING: image build could not reach the registry; starting with previously built images"
+    else
+      tail -20 "$ART/compose-build.log" >&2
+      return 1
+    fi
+  fi
+  # shellcheck disable=SC2086
+  if ! compose up -d --no-build --quiet-pull $services > "$ART/compose-up.log" 2>&1; then
     if ! grep -qE "is unhealthy|dependency failed to start" "$ART/compose-up.log"; then
       tail -20 "$ART/compose-up.log" >&2
       return 1
@@ -171,7 +182,7 @@ fresh_stack() {
     wait_healthy 900 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
     log "dependencies healthy; retrying compose up"
     # shellcheck disable=SC2086
-    compose up -d --quiet-pull $services >> "$ART/compose-up.log" 2>&1 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
+    compose up -d --no-build --quiet-pull $services >> "$ART/compose-up.log" 2>&1 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
   fi
   wait_http "http://localhost:3000/" 400
   wait_http "http://localhost:8082/realms/civic-os-dev/.well-known/openid-configuration" 400
