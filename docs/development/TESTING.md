@@ -941,12 +941,17 @@ Tests marked `unstable` in the baseline have counts inflated by assertions that 
 
 ### Async-emission probe
 
-`src/app/testing/async-flush-probe.ts` (imported from `src/test-setup.ts`) is inert unless `SDK_ASYNC_FLUSH=microtask` is set. When active it patches `TestRequest.prototype.flush` so the real flush runs after three chained microtasks (`ASYNC_FLUSH_HOPS`), simulating the Promise hops introduced when `SchemaService`/`DataService` delegate to Promise-based core clients. Only `flush` is delayed; `error()` and `expectOne`/`match` stay synchronous.
+`src/app/testing/async-flush-probe.ts` (imported from `src/test-setup.ts`) is inert unless `SDK_ASYNC_FLUSH` is set. It patches `TestRequest.prototype.flush`, `error` and `event` so delivery to the subscriber is deferred, simulating the Promise hops introduced when `SchemaService`/`DataService` delegate to Promise-based core clients. Two modes:
+
+- `macrotask`: delivery runs from a real `setTimeout(0)`. **This is the gate.** It detects assertions outside the test body: a `subscribe()` callback that nobody awaits now fires after the test ended, so the ledger count of that test drops (DECREASED) or its state changes.
+- `microtask`: delivery runs after `ASYNC_FLUSH_HOPS` (3) chained microtasks. It checks ordering assumptions only (code that reads state right after `flush()`). It cannot detect assertions that moved back into `subscribe()`, because vitest runs `afterEach` more than 10 microtask hops later, so such a late assertion still lands inside the counted test lifecycle.
+
+The real `setTimeout` is captured at module load, so fake timers do not stall delivery. If the request is already cancelled when `flush`/`error`/`event` is called, the original runs synchronously (and throws, as before). Otherwise delivery is deferred and dropped if the request was cancelled by then, matching production behavior for a late response to an unsubscribed request.
 
 ```bash
-SDK_ASYNC_FLUSH=microtask npm run test:headless                  # failures = tests that depend on synchronous emission
-SDK_ASYNC_FLUSH=microtask node scripts/test-ledger.mjs           # also compare assertion counts with the baseline
-SDK_ASYNC_FLUSH=microtask npx ng test --watch=false --include='**/schema.service.spec.ts'
+SDK_ASYNC_FLUSH=macrotask node scripts/test-ledger.mjs            # gate: no DECREASED, same pass/fail
+SDK_ASYNC_FLUSH=microtask node scripts/test-ledger.mjs            # ordering assumptions
+SDK_ASYNC_FLUSH=macrotask npx ng test --watch=false --include='**/schema.service.spec.ts'
 ```
 
 A spec is robust to deferred emission when it passes under the probe with the same assertion count as without it. Await-style pattern (works for synchronous and deferred emission):
@@ -958,4 +963,8 @@ const result = await result$;
 expect(result).toEqual(...);
 ```
 
-Anything that reads service state populated by the emission (signal caches, `ensure*Loaded` guards) must come after the `await`. `schema.service.spec.ts` and `data.service.spec.ts` are fully converted; other specs still fail under the probe until converted (the probe run lists them).
+Anything that reads service state populated by the emission (signal caches, `ensure*Loaded` guards) must come after the `await`. `schema.service.spec.ts` and `data.service.spec.ts` are fully converted; other specs may still fail under the probe until converted (the probe run lists them).
+
+### Shared fixtures are frozen
+
+The exported fixtures in `src/app/testing/mock-schema.ts` and `mock-dashboard.ts` (`MOCK_PROPERTIES`, `MOCK_ENTITIES`, `MOCK_DATA`, `MOCK_M2M_PROPERTY`, `MOCK_WIDGETS`, ...) are deep-frozen with `deepFreeze()`, so an in-place mutation throws at the mutation site. Angular's vitest runner shares module instances across spec files in a worker, so an unfrozen mutation (for example `SchemaService.getProperties()` setting `type` on a response object) silently corrupts later specs. Clone before passing a fixture through code that mutates its input: `structuredClone(MOCK_PROPERTIES.integer)`. The `createMock*` factories return fresh unfrozen objects.
