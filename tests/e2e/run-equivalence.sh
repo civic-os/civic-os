@@ -149,6 +149,10 @@ fresh_stack() {
   services=$(compose config --services | grep -vxE 'swagger-ui|mcp-server|payment-worker' | tr '\n' ' ')
   # shellcheck disable=SC2086
   if ! compose up -d --build --quiet-pull $services > "$ART/compose-up.log" 2>&1; then
+    if ! grep -qE "is unhealthy|dependency failed to start" "$ART/compose-up.log"; then
+      tail -20 "$ART/compose-up.log" >&2
+      return 1
+    fi
     # Postgres init (migrations + init scripts, amd64 image) can overrun the compose
     # healthcheck window on a loaded VM. Show the memory picture, wait for postgres
     # to finish, then start the remaining services.
