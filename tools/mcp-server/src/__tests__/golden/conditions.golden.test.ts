@@ -25,7 +25,8 @@ import { propertyToSelectString } from '../../select-builder.js';
 import {
   adminVariant, checkGolden, compactStringify, expectNoOrphans, listExamples, loadFrontendArtifact, parseLabel,
 } from './golden-io.js';
-import { bootVariant, callTool, makeServer, restoreFetch, type CapturedRequest, type McpContext } from './mcp-harness.js';
+import { BASE, bootMcp, bootVariant, callTool, makeServer, restoreFetch, routesFrom, type CapturedRequest, type McpContext } from './mcp-harness.js';
+import { EntityPropertyType } from '../../interfaces.js';
 
 afterEach(() => restoreFetch());
 
@@ -175,12 +176,20 @@ function getRecordListing(text: string | undefined, action: SchemaEntityAction):
   return line.includes('*(disabled:') ? 'listed-disabled' : 'listed';
 }
 
+/**
+ * Stub routes for one action run, matched exactly: the action's RPC (POST),
+ * the entity's row (GET on the table path), the notes teaser (GET
+ * entity_notes). Anything else answers 404, so a renamed RPC or path shows up
+ * in the golden instead of being served.
+ */
 async function runAction(ctx: McpContext, server: ReturnType<typeof makeServer>, action: SchemaEntityAction, record: Rec) {
-  const rpcPath = `/rpc/${action.rpc_function}`;
+  const rpcUrl = `<PGRST>/rpc/${action.rpc_function}`;
   ctx.backend.responder = (req: CapturedRequest) => {
-    if (req.method === 'POST' && req.url.includes(rpcPath)) return { status: 200, body: { success: true, message: 'ok' } };
-    if (req.url.startsWith(`<PGRST>/${encodeURIComponent(action.table_name)}?`)) return { status: 200, body: [structuredClone(record)] };
-    return { status: 200, body: [], headers: { 'Content-Range': '*/0' } };
+    const pathname = decodeURIComponent(new URL(req.url.replace('<PGRST>', BASE)).pathname);
+    if (req.method === 'POST' && req.url === rpcUrl) return { status: 200, body: { success: true, message: 'ok' } };
+    if (req.method === 'GET' && pathname === `/${action.table_name}`) return { status: 200, body: [structuredClone(record)] };
+    if (req.method === 'GET' && pathname === '/entity_notes') return { status: 200, body: [], headers: { 'Content-Range': '*/0' } };
+    return { status: 404, body: { code: 'PGRST205', message: `unexpected request ${req.method} ${req.url}`, details: null, hint: null } };
   };
   const exec = await callTool(ctx, server, 'execute_action', { entity: action.table_name, id: 1, action: action.action_name });
   const get = await callTool(ctx, server, 'get_record', { entity: action.table_name, id: 1 }, { keepText: true });
@@ -189,8 +198,85 @@ async function runAction(ctx: McpContext, server: ReturnType<typeof makeServer>,
     ...(exec.toolError && classify(exec) !== 'passed-conditions (missing required parameter)' ? { executeActionText: exec.toolError } : {}),
     rpcCalled: exec.requests.some(r => r.method === 'POST'),
     getRecordListing: getRecordListing(get.toolError ? undefined : get.text, action),
+    executeRequests: exec.requests,
+    getRecordRequests: get.requests,
   };
 }
+
+async function actionsArtifact(ctx: McpContext) {
+  const server = makeServer(ctx);
+  const out: Record<string, unknown> = {};
+  const selects: Record<string, string> = {};
+  for (const action of ctx.cache.actions) {
+    const kinds = (['visibility_condition', 'enabled_condition'] as const).filter(k => action[k]);
+    if (!kinds.length) continue;
+    const props = ctx.cache.getProperties(action.table_name);
+    const roots: Record<string, string> = {};
+    const satisfyAll: Rec = {};
+    for (const k of kinds) shapeRecord(satisfyAll, action[k], true, props, roots);
+    const cases: Record<string, unknown> = {};
+    cases['satisfies all conditions'] = { record: satisfyAll, ...(await runAction(ctx, server, action, satisfyAll)) };
+    for (const k of kinds) {
+      const rec: Rec = {};
+      for (const other of kinds) if (other !== k) shapeRecord(rec, action[other], true, props, {});
+      shapeRecord(rec, action[k], false, props, {});
+      cases[`violates ${k}`] = { record: rec, ...(await runAction(ctx, server, action, rec)) };
+    }
+    // The select the condition-check fetch uses (same for every action of the table).
+    const fetch = (cases['satisfies all conditions'] as { executeRequests: CapturedRequest[] }).executeRequests.find(r => r.method === 'GET');
+    if (fetch) selects[action.table_name] = fetch.decoded.find(d => d.startsWith('select='))?.slice(7) ?? '<none>';
+    out[`${action.table_name}.${action.action_name}`] = {
+      conditions: Object.fromEntries(kinds.map(k => [k, action[k]])),
+      leafShapes: roots,
+      canExecute: action.can_execute,
+      showOnDetail: action.show_on_detail,
+      cases,
+    };
+  }
+  return { conditionFetchSelect: selects, actions: out };
+}
+
+const synProp = (column: string, sort: number, extra: Record<string, unknown>) => ({
+  table_name: 'tasks', column_name: column, display_name: column, description: null, sort_order: sort,
+  data_type: 'character varying', udt_name: 'varchar', udt_schema: 'pg_catalog',
+  join_schema: null, join_table: null, join_column: null, geography_type: null,
+  is_nullable: true, is_updatable: true, is_identity: false, is_generated: false, is_self_referencing: false,
+  column_default: null, show_on_list: true, show_on_create: true, show_on_edit: true, show_on_detail: true,
+  sortable: true, filterable: false, validation_rules: [], ...extra,
+});
+const synAction = (id: number, name: string, rpc: string, extra: Record<string, unknown>) => ({
+  id, table_name: 'tasks', action_name: name, display_name: name[0].toUpperCase() + name.slice(1), description: null, rpc_function: rpc,
+  icon: null, button_style: 'primary', sort_order: id, requires_confirmation: false, confirmation_message: null,
+  visibility_condition: null, enabled_condition: null, disabled_tooltip: null, default_success_message: null, default_navigate_to: null,
+  refresh_after_action: true, show_on_detail: true, can_execute: true, parameters: [], ...extra,
+});
+/** Synthetic schema: an entity without timestamp columns, with notes, a Status FK and a User FK. */
+const SYN = {
+  entities: [{ table_name: 'tasks', display_name: 'Tasks', description: null, sort_order: 1, insert: true, select: true, update: true, delete: true, enable_notes: true }],
+  properties: [
+    synProp('id', 1, { data_type: 'integer', udt_name: 'int4', is_identity: true, is_updatable: false }),
+    synProp('display_name', 2, {}),
+    synProp('status_id', 3, { data_type: 'integer', udt_name: 'int4', join_schema: 'metadata', join_table: 'statuses', join_column: 'id', status_entity_type: 'task' }),
+    synProp('owner', 4, { data_type: 'uuid', udt_name: 'uuid', join_schema: 'metadata', join_table: 'civic_os_users', join_column: 'id' }),
+  ],
+  actions: [
+    synAction(1, 'start', 'start_task', {
+      visibility_condition: { field: 'status_id', operator: 'ne', value: 3 },
+      enabled_condition: { field: 'status_id.status_key', operator: 'eq', value: 'open' },
+    }),
+    synAction(2, 'assign', 'assign_task', {
+      visibility_condition: { or: [{ field: 'owner', operator: 'is_null' }, { field: 'display_name', operator: 'eq', value: 'x' }] },
+      disabled_tooltip: 'Only unassigned tasks',
+      parameters: [{ id: 1, param_name: 'p_owner', display_name: 'Owner', param_type: 'user', required: true, sort_order: 1 }],
+    }),
+    synAction(3, 'close', 'close_task', { enabled_condition: { and: [{ field: 'status_id', operator: 'in', value: [1, 2] }, { field: 'display_name', operator: 'is_not_null' }] }, disabled_tooltip: 'Open or started tasks only' }),
+  ],
+  statuses: [
+    { id: 1, entity_type: 'task', display_name: 'Open', status_key: 'open', sort_order: 1, color: null, is_initial: true, is_terminal: false },
+    { id: 2, entity_type: 'task', display_name: 'Started', status_key: 'started', sort_order: 2, color: null, is_initial: false, is_terminal: false },
+    { id: 3, entity_type: 'task', display_name: 'Done', status_key: 'done', sort_order: 3, color: null, is_initial: false, is_terminal: true },
+  ],
+};
 
 describe('golden (mcp): condition evaluator', () => {
   for (const example of listExamples()) {
@@ -216,40 +302,27 @@ describe('golden (mcp): condition evaluator', () => {
 
     it(`${example}: conditional actions end to end in the MCP fetch shape`, async () => {
       const ctx = await bootVariant(adminVariant(example));
-      const server = makeServer(ctx);
-      const out: Record<string, unknown> = {};
-      const selects: Record<string, string> = {};
-      for (const action of ctx.cache.actions) {
-        const kinds = (['visibility_condition', 'enabled_condition'] as const).filter(k => action[k]);
-        if (!kinds.length) continue;
-        const props = ctx.cache.getProperties(action.table_name);
-        const roots: Record<string, string> = {};
-        const satisfyAll: Rec = {};
-        for (const k of kinds) shapeRecord(satisfyAll, action[k], true, props, roots);
-        const cases: Record<string, unknown> = {};
-        cases['satisfies all conditions'] = { record: satisfyAll, ...(await runAction(ctx, server, action, satisfyAll)) };
-        for (const k of kinds) {
-          const rec: Rec = {};
-          for (const other of kinds) if (other !== k) shapeRecord(rec, action[other], true, props, {});
-          shapeRecord(rec, action[k], false, props, {});
-          cases[`violates ${k}`] = { record: rec, ...(await runAction(ctx, server, action, rec)) };
-        }
-        // The select the condition-check fetch uses (same for every action of the table).
-        ctx.backend.responder = () => ({ status: 200, body: [] });
-        const probe = await callTool(ctx, server, 'execute_action', { entity: action.table_name, id: 1, action: action.action_name });
-        const get = probe.requests.find(r => r.method === 'GET');
-        if (get) selects[action.table_name] = get.decoded.find(d => d.startsWith('select='))?.slice(7) ?? '<none>';
-        out[`${action.table_name}.${action.action_name}`] = {
-          conditions: Object.fromEntries(kinds.map(k => [k, action[k]])),
-          leafShapes: roots,
-          canExecute: action.can_execute,
-          showOnDetail: action.show_on_detail,
-          cases,
-        };
-      }
-      checkGolden(`${example}/_example/mcp.actions-execute.json`, { conditionFetchSelect: selects, actions: out });
+      checkGolden(`${example}/_example/mcp.actions-execute.json`, await actionsArtifact(ctx));
     });
   }
+
+  it('conditional actions on a synthetic entity without timestamp columns', async () => {
+    // The examples' conditional actions all sit on entities that have created_at / updated_at,
+    // so a change to which columns the condition fetch selects could hide behind the select's
+    // de-duplication; this entity has neither (and enables notes, and has a required parameter).
+    const ctx = await bootMcp(routesFrom({
+      'schema_entities?order=sort_order.asc,display_name.asc': SYN.entities,
+      'schema_properties?order=table_name.asc,sort_order.asc': SYN.properties,
+      'schema_entity_actions?order=table_name.asc,sort_order.asc': SYN.actions,
+      'statuses?order=entity_type.asc,sort_order.asc,display_name.asc': SYN.statuses,
+      'categories?order=entity_type.asc,sort_order.asc,display_name.asc': [],
+      'status_transitions': { __status: 404, __body: { code: '42P01', message: 'relation does not exist' } },
+      'constraint_messages': [],
+      'schema_cache_versions': [{ cache_name: 'entities', version: '1' }, { cache_name: 'properties', version: '1' }],
+    }));
+    const syntheticTypes = Object.fromEntries(ctx.cache.properties.map(p => [`${p.table_name}.${p.column_name}`, EntityPropertyType[p.type ?? 0]]));
+    checkGolden('_shared/mcp.actions-execute.json', { synthetic: SYN, syntheticTypes, ...(await actionsArtifact(ctx)) });
+  });
 
   it('operator x value x data matrix, dot paths and compounds (frontend inputs)', () => {
     const fe = loadFrontendArtifact('_shared/conditions.matrix.json');

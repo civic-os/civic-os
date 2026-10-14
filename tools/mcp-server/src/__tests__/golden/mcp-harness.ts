@@ -88,6 +88,10 @@ export class FixtureBackend {
     for (const [k, v] of Object.entries(init?.headers ?? {})) {
       if (TRANSPORT_DEFAULTS[k] !== v) headers[k] = v;
     }
+    // A transport default that is not sent is recorded too, so dropping one changes the golden.
+    for (const k of Object.keys(TRANSPORT_DEFAULTS)) {
+      if (!(k in (init?.headers ?? {}))) headers[k] = '<absent>';
+    }
     const req: CapturedRequest = {
       method,
       url: url.startsWith(BASE) ? `<PGRST>${url.slice(BASE.length)}` : url,

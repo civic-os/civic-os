@@ -10,7 +10,7 @@ A stubbed global `fetch` plays PostgREST. Bootstrap requests the MCP makes (`sch
 
 Inputs are shared with the frontend wherever a frontend artifact exists: condition records are recovered from the frontend's result labels, error payloads and query inputs are read from the frontend artifacts, and the matrix tests assert that every frontend case is mapped. Per-entity frontend queries are mapped by query NAME and the actual field array (the frontend artifact elides field arrays equal to a named list as `<list>` / `<detail>` / `<edit>`, and those labels collide when two lists are equal). Regenerate the frontend goldens first when both need refreshing.
 
-Harness limits: the stub answers every data request with an empty result (or, in `mcp.actions-execute.json`, the record under test) and cannot reject a select. A select PostgREST would refuse (an embed through a view without the FK relationship, a column the entity lacks) therefore still "succeeds" here; the request shapes are exact, their acceptance by PostgREST is not proven (the request-equivalence harness, P0.4, covers live behavior). The ledger states this as evidence confidence 4/5 where it matters (A-01, S-02).
+Harness limits: the stub answers every data request with an empty result (or, in `mcp.actions-execute.json`, the record under test, the action's own RPC and the notes teaser, matched exactly by method and path; anything else gets a 404, so a renamed RPC or path changes the golden) and cannot reject a select. A select PostgREST would refuse (an embed through a view without the FK relationship, a column the entity lacks) therefore still "succeeds" here; the request shapes are exact, their acceptance by PostgREST is not proven (the request-equivalence harness, P0.4, covers live behavior). The ledger states this as evidence confidence 4/5 where it matters (A-01, S-02).
 
 ## Layout
 
@@ -25,13 +25,16 @@ tests/golden/derived/mcp/
     conditions.actions.json           evaluateCondition over the frontend artifact's conditions and records
     mcp.conditions-describe.json      describeConditionFailure for every record the evaluator rejects
     mcp.actions-execute.json          each conditional action through execute_action and get_record against records in
-                                      the MCP's own fetch shape: satisfying all conditions, violating each condition kind
+                                      the MCP's own fetch shape: satisfying all conditions, violating each condition kind;
+                                      every request each tool sent (condition fetch, RPC call with its body, notes teaser)
     errors.lookup.json                toHumanMessage over the frontend payload set with the example's constraint_messages
     data.queries.json                 the frontend's per-entity queries mapped to list_records / get_record, requests as sent
     mcp.names-status-category.json    resolveStatus / resolveCategory by status_key, display name, upper case, padding
   _shared/
     conditions.matrix.json            operator x value x data matrix, dot paths, compounds (frontend inputs)
     mcp.conditions-extra.json         extra cells the frontend matrix lacks (empty / whitespace strings, falsy values, falsy ids)
+    mcp.actions-execute.json          conditional actions on a synthetic entity without timestamp columns (notes on, a
+                                      required parameter, OR / AND conditions), with the synthetic schema it ran on
     errors.data-parse-api-error.json  PostgRESTClient error path over the frontend's HTTP error cases (each with its stubbed `input`)
     data.query-matrix.json            the frontend's special-character / id / limit / pagination cases, synthetic `items` schema (+ the MCP's detected types)
     data.content-range.json           client contentRange and the total list_records reports, frontend header list
