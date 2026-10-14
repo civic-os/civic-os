@@ -53,7 +53,7 @@ cleanup() {
     stop_dev_server
     if [[ $STACK_STARTED == 1 ]]; then
       log "tearing down $PROJECT"
-      compose down -v --remove-orphans >/dev/null 2>&1
+      teardown_stack
     fi
   elif [[ -n "$DEV_PID" ]]; then
     log "leaving dev server (pid $DEV_PID) and stack $PROJECT running (--keep-stack)"
@@ -99,16 +99,67 @@ settle_workers() {
   done
 }
 
+wait_postgres() {
+  local timeout="$1" t=0
+  until compose exec -T postgres pg_isready -q -h 127.0.0.1 -U postgres -d civic_os_db 2>/dev/null; do
+    t=$((t + 5)); [[ $t -ge $timeout ]] && { echo "postgres did not become ready within ${timeout}s" >&2; return 1; }
+    sleep 5
+  done
+}
+
+# Tears down this run's stack. Containers that carry this project's compose label
+# but are not one of its services (e.g. a container started from an image this
+# project built) are never touched: in that case only our own services, their
+# anonymous volumes and our named volumes are removed.
+teardown_stack() {
+  local expected labelled foreign=""
+  expected=$(compose config --format json 2>/dev/null | node -e '
+    let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+      const c = JSON.parse(s);
+      for (const [name, svc] of Object.entries(c.services || {})) console.log(svc.container_name || `${c.name}-${name}-1`);
+    });')
+  labelled=$(docker ps -a --filter "label=com.docker.compose.project=$PROJECT" --format '{{.Names}}')
+  for name in $labelled; do
+    grep -qx "$name" <<< "$expected" || foreign="$foreign $name"
+  done
+  if [[ -z "$foreign" ]]; then
+    compose down -v >/dev/null 2>&1 || true
+    return 0
+  fi
+  log "foreign containers carry the $PROJECT label (left untouched):$foreign"
+  # shellcheck disable=SC2046
+  compose rm -s -f -v $(compose config --services) >/dev/null 2>&1 || true
+  local vol
+  for vol in $(compose config --volumes 2>/dev/null); do
+    docker volume rm "${PROJECT}_${vol}" >/dev/null 2>&1 || true
+  done
+  local net
+  for net in $(docker network ls --filter "label=com.docker.compose.project=$PROJECT" -q); do
+    docker network rm "$net" >/dev/null 2>&1 || true
+  done
+}
+
 fresh_stack() {
   if [[ $REUSE_STACK == 1 ]]; then log "reusing running stack $PROJECT"; return; fi
   local t0; t0=$(date +%s)
   log "fresh stack $PROJECT (down -v, up --build)"
   STACK_STARTED=1
-  compose down -v --remove-orphans >/dev/null 2>&1 || true
+  teardown_stack
   local services
   services=$(compose config --services | grep -vxE 'swagger-ui|mcp-server|payment-worker' | tr '\n' ' ')
   # shellcheck disable=SC2086
-  compose up -d --build --quiet-pull $services > "$ART/compose-up.log" 2>&1 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
+  if ! compose up -d --build --quiet-pull $services > "$ART/compose-up.log" 2>&1; then
+    # Postgres init (migrations + init scripts, amd64 image) can overrun the compose
+    # healthcheck window on a loaded VM. Show the memory picture, wait for postgres
+    # to finish, then start the remaining services.
+    log "compose up failed (see compose-up.log); VM memory and load:"
+    docker info --format 'MemTotal={{.MemTotal}} NCPU={{.NCPU}}' >&2 || true
+    docker stats --no-stream --format '  {{.Name}} {{.MemUsage}} {{.CPUPerc}}' >&2 || true
+    wait_postgres 900 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
+    log "postgres ready; retrying compose up"
+    # shellcheck disable=SC2086
+    compose up -d --quiet-pull $services >> "$ART/compose-up.log" 2>&1 || { tail -40 "$ART/compose-up.log" >&2; return 1; }
+  fi
   wait_http "http://localhost:3000/" 400
   wait_http "http://localhost:8082/realms/civic-os-dev/.well-known/openid-configuration" 400
   settle_workers

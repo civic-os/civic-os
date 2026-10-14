@@ -49,6 +49,16 @@ Each run does the following:
 6. Runs the flows, normalizes the recordings, and tears everything down
    again, including the lock.
 
+Teardown only removes this project's own services, their anonymous volumes
+and its named volumes. A container that merely carries the
+`com.docker.compose.project=sdk-<example>` label, for example one started
+from an image this project built, is reported and left alone.
+
+On a loaded Docker VM, Postgres init (migrations plus init scripts on the
+amd64 image) can overrun the compose healthcheck window. The runner then
+prints the VM's memory and per-container usage, waits up to 15 minutes for
+Postgres, and starts the remaining services.
+
 Development options:
 
 | Option | Effect |
