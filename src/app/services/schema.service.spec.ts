@@ -138,7 +138,7 @@ describe('SchemaService', () => {
         });
 
         it('should cache properties on first call', async () => {
-            const mockProps = [MOCK_PROPERTIES.textShort];
+            const mockProps = structuredClone([MOCK_PROPERTIES.textShort]);
 
             const first$ = firstValueFrom(service.getProperties());
             expectPostgrestRequest(httpMock, 'schema_entities', []);
@@ -957,7 +957,8 @@ describe('SchemaService', () => {
 
         it('should prevent concurrent getProperties() calls from triggering duplicate HTTP requests', async () => {
             const mockEntities = [MOCK_ENTITIES.issue];
-            const mockProperties = [MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.integer];
+            // Clone: getProperties() sets `type` on response objects in place and MOCK_* fixtures are frozen
+            const mockProperties = structuredClone([MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.integer]);
 
             // First ensure entities are loaded (getProperties depends on getEntities)
             const entities$ = firstValueFrom(service.getEntities());
@@ -987,7 +988,7 @@ describe('SchemaService', () => {
 
         it('should allow refreshCache() to trigger new requests after initial load completes', async () => {
             const mockEntities = [MOCK_ENTITIES.issue];
-            const mockProperties = [MOCK_PROPERTIES.textShort];
+            const mockProperties = structuredClone([MOCK_PROPERTIES.textShort]);
             const mockConstraintMessages: any[] = [];
 
             // Initial load
