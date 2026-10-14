@@ -998,4 +998,7 @@ The MCP server has the same kind of goldens: `tools/mcp-server/src/__tests__/gol
 scripts/golden/derive-mcp.sh                # regenerate (GOLDEN_UPDATE=1); a normal `npm test` in tools/mcp-server compares
 scripts/golden/derive-mcp.sh --check        # compare only
 node scripts/golden/ledger.mjs [--check]    # rewrite (or verify) the divergence ledger from both golden trees
+scripts/golden/ledger-mutation-check.sh     # opt-in gate: every MCP mutation must make the ledger fail
 ```
+
+The ledger attributes a difference to a row only when both golden values equal its reference models (`scripts/golden/ledger-models.mjs`, transcriptions of the cited frontend and MCP code) and the row's transformation explains the gap; anything else is unattributed and the run exits 2. `scripts/golden/ledger-mutation-check.sh` applies each mutation in `scripts/golden/ledger-mutations.mjs` to a scratch copy of the MCP source, re-derives the MCP goldens, and requires that a golden changed and that the ledger exits 2. It is not part of the normal suites (about a minute); run it, and keep it passing, for any change to `scripts/golden/ledger*.mjs`, to the MCP golden tests, or to the MCP behavior the ledger models. A deliberate MCP behavior change (including one toward parity) must update the models and the rule catalogue in the same change.

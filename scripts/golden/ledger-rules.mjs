@@ -9,8 +9,9 @@
  * One entry per distinct RULE on which the frontend and the MCP server
  * interpret the metadata contract differently, plus the frontend quirks the
  * P0.2b goldens captured. Instance counts are NOT written here: the ledger
- * engines compute them from the golden trees and attribute every difference
- * to exactly one rule. Prose here states each side's behavior with code
+ * engines compute them from the golden trees, attributing a difference only
+ * when both sides match the reference models in ledger-models.mjs and the
+ * rule's transformation explains it. Prose here states each side's behavior with code
  * citations; `checks` assert that the cited code still contains the quoted
  * text (a stale citation fails the ledger run); `probes` (type detection)
  * name synthetic inputs from tests/golden/derived/mcp/_shared/mcp.type-probes.json
@@ -72,7 +73,7 @@ export const RULES = [
     latent: 'schema_properties always reports join_table with join_column in every example; demonstrated by the type probes',
     impact: {
       adoptFrontend: 'No generic-app change; the MCP would type a join_column-only property as a foreign key it cannot embed (no join_table for the select).',
-      adoptMcp: 'Generic app stops treating a join_column-only property as an FK; it would otherwise build a select and dropdown with no target table.',
+      adoptMcp: 'Generic app stops treating a join_column-only integer as an FK, and a join_column-only column carrying status_entity_type / category_entity_type stops rendering as a Status / Category badge (latent: no example has such a column); today the frontend would build a select and dropdown with no target table for it.',
     },
     recommendation: 'adopt-mcp', reason: 'Strictly safer: an FK without join_table cannot be embedded or offered as options, so typing it as a plain integer is the correct fallback.',
   },
@@ -190,9 +191,9 @@ export const RULES = [
     probes: { 'uuid plain': 'Unknown', 'uuid fk public non-system': 'Unknown' },
     impact: {
       adoptFrontend: 'MCP shows these columns untyped (it already renders unknowns as text, so output barely changes).',
-      adoptMcp: 'Generic app renders plain uuids as short text (instances below: ids and created_by uuids on views) and would offer FK dropdowns for uuid FKs to integrator tables.',
+      adoptMcp: 'Generic app renders plain uuids as short text and edits them in a free-text input: neighborhood-hub `mek_checkouts.checkout_photos` / `return_photos` (show_on_edit, today Unknown with no control) would get a free-text uuid field; uuid FKs to integrator tables would get FK dropdowns.',
     },
-    recommendation: 'adopt-mcp', reason: 'Strictly better for display; verify the edit component handles uuid FK values before enabling uuid FK dropdowns.',
+    recommendation: 'needs-decision', reason: 'Display improves, but a free-text uuid editor is worse than no control. Suggested core rule: plain uuid is a read-only short text; uuid FK to a table with display_name is ForeignKeyName (verify the FK editor handles uuid keys).',
   },
   {
     id: 'T-10', area: T,
@@ -247,7 +248,7 @@ export const RULES = [
       adoptFrontend: 'No generic-app change; the MCP stops requesting `id` from target tables that are referenced by another column (and may have no id).',
       adoptMcp: 'Generic app requests `id` instead of the referenced key; breaks FKs whose target key is not id.',
     },
-    recommendation: 'adopt-frontend', reason: 'The embed must select the referenced key. Fix the frontend duplicate `(display_name,display_name)` in the core while moving it.',
+    recommendation: 'adopt-frontend', reason: 'The embed must select the referenced key. The frontend\'s own duplicate `(display_name,display_name)` for FKs that reference display_name is a separate decision (S-07).',
   },
   {
     id: 'S-02', area: S,
@@ -260,7 +261,7 @@ export const RULES = [
       adoptFrontend: 'MCP shows raw ids for these columns instead of names.',
       adoptMcp: 'Generic app shows names for metadata FKs, provided a public view of the same name exists and exposes the FK relationship to PostgREST.',
     },
-    recommendation: 'needs-decision', reason: 'The MCP output is more useful, but embedding through metadata views depends on PostgREST resolving the relationship through a view; verify on the instances below (P0.4 harness) before adopting.',
+    recommendation: 'needs-decision', reason: 'The MCP output is more useful, but embedding through metadata views depends on PostgREST resolving the relationship through a view; verify on the instances below (P0.4 harness) before adopting. Evidence confidence 4/5: the golden stub cannot reject a select, so these goldens do not show whether PostgREST accepts the MCP embed.',
   },
   {
     id: 'S-03', area: S,
@@ -304,6 +305,25 @@ export const RULES = [
     checks: [{ file: SB, contains: ['(id,photo_gallery_files(file_id))'] }],
     impact: { adoptFrontend: 'get_record could list photo captions / file names.', adoptMcp: 'Generic app detail pages could not show photos.' },
     recommendation: 'adopt-frontend', reason: 'The core exposes the context-specific variants; the MCP picks list for list_records and detail for get_record.',
+  },
+  {
+    id: 'S-07', area: S,
+    rule: 'Frontend FK embed selects display_name twice when the FK references display_name',
+    frontend: '`col:join_table!col(<join_column>,display_name)` with join_column = display_name gives `(display_name,display_name)`: the embed carries no id.',
+    mcp: 'Not affected by this quirk (always `(id,display_name)`, see S-01).',
+    evidence: [`${SS}:752`, `${FEG}/staff-portal/<variant>/schema.properties.json`],
+    checks: [{ file: SS, contains: ["'(' + prop.join_column + ',display_name)'"] }],
+    compute: ({ hit, readJson, FE, examples, variants }) => {
+      for (const ex of examples()) {
+        for (const v of variants(ex)) {
+          for (const [t, list] of Object.entries(readJson(path.join(FE, ex, v, 'schema.properties.json')).entities)) {
+            for (const p of list) if (p.select.endsWith('(display_name,display_name)')) hit('S-07', { example: ex, variant: v, entity: t, subject: p.column, detail: p.select });
+          }
+        }
+      }
+    },
+    impact: { adoptFrontend: 'n/a (frontend-only quirk).', adoptMcp: 'n/a' },
+    recommendation: 'needs-decision', reason: 'Selecting `(display_name)` once (or the key plus display_name) changes the generic app\'s select string: an approved golden diff, not a silent fix inside the move. Decide together with S-01.',
   },
 
   // ---------------------------------------------------------------- views
@@ -417,12 +437,12 @@ export const RULES = [
   // ---------------------------------------------------------------- actions
   {
     id: 'A-01', area: A,
-    rule: 'Status-gated actions are wrongly blocked (or wrongly allowed) through the MCP',
+    rule: 'Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed)',
     frontend: 'Detail page evaluates conditions with .id extraction against its embedded record; actions behave as configured.',
-    mcp: 'With the record the MCP actually fetches (Status/FK columns embedded), `status_id eq 5` never holds (execute_action says disabled / not available, get_record hides or greys the action) and `status_id ne 6` always holds (visible in the wrong state).',
-    evidence: [`${MCG}/<example>/_example/mcp.actions-execute.json`, `${EA}:62-110`, `${GR}:96-123`],
-    impact: { adoptFrontend: 'MCP users can run approve/deny/cancel/check-out actions again.', adoptMcp: 'n/a' },
-    recommendation: 'mcp-bug', reason: 'Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions are unusable through the MCP in community-center, mottpark, neighborhood-hub and staff-portal.',
+    mcp: 'With the record the MCP fetches (Status/FK columns embedded), `status_id eq 5` never holds, so execute_action refuses the action (disabled / not available) and get_record hides or greys it; `status_id ne 6` always holds, so an action stays listed in the wrong state, but its `eq` enabled condition still refuses it. Evidence confidence 4/5: the golden stub cannot reject a select, so the record shape is the one the MCP\'s select requests (one embed per FK), not one PostgREST returned.',
+    evidence: [`${MCG}/<example>/_example/mcp.actions-execute.json`, `${EA}:62-110`, `${GR}:96-123`, 'stub limit: tests/golden/derived/mcp/COVERAGE.md'],
+    impact: { adoptFrontend: 'MCP users can run approve/deny/cancel/check-out actions again, and get_record lists them in the right states.', adoptMcp: 'n/a' },
+    recommendation: 'mcp-bug', reason: 'Consequence of C-01 (and of embedding every FK in the condition fetch). Highest user impact of the ledger: core workflow actions cannot be run through the MCP in community-center, mottpark, neighborhood-hub and staff-portal.',
   },
   {
     id: 'A-02', area: A,
@@ -473,7 +493,7 @@ export const RULES = [
   // ---------------------------------------------------------------- errors
   {
     id: 'E-01', area: E,
-    rule: 'Different wording for errors both sides recognize (network, 42501, 23505, 401, 404, 23P01 without a name)',
+    rule: 'Different wording for errors both sides recognize (42501, 23505, 401, 404)',
     frontend: 'Short UI strings: "Permissions error", "Record must be unique", "Resource not found", "Your session has expired. Please refresh the page to log in again."',
     mcp: 'LLM-oriented sentences: "Permission denied. You do not have access to perform this action.", "A record with these values already exists (duplicate).", "Record not found.", "Authentication required. Your session may have expired."',
     evidence: [`${ES}:106-126`, `${PC}:204-255`],
@@ -484,8 +504,8 @@ export const RULES = [
   {
     id: 'E-03', area: E,
     rule: 'Constraint violations without a configured message: different fallback text',
-    frontend: '"Validation failed: <constraint_name>" (23514, name found), "Validation failed" (no name), "This conflicts with an existing record. Please check your input and try again." (23P01).',
-    mcp: '"Invalid <constraint name without _check, underscores as spaces>. Check the value and try again."; static parseToHuman (no lookup) differs the same way.',
+    frontend: '"Validation failed: <constraint_name>" (23514, name found), "Validation failed" (no name), "This conflicts with an existing record. Please check your input and try again." (23P01, name found), "This conflicts with an existing record." (23P01 without a name, and parseToHuman without lookup).',
+    mcp: '"Invalid <constraint name without _check, underscores as spaces>. Check the value and try again." (23514; "Invalid check constraint. ..." without a name); 23P01 always gets the long sentence. The no-lookup call differs the same way.',
     evidence: [`${ES}:61-95`, `${PC}:205-221`],
     checks: [{ file: ES, contains: ['return `Validation failed: ${constraintName}`;'] }, { file: PC, contains: [".replace(/_check$/, '')"] }],
     impact: { adoptFrontend: 'MCP shows raw constraint names to the LLM.', adoptMcp: 'Generic app shows humanized constraint names instead of raw ones.' },
@@ -521,7 +541,7 @@ export const RULES = [
     evidence: [`${DS}:52-54`, `${LR}:232-247`],
     checks: [{ file: LR, contains: ["params['order'] = 'display_name.asc';"] }],
     impact: { adoptFrontend: 'MCP pages become unstable across calls.', adoptMcp: 'Generic list pages get a deterministic default order (display_name), which changes what users see first.' },
-    recommendation: 'adopt-mcp', reason: 'Strictly better: paging without ORDER BY can skip or repeat rows. The core query builder should add a deterministic tie-breaker (id) as well.',
+    recommendation: 'adopt-mcp', reason: 'Strictly better: paging without ORDER BY can skip or repeat rows. Neither side adds an `id` tie-breaker today (the MCP orders by display_name alone, so duplicate names still page unstably); the core should append `,id.asc` to every default and user order.',
   },
   {
     id: 'Q-02', area: Q,
@@ -546,7 +566,7 @@ export const RULES = [
   {
     id: 'Q-11', area: Q,
     rule: 'id inclusion: the frontend appends id unless the entity is a summary view (is_view and no insert); the MCP only when the entity has an id column',
-    frontend: 'Junction tables (composite keys) and updatable views without id still get `id` appended, which PostgREST rejects.',
+    frontend: 'Junction tables (composite keys) and updatable views without id still get `id` appended, which PostgREST rejects. Summary views (is_view and no insert) are exempt only when the caller passes isSummaryView; the real list page does (list.page.ts:338), so FE-only ids on summary views come from the golden harness\'s other queries and are reported as harness-only.',
     mcp: 'Checks the properties for `id` / identity.',
     evidence: [`${DS}:43-45`, `${SB}:72-77`],
     checks: [{ file: DS, contains: ['if(!query.isSummaryView && !query.fields.includes(\'id\')) {'] }],
@@ -576,12 +596,12 @@ export const RULES = [
   {
     id: 'Q-06', area: Q,
     rule: 'Searching with a sort: the frontend drops the sort; the MCP keeps it',
-    frontend: 'When searchQuery is set, `order` is not sent.',
+    frontend: 'DataService does not send `order` when searchQuery is set, and ListPage clears orderField / orderDirection whenever any search is active, legacy or hybrid (list.page.ts:333-334).',
     mcp: 'Search and sort are independent.',
     evidence: [`${DS}:49-54`, `${LR}:216-247`],
     checks: [{ file: DS, contains: ["args.push('civic_os_text_search=wfts.'"] }],
     impact: { adoptFrontend: 'MCP search results lose the requested order.', adoptMcp: 'Generic app keeps the user\'s sort while searching.' },
-    recommendation: 'adopt-mcp', reason: 'Dropping an explicit sort is surprising; `wfts` does not rank results, so there is no relevance order to preserve.',
+    recommendation: 'adopt-mcp', reason: 'Dropping an explicit sort is surprising; `wfts` does not rank results, so there is no relevance order to preserve. Adopting it in the core alone changes nothing for the generic app: ListPage must also stop clearing the sort during search (list.page.ts:333-334).',
   },
   {
     id: 'Q-07', area: Q,
@@ -625,6 +645,7 @@ export const RULES = [
   },
   {
     id: 'Q-12', area: Q,
+    unit: 'one instance is one (query, missing timestamp column) pair; the entity count is the number of distinct entities affected.',
     rule: 'get_record always selects created_at and updated_at, even on entities without those columns',
     frontend: 'Detail selects only existing properties.',
     mcp: '`buildSelectString(allProperties, { includeTimestamps: true })` appends both unconditionally, so get_record fails on entities that lack them.',
@@ -687,6 +708,7 @@ export const RULES = [
   {
     id: 'N-02', area: N,
     rule: 'Status names: the MCP resolves status_key first, then display name; the import worker matches display names only',
+    unit: 'one instance is a status whose status_key the MCP resolves (not a failure), or a display name that resolves to another status because a key matched first.',
     frontend: 'Excel import builds `status_<entity_type>` lookups from `statuses` display names (lowercased, trimmed); status keys are not accepted.',
     mcp: '`resolveStatus` tries `status_key`, then display name, case-insensitive.',
     evidence: [`${NR}:211-226`, 'src/app/services/import-export.service.ts:660-700', 'src/app/workers/import-validation.worker.ts:856-922'],
@@ -726,7 +748,7 @@ export const RULES = [
   },
   {
     id: 'N-06', area: N,
-    rule: 'MCP-only fuzzy matching: duplicate column display names resolve to the first match',
+    rule: 'MCP-only name precedence: exact name, then the first exact display-name match, then substring; duplicate display names resolve to the first match',
     frontend: 'n/a (no free-text column names).',
     mcp: 'Exact column name, then exact display name (first match wins on duplicates), then substring.',
     evidence: [`${NR}:86-128`, `${MCG}/<variant>/mcp.names.json`],
@@ -822,13 +844,23 @@ export const RULES = [
   },
   {
     id: 'F-04', area: F,
-    rule: 'parseToHuman returns "System Error" for 23503, 23502, 22P02, 22007, PGRST116 and PT503 (PGRST301 only via HTTP 401)',
-    frontend: '"System Error" for all of these.',
-    mcp: '23502 "Required field \\"c\\" is missing.", 22P02 names the expected type ("a whole number", "a date (YYYY-MM-DD)", ...),22007/22008 "Invalid date format...", 412 handled; 23503 and PGRST116 fall back to "Error: <raw message>"; PT503 throws MaintenanceError at the client and index.ts returns a maintenance explanation.',
+    rule: 'parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message',
+    frontend: '"System Error" for all of these (PGRST301 is handled only through HTTP 401).',
+    mcp: '23502 "Required field \\"c\\" is missing.", 22P02 names the expected type ("a whole number", "a date (YYYY-MM-DD)", ...), 22007/22008 "Invalid date format...", 412 "This record has been modified since you last read it...".',
     evidence: [`${ES}:106-126`, `${PC}:225-251`, 'tools/mcp-server/src/index.ts:215-231', `${FEG}/<example>/_example/errors.lookup.json`],
     checks: [{ file: PC, contains: ["if (this.code === '23502') {", "if (this.code === '22P02') {"] }],
     impact: { adoptFrontend: 'MCP loses its friendlier messages.', adoptMcp: 'Generic app explains missing required fields, bad numbers and bad dates instead of "System Error".' },
-    recommendation: 'adopt-mcp', reason: 'Strictly better for 23502 / 22P02 / 22007 / 22008 / 412. 23503 (FK violation) and PGRST116 need a message on both sides; PT503 is handled by the frontend\'s maintenance interceptor, so its parseToHuman text rarely shows.',
+    recommendation: 'adopt-mcp', reason: 'Strictly better: these name the missing field or the expected format instead of "System Error".',
+  },
+  {
+    id: 'F-17', area: F,
+    rule: 'parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError)',
+    frontend: '"System Error".',
+    mcp: '23503 and PGRST116 fall back to "Error: <raw PostgREST message>"; PT503 makes the client throw MaintenanceError and index.ts returns a maintenance explanation (toHumanMessage alone gives "Error: <message>").',
+    evidence: [`${ES}:106-126`, `${PC}:254`, 'tools/mcp-server/src/index.ts:215-231', `${FEG}/<example>/_example/errors.lookup.json`],
+    checks: [{ file: PC, contains: ['return `Error: ${this.message}`;'] }],
+    impact: { adoptFrontend: 'MCP loses the raw message an LLM can act on.', adoptMcp: 'Generic app would show raw PostgREST / database text ("Error: insert or update on table ... violates foreign key constraint ...") to end users.' },
+    recommendation: 'needs-decision', reason: 'Wholesale adoption would surface raw messages in the UI. 23503 (FK violation) deserves a friendly message on both sides; PGRST116 likewise; PT503 is handled by the frontend\'s maintenance interceptor, so its parseToHuman text rarely shows.',
   },
   {
     id: 'F-05', area: F,

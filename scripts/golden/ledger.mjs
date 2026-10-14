@@ -9,22 +9,32 @@
  *
  * Reads the frontend and MCP golden trees (tests/golden/derived/{frontend,mcp})
  * plus the raw fixtures, diffs every shared artifact, attributes each
- * difference to exactly one rule from scripts/golden/ledger-rules.mjs, and
- * writes:
+ * difference to a rule from scripts/golden/ledger-rules.mjs, and writes:
  *   docs/notes/SDK_DIVERGENCE_LEDGER.md   (for Daniel's per-row decision at gate 2)
  *   tests/golden/ledger.json             (machine-readable, same content)
  *
  *   node scripts/golden/ledger.mjs            rewrite both files
  *   node scripts/golden/ledger.mjs --check    fail (exit 1) if either committed file is stale
  *
- * Any difference no rule explains is reported as unattributed and fails the
- * run (exit 2): the ledger must account for every computed divergence.
+ * Attribution is exact: a difference counts for a rule only when both golden
+ * values equal the reference models in scripts/golden/ledger-models.mjs and
+ * the rule's specific transformation turns one into the other. Anything else
+ * (a golden value no model reproduces, or a gap no rule explains) is
+ * unattributed and fails the run with exit 2, in both modes. The `.es`
+ * variants are skipped: the MCP never receives translated metadata (N-05).
+ * scripts/golden/ledger-mutation-check.sh proves the attribution is tight.
  * Output is deterministic (no timestamps, everything sorted).
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RULES, AREAS, NONDETERMINISM } from './ledger-rules.mjs';
+import {
+  STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULE_FLAGS, attempt, conditionRules, decodeFeUrl, evaluate, feBase, feHybridSearch,
+  feParse, feParseLookup, feRequest, feSelect, feSelectForList, feTotalPaginated, feTotalPreview, mcpClientError, mcpContentRange,
+  mcpFilter, mcpGetRecord, mcpListRecords, mcpParse, mcpSelect, resolveAction, resolveCategory, resolveColumn, resolveEntity,
+  resolveFk, resolveStatus, selectAlias, selectRule, splitSelect, typeRule, NameError,
+} from './ledger-models.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FE = path.join(ROOT, 'tests/golden/derived/frontend');
@@ -37,6 +47,7 @@ const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 const isDir = p => fs.existsSync(p) && fs.statSync(p).isDirectory();
 const rel = p => path.relative(ROOT, p).split(path.sep).join('/');
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 /** Canonical JSON (sorted keys) for labels. */
 function canon(v) {
   if (Array.isArray(v)) return `[${v.map(canon).join(',')}]`;
@@ -46,27 +57,32 @@ function canon(v) {
 
 const ROLE_ORDER = ['anon', 'testuser', 'testeditor', 'testmanager', 'testadmin'];
 const examples = () => fs.readdirSync(RAW).filter(d => isDir(path.join(RAW, d))).sort();
-const variants = ex => fs.readdirSync(path.join(RAW, ex)).filter(d => isDir(path.join(RAW, ex, d))).sort((x, y) => {
-  const [rx, lx = ''] = x.split('.');
-  const [ry, ly = ''] = y.split('.');
-  return cmp(lx, ly) || ROLE_ORDER.indexOf(rx) - ROLE_ORDER.indexOf(ry);
-});
+/** Role variants in production for both consumers (the `.es` variants are frontend-only). */
+const variants = ex => fs.readdirSync(path.join(RAW, ex)).filter(d => isDir(path.join(RAW, ex, d)) && !d.includes('.'))
+  .sort((x, y) => ROLE_ORDER.indexOf(x) - ROLE_ORDER.indexOf(y));
+const allVariants = ex => fs.readdirSync(path.join(RAW, ex)).filter(d => isDir(path.join(RAW, ex, d))).sort();
 
 // ---------------------------------------------------------------------------
 // Collector
 // ---------------------------------------------------------------------------
 
 const ruleById = new Map(RULES.map(r => [r.id, r]));
+const BUCKETS = ['instances', 'effects', 'harnessOnly'];
 const hits = new Map();
 const unattributed = [];
-const diagnostics = { tieOrderArtifacts: 0, comparisons: {} };
+const notes = new Map();
+const diagnostics = { tieOrderArtifacts: 0, bothReject: 0, mappingArtifacts: 0, comparisons: {} };
 
 function count(area) { diagnostics.comparisons[area] = (diagnostics.comparisons[area] ?? 0) + 1; }
 
-/** Record one difference explained by `ruleId`. kind 'instances' = the rule itself, 'effects' = a downstream difference it causes. */
+/**
+ * Record one difference explained by `ruleId`. Buckets: 'instances' (the rule
+ * itself), 'effects' (a downstream difference it causes), 'harnessOnly' (a
+ * difference only the golden harness produces, not the real app).
+ */
 function hit(ruleId, inst, kind = 'instances') {
   if (!ruleById.has(ruleId)) throw new Error(`unknown rule ${ruleId}`);
-  if (!hits.has(ruleId)) hits.set(ruleId, { instances: new Map(), effects: new Map() });
+  if (!hits.has(ruleId)) hits.set(ruleId, Object.fromEntries(BUCKETS.map(b => [b, new Map()])));
   const bucket = hits.get(ruleId)[kind];
   const key = [inst.example ?? '', inst.entity ?? '', inst.subject ?? ''].join(' · ');
   if (!bucket.has(key)) bucket.set(key, { example: inst.example, entity: inst.entity, subject: inst.subject, detail: inst.detail, variants: new Set(), occurrences: 0 });
@@ -74,100 +90,49 @@ function hit(ruleId, inst, kind = 'instances') {
   if (inst.variant) e.variants.add(inst.variant);
   e.occurrences++;
 }
-
-function miss(area, inst) {
-  unattributed.push({ area, ...inst });
-}
+function miss(area, inst) { unattributed.push({ area, ...inst }); }
+function note(ruleId, text) { notes.set(ruleId, [...(notes.get(ruleId) ?? []), text]); }
 
 // ---------------------------------------------------------------------------
-// Shared helpers
+// Schema context for the MCP models
 // ---------------------------------------------------------------------------
 
-const SYSTEM_TYPES = ['User', 'File', 'FileImage', 'FilePDF', 'Payment', 'PhotoGallery'];
-const STATUSY = ['Status', 'Category'];
-const INT = ['int4', 'int8'];
-
-/** Which type-detection rule explains fe -> mcp for raw property p (null if none). */
-function classifyType(p, fe, mc) {
-  if (!p) return null;
-  const { udt_name: udt, join_table: jt, join_column: jc, join_schema: js } = p;
-  if ((fe === 'FileImage' && mc === 'File') || (fe === 'File' && mc === 'FileImage')) return 'T-06';
-  if (STATUSY.includes(mc) && !STATUSY.includes(fe)) return !INT.includes(udt) ? 'T-02' : (!jt ? 'T-01' : null);
-  if (STATUSY.includes(fe) && !STATUSY.includes(mc)) return jc != null && !jt ? 'T-01' : null;
-  if (SYSTEM_TYPES.includes(mc) && !SYSTEM_TYPES.includes(fe)) {
-    if (jt === 'civic_os_users_private') return 'T-04';
-    if (jt === 'transactions' && js !== 'payments' && udt === 'uuid') return 'T-05';
-    if (udt !== 'uuid') return 'T-03';
-    return null;
+const schemaCache = new Map();
+/** The MCP's view of one variant: .mcp fixtures (MCP order) with the MCP's detected types from its golden. */
+function mcpSchema(ex, v) {
+  const key = `${ex}|${v}`;
+  if (schemaCache.has(key)) return schemaCache.get(key);
+  const types = new Map();
+  for (const [t, list] of Object.entries(readJson(path.join(MCP, ex, v, 'schema.properties.json')).entities)) {
+    for (const p of list) types.set(`${t}.${p.column}`, p.type);
   }
-  if (udt === 'geography') return 'T-07';
-  if (udt === 'int2') return 'T-08';
-  if (udt === 'bpchar') return 'T-10';
-  if (udt === 'uuid') return 'T-09';
-  if (fe === 'ForeignKeyName' || mc === 'ForeignKeyName') {
-    if (jc != null && !jt) return 'T-01';
-    if (mc === 'ForeignKeyName' && !INT.includes(udt)) return 'T-11';
-  }
-  return null;
+  const props = readJson(path.join(RAW, ex, v, 'schema_properties.mcp.json')).map(p => ({ ...p, type: types.get(`${p.table_name}.${p.column_name}`) }));
+  const byTable = new Map();
+  for (const p of props) byTable.set(p.table_name, [...(byTable.get(p.table_name) ?? []), p]);
+  const S = {
+    entities: readJson(path.join(RAW, ex, v, 'schema_entities.mcp.json')),
+    props: t => byTable.get(t) ?? [],
+    actions: readJson(path.join(RAW, ex, v, 'schema_entity_actions.mcp.json')),
+    statuses: readJson(path.join(RAW, ex, v, 'statuses.json')),
+    categories: readJson(path.join(RAW, ex, v, 'categories.json')),
+  };
+  schemaCache.set(key, S);
+  return S;
 }
 
-function classifySelect(e, m, p) {
-  switch (e.type) {
-    case 'User': return 'S-03';
-    case 'File': case 'FileImage': case 'FilePDF': return 'S-04';
-    case 'Payment': return 'S-05';
-    case 'PhotoGallery': return e.selectForList !== '=' && m.select === e.selectForList ? 'S-06' : null;
-    case 'ForeignKeyName':
-      if (!p) return null;
-      if (p.join_schema !== 'public') return 'S-02';
-      if (p.join_column !== 'id') return 'S-01';
-      return null;
-    default: return null;
-  }
-}
-
-/** Split a PostgREST select value into top-level items (parentheses-aware). */
-function splitSelect(s) {
-  const out = [];
-  let depth = 0;
-  let cur = '';
-  for (const ch of s ?? '') {
-    if (ch === '(') depth++;
-    if (ch === ')') depth--;
-    if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
-  }
-  if (cur !== '' || out.length) out.push(cur);
-  return out;
-}
-const alias = item => item.split(':')[0].split('!')[0].split('(')[0];
-
-/** Parse a recorded frontend URL (`<PGRST>/path?query`, not encoded) the way PostgREST decodes it. */
-function parseFeUrl(url) {
-  const rest = url.replace(/^<PGRST>\//, '');
-  const q = rest.indexOf('?');
-  const pathPart = q < 0 ? rest : rest.slice(0, q);
-  const query = q < 0 ? '' : rest.slice(q + 1);
-  const params = [...new URLSearchParams(query).entries()].map(([k, v]) => [k, v]);
-  return { path: pathPart, params };
-}
-function parseMcpRequest(r) {
-  const rest = r.url.replace(/^<PGRST>\//, '');
-  const q = rest.indexOf('?');
-  return { path: decodeURIComponent(q < 0 ? rest : rest.slice(0, q)), params: r.decoded.map(d => { const i = d.indexOf('='); return [d.slice(0, i), d.slice(i + 1)]; }) };
-}
+/** Rule assigned to each property / view difference by the property and view engines (used by the request engine). */
+const propRule = new Map();
+const viewRule = new Map();
 
 // ---------------------------------------------------------------------------
-// Engine 1: property types and select strings (per variant)
+// Engine 1: property types and select strings
 // ---------------------------------------------------------------------------
 
 function propertyEngine() {
   for (const ex of examples()) {
     for (const v of variants(ex)) {
-      const fePath = path.join(FE, ex, v, 'schema.properties.json');
-      const mcPath = path.join(MCP, ex, v, 'schema.properties.json');
-      if (!fs.existsSync(fePath) || !fs.existsSync(mcPath)) { miss('properties', { example: ex, variant: v, detail: 'artifact missing on one side' }); continue; }
-      const fe = readJson(fePath).entities;
-      const mc = readJson(mcPath).entities;
+      const fe = readJson(path.join(FE, ex, v, 'schema.properties.json')).entities;
+      const mc = readJson(path.join(MCP, ex, v, 'schema.properties.json')).entities;
       const raw = new Map(readJson(path.join(RAW, ex, v, 'schema_properties.json')).map(p => [`${p.table_name}.${p.column_name}`, p]));
       for (const [table, list] of Object.entries(fe)) {
         const mIndex = new Map((mc[table] ?? []).map(m => [m.column, m]));
@@ -176,26 +141,27 @@ function propertyEngine() {
           const base = { example: ex, variant: v, entity: table, subject: e.column };
           const m = mIndex.get(e.column);
           mIndex.delete(e.column);
+          const p = raw.get(`${table}.${e.column}`);
           if (!m) {
-            if (e.type === 'ManyToMany') hit('T-12', { ...base, detail: e.select });
+            if (e.type === 'ManyToMany' && !p) { hit('T-12', { ...base, detail: e.select }); propRule.set(`${ex}|${table}|${e.column}`, 'T-12'); }
             else miss('properties', { ...base, detail: 'property missing in MCP' });
             continue;
           }
-          const p = raw.get(`${table}.${e.column}`);
-          let typeRule = null;
+          if (!p) { miss('properties', { ...base, detail: 'no raw property' }); continue; }
+          const feList = e.selectForList === '=' ? e.select : e.selectForList;
+          if (e.select !== feSelect(e.type, p) || feList !== feSelectForList(e.type, p)) { miss('fe-model', { ...base, detail: `frontend select ${e.select} differs from the model` }); continue; }
+          if (m.select !== mcpSelect(m.type, p)) { miss('mcp-model', { ...base, detail: `MCP select ${m.select} differs from the model ${mcpSelect(m.type, p)}` }); continue; }
           if (e.type !== m.type) {
-            typeRule = classifyType(p, e.type, m.type);
-            if (typeRule) hit(typeRule, { ...base, detail: `frontend ${e.type}, MCP ${m.type}` });
-            else miss('type', { ...base, detail: `${e.type} -> ${m.type}` });
-          }
-          if (e.select !== m.select) {
-            if (e.type !== m.type) {
-              if (typeRule) hit(typeRule, { ...base, subject: `${e.column} (select)`, detail: `frontend ${e.select} | MCP ${m.select}` }, 'effects');
-            } else {
-              const r = classifySelect(e, m, p);
-              if (r) hit(r, { ...base, detail: `frontend ${e.select} | MCP ${m.select}` });
-              else miss('select', { ...base, detail: `${e.select} | ${m.select}` });
-            }
+            const r = typeRule(p, e.type, m.type);
+            if (!r) { miss('type', { ...base, detail: `${e.type} -> ${m.type}` }); continue; }
+            hit(r, { ...base, detail: `frontend ${e.type}, MCP ${m.type}` });
+            propRule.set(`${ex}|${table}|${e.column}`, r);
+            if (e.select !== m.select) hit(r, { ...base, subject: `${e.column} (select)`, detail: `frontend ${e.select} | MCP ${m.select}` }, 'effects');
+          } else if (e.select !== m.select) {
+            const r = selectRule(e.type, p, e.select, m.select);
+            if (!r) { miss('select', { ...base, detail: `${e.select} | ${m.select}` }); continue; }
+            hit(r, { ...base, detail: `frontend ${e.select} | MCP ${m.select}` });
+            propRule.set(`${ex}|${table}|${e.column}`, r);
           }
         }
         for (const m of mIndex.values()) miss('properties', { example: ex, variant: v, entity: table, subject: m.column, detail: 'property only in MCP' });
@@ -206,23 +172,29 @@ function propertyEngine() {
 }
 
 // ---------------------------------------------------------------------------
-// Engine 2: view property lists (per variant)
+// Engine 2: view property lists
 // ---------------------------------------------------------------------------
-
-const STRUCTURAL = ['display_name', 'status_id', 'submitted_at'];
 
 function viewEngine() {
   for (const ex of examples()) {
     for (const v of variants(ex)) {
       const fe = readJson(path.join(FE, ex, v, 'schema.views.json')).entities;
       const mc = readJson(path.join(MCP, ex, v, 'schema.views.json')).entities;
-      const feProps = readJson(path.join(FE, ex, v, 'schema.properties.json')).entities;
+      const feTypes = new Map();
+      for (const [t, list] of Object.entries(readJson(path.join(FE, ex, v, 'schema.properties.json')).entities)) for (const p of list) feTypes.set(`${t}.${p.column}`, p.type);
       const raw = new Map(readJson(path.join(RAW, ex, v, 'schema_properties.json')).map(p => [`${p.table_name}.${p.column_name}`, p]));
       const ents = new Map(readJson(path.join(RAW, ex, v, 'schema_entities.json')).map(e => [e.table_name, e]));
+      const S = mcpSchema(ex, v);
+      for (const [table, views] of Object.entries(mc)) {
+        for (const view of ['list', 'detail', 'create', 'edit']) {
+          const expected = mcpFilter(S.props(table), view).map(p => p.column_name);
+          if (!same(expected, views[view])) miss('mcp-model', { example: ex, variant: v, entity: table, subject: view, detail: `MCP ${views[view].join()} | model ${expected.join()}` });
+        }
+      }
       for (const [table, views] of Object.entries(fe)) {
         const m = mc[table];
         if (!m) { miss('views', { example: ex, variant: v, entity: table, detail: 'entity missing in MCP' }); continue; }
-        const feType = new Map((feProps[table] ?? []).map(p => [p.column, p.type]));
+        const ent = ents.get(table) ?? {};
         for (const view of ['list', 'detail', 'create', 'edit']) {
           count('view');
           const f = views[view];
@@ -231,19 +203,28 @@ function viewEngine() {
           for (const col of f.filter(c => !g.includes(c))) {
             const p = raw.get(`${table}.${col}`);
             const inst = { ...base, subject: `${view}: ${col}`, detail: 'frontend only' };
-            if (feType.get(col) === 'ManyToMany') hit('T-12', inst, 'effects');
-            else if (view !== 'create' && STRUCTURAL.includes(col) && p) hit('V-03', inst);
-            else if (view === 'list' && ents.get(table)?.map_property_name === col) hit('V-04', inst);
-            else miss('views', inst);
+            let r = null;
+            if (!p && feTypes.get(`${table}.${col}`) === 'ManyToMany') r = 'T-12';
+            else if (p && !feBase(view, p) && mcpFilter([p], view).length === 0) {
+              if (view !== 'create' && STRUCTURAL.includes(col)) r = 'V-03';
+              else if (view === 'list' && ent.show_map && ent.map_property_name === col) r = 'V-04';
+            }
+            if (!r) { miss('views', inst); continue; }
+            hit(r, inst, r === 'T-12' ? 'effects' : 'instances');
+            viewRule.set(`${ex}|${v}|${table}|${view}|${col}`, r);
           }
           for (const col of g.filter(c => !f.includes(c))) {
             const p = raw.get(`${table}.${col}`);
             const inst = { ...base, subject: `${view}: ${col}`, detail: 'MCP only' };
-            if ((view === 'create' || view === 'edit') && (col === 'created_at' || col === 'updated_at')) hit('V-01', inst);
-            else if ((view === 'create' || view === 'edit') && p && p.is_updatable === false) hit('V-02', inst);
-            else miss('views', inst);
+            let r = null;
+            if (p && (view === 'create' || view === 'edit') && !p.is_generated && !p.is_identity && p[`show_on_${view}`] !== false) {
+              if (col === 'created_at' || col === 'updated_at') r = 'V-01';
+              else if (!p.is_updatable) r = 'V-02';
+            }
+            if (!r) { miss('views', inst); continue; }
+            hit(r, inst);
+            viewRule.set(`${ex}|${v}|${table}|${view}|${col}`, r);
           }
-          // Order of the shared columns: differences confined to sort_order ties are capture artifacts (not rows).
           const shared = f.filter(c => g.includes(c));
           const gShared = g.filter(c => f.includes(c));
           if (shared.join() !== gShared.join()) {
@@ -263,55 +244,32 @@ function viewEngine() {
 // Engine 3: condition evaluator
 // ---------------------------------------------------------------------------
 
-const KNOWN_OPS = ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'in', 'is_null', 'is_not_null'];
-
-function leaves(c) {
-  if (!c || typeof c !== 'object') return [];
-  if (Array.isArray(c.or)) return c.or.flatMap(leaves);
-  if (Array.isArray(c.and)) return c.and.flatMap(leaves);
-  return [c];
+/** Check both goldens against the models and attribute a differing pair. */
+function conditionCell(cond, rec, feResult, mcResult, inst, synthetic) {
+  count('condition');
+  const feModel = evaluate(cond, rec);
+  const mcModel = evaluate(cond, rec, MCP_FLAGS);
+  if (feResult !== undefined && feModel !== feResult) { miss('fe-model', { ...inst, detail: `frontend ${feResult}, model ${feModel}` }); return; }
+  if (mcModel !== mcResult) { miss('mcp-model', { ...inst, detail: `MCP ${mcResult}, model ${mcModel}` }); return; }
+  if (feModel === mcResult) return;
+  const rules = conditionRules(cond, rec);
+  if (!rules) { miss('conditions', { ...inst, detail: `frontend ${feModel}, MCP ${mcResult}: no rule explains it` }); return; }
+  for (const r of rules) hit(r, { ...inst, example: synthetic ? '_shared' : inst.example, detail: `frontend ${feModel}, MCP ${mcResult}${rules.length > 1 ? ` (with ${rules.filter(x => x !== r).join(', ')})` : ''}` });
 }
 
-function resolveDot(rec, field) {
-  let cur = rec;
-  for (const part of String(field).split('.')) {
-    if (cur === null || cur === undefined || typeof cur !== 'object') return undefined;
-    cur = cur[part];
-  }
-  return cur;
-}
-
-/** Which evaluator rule explains a differing result for `cond` on `rec` (rec null/undefined allowed). */
-function classifyCondition(cond, rec) {
-  if (cond === null || cond === undefined) return 'C-06';
-  if (rec === null || rec === undefined) return 'C-05';
-  for (const leaf of leaves(cond)) {
-    const field = String(leaf.field);
-    const raw = resolveDot(rec, field);
-    if (!field.includes('.') && raw !== null && typeof raw === 'object' && 'id' in raw) return 'C-01';
-    if (!KNOWN_OPS.includes(leaf.operator)) return 'C-04';
-    if (['gt', 'lt', 'gte', 'lte'].includes(leaf.operator) && !(typeof raw === 'number' && typeof leaf.value === 'number')) return 'C-03';
-    // eslint-disable-next-line eqeqeq
-    if ((leaf.operator === 'eq' || leaf.operator === 'ne') && (raw == leaf.value) !== (raw === leaf.value)) return 'C-02';
-  }
-  return null;
-}
+const recordOf = label => (label === '<null data>' ? null : label === '<undefined data>' ? undefined : JSON.parse(label));
 
 function conditionEngine() {
   for (const ex of examples()) {
     const fe = readJson(path.join(FE, ex, '_example/conditions.actions.json')).conditions;
     const mc = readJson(path.join(MCP, ex, '_example/conditions.actions.json')).conditions;
     const mIndex = new Map(mc.map(c => [canon(c.condition), c]));
+    if (mc.length !== fe.length) miss('conditions', { example: ex, detail: 'condition count differs' });
     for (const c of fe) {
       const m = mIndex.get(canon(c.condition));
       if (!m) { miss('conditions', { example: ex, subject: canon(c.condition), detail: 'condition missing in MCP' }); continue; }
       for (const [label, r] of Object.entries(c.results)) {
-        count('condition');
-        if (m.results[label] === r) continue;
-        const rec = label === '<null data>' ? null : label === '<undefined data>' ? undefined : JSON.parse(label);
-        const rule = classifyCondition(c.condition, rec);
-        const inst = { example: ex, entity: c.usedBy.join(', '), subject: `${canon(c.condition)} @ ${label}`, detail: `frontend ${r}, MCP ${m.results[label]}` };
-        if (rule) hit(rule, inst); else miss('conditions', inst);
+        conditionCell(c.condition, recordOf(label), r, m.results[label], { example: ex, entity: c.usedBy.join(', '), subject: `${canon(c.condition)} @ ${label}` }, false);
       }
     }
   }
@@ -322,22 +280,13 @@ function conditionEngine() {
     const op = key.slice(0, sp) === '<empty>' ? '' : key.slice(0, sp);
     const cv = JSON.parse(key.slice(sp + 1));
     for (const [dl, r] of Object.entries(row)) {
-      count('condition');
-      const got = mc.matrix[key]?.[dl];
-      if (got === r) continue;
       const rec = dl === '<missing>' ? {} : { f: JSON.parse(dl) };
-      const rule = classifyCondition({ field: 'f', operator: op, value: cv }, rec);
-      const inst = { example: '_shared', entity: 'conditions.matrix', subject: `${key} @ ${dl}`, detail: `frontend ${r}, MCP ${got}` };
-      if (rule) hit(rule, inst); else miss('conditions', inst);
+      conditionCell({ field: 'f', operator: op, value: cv }, rec, r, mc.matrix[key]?.[dl], { example: '_shared', entity: 'conditions.matrix', subject: `${key} @ ${dl}` }, true);
     }
   }
   for (const [key, r] of Object.entries(fe.dotted)) {
-    count('condition');
-    if (mc.dotted[key] === r) continue;
     const at = key.indexOf(' @ ');
-    const rule = classifyCondition({ field: key.slice(0, at), operator: 'eq', value: 1 }, JSON.parse(key.slice(at + 3)));
-    const inst = { example: '_shared', entity: 'conditions.dotted', subject: key, detail: `frontend ${r}, MCP ${mc.dotted[key]}` };
-    if (rule) hit(rule, inst); else miss('conditions', inst);
+    conditionCell({ field: key.slice(0, at), operator: 'eq', value: 1 }, JSON.parse(key.slice(at + 3)), r, mc.dotted[key], { example: '_shared', entity: 'conditions.dotted', subject: key }, true);
   }
   const compoundInputs = {
     or: [{ or: [{ field: 'a', operator: 'eq', value: 1 }, { field: 'b', operator: 'eq', value: 2 }] }, { a: 0, b: 2 }],
@@ -349,12 +298,18 @@ function conditionEngine() {
     conditionNullData: [{ field: 'a', operator: 'eq', value: 1 }, null],
   };
   for (const [key, r] of Object.entries(fe.compound)) {
-    count('condition');
-    if (mc.compound[key] === r) continue;
-    const [cond, rec] = compoundInputs[key] ?? [];
-    const rule = key in compoundInputs ? classifyCondition(cond, rec) : null;
-    const inst = { example: '_shared', entity: 'conditions.compound', subject: key, detail: `frontend ${r}, MCP ${mc.compound[key]}` };
-    if (rule) hit(rule, inst); else miss('conditions', inst);
+    if (!(key in compoundInputs)) { miss('conditions', { example: '_shared', subject: key, detail: 'compound case not modeled' }); continue; }
+    const [cond, rec] = compoundInputs[key];
+    conditionCell(cond, rec, r, mc.compound[key], { example: '_shared', entity: 'conditions.compound', subject: key }, true);
+  }
+  // MCP-only extra cells (empty strings, falsy values): the frontend side is the anchored model.
+  const extra = readJson(path.join(MCP, '_shared/mcp.conditions-extra.json')).matrix;
+  for (const [key, row] of Object.entries(extra)) {
+    const sp = key.indexOf(' ');
+    const cond = { field: 'f', operator: key.slice(0, sp), value: JSON.parse(key.slice(sp + 1)) };
+    for (const [dl, r] of Object.entries(row)) {
+      conditionCell(cond, dl === '<missing>' ? {} : { f: JSON.parse(dl) }, undefined, r, { example: '_shared', entity: 'mcp.conditions-extra', subject: `${key} @ ${dl}` }, true);
+    }
   }
 }
 
@@ -362,85 +317,149 @@ function conditionEngine() {
 // Engine 4: conditional actions end to end (MCP-only artifact)
 // ---------------------------------------------------------------------------
 
-const PASSED = ['executed', 'passed-conditions (missing required parameter)'];
+function predictAction(action, rec, flags, entities) {
+  try {
+    resolveEntity(entities, action.table_name);
+  } catch (e) {
+    if (e instanceof NameError) return { executeAction: `other: NameResolutionError: ${e.message}`, getRecordListing: 'error' };
+    throw e;
+  }
+  const vis = action.visibility_condition ? evaluate(action.visibility_condition, rec, flags) : true;
+  const en = action.enabled_condition ? evaluate(action.enabled_condition, rec, flags) : true;
+  if (vis === THROWS || en === THROWS) return { executeAction: 'throws', getRecordListing: 'throws' };
+  let executeAction;
+  if (!action.can_execute) executeAction = 'no-permission';
+  else if (!vis) executeAction = 'not-available';
+  else if (!en) executeAction = 'disabled';
+  else executeAction = (action.parameters ?? []).some(p => p.required) ? 'passed-conditions (missing required parameter)' : 'executed';
+  let getRecordListing;
+  if (!action.can_execute || !action.show_on_detail || !vis) getRecordListing = 'hidden';
+  else getRecordListing = en ? 'listed' : 'listed-disabled';
+  return { executeAction, getRecordListing };
+}
 
 function actionEngine() {
+  let wronglyExecuted = 0;
+  let wrongCases = 0;
   for (const ex of examples()) {
+    const S = mcpSchema(ex, 'testadmin');
     const art = readJson(path.join(MCP, ex, '_example/mcp.actions-execute.json'));
     for (const [name, a] of Object.entries(art.actions)) {
-      const [table, action] = [name.slice(0, name.indexOf('.')), name.slice(name.indexOf('.') + 1)];
+      const action = S.actions.find(x => `${x.table_name}.${x.action_name}` === name);
+      if (!action) { miss('actions', { example: ex, subject: name, detail: 'action not in fixtures' }); continue; }
+      const base = { example: ex, entity: action.table_name, subject: action.action_name };
       for (const [kase, out] of Object.entries(a.cases)) {
         count('action-case');
-        const base = { example: ex, entity: table, subject: action };
-        if (out.executeAction.startsWith('other: NameResolutionError: Entity')) { hit('A-02', { ...base, detail: out.executeAction.slice(7, 80) }); continue; }
-        const expectPass = kase === 'satisfies all conditions';
-        const passed = PASSED.includes(out.executeAction);
-        const expectedListing = expectPass ? 'listed' : kase === 'violates visibility_condition' ? 'hidden' : 'listed-disabled';
-        const listingOk = !a.showOnDetail || out.getRecordListing === expectedListing
-          // a violated enabled condition that shares its field with the visibility condition also hides the action
-          || (kase === 'violates enabled_condition' && out.getRecordListing === 'hidden' && out.executeAction === 'not-available');
-        if (passed !== expectPass || !listingOk) {
-          const roots = Object.values(a.leafShapes);
-          const why = roots.includes('embed') ? 'plain condition field on an FK-embedded column' : roots.join(',');
-          hit('A-01', { ...base, detail: `${kase}: execute_action ${out.executeAction}, get_record ${out.getRecordListing} (${why})` });
+        const mc = predictAction(action, out.record, MCP_FLAGS, S.entities);
+        const obs = { executeAction: out.executeAction.startsWith('other: ') ? out.executeAction.split('\n')[0] : out.executeAction, getRecordListing: out.getRecordListing };
+        if (obs.executeAction !== mc.executeAction || obs.getRecordListing !== mc.getRecordListing) {
+          miss('mcp-model', { ...base, detail: `${kase}: observed ${obs.executeAction}/${obs.getRecordListing}, model ${mc.executeAction}/${mc.getRecordListing}` });
+          continue;
         }
+        if (mc.executeAction.startsWith('other: NameResolutionError: Entity')) {
+          if (!S.entities.some(e => e.table_name === action.table_name)) hit('A-02', { ...base, detail: 'entity not in schema_entities: execute_action and get_record fail with "Entity not found"' });
+          else miss('actions', { ...base, detail: mc.executeAction });
+          continue;
+        }
+        const fe = predictAction(action, out.record, {}, S.entities);
+        if (same(fe, mc)) continue;
+        const c01 = predictAction(action, out.record, CONDITION_RULE_FLAGS['C-01'], S.entities);
+        if (!same(c01, mc)) { miss('actions', { ...base, detail: `${kase}: no single rule explains ${mc.executeAction}/${mc.getRecordListing}` }); continue; }
+        const passed = o => o.executeAction === 'executed' || o.executeAction.startsWith('passed-conditions');
+        if (passed(mc) && !passed(fe)) wronglyExecuted++;
+        wrongCases++;
+        hit('A-01', { ...base, detail: `${kase}: MCP ${mc.executeAction} / get_record ${mc.getRecordListing}; correct ${fe.executeAction} / ${fe.getRecordListing}` });
       }
     }
   }
+  note('A-01', `${wrongCases} (action, case) pairs disagree with the frontend evaluator; in ${wronglyExecuted} of them the MCP would run an action the frontend blocks. Every other disagreement is an action wrongly refused (disabled / not available) or wrongly listed (visible in the wrong state, but still refused).`);
 }
 
 // ---------------------------------------------------------------------------
 // Engine 5: error messages
 // ---------------------------------------------------------------------------
 
-const F04_CODES = ['23503', '23502', '22P02', '22007', '22008', 'PGRST116', 'PGRST301', 'PT503'];
+const SHARED_KINDS = ['network', 'permission', 'unique', 'notfound', 'auth'];
+const FE_CONSTRAINT = ['check', 'check-named', 'exclusion', 'exclusion-named', 'constraint-lookup'];
+const MCP_CONSTRAINT = ['check', 'check-named', 'exclusion-named', 'constraint-lookup'];
 
-function classifyError(payload, fe, mc) {
-  const code = payload.code;
-  if (code === '23514' || code === '23P01') return 'E-03';
-  if (F04_CODES.includes(code) && fe === 'System Error') return 'F-04';
-  if (fe === 'System Error' && typeof mc === 'string' && mc.startsWith('Error: ')) return 'E-04';
-  return 'E-01';
+function errorRule(feKind, mcKind, code) {
+  if (feKind === mcKind && SHARED_KINDS.includes(feKind)) return 'E-01';
+  if ((code === '23514' || code === '23P01') && FE_CONSTRAINT.includes(feKind) && MCP_CONSTRAINT.includes(mcKind)) return 'E-03';
+  if (feKind === 'fallback' && ['notnull', 'invalid-input', 'datetime', 'precondition'].includes(mcKind)) return 'F-04';
+  if (feKind === 'fallback' && mcKind === 'fallback' && ['23503', 'PGRST116', 'PT503'].includes(code)) return 'F-17';
+  if (feKind === 'fallback' && mcKind === 'fallback') return 'E-04';
+  return null;
 }
 
 function errorEngine() {
   for (const ex of examples()) {
     const fe = readJson(path.join(FE, ex, '_example/errors.lookup.json'));
     const mc = readJson(path.join(MCP, ex, '_example/errors.lookup.json'));
-    const pairs = [
-      ...fe.results.map((r, i) => [r, mc.results[i], ['parseToHuman', 'parseToHumanWithLookup']]),
-      ...fe.unloaded.map((r, i) => [r, mc.unloaded[i], ['parseToHumanWithLookup']]),
+    const messages = fe.constraintMessages;
+    if (!same(messages, mc.constraintMessages)) miss('errors', { example: ex, detail: 'constraint messages differ' });
+    const cases = [
+      ...fe.results.map((r, i) => [r, mc.results[i], 'parseToHuman', undefined, undefined]),
+      ...fe.results.map((r, i) => [r, mc.results[i], 'parseToHumanWithLookup', messages, messages]),
+      ...fe.unloaded.map((r, i) => [r, mc.unloaded[i], 'parseToHumanWithLookup', undefined, []]),
     ];
-    for (const [f, m, keys] of pairs) {
-      if (!m || canon(f.payload) !== canon(m.payload)) { miss('errors', { example: ex, detail: `payload mismatch ${canon(f.payload)}` }); continue; }
+    for (const [f, m, key, feMsgs, mcMsgs] of cases) {
+      count('error');
+      const p = f.payload;
+      const inst = { example: ex, entity: key, subject: canon(p) };
+      if (!m || canon(p) !== canon(m.payload)) { miss('errors', { ...inst, detail: 'payload mismatch' }); continue; }
+      const [fk, ft] = key === 'parseToHuman' ? feParse(p) : feParseLookup(p, feMsgs);
+      const [mk, mt] = mcpParse(p, mcMsgs);
+      if (ft !== f[key]) { miss('fe-model', { ...inst, detail: `frontend ${JSON.stringify(f[key])}, model ${JSON.stringify(ft)}` }); continue; }
+      if (mt !== m[key]) { miss('mcp-model', { ...inst, detail: `MCP ${JSON.stringify(m[key])}, model ${JSON.stringify(mt)}` }); continue; }
+      if (ft === mt) continue;
+      const r = errorRule(fk, mk, p.code);
+      if (!r) { miss('errors', { ...inst, detail: `${fk} ${JSON.stringify(ft)} vs ${mk} ${JSON.stringify(mt)}` }); continue; }
       // Payloads without a constraint name behave the same in every example: count them once.
-      // Only check / exclusion violations are looked up in the example's constraint_messages.
-      const perExample = (f.payload.code === '23514' || f.payload.code === '23P01')
-        && /constraint "[^"]+"/.test(`${f.payload.message ?? ''} ${f.payload.details ?? ''}`);
-      for (const k of keys) {
-        count('error');
-        if (f[k] === m[k]) continue;
-        const rule = classifyError(f.payload, f[k], m[k]);
-        hit(rule, { example: perExample ? ex : '_shared', entity: k, subject: canon(f.payload), detail: `frontend ${JSON.stringify(f[k])}, MCP ${JSON.stringify(m[k])}` });
-      }
+      const perExample = (p.code === '23514' || p.code === '23P01') && /constraint "[^"]+"/.test(`${p.message ?? ''} ${p.details ?? ''}`);
+      hit(r, { ...inst, example: perExample ? ex : '_shared', detail: `frontend ${JSON.stringify(ft)}, MCP ${JSON.stringify(mt)}` });
     }
   }
   const fe = readJson(path.join(FE, '_shared/errors.data-parse-api-error.json'));
   const mc = readJson(path.join(MCP, '_shared/errors.data-parse-api-error.json'));
   for (const [name, f] of Object.entries(fe)) {
-    const m = mc[name];
     count('error');
-    if (!m) { miss('errors', { example: '_shared', subject: name, detail: 'case missing in MCP' }); continue; }
-    if (m.thrown === 'MaintenanceError') {
-      hit('F-04', { example: '_shared', entity: 'client', subject: name, detail: `frontend ${JSON.stringify(f.error.humanMessage)}, MCP throws MaintenanceError (${m.error.mode})` });
+    const m = mc[name];
+    const inst = { example: '_shared', entity: 'client', subject: name };
+    if (!m?.input) { miss('errors', { ...inst, detail: 'case missing in MCP' }); continue; }
+    const { response, feStatusText } = m.input;
+    const body = response.text !== undefined ? response.text : response.body;
+    const feErr = {
+      httpCode: response.networkError ? 0 : response.status,
+      code: body && typeof body === 'object' ? body.code : undefined,
+      message: typeof body === 'string' ? body : (body?.message ?? feStatusText ?? 'Unknown Error'),
+      details: body && typeof body === 'object' ? body.details : undefined,
+    };
+    const [fk, ft] = feParseLookup(feErr, undefined);
+    if (f.error.httpCode !== feErr.httpCode || f.error.message !== feErr.message || f.error.humanMessage !== ft || f.error.code !== feErr.code) {
+      miss('fe-model', { ...inst, detail: `frontend ${canon(f.error)} vs model ${canon({ ...feErr, humanMessage: ft })}` });
       continue;
     }
-    if (f.error.humanMessage !== m.error.humanMessage) {
-      const rule = classifyError({ code: f.error.code, httpCode: f.error.httpCode }, f.error.humanMessage, m.error.humanMessage);
-      hit(rule, { example: '_shared', entity: 'client humanMessage', subject: name, detail: `frontend ${JSON.stringify(f.error.humanMessage)}, MCP ${JSON.stringify(m.error.humanMessage)}` });
+    const model = mcpClientError(response);
+    if (m.thrown !== model.thrown || m.error.message !== model.message) { miss('mcp-model', { ...inst, detail: `MCP ${m.thrown} ${m.error.message} vs model ${model.thrown} ${model.message}` }); continue; }
+    if (model.thrown === 'MaintenanceError') {
+      if (m.error.mode !== model.mode) { miss('mcp-model', { ...inst, detail: 'maintenance mode differs' }); continue; }
+      if (fk === 'fallback' && feErr.code === 'PT503') hit('F-17', { ...inst, detail: `frontend ${JSON.stringify(ft)}, MCP throws MaintenanceError (${model.mode})` });
+      else miss('errors', { ...inst, detail: 'MaintenanceError without a frontend fallback' });
+      continue;
     }
-    if (f.error.message !== m.error.message) {
-      hit('E-06', { example: '_shared', entity: 'client message', subject: name, detail: `frontend ${JSON.stringify(f.error.message)}, MCP ${JSON.stringify(m.error.message)}` });
+    const mcErr = { message: model.message, httpCode: model.httpCode, code: model.code, details: model.details, hint: model.hint };
+    const [mk, mt] = mcpParse(mcErr, undefined);
+    if (m.error.humanMessage !== mt || m.error.httpCode !== model.httpCode || m.error.code !== model.code) { miss('mcp-model', { ...inst, detail: `MCP humanMessage ${JSON.stringify(m.error.humanMessage)} vs model ${JSON.stringify(mt)}` }); continue; }
+    if (ft !== mt) {
+      const r = errorRule(fk, mk, feErr.code);
+      if (r) hit(r, { ...inst, entity: 'client humanMessage', detail: `frontend ${JSON.stringify(ft)}, MCP ${JSON.stringify(mt)}` });
+      else miss('errors', { ...inst, detail: `${fk} vs ${mk}` });
+    }
+    if (feErr.message !== model.message) {
+      const noBodyMessage = response.networkError || typeof body === 'string' || !body?.message;
+      if (noBodyMessage) hit('E-06', { ...inst, entity: 'client message', detail: `frontend ${JSON.stringify(feErr.message)}, MCP ${JSON.stringify(model.message)}` });
+      else miss('errors', { ...inst, detail: 'message differs although the body has one' });
     }
   }
 }
@@ -449,318 +468,508 @@ function errorEngine() {
 // Engine 6: request building
 // ---------------------------------------------------------------------------
 
-const SEARCH_PARAM = /^(civic_os_text_search|.*)$/;
-const isSearchValue = v => /^(wfts(\([a-z]+\))?|ilike)\./.test(v);
+/** The frontend's special-character / pagination matrix inputs (data.golden.spec.ts), keyed by case name. */
+function matrixInputs() {
+  const nasty = ['a&b', 'a,b', 'a(b)', 'a b', '100%', '50%25', 'ñandú', '日本語', 'a=b', 'a#b', 'a+b', "o'brien", 'a"b', 'a/b', 'a?b', 'a;b', '\\', '*wild*', 'null', 'true', ' lead', 'trail ', '\n'];
+  const out = {};
+  const plain = q => ({ paginated: false, query: { key: 'items', ...q } });
+  for (const v of nasty) {
+    out[`filter eq ${JSON.stringify(v)}`] = plain({ fields: ['id'], filters: [{ column: 'name', operator: 'eq', value: v }] });
+    out[`filter ilike ${JSON.stringify(v)}`] = plain({ fields: ['id'], filters: [{ column: 'name', operator: 'ilike', value: `*${v}*` }] });
+    out[`search ${JSON.stringify(v)}`] = plain({ fields: ['id'], searchQuery: v });
+  }
+  out['in array with specials'] = plain({ fields: ['id'], filters: [{ column: 'c', operator: 'in', value: ['a,b', 'c d', '(e)', 1, null, ''] }] });
+  out['in array of uuids'] = plain({ fields: ['id'], filters: [{ column: 'c', operator: 'in', value: ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'] }] });
+  out['non-in operator with array value'] = plain({ fields: ['id'], filters: [{ column: 'c', operator: 'eq', value: [1, 2] }] });
+  out['order with FK embed'] = plain({ fields: ['id'], orderField: 'owner(display_name)', orderDirection: 'desc' });
+  out['entityId with specials'] = plain({ fields: ['id'], entityId: 'a&b=c' });
+  out['no fields'] = plain({});
+  out['empty fields'] = plain({ fields: [] });
+  out['fields already containing id'] = plain({ fields: ['id', 'name'] });
+  out['summary view skips id'] = plain({ fields: ['name'], isSummaryView: true });
+  out['limit 0 is dropped'] = plain({ fields: ['id'], limit: 0 });
+  out['everything at once'] = plain({
+    fields: ['name', 'owner:users!owner(id,display_name)'], searchQuery: 'a b', orderField: 'name', entityId: '9',
+    filters: [{ column: 'x', operator: 'eq', value: 'y' }], limit: 3, rawQueryParams: ['or=(a.eq.1)'],
+  });
+  for (const [page, pageSize] of [[1, 25], [2, 25], [10, 7], [1, 1], [0, 25], [-1, 25], [1, 0], [2.5, 10]]) {
+    out[`pagination ${page}/${pageSize}`] = { paginated: true, query: { key: 'items', fields: ['id'], pagination: { page, pageSize } } };
+  }
+  return out;
+}
+
+function parseMcpRequest(r) {
+  const rest = r.url.replace(/^<PGRST>\//, '');
+  const q = rest.indexOf('?');
+  return { method: r.method, path: decodeURIComponent(q < 0 ? rest : rest.slice(0, q)), decoded: r.decoded, headers: r.headers ?? {} };
+}
+const pairsOf = decoded => decoded.map(d => { const i = d.indexOf('='); return [d.slice(0, i), d.slice(i + 1)]; });
+const stripEmbed = f => String(f).replace(/^([^()]+)\([^()]+\)$/, '$1');
+
+/** Check an observed MCP outcome against the model. Returns null when equal, else a description. */
+function mcpDiff(obs, model) {
+  if (same(obs.invalidInput ?? null, model.invalidInput ?? null) && (obs.thrown ?? null) === (model.thrown ?? null)
+    && (obs.toolError ?? null) === (model.toolError ?? null)) {
+    const o = (obs.requests ?? []).map(parseMcpRequest);
+    const m = (model.requests ?? []).map(r => ({ method: r.method, path: r.path, decoded: r.decoded, headers: r.headers }));
+    if (same(o, m)) return null;
+    return `requests ${JSON.stringify(o)} vs model ${JSON.stringify(m)}`;
+  }
+  return `outcome ${canon({ i: obs.invalidInput, t: obs.thrown, e: obs.toolError })} vs model ${canon({ i: model.invalidInput, t: model.thrown, e: model.toolError })}`;
+}
 
 /**
- * Compare one frontend request with the MCP's main request and attribute every
- * aspect that differs. `ctx` carries the example, entity, case name and the
- * frontend property types (for select attribution).
+ * Attribute every aspect in which the frontend's intended request differs from
+ * the MCP request (both already checked against their models).
+ * c: { base, feQuery, fe (feRequest result), mcInput, call, notes, model, S, ent, feTypes, viewKey, summaryView, synthetic }
  */
-function compareRequests(feReq, mcReq, ctx) {
-  const f = parseFeUrl(feReq.url);
-  const m = parseMcpRequest(mcReq);
-  const base = { example: ctx.example, entity: ctx.entity, subject: ctx.name };
+function compareRequests(c) {
+  const { base, feQuery, fe, mcInput, call, model, S, ent } = c;
+  const main = model.requests[model.requests.length - 1];
+  const kind = c.synthetic ? 'synthetic' : 'example';
+  const H = (rule, inst, bucket) => hit(rule, { ...base, ...inst, example: kind === 'synthetic' ? '_shared' : base.example }, bucket);
   const fParams = new Map();
-  for (const [k, v] of f.params) fParams.set(k, [...(fParams.get(k) ?? []), v]);
+  for (const [k, v] of fe.intended) fParams.set(k, [...(fParams.get(k) ?? []), v]);
   const mParams = new Map();
-  for (const [k, v] of m.params) mParams.set(k, [...(mParams.get(k) ?? []), v]);
-  const fh = feReq.headers ?? {};
-  const mh = mcReq.headers ?? {};
-  const searched = ctx.input?.searchQuery !== undefined && String(ctx.input.searchQuery).trim() !== '';
+  for (const [k, v] of pairsOf(main.decoded)) mParams.set(k, [...(mParams.get(k) ?? []), v]);
+  const handled = new Set(['select', 'order', 'id', 'limit']);
 
   // select
   const fs_ = fParams.get('select')?.[0];
   const ms = mParams.get('select')?.[0];
-  if (fs_ !== ms) {
-    const fi = splitSelect(fs_ ?? '');
-    const mi = splitSelect(ms ?? '');
-    const fSet = new Set(fi);
-    const mSet = new Set(mi);
-    const onlyF = fi.filter(x => !mSet.has(x));
-    const onlyM = mi.filter(x => !fSet.has(x));
-    if (!onlyF.length && !onlyM.length) hit('Q-03', { ...base, detail: `frontend ${fs_} | MCP ${ms}` });
-    if (fs_ === undefined && ms !== undefined) hit('Q-15', { ...base, detail: `frontend sends no select (every column); list_records has no all-columns mode, MCP select=${ms}` });
-    else {
-      const mAlias = new Map(onlyM.map(x => [alias(x), x]));
-      for (const item of onlyF) {
-        const a = alias(item);
-        const t = ctx.types?.get(a);
-        if (mAlias.has(a)) {
-          const other = mAlias.get(a);
-          mAlias.delete(a);
-          const r = ctx.selectRule?.(a, item, other);
-          if (r) hit(r, { ...base, subject: `${ctx.name}: ${a}`, detail: `frontend ${item} | MCP ${other}` }, 'effects');
-          else miss('queries', { ...base, detail: `select item differs: ${item} | ${other}` });
-        } else if (t === 'ManyToMany') hit('T-12', { ...base, subject: `${ctx.name}: ${a}`, detail: item }, 'effects');
-        else if (STRUCTURAL.includes(a)) hit('V-03', { ...base, subject: `${ctx.name}: ${a}`, detail: item }, 'effects');
-        else if (ctx.mapProperty === a) hit('V-04', { ...base, subject: `${ctx.name}: ${a}`, detail: item }, 'effects');
-        else if (a === 'id') hit('Q-11', { ...base, detail: `frontend appends id, MCP does not (entity has no id property): MCP select=${ms}` });
-        else miss('queries', { ...base, detail: `select item only in frontend: ${item}` });
+  const allProps = S.props(ent.table_name);
+  const propByCol = new Map(allProps.map(p => [p.column_name, p]));
+  if (fs_ === undefined) {
+    if (!feQuery.fields && !mcInput.columns && call === 'list_records') H('Q-15', { detail: `frontend sends no select (every column); list_records has no all-columns mode, MCP select=${ms}` }, 'effects');
+    else miss('queries', { ...base, detail: 'frontend has no select' });
+  } else if (fs_ !== ms) {
+    const fi = splitSelect(fs_);
+    const mi = splitSelect(ms);
+    const fA = new Map(fi.map(x => [selectAlias(x), x]));
+    const mA = new Map(mi.map(x => [selectAlias(x), x]));
+    for (const [a, item] of fA) {
+      if (mA.has(a)) {
+        const other = mA.get(a);
+        if (other === item) continue;
+        const r = propRule.get(`${base.example}|${ent.table_name}|${a}`);
+        if (c.name === 'everything at once' && a === 'owner' && item === 'owner:users!owner(id,display_name)' && other === mcpSelect('User', propByCol.get('owner'))) diagnostics.mappingArtifacts++;
+        else if (r && (r.startsWith('S-') || r.startsWith('T-'))) H(r, { subject: `${c.name}: ${a}`, detail: `frontend ${item} | MCP ${other}` }, 'effects');
+        else miss('queries', { ...base, detail: `select item ${item} | ${other}` });
+        continue;
       }
-      for (const [a, item] of mAlias) {
-        if (ctx.call === 'get_record' && (a === 'created_at' || a === 'updated_at') && !ctx.types?.has(a)) hit('Q-12', { ...base, subject: `${ctx.name}: ${a}`, detail: item });
-        else if (ctx.call === 'get_record') hit('Q-13', { ...base, subject: `${ctx.name}: ${a}`, detail: item });
-        else if (a === 'id' && ms === 'id,') hit('Q-14', { ...base, detail: `MCP select=${ms}` });
-        else if (a === 'id') hit('Q-11', { ...base, detail: `MCP adds id, frontend does not: frontend select=${fs_}` });
-        else if (a === '' && ms?.endsWith(',')) hit('Q-14', { ...base, detail: `MCP select=${ms}` });
-        else miss('queries', { ...base, detail: `select item only in MCP: ${item}` });
+      if (a === 'id') {
+        if (!propByCol.has('id') && !allProps.some(p => p.is_identity)) H('Q-11', { detail: `frontend appends id; the entity has no id column (MCP select=${ms})` }, c.summaryView ? 'harnessOnly' : 'instances');
+        else miss('queries', { ...base, detail: 'frontend-only id on an entity with an id' });
+        continue;
       }
+      if (c.feTypes.get(a) === 'ManyToMany') { H('T-12', { subject: `${c.name}: ${a}`, detail: item }, 'effects'); continue; }
+      const vr = c.viewKey && viewRule.get(`${c.viewKey}|list|${a}`);
+      if (call === 'list_records' && !mcInput.columns && vr) { H(vr, { subject: `${c.name}: ${a}`, detail: item }, 'effects'); continue; }
+      miss('queries', { ...base, detail: `select item only in frontend: ${item}` });
     }
+    for (const [a, item] of mA) {
+      if (fA.has(a)) continue;
+      if (a === 'id' && item === 'id') {
+        if ((propByCol.has('id') || allProps.some(p => p.is_identity)) && (feQuery.isSummaryView || call === 'get_record')) {
+          H('Q-11', { detail: `MCP adds id (the entity has one); frontend select=${fs_}` });
+        } else miss('queries', { ...base, detail: 'MCP-only id' });
+        continue;
+      }
+      if (a === '' && ms.endsWith(',')) { H('Q-14', { detail: `MCP select=${ms}` }); continue; }
+      if (call === 'get_record' && (a === 'created_at' || a === 'updated_at') && !propByCol.has(a)) { H('Q-12', { subject: `${c.name}: ${a}`, detail: `MCP selects ${a}; the entity has no such column` }); continue; }
+      if (call === 'get_record' && propByCol.has(a) && item === mcpSelect(propByCol.get(a).type, propByCol.get(a))) { H('Q-13', { subject: `${c.name}: ${a}`, detail: item }); continue; }
+      miss('queries', { ...base, detail: `select item only in MCP: ${item}` });
+    }
+    const fIds = fi.indexOf('id');
+    const mIds = mi.indexOf('id');
+    if (fIds === fi.length - 1 && mIds === 0 && fi.length > 1) H('Q-03', { detail: `frontend …,id | MCP id,…` });
+  }
+
+  // id parameter
+  if (!same(fParams.get('id') ?? null, mParams.get('id') ?? null)) {
+    if (call === 'list_records' && c.notes.some(n => n.includes('entityId'))) H('Q-15', { detail: `id=${fParams.get('id')} dropped (no entityId in list_records)` }, 'effects');
+    else miss('queries', { ...base, detail: `id ${fParams.get('id')} | ${mParams.get('id')}` });
   }
 
   // order
   const fo = fParams.get('order')?.[0];
   const mo = mParams.get('order')?.[0];
   if (fo !== mo) {
-    if (fo === undefined && searched && ctx.input?.orderField) hit('Q-06', { ...base, detail: `frontend drops order while searching, MCP order=${mo}` });
-    else if (fo === undefined) hit('Q-01', { ...base, detail: `MCP order=${mo}` });
-    else if (/\(/.test(fo) && mo === fo.replace(/\([^)]*\)/, '')) hit('Q-04', { ...base, detail: `frontend order=${fo}, MCP order=${mo}` });
+    const searched = !!(feQuery.searchQuery && feQuery.searchQuery.trim());
+    const dir = feQuery.orderDirection ?? 'asc';
+    if (fo === undefined && searched && feQuery.orderField && mo === `${stripEmbed(feQuery.orderField)}.${dir}`) H('Q-06', { detail: `frontend drops order while searching, MCP order=${mo}` });
+    else if (fo === undefined && !feQuery.orderField && model.trace?.defaultOrder) H('Q-01', { detail: `MCP order=${mo}` });
+    else if (fo !== undefined && /\(display_name\)\.(asc|desc)$/.test(fo) && mo === fo.replace('(display_name)', '')) H('Q-04', { detail: `frontend order=${fo}, MCP order=${mo}` });
     else miss('queries', { ...base, detail: `order ${fo} | ${mo}` });
   }
 
-  // limit / Range / Prefer
-  const fr = fh['Range'];
-  const mr = mh['Range'];
-  const fl = fParams.get('limit')?.[0];
-  if (fr !== mr || fl !== undefined) {
-    if (fr === undefined && mr !== undefined) hit('Q-02', { ...base, detail: `frontend ${fl !== undefined ? `limit=${fl}` : 'no Range'}, MCP Range ${mr}` });
-    else if (fr !== undefined && mr !== undefined && fr !== mr) miss('queries', { ...base, detail: `Range ${fr} | ${mr}` });
+  // search
+  const mSearchKey = mcInput.search ? (ent.fulltext_search_column || ent.substring_search_column || 'display_name') : null;
+  const feSearch = [];
+  if (feQuery.searchQuery && feQuery.searchQuery.trim()) feSearch.push(['civic_os_text_search', `wfts.${feQuery.searchQuery.trim()}`]);
+  if (c.name === 'hybrid search rawQueryParams') feSearch.push(...feHybridSearch('pot hole', c.feEnt));
+  for (const [k] of feSearch) handled.add(k);
+  if (mSearchKey) handled.add(mSearchKey);
+  const feSearchStr = feSearch.map(([k, v]) => `${k}=${v}`).join('&');
+  const mcSearchStr = mSearchKey ? `${mSearchKey}=${mParams.get(mSearchKey)?.[mParams.get(mSearchKey).length - 1]}` : '';
+  if (feSearchStr !== mcSearchStr) {
+    const term = mcInput.search ?? '';
+    const padded = term !== term.trim();
+    if (padded) H('Q-07', { detail: `term ${JSON.stringify(term)}: frontend ${feSearchStr || '(none)'}, MCP ${mcSearchStr}` });
+    if (feSearch.length && mSearchKey) H('Q-05', { detail: `frontend ${feSearchStr}, MCP ${mcSearchStr}` });
+    else if (!padded) miss('queries', { ...base, detail: `search ${feSearchStr} | ${mcSearchStr}` });
   }
-  if ((fh['Prefer'] ?? '') !== (mh['Prefer'] ?? '') && !(fr === undefined && mr !== undefined)) miss('queries', { ...base, detail: `Prefer ${fh['Prefer']} | ${mh['Prefer']}` });
 
-  // remaining parameters: search and filters
-  const skip = new Set(['select', 'order', 'limit', 'offset']);
-  const keys = new Set([...fParams.keys(), ...mParams.keys()].filter(k => !skip.has(k)));
+  // filters
+  const steps = model.trace?.filters ?? [];
+  const feFilters = (feQuery.filters ?? []).filter(f => !(f.value === null || f.value === undefined || f.value === ''));
+  const skipped = steps.filter(s => s.input === '' || s.input === null);
+  for (const s of skipped) H('Q-08', { subject: `${c.name}: ${s.column} ${s.expression}`, detail: `frontend skips the ${JSON.stringify(s.input)} value; MCP sends ${s.column}=${s.expression}` });
+  const kept = steps.filter(s => !(s.input === '' || s.input === null));
+  if (kept.length !== feFilters.length) miss('queries', { ...base, detail: `filter count frontend ${feFilters.length} vs MCP ${kept.length}` });
+  kept.forEach((s, i) => {
+    const f = feFilters[i];
+    const feExpr = f && (f.operator === 'in' && Array.isArray(f.value) ? `in.(${f.value.join(',')})` : `${f.operator}.${f.value}`);
+    if (!f || f.column !== s.column || feExpr !== s.expression) miss('queries', { ...base, detail: `filter ${f?.column}=${feExpr} | ${s.column}=${s.expression}` });
+  });
+  for (const col of model.trace?.grouped ?? []) {
+    H('Q-09', { subject: `${c.name}: ${col}`, detail: `MCP and=${mParams.get('and')?.[0]}; frontend repeats ${col}` });
+  }
+  const filterCols = new Set(steps.map(s => s.column));
+  for (const k of filterCols) handled.add(k);
+  if ((model.trace?.grouped ?? []).length) handled.add('and');
+
+  // limit / Range / headers / method
+  const fl = fParams.get('limit')?.[0];
+  const fh = fe.headers;
+  const mh = main.headers;
+  if (main.method !== 'GET') miss('queries', { ...base, detail: `MCP method ${main.method}` });
+  if (!same(fh, mh)) {
+    const limit = mcInput.limit ?? 25;
+    const offset = mcInput.offset ?? 0;
+    if (call === 'list_records' && Object.keys(fh).length === 0 && offset === 0 && mh.Range === `0-${limit - 1}` && (fl === undefined || Number(fl) === limit)) {
+      H('Q-02', { detail: `frontend ${fl !== undefined ? `limit=${fl}` : 'no Range'}, MCP Range ${mh.Range} + Prefer count=exact` });
+    } else miss('queries', { ...base, detail: `headers ${canon(fh)} | ${canon(mh)}` });
+  } else if (fl !== undefined) miss('queries', { ...base, detail: `frontend limit=${fl} with equal headers` });
+
+  // remaining parameters
+  const keys = new Set([...fParams.keys(), ...mParams.keys()].filter(k => !handled.has(k)));
   for (const k of keys) {
     const fv = fParams.get(k) ?? [];
     const mv = mParams.get(k) ?? [];
-    if (fv.join('\u0000') === mv.join('\u0000')) continue;
-    const anySearch = [...fv, ...mv].some(isSearchValue) || (k === 'or' && fv.some(v => /wfts|ilike/.test(v)));
-    if (anySearch && ctx.input?.searchQuery !== undefined && String(ctx.input.searchQuery).trim() === '') hit('Q-07', { ...base, detail: `${k}: frontend ${fv.join('|') || '(none)'}, MCP ${mv.join('|') || '(none)'}` });
-    else if (anySearch || ctx.name === 'hybrid search rawQueryParams') hit('Q-05', { ...base, detail: `${k}: frontend ${fv.join('|') || '(none)'}, MCP ${mv.join('|') || '(none)'}` });
-    else if (k === 'and' && mv.length && !fv.length) hit('Q-09', { ...base, detail: `MCP and=${mv[0]}, frontend repeats the column parameter` });
-    else if (ctx.rawDropped && fv.length && !mv.length) hit('Q-15', { ...base, detail: `${k}=${fv.join('|')} dropped (rawQueryParams)` }, 'effects');
-    else if (fv.length > mv.length && mParams.has('and')) { /* repeated params grouped into and=() (Q-09) */ }
-    else if (fv.length < mv.length || (fv.length === mv.length && ctx.emptyValues)) hit('Q-08', { ...base, detail: `${k}: frontend ${fv.join('|') || '(none)'}, MCP ${mv.join('|')}` });
-    else if (ctx.encodingCase) hit('F-01', { ...base, detail: `${k}: frontend ${fv.join('|') || '(none)'}, MCP ${mv.join('|') || '(none)'}` });
-    else miss('queries', { ...base, detail: `param ${k}: ${fv.join('|')} | ${mv.join('|')}` });
+    if (same(fv, mv)) continue;
+    const raw = (feQuery.rawQueryParams ?? []).flatMap(r => [...new URLSearchParams(r)]).filter(([rk]) => rk === k).map(([, rv]) => rv);
+    if (mv.length === 0 && same(fv, raw) && c.notes.some(n => n.includes('rawQueryParams') && n.includes('dropped'))) {
+      H('Q-15', { subject: `${c.name}: ${k}`, detail: `${k}=${fv.join('|')} dropped (no raw parameter passthrough)` }, 'effects');
+    } else miss('queries', { ...base, detail: `param ${k}: ${fv.join('|')} | ${mv.join('|')}` });
   }
 }
 
-function mainRequest(q, table) {
-  const reqs = (q.requests ?? []).filter(r => r.method === 'GET' && parseMcpRequest(r).path === table);
-  return reqs[reqs.length - 1];
+function queryCase(c) {
+  const { base, feGolden, feQuery, paginated, mq, S } = c;
+  count('query');
+  const fe = feRequest(feQuery, paginated);
+  if (fe.url !== feGolden.url || !same(fe.headers, feGolden.headers ?? {})) {
+    miss('fe-model', { ...base, detail: `frontend ${feGolden.url} ${canon(feGolden.headers)} vs model ${fe.url} ${canon(fe.headers)}` });
+    return;
+  }
+  // Encoding: what PostgREST decodes from the frontend URL vs what the caller meant.
+  const decoded = decodeFeUrl(fe.url);
+  if (!same(decoded, fe.intended)) {
+    const mcCase = mq.requests?.length ? pairsOf(parseMcpRequest(mq.requests[mq.requests.length - 1]).decoded) : [];
+    const intendedKeys = new Set(fe.intended.map(([k]) => k));
+    const mcIntact = fe.intended.filter(([k]) => k !== 'select').every(([k, v]) => mcCase.some(([mk, mv]) => mk === k && mv === v)) || mq.invalidInput;
+    hit('F-01', { ...base, example: c.synthetic ? '_shared' : base.example, detail: `intended ${fe.intended.map(([k, v]) => `${k}=${v}`).join(' & ')}; PostgREST decodes ${decoded.map(([k, v]) => `${k}=${v}`).join(' & ')}${mcIntact ? '; MCP sends it intact' : ''}` });
+    void intendedKeys;
+  }
+  if (mq.inexpressible) {
+    if (c.name === 'edit' && mq.inexpressible.startsWith('edit-form read')) hit('Q-15', { ...base, detail: mq.inexpressible });
+    else miss('queries', { ...base, detail: `inexpressible: ${mq.inexpressible}` });
+    return;
+  }
+  const model = mq.call === 'get_record' ? mcpGetRecord(mq.input, S) : mcpListRecords(mq.input, S);
+  if (model.unsupported) { miss('queries', { ...base, detail: model.unsupported }); return; }
+  const d = mcpDiff(mq, model);
+  if (d) { miss('mcp-model', { ...base, detail: d }); return; }
+  const H = (rule, detail) => hit(rule, { ...base, example: c.synthetic ? '_shared' : base.example, detail });
+  if (model.invalidInput) {
+    const inv = model.invalidInput.join('; ');
+    if (/^pagination /.test(c.name) && /^(offset|limit): too_small$/.test(inv)) H('F-02', `frontend Range ${fe.headers.Range}; MCP rejects (${inv})`);
+    else if (c.name === 'limit 0 is dropped' && inv === 'limit: too_small') H('Q-10', `frontend drops limit 0; MCP rejects (${inv})`);
+    else if (c.name === 'calendar overlap filter' && inv === 'limit: too_big') H('Q-10', `frontend page size ${feQuery.pagination?.pageSize}; MCP rejects (${inv})`);
+    else if (c.name === 'in array with specials' && inv === 'filters.0.value: invalid_union') H('F-13', `frontend ${decodeFeUrl(fe.url).map(([k, v]) => `${k}=${v}`).join('&')}; MCP rejects the null item (${inv})`);
+    else miss('queries', { ...base, detail: `invalid input ${inv}` });
+    return;
+  }
+  if (model.thrown) {
+    const colErr = /^NameResolutionError: (?:Column|Ambiguous column) "([^"]+)"/.exec(model.thrown);
+    if (c.name === 'order with FK embed' && colErr && colErr[1] === 'owner(display_name)') H('Q-04', `frontend order=owner(display_name).desc; MCP ${model.thrown.slice(0, 80)}`);
+    else if (colErr && !S.props(c.ent.table_name).some(p => p.column_name === colErr[1])) diagnostics.bothReject++;
+    else miss('queries', { ...base, detail: model.thrown });
+    return;
+  }
+  if (model.toolError && mq.call === 'list_records') {
+    const step = model.trace.filters[model.trace.filters.length - 1];
+    const prop = S.props(c.ent.table_name).find(p => p.column_name === step?.column);
+    if (step?.error && step.input === '') H('Q-08', `frontend skips the empty value; MCP resolves "" as a name and fails: ${step.error.slice(0, 90)}`);
+    else if (step?.error && prop?.type === 'User' && /^[0-9a-f-]{36}$/i.test(String(step.input))) H('N-04', step.error);
+    else miss('queries', { ...base, detail: `tool error ${model.toolError}` });
+    return;
+  }
+  compareRequests({ ...c, fe, mcInput: mq.input, call: mq.call, notes: mq.notes ?? [], model });
 }
 
 function queryEngine() {
   for (const ex of examples()) {
     const fe = readJson(path.join(FE, ex, '_example/data.queries.json')).entities;
     const mc = readJson(path.join(MCP, ex, '_example/data.queries.json')).entities;
-    const feProps = readJson(path.join(FE, ex, 'testadmin/schema.properties.json')).entities;
-    const ents = new Map(readJson(path.join(RAW, ex, 'testadmin/schema_entities.json')).map(e => [e.table_name, e]));
+    const S = mcpSchema(ex, 'testadmin');
+    const feTypes = new Map();
+    for (const [t, list] of Object.entries(readJson(path.join(FE, ex, 'testadmin/schema.properties.json')).entities)) for (const p of list) feTypes.set(p.column + '@' + t, p.type);
+    const feEnts = new Map(readJson(path.join(RAW, ex, 'testadmin/schema_entities.json')).map(e => [e.table_name, e]));
     for (const [table, e] of Object.entries(fe)) {
       const m = mc[table];
       if (!m) { miss('queries', { example: ex, entity: table, detail: 'entity missing in MCP' }); continue; }
-      const types = new Map((feProps[table] ?? []).map(p => [p.column, p.type]));
-      const selects = new Map((feProps[table] ?? []).map(p => [p.column, p]));
-      const selectRule = (a, feItem, mcItem) => {
-        const p = selects.get(a);
-        if (!p) return null;
-        const r = classifySelect({ ...p, select: feItem }, { select: mcItem }, readRawProp(ex, table, a));
-        if (r) return r;
-        if (p.type === 'PhotoGallery') return 'S-06';
-        return null;
-      };
+      const ent = S.entities.find(x => x.table_name === table);
+      const feEnt = feEnts.get(table) ?? {};
+      const types = new Map([...feTypes].filter(([k]) => k.endsWith('@' + table)).map(([k, v]) => [k.slice(0, k.lastIndexOf('@')), v]));
       e.queries.forEach((q, i) => {
-        count('query');
         const mq = m.queries[i];
         const base = { example: ex, entity: table, subject: q.name };
-        if (!mq || mq.name !== q.name) { miss('queries', { ...base, detail: 'query missing / misaligned in MCP' }); return; }
-        if (mq.inexpressible) {
-          hit('Q-15', { ...base, detail: mq.inexpressible });
-          return;
-        }
-        if (mq.invalidInput) {
-          if (mq.invalidInput.some(s => s.startsWith('limit'))) hit('Q-10', { ...base, detail: `MCP rejects input: ${mq.invalidInput.join('; ')}` });
-          else miss('queries', { ...base, detail: `invalid input ${mq.invalidInput.join('; ')}` });
-          return;
-        }
-        if (mq.toolError || mq.thrown) {
-          const t = mq.toolError ?? mq.thrown;
-          const colErr = /^NameResolutionError: (?:Column|Ambiguous column) "([^"]+)"/.exec(t);
-          if (/not found in civic_os_users/.test(t)) hit('N-04', { ...base, detail: t.slice(0, 120) });
-          else if (/(^|Status |Category )"" not found/.test(t)) hit('Q-08', { ...base, detail: `frontend skips the empty filter value; MCP resolves "" as a name: ${t.slice(0, 100)}` });
-          else if (colErr && !types.has(colErr[1])) { diagnostics.bothReject = (diagnostics.bothReject ?? 0) + 1; return; }
-          else if (/^Record #/.test(t)) { /* get_record against the stub's empty table: compare the request below */ }
-          else miss('queries', { ...base, detail: `tool error ${t.slice(0, 160)}` });
-          if (!/^Record #/.test(t)) return;
-        }
-        const req = mainRequest(mq, table);
-        if (!req) { miss('queries', { ...base, detail: 'no MCP request to the entity' }); return; }
-        const notes = mq.notes ?? [];
-        compareRequests(q.request, req, {
-          example: ex, entity: table, name: q.name, call: mq.call, input: q.input, types, selectRule,
-          mapProperty: ents.get(table)?.map_property_name,
-          rawDropped: notes.some(n => n.startsWith('rawQueryParams') && n.includes('dropped')),
-          emptyValues: q.name.startsWith('filters with'),
+        if (!mq || mq.name !== q.name) { miss('queries', { ...base, detail: 'query misaligned' }); return; }
+        const f = q.input?.fields;
+        const fields = typeof f === 'string' ? e.named[f.slice(1, -1)] : f;
+        const feQuery = { ...q.input, key: table, ...(fields !== undefined ? { fields } : {}) };
+        queryCase({
+          base, name: q.name, feGolden: q.request, feQuery, paginated: q.call === 'getDataPaginated', mq, S, ent, feEnt, feTypes: types,
+          viewKey: `${ex}|testadmin|${table}`, summaryView: !!(feEnt.is_view && !feEnt.insert), synthetic: false,
         });
       });
     }
   }
-
-  // Shared special-character / pagination matrix.
+  // Shared special-character / pagination matrix over the synthetic schema.
   const fe = readJson(path.join(FE, '_shared/data.query-matrix.json'));
-  const mc = readJson(path.join(MCP, '_shared/data.query-matrix.json')).cases;
-  for (const [name, feReq] of Object.entries(fe)) {
-    count('query');
-    const mq = mc[name];
-    const base = { example: '_shared', entity: 'data.query-matrix', subject: name };
-    if (!mq) { miss('queries', { ...base, detail: 'case missing in MCP' }); continue; }
-    if (mq.invalidInput) {
-      if (/^pagination /.test(name)) hit('F-02', { ...base, detail: `frontend Range ${feReq.headers.Range}; MCP rejects (${mq.invalidInput.join('; ')})` });
-      else if (name === 'limit 0 is dropped') hit('Q-10', { ...base, detail: `frontend drops limit 0; MCP rejects (${mq.invalidInput.join('; ')})` });
-      else if (name === 'in array with specials') hit('F-13', { ...base, detail: `frontend ${feReq.url.split('&').slice(1).join('&')}; MCP rejects a null array item (${mq.invalidInput.join('; ')})` });
-      else miss('queries', { ...base, detail: `invalid input ${mq.invalidInput.join('; ')}` });
-      continue;
-    }
-    if (mq.thrown) {
-      if (name === 'order with FK embed') hit('Q-04', { ...base, detail: `frontend order=owner(display_name).desc; MCP ${mq.thrown.slice(0, 90)}` });
-      else miss('queries', { ...base, detail: mq.thrown });
-      continue;
-    }
-    const req = mq.call === 'get_record' ? mq.requests.find(r => r.method === 'GET') : mainRequest(mq, mq.input.entity === 'summary_items' ? 'summary_items' : 'items');
-    if (!req) { miss('queries', { ...base, detail: 'no MCP request' }); continue; }
-    const f = parseFeUrl(feReq.url);
-    // Intended filter / id value (what the caller asked for), to detect the frontend's unencoded values.
-    let intended = null;
-    let m;
-    if ((m = /^filter (eq|ilike) (.+)$/.exec(name))) intended = ['name', m[1] === 'eq' ? `eq.${JSON.parse(m[2])}` : `ilike.*${JSON.parse(m[2])}*`];
-    if (name === 'entityId with specials') intended = ['id', 'eq.a&b=c'];
-    if (intended) {
-      const fv = f.params.filter(([k]) => k === intended[0]).map(([, v]) => v);
-      const extra = f.params.filter(([k]) => !['select', intended[0]].includes(k));
-      const mv = parseMcpRequest(req).params.filter(([k]) => k === intended[0]).map(([, v]) => v);
-      if (fv.join() !== intended[1] || extra.length) {
-        hit('F-01', { ...base, detail: `intended ${intended[0]}=${intended[1]}; frontend sends ${f.params.map(([k, v]) => `${k}=${v}`).join(' & ')}; MCP ${mv.join() === intended[1] ? 'sends it intact' : `sends ${mv.join()}`}` });
-      }
-      // The remaining aspects (default order, Range) are attributed below as effects.
-      compareRequests({ ...feReq, url: `<PGRST>/${f.path}?select=${f.params.find(([k]) => k === 'select')?.[1] ?? ''}` }, { ...req, decoded: parseMcpRequest(req).params.filter(([k]) => k !== intended[0]).map(([k, v]) => `${k}=${v}`) }, { example: '_shared', entity: 'data.query-matrix', name, call: mq.call, input: {} });
-      continue;
-    }
-    const searchCase = /^search /.exec(name);
-    compareRequests(feReq, req, {
-      example: '_shared', entity: 'data.query-matrix', name, call: mq.call,
-      input: searchCase ? { searchQuery: JSON.parse(name.slice(7)) } : name === 'everything at once' ? { searchQuery: 'a b', orderField: 'name' } : {},
-      selectRule: () => 'Q-15', rawDropped: name === 'everything at once',
+  const art = readJson(path.join(MCP, '_shared/data.query-matrix.json'));
+  const types = art.syntheticTypes;
+  const props = art.synthetic.properties.map(p => ({ ...p, type: types[`${p.table_name}.${p.column_name}`] }));
+  const S = {
+    entities: art.synthetic.entities, props: t => props.filter(p => p.table_name === t), actions: [], statuses: [], categories: [],
+  };
+  const inputs = matrixInputs();
+  const missingCases = Object.keys(fe).filter(k => !(k in inputs));
+  for (const k of missingCases) miss('queries', { example: '_shared', subject: k, detail: 'frontend matrix case has no modeled input' });
+  for (const [name, feGolden] of Object.entries(fe)) {
+    const spec = inputs[name];
+    const mq = art.cases[name];
+    if (!spec || !mq) continue;
+    const ent = S.entities.find(x => x.table_name === (mq.input?.entity ?? 'items'));
+    queryCase({
+      base: { example: '_shared', entity: 'data.query-matrix', subject: name }, name, feGolden, feQuery: spec.query, paginated: spec.paginated,
+      mq, S, ent, feEnt: ent, feTypes: new Map(), viewKey: null, summaryView: false, synthetic: true,
     });
   }
-
   // Content-Range parsing.
-  const fcr = readJson(path.join(FE, '_shared/data.content-range.json')).paginated;
+  const fcr = readJson(path.join(FE, '_shared/data.content-range.json'));
   const mcr = readJson(path.join(MCP, '_shared/data.content-range.json')).paginated;
-  for (const [h, f] of Object.entries(fcr)) {
+  for (const [h, f] of Object.entries(fcr.paginated)) {
     count('content-range');
-    const mt = mcr[h]?.totalCount;
-    if (f.totalCount !== mt) hit('Q-16', { example: '_shared', entity: 'data.content-range', subject: JSON.stringify(h), detail: `frontend totalCount ${f.totalCount}, MCP total ${mt === undefined ? '(none)' : mt}` });
+    const header = h === 'null' ? null : h;
+    const inst = { example: '_shared', entity: 'data.content-range', subject: JSON.stringify(h) };
+    if (f.totalCount !== feTotalPaginated(header, f.data.length) || fcr.preview[h]?.totalCount !== feTotalPreview(header, fcr.preview[h]?.records?.length ?? 0)) {
+      miss('fe-model', { ...inst, detail: 'frontend Content-Range parse differs from the model' });
+      continue;
+    }
+    const model = mcpContentRange(header);
+    const m = mcr[h];
+    if (!same(m?.contentRange ?? null, model ?? null) || m?.totalCount !== model?.total) { miss('mcp-model', { ...inst, detail: `MCP ${canon(m)} vs model ${canon(model ?? null)}` }); continue; }
+    if (f.totalCount !== (model?.total ?? undefined)) hit('Q-16', { ...inst, detail: `frontend totalCount ${f.totalCount}, MCP total ${model ? model.total : '(none)'}` });
   }
-}
-
-const rawPropCache = new Map();
-function readRawProp(ex, table, column) {
-  const key = `${ex}`;
-  if (!rawPropCache.has(key)) rawPropCache.set(key, new Map(readJson(path.join(RAW, ex, 'testadmin/schema_properties.json')).map(p => [`${p.table_name}.${p.column_name}`, p])));
-  return rawPropCache.get(key).get(`${table}.${column}`);
 }
 
 // ---------------------------------------------------------------------------
-// Engine 7: name resolution (MCP-only artifacts + raw fixtures)
+// Engine 7: name resolution
 // ---------------------------------------------------------------------------
 
 function nameEngine() {
   for (const ex of examples()) {
     for (const v of variants(ex)) {
       const n = readJson(path.join(MCP, ex, v, 'mcp.names.json'));
-      for (const [table, r] of Object.entries(n.entities)) {
+      const S = mcpSchema(ex, v);
+      for (const e of S.entities) {
         count('name');
-        const base = { example: ex, variant: v, entity: table };
-        if (r.byTableName !== table) {
-          if (table !== table.toLowerCase()) hit('N-01', { ...base, subject: 'by table name', detail: `${JSON.stringify(table)} -> ${r.byTableName.slice(0, 120)}` });
-          else hit('N-06', { ...base, subject: 'by table name', detail: r.byTableName.slice(0, 120) });
+        const r = n.entities[e.table_name];
+        const base = { example: ex, variant: v, entity: e.table_name };
+        if (!r) { miss('names', { ...base, detail: 'entity missing' }); continue; }
+        const firstWord = e.display_name.trim().split(/\s+/)[0] ?? '';
+        const model = Object.fromEntries(Object.entries({
+          byTableName: e.table_name, byDisplayName: e.display_name, byUpperDisplayName: e.display_name.toUpperCase(),
+          byPaddedDisplayName: `  ${e.display_name}  `, byFirstWord: firstWord,
+        }).map(([k, input]) => [k, attempt(() => resolveEntity(S.entities, input).table_name)]));
+        model.displayName = e.display_name;
+        if (!same(canon(model), canon(r))) { miss('mcp-model', { ...base, detail: `entity probes ${canon(r)} vs model ${canon(model)}` }); continue; }
+        if (r.byTableName !== e.table_name) {
+          if (e.table_name !== e.table_name.toLowerCase()) hit('N-01', { ...base, subject: 'by table name', detail: `${JSON.stringify(e.table_name)} -> ${r.byTableName.slice(0, 120)}` });
+          else hit('N-06', { ...base, subject: 'entity by table name', detail: r.byTableName.slice(0, 120) });
         }
         for (const k of ['byDisplayName', 'byUpperDisplayName', 'byPaddedDisplayName']) {
-          if (r[k] !== table) hit('N-06', { ...base, subject: k, detail: `${JSON.stringify(r.displayName)} -> ${r[k].slice(0, 120)}` });
+          if (r[k] !== e.table_name) hit('N-06', { ...base, subject: `entity ${k}`, detail: `${JSON.stringify(e.display_name)} -> ${r[k].slice(0, 120)}` });
         }
       }
-      for (const [table, cols] of Object.entries(n.columnAnomalies)) {
-        for (const [col, probes] of Object.entries(cols)) {
-          for (const [k, d] of Object.entries(probes)) hit('N-06', { example: ex, variant: v, entity: table, subject: `column ${col} ${k}`, detail: d.slice(0, 140) });
+      // Columns and actions: recompute every probe; the artifact keeps anomalies only, plus counts.
+      const colAnom = {};
+      let colProbes = 0;
+      let colSelf = 0;
+      const actAnom = {};
+      let actProbes = 0;
+      let actSelf = 0;
+      for (const e of S.entities) {
+        const props = S.props(e.table_name);
+        for (const p of props) {
+          for (const [k, input] of Object.entries({ byColumnName: p.column_name, byDisplayName: p.display_name, byUpperDisplayName: p.display_name.toUpperCase() })) {
+            colProbes++;
+            const got = attempt(() => resolveColumn(props, e.table_name, input).column_name);
+            if (got === p.column_name) colSelf++;
+            else ((colAnom[e.table_name] ??= {})[p.column_name] ??= {})[k] = `${JSON.stringify(input)} -> ${got}`;
+          }
+        }
+        const acts = S.actions.filter(a => a.table_name === e.table_name);
+        for (const a of acts) {
+          for (const [k, input] of Object.entries({ byActionName: a.action_name, byDisplayName: a.display_name })) {
+            actProbes++;
+            const got = attempt(() => resolveAction(acts, e.table_name, input).action_name);
+            if (got === a.action_name) actSelf++;
+            else ((actAnom[e.table_name] ??= {})[a.action_name] ??= {})[k] = `${JSON.stringify(input)} -> ${got}`;
+          }
         }
       }
-      for (const [table, acts] of Object.entries(n.actionAnomalies)) {
-        for (const [act, probes] of Object.entries(acts)) {
-          for (const [k, d] of Object.entries(probes)) hit('N-06', { example: ex, variant: v, entity: table, subject: `action ${act} ${k}`, detail: d.slice(0, 140) });
-        }
-      }
+      if (!same(canon(colAnom), canon(n.columnAnomalies)) || colProbes !== n.columnCounts.probes || colSelf !== n.columnCounts.resolvedToSelf) miss('mcp-model', { example: ex, variant: v, detail: 'column resolution differs from the model' });
+      else for (const [t, cols] of Object.entries(colAnom)) for (const [col, probes] of Object.entries(cols)) for (const [k, d] of Object.entries(probes)) hit('N-06', { example: ex, variant: v, entity: t, subject: `column ${col} ${k}`, detail: d.slice(0, 140) });
+      if (!same(canon(actAnom), canon(n.actionAnomalies)) || actProbes !== n.actionCounts.probes || actSelf !== n.actionCounts.resolvedToSelf) miss('mcp-model', { example: ex, variant: v, detail: 'action resolution differs from the model' });
+      else for (const [t, acts] of Object.entries(actAnom)) for (const [act, probes] of Object.entries(acts)) for (const [k, d] of Object.entries(probes)) hit('N-06', { example: ex, variant: v, entity: t, subject: `action ${act} ${k}`, detail: d.slice(0, 140) });
     }
+    // Statuses and categories (testadmin).
+    const S = mcpSchema(ex, 'testadmin');
     const sc = readJson(path.join(MCP, ex, '_example/mcp.names-status-category.json'));
-    for (const [et, rows] of Object.entries(sc.statuses)) {
-      for (const [label, r] of Object.entries(rows)) {
-        count('name');
-        const id = label.split(' ')[0];
-        if (r.statusKey && r.byStatusKey === id) hit('N-02', { example: ex, entity: et, subject: label, detail: `status_key ${JSON.stringify(r.statusKey)} resolves (MCP); the import worker matches display names only` });
-        if (r.byDisplayName !== id) hit('N-02', { example: ex, entity: et, subject: `${label} (display name)`, detail: `display name resolves to ${r.byDisplayName}` });
+    const statusModel = {};
+    for (const s of S.statuses) {
+      const probe = input => attempt(() => String(resolveStatus(S.statuses, s.entity_type, input)));
+      (statusModel[s.entity_type] ??= {})[`${s.id} ${s.display_name}`] = {
+        statusKey: s.status_key ?? null, byStatusKey: s.status_key ? probe(s.status_key) : null,
+        byDisplayName: probe(s.display_name), byUpperDisplayName: probe(s.display_name.toUpperCase()), byPaddedDisplayName: probe(` ${s.display_name} `),
+      };
+    }
+    const catModel = {};
+    for (const c of S.categories) {
+      const probe = input => attempt(() => String(resolveCategory(S.categories, c.entity_type, input)));
+      (catModel[c.entity_type] ??= {})[`${c.id} ${c.display_name}`] = { byDisplayName: probe(c.display_name), byUpperDisplayName: probe(c.display_name.toUpperCase()), byPaddedDisplayName: probe(` ${c.display_name} `) };
+    }
+    count('name');
+    if (!same(canon(statusModel), canon(sc.statuses))) { miss('mcp-model', { example: ex, detail: 'status resolution differs from the model' }); }
+    else {
+      for (const [et, rows] of Object.entries(statusModel)) {
+        for (const [label, r] of Object.entries(rows)) {
+          const id = label.split(' ')[0];
+          if (r.statusKey && r.byStatusKey === id) hit('N-02', { example: ex, entity: et, subject: label, detail: `status_key ${JSON.stringify(r.statusKey)} resolves in the MCP; the import worker would report it as not found unless it equals the display name` });
+          for (const k of ['byDisplayName', 'byUpperDisplayName', 'byPaddedDisplayName']) {
+            if (r[k] !== id) hit('N-02', { example: ex, entity: et, subject: `${label} ${k}`, detail: `resolves to ${r[k]} because a status_key matches first` });
+          }
+        }
       }
     }
-    // Locale: display names differ between en and es fixtures (the MCP never sends Accept-Language).
-    for (const v of variants(ex).filter(x => x.endsWith('.es'))) {
-      const es = readJson(path.join(RAW, ex, v, 'schema_entities.json'));
-      const en = new Map(readJson(path.join(RAW, ex, v.replace('.es', ''), 'schema_entities.json')).map(e => [e.table_name, e.display_name]));
-      for (const e of es) {
-        if (en.get(e.table_name) !== e.display_name) hit('N-05', { example: ex, variant: v, entity: e.table_name, subject: 'display_name', detail: `en ${JSON.stringify(en.get(e.table_name))}, es ${JSON.stringify(e.display_name)}` });
+    if (!same(canon(catModel), canon(sc.categories))) miss('mcp-model', { example: ex, detail: 'category resolution differs from the model' });
+    // Locale: what the frontend shows in another language and the MCP never sees (no Accept-Language).
+    for (const v of allVariants(ex).filter(x => x.includes('.'))) {
+      const en = new Map(readJson(path.join(RAW, ex, v.split('.')[0], 'schema_entities.json')).map(e => [e.table_name, e.display_name]));
+      for (const e of readJson(path.join(RAW, ex, v, 'schema_entities.json'))) {
+        if (en.get(e.table_name) !== e.display_name) hit('N-05', { example: ex, variant: v, entity: e.table_name, subject: 'display_name', detail: `${v.split('.')[1]} ${JSON.stringify(e.display_name)}; the MCP always gets ${JSON.stringify(en.get(e.table_name))}` });
       }
     }
   }
+  // Foreign-key lookups and resolveData over the synthetic schema.
   const fk = readJson(path.join(MCP, '_shared/mcp.names-fk-requests.json'));
+  const eqOf = d => d.find(x => x.startsWith('display_name=eq.'))?.slice('display_name=eq.'.length);
+  const ilikeOf = d => d.find(x => x.startsWith('display_name=ilike.'))?.slice('display_name=ilike.'.length);
+  const SCENARIOS = {
+    'eq finds one': d => (eqOf(d) !== undefined ? [{ id: 7, display_name: eqOf(d) }] : []),
+    'eq finds two': d => (eqOf(d) !== undefined ? [{ id: 7, display_name: 'A' }, { id: 9, display_name: 'A' }] : []),
+    'eq none, ilike one': d => (ilikeOf(d) !== undefined ? [{ id: 8, display_name: 'pattern match' }] : []),
+    'eq none, ilike two': d => (ilikeOf(d) !== undefined ? [{ id: 8, display_name: 'p1' }, { id: 10, display_name: 'p2' }] : []),
+    'no match': () => [],
+  };
   for (const [scenario, rows] of Object.entries(fk.resolveForeignKeyValue)) {
-    if (scenario !== 'eq none, ilike one') continue;
-    for (const [name, r] of Object.entries(rows)) {
-      const raw = JSON.parse(name);
-      if (/[*%_]/.test(raw)) hit('N-03', { example: '_shared', entity: 'resolveForeignKeyValue', subject: name, detail: `requests ${r.requests.join(' then ')} -> ${r.result}` });
+    for (const [nameKey, r] of Object.entries(rows)) {
+      count('name');
+      const name = JSON.parse(nameKey);
+      const responder = SCENARIOS[scenario];
+      if (!responder) { miss('names', { example: '_shared', subject: scenario, detail: 'scenario not modeled' }); continue; }
+      const model = resolveFk('parents', name, responder);
+      const result = model.error ? `ERR ${model.error}` : model.result;
+      const reqs = model.requests.map(q => q.decoded.join('&'));
+      if (result !== r.result || !same(reqs, r.requests)) { miss('mcp-model', { example: '_shared', entity: scenario, subject: nameKey, detail: `MCP ${canon(r)} vs model ${canon({ result, requests: reqs })}` }); continue; }
+      if (scenario === 'eq none, ilike one' && /[*%_]/.test(name)) hit('N-03', { example: '_shared', entity: 'resolveForeignKeyValue', subject: nameKey, detail: `requests ${reqs.join(' then ')} -> ${result}` });
     }
+  }
+  const qm = readJson(path.join(MCP, '_shared/data.query-matrix.json'));
+  const synthProps = qm.synthetic.properties.map(p => ({ ...p, type: qm.syntheticTypes[`${p.table_name}.${p.column_name}`] }));
+  const items = synthProps.filter(p => p.table_name === 'items');
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  for (const [caseName, r] of Object.entries(fk.resolveData)) {
+    count('name');
+    const urls = [];
+    const lookup = (table, value) => {
+      const m = resolveFk(table, value, SCENARIOS['eq finds one']);
+      for (const q of m.requests) urls.push(`<PGRST>/${q.path}?${new URLSearchParams(pairsOf(q.decoded)).toString()}`);
+      if (m.error) throw new NameError(m.error);
+      return m.result;
+    };
+    let result;
+    try {
+      result = {};
+      for (const [key, value] of Object.entries(r.input)) {
+        let prop;
+        try { prop = resolveColumn(items, 'items', key); } catch (e) { if (e instanceof NameError) { result[key] = value; continue; } throw e; }
+        if (value !== null && typeof value === 'string' && prop.type !== undefined) {
+          if (prop.type === 'ForeignKeyName') result[prop.column_name] = /^\d+$/.test(value) ? parseInt(value, 10) : UUID.test(value) ? value : lookup(prop.join_table, value);
+          else if (prop.type === 'User') result[prop.column_name] = UUID.test(value) ? value : lookup('civic_os_users', value);
+          else result[prop.column_name] = value;
+        } else result[prop.column_name] = value;
+      }
+    } catch (e) {
+      if (!(e instanceof NameError)) throw e;
+      result = `ERR ${e.message}`;
+    }
+    if (!same(canon(result), canon(r.result)) || !same(urls, r.requests)) miss('mcp-model', { example: '_shared', entity: 'resolveData', subject: caseName, detail: `MCP ${canon(r)} vs model ${canon({ result, requests: urls })}` });
   }
 }
 
 // ---------------------------------------------------------------------------
-// Engine 8: rules with evidence checks and source scans
+// Engine 8: rule computations, probes and evidence checks
 // ---------------------------------------------------------------------------
 
 function evidenceEngine() {
   for (const rule of RULES) {
     if (!rule.compute) continue;
-    rule.compute({ hit, miss, readJson, ROOT, FE, MCP, RAW, examples, variants, count });
+    rule.compute({ hit, miss, note, readJson, ROOT, FE, MCP, RAW, examples, variants, allVariants, count });
   }
 }
 
-/**
- * Type-detection probes: the MCP result comes from mcp.type-probes.json; the
- * frontend result is the one the rule cites from code. A probe on which both
- * agree is a catalogue error (the rule would not be a divergence).
- */
 function probeEngine() {
-  const probes = new Map(readJson(path.join(MCP, '_shared/mcp.type-probes.json')).probes.map(p => [p.name, p]));
+  const art = readJson(path.join(MCP, '_shared/mcp.type-probes.json'));
+  const probes = new Map(art.probes.map(p => [p.name, p]));
   for (const rule of RULES) {
     for (const [name, feType] of Object.entries(rule.probes ?? {})) {
       count('type-probe');
       const p = probes.get(name);
-      if (!p) { miss('probes', { example: '_shared', entity: rule.id, subject: name, detail: 'probe missing from mcp.type-probes.json' }); continue; }
-      if (p.type === feType) { miss('probes', { example: '_shared', entity: rule.id, subject: name, detail: `MCP and frontend (from code) agree on ${feType}` }); continue; }
-      hit(rule.id, { example: '_shared', entity: 'mcp.type-probes', subject: name, detail: `MCP ${p.type} (select ${p.select}); frontend (from code) ${feType}` });
+      const inst = { example: '_shared', entity: 'mcp.type-probes', subject: name };
+      if (!p) { miss('probes', { ...inst, detail: 'probe missing' }); continue; }
+      const prop = { ...art.base, ...p.input };
+      if (p.select !== mcpSelect(p.type, prop)) { miss('mcp-model', { ...inst, detail: `probe select ${p.select} vs model ${mcpSelect(p.type, prop)}` }); continue; }
+      if (typeRule(prop, feType, p.type) !== rule.id) { miss('probes', { ...inst, detail: `MCP ${p.type}, frontend (from code) ${feType}: not rule ${rule.id}` }); continue; }
+      hit(rule.id, { ...inst, detail: `MCP ${p.type} (select ${p.select}); frontend (from code) ${feType}` });
     }
   }
 }
 
-/** Every rule's `checks` (file must contain each string) must hold; a stale citation fails the run. */
 function verifyEvidence() {
   const failures = [];
   for (const rule of RULES) {
@@ -784,12 +993,13 @@ function summarize(bucket) {
   const byExample = {};
   let occurrences = 0;
   let synthetic = 0;
+  const entities = new Set();
   for (const [, e] of entries) {
     byExample[e.example] = (byExample[e.example] ?? 0) + 1;
     occurrences += e.occurrences;
     if (e.example === '_shared') synthetic++;
+    else entities.add(`${e.example}|${e.entity}`);
   }
-  // Three concrete examples, preferring distinct examples.
   const picked = [];
   const seen = new Set();
   for (const [, e] of entries) if (!seen.has(e.example) && picked.length < 3) { picked.push(e); seen.add(e.example); }
@@ -797,11 +1007,12 @@ function summarize(bucket) {
   return {
     count: entries.length - synthetic,
     synthetic,
+    entities: entities.size,
     occurrences,
     byExample,
     examples: picked.map(e => ({
       example: e.example, entity: e.entity, subject: e.subject, detail: e.detail,
-      ...(e.variants.size ? { variants: [...e.variants].sort((a, b) => ROLE_ORDER.indexOf(a.split('.')[0]) - ROLE_ORDER.indexOf(b.split('.')[0]) || cmp(a, b)) } : {}),
+      ...(e.variants.size ? { variants: [...e.variants].sort((a, b) => ROLE_ORDER.indexOf(a) - ROLE_ORDER.indexOf(b) || cmp(a, b)) } : {}),
     })),
   };
 }
@@ -818,12 +1029,14 @@ function build() {
   probeEngine();
   const evidenceFailures = verifyEvidence();
   const rows = RULES.map(rule => {
-    const h = hits.get(rule.id) ?? { instances: new Map(), effects: new Map() };
-    const { compute, checks, ...rest } = rule;
+    const h = hits.get(rule.id) ?? Object.fromEntries(BUCKETS.map(b => [b, new Map()]));
+    const { compute, checks, probes, ...rest } = rule;
     return {
       ...rest,
       instances: summarize(h.instances),
       ...(h.effects.size ? { effects: summarize(h.effects) } : {}),
+      ...(h.harnessOnly.size ? { harnessOnly: summarize(h.harnessOnly) } : {}),
+      ...(notes.has(rule.id) ? { computedNotes: notes.get(rule.id) } : {}),
       decision: null,
     };
   });
@@ -835,6 +1048,7 @@ function build() {
 // ---------------------------------------------------------------------------
 
 const md = s => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+const exLine = e => `${e.example}${e.entity ? ` · ${e.entity}` : ''}${e.subject ? ` · ${e.subject}` : ''}${e.variants ? ` [${e.variants.join(', ')}]` : ''}: ${e.detail}`;
 
 function renderMarkdown(rows) {
   const L = [];
@@ -842,11 +1056,13 @@ function renderMarkdown(rows) {
   for (const r of rows) byRec[r.recommendation] = (byRec[r.recommendation] ?? 0) + 1;
   L.push('# SDK divergence ledger');
   L.push('');
-  L.push('> Generated by `node scripts/golden/ledger.mjs` from `tests/golden/derived/frontend/`, `tests/golden/derived/mcp/` and `tests/golden/raw/`. Do not edit by hand: change the rule catalogue (`scripts/golden/ledger-rules.mjs`) or the goldens and regenerate. Machine-readable copy: `tests/golden/ledger.json`.');
+  L.push('> Generated by `node scripts/golden/ledger.mjs` from `tests/golden/derived/frontend/`, `tests/golden/derived/mcp/` and `tests/golden/raw/`. Do not edit by hand: change the rule catalogue (`scripts/golden/ledger-rules.mjs`), the reference models (`scripts/golden/ledger-models.mjs`) or the goldens and regenerate. Machine-readable copy: `tests/golden/ledger.json`.');
   L.push('');
   L.push('## How to decide');
   L.push('');
-  L.push('Each row is one rule on which the generic app (frontend) and the MCP server interpret the metadata contract differently, or a frontend quirk the golden outputs captured. Instance counts are computed from the goldens: an instance is one distinct example / entity / subject (property, view entry, condition and record, payload, query case, action); `occurrences` counts it once per role variant it appears in. `effects` are downstream differences the rule causes elsewhere (for example a select string that differs because the type differs). Rows with 0 instances are latent: no example exercises them today, and the evidence is the cited code plus, for type detection, the MCP output in `tests/golden/derived/mcp/_shared/mcp.type-probes.json`.');
+  L.push('Each row is one rule on which the generic app (frontend) and the MCP server interpret the metadata contract differently, or a frontend quirk the golden outputs captured. Attribution is exact: a difference is counted for a row only when both golden values equal the reference models of the cited code and the row\'s transformation turns one into the other; any other difference fails the ledger run, so the rows account for every computed divergence. `scripts/golden/ledger-mutation-check.sh` proves this by mutating the MCP code and requiring the run to fail.');
+  L.push('');
+  L.push('Counting: an instance is one distinct example / entity / subject (property, view entry, condition and record, payload, query case and aspect, action); `occurrences` counts it once per role variant. `synthetic` instances come from fixed input sets (the `_shared` matrices, payload sets and type probes) rather than from example metadata. `effects` are downstream differences a rule causes elsewhere (a select string that differs because the type differs). `harness-only` instances arise only from the golden harness\'s inputs, not from the real app. Rows with 0 instances in examples are latent: the evidence is the cited code plus synthetic inputs. The `.es` variants are excluded: the MCP never receives translated metadata (N-05).');
   L.push('');
   L.push('Daniel decides per row at gate 2. Recommendations:');
   L.push('');
@@ -865,12 +1081,11 @@ function renderMarkdown(rows) {
   L.push('|---|---|---|---|---|');
   for (const r of rows) {
     const i = r.instances;
-    // Rows whose comparison inputs are synthetic by construction (fixed payload / query / transform sets) have no
-    // example-derived count; they are not latent, so they read "N synthetic" instead of "0".
     const parts = i.count ? [`${i.count}`] : r.latent ? ['0 (latent)'] : [];
     if (i.synthetic) parts.push(`${parts.length ? '+' : ''}${i.synthetic} synthetic`);
     if (!parts.length) parts.push('0');
     if (r.effects) parts.push(`+${r.effects.count + r.effects.synthetic} effects`);
+    if (r.harnessOnly) parts.push(`+${r.harnessOnly.count} harness-only`);
     L.push(`| [${r.id}](#${r.id.toLowerCase()}) | ${md(r.area)} | ${md(r.rule)} | \`${r.recommendation}\` | ${parts.join(', ')} |`);
   }
   for (const area of AREAS) {
@@ -888,18 +1103,24 @@ function renderMarkdown(rows) {
       L.push(`- Frontend: ${r.frontend}`);
       L.push(`- MCP: ${r.mcp}`);
       L.push(`- Evidence: ${r.evidence.map(e => `\`${e}\``).join(', ')}`);
+      if (r.unit) L.push(`- Unit: ${r.unit}`);
       const i = r.instances;
-      const head = i.count ? `${i.count} in examples` : r.latent ? `0 in examples (latent: ${r.latent})` : 'inputs are synthetic by construction';
-      const synth = i.synthetic ? `; ${i.synthetic} synthetic (\`_shared\` matrices, payload sets and probes)` : '';
+      const head = i.count ? `${i.count} in examples (${i.entities} entities)` : r.latent ? `0 in examples (latent: ${r.latent})` : 'inputs are synthetic by construction';
+      const synth = i.synthetic ? `; ${i.synthetic} synthetic` : '';
       if (i.count || i.synthetic) {
         L.push(`- Instances: ${head}${synth}; ${i.occurrences} occurrences; by example: ${Object.entries(i.byExample).map(([k, v]) => `${k} ${v}`).join(', ')}`);
-        for (const e of i.examples) L.push(`  - ${e.example}${e.entity ? ` · ${e.entity}` : ''}${e.subject ? ` · ${e.subject}` : ''}${e.variants ? ` [${e.variants.join(', ')}]` : ''}: ${e.detail}`);
+        for (const e of i.examples) L.push(`  - ${exLine(e)}`);
       } else {
         L.push(`- Instances: ${head}`);
       }
+      for (const n of r.computedNotes ?? []) L.push(`- Computed: ${n}`);
       if (r.effects) {
         L.push(`- Effects: ${r.effects.count + r.effects.synthetic} downstream differences (${r.effects.occurrences} occurrences); by example: ${Object.entries(r.effects.byExample).map(([k, v]) => `${k} ${v}`).join(', ')}`);
-        for (const e of r.effects.examples) L.push(`  - ${e.example}${e.entity ? ` · ${e.entity}` : ''}${e.subject ? ` · ${e.subject}` : ''}: ${e.detail}`);
+        for (const e of r.effects.examples) L.push(`  - ${exLine(e)}`);
+      }
+      if (r.harnessOnly) {
+        L.push(`- Harness-only: ${r.harnessOnly.count} (not produced by the real app); by example: ${Object.entries(r.harnessOnly.byExample).map(([k, v]) => `${k} ${v}`).join(', ')}`);
+        for (const e of r.harnessOnly.examples) L.push(`  - ${exLine(e)}`);
       }
       L.push(`- If the frontend behavior is adopted: ${r.impact.adoptFrontend}`);
       L.push(`- If the MCP behavior is adopted: ${r.impact.adoptMcp}`);
@@ -925,7 +1146,11 @@ function renderMarkdown(rows) {
   L.push('');
   L.push('## Coverage');
   L.push('');
-  L.push(`Comparisons made: ${Object.entries(diagnostics.comparisons).sort(([a], [b]) => cmp(a, b)).map(([k, v]) => `${k} ${v}`).join(', ')}. Unattributed differences: ${unattributed.length}. View-order differences confined to \`sort_order\` ties (capture artifacts, not rows): ${diagnostics.tieOrderArtifacts}.`);
+  L.push(`Comparisons made: ${Object.entries(diagnostics.comparisons).sort(([a], [b]) => cmp(a, b)).map(([k, v]) => `${k} ${v}`).join(', ')}. Unattributed differences: ${unattributed.length}.`);
+  L.push('');
+  L.push(`Not rows: ${diagnostics.tieOrderArtifacts} view-order differences confined to \`sort_order\` ties (capture artifacts); ${diagnostics.bothReject} frontend queries that name a column the entity lacks, which both sides reject (PostgREST on the frontend side, name resolution on the MCP side); ${diagnostics.mappingArtifacts} select difference caused by a hand-written embed in a frontend matrix input.`);
+  L.push('');
+  L.push('Harness limits: the MCP golden stub answers every data request with an empty result (or the record under test) and cannot reject a select, so an embed PostgREST would refuse (for example a FK hint through a metadata view, S-02) is not proven to work by these goldens; the request-equivalence harness (P0.4) covers live behavior.');
   L.push('');
   return L.join('\n');
 }
@@ -951,25 +1176,29 @@ function main() {
     rows,
     latentNondeterminism: nondeterminismJson(),
     remedy: NONDETERMINISM.remedy,
-    coverage: { comparisons: diagnostics.comparisons, unattributed: unattributed.length, tieOrderArtifacts: diagnostics.tieOrderArtifacts },
+    coverage: {
+      comparisons: diagnostics.comparisons, unattributed: unattributed.length, tieOrderArtifacts: diagnostics.tieOrderArtifacts,
+      bothReject: diagnostics.bothReject, mappingArtifacts: diagnostics.mappingArtifacts,
+    },
   });
   const text = renderMarkdown(rows);
-  let failed = 0;
+  let failed = false;
   if (unattributed.length) {
     console.error(`${unattributed.length} unattributed difference(s):`);
     const byArea = {};
     for (const u of unattributed) (byArea[u.area] ??= []).push(u);
     for (const [area, list] of Object.entries(byArea)) {
       console.error(`  ${area}: ${list.length}`);
-      for (const u of list.slice(0, 15)) console.error(`    ${[u.example, u.variant, u.entity, u.subject].filter(Boolean).join(' · ')}: ${u.detail}`);
+      for (const u of list.slice(0, 15)) console.error(`    ${[u.example, u.variant, u.entity, u.subject].filter(Boolean).join(' · ')}: ${String(u.detail).slice(0, 400)}`);
     }
-    failed = 2;
+    failed = true;
   }
   if (evidenceFailures.length) {
     console.error('evidence checks failed:');
     for (const f of evidenceFailures) console.error(`  ${f}`);
-    failed = 2;
+    failed = true;
   }
+  if (failed) process.exit(2);
   if (check) {
     const stale = [];
     if (!fs.existsSync(OUT_JSON) || fs.readFileSync(OUT_JSON, 'utf8') !== json) stale.push(rel(OUT_JSON));
@@ -979,9 +1208,8 @@ function main() {
       process.exit(1);
     }
     console.log(`ledger up to date: ${rows.length} rows`);
-    process.exit(failed);
+    return;
   }
-  if (failed) process.exit(failed);
   fs.writeFileSync(OUT_JSON, json);
   fs.writeFileSync(OUT_MD, text);
   console.log(`wrote ${rel(OUT_MD)} and ${rel(OUT_JSON)}: ${rows.length} rows`);
