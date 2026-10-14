@@ -1699,10 +1699,10 @@
           "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
-              "decoded": ["select=id,display_name,organization_type_id:categories!organization_type_id(id,display_name,color),created_at,email,updated_at,phone,website,address,description,civic_os_text_search", "id=eq.1"],
+              "decoded": ["select=id,display_name,created_at,organization_type_id:categories!organization_type_id(id,display_name,color),email,updated_at,phone,website,address,description,civic_os_text_search", "id=eq.1"],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/organizations?select=id%2Cdisplay_name%2Corganization_type_id%3Acategories%21organization_type_id%28id%2Cdisplay_name%2Ccolor%29%2Ccreated_at%2Cemail%2Cupdated_at%2Cphone%2Cwebsite%2Caddress%2Cdescription%2Ccivic_os_text_search&id=eq.1"
+              "url": "<PGRST>/organizations?select=id%2Cdisplay_name%2Ccreated_at%2Corganization_type_id%3Acategories%21organization_type_id%28id%2Cdisplay_name%2Ccolor%29%2Cemail%2Cupdated_at%2Cphone%2Cwebsite%2Caddress%2Cdescription%2Ccivic_os_text_search&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Organizations."

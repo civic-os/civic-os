@@ -54,7 +54,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 | [C-06](#c-06) | Condition evaluation | Missing or malformed condition: the frontend returns true (null/undefined) or treats a non-array `or` / `and` as a simple condition; the MCP throws | `adopt-frontend` | 0 (latent), +2 synthetic |
 | [A-01](#a-01) | Actions end to end | Status-gated actions are wrongly refused or wrongly listed through the MCP (none is wrongly executed) | `mcp-bug` | 29, +2 synthetic |
 | [A-02](#a-02) | Actions end to end | Actions defined on civic_os_users (shown on the profile page) are unreachable through the MCP | `needs-decision` | 4 |
-| [A-03](#a-03) | Actions end to end | Status transitions: the MCP reads a status_transitions view that does not exist | `mcp-bug` | 4 |
+| [A-03](#a-03) | Actions end to end | Status transitions: the MCP reads a status_transitions view that does not exist | `mcp-bug` | 13 |
 | [E-01](#e-01) | Error messages | Different wording for errors both sides recognize (42501, 23505, 401, 404) | `needs-decision` | 24 synthetic |
 | [E-03](#e-03) | Error messages | Constraint violations without a configured message: different fallback text | `needs-decision` | 256, +9 synthetic |
 | [E-04](#e-04) | Error messages | Unrecognized error: frontend "System Error"; MCP "Error: <raw message>" | `needs-decision` | 9 synthetic |
@@ -85,7 +85,7 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 | [X-02](#x-02) | Other MCP behavior | Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core) | `frontend-bug` | 3 |
 | [F-01](#f-01) | Frontend quirks | Filter values and entityId are not URL-encoded (only the search term is) | `frontend-bug` | 7 synthetic |
 | [F-02](#f-02) | Frontend quirks | page <= 0 gives a negative Range; pageSize 0 gives `0--1`; page 2.5 gives `15-24` | `frontend-bug` | 3 synthetic |
-| [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | 5, +1 synthetic |
+| [F-03](#f-03) | Frontend quirks | Garbage or empty DateTimeLocal becomes "NaN-NaN-NaNTNaN:NaN" in transformValueForControl | `frontend-bug` | 4, +1 synthetic |
 | [F-04](#f-04) | Frontend quirks | parseToHuman returns "System Error" for 23502, 22P02, 22007 / 22008 (and 412), where the MCP has a specific message | `adopt-mcp` | 6 synthetic |
 | [F-17](#f-17) | Frontend quirks | parseToHuman returns "System Error" for 23503, PGRST116 and PT503, where the MCP returns the raw PostgREST message (or a MaintenanceError) | `needs-decision` | 7 synthetic |
 | [F-05](#f-05) | Frontend quirks | New York DST gap: 02:30 on 2026-03-08 is sent as 07:30Z (JavaScript forward-shift) | `needs-decision` | 1 synthetic |
@@ -98,12 +98,12 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 | [F-12](#f-12) | Frontend quirks | CreatePage deletes the PhotoGallery key only when the value is non-null, so null is sent | `frontend-bug` | 1 synthetic |
 | [F-13](#f-13) | Frontend quirks | The in filter emits `in.()`, `in.not-an-array` and empty items (`1,,`); `eq.false` and `eq.0` are emitted; in-list items are never quoted | `needs-decision` | 24, +1 synthetic |
 | [F-14](#f-14) | Frontend quirks | The two frontend Content-Range parsers disagree on missing, empty or unknown totals | `frontend-bug` | 2 synthetic |
-| [F-15](#f-15) | Frontend quirks | P0001 with an empty message returns ""; under HTTP 401/404 the status wins over the code | `needs-decision` | 4 synthetic |
+| [F-15](#f-15) | Frontend quirks | P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code | `needs-decision` | 2 synthetic |
 | [F-16](#f-16) | Frontend quirks | The guided-form and action condition evaluators disagree (String coercion vs strict equality; neq against null) | `needs-decision` | 4 synthetic |
 
 ## Type detection
 
-`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`. Every probe is compared: its frontend type comes from the transcription of `getPropertyType` in `scripts/golden/ledger-models.mjs` (`feType`), which is checked against the frontend type of every fixture property; branches no fixture exercises (int2, bpchar, MultiPolygon, non-uuid system FKs, timestamp until P0.5 adds a real column) are anchored by that transcription only (follow-up: run the probe inputs through the frontend golden harness).
+`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`. Every probe is compared: its frontend type comes from the transcription of `getPropertyType` in `scripts/golden/ledger-models.mjs` (`feType`), which is checked against the frontend type of every fixture property and of every row of the hand-built frontend `_synthetic` golden variant (which reaches every frontend result type, DateTime and RecurringTimeSlot included); branches neither exercises are anchored by that transcription only. The Coverage section lists them, computed: on the MCP side DateTime and RecurringTimeSlot (until P0.5 adds a real timestamp column), and udt values in no raw fixture such as int2, bpchar, float4 / float8, jsonb, MultiPolygon. Follow-up: run the probe inputs through the frontend golden harness.
 
 ### T-01
 
@@ -613,11 +613,13 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 
 - Frontend: Admin and workflow UIs read transitions through `rpc/get_status_transitions_for_entity`.
 - MCP: `fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallows the error and uses an empty list, so get_status_workflow reports no transition restrictions.
-- Evidence: `tools/mcp-server/src/schema-cache.ts:299-307`, `src/app/services/status-admin.service.ts:152`, `tests/golden/raw/<example>/<role>/status_transitions.json`, `tools/mcp-server/src/tools/get-status-workflow.ts:58`
-- Instances: 4 in examples (4 entities); 4 occurrences; by example: client-intake 1, community-center 1, mottpark 1, staff-portal 1
-  - client-intake · status_transitions · get_status_workflow: view returns 404 for the MCP; transitions defined: 3 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)
-  - community-center · status_transitions · get_status_workflow: view returns 404 for the MCP; transitions defined: 1 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)
-  - mottpark · status_transitions · get_status_workflow: view returns 404 for the MCP; transitions defined: 2 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)
+- Evidence: `tools/mcp-server/src/schema-cache.ts:299-307`, `src/app/services/status-admin.service.ts:152`, `tests/golden/raw/<example>/<role>/status_transitions.json`, `tests/golden/raw/<example>/<role>/rpc.get_status_transitions_for_entity.<entity_type>.json`, `tools/mcp-server/src/tools/get-status-workflow.ts:58`
+- Unit: one instance is an entity type whose transitions the RPC returns while the MCP sees none.
+- Instances: 13 in examples (13 entities); 13 occurrences; by example: client-intake 5, community-center 1, mottpark 2, staff-portal 5
+  - client-intake · client · get_status_workflow: rpc/get_status_transitions_for_entity returns 3 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none
+  - community-center · reservation_request · get_status_workflow: rpc/get_status_transitions_for_entity returns 4 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none
+  - mottpark · reservation_payment · get_status_workflow: rpc/get_status_transitions_for_entity returns 4 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none
+- Computed: 43 transitions in 4 examples (client-intake 14, community-center 4, mottpark 10, staff-portal 15), identical for all five roles; the other examples (pothole included) define none. Earlier counts grepped INSERT statements in the init scripts; the RPC fixtures replace them.
 - If the frontend behavior is adopted: MCP reports the real allowed transitions and on-transition RPCs.
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. The MCP should call the same RPC as the frontend (the core's status client).
@@ -1105,7 +1107,7 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 - Frontend: Invalid Date is formatted field by field without a validity check.
 - MCP: No counterpart (the MCP has no form controls).
 - Evidence: `src/app/pages/edit/edit.page.ts:839-880`, `tests/golden/derived/frontend/_shared/transforms.dst-edges.json`, `tests/golden/derived/frontend/<variant>/transforms.rows.json`
-- Instances: 5 in examples (5 entities); 1 synthetic; 6 occurrences; by example: _shared 1, client-intake 1, community-center 1, neighborhood-hub 1, pothole 1, staff-portal 1
+- Instances: 4 in examples (4 entities); 1 synthetic; 5 occurrences; by example: _shared 1, client-intake 1, community-center 1, pothole 1, staff-portal 1
   - _shared · transforms.dst-edges.json · NaN control value: 8 occurrence(s) of NaN-NaN-NaNTNaN:NaN
   - client-intake · transforms.rows.json · NaN control value: 1 occurrence(s) of NaN-NaN-NaNTNaN:NaN
   - community-center · transforms.rows.json · NaN control value: 1 occurrence(s) of NaN-NaN-NaNTNaN:NaN
@@ -1284,18 +1286,17 @@ Current frontend behavior captured by the P0.2b goldens and confirmed by its ver
 
 ### F-15
 
-**P0001 with an empty message returns ""; under HTTP 401/404 the status wins over the code**
+**P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code**
 
-- Frontend: Empty RAISE message gives an empty error text; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".
-- MCP: Identical outcome classes: empty P0001 returns "", 401/404 are checked before P0001 (only the wording differs, E-01).
+- Frontend: A RAISE with no message property returns `err.message`, i.e. undefined (callers render whatever that becomes); an empty message gives ""; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".
+- MCP: PostgRESTRequestError passes the message to Error, so a missing message becomes "" and P0001 returns ""; 401/404 are checked before P0001 as on the frontend (only the wording differs, E-01).
 - Evidence: `src/app/services/error.service.ts:106-126`, `tools/mcp-server/src/postgrest-client.ts:247-252`, `tests/golden/derived/frontend/<example>/_example/errors.lookup.json`
-- Instances: inputs are synthetic by construction; 4 synthetic; 4 occurrences; by example: _shared 4
-  - _shared · errors.lookup · {"code":"P0001","httpCode":400,"humanMessage":"","message":""}: frontend "", MCP ""
-  - _shared · errors.lookup · {"code":"P0001","httpCode":400,"humanMessage":"","message":"Custom RAISE EXCEPTION text"}: frontend "Custom RAISE EXCEPTION text", MCP "Custom RAISE EXCEPTION text"
-  - _shared · errors.lookup · {"code":"P0001","httpCode":401,"humanMessage":"","message":"raise"}: frontend "Your session has expired. Please refresh the page to log in again.", MCP "Authentication required. Your session may have expired."
-- If the frontend behavior is adopted: n/a
-- If the MCP behavior is adopted: n/a
-- Recommendation: `needs-decision`. An empty RAISE message should fall back to a generic text; status-over-code precedence is reasonable but should be explicit in the core.
+- Instances: inputs are synthetic by construction; 2 synthetic; 16 occurrences; by example: _shared 2
+  - _shared · parseToHuman · {"code":"P0001","httpCode":400,"humanMessage":""}: frontend undefined, MCP ""
+  - _shared · parseToHumanWithLookup · {"code":"P0001","httpCode":400,"humanMessage":""}: frontend undefined, MCP ""
+- If the frontend behavior is adopted: MCP would return undefined for an empty RAISE.
+- If the MCP behavior is adopted: Generic app shows an empty message instead of undefined.
+- Recommendation: `needs-decision`. Neither is a good message: an empty or missing RAISE message should fall back to a generic text on both sides. Status-over-code precedence is reasonable but should be explicit in the core.
 
 ### F-16
 
@@ -1343,8 +1344,10 @@ Suggested remedy (for Daniel to decide, not implemented): add a deterministic ti
 
 ## Coverage
 
-Comparisons made: action-case 158, condition 3239, condition-describe 46, content-range 11, error 883, es-model 415, fe-hybrid-model 130, fe-view-model 2015, name 469, property 3952, query 1696, type-probe 64, view 1612. Unattributed differences: 0.
+Comparisons made: action-case 158, condition 3239, condition-describe 46, content-range 11, error 915, es-model 415, fe-hybrid-model 130, fe-synthetic-model 312, fe-view-model 2015, name 469, property 3952, query 1696, type-probe 64, view 1612. Unattributed differences: 0.
 
-Not rows: 39 view-order differences confined to `sort_order` ties (capture artifacts); 251 frontend queries that name a column the entity lacks, which both sides reject (PostgREST on the frontend side, name resolution on the MCP side); 1 select difference caused by a hand-written embed in a frontend matrix input.
+Type detection anchored by transcription only (no raw fixture property, and on the frontend side no row of the frontend's `_synthetic` golden variant, reaches the branch; the type probes and the transcriptions in `ledger-models.mjs` are the only evidence): frontend result types none; MCP result types DateTime, RecurringTimeSlot; udt values in no raw fixture bpchar, citext, float4, float8, int2, jsonb, timestamp (float4 / float8 share the numeric branch on both sides, jsonb / citext the Unknown or FK fallback; the frontend synthetic variant covers some of these on the frontend side only); geography types LineString, MultiPolygon, null.
+
+Not rows: 0 view-order differences confined to `sort_order` ties (capture artifacts); 251 frontend queries that name a column the entity lacks, which both sides reject (PostgREST on the frontend side, name resolution on the MCP side); 1 select difference caused by a hand-written embed in a frontend matrix input.
 
 Harness limits: the MCP golden stub answers every data request with an empty result (or the record under test) and cannot reject a select, so an embed PostgREST would refuse (for example a FK hint through a metadata view, S-02) is not proven to work by these goldens; the request-equivalence harness (P0.4) covers live behavior.

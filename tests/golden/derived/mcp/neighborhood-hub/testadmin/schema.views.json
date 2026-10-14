@@ -66,7 +66,7 @@
     },
     "mek_checkouts": {
       "create": ["display_name"],
-      "detail": ["created_at", "updated_at", "mek_request_id", "display_name", "checkout_photos", "return_photos", "checkout_notes", "return_notes", "damage_reported", "status_id"],
+      "detail": ["created_at", "mek_request_id", "updated_at", "display_name", "checkout_photos", "return_photos", "checkout_notes", "return_notes", "damage_reported", "status_id"],
       "edit": ["display_name", "checkout_photos", "return_photos", "checkout_notes", "return_notes"],
       "list": ["mek_request_id", "display_name", "checkout_photos", "return_photos", "checkout_notes", "return_notes", "damage_reported", "status_id"]
     },
@@ -90,7 +90,7 @@
     },
     "parcels": {
       "create": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary"],
-      "detail": ["parcel_number_formatted", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "lmi_status", "land_bank_status", "boundary", "display_name"],
+      "detail": ["parcel_number_formatted", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "lmi_status", "boundary", "land_bank_status", "display_name"],
       "edit": ["parcel_number", "prop_num", "prop_dir", "prop_street", "prop_city", "prop_zip", "acreage", "property_class", "eligibility", "boundary"],
       "list": ["parcel_number_formatted", "acreage", "property_class", "eligibility", "lmi_status", "land_bank_status", "display_name"]
     },

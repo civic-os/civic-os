@@ -5,8 +5,8 @@
       {"column": "staff_role_id", "select": "staff_role_id:staff_roles!staff_role_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
     ],
     "document_requirements": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "requires_approval", "select": "requires_approval", "type": "Boolean", "typeId": 3},
       {"column": "sort_order", "select": "sort_order", "type": "IntegerNumber", "typeId": 8},
@@ -14,8 +14,8 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
     ],
     "incident_reports": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "reported_by_id", "select": "reported_by_id:staff_members!reported_by_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "site_id", "select": "site_id:sites!site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "incident_date", "select": "incident_date", "type": "Date", "typeId": 4},
@@ -30,8 +30,8 @@
       {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
     ],
     "offboarding_feedback": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "overall_rating", "select": "overall_rating", "type": "IntegerNumber", "typeId": 8},
       {"column": "what_went_well", "select": "what_went_well", "type": "TextLong", "typeId": 2},
@@ -43,8 +43,8 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
     ],
     "reimbursements": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "amount", "select": "amount", "type": "Money", "typeId": 7},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
@@ -57,8 +57,8 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
     ],
     "sites": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "lead_id", "select": "lead_id:staff_members!lead_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "address", "select": "address", "type": "TextLong", "typeId": 2},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
@@ -75,8 +75,8 @@
       {"column": "site_id", "select": "site_id:sites!site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
     ],
     "staff_documents": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "requirement_id", "select": "requirement_id:document_requirements!requirement_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
@@ -88,8 +88,8 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
     ],
     "staff_members": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "user_id", "select": "user_id:civic_os_users!user_id(id,display_name,full_name)", "type": "User", "typeId": 11},
       {"column": "site_id", "select": "site_id:sites!site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "role_id", "select": "role_id:staff_roles!role_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
@@ -114,8 +114,8 @@
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0},
-      {"column": "priority_id", "select": "priority_id:categories!priority_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "priority_id", "select": "priority_id:categories!priority_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "assigned_to_id", "select": "assigned_to_id:staff_members!assigned_to_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "assigned_to_site_id", "select": "assigned_to_site_id:sites!assigned_to_site_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "assigned_to_role_id", "select": "assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
@@ -127,8 +127,8 @@
       {"column": "completed_at", "select": "completed_at", "type": "DateTimeLocal", "typeId": 6}
     ],
     "time_entries": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "entry_type_id", "select": "entry_type_id:categories!entry_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "entry_time", "select": "entry_time", "type": "DateTimeLocal", "typeId": 6},
@@ -140,8 +140,8 @@
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
     ],
     "time_off_requests": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "staff_member_id", "select": "staff_member_id:staff_members!staff_member_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "start_date", "select": "start_date", "type": "Date", "typeId": 4},
       {"column": "end_date", "select": "end_date", "type": "Date", "typeId": 4},

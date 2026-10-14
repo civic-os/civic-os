@@ -3755,12 +3755,12 @@
           "requests": [
             {
               "decoded": [
-                "select=id,display_name,created_at,updated_at,civic_os_text_search,priority_id:categories!priority_id(id,display_name,color),description,assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name),status_id:statuses!status_id(id,display_name),completion_notes,completed_at",
+                "select=id,display_name,created_at,updated_at,civic_os_text_search,description,priority_id:categories!priority_id(id,display_name,color),assigned_to_id:staff_members!assigned_to_id(id,display_name),assigned_to_site_id:sites!assigned_to_site_id(id,display_name),assigned_to_role_id:staff_roles!assigned_to_role_id(id,display_name),site_id:sites!site_id(id,display_name),due_date,assigned_by:civic_os_users!assigned_by(id,display_name,full_name),status_id:statuses!status_id(id,display_name),completion_notes,completed_at",
                 "id=eq.1"
               ],
               "headers": {},
               "method": "GET",
-              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cdescription%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cassigned_by%3Acivic_os_users%21assigned_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Ccompletion_notes%2Ccompleted_at&id=eq.1"
+              "url": "<PGRST>/staff_tasks?select=id%2Cdisplay_name%2Ccreated_at%2Cupdated_at%2Ccivic_os_text_search%2Cdescription%2Cpriority_id%3Acategories%21priority_id%28id%2Cdisplay_name%2Ccolor%29%2Cassigned_to_id%3Astaff_members%21assigned_to_id%28id%2Cdisplay_name%29%2Cassigned_to_site_id%3Asites%21assigned_to_site_id%28id%2Cdisplay_name%29%2Cassigned_to_role_id%3Astaff_roles%21assigned_to_role_id%28id%2Cdisplay_name%29%2Csite_id%3Asites%21site_id%28id%2Cdisplay_name%29%2Cdue_date%2Cassigned_by%3Acivic_os_users%21assigned_by%28id%2Cdisplay_name%2Cfull_name%29%2Cstatus_id%3Astatuses%21status_id%28id%2Cdisplay_name%29%2Ccompletion_notes%2Ccompleted_at&id=eq.1"
             }
           ],
           "toolError": "Record #1 not found in Staff Tasks."

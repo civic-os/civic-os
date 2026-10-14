@@ -16,7 +16,8 @@
  * updating the models and the rule catalogue.
  *
  * M1-M15: first P0.3 verifier round (anchors verbatim). V1-V5, FE-1, FE-2:
- * second verifier round. O1-O9, FE-3..FE-8: additional coverage.
+ * second verifier round (V5 re-anchored to float4 only). N1-N7: third verifier
+ * round, reconstructed from their names. O1-O9, FE-3..FE-8: additional coverage.
  *
  *   node scripts/golden/ledger-mutations.mjs list            id <TAB> side <TAB> description
  *   node scripts/golden/ledger-mutations.mjs apply <root> <id>
@@ -62,7 +63,8 @@ export const MUTATIONS = [
   ['V2-condition-fetch-timestamps', 'mcp', 'condition fetch forces timestamps', EA, 'const selectStr = buildSelectString(allProperties);', 'const selectStr = buildSelectString(allProperties, { includeTimestamps: true });'],
   ['V3-column-substring-startswith', 'mcp', 'column substring match becomes prefix match', NR, '        p.column_name.includes(normalized),\n    );\n\n    if (substringMatches.length === 1) return substringMatches[0];', '        p.column_name.startsWith(normalized),\n    );\n\n    if (substringMatches.length === 1) return substringMatches[0];'],
   ['V4-rpc-renamed', 'mcp', 'execute_action calls a renamed RPC', EA, '        const response = await client.post<EntityActionResult>(\n          `rpc/${actionConfig.rpc_function}`,', '        const response = await client.post<EntityActionResult>(\n          `rpc/${actionConfig.rpc_function}_v2`,'],
-  ['V5-float4-integer', 'mcp', 'float4 detected as IntegerNumber (probe only)', SC, "    case 'float4':\n    case 'float8': return EntityPropertyType.DecimalNumber;", "    case 'float4': return EntityPropertyType.IntegerNumber;\n    case 'float8': return EntityPropertyType.DecimalNumber;"],
+  // V5 originally dropped the `return` after `case 'float4':` and let `numeric` fall through too; re-anchored to float4 only.
+  ['V5-float4-only-integer', 'mcp', 'float4 alone detected as IntegerNumber (numeric and float8 untouched; probe only)', SC, "    case 'numeric':\n    case 'float4':\n    case 'float8': return EntityPropertyType.DecimalNumber;", "    case 'numeric':\n    case 'float8': return EntityPropertyType.DecimalNumber;\n    case 'float4': return EntityPropertyType.IntegerNumber;"],
   ['O1-user-embed-matches-frontend', 'mcp', 'User embed gains phone,email (toward parity; still a model change)', SB, 'return `${col}:civic_os_users!${col}(id,display_name,full_name)`;', 'return `${col}:civic_os_users!${col}(id,display_name,full_name,phone,email)`;'],
   ['O2-varchar-bpchar-textlong', 'mcp', 'varchar and bpchar (shared case) detected as TextLong', SC, "case 'bpchar': return EntityPropertyType.TextShort;", "case 'bpchar': return EntityPropertyType.TextLong;"],
   ['O3-default-order-display-name-desc', 'mcp', 'default order display_name.desc', LR, "params['order'] = 'display_name.asc';", "params['order'] = 'display_name.desc';"],
@@ -72,6 +74,14 @@ export const MUTATIONS = [
   ['O7-get-record-no-timestamps', 'mcp', 'get_record stops forcing timestamps (fixes Q-12; still a model change)', GR, 'buildSelectString(allProperties, { includeTimestamps: true })', 'buildSelectString(allProperties)'],
   ['O8-edit-view-keeps-identity', 'mcp', 'filterProperties keeps identity/generated columns in edit views', SB, "if ((context === 'create' || context === 'edit') && (prop.is_identity || prop.is_generated)) {", "if (context === 'create' && (prop.is_identity || prop.is_generated)) {"],
   ['O9-status-no-trim', 'mcp', 'resolveStatus stops trimming its input', NR, anchorStatus, '    const statuses = this.cache.getStatuses(entityType);\n    const normalized = name.toLowerCase();'],
+  // N1-N7: the P0.3 verifier's third-round mutations, reconstructed from their names (anchors recorded here).
+  ['N1-fe-range-off-by-one', 'frontend', 'getDataPaginated Range end one past the page', DS, 'const rangeEnd = offset + pagination.pageSize - 1;', 'const rangeEnd = offset + pagination.pageSize;'],
+  ['N2-fe-23p01-named-wording', 'frontend', 'parseToHumanWithLookup 23P01 named fallback reworded', ES, 'return `This conflicts with an existing record. Please check your input and try again.`;', 'return `This conflicts with another record.`;'],
+  ['N3-fe-in-loose', 'frontend', 'action evaluator `in` uses loose equality', CE, 'simple.value.includes(fieldValue);', 'simple.value.some((v: unknown) => v == fieldValue);'],
+  ['N4-mcp-fk-limit-10', 'mcp', 'FK eq lookup limit 5 -> 10 (ilike lookup untouched)', NR, "        display_name: `eq.${displayName}`,\n        limit: '5',", "        display_name: `eq.${displayName}`,\n        limit: '10',"],
+  ['N5-mcp-content-range-anchored', 'mcp', 'Content-Range regex anchored at the end', PC, 'const match = header.match(/^(\\d+)-(\\d+)\\/(\\d+|\\*)/);', 'const match = header.match(/^(\\d+)-(\\d+)\\/(\\d+|\\*)$/);'],
+  ['N6-mcp-entity-no-readable-preference', 'mcp', 'resolveEntity drops the readable-entity preference among substring matches', NR, 'const effectiveMatches = readableMatches.length > 0 ? readableMatches : substringMatches;', 'const effectiveMatches = substringMatches;'],
+  ['N7-mcp-float4-only-integer', 'mcp', 'float4 alone detected as IntegerNumber via an early return (same behavior as V5, different code shape)', SC, '  switch (udt_name) {\n', "  if (udt_name === 'float4') return EntityPropertyType.IntegerNumber;\n  switch (udt_name) {\n"],
   ['FE-1-hybrid-ilike-prefix', 'frontend', 'buildHybridSearchParams ilike *x* -> x*', SU, 'clauses.push(`${col}.ilike.*${encoded}*`);', 'clauses.push(`${col}.ilike.${encoded}*`);'],
   ['FE-2-user-embed-drops-email', 'frontend', 'User embed drops email', SS, "'(id,display_name,full_name,phone,email)'", "'(id,display_name,full_name,phone)'"],
   ['FE-3-ne-loose', 'frontend', 'action evaluator `ne` becomes loose', CE, '            return fieldValue !== simple.value;', '            return fieldValue != simple.value;'],

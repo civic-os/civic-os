@@ -61,9 +61,9 @@
       "list": ["display_name", "description", "sort_order"]
     },
     "staff_tasks": {
-      "create": ["display_name", "priority_id", "description", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date"],
-      "detail": ["display_name", "created_at", "updated_at", "priority_id", "description", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "assigned_by", "status_id", "completion_notes", "completed_at"],
-      "edit": ["display_name", "priority_id", "description", "site_id", "due_date"],
+      "create": ["display_name", "description", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date"],
+      "detail": ["display_name", "created_at", "updated_at", "description", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "assigned_by", "status_id", "completion_notes", "completed_at"],
+      "edit": ["display_name", "description", "priority_id", "site_id", "due_date"],
       "list": ["display_name", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "status_id"]
     },
     "time_entries": {

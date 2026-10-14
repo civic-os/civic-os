@@ -46,8 +46,8 @@
     "organizations": [
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
       {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
-      {"column": "organization_type_id", "select": "organization_type_id:categories!organization_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "organization_type_id", "select": "organization_type_id:categories!organization_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "email", "select": "email", "type": "Email", "typeId": 14},
       {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
       {"column": "phone", "select": "phone", "type": "Telephone", "typeId": 15},

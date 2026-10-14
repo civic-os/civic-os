@@ -26,9 +26,9 @@
     },
     "reservation_payments": {
       "create": ["reservation_request_id", "payment_type_id", "display_name", "amount", "due_date", "paid_amount"],
-      "detail": ["reservation_request_id", "payment_type_id", "display_name", "status_id", "amount", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "created_at", "updated_at", "payment_transaction_id"],
-      "edit": ["reservation_request_id", "payment_type_id", "display_name", "status_id", "amount", "due_date", "paid_amount"],
-      "list": ["reservation_request_id", "payment_type_id", "display_name", "status_id", "amount", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "payment_transaction_id"]
+      "detail": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "created_at", "updated_at", "payment_transaction_id"],
+      "edit": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "paid_amount"],
+      "list": ["reservation_request_id", "payment_type_id", "display_name", "amount", "status_id", "due_date", "payment_method_id", "payment_date", "paid_amount", "days_until_due", "is_overdue", "payment_transaction_id"]
     },
     "reservation_requests": {
       "create": ["requestor_name", "requestor_address", "requestor_phone", "organization_name", "event_type", "time_slot", "attendee_count", "attendee_ages", "is_food_served", "is_public_event", "is_fundraiser", "is_admission_charged", "policy_agreed"],

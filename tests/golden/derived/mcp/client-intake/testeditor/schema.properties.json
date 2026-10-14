@@ -67,8 +67,8 @@
       {"column": "days_remaining", "select": "days_remaining", "type": "IntegerNumber", "typeId": 8}
     ],
     "follow_up_surveys": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "referral_id", "select": "referral_id:referrals!referral_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
       {"column": "helpfulness_id", "select": "helpfulness_id:categories!helpfulness_id(id,display_name,color)", "type": "Category", "typeId": 23},
@@ -118,8 +118,8 @@
       {"column": "service_categories", "select": "service_categories", "type": "TextLong", "typeId": 2}
     ],
     "partners": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "partner_type_id", "select": "partner_type_id:categories!partner_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
       {"column": "contact_name", "select": "contact_name", "type": "TextShort", "typeId": 1},
       {"column": "email", "select": "email", "type": "Email", "typeId": 14},
@@ -141,8 +141,8 @@
       {"column": "service_category_id", "select": "service_category_id:service_categories!service_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10}
     ],
     "referrals": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "client_id", "select": "client_id:clients!client_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "partner_id", "select": "partner_id:partners!partner_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
       {"column": "referral_type_id", "select": "referral_type_id:categories!referral_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
@@ -161,8 +161,8 @@
       {"column": "poor_outcome_referrals", "select": "poor_outcome_referrals", "type": "IntegerNumber", "typeId": 8}
     ],
     "service_categories": [
-      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
       {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
       {"column": "color", "select": "color", "type": "Color", "typeId": 13},
       {"column": "active", "select": "active", "type": "Boolean", "typeId": 3},

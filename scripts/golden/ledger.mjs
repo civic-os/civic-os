@@ -26,8 +26,9 @@
  * Output is deterministic (no timestamps, everything sorted).
  */
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { RULES, AREAS, NONDETERMINISM } from './ledger-rules.mjs';
 import {
   STRUCTURAL, THROWS, MCP_FLAGS, CONDITION_RULE_FLAGS, attempt, conditionRules, decodeFeUrl, decodeParams, evaluate, feBase,
@@ -479,6 +480,7 @@ const MCP_CONSTRAINT = ['check', 'check-named', 'exclusion-named', 'constraint-l
 
 function errorRule(feKind, mcKind, code) {
   if (feKind === mcKind && SHARED_KINDS.includes(feKind)) return 'E-01';
+  if (feKind === 'raise' && mcKind === 'raise' && code === 'P0001') return 'F-15';
   if ((code === '23514' || code === '23P01') && FE_CONSTRAINT.includes(feKind) && MCP_CONSTRAINT.includes(mcKind)) return 'E-03';
   if (feKind === 'fallback' && ['notnull', 'invalid-input', 'datetime', 'precondition'].includes(mcKind)) return 'F-04';
   if (feKind === 'fallback' && mcKind === 'fallback' && ['23503', 'PGRST116', 'PT503'].includes(code)) return 'F-17';
@@ -504,7 +506,8 @@ function errorEngine() {
       if (!m || canon(p) !== canon(m.payload)) { miss('errors', { ...inst, detail: 'payload mismatch' }); continue; }
       const [fk, ft] = key === 'parseToHuman' ? feParse(p) : feParseLookup(p, feMsgs);
       const [mk, mt] = mcpParse(p, mcMsgs);
-      if (ft !== f[key]) { miss('fe-model', { ...inst, detail: `frontend ${JSON.stringify(f[key])}, model ${JSON.stringify(ft)}` }); continue; }
+      // The frontend spec writes an undefined result as '<undefined>' (P0001 without a message).
+      if ((ft ?? '<undefined>') !== f[key]) { miss('fe-model', { ...inst, detail: `frontend ${JSON.stringify(f[key])}, model ${JSON.stringify(ft)}` }); continue; }
       if (mt !== m[key]) { miss('mcp-model', { ...inst, detail: `MCP ${JSON.stringify(m[key])}, model ${JSON.stringify(mt)}` }); continue; }
       if (ft === mt) continue;
       const r = errorRule(fk, mk, p.code);
@@ -1088,6 +1091,104 @@ function evidenceEngine() {
   }
 }
 
+/**
+ * The frontend's hand-built `_synthetic` golden variant
+ * (src/app/testing/golden/synthetic-fixtures.ts) reaches getPropertyType
+ * branches no example does. Its rows are TypeScript, so they are bundled with
+ * esbuild (a root devDependency) and read here, and the frontend models are
+ * checked against `derived/frontend/_synthetic/all/*` too.
+ */
+let feSynthetic = null;
+async function loadFeSynthetic() {
+  const src = path.join(ROOT, 'src/app/testing/golden/synthetic-fixtures.ts');
+  if (!fs.existsSync(src) || !fs.existsSync(path.join(FE, '_synthetic/all/schema.properties.json'))) return null;
+  let esbuild;
+  try {
+    esbuild = await import('esbuild');
+  } catch {
+    throw new Error('esbuild not found: run npm ci in the repository root (the ledger bundles the frontend synthetic fixtures)');
+  }
+  const out = path.join(os.tmpdir(), `ledger-synthetic-${process.pid}.mjs`);
+  await esbuild.build({ entryPoints: [src], bundle: true, platform: 'node', format: 'esm', outfile: out, logLevel: 'silent' });
+  try {
+    const mod = await import(pathToFileURL(out).href);
+    return mod.syntheticVariant().inline;
+  } finally {
+    fs.rmSync(out, { force: true });
+  }
+}
+
+function feSyntheticEngine() {
+  if (!feSynthetic) return;
+  const rows = feSynthetic.schema_properties;
+  const fe = readJson(path.join(FE, '_synthetic/all/schema.properties.json')).entities;
+  for (const [table, list] of Object.entries(fe)) {
+    for (const e of list) {
+      count('fe-synthetic-model');
+      if (e.type === 'ManyToMany') continue;
+      const p = rows.find(r => r.table_name === table && r.column_name === e.column);
+      const inst = { example: '_synthetic', entity: table, subject: e.column };
+      if (!p) { miss('fe-model', { ...inst, detail: 'synthetic row not found' }); continue; }
+      const feList = e.selectForList === '=' ? e.select : e.selectForList;
+      if (e.type !== feType(p) || e.select !== feSelect(e.type, p) || feList !== feSelectForList(e.type, p)) {
+        miss('fe-model', { ...inst, detail: `frontend ${e.type} ${e.select} | model ${feType(p)} ${feSelect(feType(p), p)}` });
+      }
+    }
+  }
+  const types = new Map();
+  for (const [t, list] of Object.entries(fe)) for (const e of list) types.set(`${t}.${e.column}`, e.type);
+  const virtual = readJson(path.join(FE, '_synthetic/all/schema.m2m.json')).virtualProperties ?? [];
+  const views = readJson(path.join(FE, '_synthetic/all/schema.views.json')).entities;
+  const ents = new Map(feSynthetic.schema_entities.map(e => [e.table_name, e]));
+  for (const [table, v] of Object.entries(views)) {
+    const props = [
+      ...rows.filter(r => r.table_name === table).map(r => ({ ...r, type: types.get(`${table}.${r.column_name}`) })),
+      ...virtual.filter(x => x.table_name === table).map(x => ({ ...x, type: 'ManyToMany' })),
+    ];
+    const model = feViews(props, ents.get(table));
+    for (const view of ['list', 'detail', 'create', 'edit', 'filter']) {
+      count('fe-synthetic-model');
+      if (!same([...model[view]].sort(), [...v[view]].sort())) miss('fe-model', { example: '_synthetic', entity: table, subject: view, detail: `frontend ${v[view].join()} | model ${model[view].join()}` });
+    }
+  }
+}
+
+/**
+ * Which type-detection branches no fixture property reaches on either side:
+ * those are anchored by the transcriptions in ledger-models.mjs (and the
+ * probes) only. Computed, so it shrinks as fixtures grow (P0.5's timestamp column).
+ */
+function transcriptionOnly() {
+  const ALL_TYPES = ['Unknown', 'TextShort', 'TextLong', 'Boolean', 'Date', 'DateTime', 'DateTimeLocal', 'Money', 'IntegerNumber', 'DecimalNumber',
+    'ForeignKeyName', 'User', 'GeoPoint', 'Color', 'Email', 'Telephone', 'TimeSlot', 'File', 'FileImage', 'FilePDF', 'Payment', 'Status',
+    'Category', 'RecurringTimeSlot', 'PhotoGallery', 'GeoPolygon', 'Markdown'];
+  const feSeen = new Set();
+  const mcSeen = new Set();
+  const udts = new Set();
+  const geo = new Set();
+  for (const ex of examples()) {
+    for (const v of variants(ex)) {
+      for (const p of readJson(path.join(RAW, ex, v, 'schema_properties.json'))) {
+        feSeen.add(feType(p));
+        mcSeen.add(mcpType(p));
+        udts.add(p.udt_name);
+        if (p.udt_name === 'geography') geo.add(p.geography_type);
+      }
+    }
+  }
+  // The frontend's synthetic variant reaches more frontend branches (not MCP ones: the MCP never sees those rows).
+  for (const p of feSynthetic?.schema_properties ?? []) feSeen.add(feType(p));
+  const probes = readJson(path.join(MCP, '_shared/mcp.type-probes.json'));
+  const probeUdts = new Set(probes.probes.map(p => ({ ...probes.base, ...p.input }).udt_name));
+  const probeGeo = new Set(probes.probes.map(p => ({ ...probes.base, ...p.input })).filter(p => p.udt_name === 'geography').map(p => String(p.geography_type)));
+  return {
+    frontendTypes: ALL_TYPES.filter(t => !feSeen.has(t)),
+    mcpTypes: ALL_TYPES.filter(t => !mcSeen.has(t)),
+    udts: [...probeUdts].filter(u => !udts.has(u)).sort(),
+    geographyTypes: [...probeGeo].filter(g => !geo.has(g === 'null' ? null : g)).sort(),
+  };
+}
+
 function probeEngine() {
   const art = readJson(path.join(MCP, '_shared/mcp.type-probes.json'));
   const declared = new Map();
@@ -1160,6 +1261,7 @@ function summarize(bucket) {
 
 function build() {
   propertyEngine();
+  feSyntheticEngine();
   esModelEngine();
   viewEngine();
   conditionEngine();
@@ -1290,6 +1392,9 @@ function renderMarkdown(rows) {
   L.push('');
   L.push(`Comparisons made: ${Object.entries(diagnostics.comparisons).sort(([a], [b]) => cmp(a, b)).map(([k, v]) => `${k} ${v}`).join(', ')}. Unattributed differences: ${unattributed.length}.`);
   L.push('');
+  const tx = transcriptionOnly();
+  L.push(`Type detection anchored by transcription only (no raw fixture property, and on the frontend side no row of the frontend's \`_synthetic\` golden variant, reaches the branch; the type probes and the transcriptions in \`ledger-models.mjs\` are the only evidence): frontend result types ${tx.frontendTypes.join(', ') || 'none'}; MCP result types ${tx.mcpTypes.join(', ') || 'none'}; udt values in no raw fixture ${tx.udts.join(', ') || 'none'} (float4 / float8 share the numeric branch on both sides, jsonb / citext the Unknown or FK fallback; the frontend synthetic variant covers some of these on the frontend side only); geography types ${tx.geographyTypes.join(', ') || 'none'}.`);
+  L.push('');
   L.push(`Not rows: ${diagnostics.tieOrderArtifacts} view-order differences confined to \`sort_order\` ties (capture artifacts); ${diagnostics.bothReject} frontend queries that name a column the entity lacks, which both sides reject (PostgREST on the frontend side, name resolution on the MCP side); ${diagnostics.mappingArtifacts} select difference caused by a hand-written embed in a frontend matrix input.`);
   L.push('');
   L.push('Harness limits: the MCP golden stub answers every data request with an empty result (or the record under test) and cannot reject a select, so an embed PostgREST would refuse (for example a FK hint through a metadata view, S-02) is not proven to work by these goldens; the request-equivalence harness (P0.4) covers live behavior.');
@@ -1309,7 +1414,8 @@ const stable = v => JSON.stringify(v, (k, val) => {
   return val;
 }, 2) + '\n';
 
-function main() {
+async function main() {
+  feSynthetic = await loadFeSynthetic();
   const check = process.argv.includes('--check');
   const { rows, evidenceFailures } = build();
   const json = stable({
@@ -1321,6 +1427,7 @@ function main() {
     coverage: {
       comparisons: diagnostics.comparisons, unattributed: unattributed.length, tieOrderArtifacts: diagnostics.tieOrderArtifacts,
       bothReject: diagnostics.bothReject, mappingArtifacts: diagnostics.mappingArtifacts,
+      transcriptionOnly: transcriptionOnly(),
     },
   });
   const text = renderMarkdown(rows);
@@ -1357,4 +1464,4 @@ function main() {
   console.log(`wrote ${rel(OUT_MD)} and ${rel(OUT_JSON)}: ${rows.length} rows`);
 }
 
-main();
+await main();

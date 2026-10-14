@@ -6,9 +6,10 @@
       "condition": 3239,
       "condition-describe": 46,
       "content-range": 11,
-      "error": 883,
+      "error": 915,
       "es-model": 415,
       "fe-hybrid-model": 130,
+      "fe-synthetic-model": 312,
       "fe-view-model": 2015,
       "name": 469,
       "property": 3952,
@@ -17,7 +18,28 @@
       "view": 1612
     },
     "mappingArtifacts": 1,
-    "tieOrderArtifacts": 39,
+    "tieOrderArtifacts": 0,
+    "transcriptionOnly": {
+      "frontendTypes": [],
+      "geographyTypes": [
+        "LineString",
+        "MultiPolygon",
+        "null"
+      ],
+      "mcpTypes": [
+        "DateTime",
+        "RecurringTimeSlot"
+      ],
+      "udts": [
+        "bpchar",
+        "citext",
+        "float4",
+        "float8",
+        "int2",
+        "jsonb",
+        "timestamp"
+      ]
+    },
     "unattributed": 0
   },
   "generatedBy": "scripts/golden/ledger.mjs",
@@ -2019,11 +2041,15 @@
     },
     {
       "area": "Actions end to end",
+      "computedNotes": [
+        "43 transitions in 4 examples (client-intake 14, community-center 4, mottpark 10, staff-portal 15), identical for all five roles; the other examples (pothole included) define none. Earlier counts grepped INSERT statements in the init scripts; the RPC fixtures replace them."
+      ],
       "decision": null,
       "evidence": [
         "tools/mcp-server/src/schema-cache.ts:299-307",
         "src/app/services/status-admin.service.ts:152",
         "tests/golden/raw/<example>/<role>/status_transitions.json",
+        "tests/golden/raw/<example>/<role>/rpc.get_status_transitions_for_entity.<entity_type>.json",
         "tools/mcp-server/src/tools/get-status-workflow.ts:58"
       ],
       "frontend": "Admin and workflow UIs read transitions through `rpc/get_status_transitions_for_entity`.",
@@ -2034,40 +2060,41 @@
       },
       "instances": {
         "byExample": {
-          "client-intake": 1,
+          "client-intake": 5,
           "community-center": 1,
-          "mottpark": 1,
-          "staff-portal": 1
+          "mottpark": 2,
+          "staff-portal": 5
         },
-        "count": 4,
-        "entities": 4,
+        "count": 13,
+        "entities": 13,
         "examples": [
           {
-            "detail": "view returns 404 for the MCP; transitions defined: 3 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)",
-            "entity": "status_transitions",
+            "detail": "rpc/get_status_transitions_for_entity returns 3 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none",
+            "entity": "client",
             "example": "client-intake",
             "subject": "get_status_workflow"
           },
           {
-            "detail": "view returns 404 for the MCP; transitions defined: 1 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)",
-            "entity": "status_transitions",
+            "detail": "rpc/get_status_transitions_for_entity returns 4 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none",
+            "entity": "reservation_request",
             "example": "community-center",
             "subject": "get_status_workflow"
           },
           {
-            "detail": "view returns 404 for the MCP; transitions defined: 2 (INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count)",
-            "entity": "status_transitions",
+            "detail": "rpc/get_status_transitions_for_entity returns 4 transition(s) for every role; the MCP's status_transitions view is 404, so it reports none",
+            "entity": "reservation_payment",
             "example": "mottpark",
             "subject": "get_status_workflow"
           }
         ],
-        "occurrences": 4,
+        "occurrences": 13,
         "synthetic": 0
       },
       "mcp": "`fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallows the error and uses an empty list, so get_status_workflow reports no transition restrictions.",
       "reason": "The MCP should call the same RPC as the frontend (the core's status client).",
       "recommendation": "mcp-bug",
-      "rule": "Status transitions: the MCP reads a status_transitions view that does not exist"
+      "rule": "Status transitions: the MCP reads a status_transitions view that does not exist",
+      "unit": "one instance is an entity type whose transitions the RPC returns while the MCP sees none."
     },
     {
       "area": "Error messages",
@@ -3716,12 +3743,11 @@
           "_shared": 1,
           "client-intake": 1,
           "community-center": 1,
-          "neighborhood-hub": 1,
           "pothole": 1,
           "staff-portal": 1
         },
-        "count": 5,
-        "entities": 5,
+        "count": 4,
+        "entities": 4,
         "examples": [
           {
             "detail": "8 occurrence(s) of NaN-NaN-NaNTNaN:NaN",
@@ -3742,7 +3768,7 @@
             "subject": "NaN control value"
           }
         ],
-        "occurrences": 6,
+        "occurrences": 5,
         "synthetic": 1
       },
       "mcp": "No counterpart (the MCP has no form controls).",
@@ -4270,45 +4296,39 @@
         "tools/mcp-server/src/postgrest-client.ts:247-252",
         "tests/golden/derived/frontend/<example>/_example/errors.lookup.json"
       ],
-      "frontend": "Empty RAISE message gives an empty error text; `{401, P0001}` reads \"session expired\", `{404, P0001}` \"Resource not found\".",
+      "frontend": "A RAISE with no message property returns `err.message`, i.e. undefined (callers render whatever that becomes); an empty message gives \"\"; `{401, P0001}` reads \"session expired\", `{404, P0001}` \"Resource not found\".",
       "id": "F-15",
       "impact": {
-        "adoptFrontend": "n/a",
-        "adoptMcp": "n/a"
+        "adoptFrontend": "MCP would return undefined for an empty RAISE.",
+        "adoptMcp": "Generic app shows an empty message instead of undefined."
       },
       "instances": {
         "byExample": {
-          "_shared": 4
+          "_shared": 2
         },
         "count": 0,
         "entities": 0,
         "examples": [
           {
-            "detail": "frontend \"\", MCP \"\"",
-            "entity": "errors.lookup",
+            "detail": "frontend undefined, MCP \"\"",
+            "entity": "parseToHuman",
             "example": "_shared",
-            "subject": "{\"code\":\"P0001\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"\"}"
+            "subject": "{\"code\":\"P0001\",\"httpCode\":400,\"humanMessage\":\"\"}"
           },
           {
-            "detail": "frontend \"Custom RAISE EXCEPTION text\", MCP \"Custom RAISE EXCEPTION text\"",
-            "entity": "errors.lookup",
+            "detail": "frontend undefined, MCP \"\"",
+            "entity": "parseToHumanWithLookup",
             "example": "_shared",
-            "subject": "{\"code\":\"P0001\",\"httpCode\":400,\"humanMessage\":\"\",\"message\":\"Custom RAISE EXCEPTION text\"}"
-          },
-          {
-            "detail": "frontend \"Your session has expired. Please refresh the page to log in again.\", MCP \"Authentication required. Your session may have expired.\"",
-            "entity": "errors.lookup",
-            "example": "_shared",
-            "subject": "{\"code\":\"P0001\",\"httpCode\":401,\"humanMessage\":\"\",\"message\":\"raise\"}"
+            "subject": "{\"code\":\"P0001\",\"httpCode\":400,\"humanMessage\":\"\"}"
           }
         ],
-        "occurrences": 4,
-        "synthetic": 4
+        "occurrences": 16,
+        "synthetic": 2
       },
-      "mcp": "Identical outcome classes: empty P0001 returns \"\", 401/404 are checked before P0001 (only the wording differs, E-01).",
-      "reason": "An empty RAISE message should fall back to a generic text; status-over-code precedence is reasonable but should be explicit in the core.",
+      "mcp": "PostgRESTRequestError passes the message to Error, so a missing message becomes \"\" and P0001 returns \"\"; 401/404 are checked before P0001 as on the frontend (only the wording differs, E-01).",
+      "reason": "Neither is a good message: an empty or missing RAISE message should fall back to a generic text on both sides. Status-over-code precedence is reasonable but should be explicit in the core.",
       "recommendation": "needs-decision",
-      "rule": "P0001 with an empty message returns \"\"; under HTTP 401/404 the status wins over the code"
+      "rule": "P0001 without a message: parseToHuman returns undefined (the MCP returns \"\"); an empty message gives \"\"; under HTTP 401/404 the status wins over the code"
     },
     {
       "area": "Frontend quirks",

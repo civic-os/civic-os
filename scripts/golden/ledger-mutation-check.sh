@@ -20,7 +20,7 @@
 # Control runs without a mutation must re-derive identical goldens and leave
 # `ledger --check` at exit 0.
 #
-#   scripts/golden/ledger-mutation-check.sh            all mutations (about 6 minutes)
+#   scripts/golden/ledger-mutation-check.sh            all mutations (about 15-20 minutes; each frontend mutation rebuilds the Angular test bundle)
 #   scripts/golden/ledger-mutation-check.sh M3 FE-1    selected ids (prefix match)
 #
 # Needs node_modules in the repo root and in tools/mcp-server (npm ci in both).

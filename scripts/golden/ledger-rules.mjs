@@ -37,7 +37,7 @@ const FEG = 'tests/golden/derived/frontend';
 const MCG = 'tests/golden/derived/mcp';
 
 export const AREAS = [
-  { name: 'Type detection', intro: '`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`. Every probe is compared: its frontend type comes from the transcription of `getPropertyType` in `scripts/golden/ledger-models.mjs` (`feType`), which is checked against the frontend type of every fixture property; branches no fixture exercises (int2, bpchar, MultiPolygon, non-uuid system FKs, timestamp until P0.5 adds a real column) are anchored by that transcription only (follow-up: run the probe inputs through the frontend golden harness).' },
+  { name: 'Type detection', intro: '`SchemaService.getPropertyType` (frontend) vs `detectPropertyType` (MCP). Artifacts: `<variant>/schema.properties.json` `type` on both sides; latent rules are demonstrated by `mcp/_shared/mcp.type-probes.json`. Every probe is compared: its frontend type comes from the transcription of `getPropertyType` in `scripts/golden/ledger-models.mjs` (`feType`), which is checked against the frontend type of every fixture property and of every row of the hand-built frontend `_synthetic` golden variant (which reaches every frontend result type, DateTime and RecurringTimeSlot included); branches neither exercises are anchored by that transcription only. The Coverage section lists them, computed: on the MCP side DateTime and RecurringTimeSlot (until P0.5 adds a real timestamp column), and udt values in no raw fixture such as int2, bpchar, float4 / float8, jsonb, MultiPolygon. Follow-up: run the probe inputs through the frontend golden harness.' },
   { name: 'Select strings', intro: '`SchemaService.propertyToSelectString[ForList]` vs MCP `propertyToSelectString`. Artifacts: `<variant>/schema.properties.json` `select`. Differences caused by a type rule are counted as that rule\'s effects.' },
   { name: 'View property lists', intro: '`getPropsForList/Detail/Create/Edit` vs MCP `filterProperties`. Artifacts: `<variant>/schema.views.json`. Order differences confined to `sort_order` ties are capture artifacts and not counted.' },
   { name: 'Condition evaluation', intro: '`utils/condition-evaluator.ts` vs MCP `evaluateCondition` over identical condition / record inputs. Artifacts: `_example/conditions.actions.json`, `_shared/conditions.matrix.json`. Counts are (condition, record) pairs; `_shared` matrix cells are reported as synthetic.' },
@@ -459,32 +459,36 @@ export const RULES = [
     rule: 'Status transitions: the MCP reads a status_transitions view that does not exist',
     frontend: 'Admin and workflow UIs read transitions through `rpc/get_status_transitions_for_entity`.',
     mcp: '`fetchTransitions` GETs `status_transitions` (404 PGRST205 in every example), swallows the error and uses an empty list, so get_status_workflow reports no transition restrictions.',
-    evidence: [`${SC}:299-307`, 'src/app/services/status-admin.service.ts:152', 'tests/golden/raw/<example>/<role>/status_transitions.json', 'tools/mcp-server/src/tools/get-status-workflow.ts:58'],
+    evidence: [`${SC}:299-307`, 'src/app/services/status-admin.service.ts:152', 'tests/golden/raw/<example>/<role>/status_transitions.json', 'tests/golden/raw/<example>/<role>/rpc.get_status_transitions_for_entity.<entity_type>.json', 'tools/mcp-server/src/tools/get-status-workflow.ts:58'],
+    unit: 'one instance is an entity type whose transitions the RPC returns while the MCP sees none.',
     checks: [{ file: SC, contains: ["this.client.get<StatusTransition[]>('status_transitions')"] }, { file: 'src/app/services/status-admin.service.ts', contains: ["'rpc/get_status_transitions_for_entity'"] }],
-    compute: ({ hit, readJson, RAW, examples, variants, ROOT }) => {
+    compute: ({ hit, miss, note, readJson, RAW, examples }) => {
+      const ROLES = ['anon', 'testuser', 'testeditor', 'testmanager', 'testadmin'];
+      let total = 0;
+      const withTransitions = [];
       for (const ex of examples()) {
-        const v = 'testadmin';
-        const st = readJson(path.join(RAW, ex, v, 'status_transitions.json'));
-        const missing = st && st.__status === 404;
-        const rpcFiles = fs.readdirSync(path.join(RAW, ex, v)).filter(f => f.startsWith('rpc.get_status_transitions_for_entity.'));
-        let defined = 0;
-        let source = '';
-        if (rpcFiles.length) {
-          for (const f of rpcFiles) { const rows = readJson(path.join(RAW, ex, v, f)); if (Array.isArray(rows)) defined += rows.length; }
-          source = 'rpc fixtures';
-        } else {
-          const dir = path.join(ROOT, 'examples', ex, 'init-scripts');
-          if (fs.existsSync(dir)) {
-            for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.sql')).sort()) {
-              const sql = fs.readFileSync(path.join(dir, f), 'utf8');
-              defined += sql.split('\n').filter(l => !l.trim().startsWith('--') && /INSERT INTO metadata\.status_transitions|add_status_transition\(/.test(l)).length;
-            }
+        const counts = new Map();
+        for (const role of ROLES) {
+          const dir = path.join(RAW, ex, role);
+          const view = readJson(path.join(dir, 'status_transitions.json'));
+          if (!(view && view.__status === 404)) miss('transitions', { example: ex, variant: role, detail: 'status_transitions view no longer 404' });
+          for (const f of fs.readdirSync(dir).filter(x => x.startsWith('rpc.get_status_transitions_for_entity.')).sort()) {
+            const type = f.slice('rpc.get_status_transitions_for_entity.'.length, -'.json'.length);
+            const rows = readJson(path.join(dir, f));
+            if (!Array.isArray(rows)) { miss('transitions', { example: ex, variant: role, subject: type, detail: 'RPC fixture is not a list' }); continue; }
+            counts.set(type, [...(counts.get(type) ?? []), rows.length]);
           }
-          source = 'INSERT statements in the example init scripts; the recaptured rpc.get_status_transitions_for_entity fixtures will replace this count';
         }
-        if (missing && defined > 0) hit('A-03', { example: ex, entity: 'status_transitions', subject: 'get_status_workflow', detail: `view returns 404 for the MCP; transitions defined: ${defined} (${source})` });
+        let exTotal = 0;
+        for (const [type, perRole] of counts) {
+          if (perRole.length !== ROLES.length || new Set(perRole).size !== 1) { miss('transitions', { example: ex, subject: type, detail: `transition count varies by role: ${perRole.join(',')}` }); continue; }
+          if (perRole[0] === 0) continue;
+          exTotal += perRole[0];
+          hit('A-03', { example: ex, entity: type, subject: 'get_status_workflow', detail: `rpc/get_status_transitions_for_entity returns ${perRole[0]} transition(s) for every role; the MCP's status_transitions view is 404, so it reports none` });
+        }
+        if (exTotal) { total += exTotal; withTransitions.push(`${ex} ${exTotal}`); }
       }
-      void variants;
+      note('A-03', `${total} transitions in ${withTransitions.length} examples (${withTransitions.join(', ')}), identical for all five roles; the other examples (pothole included) define none. Earlier counts grepped INSERT statements in the init scripts; the RPC fixtures replace them.`);
     },
     impact: { adoptFrontend: 'MCP reports the real allowed transitions and on-transition RPCs.', adoptMcp: 'n/a' },
     recommendation: 'mcp-bug', reason: 'The MCP should call the same RPC as the frontend (the core\'s status client).',
@@ -1008,22 +1012,13 @@ export const RULES = [
   },
   {
     id: 'F-15', area: F,
-    rule: 'P0001 with an empty message returns ""; under HTTP 401/404 the status wins over the code',
-    frontend: 'Empty RAISE message gives an empty error text; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".',
-    mcp: 'Identical outcome classes: empty P0001 returns "", 401/404 are checked before P0001 (only the wording differs, E-01).',
+    rule: 'P0001 without a message: parseToHuman returns undefined (the MCP returns ""); an empty message gives ""; under HTTP 401/404 the status wins over the code',
+    frontend: 'A RAISE with no message property returns `err.message`, i.e. undefined (callers render whatever that becomes); an empty message gives ""; `{401, P0001}` reads "session expired", `{404, P0001}` "Resource not found".',
+    mcp: 'PostgRESTRequestError passes the message to Error, so a missing message becomes "" and P0001 returns ""; 401/404 are checked before P0001 as on the frontend (only the wording differs, E-01).',
     evidence: [`${ES}:106-126`, `${PC}:247-252`, `${FEG}/<example>/_example/errors.lookup.json`],
     checks: [{ file: ES, contains: ["} else if(err.code == 'P0001') {"] }],
-    compute: ({ hit, readJson, FE, MCP }) => {
-      const fe = readJson(path.join(FE, 'pothole/_example/errors.lookup.json')).results;
-      const mc = readJson(path.join(MCP, 'pothole/_example/errors.lookup.json')).results;
-      fe.forEach((r, i) => {
-        if (r.payload.code !== 'P0001') return;
-        const m = mc[i];
-        hit('F-15', { example: '_shared', entity: 'errors.lookup', subject: JSON.stringify(r.payload), detail: `frontend ${JSON.stringify(r.parseToHuman)}, MCP ${JSON.stringify(m.parseToHuman)}` });
-      });
-    },
-    impact: { adoptFrontend: 'n/a', adoptMcp: 'n/a' },
-    recommendation: 'needs-decision', reason: 'An empty RAISE message should fall back to a generic text; status-over-code precedence is reasonable but should be explicit in the core.',
+    impact: { adoptFrontend: 'MCP would return undefined for an empty RAISE.', adoptMcp: 'Generic app shows an empty message instead of undefined.' },
+    recommendation: 'needs-decision', reason: 'Neither is a good message: an empty or missing RAISE message should fall back to a generic text on both sides. Status-over-code precedence is reasonable but should be explicit in the core.',
   },
   {
     id: 'F-16', area: F,

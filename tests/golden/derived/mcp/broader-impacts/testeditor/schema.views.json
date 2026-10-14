@@ -38,7 +38,7 @@
     },
     "organizations": {
       "create": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description"],
-      "detail": ["display_name", "organization_type_id", "created_at", "email", "updated_at", "phone", "website", "address", "description"],
+      "detail": ["display_name", "created_at", "organization_type_id", "email", "updated_at", "phone", "website", "address", "description"],
       "edit": ["display_name", "organization_type_id", "email", "phone", "website", "address", "description"],
       "list": ["display_name", "organization_type_id", "email", "phone", "website"]
     },
