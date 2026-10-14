@@ -938,3 +938,24 @@ The check fails if any test's assertion count decreased, a baseline test disappe
 Tests marked `unstable` in the baseline have counts inflated by assertions that leak from other tests which assert after they ended (typically inside an async `subscribe` callback): vitest charges a late assertion to whichever test is running at that moment. The baseline stores the minimum observed count and `maxAssertions` for them, and later `--update` runs only widen that range. The leaking tests are in the baseline's hand-curated `leakers` array (file, name, mechanism); `uncountedButReal` lists zero-count tests that are real (they assert through `HttpTestingController` helpers that throw). `--suggest-leakers` prints heuristic candidates and never writes.
 
 `--update` compares against the existing baseline first and prints DECREASED, DISAPPEARED, NEWLY UNSTABLE, NEW and INCREASED. It refuses to write (exit 1) on the first three unless `--accept-decreases`, `--accept-disappeared` or `--accept-new-unstable` is passed; waived items are recorded with a timestamp under `acceptedChanges`. `--update --reset-unstable` rebuilds the unstable marks and is subject to the same gates. Update the baseline only for intentional, reviewed changes.
+
+### Async-emission probe
+
+`src/app/testing/async-flush-probe.ts` (imported from `src/test-setup.ts`) is inert unless `SDK_ASYNC_FLUSH=microtask` is set. When active it patches `TestRequest.prototype.flush` so the real flush runs after three chained microtasks (`ASYNC_FLUSH_HOPS`), simulating the Promise hops introduced when `SchemaService`/`DataService` delegate to Promise-based core clients. Only `flush` is delayed; `error()` and `expectOne`/`match` stay synchronous.
+
+```bash
+SDK_ASYNC_FLUSH=microtask npm run test:headless                  # failures = tests that depend on synchronous emission
+SDK_ASYNC_FLUSH=microtask node scripts/test-ledger.mjs           # also compare assertion counts with the baseline
+SDK_ASYNC_FLUSH=microtask npx ng test --watch=false --include='**/schema.service.spec.ts'
+```
+
+A spec is robust to deferred emission when it passes under the probe with the same assertion count as without it. Await-style pattern (works for synchronous and deferred emission):
+
+```ts
+const result$ = firstValueFrom(service.getX(args));   // subscribe before flush
+httpMock.expectOne(url).flush(body);
+const result = await result$;
+expect(result).toEqual(...);
+```
+
+Anything that reads service state populated by the emission (signal caches, `ensure*Loaded` guards) must come after the `await`. `schema.service.spec.ts` and `data.service.spec.ts` are fully converted; other specs still fail under the probe until converted (the probe run lists them).

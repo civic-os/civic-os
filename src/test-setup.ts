@@ -44,3 +44,6 @@ afterEach((ctx: any) => {
     // never let instrumentation affect a test
   }
 });
+
+// Async-emission probe (inert unless SDK_ASYNC_FLUSH=microtask).
+import './app/testing/async-flush-probe';
