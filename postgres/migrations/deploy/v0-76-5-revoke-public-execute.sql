@@ -346,17 +346,26 @@ AS $function$
 DECLARE
     v_note_id BIGINT;
     v_author UUID;
+    v_is_db_admin BOOLEAN := metadata._is_db_admin();
 BEGIN
     v_author := COALESCE(p_author_id, current_user_id());
 
-    IF v_author IS NULL THEN
-        RAISE EXCEPTION 'Authentication required'
-            USING HINT = 'Must be logged in to create notes';
-    END IF;
+    -- DB admins (migrations, workers) bypass auth -- they have no JWT context
+    IF NOT v_is_db_admin THEN
+        IF v_author IS NULL THEN
+            RAISE EXCEPTION 'Authentication required'
+                USING HINT = 'Must be logged in to create notes';
+        END IF;
 
-    IF NOT has_permission(p_entity_type || ':notes', 'create') THEN
-        RAISE EXCEPTION 'Permission denied'
-            USING HINT = format('Requires %s:notes:create permission', p_entity_type);
+        -- System notes (from triggers like add_status_change_note) skip the
+        -- permission check -- the user already proved they can update the entity
+        -- row, and the note is machine-generated, not user-initiated.
+        IF p_note_type != 'system' THEN
+            IF NOT has_permission(p_entity_type || ':notes', 'create') THEN
+                RAISE EXCEPTION 'Permission denied'
+                    USING HINT = format('Requires %s:notes:create permission', p_entity_type);
+            END IF;
+        END IF;
     END IF;
 
     IF NOT EXISTS (
@@ -370,8 +379,12 @@ BEGIN
         RAISE EXCEPTION 'Note content cannot be empty';
     END IF;
 
-    -- Only admins can impersonate other authors
-    IF p_author_id IS NOT NULL AND p_author_id != current_user_id() THEN
+    -- Only admins can impersonate other authors (skip for db-admin sessions
+    -- which have no current_user_id to compare against)
+    IF NOT v_is_db_admin
+        AND p_author_id IS NOT NULL
+        AND p_author_id != current_user_id()
+    THEN
         IF NOT is_admin() THEN
             RAISE EXCEPTION 'Permission denied'
                 USING HINT = 'Only admins can set custom authors';

@@ -868,6 +868,11 @@ GRANT EXECUTE ON FUNCTION public.return_mek_checkout(bigint, uuid, boolean, text
 GRANT EXECUTE ON FUNCTION public.confirm_checkout(bigint, uuid, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.confirm_mek_checkout(bigint, uuid, text) TO authenticated;
 
+-- Computed-field functions (INVOKER, RLS applies). Not selected through PostgREST today, but the dashboard
+-- widget configs list tools_summary as a column; grant so it keeps working if that is ever wired up.
+GRANT EXECUTE ON FUNCTION public.tools_summary(tool_reservations) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.requested_tools(tool_reservation_checkouts) TO authenticated;
+
 -- boundary_text() is the GeoPolygon text companion for anon-readable tables (parcels, census_block_groups).
 -- PUBLIC is intentionally left in place; the explicit grants survive the new default privileges.
 
