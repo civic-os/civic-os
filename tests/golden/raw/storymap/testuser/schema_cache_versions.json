@@ -1,0 +1,30 @@
+[
+  {
+    "cache_name": "categories",
+    "version": "__MASKED__"
+  },
+  {
+    "cache_name": "constraint_messages",
+    "version": "__MASKED__"
+  },
+  {
+    "cache_name": "entities",
+    "version": "__MASKED__"
+  },
+  {
+    "cache_name": "introspection",
+    "version": "__MASKED__"
+  },
+  {
+    "cache_name": "profile_extensions",
+    "version": "__MASKED__"
+  },
+  {
+    "cache_name": "properties",
+    "version": "__MASKED__"
+  },
+  {
+    "cache_name": "translations",
+    "version": "__MASKED__"
+  }
+]

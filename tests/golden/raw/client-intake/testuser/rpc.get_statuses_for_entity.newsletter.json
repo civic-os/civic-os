@@ -1,0 +1,42 @@
+[
+  {
+    "color": "#F59E0B",
+    "description": "Content being composed",
+    "display_name": "Draft",
+    "id": 19,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "draft"
+  },
+  {
+    "color": "#3B82F6",
+    "description": "Queued for delivery at set time",
+    "display_name": "Scheduled",
+    "id": 20,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "scheduled"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Delivered to recipients",
+    "display_name": "Sent",
+    "id": 21,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "sent"
+  },
+  {
+    "color": "#6B7280",
+    "description": "Removed from active list",
+    "display_name": "Archived",
+    "id": 22,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 4,
+    "status_key": "archived"
+  }
+]

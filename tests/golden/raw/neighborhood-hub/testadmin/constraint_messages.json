@@ -1,0 +1,92 @@
+[
+  {
+    "column_name": "user_id",
+    "constraint_name": "borrowers_user_id_key",
+    "error_message": "A borrower record already exists for this user",
+    "table_name": "borrowers"
+  },
+  {
+    "column_name": "event_title",
+    "constraint_name": "building_use_event_details_event_title_required_wfcheck",
+    "error_message": "Event title is required",
+    "table_name": "building_use_event_details"
+  },
+  {
+    "column_name": "room_id",
+    "constraint_name": "building_use_request_rooms_pkey",
+    "error_message": "This room has already been added to the request",
+    "table_name": "building_use_request_rooms"
+  },
+  {
+    "column_name": "estimated_attendees",
+    "constraint_name": "building_use_requests_estimated_attendees_max_wfcheck",
+    "error_message": "Cannot exceed 500 attendees",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "estimated_attendees",
+    "constraint_name": "building_use_requests_estimated_attendees_min_wfcheck",
+    "error_message": "Must have at least 1 attendee",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "estimated_attendees",
+    "constraint_name": "building_use_requests_estimated_attendees_required_wfcheck",
+    "error_message": "Estimated attendees is required",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "event_title",
+    "constraint_name": "building_use_requests_event_title_required_wfcheck",
+    "error_message": "Event title is required",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "group_name",
+    "constraint_name": "building_use_requests_group_name_required_wfcheck",
+    "error_message": "Group name is required",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "hold_harmless_accepted",
+    "constraint_name": "building_use_requests_hold_harmless_accepted_required_wfcheck",
+    "error_message": "Hold harmless agreement is required",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "photo_release_accepted",
+    "constraint_name": "building_use_requests_photo_release_accepted_required_wfcheck",
+    "error_message": "Photo release agreement is required",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "time_slot",
+    "constraint_name": "building_use_requests_time_slot_required_wfcheck",
+    "error_message": "Event time slot is required",
+    "table_name": "building_use_requests"
+  },
+  {
+    "column_name": "tool_type_id",
+    "constraint_name": "mek_request_equipment_items_pkey",
+    "error_message": "This equipment item has already been added",
+    "table_name": "mek_request_equipment_items"
+  },
+  {
+    "column_name": "pickup_date",
+    "constraint_name": "mek_requests_pickup_date_required_wfcheck",
+    "error_message": "Pickup date is required",
+    "table_name": "mek_requests"
+  },
+  {
+    "column_name": "responsibility_acknowledged",
+    "constraint_name": "mek_requests_responsibility_acknowledged_required_wfcheck",
+    "error_message": "You must acknowledge responsibility for the equipment",
+    "table_name": "mek_requests"
+  },
+  {
+    "column_name": "return_date",
+    "constraint_name": "mek_requests_return_date_required_wfcheck",
+    "error_message": "Return date is required",
+    "table_name": "mek_requests"
+  }
+]

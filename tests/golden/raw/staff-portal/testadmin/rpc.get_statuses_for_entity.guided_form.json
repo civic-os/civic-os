@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#f59e0b",
+    "description": null,
+    "display_name": "Draft",
+    "id": 2,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "draft"
+  },
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "Complete",
+    "id": 3,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "complete"
+  },
+  {
+    "color": "#3b82f6",
+    "description": null,
+    "display_name": "Submitted",
+    "id": 4,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "submitted"
+  }
+]

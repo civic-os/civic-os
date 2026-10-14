@@ -1,0 +1,434 @@
+[
+  {
+    "permission": "create",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "update",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "document_requirement_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "delete",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "read",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "update",
+    "table_name": "document_requirements"
+  },
+  {
+    "permission": "create",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "delete",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "read",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "update",
+    "table_name": "incident_reports"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "create",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "delete",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "read",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "update",
+    "table_name": "offboarding_feedback"
+  },
+  {
+    "permission": "create",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_transactions"
+  },
+  {
+    "permission": "create",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "read",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "update",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "create",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "delete",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "read",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "update",
+    "table_name": "reimbursements"
+  },
+  {
+    "permission": "create",
+    "table_name": "roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "create",
+    "table_name": "sites"
+  },
+  {
+    "permission": "delete",
+    "table_name": "sites"
+  },
+  {
+    "permission": "read",
+    "table_name": "sites"
+  },
+  {
+    "permission": "update",
+    "table_name": "sites"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_directory"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_documents"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_members"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "delete",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "read",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "update",
+    "table_name": "staff_tasks"
+  },
+  {
+    "permission": "create",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "delete",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "read",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "update",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_entries"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_off_requests"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series_groups"
+  }
+]

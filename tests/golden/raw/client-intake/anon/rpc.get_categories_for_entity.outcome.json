@@ -1,0 +1,37 @@
+[
+  {
+    "color": "#22C55E",
+    "description": null,
+    "display_name": "Enrolled in Services",
+    "id": 18,
+    "sort_order": 1
+  },
+  {
+    "color": "#3B82F6",
+    "description": null,
+    "display_name": "Received Information",
+    "id": 19,
+    "sort_order": 2
+  },
+  {
+    "color": "#F59E0B",
+    "description": null,
+    "display_name": "Referred Elsewhere",
+    "id": 20,
+    "sort_order": 3
+  },
+  {
+    "color": "#6B7280",
+    "description": null,
+    "display_name": "No Action Taken",
+    "id": 21,
+    "sort_order": 4
+  },
+  {
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "Other",
+    "id": 22,
+    "sort_order": 5
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "color": "#22C55E",
+    "description": "Staff member clocked in",
+    "display_name": "Clock In",
+    "id": 1,
+    "sort_order": 1
+  },
+  {
+    "color": "#6B7280",
+    "description": "Staff member clocked out",
+    "display_name": "Clock Out",
+    "id": 2,
+    "sort_order": 2
+  }
+]

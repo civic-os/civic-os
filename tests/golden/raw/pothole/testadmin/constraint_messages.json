@@ -1,0 +1,38 @@
+[
+  {
+    "column_name": "total_cost",
+    "constraint_name": "bid_total_cost_positive",
+    "error_message": "Bid total cost must be greater than zero",
+    "table_name": "Bid"
+  },
+  {
+    "column_name": "total_cost",
+    "constraint_name": "bid_total_cost_reasonable",
+    "error_message": "Bid total cost cannot exceed $100,000",
+    "table_name": "Bid"
+  },
+  {
+    "column_name": "cost",
+    "constraint_name": "cost_positive",
+    "error_message": "Cost must be greater than zero",
+    "table_name": "WorkPackage"
+  },
+  {
+    "column_name": "description",
+    "constraint_name": "description_min_length",
+    "error_message": "Description must be at least 10 characters",
+    "table_name": "Issue"
+  },
+  {
+    "column_name": "severity_level",
+    "constraint_name": "severity_valid_range",
+    "error_message": "Severity must be between 1 (low) and 5 (critical)",
+    "table_name": "Issue"
+  },
+  {
+    "column_name": "display_name",
+    "constraint_name": "tag_name_max_length",
+    "error_message": "Tag name cannot exceed 50 characters",
+    "table_name": "Tag"
+  }
+]

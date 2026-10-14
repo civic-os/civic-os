@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#F59E0B",
+    "description": "Awaiting staff assessment",
+    "display_name": "Intake Pending",
+    "id": 5,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "intake_pending"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Assessed and actively receiving services",
+    "display_name": "Active",
+    "id": 6,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "active"
+  },
+  {
+    "color": "#6B7280",
+    "description": "No longer engaged or moved away",
+    "display_name": "Inactive",
+    "id": 7,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "inactive"
+  }
+]

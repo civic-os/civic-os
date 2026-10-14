@@ -1,0 +1,50 @@
+[
+  {
+    "column_name": "attendee_count",
+    "constraint_name": "attendee_count_positive",
+    "error_message": "Number of attendees must be between 1 and 75 (maximum capacity).",
+    "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "cancellation_reason",
+    "constraint_name": "cancellation_reason_required",
+    "error_message": "A cancellation reason is required when cancelling a reservation.",
+    "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "denial_reason",
+    "constraint_name": "denial_reason_required",
+    "error_message": "A denial reason is required when denying a reservation.",
+    "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "time_slot",
+    "constraint_name": "max_advance_booking",
+    "error_message": "Reservations cannot be made more than 1 year in advance.",
+    "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "time_slot",
+    "constraint_name": "min_advance_booking",
+    "error_message": "Reservations must be made at least 24 hours in advance.",
+    "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "time_slot",
+    "constraint_name": "no_overlapping_approved_events",
+    "error_message": "Cannot secure this reservation: the requested time slot conflicts with an existing confirmed event. Please check the calendar for availability or contact the requestor to reschedule.",
+    "table_name": "public_calendar_events"
+  },
+  {
+    "column_name": "policy_agreed",
+    "constraint_name": "policy_must_be_agreed",
+    "error_message": "You must agree to the Facility and Parkland Use Policy to submit a reservation request.",
+    "table_name": "reservation_requests"
+  },
+  {
+    "column_name": "time_slot",
+    "constraint_name": "valid_time_slot_bounds",
+    "error_message": "Invalid time slot: end time must be after start time.",
+    "table_name": "reservation_requests"
+  }
+]

@@ -1,0 +1,328 @@
+[
+  {
+    "action_name": "record_cash",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Mark this payment as received in cash?",
+    "default_navigate_to": null,
+    "default_success_message": "Cash payment recorded",
+    "description": "Mark payment as received in cash",
+    "disabled_tooltip": null,
+    "display_name": "Record Cash",
+    "enabled_condition": null,
+    "icon": "payments",
+    "id": 5,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_cash_payment",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "reservation_payments",
+    "visibility_condition": {
+      "field": "can_record_payment",
+      "operator": "eq",
+      "value": true
+    }
+  },
+  {
+    "action_name": "record_check",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Mark this payment as received by check?",
+    "default_navigate_to": null,
+    "default_success_message": "Check payment recorded",
+    "description": "Mark payment as received by check",
+    "disabled_tooltip": null,
+    "display_name": "Record Check",
+    "enabled_condition": null,
+    "icon": "receipt_long",
+    "id": 6,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_check_payment",
+    "show_on_detail": true,
+    "sort_order": 11,
+    "table_name": "reservation_payments",
+    "visibility_condition": {
+      "field": "can_record_payment",
+      "operator": "eq",
+      "value": true
+    }
+  },
+  {
+    "action_name": "record_money_order",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Mark this payment as received by money order?",
+    "default_navigate_to": null,
+    "default_success_message": "Money order payment recorded",
+    "description": "Mark payment as received by money order",
+    "disabled_tooltip": null,
+    "display_name": "Record Money Order",
+    "enabled_condition": null,
+    "icon": "request_quote",
+    "id": 7,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_money_order_payment",
+    "show_on_detail": true,
+    "sort_order": 12,
+    "table_name": "reservation_payments",
+    "visibility_condition": {
+      "field": "can_record_payment",
+      "operator": "eq",
+      "value": true
+    }
+  },
+  {
+    "action_name": "record_cashapp",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Mark this payment as received via CashApp?",
+    "default_navigate_to": null,
+    "default_success_message": "CashApp payment recorded",
+    "description": "Mark payment as received via CashApp",
+    "disabled_tooltip": null,
+    "display_name": "Record CashApp",
+    "enabled_condition": null,
+    "icon": "phone_iphone",
+    "id": 8,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "record_cashapp_payment",
+    "show_on_detail": true,
+    "sort_order": 13,
+    "table_name": "reservation_payments",
+    "visibility_condition": {
+      "field": "can_record_payment",
+      "operator": "eq",
+      "value": true
+    }
+  },
+  {
+    "action_name": "approve",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to approve this reservation request? This will create payment records for the requestor.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Approve this reservation request",
+    "disabled_tooltip": "Only pending requests can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 5
+    },
+    "icon": "check_circle",
+    "id": 1,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 5
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to deny this reservation request?",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Deny this reservation request",
+    "disabled_tooltip": "Only pending requests can be denied",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 5
+    },
+    "icon": "block",
+    "id": 9,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Denial Reason",
+        "file_type": null,
+        "id": 1,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_denial_reason",
+        "param_type": "text",
+        "placeholder": "Enter reason for denial...",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 5
+    }
+  },
+  {
+    "action_name": "cancel",
+    "button_style": "warning",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to cancel this reservation?",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Cancel this reservation request",
+    "disabled_tooltip": "Only pending, approved, or secured requests can be cancelled",
+    "display_name": "Cancel",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        5,
+        6,
+        21
+      ]
+    },
+    "icon": "cancel",
+    "id": 10,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Cancellation Reason",
+        "file_type": null,
+        "id": 2,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_cancellation_reason",
+        "param_type": "text",
+        "placeholder": "Enter reason for cancellation...",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "cancel_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        5,
+        6,
+        21
+      ]
+    }
+  },
+  {
+    "action_name": "complete",
+    "button_style": "accent",
+    "can_execute": false,
+    "confirmation_message": "Mark this event as completed? This should be done after the event has concluded.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Mark this event as completed (post-event)",
+    "disabled_tooltip": "Only secured requests can be marked completed",
+    "display_name": "Mark Completed",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 21
+    },
+    "icon": "task_alt",
+    "id": 2,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "complete_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 40,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 21
+    }
+  },
+  {
+    "action_name": "close",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Close this reservation? Ensure the security deposit has been refunded or waived first.",
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Close this reservation (after deposit processed)",
+    "disabled_tooltip": "Only completed requests can be closed",
+    "display_name": "Close",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 9
+    },
+    "icon": "lock",
+    "id": 3,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "close_reservation_request",
+    "show_on_detail": true,
+    "sort_order": 50,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 9
+    }
+  },
+  {
+    "action_name": "waive_all_fees",
+    "button_style": "secondary",
+    "can_execute": false,
+    "confirmation_message": "Are you sure you want to waive all pending fees for this reservation?",
+    "default_navigate_to": null,
+    "default_success_message": "Fees waived successfully",
+    "description": "Waive all pending payments for this reservation",
+    "disabled_tooltip": null,
+    "display_name": "Waive All Fees",
+    "enabled_condition": null,
+    "icon": "money_off",
+    "id": 4,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "waive_all_reservation_payments",
+    "show_on_detail": true,
+    "sort_order": 50,
+    "table_name": "reservation_requests",
+    "visibility_condition": {
+      "field": "can_waive_fees",
+      "operator": "eq",
+      "value": true
+    }
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "column_name": "user_id",
+    "constraint_name": "clients_user_id_unique",
+    "error_message": "This user is already linked to a client record.",
+    "table_name": "clients"
+  }
+]

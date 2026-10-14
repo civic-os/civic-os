@@ -1,0 +1,57 @@
+[
+  {
+    "category_key": "high",
+    "color": "#EF4444",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "High",
+    "entity_type": "task_priority",
+    "id": 7,
+    "sort_order": 1,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "medium",
+    "color": "#F59E0B",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Medium",
+    "entity_type": "task_priority",
+    "id": 8,
+    "sort_order": 2,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "low",
+    "color": "#6B7280",
+    "created_at": "__MASKED__",
+    "description": null,
+    "display_name": "Low",
+    "entity_type": "task_priority",
+    "id": 9,
+    "sort_order": 3,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "clock_in",
+    "color": "#22C55E",
+    "created_at": "__MASKED__",
+    "description": "Staff member clocked in",
+    "display_name": "Clock In",
+    "entity_type": "time_entry",
+    "id": 1,
+    "sort_order": 1,
+    "updated_at": "__MASKED__"
+  },
+  {
+    "category_key": "clock_out",
+    "color": "#6B7280",
+    "created_at": "__MASKED__",
+    "description": "Staff member clocked out",
+    "display_name": "Clock Out",
+    "entity_type": "time_entry",
+    "id": 2,
+    "sort_order": 2,
+    "updated_at": "__MASKED__"
+  }
+]

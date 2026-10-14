@@ -1,0 +1,69 @@
+[
+  {
+    "column_name": "client_service_needs_m2m",
+    "column_width": null,
+    "depends_on_columns": null,
+    "display_name": null,
+    "fk_search_modal": false,
+    "options_filter_column": null,
+    "options_source_rpc": null,
+    "show_inline": true,
+    "show_on_create": true,
+    "show_on_detail": true,
+    "show_on_edit": true,
+    "show_on_list": true,
+    "sort_order": null,
+    "table_name": "clients"
+  },
+  {
+    "column_name": "newsletter_recipients_m2m",
+    "column_width": null,
+    "depends_on_columns": null,
+    "display_name": "Recipients",
+    "fk_search_modal": true,
+    "options_filter_column": null,
+    "options_source_rpc": null,
+    "show_inline": true,
+    "show_on_create": true,
+    "show_on_detail": true,
+    "show_on_edit": true,
+    "show_on_list": true,
+    "sort_order": null,
+    "table_name": "newsletters"
+  },
+  {
+    "column_name": "partner_service_categories_m2m",
+    "column_width": null,
+    "depends_on_columns": null,
+    "display_name": null,
+    "fk_search_modal": false,
+    "options_filter_column": null,
+    "options_source_rpc": null,
+    "show_inline": true,
+    "show_on_create": true,
+    "show_on_detail": true,
+    "show_on_edit": true,
+    "show_on_list": true,
+    "sort_order": null,
+    "table_name": "partners"
+  },
+  {
+    "column_name": "referral_service_categories_m2m",
+    "column_width": null,
+    "depends_on_columns": [
+      "client_id",
+      "partner_id"
+    ],
+    "display_name": null,
+    "fk_search_modal": false,
+    "options_filter_column": null,
+    "options_source_rpc": "get_referral_service_options",
+    "show_inline": true,
+    "show_on_create": true,
+    "show_on_detail": true,
+    "show_on_edit": true,
+    "show_on_list": true,
+    "sort_order": null,
+    "table_name": "referrals"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#F59E0B",
+    "description": "Awaiting review",
+    "display_name": "Pending",
+    "id": 15,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "pending"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Reimbursement approved",
+    "display_name": "Approved",
+    "id": 16,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 2,
+    "status_key": "approved"
+  },
+  {
+    "color": "#EF4444",
+    "description": "Reimbursement denied",
+    "display_name": "Denied",
+    "id": 17,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "denied"
+  }
+]
