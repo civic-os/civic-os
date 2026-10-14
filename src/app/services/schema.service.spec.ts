@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,6 +16,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -65,27 +66,28 @@ describe('SchemaService', () => {
                 MOCK_ENTITIES.status
             ];
 
-            service.getEntities().subscribe(entities => {
-                expect(entities).toEqual(mockEntities);
-                expect(entities.length).toBe(2);
-            });
+            const entities$ = firstValueFrom(service.getEntities());
 
             expectPostgrestRequest(httpMock, 'schema_entities', mockEntities);
+
+            const entities = await entities$;
+            expect(entities).toEqual(mockEntities);
+            expect(entities.length).toBe(2);
         });
 
         it('should cache entities and return from memory on subsequent calls', async () => {
             const mockEntities: SchemaEntityTable[] = [MOCK_ENTITIES.issue];
 
             // First call - fetches from HTTP
-            service.getEntities().subscribe(() => {
-                // Second call - should return from cache without HTTP request
-                service.getEntities().subscribe(cachedEntities => {
-                    expect(cachedEntities).toEqual(mockEntities);
-                });
-                // No HTTP request should be made for the second call
-            });
-
+            const first$ = firstValueFrom(service.getEntities());
             expectPostgrestRequest(httpMock, 'schema_entities', mockEntities);
+            await first$;
+
+            // Second call - should return from cache without HTTP request
+            const cachedEntities = await firstValueFrom(service.getEntities());
+            expect(cachedEntities).toEqual(mockEntities);
+            // No HTTP request should be made for the second call (httpMock.verify() in afterEach)
+            httpMock.expectNone(req => req.url.includes('schema_entities'));
         });
     });
 
@@ -96,20 +98,22 @@ describe('SchemaService', () => {
                 MOCK_ENTITIES.status
             ];
 
-            service.getEntity('Issue').subscribe(entity => {
-                expect(entity).toBeDefined();
-                expect(entity?.table_name).toBe('Issue');
-            });
+            const entity$ = firstValueFrom(service.getEntity('Issue'));
 
             expectPostgrestRequest(httpMock, 'schema_entities', mockEntities);
+
+            const entity = await entity$;
+            expect(entity).toBeDefined();
+            expect(entity?.table_name).toBe('Issue');
         });
 
         it('should return undefined for non-existent entity', async () => {
-            service.getEntity('NonExistent').subscribe(entity => {
-                expect(entity).toBeUndefined();
-            });
+            const entity$ = firstValueFrom(service.getEntity('NonExistent'));
 
             expectPostgrestRequest(httpMock, 'schema_entities', []);
+
+            const entity = await entity$;
+            expect(entity).toBeUndefined();
         });
     });
 
@@ -120,32 +124,32 @@ describe('SchemaService', () => {
                 createMockProperty({ column_name: 'count', udt_name: 'int4' })
             ];
 
-            service.getProperties().subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props[0].column_name).toBe('name');
-                // Should have type calculated
-                expect(props[0].type).toBe(EntityPropertyType.TextShort);
-            });
+            const props$ = firstValueFrom(service.getProperties());
 
             expectPostgrestRequest(httpMock, 'schema_entities', []);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(2);
+            expect(props[0].column_name).toBe('name');
+            // Should have type calculated
+            expect(props[0].type).toBe(EntityPropertyType.TextShort);
         });
 
         it('should cache properties on first call', async () => {
-            const mockProps = [MOCK_PROPERTIES.textShort];
+            const mockProps = structuredClone([MOCK_PROPERTIES.textShort]);
 
-            service.getProperties().subscribe(() => {
-                service.getProperties().subscribe(cachedProps => {
-                    expect(cachedProps).toEqual(expect.arrayContaining([
-                        expect.objectContaining({ column_name: 'name' })
-                    ]));
-                });
-            });
-
+            const first$ = firstValueFrom(service.getProperties());
             expectPostgrestRequest(httpMock, 'schema_entities', []);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+            await first$;
+
+            const cachedProps = await firstValueFrom(service.getProperties());
+            expect(cachedProps).toEqual(expect.arrayContaining([
+                expect.objectContaining({ column_name: 'name' })
+            ]));
         });
     });
 
@@ -175,16 +179,17 @@ describe('SchemaService', () => {
                 fkTo('team_rosters'), col('team_rosters', 'member_id')
             ];
 
-            service.getInverseRelationships('Issue').subscribe(rels => {
-                const byTable = new Map(rels.map(r => [r.sourceTable, r]));
-                expect(byTable.get('work_details')?.previewMode).toBe('display_name');
-                expect(byTable.get('step_records')?.previewMode).toBe('id');
-                expect(byTable.get('team_rosters')?.previewMode).toBe('count');
-            });
+            const rels$ = firstValueFrom(service.getInverseRelationships('Issue'));
 
             expectPostgrestRequest(httpMock, 'schema_entities', []);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const rels = await rels$;
+            const byTable = new Map(rels.map(r => [r.sourceTable, r]));
+            expect(byTable.get('work_details')?.previewMode).toBe('display_name');
+            expect(byTable.get('step_records')?.previewMode).toBe('id');
+            expect(byTable.get('team_rosters')?.previewMode).toBe('count');
         });
     });
 
@@ -404,17 +409,18 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'updated_at', udt_name: 'timestamp', show_on_list: false })
             ];
 
-            service.getPropsForList(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].column_name).toBe('name');
-                expect(props.find(p => p.column_name === 'id')).toBeUndefined();
-                expect(props.find(p => p.column_name === 'created_at')).toBeUndefined();
-                expect(props.find(p => p.column_name === 'updated_at')).toBeUndefined();
-            });
+            const props$ = firstValueFrom(service.getPropsForList(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].column_name).toBe('name');
+            expect(props.find(p => p.column_name === 'id')).toBeUndefined();
+            expect(props.find(p => p.column_name === 'created_at')).toBeUndefined();
+            expect(props.find(p => p.column_name === 'updated_at')).toBeUndefined();
         });
 
         it('should only return properties for the specified table', async () => {
@@ -423,14 +429,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Status', column_name: 'status_name', udt_name: 'varchar' })
             ];
 
-            service.getPropsForList(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].column_name).toBe('issue_name');
-            });
+            const props$ = firstValueFrom(service.getPropsForList(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].column_name).toBe('issue_name');
         });
 
         it('should include map property even if hidden from list when map is enabled', async () => {
@@ -451,15 +458,16 @@ describe('SchemaService', () => {
                 })
             ];
 
-            service.getPropsForList(entityWithMap).subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props.find(p => p.column_name === 'name')).toBeDefined();
-                expect(props.find(p => p.column_name === 'location')).toBeDefined();
-            });
+            const props$ = firstValueFrom(service.getPropsForList(entityWithMap));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [entityWithMap]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(2);
+            expect(props.find(p => p.column_name === 'name')).toBeDefined();
+            expect(props.find(p => p.column_name === 'location')).toBeDefined();
         });
 
         it('should not duplicate map property if already visible in list', async () => {
@@ -480,14 +488,15 @@ describe('SchemaService', () => {
                 })
             ];
 
-            service.getPropsForList(entityWithMap).subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props.filter(p => p.column_name === 'location').length).toBe(1);
-            });
+            const props$ = firstValueFrom(service.getPropsForList(entityWithMap));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [entityWithMap]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(2);
+            expect(props.filter(p => p.column_name === 'location').length).toBe(1);
         });
     });
 
@@ -499,14 +508,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'computed', is_generated: true })
             ];
 
-            service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].column_name).toBe('name');
-            });
+            const props$ = firstValueFrom(service.getPropsForCreate(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].column_name).toBe('name');
         });
 
         it('should filter out non-updatable columns', async () => {
@@ -515,14 +525,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'readonly', is_updatable: false })
             ];
 
-            service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].column_name).toBe('name');
-            });
+            const props$ = firstValueFrom(service.getPropsForCreate(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].column_name).toBe('name');
         });
 
         it('should filter out hidden fields (id, created_at, updated_at)', async () => {
@@ -532,14 +543,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'updated_at', is_updatable: false })
             ];
 
-            service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].column_name).toBe('name');
-            });
+            const props$ = firstValueFrom(service.getPropsForCreate(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].column_name).toBe('name');
         });
 
         it('should filter based on show_on_create flag', async () => {
@@ -549,16 +561,17 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'status', udt_name: 'varchar', is_updatable: true, show_on_create: true })
             ];
 
-            service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props[0].column_name).toBe('name');
-                expect(props[1].column_name).toBe('status');
-                expect(props.find(p => p.column_name === 'internal_notes')).toBeUndefined();
-            });
+            const props$ = firstValueFrom(service.getPropsForCreate(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(2);
+            expect(props[0].column_name).toBe('name');
+            expect(props[1].column_name).toBe('status');
+            expect(props.find(p => p.column_name === 'internal_notes')).toBeUndefined();
         });
     });
 
@@ -569,14 +582,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'id', is_identity: true })
             ];
 
-            service.getPropsForEdit(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].column_name).toBe('name');
-            });
+            const props$ = firstValueFrom(service.getPropsForEdit(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].column_name).toBe('name');
         });
 
         it('should filter out fields with show_on_edit=false', async () => {
@@ -586,16 +600,17 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'description', udt_name: 'text', is_updatable: true, show_on_edit: true })
             ];
 
-            service.getPropsForEdit(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props.find(p => p.column_name === 'title')).toBeDefined();
-                expect(props.find(p => p.column_name === 'calculated_field')).toBeUndefined();
-                expect(props.find(p => p.column_name === 'description')).toBeDefined();
-            });
+            const props$ = firstValueFrom(service.getPropsForEdit(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(2);
+            expect(props.find(p => p.column_name === 'title')).toBeDefined();
+            expect(props.find(p => p.column_name === 'calculated_field')).toBeUndefined();
+            expect(props.find(p => p.column_name === 'description')).toBeDefined();
         });
     });
 
@@ -608,16 +623,17 @@ describe('SchemaService', () => {
                     createMockProperty({ table_name: 'Issue', column_name: 'count', sort_order: 1 })
                 ];
 
-                service.getPropsForList(MOCK_ENTITIES.issue).subscribe(props => {
-                    expect(props.length).toBe(3);
-                    expect(props[0].column_name).toBe('status'); // sort_order: 0
-                    expect(props[1].column_name).toBe('count'); // sort_order: 1
-                    expect(props[2].column_name).toBe('name'); // sort_order: 2
-                });
+                const props$ = firstValueFrom(service.getPropsForList(MOCK_ENTITIES.issue));
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
                 expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
                 flushM2mMetadata(httpMock);
+
+                const props = await props$;
+                expect(props.length).toBe(3);
+                expect(props[0].column_name).toBe('status'); // sort_order: 0
+                expect(props[1].column_name).toBe('count'); // sort_order: 1
+                expect(props[2].column_name).toBe('name'); // sort_order: 2
             });
         });
 
@@ -628,14 +644,15 @@ describe('SchemaService', () => {
                     createMockProperty({ table_name: 'Issue', column_name: 'title', sort_order: 3 })
                 ];
 
-                service.getPropsForDetail(MOCK_ENTITIES.issue).subscribe(props => {
-                    expect(props[0].column_name).toBe('title'); // sort_order: 3
-                    expect(props[1].column_name).toBe('description'); // sort_order: 5
-                });
+                const props$ = firstValueFrom(service.getPropsForDetail(MOCK_ENTITIES.issue));
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
                 expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
                 flushM2mMetadata(httpMock);
+
+                const props = await props$;
+                expect(props[0].column_name).toBe('title'); // sort_order: 3
+                expect(props[1].column_name).toBe('description'); // sort_order: 5
             });
 
             it('should filter out fields with show_on_detail=false', async () => {
@@ -646,17 +663,18 @@ describe('SchemaService', () => {
                     createMockProperty({ table_name: 'Issue', column_name: 'updated_at', udt_name: 'timestamptz', show_on_detail: true })
                 ];
 
-                service.getPropsForDetail(MOCK_ENTITIES.issue).subscribe(props => {
-                    expect(props.length).toBe(3);
-                    expect(props.find(p => p.column_name === 'title')).toBeDefined();
-                    expect(props.find(p => p.column_name === 'internal_id')).toBeUndefined();
-                    expect(props.find(p => p.column_name === 'created_at')).toBeDefined();
-                    expect(props.find(p => p.column_name === 'updated_at')).toBeDefined();
-                });
+                const props$ = firstValueFrom(service.getPropsForDetail(MOCK_ENTITIES.issue));
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
                 expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
                 flushM2mMetadata(httpMock);
+
+                const props = await props$;
+                expect(props.length).toBe(3);
+                expect(props.find(p => p.column_name === 'title')).toBeDefined();
+                expect(props.find(p => p.column_name === 'internal_id')).toBeUndefined();
+                expect(props.find(p => p.column_name === 'created_at')).toBeDefined();
+                expect(props.find(p => p.column_name === 'updated_at')).toBeDefined();
             });
         });
 
@@ -668,15 +686,16 @@ describe('SchemaService', () => {
                     createMockProperty({ table_name: 'Issue', column_name: 'field_c', sort_order: 7, is_updatable: true })
                 ];
 
-                service.getPropsForCreate(MOCK_ENTITIES.issue).subscribe(props => {
-                    expect(props[0].column_name).toBe('field_b'); // sort_order: 5
-                    expect(props[1].column_name).toBe('field_c'); // sort_order: 7
-                    expect(props[2].column_name).toBe('field_a'); // sort_order: 10
-                });
+                const props$ = firstValueFrom(service.getPropsForCreate(MOCK_ENTITIES.issue));
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
                 expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
                 flushM2mMetadata(httpMock);
+
+                const props = await props$;
+                expect(props[0].column_name).toBe('field_b'); // sort_order: 5
+                expect(props[1].column_name).toBe('field_c'); // sort_order: 7
+                expect(props[2].column_name).toBe('field_a'); // sort_order: 10
             });
         });
 
@@ -687,14 +706,15 @@ describe('SchemaService', () => {
                     createMockProperty({ table_name: 'Issue', column_name: 'first', sort_order: 1, is_updatable: true })
                 ];
 
-                service.getPropsForEdit(MOCK_ENTITIES.issue).subscribe(props => {
-                    expect(props[0].column_name).toBe('first'); // sort_order: 1
-                    expect(props[1].column_name).toBe('last'); // sort_order: 99
-                });
+                const props$ = firstValueFrom(service.getPropsForEdit(MOCK_ENTITIES.issue));
 
                 expectPostgrestRequest(httpMock, 'schema_entities', [MOCK_ENTITIES.issue]);
                 expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
                 flushM2mMetadata(httpMock);
+
+                const props = await props$;
+                expect(props[0].column_name).toBe('first'); // sort_order: 1
+                expect(props[1].column_name).toBe('last'); // sort_order: 99
             });
         });
     });
@@ -784,15 +804,16 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'description', udt_name: 'text' })
             ];
 
-            service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(2);
-                expect(props[0].column_name).toBe('title');
-                expect(props[0].type).toBe(EntityPropertyType.TextShort);
-                expect(props[1].type).toBe(EntityPropertyType.TextLong);
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(2);
+            expect(props[0].column_name).toBe('title');
+            expect(props[0].type).toBe(EntityPropertyType.TextShort);
+            expect(props[1].type).toBe(EntityPropertyType.TextLong);
         });
 
         it('should filter properties by table name', async () => {
@@ -801,14 +822,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Status', column_name: 'name', udt_name: 'varchar' })
             ];
 
-            service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-                expect(props[0].table_name).toBe('Issue');
-                expect(props[0].column_name).toBe('title');
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(1);
+            expect(props[0].table_name).toBe('Issue');
+            expect(props[0].column_name).toBe('title');
         });
 
         it('should make HTTP request every time (not use cache)', async () => {
@@ -817,22 +839,18 @@ describe('SchemaService', () => {
             ];
 
             // First call
-            service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(1);
-
-                // Second call - should make another HTTP request
-                service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props2 => {
-                    expect(props2.length).toBe(1);
-                });
-
-                // Expect second HTTP request
-                expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
-                flushM2mMetadata(httpMock);
-            });
-
-            // Expect first HTTP request
+            const first$ = firstValueFrom(service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue));
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+            const props = await first$;
+            expect(props.length).toBe(1);
+
+            // Second call - should make another HTTP request
+            const second$ = firstValueFrom(service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue));
+            expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
+            flushM2mMetadata(httpMock);
+            const props2 = await second$;
+            expect(props2.length).toBe(1);
         });
 
         it('should return empty array for entity with no properties', async () => {
@@ -840,12 +858,13 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'OtherTable', column_name: 'name', udt_name: 'varchar' })
             ];
 
-            service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props.length).toBe(0);
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props.length).toBe(0);
         });
 
         it('should calculate property types for all properties', async () => {
@@ -855,14 +874,15 @@ describe('SchemaService', () => {
                 createMockProperty({ table_name: 'Issue', column_name: 'active', udt_name: 'bool' })
             ];
 
-            service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue).subscribe(props => {
-                expect(props[0].type).toBe(EntityPropertyType.TextShort);
-                expect(props[1].type).toBe(EntityPropertyType.IntegerNumber);
-                expect(props[2].type).toBe(EntityPropertyType.Boolean);
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntityFresh(MOCK_ENTITIES.issue));
 
             expectPostgrestRequest(httpMock, 'schema_properties', mockProps);
             flushM2mMetadata(httpMock);
+
+            const props = await props$;
+            expect(props[0].type).toBe(EntityPropertyType.TextShort);
+            expect(props[1].type).toBe(EntityPropertyType.IntegerNumber);
+            expect(props[2].type).toBe(EntityPropertyType.Boolean);
         });
     });
 
@@ -913,13 +933,15 @@ describe('SchemaService', () => {
     });
 
     describe('In-Flight Request Tracking', () => {
-        it('should prevent concurrent getEntities() calls from triggering duplicate HTTP requests', () => {
+        it('should prevent concurrent getEntities() calls from triggering duplicate HTTP requests', async () => {
             const mockEntities = [MOCK_ENTITIES.issue, MOCK_ENTITIES.status];
 
             // Simulate 3 components all calling getEntities() simultaneously
-            const sub1 = service.getEntities().subscribe();
-            const sub2 = service.getEntities().subscribe();
-            const sub3 = service.getEntities().subscribe();
+            const results$ = Promise.all([
+                firstValueFrom(service.getEntities()),
+                firstValueFrom(service.getEntities()),
+                firstValueFrom(service.getEntities())
+            ]);
 
             // Should only make ONE HTTP request despite 3 subscriptions
             const requests = httpMock.match(req => req.url.includes('schema_entities'));
@@ -929,47 +951,51 @@ describe('SchemaService', () => {
             requests[0].flush(mockEntities);
 
             // All subscribers should receive the data
-            sub1.unsubscribe();
-            sub2.unsubscribe();
-            sub3.unsubscribe();
+            const results = await results$;
+            results.forEach(entities => expect(entities).toEqual(mockEntities));
         });
 
-        it('should prevent concurrent getProperties() calls from triggering duplicate HTTP requests', () => {
+        it('should prevent concurrent getProperties() calls from triggering duplicate HTTP requests', async () => {
             const mockEntities = [MOCK_ENTITIES.issue];
-            const mockProperties = [MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.integer];
+            // Clone: getProperties() sets `type` on response objects in place and MOCK_* fixtures are frozen
+            const mockProperties = structuredClone([MOCK_PROPERTIES.textShort, MOCK_PROPERTIES.integer]);
 
             // First ensure entities are loaded (getProperties depends on getEntities)
-            service.getEntities().subscribe();
+            const entities$ = firstValueFrom(service.getEntities());
             const entitiesReq = httpMock.expectOne(req => req.url.includes('schema_entities'));
             entitiesReq.flush(mockEntities);
+            await entities$;
 
             // Now simulate 3 components calling getProperties() simultaneously
-            const sub1 = service.getProperties().subscribe();
-            const sub2 = service.getProperties().subscribe();
-            const sub3 = service.getProperties().subscribe();
+            const results$ = Promise.all([
+                firstValueFrom(service.getProperties()),
+                firstValueFrom(service.getProperties()),
+                firstValueFrom(service.getProperties())
+            ]);
 
             // Should only make ONE HTTP request for properties despite 3 subscriptions
             const requests = httpMock.match(req => req.url.includes('schema_properties'));
             expect(requests.length).toBe(1);
 
-            // Flush the single request
+            // Flush the single request (M:M metadata is requested alongside)
             requests[0].flush(mockProperties);
+            flushM2mMetadata(httpMock);
 
             // All subscribers should receive the processed data
-            sub1.unsubscribe();
-            sub2.unsubscribe();
-            sub3.unsubscribe();
+            const results = await results$;
+            results.forEach(props => expect(props.length).toBe(2));
         });
 
-        it('should allow refreshCache() to trigger new requests after initial load completes', () => {
+        it('should allow refreshCache() to trigger new requests after initial load completes', async () => {
             const mockEntities = [MOCK_ENTITIES.issue];
-            const mockProperties = [MOCK_PROPERTIES.textShort];
+            const mockProperties = structuredClone([MOCK_PROPERTIES.textShort]);
             const mockConstraintMessages: any[] = [];
 
             // Initial load
-            service.getEntities().subscribe();
+            const initial$ = firstValueFrom(service.getEntities());
             const req1 = httpMock.expectOne(req => req.url.includes('schema_entities'));
             req1.flush(mockEntities);
+            await initial$;
 
             // Refresh cache
             service.refreshCache();
@@ -985,14 +1011,17 @@ describe('SchemaService', () => {
             entitiesRequests.forEach(req => req.flush(mockEntities));
 
             // After refreshCache, calling getProperties() should trigger a new request
-            service.getProperties().subscribe();
+            const props$ = firstValueFrom(service.getProperties());
             const propsReq = httpMock.expectOne(req => req.url.includes('schema_properties'));
             propsReq.flush(mockProperties);
+            flushM2mMetadata(httpMock);
+            await props$;
 
             // Same for constraint messages
-            service.getConstraintMessages().subscribe();
+            const constraints$ = firstValueFrom(service.getConstraintMessages());
             const constraintReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
             constraintReq.flush(mockConstraintMessages);
+            await constraints$;
         });
     });
 
@@ -1008,31 +1037,32 @@ describe('SchemaService', () => {
 
         describe('getStatusesForEntity()', () => {
             it('should fetch statuses via RPC for given entity type', async () => {
-                service.getStatusesForEntity('reservation_request').subscribe(statuses => {
-                    expect(statuses.length).toBe(3);
-                    expect(statuses[0].display_name).toBe('Pending');
-                    expect(statuses[1].display_name).toBe('Approved');
-                    expect(statuses[2].display_name).toBe('Denied');
-                });
+                const statuses$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'reservation_request');
                 expect(req.request.method).toBe('POST');
                 req.flush(mockStatusOptions);
+
+                const statuses = await statuses$;
+                expect(statuses.length).toBe(3);
+                expect(statuses[0].display_name).toBe('Pending');
+                expect(statuses[1].display_name).toBe('Approved');
+                expect(statuses[2].display_name).toBe('Denied');
             });
 
             it('should cache status options per entity type', async () => {
                 // First call
-                service.getStatusesForEntity('reservation_request').subscribe(() => {
-                    // Second call - should return from cache
-                    service.getStatusesForEntity('reservation_request').subscribe(cachedStatuses => {
-                        expect(cachedStatuses.length).toBe(3);
-                    });
-                    // No second HTTP request should be made
-                });
-
+                const first$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req.flush(mockStatusOptions);
+                await first$;
+
+                // Second call - should return from cache
+                const cachedStatuses = await firstValueFrom(service.getStatusesForEntity('reservation_request'));
+                expect(cachedStatuses.length).toBe(3);
+                // No second HTTP request should be made
+                httpMock.expectNone(req => req.url.includes('rpc/get_statuses_for_entity'));
             });
 
             it('should maintain separate caches for different entity types', async () => {
@@ -1042,52 +1072,56 @@ describe('SchemaService', () => {
                 ];
 
                 // Load reservation_request statuses
-                service.getStatusesForEntity('reservation_request').subscribe(() => {
-                    // Load issue statuses (different entity type)
-                    service.getStatusesForEntity('issue').subscribe(statuses => {
-                        expect(statuses.length).toBe(2);
-                        expect(statuses[0].display_name).toBe('Open');
-                    });
-
-                    const issueReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
-                        req.body.p_entity_type === 'issue');
-                    issueReq.flush(issueStatuses);
-                });
-
+                const reservation$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const reservationReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'reservation_request');
                 reservationReq.flush(mockStatusOptions);
+                await reservation$;
+
+                // Load issue statuses (different entity type)
+                const issue$ = firstValueFrom(service.getStatusesForEntity('issue'));
+                const issueReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
+                    req.body.p_entity_type === 'issue');
+                issueReq.flush(issueStatuses);
+
+                const statuses = await issue$;
+                expect(statuses.length).toBe(2);
+                expect(statuses[0].display_name).toBe('Open');
             });
 
             it('should handle HTTP errors gracefully', async () => {
-                service.getStatusesForEntity('invalid_entity').subscribe(statuses => {
-                    expect(statuses).toEqual([]);
-                });
+                const statuses$ = firstValueFrom(service.getStatusesForEntity('invalid_entity'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req.error(new ProgressEvent('error'), { status: 404, statusText: 'Not Found' });
+
+                const statuses = await statuses$;
+                expect(statuses).toEqual([]);
             });
 
             it('should populate signal cache when data loads', async () => {
                 // Initially, signal cache should be empty
                 expect(service.getStatusOptionsSync('reservation_request')).toEqual([]);
 
-                service.getStatusesForEntity('reservation_request').subscribe(() => {
-                    // After load, signal cache should have data
-                    const cached = service.getStatusOptionsSync('reservation_request');
-                    expect(cached.length).toBe(3);
-                    expect(cached[0].display_name).toBe('Pending');
-                });
+                const load$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req.flush(mockStatusOptions);
+                await load$;
+
+                // After load, signal cache should have data
+                const cached = service.getStatusOptionsSync('reservation_request');
+                expect(cached.length).toBe(3);
+                expect(cached[0].display_name).toBe('Pending');
             });
 
-            it('should prevent duplicate concurrent requests', () => {
+            it('should prevent duplicate concurrent requests', async () => {
                 // Simulate multiple components calling simultaneously
-                const sub1 = service.getStatusesForEntity('reservation_request').subscribe();
-                const sub2 = service.getStatusesForEntity('reservation_request').subscribe();
-                const sub3 = service.getStatusesForEntity('reservation_request').subscribe();
+                const results$ = Promise.all([
+                    firstValueFrom(service.getStatusesForEntity('reservation_request')),
+                    firstValueFrom(service.getStatusesForEntity('reservation_request')),
+                    firstValueFrom(service.getStatusesForEntity('reservation_request'))
+                ]);
 
                 // Should only make ONE HTTP request
                 const requests = httpMock.match(req => req.url.includes('rpc/get_statuses_for_entity'));
@@ -1095,9 +1129,8 @@ describe('SchemaService', () => {
 
                 requests[0].flush(mockStatusOptions);
 
-                sub1.unsubscribe();
-                sub2.unsubscribe();
-                sub3.unsubscribe();
+                const results = await results$;
+                results.forEach(statuses => expect(statuses.length).toBe(3));
             });
         });
 
@@ -1108,42 +1141,43 @@ describe('SchemaService', () => {
             });
 
             it('should return cached options after load completes', async () => {
-                service.getStatusesForEntity('reservation_request').subscribe(() => {
-                    const result = service.getStatusOptionsSync('reservation_request');
-                    expect(result.length).toBe(3);
-                    expect(result[0].id).toBe(1);
-                    expect(result[0].display_name).toBe('Pending');
-                    expect(result[0].color).toBe('#fbbf24');
-                });
+                const load$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req.flush(mockStatusOptions);
+                await load$;
+
+                const result = service.getStatusOptionsSync('reservation_request');
+                expect(result.length).toBe(3);
+                expect(result[0].id).toBe(1);
+                expect(result[0].display_name).toBe('Pending');
+                expect(result[0].color).toBe('#fbbf24');
             });
 
             it('should return options for specific entity type only', async () => {
                 const issueStatuses = [{ id: 10, display_name: 'Open', color: '#3b82f6' }];
 
                 // Load both entity types
-                service.getStatusesForEntity('reservation_request').subscribe(() => {
-                    service.getStatusesForEntity('issue').subscribe(() => {
-                        // Each entity type should have its own cached options
-                        const reservationOptions = service.getStatusOptionsSync('reservation_request');
-                        const issueOptions = service.getStatusOptionsSync('issue');
-
-                        expect(reservationOptions.length).toBe(3);
-                        expect(issueOptions.length).toBe(1);
-                        expect(reservationOptions[0].display_name).toBe('Pending');
-                        expect(issueOptions[0].display_name).toBe('Open');
-                    });
-
-                    const issueReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
-                        req.body.p_entity_type === 'issue');
-                    issueReq.flush(issueStatuses);
-                });
-
+                const reservation$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const reservationReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'reservation_request');
                 reservationReq.flush(mockStatusOptions);
+                await reservation$;
+
+                const issue$ = firstValueFrom(service.getStatusesForEntity('issue'));
+                const issueReq = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
+                    req.body.p_entity_type === 'issue');
+                issueReq.flush(issueStatuses);
+                await issue$;
+
+                // Each entity type should have its own cached options
+                const reservationOptions = service.getStatusOptionsSync('reservation_request');
+                const issueOptions = service.getStatusOptionsSync('issue');
+
+                expect(reservationOptions.length).toBe(3);
+                expect(issueOptions.length).toBe(1);
+                expect(reservationOptions[0].display_name).toBe('Pending');
+                expect(issueOptions[0].display_name).toBe('Open');
             });
         });
 
@@ -1157,11 +1191,12 @@ describe('SchemaService', () => {
                 req.flush(mockStatusOptions);
             });
 
-            it('should not trigger HTTP request when already cached', () => {
+            it('should not trigger HTTP request when already cached', async () => {
                 // First, load the data
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const result$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req.flush(mockStatusOptions);
+                await result$;
 
                 // Now call ensureStatusOptionsLoaded - should NOT make another request
                 service.ensureStatusOptionsLoaded('reservation_request');
@@ -1187,11 +1222,12 @@ describe('SchemaService', () => {
         });
 
         describe('invalidateStatusCache()', () => {
-            it('should clear cache for specific entity type', () => {
+            it('should clear cache for specific entity type', async () => {
                 // Load data first
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const result$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req1.flush(mockStatusOptions);
+                await result$;
 
                 // Verify data is cached
                 expect(service.getStatusOptionsSync('reservation_request').length).toBe(3);
@@ -1205,36 +1241,40 @@ describe('SchemaService', () => {
 
             it('should allow fresh HTTP request after invalidation', async () => {
                 // Load data first
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const load1$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req1.flush(mockStatusOptions);
+                await load1$;
 
                 // Invalidate cache
                 service.invalidateStatusCache('reservation_request');
 
                 // Next request should trigger fresh HTTP
-                service.getStatusesForEntity('reservation_request').subscribe(statuses => {
-                    expect(statuses.length).toBe(3);
-                });
+                const statuses$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
 
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req2.flush(mockStatusOptions);
+
+                const statuses = await statuses$;
+                expect(statuses.length).toBe(3);
             });
 
-            it('should clear all status caches when no entity type specified', () => {
+            it('should clear all status caches when no entity type specified', async () => {
                 const issueStatuses = [{ id: 10, display_name: 'Open', color: '#3b82f6' }];
 
                 // Load reservation_request
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const load1$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'reservation_request');
                 req1.flush(mockStatusOptions);
+                await load1$;
 
                 // Load issue
-                service.getStatusesForEntity('issue').subscribe();
+                const load2$ = firstValueFrom(service.getStatusesForEntity('issue'));
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'issue');
                 req2.flush(issueStatuses);
+                await load2$;
 
                 // Verify both are cached
                 expect(service.getStatusOptionsSync('reservation_request').length).toBe(3);
@@ -1248,20 +1288,22 @@ describe('SchemaService', () => {
                 expect(service.getStatusOptionsSync('issue')).toEqual([]);
             });
 
-            it('should not affect other entity types when invalidating specific one', () => {
+            it('should not affect other entity types when invalidating specific one', async () => {
                 const issueStatuses = [{ id: 10, display_name: 'Open', color: '#3b82f6' }];
 
                 // Load reservation_request
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const load1$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'reservation_request');
                 req1.flush(mockStatusOptions);
+                await load1$;
 
                 // Load issue
-                service.getStatusesForEntity('issue').subscribe();
+                const load2$ = firstValueFrom(service.getStatusesForEntity('issue'));
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity') &&
                     req.body.p_entity_type === 'issue');
                 req2.flush(issueStatuses);
+                await load2$;
 
                 // Invalidate only reservation_request
                 service.invalidateStatusCache('reservation_request');
@@ -1275,11 +1317,12 @@ describe('SchemaService', () => {
         });
 
         describe('refreshStatusesCache()', () => {
-            it('should clear both observable and signal caches', () => {
+            it('should clear both observable and signal caches', async () => {
                 // Load data first
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const result$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req1.flush(mockStatusOptions);
+                await result$;
 
                 // Verify data is cached
                 expect(service.getStatusOptionsSync('reservation_request').length).toBe(3);
@@ -1293,20 +1336,22 @@ describe('SchemaService', () => {
 
             it('should allow fresh HTTP request after refresh', async () => {
                 // Load data first
-                service.getStatusesForEntity('reservation_request').subscribe();
+                const load1$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req1.flush(mockStatusOptions);
+                await load1$;
 
                 // Refresh cache
                 service.refreshStatusesCache();
 
                 // Next request should trigger fresh HTTP
-                service.getStatusesForEntity('reservation_request').subscribe(statuses => {
-                    expect(statuses.length).toBe(3);
-                });
+                const statuses$ = firstValueFrom(service.getStatusesForEntity('reservation_request'));
 
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_statuses_for_entity'));
                 req2.flush(mockStatusOptions);
+
+                const statuses = await statuses$;
+                expect(statuses.length).toBe(3);
             });
         });
     });
@@ -1322,27 +1367,29 @@ describe('SchemaService', () => {
 
         describe('getCategoriesForEntity()', () => {
             it('should fetch categories via RPC for given entity type', async () => {
-                service.getCategoriesForEntity('time_entry').subscribe(types => {
-                    expect(types.length).toBe(2);
-                    expect(types[0].display_name).toBe('Clock In');
-                    expect(types[1].display_name).toBe('Clock Out');
-                });
+                const types$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
                     req.body.p_entity_type === 'time_entry');
                 expect(req.request.method).toBe('POST');
                 req.flush(mockCategoryOptions);
+
+                const types = await types$;
+                expect(types.length).toBe(2);
+                expect(types[0].display_name).toBe('Clock In');
+                expect(types[1].display_name).toBe('Clock Out');
             });
 
             it('should cache category options per entity type', async () => {
-                service.getCategoriesForEntity('time_entry').subscribe(() => {
-                    service.getCategoriesForEntity('time_entry').subscribe(cachedTypes => {
-                        expect(cachedTypes.length).toBe(2);
-                    });
-                });
-
+                const first$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req.flush(mockCategoryOptions);
+                await first$;
+
+                const cachedTypes = await firstValueFrom(service.getCategoriesForEntity('time_entry'));
+                expect(cachedTypes.length).toBe(2);
+                // Served from cache: no second request
+                httpMock.expectNone(req => req.url.includes('rpc/get_categories_for_entity'));
             });
 
             it('should maintain separate caches for different entity types', async () => {
@@ -1351,57 +1398,60 @@ describe('SchemaService', () => {
                     { id: 11, display_name: 'Residential', color: '#8b5cf6' }
                 ];
 
-                service.getCategoriesForEntity('time_entry').subscribe(() => {
-                    service.getCategoriesForEntity('building').subscribe(categories => {
-                        expect(categories.length).toBe(2);
-                        expect(categories[0].display_name).toBe('Commercial');
-                    });
-
-                    const buildingReq = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
-                        req.body.p_entity_type === 'building');
-                    buildingReq.flush(buildingCategories);
-                });
-
+                const timeEntry$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
                 const timeEntryReq = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
                     req.body.p_entity_type === 'time_entry');
                 timeEntryReq.flush(mockCategoryOptions);
+                await timeEntry$;
+
+                const building$ = firstValueFrom(service.getCategoriesForEntity('building'));
+                const buildingReq = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
+                    req.body.p_entity_type === 'building');
+                buildingReq.flush(buildingCategories);
+
+                const categories = await building$;
+                expect(categories.length).toBe(2);
+                expect(categories[0].display_name).toBe('Commercial');
             });
 
             it('should handle HTTP errors gracefully', async () => {
-                service.getCategoriesForEntity('invalid_entity').subscribe(categories => {
-                    expect(categories).toEqual([]);
-                });
+                const categories$ = firstValueFrom(service.getCategoriesForEntity('invalid_entity'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req.error(new ProgressEvent('error'), { status: 404, statusText: 'Not Found' });
+
+                const categories = await categories$;
+                expect(categories).toEqual([]);
             });
 
             it('should populate signal cache when data loads', async () => {
                 expect(service.getCategoryOptionsSync('time_entry')).toEqual([]);
 
-                service.getCategoriesForEntity('time_entry').subscribe(() => {
-                    const cached = service.getCategoryOptionsSync('time_entry');
-                    expect(cached.length).toBe(2);
-                    expect(cached[0].display_name).toBe('Clock In');
-                });
+                const load$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req.flush(mockCategoryOptions);
+                await load$;
+
+                const cached = service.getCategoryOptionsSync('time_entry');
+                expect(cached.length).toBe(2);
+                expect(cached[0].display_name).toBe('Clock In');
             });
 
-            it('should prevent duplicate concurrent requests', () => {
-                const sub1 = service.getCategoriesForEntity('time_entry').subscribe();
-                const sub2 = service.getCategoriesForEntity('time_entry').subscribe();
-                const sub3 = service.getCategoriesForEntity('time_entry').subscribe();
+            it('should prevent duplicate concurrent requests', async () => {
+                const results$ = Promise.all([
+                    firstValueFrom(service.getCategoriesForEntity('time_entry')),
+                    firstValueFrom(service.getCategoriesForEntity('time_entry')),
+                    firstValueFrom(service.getCategoriesForEntity('time_entry'))
+                ]);
 
                 const requests = httpMock.match(req => req.url.includes('rpc/get_categories_for_entity'));
                 expect(requests.length).toBe(1);
 
                 requests[0].flush(mockCategoryOptions);
 
-                sub1.unsubscribe();
-                sub2.unsubscribe();
-                sub3.unsubscribe();
+                const results = await results$;
+                results.forEach(categories => expect(categories.length).toBe(2));
             });
         });
 
@@ -1412,16 +1462,17 @@ describe('SchemaService', () => {
             });
 
             it('should return cached options after load completes', async () => {
-                service.getCategoriesForEntity('time_entry').subscribe(() => {
-                    const result = service.getCategoryOptionsSync('time_entry');
-                    expect(result.length).toBe(2);
-                    expect(result[0].id).toBe(1);
-                    expect(result[0].display_name).toBe('Clock In');
-                    expect(result[0].color).toBe('#22c55e');
-                });
+                const load$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
 
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req.flush(mockCategoryOptions);
+                await load$;
+
+                const result = service.getCategoryOptionsSync('time_entry');
+                expect(result.length).toBe(2);
+                expect(result[0].id).toBe(1);
+                expect(result[0].display_name).toBe('Clock In');
+                expect(result[0].color).toBe('#22c55e');
             });
         });
 
@@ -1435,10 +1486,11 @@ describe('SchemaService', () => {
                 req.flush(mockCategoryOptions);
             });
 
-            it('should not trigger HTTP request when already cached', () => {
-                service.getCategoriesForEntity('time_entry').subscribe();
+            it('should not trigger HTTP request when already cached', async () => {
+                const result$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
                 const req = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req.flush(mockCategoryOptions);
+                await result$;
 
                 service.ensureCategoryOptionsLoaded('time_entry');
 
@@ -1458,10 +1510,11 @@ describe('SchemaService', () => {
         });
 
         describe('invalidateCategoryCache()', () => {
-            it('should clear cache for specific entity type', () => {
-                service.getCategoriesForEntity('time_entry').subscribe();
+            it('should clear cache for specific entity type', async () => {
+                const result$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req1.flush(mockCategoryOptions);
+                await result$;
 
                 expect(service.getCategoryOptionsSync('time_entry').length).toBe(2);
 
@@ -1471,32 +1524,36 @@ describe('SchemaService', () => {
             });
 
             it('should allow fresh HTTP request after invalidation', async () => {
-                service.getCategoriesForEntity('time_entry').subscribe();
+                const load1$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req1.flush(mockCategoryOptions);
+                await load1$;
 
                 service.invalidateCategoryCache('time_entry');
 
-                service.getCategoriesForEntity('time_entry').subscribe(categories => {
-                    expect(categories.length).toBe(2);
-                });
+                const categories$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
 
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity'));
                 req2.flush(mockCategoryOptions);
+
+                const categories = await categories$;
+                expect(categories.length).toBe(2);
             });
 
-            it('should clear all category caches when no entity type specified', () => {
+            it('should clear all category caches when no entity type specified', async () => {
                 const buildingCategories = [{ id: 10, display_name: 'Commercial', color: '#3b82f6' }];
 
-                service.getCategoriesForEntity('time_entry').subscribe();
+                const load1$ = firstValueFrom(service.getCategoriesForEntity('time_entry'));
                 const req1 = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
                     req.body.p_entity_type === 'time_entry');
                 req1.flush(mockCategoryOptions);
+                await load1$;
 
-                service.getCategoriesForEntity('building').subscribe();
+                const load2$ = firstValueFrom(service.getCategoriesForEntity('building'));
                 const req2 = httpMock.expectOne(req => req.url.includes('rpc/get_categories_for_entity') &&
                     req.body.p_entity_type === 'building');
                 req2.flush(buildingCategories);
+                await load2$;
 
                 expect(service.getCategoryOptionsSync('time_entry').length).toBe(2);
                 expect(service.getCategoryOptionsSync('building').length).toBe(1);
@@ -1792,26 +1849,26 @@ describe('SchemaService', () => {
             const allProps = [...issueProps, ...tagProps, ...junctionProps];
 
             // Call getPropertiesForEntity for Issue (triggers M:M enrichment)
-            service.getPropertiesForEntity(entities[0]).subscribe(props => {
-                // Find the M:M property
-                const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
-
-                expect(m2mProp).toBeDefined();
-                expect(m2mProp?.column_name).toBe('issue_tags_m2m');
-                expect(m2mProp?.display_name).toBe('Tags');
-                expect(m2mProp?.many_to_many_meta).toBeDefined();
-                expect(m2mProp?.many_to_many_meta?.junctionTable).toBe('issue_tags');
-                expect(m2mProp?.many_to_many_meta?.sourceTable).toBe('Issue');
-                expect(m2mProp?.many_to_many_meta?.targetTable).toBe('tags');
-                expect(m2mProp?.many_to_many_meta?.sourceColumn).toBe('issue_id');
-                expect(m2mProp?.many_to_many_meta?.targetColumn).toBe('tag_id');
-                expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(true);
-
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntity(entities[0]));
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
             flushM2mMetadata(httpMock);
             expectPostgrestRequest(httpMock, 'schema_entities', entities);
+
+            const props = await props$;
+            // Find the M:M property
+            const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
+
+            expect(m2mProp).toBeDefined();
+            expect(m2mProp?.column_name).toBe('issue_tags_m2m');
+            expect(m2mProp?.display_name).toBe('Tags');
+            expect(m2mProp?.many_to_many_meta).toBeDefined();
+            expect(m2mProp?.many_to_many_meta?.junctionTable).toBe('issue_tags');
+            expect(m2mProp?.many_to_many_meta?.sourceTable).toBe('Issue');
+            expect(m2mProp?.many_to_many_meta?.targetTable).toBe('tags');
+            expect(m2mProp?.many_to_many_meta?.sourceColumn).toBe('issue_id');
+            expect(m2mProp?.many_to_many_meta?.targetColumn).toBe('tag_id');
+            expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(true);
         });
 
         it('should generate bidirectional M:M properties', async () => {
@@ -1845,23 +1902,23 @@ describe('SchemaService', () => {
             ];
 
             // Get properties for tags table (triggers M:M enrichment)
-            service.getPropertiesForEntity(entities[1]).subscribe(props => {
-                const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
-
-                expect(m2mProp).toBeDefined();
-                expect(m2mProp?.column_name).toBe('issue_tags_m2m');
-                expect(m2mProp?.display_name).toBe('Issues');
-                expect(m2mProp?.many_to_many_meta?.junctionTable).toBe('issue_tags');
-                expect(m2mProp?.many_to_many_meta?.sourceTable).toBe('tags');
-                expect(m2mProp?.many_to_many_meta?.targetTable).toBe('Issue');
-                expect(m2mProp?.many_to_many_meta?.sourceColumn).toBe('tag_id');
-                expect(m2mProp?.many_to_many_meta?.targetColumn).toBe('issue_id');
-
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntity(entities[1]));
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
             flushM2mMetadata(httpMock);
             expectPostgrestRequest(httpMock, 'schema_entities', entities);
+
+            const props = await props$;
+            const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
+
+            expect(m2mProp).toBeDefined();
+            expect(m2mProp?.column_name).toBe('issue_tags_m2m');
+            expect(m2mProp?.display_name).toBe('Issues');
+            expect(m2mProp?.many_to_many_meta?.junctionTable).toBe('issue_tags');
+            expect(m2mProp?.many_to_many_meta?.sourceTable).toBe('tags');
+            expect(m2mProp?.many_to_many_meta?.targetTable).toBe('Issue');
+            expect(m2mProp?.many_to_many_meta?.sourceColumn).toBe('tag_id');
+            expect(m2mProp?.many_to_many_meta?.targetColumn).toBe('issue_id');
         });
 
         it('should set relatedTableHasColor=true when related table has color column', async () => {
@@ -1895,14 +1952,15 @@ describe('SchemaService', () => {
                 })
             ];
 
-            service.getPropertiesForEntity(entities[0]).subscribe(props => {
-                const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
-                expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(true);
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntity(entities[0]));
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
             flushM2mMetadata(httpMock);
             expectPostgrestRequest(httpMock, 'schema_entities', entities);
+
+            const props = await props$;
+            const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
+            expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(true);
         });
 
         it('should set relatedTableHasColor=false when related table has no color column', async () => {
@@ -1935,14 +1993,15 @@ describe('SchemaService', () => {
                 })
             ];
 
-            service.getPropertiesForEntity(entities[0]).subscribe(props => {
-                const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
-                expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(false);
-            });
+            const props$ = firstValueFrom(service.getPropertiesForEntity(entities[0]));
 
             expectPostgrestRequest(httpMock, 'schema_properties', allProps);
             flushM2mMetadata(httpMock);
             expectPostgrestRequest(httpMock, 'schema_entities', entities);
+
+            const props = await props$;
+            const m2mProp = props.find(p => p.type === EntityPropertyType.ManyToMany);
+            expect(m2mProp?.many_to_many_meta?.relatedTableHasColor).toBe(false);
         });
 
         it('should build PostgREST select string for M:M properties', () => {
@@ -2098,12 +2157,13 @@ describe('SchemaService', () => {
                 }
             ];
 
-            service.getConstraintMessages().subscribe(messages => {
-                expect(messages).toEqual(mockMessages);
-                expect(messages.length).toBe(2);
-            });
+            const messages$ = firstValueFrom(service.getConstraintMessages());
 
             expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
+
+            const messages = await messages$;
+            expect(messages).toEqual(mockMessages);
+            expect(messages.length).toBe(2);
         });
 
         it('should cache constraint messages and return from memory on subsequent calls', async () => {
@@ -2117,24 +2177,25 @@ describe('SchemaService', () => {
             ];
 
             // First call - fetches from HTTP
-            service.getConstraintMessages().subscribe(() => {
-                // Second call - should return from cache without HTTP request
-                service.getConstraintMessages().subscribe(cachedMessages => {
-                    expect(cachedMessages).toEqual(mockMessages);
-                });
-                // No HTTP request should be made for the second call
-            });
-
+            const first$ = firstValueFrom(service.getConstraintMessages());
             expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
+            await first$;
+
+            // Second call - should return from cache without HTTP request
+            const cachedMessages = await firstValueFrom(service.getConstraintMessages());
+            expect(cachedMessages).toEqual(mockMessages);
+            // No HTTP request should be made for the second call
+            httpMock.expectNone(req => req.url.includes('constraint_messages'));
         });
 
         it('should handle HTTP errors gracefully and return empty array', async () => {
-            service.getConstraintMessages().subscribe(messages => {
-                expect(messages).toEqual([]);
-            });
+            const messages$ = firstValueFrom(service.getConstraintMessages());
 
             const req = httpMock.expectOne(req => req.url.includes('constraint_messages'));
             req.error(new ProgressEvent('error'), { status: 500, statusText: 'Server Error' });
+
+            const messages = await messages$;
+            expect(messages).toEqual([]);
         });
 
         it('should prevent duplicate HTTP requests when called multiple times before response', async () => {
@@ -2148,18 +2209,17 @@ describe('SchemaService', () => {
             ];
 
             // Call getConstraintMessages() three times in quick succession
-            const sub1 = service.getConstraintMessages().subscribe();
-            const sub2 = service.getConstraintMessages().subscribe();
-            const sub3 = service.getConstraintMessages().subscribe(messages => {
-                expect(messages).toEqual(mockMessages);
-            });
+            const results$ = Promise.all([
+                firstValueFrom(service.getConstraintMessages()),
+                firstValueFrom(service.getConstraintMessages()),
+                firstValueFrom(service.getConstraintMessages())
+            ]);
 
             // Should only make ONE HTTP request despite three subscriptions
             expectPostgrestRequest(httpMock, 'constraint_messages', mockMessages);
 
-            sub1.unsubscribe();
-            sub2.unsubscribe();
-            sub3.unsubscribe();
+            const results = await results$;
+            results.forEach(messages => expect(messages).toEqual(mockMessages));
         });
     });
 
@@ -2183,28 +2243,29 @@ describe('SchemaService', () => {
             ];
 
             // First load
-            service.getConstraintMessages().subscribe(() => {
-                // Refresh cache - lazily invalidates properties and constraint messages
-                service.refreshCache();
-
-                // Flush schema request (eagerly triggered)
-                const entitiesRequests = httpMock.match(req => req.url.includes('schema_entities'));
-                entitiesRequests.forEach(req => req.flush([]));
-
-                // Properties and constraint messages are NOT eagerly fetched
-                httpMock.expectNone(req => req.url.includes('schema_properties'));
-                httpMock.expectNone(req => req.url.includes('constraint_messages'));
-
-                // Next call to getConstraintMessages() should trigger a new fetch
-                service.getConstraintMessages().subscribe(() => {
-                    expect(service.constraintMessages).toEqual(secondMessages);
-                });
-
-                const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
-                constraintMsgsReq.flush(secondMessages);
-            });
-
+            const first$ = firstValueFrom(service.getConstraintMessages());
             expectPostgrestRequest(httpMock, 'constraint_messages', firstMessages);
+            await first$;
+
+            // Refresh cache - lazily invalidates properties and constraint messages
+            service.refreshCache();
+
+            // Flush schema request (eagerly triggered)
+            const entitiesRequests = httpMock.match(req => req.url.includes('schema_entities'));
+            entitiesRequests.forEach(req => req.flush([]));
+
+            // Properties and constraint messages are NOT eagerly fetched
+            httpMock.expectNone(req => req.url.includes('schema_properties'));
+            httpMock.expectNone(req => req.url.includes('constraint_messages'));
+
+            // Next call to getConstraintMessages() should trigger a new fetch
+            const second$ = firstValueFrom(service.getConstraintMessages());
+
+            const constraintMsgsReq = httpMock.expectOne(req => req.url.includes('constraint_messages'));
+            constraintMsgsReq.flush(secondMessages);
+            await second$;
+
+            expect(service.constraintMessages).toEqual(secondMessages);
         });
     });
 
@@ -2250,43 +2311,46 @@ describe('SchemaService', () => {
 
         describe('getStaticText()', () => {
             it('should fetch static text from PostgREST', async () => {
-                service.getStaticText().subscribe(staticTexts => {
-                    expect(staticTexts).toEqual(mockStaticTexts);
-                    expect(staticTexts.length).toBe(3);
-                });
+                const staticTexts$ = firstValueFrom(service.getStaticText());
 
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+
+                const staticTexts = await staticTexts$;
+                expect(staticTexts).toEqual(mockStaticTexts);
+                expect(staticTexts.length).toBe(3);
             });
 
             it('should cache static text on subsequent calls', async () => {
                 // First call - fetches from HTTP
-                service.getStaticText().subscribe(() => {
-                    // Second call - should return from cache
-                    service.getStaticText().subscribe(cachedStaticTexts => {
-                        expect(cachedStaticTexts).toEqual(mockStaticTexts);
-                    });
-                });
-
+                const first$ = firstValueFrom(service.getStaticText());
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+                await first$;
+
+                // Second call - should return from cache
+                const cachedStaticTexts = await firstValueFrom(service.getStaticText());
+                expect(cachedStaticTexts).toEqual(mockStaticTexts);
+                httpMock.expectNone(req => req.url.includes('static_text'));
             });
         });
 
         describe('getStaticTextForEntity()', () => {
             it('should filter static text by table_name', async () => {
-                service.getStaticTextForEntity('Issue').subscribe(staticTexts => {
-                    expect(staticTexts.length).toBe(2);
-                    expect(staticTexts.every(st => st.table_name === 'Issue')).toBe(true);
-                });
+                const staticTexts$ = firstValueFrom(service.getStaticTextForEntity('Issue'));
 
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+
+                const staticTexts = await staticTexts$;
+                expect(staticTexts.length).toBe(2);
+                expect(staticTexts.every(st => st.table_name === 'Issue')).toBe(true);
             });
 
             it('should return empty array for entity with no static text', async () => {
-                service.getStaticTextForEntity('NonExistentEntity').subscribe(staticTexts => {
-                    expect(staticTexts.length).toBe(0);
-                });
+                const staticTexts$ = firstValueFrom(service.getStaticTextForEntity('NonExistentEntity'));
 
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+
+                const staticTexts = await staticTexts$;
+                expect(staticTexts.length).toBe(0);
             });
         });
 
@@ -2297,19 +2361,19 @@ describe('SchemaService', () => {
                 ];
 
                 // First load
-                service.getStaticText().subscribe(() => {
-                    // Refresh cache
-                    service.refreshStaticTextCache();
-
-                    // Next call should fetch fresh data
-                    service.getStaticText().subscribe(refreshedStaticTexts => {
-                        expect(refreshedStaticTexts).toEqual(updatedStaticTexts);
-                    });
-
-                    expectPostgrestRequest(httpMock, 'static_text', updatedStaticTexts);
-                });
-
+                const first$ = firstValueFrom(service.getStaticText());
                 expectPostgrestRequest(httpMock, 'static_text', mockStaticTexts);
+                await first$;
+
+                // Refresh cache
+                service.refreshStaticTextCache();
+
+                // Next call should fetch fresh data
+                const refreshed$ = firstValueFrom(service.getStaticText());
+                expectPostgrestRequest(httpMock, 'static_text', updatedStaticTexts);
+
+                const refreshedStaticTexts = await refreshed$;
+                expect(refreshedStaticTexts).toEqual(updatedStaticTexts);
             });
         });
 
@@ -2392,17 +2456,19 @@ describe('SchemaService', () => {
             constraintReq.forEach(r => r.flush([]));
         });
 
-        it('should clear category caches on refreshCache', () => {
+        it('should clear category caches on refreshCache', async () => {
             // Pre-populate category cache
-            service.getCategoriesForEntity('test_type').subscribe();
-            const statusReq = httpMock.match(req => req.url.includes('statuses'));
-            statusReq.forEach(r => r.flush([]));
+            const load1$ = firstValueFrom(service.getCategoriesForEntity('test_type'));
+            const firstCatReq = httpMock.match(req => req.url.includes('get_categories_for_entity'));
+            expect(firstCatReq.length).toBe(1);
+            firstCatReq.forEach(r => r.flush([]));
+            await load1$;
 
             // Call refreshCache directly
             service.refreshCache();
 
             // Verify categories are cleared by checking that a new request is needed
-            service.getCategoriesForEntity('test_type').subscribe();
+            const load2$ = firstValueFrom(service.getCategoriesForEntity('test_type'));
 
             // Should see new HTTP requests for schema + categories
             const schemaReq = httpMock.match(req => req.url.includes('schema_entities'));
@@ -2417,6 +2483,7 @@ describe('SchemaService', () => {
             const catReq = httpMock.match(req => req.url.includes('categories'));
             expect(catReq.length).toBeGreaterThanOrEqual(1);
             catReq.forEach(r => r.flush([]));
+            await load2$;
         });
     });
 });
