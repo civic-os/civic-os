@@ -856,10 +856,9 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 
 - **No `:modal` pseudo-selector** — use `hasAttribute('open')` instead
 - **No focus trapping** for `<dialog>` — test open/close lifecycle rather than focus containment
-- **DOMPurify doesn't work** — happy-dom's parser isn't complete enough for sanitization. Wrap those tests in a browser-detection guard.
 - **Inline styles keep raw hex** — happy-dom doesn't convert `#3b82f6` to `rgb(59, 130, 246)` like browsers do
 - **`@unovis/angular`** — uses bare ESM directory imports that Node.js can't resolve, so specs for components that import it substitute the package with `src/app/testing/unovis-angular.stub.ts` via `vi.mock('@unovis/angular', () => import('../../../testing/unovis-angular.stub'))` (see `chart-widget.component.spec.ts`). Component logic is tested; SVG rendering is not.
-- **DOMPurify under happy-dom is a no-op** — it passes `<script>`, `onclick=` and other payloads straight through, so sanitizer behavior cannot be asserted in a unit spec. `tests/functional/markdown-sanitize-browser-test.cjs` bundles the real sanitizer and asserts it in headless Chromium (no Docker stack needed).
+- **DOMPurify does not sanitize under happy-dom** — it is not a pass-through either: it drops the tag of the first top-level element and returns that element's content and every later sibling untouched, without running hooks on any of them. `<button onclick="…">Click</button>` comes back as `Click`, `<h1>Title</h1><p>…</p>` as `Title<p>…</p>`, but `<p>Hello</p><script>…</script>` keeps the `<script>` and a second element keeps its `onclick`. No sanitizer behavior (including our `uponSanitizeElement` iframe allowlist hook) can be asserted in a unit spec, and do not paper over it with a browser-detection guard (a guarded test is a skipped test). Put sanitizer assertions in `tests/functional/markdown-sanitize-browser-test.cjs`, which bundles the real sanitizer and runs it in headless Chromium (no Docker stack needed).
 - **No real network in unit specs** — `src/test-setup.ts` disables happy-dom iframe page loading, and any spec that provides `provideHttpClient(...)` must also provide `provideHttpClientTesting()`; otherwise requests escape to the real `localhost:3000` / remote hosts.
 
 ### Test Setup
