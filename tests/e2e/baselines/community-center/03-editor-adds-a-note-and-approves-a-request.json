@@ -1,0 +1,412 @@
+{
+  "harness": "1",
+  "flow": "03 editor adds a note and approves a request",
+  "steps": [
+    {
+      "name": "open created request",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/entity_notes",
+          "query": {
+            "entity_id": "eq.<reservation_requests:1>",
+            "entity_type": "eq.reservation_requests",
+            "order": "created_at.desc",
+            "select": "id,entity_type,entity_id,author_id,author:civic_os_users(id,display_name,full_name),content,note_type,is_internal,created_at,updated_at"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/entity_notes?entity_type=eq.reservation_requests&entity_id=eq.<reservation_requests:1>&select=id%2Centity_type%2Centity_id%2Cauthor_id%2Cauthor%3Acivic_os_users(id%2Cdisplay_name%2Cfull_name)%2Ccontent%2Cnote_type%2Cis_internal%2Ccreated_at%2Cupdated_at&order=created_at.desc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/reservation_requests",
+          "query": {
+            "id": "eq.<reservation_requests:1>",
+            "select": "display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/reservation_requests?select=display_name,status_id:statuses!status_id(id,display_name,color,status_key),resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,notes,requested_by:civic_os_users!requested_by(id,display_name,full_name,phone,email),reviewed_by:civic_os_users!reviewed_by(id,display_name,full_name,phone,email),reviewed_at,denial_reason,reservation_id:reservations!reservation_id(id,display_name),created_at,updated_at,color_hex,payment_transaction_id:payment_transactions!payment_transaction_id(id,amount,currency,status,effective_status,total_refunded,refund_count,pending_refund_count,display_name,error_message,created_at),id&id=eq.<reservation_requests:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.reservation_requests"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 2,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.reservation_requests&order=sort_order.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/static_text",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/static_text"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_series_membership",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_id": "<reservation_requests:1>",
+            "p_entity_table": "reservation_requests"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_table\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:1>\"}",
+              "url": "/rpc/get_series_membership"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "add note",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/entity_notes",
+          "query": {
+            "entity_id": "eq.<reservation_requests:1>",
+            "entity_type": "eq.reservation_requests",
+            "order": "created_at.desc",
+            "select": "id,entity_type,entity_id,author_id,author:civic_os_users(id,display_name,full_name),content,note_type,is_internal,created_at,updated_at"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/entity_notes?entity_type=eq.reservation_requests&entity_id=eq.<reservation_requests:1>&select=id%2Centity_type%2Centity_id%2Cauthor_id%2Cauthor%3Acivic_os_users(id%2Cdisplay_name%2Cfull_name)%2Ccontent%2Cnote_type%2Cis_internal%2Ccreated_at%2Cupdated_at&order=created_at.desc"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/create_entity_note",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_content": "Confirmed the room layout with the requester.",
+            "p_entity_id": "<reservation_requests:1>",
+            "p_entity_type": "reservation_requests",
+            "p_is_internal": true,
+            "p_note_type": "note"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"reservation_requests\",\"p_entity_id\":\"<reservation_requests:1>\",\"p_content\":\"Confirmed the room layout with the requester.\",\"p_note_type\":\"note\",\"p_is_internal\":true}",
+              "url": "/rpc/create_entity_note"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "approve request",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.reservation_requests"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.reservation_requests&order=sort_order.asc"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/approve_reservation_request",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_id": "<reservation_requests:1>"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_id\":\"<reservation_requests:1>\"}",
+              "url": "/rpc/approve_reservation_request"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    }
+  ]
+}

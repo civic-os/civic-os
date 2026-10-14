@@ -1,0 +1,19 @@
+{
+  "example": "pothole",
+  "baseSha": "eeeed2c999233708a0ee3f7e6d266ca1a1891551",
+  "exampleTree": "64feb556a9bf95de09c37c0340bbbdc050c92ac3",
+  "migrationsTree": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
+  "appSourceDirty": false,
+  "clockT0": "2026-10-20T09:30:00-04:00",
+  "timezone": "America/New_York",
+  "locale": "en-US",
+  "harness": "1",
+  "flows": [
+    "01-list-issues",
+    "02-create-work-package",
+    "03-create-issue-with-fk-user-and-location-then-tags",
+    "04-edit-issue-with-photo-and-gallery",
+    "05-work-package-detail-with-related-issues-and-report",
+    "06-editor-updates-status-and-deletes-an-issue"
+  ]
+}

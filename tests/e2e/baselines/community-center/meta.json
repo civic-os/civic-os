@@ -1,0 +1,18 @@
+{
+  "example": "community-center",
+  "baseSha": "e99b90725845b0a1c7274605e82fe953b33c5e72",
+  "exampleTree": "a5fdaa1a78c7d286c7ca055f53730128b1868747",
+  "migrationsTree": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
+  "appSourceDirty": false,
+  "clockT0": "2026-10-20T09:30:00-04:00",
+  "timezone": "America/New_York",
+  "locale": "en-US",
+  "harness": "1",
+  "flows": [
+    "01-list-requests-with-calendar",
+    "02-create-reservation-request",
+    "03-editor-adds-a-note-and-approves-a-request",
+    "04-create-and-delete-a-resource",
+    "05-split-a-recurring-series-from-one-occurrence"
+  ]
+}
