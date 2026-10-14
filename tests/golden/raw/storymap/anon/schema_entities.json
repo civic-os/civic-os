@@ -31,8 +31,8 @@
     "calendar_color_property": null,
     "calendar_property_name": null,
     "delete": false,
-    "description": "Organizations and individuals supporting the program",
-    "display_name": "Community Sponsors",
+    "description": "Age-based teams by season",
+    "display_name": "Teams",
     "enable_notes": false,
     "fulltext_search_column": null,
     "guided_form_key": null,
@@ -49,10 +49,10 @@
     "show_calendar": false,
     "show_in_sidebar": true,
     "show_map": false,
-    "sort_order": 40,
+    "sort_order": 20,
     "substring_search_column": null,
     "supports_recurring": false,
-    "table_name": "sponsors",
+    "table_name": "teams",
     "update": false
   },
   {
@@ -87,8 +87,8 @@
     "calendar_color_property": null,
     "calendar_property_name": null,
     "delete": false,
-    "description": "Age-based teams by season",
-    "display_name": "Teams",
+    "description": "Organizations and individuals supporting the program",
+    "display_name": "Community Sponsors",
     "enable_notes": false,
     "fulltext_search_column": null,
     "guided_form_key": null,
@@ -105,10 +105,10 @@
     "show_calendar": false,
     "show_in_sidebar": true,
     "show_map": false,
-    "sort_order": 20,
+    "sort_order": 40,
     "substring_search_column": null,
     "supports_recurring": false,
-    "table_name": "teams",
+    "table_name": "sponsors",
     "update": false
   }
 ]

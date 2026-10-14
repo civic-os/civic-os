@@ -11,7 +11,7 @@
  *
  *   node scripts/golden/alt-ports-override.mjs <example> > override.yml
  *
- * Reads the effective config via `docker compose config` (needs the example's .env).
+ * Reads the effective config via `docker compose config` (set ENV_FILE to an env file supplying POSTGRES_DB/POSTGRES_PASSWORD).
  * Requires Compose >= 2.24 (`!reset` / `!override`). Example files are never edited.
  */
 import { execFileSync } from 'node:child_process';
@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 const example = process.argv[2];
 if (!example) { console.error('usage: alt-ports-override.mjs <example>'); process.exit(2); }
 const dir = join(resolve(dirname(fileURLToPath(import.meta.url)), '..', '..'), 'examples', example);
-const cfg = JSON.parse(execFileSync('docker', ['compose', '-p', `sdk-alt-${example}`, 'config', '--format', 'json'], {
+const cfg = JSON.parse(execFileSync('docker', [ 'compose', ...(process.env.ENV_FILE ? ['--env-file', process.env.ENV_FILE] : []), '-p', `sdk-alt-${example}`, 'config', '--format', 'json'], {
   cwd: dir, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
 }));
 

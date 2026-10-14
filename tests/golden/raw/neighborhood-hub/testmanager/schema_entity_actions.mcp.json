@@ -1051,36 +1051,6 @@
     }
   },
   {
-    "action_name": "complete",
-    "button_style": "success",
-    "can_execute": false,
-    "confirmation_message": null,
-    "default_navigate_to": null,
-    "default_success_message": null,
-    "description": "Mark reservation as fully completed",
-    "disabled_tooltip": null,
-    "display_name": "Complete",
-    "enabled_condition": {
-      "field": "workflow_status_id",
-      "operator": "eq",
-      "value": 15
-    },
-    "icon": "task_alt",
-    "id": 7,
-    "parameters": [],
-    "refresh_after_action": true,
-    "requires_confirmation": false,
-    "rpc_function": "complete_tool_reservation",
-    "show_on_detail": true,
-    "sort_order": 10,
-    "table_name": "tool_reservations",
-    "visibility_condition": {
-      "field": "workflow_status_id",
-      "operator": "eq",
-      "value": 15
-    }
-  },
-  {
     "action_name": "mark_returned",
     "button_style": "primary",
     "can_execute": false,
@@ -1108,6 +1078,36 @@
       "field": "workflow_status_id",
       "operator": "eq",
       "value": 14
+    }
+  },
+  {
+    "action_name": "complete",
+    "button_style": "success",
+    "can_execute": false,
+    "confirmation_message": null,
+    "default_navigate_to": null,
+    "default_success_message": null,
+    "description": "Mark reservation as fully completed",
+    "disabled_tooltip": null,
+    "display_name": "Complete",
+    "enabled_condition": {
+      "field": "workflow_status_id",
+      "operator": "eq",
+      "value": 15
+    },
+    "icon": "task_alt",
+    "id": 7,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": false,
+    "rpc_function": "complete_tool_reservation",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "tool_reservations",
+    "visibility_condition": {
+      "field": "workflow_status_id",
+      "operator": "eq",
+      "value": 15
     }
   },
   {

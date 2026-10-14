@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-14T01:30:53.943Z",
+  "capturedAt": "2026-10-14T12:43:04.473Z",
   "endpoints": [
     {
       "consumer": "frontend schema.service getSchema()",
@@ -127,91 +127,211 @@
     ]
   },
   "migrationsTreeHash": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
-  "redactions": {},
-  "sortedBy": {
-    "categories": [
-      "entity_type",
-      "sort_order",
-      "display_name"
-    ],
-    "constraint_messages": [
-      "constraint_name",
-      "table_name",
-      "column_name"
-    ],
-    "photo_gallery_config": [
-      "table_name",
-      "column_name",
-      "id"
-    ],
-    "rpc.get_categories_for_entity.<entity_type>": [
-      "sort_order",
-      "display_name",
-      "id"
-    ],
-    "rpc.get_current_user_permissions": [
-      "table_name",
-      "permission"
-    ],
-    "rpc.get_statuses_for_entity.<entity_type>": [
-      "sort_order",
-      "display_name",
-      "id"
-    ],
-    "schema_cache_versions": [
-      "cache_name"
-    ],
-    "schema_entities": [
-      "table_name"
-    ],
-    "schema_entities.mcp": [
-      "sort_order",
-      "display_name"
-    ],
-    "schema_entity_actions": [
-      "table_name",
-      "sort_order",
-      "id"
-    ],
-    "schema_entity_actions.mcp": [
-      "table_name",
-      "sort_order"
-    ],
-    "schema_guided_form_steps": [
-      "guided_form_key",
-      "step_order",
-      "id"
-    ],
-    "schema_guided_forms": [
-      "guided_form_key"
-    ],
-    "schema_m2m_properties": [
-      "table_name",
-      "column_name"
-    ],
-    "schema_properties": [
-      "table_name",
-      "column_name"
-    ],
-    "schema_properties.mcp": [
-      "table_name",
-      "sort_order"
-    ],
-    "static_text": [
-      "table_name",
-      "sort_order",
-      "id"
-    ],
-    "statuses": [
-      "entity_type",
-      "sort_order",
-      "display_name"
-    ],
-    "user_profile_extensions": [
-      "sort_order",
-      "table_name"
-    ]
+  "ordering": {
+    "categories": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "entity_type",
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "constraint_messages": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "constraint_name",
+        "table_name",
+        "column_name"
+      ]
+    },
+    "photo_gallery_config": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "column_name",
+        "id"
+      ]
+    },
+    "rpc.get_categories_for_entity.<entity_type>": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "rpc.get_current_user_permissions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "permission"
+      ]
+    },
+    "rpc.get_status_transitions_for_entity.<entity_type>": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "rpc.get_statuses_for_entity.<entity_type>": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_cache_versions": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "cache_name"
+      ]
+    },
+    "schema_entities": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "table_name"
+      ],
+      "tieKeys": []
+    },
+    "schema_entities.mcp": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "table_name"
+      ]
+    },
+    "schema_entity_actions": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "table_name",
+        "sort_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_entity_actions.mcp": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "table_name",
+        "sort_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_guided_form_steps": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "guided_form_key",
+        "step_order"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "schema_guided_forms": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "guided_form_key"
+      ]
+    },
+    "schema_m2m_properties": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "column_name"
+      ]
+    },
+    "schema_properties": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "column_name"
+      ]
+    },
+    "schema_properties.mcp": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "table_name",
+        "sort_order"
+      ],
+      "tieKeys": [
+        "column_name"
+      ]
+    },
+    "static_text": {
+      "note": "no defined order from server or consumer; sorted by tieKeys",
+      "orderSource": "natural-key",
+      "serverKeys": null,
+      "tieKeys": [
+        "table_name",
+        "sort_order",
+        "id"
+      ]
+    },
+    "statuses": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "entity_type",
+        "sort_order",
+        "display_name"
+      ],
+      "tieKeys": [
+        "id"
+      ]
+    },
+    "user_profile_extensions": {
+      "note": "row order preserved as returned; order within runs tied on serverKeys is canonicalized and is not contract",
+      "orderSource": "server",
+      "serverKeys": [
+        "sort_order",
+        "table_name"
+      ],
+      "tieKeys": []
+    }
   },
+  "redactions": {},
   "variants": {
     "anon": {
       "categoryEntityTypes": [
@@ -223,6 +343,8 @@
         "photo_gallery_config.json",
         "rpc.get_categories_for_entity.organization_type.json",
         "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.project.json",
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.project.json",
         "schema_cache_versions.json",
@@ -250,6 +372,8 @@
         "photo_gallery_config": 200,
         "rpc.get_categories_for_entity.organization_type": 200,
         "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.project": 200,
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.project": 200,
         "schema_cache_versions": 200,
@@ -278,6 +402,8 @@
         "photo_gallery_config.json",
         "rpc.get_categories_for_entity.organization_type.json",
         "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.project.json",
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.project.json",
         "schema_cache_versions.json",
@@ -306,6 +432,8 @@
         "photo_gallery_config": 200,
         "rpc.get_categories_for_entity.organization_type": 200,
         "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.project": 200,
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.project": 200,
         "schema_cache_versions": 200,
@@ -334,6 +462,8 @@
         "photo_gallery_config.json",
         "rpc.get_categories_for_entity.organization_type.json",
         "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.project.json",
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.project.json",
         "schema_cache_versions.json",
@@ -362,6 +492,8 @@
         "photo_gallery_config": 200,
         "rpc.get_categories_for_entity.organization_type": 200,
         "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.project": 200,
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.project": 200,
         "schema_cache_versions": 200,
@@ -390,6 +522,8 @@
         "photo_gallery_config.json",
         "rpc.get_categories_for_entity.organization_type.json",
         "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.project.json",
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.project.json",
         "schema_cache_versions.json",
@@ -418,6 +552,8 @@
         "photo_gallery_config": 200,
         "rpc.get_categories_for_entity.organization_type": 200,
         "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.project": 200,
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.project": 200,
         "schema_cache_versions": 200,
@@ -446,6 +582,8 @@
         "photo_gallery_config.json",
         "rpc.get_categories_for_entity.organization_type.json",
         "rpc.get_current_user_permissions.json",
+        "rpc.get_status_transitions_for_entity.guided_form.json",
+        "rpc.get_status_transitions_for_entity.project.json",
         "rpc.get_statuses_for_entity.guided_form.json",
         "rpc.get_statuses_for_entity.project.json",
         "schema_cache_versions.json",
@@ -474,6 +612,8 @@
         "photo_gallery_config": 200,
         "rpc.get_categories_for_entity.organization_type": 200,
         "rpc.get_current_user_permissions": 200,
+        "rpc.get_status_transitions_for_entity.guided_form": 200,
+        "rpc.get_status_transitions_for_entity.project": 200,
         "rpc.get_statuses_for_entity.guided_form": 200,
         "rpc.get_statuses_for_entity.project": 200,
         "schema_cache_versions": 200,
