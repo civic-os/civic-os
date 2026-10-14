@@ -69,6 +69,15 @@ export function actionParam(dialog: Locator, label: string): Locator {
   return dialog.getByRole('group').filter({ has: dialog.page().getByText(new RegExp(`^\\s*${escapeRe(label)}\\s*\\*?\\s*$`)) });
 }
 
+/**
+ * The rich-text (Markdown) editor that follows a "Markdown formatting toolbar".
+ * The editor surface itself has no accessible name, so it is reached from the
+ * named toolbar next to it (the n-th editor on the page, in DOM order).
+ */
+export function markdownEditor(page: Page, nth = 0): Locator {
+  return page.getByRole('toolbar', { name: 'Markdown formatting toolbar' }).nth(nth).locator('xpath=following-sibling::*[1]').getByRole('textbox');
+}
+
 /** The record id in an app route such as /edit/<table>/<id>. */
 export function routeId(url: string, table: string): string {
   const m = new RegExp(`/(?:view|edit)/${escapeRe(table)}/(\\d+)`).exec(new URL(url).pathname);

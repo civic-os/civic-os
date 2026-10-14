@@ -100,6 +100,15 @@ test('polymorphic entity_id follows its entity_type sibling', () => {
   assert.match(s, /"entity_id":"<Issue:1>","entity_type":"Issue"/);
 });
 
+test('object keys embedding a created record id are masked', () => {
+  const doc = run([
+    { method: 'POST', url: 'http://localhost:3000/rpc/create_file_record', postData: '{"p_s3_original_key":"Issue/13/aaaaaaaa-1111-4111-8111-111111111111/original.png","other":"Tag/13/aaaaaaaa-1111-4111-8111-111111111111/x"}' },
+  ], { registered: [{ step: 's1', table: 'Issue', ids: ['13'] }] });
+  const b = doc.steps[0].postgrest[0].body;
+  assert.equal(b.p_s3_original_key, 'Issue/<Issue:1>/<uuid:1>/original.png');
+  assert.equal(b.other, 'Tag/13/<uuid:1>/x');
+});
+
 test('in-lists and or-filters mask registered ids of the right table', () => {
   const doc = run([
     { url: 'http://localhost:3000/Issue?id=in.(7,8,99)' },

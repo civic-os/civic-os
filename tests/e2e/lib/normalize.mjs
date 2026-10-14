@@ -24,6 +24,8 @@ const JWT_RE = /eyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]*/g;
 const TS_RE = /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}(?::?\d{2})?)?/g;
 // Same shape as TS_RE but tolerant of percent-encoding / form-encoding in raw URLs.
 const RAW_TS_RE = /\d{4}-\d{2}-\d{2}(?:T| |%20|\+)\d{2}(?::|%3[Aa])\d{2}(?:(?::|%3[Aa])\d{2}(?:\.\d{1,9})?)?(?:Z|(?:\+|-|%2[Bb])\d{2}(?:(?::|%3[Aa])?\d{2})?)?/g;
+/** <Table>/<id>/ immediately followed by a UUID, as in S3 object keys built by the file upload service. */
+const OBJECT_KEY_RE = /(^|\/)([A-Za-z_][A-Za-z0-9_]*)\/(\d+)\/(?=[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-)/g;
 /** A PostgREST condition inside or=(...)/and=(...): column.[not.]operator.value */
 const COND_RE = /([A-Za-z0-9_]+)\.(?:not\.)?(?:eq|neq|gt|gte|lt|lte|in|is|like|ilike|cs|cd|ov)\.(\([^)]*\)|[^,()]+)/g;
 
@@ -191,10 +193,12 @@ export class MaskContext {
     return instants.some((t) => this.windows.some(([a, b]) => t >= a - WINDOW_MARGIN_MS && t <= b + WINDOW_MARGIN_MS));
   }
 
-  /** Masks JWTs, UUIDs and runtime timestamps inside a decoded string. */
+  /** Masks JWTs, object-key ids, UUIDs and runtime timestamps inside a decoded string. */
   maskString(s) {
     return s
       .replace(JWT_RE, '<jwt>')
+      // Storage object keys embed the owning record: <Table>/<id>/<uuid>/<name>.
+      .replace(OBJECT_KEY_RE, (m, pre, table, id) => (this.isRegistered(table, id) ? `${pre}${table}/${this.idToken(table, id)}/` : m))
       .replace(UUID_RE, (m) => this.uuidToken(m))
       .replace(TS_RE, (m) => (this.inWindow(timestampInstants(m)) ? '<runtime-ts>' : m));
   }
