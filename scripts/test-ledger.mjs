@@ -10,7 +10,11 @@
  *   node scripts/test-ledger.mjs                 run suite, compare to baseline
  *   node scripts/test-ledger.mjs --update        run suite N times (--runs N, default 5),
  *                                                rewrite baseline with per-test minimum
- *   node scripts/test-ledger.mjs --update --reset-unstable   rebuild unstable/leaker marks from scratch
+ *   node scripts/test-ledger.mjs --update --reset-unstable   rebuild unstable marks from scratch
+ *   --update refuses to write on DECREASED / DISAPPEARED / NEWLY UNSTABLE unless
+ *   --accept-decreases / --accept-disappeared / --accept-new-unstable is given;
+ *   waived items are recorded in the baseline's acceptedChanges.
+ *   node scripts/test-ledger.mjs --suggest-leakers   heuristic report, never writes
  *   node scripts/test-ledger.mjs --from <file>   use an existing raw ledger JSON
  *                                                (written by the vitest reporter
  *                                                when SDK_LEDGER_OUT is set)
@@ -28,7 +32,7 @@
  * late assertions to whichever test is running at that moment. The tests that
  * receive them are `unstable` (counts inflated by assertions leaking from other
  * tests); the tests that leak are listed in the baseline's `leakers` array
- * (heuristic, a checklist for repairing them). Hence --update runs the suite
+ * (hand-curated checklist for repairing them). Hence --update runs the suite
  * several times and stores the minimum count plus `maxAssertions`; flags only
  * widen on later updates (reproducible) until --reset-unstable is passed
  * (use after the leakers are fixed).
@@ -119,10 +123,10 @@ function mergeRuns(rawRuns) {
 // subscribe callback). Detected heuristically from source: a passing test whose
 // recorded count is 0 although its body contains expect(, or whose body both
 // subscribes and expects and asserts less than its expect( occurrences.
-// Merged with any previously recorded leakers (never dropped without
-// --reset-unstable). Checklist for the repair lane; not used for pass/fail.
-function findLeakers(tests, previous) {
-  const found = new Set(previous);
+// Only used by --suggest-leakers (report, never writes). The authoritative
+// `leakers` list in the baseline is curated by hand.
+function findLeakers(tests) {
+  const found = new Set();
   const cache = new Map();
   for (const [k, t] of Object.entries(tests)) {
     if (t.state !== 'passed') continue;
@@ -163,29 +167,87 @@ if (update && !fromFile) {
 }
 const current = sortedTests(raw.tests);
 
+if (args.includes('--suggest-leakers')) {
+  // Report only; never writes. Heuristic candidates not already curated.
+  const curated = new Set(
+    existsSync(BASELINE) ? (JSON.parse(readFileSync(BASELINE, 'utf8')).leakers ?? []).map((l) => `${l.file} :: ${l.name}`) : [],
+  );
+  const cand = findLeakers(current).filter((k) => !curated.has(k));
+  console.log(`\nledger: ${cand.length} heuristic leaker candidate(s) not in the curated list:`);
+  for (const k of cand) console.log(`  - ${k}`);
+  process.exit(0);
+}
+
 if (update) {
   if (runExit !== 0) {
     console.error('ledger: refusing to update baseline from a failing run.');
     process.exit(1);
   }
   const resetUnstable = args.includes('--reset-unstable');
-  const existing = !resetUnstable && existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
-  if (existing) {
+  const existing = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : null;
+  if (existing && !resetUnstable) {
     // Reproducibility: once flagged unstable, a test stays unstable and its
     // range only widens (min of mins, max of maxes), regardless of what this
     // particular set of runs happened to observe.
     for (const [k, e] of Object.entries(existing.tests)) {
       const c = current[k];
       if (!e.unstable || !c) continue;
-      const lo = Math.min(e.assertions, c.assertions);
-      const hi = Math.max(e.maxAssertions, c.maxAssertions ?? c.assertions);
-      c.assertions = lo;
+      c.assertions = Math.min(e.assertions, c.assertions);
       c.unstable = true;
-      c.maxAssertions = hi;
+      c.maxAssertions = Math.max(e.maxAssertions, c.maxAssertions ?? c.assertions);
     }
   }
-  const leakers = findLeakers(current, existing?.leakers ?? []);
-  const doc = { version: 1, totals: totals(current), leakers, tests: sortedTests(current) };
+
+  const decreased = [], disappeared = [], newlyUnstable = [], added = [], increased = [];
+  if (existing) {
+    for (const [k, e] of Object.entries(existing.tests)) {
+      const c = current[k];
+      if (!c) disappeared.push({ test: k, from: e.assertions, to: null });
+      else {
+        if (c.assertions < e.assertions) decreased.push({ test: k, from: e.assertions, to: c.assertions });
+        else if (c.assertions > e.assertions) increased.push({ test: k, from: e.assertions, to: c.assertions });
+        if (c.unstable && !e.unstable) newlyUnstable.push({ test: k, from: e.assertions, to: c.assertions });
+      }
+    }
+    for (const k of Object.keys(current)) if (!(k in existing.tests)) added.push({ test: k, from: null, to: current[k].assertions });
+  }
+  const show = (title, items, fmt) => {
+    if (!items.length) return;
+    console.log(`\n${title} (${items.length})`);
+    for (const i of items) console.log(`  - ${i.test}${fmt ? '\n      ' + fmt(i) : ''}`);
+  };
+  console.log('\n=== Ledger update vs existing baseline ===');
+  show('DECREASED', decreased, (i) => `${i.from} -> ${i.to}`);
+  show('DISAPPEARED', disappeared);
+  show('NEWLY UNSTABLE', newlyUnstable, (i) => `was stable at ${i.from}, now varies (min ${i.to})`);
+  show('NEW', added);
+  if (increased.length) console.log(`\nINCREASED (${increased.length}), allowed.`);
+
+  const gates = [
+    ['DECREASED', decreased, '--accept-decreases'],
+    ['DISAPPEARED', disappeared, '--accept-disappeared'],
+    ['NEWLY UNSTABLE', newlyUnstable, '--accept-new-unstable'],
+  ];
+  const blocked = gates.filter(([, items, flag]) => items.length && !args.includes(flag));
+  if (blocked.length) {
+    for (const [name, items, flag] of blocked) console.error(`\nledger: refusing to write: ${items.length} ${name}; review, then pass ${flag} to waive.`);
+    process.exit(1);
+  }
+  const now = new Date().toISOString();
+  const accepted = [];
+  for (const [name, items] of gates) for (const i of items) accepted.push({ at: now, kind: name, test: i.test, from: i.from, to: i.to });
+  if (accepted.length) {
+    console.log('\nACCEPTED CHANGES (recorded in baseline acceptedChanges):');
+    for (const a of accepted) console.log(`  - [${a.kind}] ${a.test}  ${a.from} -> ${a.to}`);
+  }
+  const doc = {
+    version: 1,
+    totals: totals(current),
+    leakers: existing?.leakers ?? [],
+    uncountedButReal: existing?.uncountedButReal ?? [],
+    acceptedChanges: [...(existing?.acceptedChanges ?? []), ...accepted],
+    tests: sortedTests(current),
+  };
   mkdirSync(dirname(BASELINE), { recursive: true });
   writeFileSync(BASELINE, JSON.stringify(doc, null, 2) + '\n');
   console.log(`ledger: baseline written (${doc.totals.tests} tests, ${doc.totals.assertions} assertions).`);

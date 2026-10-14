@@ -10,45 +10,260 @@
     "passedWithZeroAssertions": 48
   },
   "leakers": [
-    "src/app/components/geo-point-map/geo-point-map.component.spec.ts :: GeoPointMapComponent > Event Emitters > should emit coordinatesChange with initial value",
-    "src/app/interceptors/error-tracking.interceptor.spec.ts :: errorTrackingInterceptor > should track external URL errors with External context",
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should hide error banner when form becomes valid",
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should not call createData when token refresh fails",
-    "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should show 401 error modal when token refresh fails",
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view",
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should extract first item from data array",
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when no data found",
-    "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityId changes",
-    "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should hide error banner when form becomes valid",
-    "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when properties are empty",
-    "src/app/services/dashboard.service.spec.ts :: DashboardService > getWidgetTypes() > should handle empty array response",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should generate ManyToMany property for each side of relationship",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should generate bidirectional M:M properties",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should set relatedTableHasColor=false when related table has no color column",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should set relatedTableHasColor=true when related table has color column",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForCreate() > should return properties sorted by sort_order",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForDetail() > should filter out fields with show_on_detail=false",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForDetail() > should return properties sorted by sort_order",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForEdit() > should return properties sorted by sort_order (inherits from getPropsForCreate)",
-    "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForList() > should return properties sorted by sort_order",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getEntities() > should cache entities and return from memory on subsequent calls",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getEntities() > should fetch entities from PostgREST on first call",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getEntity() > should return entity matching the key",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getEntity() > should return undefined for non-existent entity",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getInverseRelationships() - previewMode derivation > should derive previewMode from the source table columns",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getProperties() > should cache properties on first call",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getProperties() > should fetch properties from PostgREST",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter based on show_on_create flag",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter out generated and identity columns",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter out hidden fields (id, created_at, updated_at)",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter out non-updatable columns",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForEdit() > should filter out fields with show_on_edit=false",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForEdit() > should use same logic as getPropsForCreate",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should filter out hidden fields based on show_on_list flag",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should include map property even if hidden from list when map is enabled",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should not duplicate map property if already visible in list",
-    "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should only return properties for the specified table"
+    {
+      "file": "src/app/components/geo-point-map/geo-point-map.component.spec.ts",
+      "name": "GeoPointMapComponent > Event Emitters > should emit coordinatesChange with initial value",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/components/geo-point-map/geo-point-map.component.spec.ts",
+      "name": "GeoPointMapComponent > Reset View Functionality > should emit resetView event when onResetView is called",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/components/save-progress/save-progress.component.spec.ts",
+      "name": "SaveProgressComponent > should handle Observable errors gracefully",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/pages/create/create.page.spec.ts",
+      "name": "CreatePage > Form Validation UX > should hide error banner when form becomes valid",
+      "mechanism": "decisive expect runs after a 50 ms wait inside an async subscribe, after the test ended"
+    },
+    {
+      "file": "src/app/pages/create/create.page.spec.ts",
+      "name": "CreatePage > Token Refresh (Keycloak Integration) > should not call createData when token refresh fails",
+      "mechanism": "assertions inside async subscribe/error callbacks after token-refresh rejection; run after test end"
+    },
+    {
+      "file": "src/app/pages/create/create.page.spec.ts",
+      "name": "CreatePage > Token Refresh (Keycloak Integration) > should show 401 error modal when token refresh fails",
+      "mechanism": "assertions inside async subscribe/error callbacks after token-refresh rejection; run after test end"
+    },
+    {
+      "file": "src/app/pages/detail/detail.page.spec.ts",
+      "name": "DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/pages/detail/detail.page.spec.ts",
+      "name": "DetailPage > Observable Chain Integration > should extract first item from data array",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/pages/detail/detail.page.spec.ts",
+      "name": "DetailPage > Observable Chain Integration > should return undefined when no data found",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/pages/detail/detail.page.spec.ts",
+      "name": "DetailPage > Route Parameter Changes > should reload data when entityId changes",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/pages/edit/edit.page.spec.ts",
+      "name": "EditPage > Form Validation UX > should hide error banner when form becomes valid",
+      "mechanism": "decisive expect runs after a 50 ms wait inside an async subscribe, after the test ended"
+    },
+    {
+      "file": "src/app/pages/list/list.page.spec.ts",
+      "name": "ListPage > Observable Chain Integration > should return empty observable when properties are empty",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getEntities() > should cache entities and return from memory on subsequent calls",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getEntities() > should fetch entities from PostgREST on first call",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getEntity() > should return entity matching the key",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getEntity() > should return undefined for non-existent entity",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getInverseRelationships() - previewMode derivation > should derive previewMode from the source table columns",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getProperties() > should cache properties on first call",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getProperties() > should fetch properties from PostgREST",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForCreate() > should filter based on show_on_create flag",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForCreate() > should filter out generated and identity columns",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForCreate() > should filter out hidden fields (id, created_at, updated_at)",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForCreate() > should filter out non-updatable columns",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForEdit() > should filter out fields with show_on_edit=false",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForEdit() > should use same logic as getPropsForCreate",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForList() > should filter out hidden fields based on show_on_list flag",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForList() > should include map property even if hidden from list when map is enabled",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForList() > should not duplicate map property if already visible in list",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > getPropsForList() > should only return properties for the specified table",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Many-to-Many Detection > should generate bidirectional M:M properties",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Many-to-Many Detection > should generate ManyToMany property for each side of relationship",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Many-to-Many Detection > should set relatedTableHasColor=false when related table has no color column",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Many-to-Many Detection > should set relatedTableHasColor=true when related table has color column",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Property Sorting > getPropsForCreate() > should return properties sorted by sort_order",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Property Sorting > getPropsForDetail() > should filter out fields with show_on_detail=false",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Property Sorting > getPropsForDetail() > should return properties sorted by sort_order",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Property Sorting > getPropsForEdit() > should return properties sorted by sort_order (inherits from getPropsForCreate)",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Property Sorting > getPropsForList() > should return properties sorted by sort_order",
+      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
+    }
   ],
+  "uncountedButReal": [
+    {
+      "file": "src/app/pages/admin-payments/admin-payments.page.spec.ts",
+      "name": "AdminPaymentsPage > Refresh > should trigger reload on refresh",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/dashboard.service.spec.ts",
+      "name": "DashboardService > Locale-aware cache invalidation > should not trigger refresh on initial locale",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/profile.service.spec.ts",
+      "name": "ProfileService > getExtensionRecord() > should use select=* when no fields specified",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/profile.service.spec.ts",
+      "name": "ProfileService > getProfileExtensions(userId) — other user > should not use cache from own profile when querying other user",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/profile.service.spec.ts",
+      "name": "ProfileService > invalidateCache() > should force fresh HTTP on next call",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Category Options Caching > ensureCategoryOptionsLoaded() > should not trigger HTTP request when already cached",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Locale-aware cache invalidation > should not trigger refreshCache on initial locale",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > Status Options Caching > ensureStatusOptionsLoaded() > should not trigger HTTP request when already cached",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > refreshEntitiesCache() > should trigger background refresh of schema entities only",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/schema.service.spec.ts",
+      "name": "SchemaService > refreshPropertiesCache() > should clear properties cache and trigger refresh",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/static-assets.service.spec.ts",
+      "name": "StaticAssetsService > delete > should delete a static asset",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    },
+    {
+      "file": "src/app/services/user-management.service.spec.ts",
+      "name": "UserManagementService > getManagedUsers() > should not append status filter when \"all\"",
+      "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
+    }
+  ],
+  "acceptedChanges": [],
   "tests": {
     "src/app/app.component.spec.ts :: AppComponent > Profile Menu Integration > should NOT render Account Settings link when not authenticated": {
       "state": "passed",
