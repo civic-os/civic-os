@@ -25,6 +25,7 @@ import { AdminFilesPage } from './admin-files.page';
 import { AuthService } from '../../services/auth.service';
 import { SchemaService } from '../../services/schema.service';
 import { EntityPropertyType, FileReference } from '../../interfaces/entity';
+import { settle } from '../../testing/await-http';
 
 describe('AdminFilesPage', () => {
     let component: AdminFilesPage;
@@ -105,7 +106,7 @@ describe('AdminFilesPage', () => {
      * AdminFilesPage makes: stats RPC + All Files mode query.
      * Must be called after fixture.detectChanges() to ensure ngOnInit fires.
      */
-    function flushInitialRequests() {
+    async function flushInitialRequests() {
         fixture.detectChanges();
 
         // Storage stats RPC
@@ -117,15 +118,16 @@ describe('AdminFilesPage', () => {
         filesReq.forEach(req => req.flush([], {
             headers: { 'Content-Range': '0-0/0' }
         }));
+        await settle();
     }
 
-    it('should create', () => {
+    it('should create', async () => {
         expect(component).toBeTruthy();
-        flushInitialRequests();
+        await flushInitialRequests();
     });
 
-    it('should load storage stats on init', () => {
-        flushInitialRequests();
+    it('should load storage stats on init', async () => {
+        await flushInitialRequests();
 
         expect(component.totalFileCount()).toBe(42);
         expect(component.totalFileSize()).toBe(1048576);
@@ -148,8 +150,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('Entity Dropdown', () => {
-        it('should show entities with file properties', () => {
-            flushInitialRequests();
+        it('should show entities with file properties', async () => {
+            await flushInitialRequests();
 
             const options = component.entityOptions();
             expect(options.length).toBe(2);
@@ -222,8 +224,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('File Selection', () => {
-        beforeEach(() => {
-            flushInitialRequests();
+        beforeEach(async () => {
+            await flushInitialRequests();
         });
 
         it('should toggle file selection', () => {
@@ -261,8 +263,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('Sorting', () => {
-        beforeEach(() => {
-            flushInitialRequests();
+        beforeEach(async () => {
+            await flushInitialRequests();
         });
 
         it('should return correct sort icon for active column', () => {
@@ -281,8 +283,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('All Files Mode Query Building', () => {
-        beforeEach(() => {
-            flushInitialRequests();
+        beforeEach(async () => {
+            await flushInitialRequests();
         });
 
         it('should build default query params', () => {
@@ -333,8 +335,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('Filter Params Parsing', () => {
-        beforeEach(() => {
-            flushInitialRequests();
+        beforeEach(async () => {
+            await flushInitialRequests();
         });
 
         it('should parse filter params from URL', () => {
@@ -378,8 +380,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('Entity Display Name', () => {
-        beforeEach(() => {
-            flushInitialRequests();
+        beforeEach(async () => {
+            await flushInitialRequests();
         });
 
         it('should use cached name in entity mode', () => {
@@ -407,8 +409,8 @@ describe('AdminFilesPage', () => {
     });
 
     describe('Entity Route', () => {
-        beforeEach(() => {
-            flushInitialRequests();
+        beforeEach(async () => {
+            await flushInitialRequests();
         });
 
         it('should return route to entity detail page', () => {
