@@ -8,9 +8,12 @@
  * Browser Test: markdownSanitize (DOMPurify) in a real browser DOM
  *
  * Why this is not a Vitest spec: DOMPurify needs a browser-grade HTML parser.
- * Under happy-dom (the unit-test environment) DOMPurify is a silent no-op that
- * passes <script>, onclick= and every other payload straight through, so the
- * sanitisation assertions can never be meaningful there. This script bundles
+ * Under happy-dom (the unit-test environment) DOMPurify neither sanitizes nor
+ * passes through: it drops the tag of the first top-level element and returns
+ * that element's content and every later sibling untouched, without running
+ * hooks on any of them (<button onclick>Click</button> -> "Click", but
+ * <p>Hello</p><script>...</script> keeps the <script>). Sanitisation and
+ * iframe-allowlist assertions can never be meaningful there. This script bundles
  * the real `src/app/markdown/markdown-sanitize.ts` with esbuild and runs every
  * assertion in headless Chromium.
  *

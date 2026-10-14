@@ -338,18 +338,18 @@ describe('CreatePage', () => {
         });
 
         it('should hide error banner when form becomes valid', async () => {
-            component.properties$.subscribe(async () => {
-                // Submit invalid form to show error
-                component.submitForm({});
-                expect(component.showValidationError).toBe(true);
+            await firstValueFrom(component.properties$);
 
-                // Make form valid
-                component.createForm?.patchValue({ name: 'Valid Name' });
+            // Submit invalid form to show error
+            component.submitForm({});
+            expect(component.showValidationError).toBe(true);
 
-                // Wait for statusChanges observable to trigger
-                await new Promise(resolve => setTimeout(resolve, 50));
-                expect(component.showValidationError).toBe(false);
-            });
+            // Make form valid
+            component.createForm?.patchValue({ name: 'Valid Name' });
+
+            // Let the statusChanges subscription react before asserting
+            await fixture.whenStable();
+            expect(component.showValidationError).toBe(false);
         });
 
         it('should call scrollToFirstError when form is invalid', async () => {
@@ -539,33 +539,35 @@ describe('CreatePage', () => {
         it('should show 401 error modal when token refresh fails', async () => {
             mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
 
-            component.properties$.subscribe(async () => {
-                component.createForm?.patchValue({ name: 'Test Issue' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test Issue' });
+            component.submitForm({});
 
-                await new Promise(resolve => setTimeout(resolve, 10));
-                expect(component.showErrorModal()).toBe(true);
-                expect(component.currentError()).toEqual(expect.objectContaining({
-                    httpCode: 401,
-                    message: 'Session expired',
-                    humanMessage: 'Session Expired',
-                    hint: 'Your login session has expired. Please refresh the page to log in again.'
-                }));
-                expect(mockDataService.createData).not.toHaveBeenCalled();
-                expect(component.showSuccessModal()).toBe(false);
-            });
+            // Let the rejected updateToken() promise reach its catch handler
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
+            expect(component.showErrorModal()).toBe(true);
+            expect(component.currentError()).toEqual(expect.objectContaining({
+                httpCode: 401,
+                message: 'Session expired',
+                humanMessage: 'Session Expired',
+                hint: 'Your login session has expired. Please refresh the page to log in again.'
+            }));
+            expect(mockDataService.createData).not.toHaveBeenCalled();
+            expect(component.showSuccessModal()).toBe(false);
         });
 
         it('should not call createData when token refresh fails', async () => {
             mockKeycloak.updateToken.mockRejectedValue(new Error('Token refresh failed'));
 
-            component.properties$.subscribe(async () => {
-                component.createForm?.patchValue({ name: 'Test Issue' });
-                component.submitForm({});
+            await firstValueFrom(component.properties$);
+            component.createForm?.patchValue({ name: 'Test Issue' });
+            component.submitForm({});
 
-                await new Promise(resolve => setTimeout(resolve, 10));
-                expect(mockDataService.createData).not.toHaveBeenCalled();
-            });
+            // Let the rejected updateToken() promise reach its catch handler
+            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(mockKeycloak.updateToken).toHaveBeenCalledWith(60);
+            expect(mockDataService.createData).not.toHaveBeenCalled();
         });
     });
 });

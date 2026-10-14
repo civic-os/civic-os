@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -140,6 +140,21 @@ describe('Runtime Configuration Helpers', () => {
     });
 
     describe('getKeycloakAccountUrl', () => {
+        // getKeycloakAccountUrl() encodes window.location.href. Set it explicitly
+        // instead of relying on whatever URL the shared happy-dom window has
+        // (spec files share one window per worker, so ambient state is not ours).
+        const PAGE_URL = 'http://localhost:4200/view/issues?status=open&q=a b#top';
+        let originalHref: string;
+
+        beforeEach(() => {
+            originalHref = window.location.href;
+            (window as any).happyDOM.setURL(PAGE_URL);
+        });
+
+        afterEach(() => {
+            (window as any).happyDOM.setURL(originalHref);
+        });
+
         it('should build correct Keycloak account URL with referrer params', () => {
             window.civicOsConfig = {
                 postgrestUrl: '',
@@ -177,8 +192,13 @@ describe('Runtime Configuration Helpers', () => {
 
             const accountUrl = getKeycloakAccountUrl();
 
-            // Should include referrer_uri parameter (value will be current window.location.href)
+            // referrer_uri is the current window.location.href, fully URL-encoded
             expect(accountUrl).toMatch(/referrer_uri=http/);
+            expect(accountUrl).toBe(
+                'https://auth.example.com/realms/test-realm/account?referrer=test-client&referrer_uri='
+                + encodeURIComponent(window.location.href)
+            );
+            expect(accountUrl).toContain('referrer_uri=http%3A%2F%2Flocalhost%3A4200%2Fview%2Fissues%3Fstatus%3Dopen%26q%3Da%2520b%23top');
         });
 
         it('should work when reading from environment fallback', () => {
