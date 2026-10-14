@@ -62,7 +62,25 @@ Probe (temporary spec, DOMPurify 3.4.14, happy-dom 20.14.0; `markdownSanitize` a
 
 DOMPurify drops the tag of the first top-level element and returns that element's content and every later sibling untouched. An `uponSanitizeElement` hook is called twice without a `tagName` and never for the real elements.
 
-Finding: the four iframe tests that remain in `markdown-sanitize.spec.ts` are vacuous under happy-dom. Mutation check: inverting the allowlist in `markdown-sanitize.ts` (allow non-YouTube, reject YouTube) left all 4 unit tests green, while `tests/functional/markdown-sanitize-browser-test.cjs` failed 5 of 10 on the same mutation (10/10 on clean code). The spec comment now says so. Kept as they are (they still show `markdownSanitize` runs under happy-dom); whether to delete them or replace them with a unit test of the hook logic is an open decision for the lead.
+Finding: the four iframe tests that were left in `markdown-sanitize.spec.ts` (`should allow YouTube iframes`, `should strip iframes with non-allowlisted src`, `should strip iframes with no src`, `should strip iframes with invalid src URL`) were vacuous under happy-dom. Mutation check: inverting the allowlist in `markdown-sanitize.ts` (allow non-YouTube, reject YouTube) left all 4 green, while `tests/functional/markdown-sanitize-browser-test.cjs` failed 5 of 10 on the same mutation (10/10 on clean code).
+
+Decision (lead): REPLACE. The 4 were deleted and replaced by 9 environment-independent unit tests of our own logic. `vi.mock('dompurify')` substitutes a recording fake (a factory that records the `window` it is bound to, `addHook`, `sanitize` with its config, `removeAllHooks`, and any use of the shared global instance); the captured `uponSanitizeElement` hook is called directly on element-like objects (`getAttribute`, `parentNode.removeChild`). No application code changed. The browser script stays the integration check.
+
+| New test (`markdownSanitize > ...`) | Killed by mutation of `markdown-sanitize.ts` |
+|------|------|
+| `DOMPurify wiring > should sanitize with a fresh DOMPurify instance bound to window and return its output` | M7 `DOMPurify(window)` -> shared `DOMPurify`; M8 `return clean` -> `return html` |
+| `DOMPurify wiring > should allow iframes plus the embed and link attributes (allow, allowfullscreen, frameborder, sandbox, loading, target)` | M5 drop `'sandbox'` from `ADD_ATTR`; M7 |
+| `DOMPurify wiring > should install one uponSanitizeElement hook for the sanitize call and remove it afterwards` | M6 drop `purify.removeAllHooks()`; M7 |
+| `iframe allowlist hook > should keep iframes from allowlisted YouTube hosts` | **M1 allowlist inverted**; M7 |
+| `iframe allowlist hook > should remove iframes from hosts outside the allowlist, including lookalikes` | **M1**; M7 |
+| `iframe allowlist hook > should remove iframes whose src has no host (javascript:, data:)` | **M1**; M7 |
+| `iframe allowlist hook > should remove iframes with no src or an unparseable src` | M2 parse failure fails open (`allowed = true` in `catch`); M7 |
+| `iframe allowlist hook > should leave non-iframe elements to DOMPurify` | M3 tag check removed (`if (true)`); M7 |
+| `iframe allowlist hook > should not throw for a disallowed iframe that has no parent` | M4 `parentNode?.` -> `parentNode!.`; M7 |
+
+Every test passes on clean code (9/9) and fails under at least one mutation; each mutation run failed exactly the tests listed for it. The allowlist inversion (M1) kills the three tests whose outcome depends on the allowlist decision. The other six cover code paths that M1 cannot reach (the parse-failure `catch`, the tag check, the optional parent, the config, the hook lifecycle, the instance), so each was proven with a mutation of its own path.
+
+Cross-file safety of the module mock (`isolate: false`): ordered single-worker runs with a probe spec that imports the real `dompurify` (checks `version`, `isSupported` and a real `sanitize`) pass in both orders (sanitizer spec first: 10/10; probe first, so the real module is already loaded: 10/10, the sanitizer spec still gets the fake). The spec also calls `vi.doUnmock('dompurify')` in `afterAll`; an ordered run without it showed no leak either, so it is defensive.
 
 ## 5. Verification
 
@@ -72,4 +90,5 @@ Finding: the four iframe tests that remain in `markdown-sanitize.spec.ts` are va
 | 3 full runs under `SDK_ASYNC_FLUSH=macrotask` | 3/3 green; per-test counts identical to the plain runs (0 decreased, 0 increased, 0 state changes) for all 3087 tests. |
 | Ordered repro (chart-widget -> runtime, one worker) | base: 1 failed; after: 43 passed. |
 | `tests/functional/markdown-sanitize-browser-test.cjs` | 10/10 on clean code; 5/10 fail with the allowlist inverted. |
+| After the sanitizer-spec replacement: one full run plain and one under `SDK_ASYNC_FLUSH=macrotask` | Both green: 3092 passed (3087 - 4 + 9), 5718 assertions; per-test counts identical across the two modes. |
 
