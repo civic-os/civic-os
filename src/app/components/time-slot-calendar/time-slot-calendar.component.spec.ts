@@ -47,7 +47,7 @@ describe('TimeSlotCalendarComponent', () => {
         component = fixture.componentInstance;
     });
 
-    afterEach(() => {
+    afterEach(async () => {
         // Clean up component - suppress FullCalendar DOM errors in test environment
         // FullCalendar expects real DOM nodes, which don't exist in tests
         try {
@@ -57,6 +57,10 @@ describe('TimeSlotCalendarComponent', () => {
             // Suppress FullCalendar cleanup errors (NotFoundError: removeChild on non-existent node)
             // These errors are expected in test environment where FullCalendar doesn't have real DOM
         }
+        // Destroying the calendar requests an animation frame (FullCalendar's
+        // afterSize flush). Let it run here, not after this spec file: frames are
+        // served in request order, so waiting for one more frame outlasts it.
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     });
 
     it('should create', () => {

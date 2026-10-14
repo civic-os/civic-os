@@ -1,6 +1,6 @@
 import type { Mock } from "vitest";
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,6 +22,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { GeoPointMapComponent } from './geo-point-map.component';
 import { ThemeService } from '../../services/theme.service';
 import { BehaviorSubject } from 'rxjs';
+import { settleLazyComponents } from '../../testing/lazy-components';
 
 // Mock factory functions for Leaflet objects
 function createMockMap(): any {
@@ -82,8 +83,10 @@ describe('GeoPointMapComponent', () => {
         component = fixture.componentInstance;
     });
 
-    afterEach(() => {
-        // Clean up component and any pending async operations
+    afterEach(async () => {
+        // Let the markercluster import and map creation finish while the
+        // component is alive, then clean up (testing/lazy-components.ts).
+        await settleLazyComponents(fixture);
         fixture.destroy();
     });
 

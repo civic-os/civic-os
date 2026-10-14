@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -312,6 +312,10 @@ describe('EntityManagementPage', () => {
     });
 
     describe('Metadata Saving', () => {
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
         it('should save metadata on blur', async () => {
             mockEntityManagementService.isAdmin.mockReturnValue(of(true));
             mockSchemaService.getEntitiesForManagement.mockReturnValue(of(mockEntities));
@@ -324,14 +328,18 @@ describe('EntityManagementPage', () => {
             await new Promise(resolve => setTimeout(resolve, 100));
             const entity = component.entities()[0];
             entity.customDisplayName = 'Updated Issues';
+            // A save starts the 4 s fade and 5 s removal timers of the saved checkmark;
+            // run them under fake timers instead of leaving them to fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
             component.onFieldBlur(entity);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await vi.advanceTimersByTimeAsync(10);
             expect(mockEntityManagementService.upsertEntityMetadata).toHaveBeenCalledWith('Issue', 'Updated Issues', 'Track issues', 0, false, null, false, null, null, undefined, // enable_notes
             undefined, // supports_recurring
             undefined, // recurring_property_name
             true // show_in_sidebar
             );
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         it('should show saved indicator after save completes', async () => {
@@ -345,12 +353,20 @@ describe('EntityManagementPage', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
             const entity = component.entities()[0];
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
             component.onFieldBlur(entity);
 
             // With synchronous mock, save completes immediately
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await vi.advanceTimersByTimeAsync(10);
             expect(component.isSaving('Issue')).toBe(false);
             expect(component.isSaved('Issue')).toBe(true);
+
+            // The checkmark starts fading after 4 s and is removed after 5 s.
+            await vi.advanceTimersByTimeAsync(3990);
+            expect(component.isFading('Issue')).toBe(true);
+            await vi.advanceTimersByTimeAsync(1000);
+            expect(component.isSaved('Issue')).toBe(false);
+            expect(component.isFading('Issue')).toBe(false);
         });
 
         it('should handle save errors', async () => {

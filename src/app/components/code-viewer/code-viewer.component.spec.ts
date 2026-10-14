@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -13,6 +13,8 @@ import { By } from '@angular/platform-browser';
 import { provideMarkdown } from 'ngx-markdown';
 import { CodeViewerComponent } from './code-viewer.component';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
+import { BlocklyViewerComponent } from '../blockly-viewer/blockly-viewer.component';
+import { BlocklyViewerStubComponent } from '../../testing/blockly-viewer.stub';
 
 describe('CodeViewerComponent', () => {
     let component: CodeViewerComponent;
@@ -39,7 +41,14 @@ describe('CodeViewerComponent', () => {
                 provideMarkdown(),
                 { provide: SqlBlockTransformerService, useValue: mockTransformer }
             ]
-        }).compileComponents();
+        })
+            // The real viewer lazy-loads Blockly and finishes after the test has
+            // ended; this spec covers the wrapper (see testing/blockly-viewer.stub.ts).
+            .overrideComponent(CodeViewerComponent, {
+                remove: { imports: [BlocklyViewerComponent] },
+                add: { imports: [BlocklyViewerStubComponent] }
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(CodeViewerComponent);
         component = fixture.componentInstance;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -24,6 +24,7 @@ import { DataService } from '../../../services/data.service';
 import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 import { provideTranslationTesting } from '../../../testing/translation-testing';
+import { settleLazyComponents } from '../../../testing/lazy-components';
 
 describe('MapWidgetComponent', () => {
     let component: MapWidgetComponent;
@@ -139,6 +140,12 @@ describe('MapWidgetComponent', () => {
 
         // Set required input
         fixture.componentRef.setInput('widget', mockWidget);
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {

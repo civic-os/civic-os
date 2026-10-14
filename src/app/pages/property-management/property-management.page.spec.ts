@@ -1,6 +1,6 @@
 import type { Mock } from "vitest";
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -428,6 +428,10 @@ describe('PropertyManagementPage', () => {
     });
 
     describe('Metadata Saving', () => {
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
         it('should save metadata on blur', async () => {
             mockPropertyManagementService.isAdmin.mockReturnValue(of(true));
             mockSchemaService.getEntitiesForMenu.mockReturnValue(of(mockEntities));
@@ -447,12 +451,16 @@ describe('PropertyManagementPage', () => {
             const properties = getPropertyItems(component);
             const property = properties[0] as any;
             property.customDisplayName = 'Updated Title';
+            // A save starts the 4 s fade and 5 s removal timers of the saved checkmark;
+            // run them under fake timers instead of leaving them to fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
             component.onFieldBlur(property);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await vi.advanceTimersByTimeAsync(10);
             expect(mockPropertyManagementService.upsertPropertyMetadata).toHaveBeenCalledWith('Issue', 'title', 'Updated Title', 'Issue title', 0, 200, true, false, // filterable defaults to false when undefined
             true, true, true, true, null // is_recurring defaults to null when undefined
             );
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         it('should show saved indicator after save completes', async () => {
@@ -473,11 +481,19 @@ describe('PropertyManagementPage', () => {
             await new Promise(resolve => setTimeout(resolve, 10));
             const properties = getPropertyItems(component);
             const property = properties[0] as any;
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
             component.onFieldBlur(property);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await vi.advanceTimersByTimeAsync(10);
             expect(component.isSaving(property)).toBe(false);
             expect(component.isSaved(property)).toBe(true);
+
+            // The checkmark starts fading after 4 s and is removed after 5 s.
+            await vi.advanceTimersByTimeAsync(3990);
+            expect(component.isFading(property)).toBe(true);
+            await vi.advanceTimersByTimeAsync(1000);
+            expect(component.isSaved(property)).toBe(false);
+            expect(component.isFading(property)).toBe(false);
         });
 
         it('should refresh schema cache but NOT reload items after save', async () => {
@@ -503,9 +519,10 @@ describe('PropertyManagementPage', () => {
             const properties = getPropertyItems(component);
             const property = properties[0] as any;
             property.customDisplayName = 'New Name';
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
             component.onFieldBlur(property);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await vi.advanceTimersByTimeAsync(10);
             // Should call refreshCache
             expect(mockSchemaService.refreshCache).toHaveBeenCalled();
 
@@ -515,6 +532,9 @@ describe('PropertyManagementPage', () => {
             // Local state should still have the updated value via ngModel
             const updatedProperties = getPropertyItems(component);
             expect((updatedProperties[0] as any).customDisplayName).toBe('New Name');
+
+            // Run the saved-checkmark timers inside the test.
+            await vi.advanceTimersByTimeAsync(5000);
         });
     });
 

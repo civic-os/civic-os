@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,6 +18,9 @@ import { EntityCodePage } from './entity-code.page';
 import { IntrospectionService } from '../../services/introspection.service';
 import { SqlBlockTransformerService } from '../../services/sql-block-transformer.service';
 import { EntitySourceCodeResponse } from '../../interfaces/introspection';
+import { CodeViewerComponent } from '../../components/code-viewer/code-viewer.component';
+import { BlocklyViewerComponent } from '../../components/blockly-viewer/blockly-viewer.component';
+import { BlocklyViewerStubComponent } from '../../testing/blockly-viewer.stub';
 
 describe('EntityCodePage', () => {
     let component: EntityCodePage;
@@ -87,7 +90,14 @@ describe('EntityCodePage', () => {
                 { provide: IntrospectionService, useValue: mockIntrospection },
                 { provide: SqlBlockTransformerService, useValue: mockTransformer }
             ]
-        }).compileComponents();
+        })
+            // Every code viewer would lazy-load Blockly and finish after the test
+            // has ended; Blockly is covered by its own spec.
+            .overrideComponent(CodeViewerComponent, {
+                remove: { imports: [BlocklyViewerComponent] },
+                add: { imports: [BlocklyViewerStubComponent] }
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(EntityCodePage);
         component = fixture.componentInstance;

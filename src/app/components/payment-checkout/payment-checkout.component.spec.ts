@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -89,6 +89,7 @@ describe('PaymentCheckoutComponent', () => {
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         httpMock.verify();
         // Clean up mocks
         delete (window as any).Stripe;
@@ -243,16 +244,29 @@ describe('PaymentCheckoutComponent', () => {
             };
 
             dataService.getData.mockReturnValue(of([mockPaymentNoSecret] as any));
+            // The component re-polls every 500 ms for up to 60 attempts (30 s) and does
+            // not stop on destroy; drive the whole poll under fake timers so none of it
+            // runs after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             fixture.componentRef.setInput('paymentId', mockPaymentId);
             fixture.componentRef.setInput('isOpen', true);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 100));
             expect(component.clientSecret()).toBeUndefined();
             expect(component.loading()).toBe(true);
             // Verify service was called at least once (initial load)
             expect(dataService.getData).toHaveBeenCalled();
+            expect(dataService.getData).toHaveBeenCalledTimes(1);
+
+            vi.advanceTimersByTime(500);
+            expect(dataService.getData).toHaveBeenCalledTimes(2);
+
+            // Initial request plus 60 re-polls, then it gives up.
+            vi.advanceTimersByTime(59 * 500);
+            expect(dataService.getData).toHaveBeenCalledTimes(61);
+            expect(component.error()).toBe('Payment initialization timed out. Please try again.');
+            expect(component.loading()).toBe(false);
         });
 
         it('should handle payment that becomes succeeded during polling', async () => {
@@ -383,12 +397,20 @@ describe('PaymentCheckoutComponent', () => {
 
             vi.spyOn(component.paymentSuccess, 'emit').mockReturnValue(undefined);
             fixture.componentRef.setInput('paymentId', mockPaymentId);
+            // paymentSuccess is emitted 500 ms after the status change is seen; drive
+            // that timer instead of leaving it to fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             await component.handleSubmit();
 
             expect(mockStripe.confirmPayment).toHaveBeenCalled();
             // Processing state should be set during submit
             expect(component.error()).toBeUndefined();
+            expect(component.paymentSuccess.emit).not.toHaveBeenCalled();
+
+            vi.advanceTimersByTime(500);
+            expect(component.paymentSuccess.emit).toHaveBeenCalledWith(mockPaymentId);
+            expect(component.processing()).toBe(false);
         });
 
         it('should handle payment confirmation error', async () => {

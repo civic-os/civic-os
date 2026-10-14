@@ -132,6 +132,10 @@ describe('DetailPage', () => {
         component = fixture.componentInstance;
     });
 
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
@@ -1138,6 +1142,9 @@ describe('DetailPage', () => {
             // Simulate draft gallery was created and UUID stored
             component.onActionGalleryDraftCreated('p_checkout_photos', 'gallery-uuid-789');
             component.currentAction.set(action);
+            // A successful action closes the modal 1.5 s later; drive that timer
+            // instead of leaving it to fire after this spec file.
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             await component.confirmEntityAction();
 
@@ -1145,6 +1152,11 @@ describe('DetailPage', () => {
                 p_entity_id: '42',
                 p_checkout_photos: 'gallery-uuid-789'
             });
+
+            const refreshesBefore = component.refreshCounter();
+            vi.advanceTimersByTime(1500);
+            expect(component.currentAction()).toBeUndefined();
+            expect(component.refreshCounter()).toBe(refreshesBefore + 1); // response asked for refresh
         });
 
         it('should clear gallery state when modal is closed', () => {
@@ -1176,6 +1188,7 @@ describe('DetailPage', () => {
             component.buildActionParamForm(params);
             // No draft created — form control stays null
             component.currentAction.set(action);
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
             await component.confirmEntityAction();
 
@@ -1183,6 +1196,10 @@ describe('DetailPage', () => {
             expect(mockDataService.executeRpc).toHaveBeenCalledWith('confirm_checkout', {
                 p_entity_id: '42'
             });
+
+            // Run the 1.5 s auto-close timer inside the test.
+            vi.advanceTimersByTime(1500);
+            expect(component.currentAction()).toBeUndefined();
         });
     });
 

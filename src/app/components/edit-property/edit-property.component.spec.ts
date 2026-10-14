@@ -28,6 +28,7 @@ import { EntityPropertyType } from '../../interfaces/entity';
 import { MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
+import { settleLazyComponents } from '../../testing/lazy-components';
 
 describe('EditPropertyComponent', () => {
     let component: EditPropertyComponent;
@@ -75,6 +76,12 @@ describe('EditPropertyComponent', () => {
 
         fixture = TestBed.createComponent(EditPropertyComponent);
         component = fixture.componentInstance;
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {

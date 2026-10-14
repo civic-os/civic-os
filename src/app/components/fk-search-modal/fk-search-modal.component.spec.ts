@@ -113,6 +113,15 @@ describe('FkSearchModalComponent', () => {
         component = fixture.componentInstance;
     });
 
+    afterAll(async () => {
+        // While the modal is open, every results re-render schedules a 60 ms
+        // focus-retention timer (fk-search-modal.component.ts constructor) that
+        // destroying the component does not cancel. Let the last one run here
+        // rather than during the next spec file in this worker. Node fires timers
+        // of equal duration in creation order, so this wait outlasts it.
+        await new Promise(resolve => setTimeout(resolve, 60));
+    });
+
     it('should create', () => {
         fixture.componentRef.setInput('isOpen', false);
         fixture.componentRef.setInput('joinTable', 'borrowers');

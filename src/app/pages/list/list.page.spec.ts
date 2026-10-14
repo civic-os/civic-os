@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -32,6 +32,7 @@ import { BehaviorSubject, of, firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
+import { settleLazyComponents } from '../../testing/lazy-components';
 
 describe('ListPage', () => {
     let component: ListPage;
@@ -98,6 +99,12 @@ describe('ListPage', () => {
 
         fixture = TestBed.createComponent(ListPage);
         component = fixture.componentInstance;
+    });
+
+    // Let lazy-loaded children (maps, editor, Blockly) finish initializing
+    // before teardown so nothing outlives this spec file (testing/lazy-components.ts).
+    afterEach(async () => {
+        await settleLazyComponents(fixture);
     });
 
     it('should create', () => {
