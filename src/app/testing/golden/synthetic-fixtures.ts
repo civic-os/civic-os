@@ -216,12 +216,12 @@ function build() {
   props.push(idProp('syn_nodn'), fk('syn_nodn', 'grandparent_id', 'syn_grandparent'));
   addEntity('syn_jn_hop', {}, false);
   props.push(fk('syn_jn_hop', 'left_id', 'syn_left'), fk('syn_jn_hop', 'nodn_id', 'syn_nodn'));
-  // ambiguous hop: two displayable parents -> no M:M in that direction
+  // ambiguous hop: two displayable parents -> left -> nodn_ambiguous yields no M:M. The table itself (id + two FKs) is detected as a junction (gp1 <-> extra).
   addEntity('syn_nodn_ambiguous', {}, false);
   props.push(idProp('syn_nodn_ambiguous'), fk('syn_nodn_ambiguous', 'gp1_id', 'syn_grandparent'), fk('syn_nodn_ambiguous', 'gp2_id', 'syn_extra'));
   addEntity('syn_jn_hop_ambiguous', {}, false);
   props.push(fk('syn_jn_hop_ambiguous', 'left_id', 'syn_left'), fk('syn_jn_hop_ambiguous', 'nodn_id', 'syn_nodn_ambiguous'));
-  // no display_name and no hop candidates -> no M:M
+  // no display_name and no hop candidates: left -> dead_end yields no M:M; the reverse direction (dead_end -> left) still does
   addEntity('syn_nodn_dead_end', {}, false);
   props.push(idProp('syn_nodn_dead_end'));
   addEntity('syn_jn_dead_end', {}, false);
@@ -266,8 +266,8 @@ export function syntheticGuidedFormSteps() {
     step(5, 'skip_not_null', [cond(4, 'skip_if', 'note', 'is_not_null', null)]),
     step(6, 'require_eq_on_skippable', [cond(5, 'require_if', 'kind', 'eq', '2')], { can_skip: true }),
     step(7, 'require_eq_on_required', [cond(6, 'require_if', 'kind', 'eq', '2')]),
-    step(8, 'multi_skip_first_wins', [cond(7, 'skip_if', 'kind', 'eq', '1'), cond(8, 'skip_if', 'note', 'is_null', null), cond(9, 'skip_if', 'kind', 'eq', '9')]),
-    step(9, 'multi_require_first_wins', [cond(10, 'require_if', 'kind', 'eq', '1'), cond(11, 'require_if', 'note', 'is_not_null', null)], { can_skip: true }),
+    step(8, 'multi_skip_second_matches', [cond(7, 'skip_if', 'kind', 'eq', '1'), cond(8, 'skip_if', 'note', 'is_null', null), cond(9, 'skip_if', 'kind', 'eq', '9')]),
+    step(9, 'multi_require_second_matches', [cond(10, 'require_if', 'kind', 'eq', '1'), cond(11, 'require_if', 'note', 'is_not_null', null)], { can_skip: true }),
     step(10, 'skip_and_require', [cond(12, 'skip_if', 'kind', 'eq', '1'), cond(13, 'require_if', 'note', 'is_not_null', null)], { can_skip: true }),
     step(11, 'skip_embedded_fk', [cond(14, 'skip_if', 'owner_id', 'eq', '7')]),
     step(12, 'unknown_operator_never_matches', [cond(15, 'skip_if', 'kind', 'gt' as any, '1'), cond(16, 'require_if', 'kind', 'lt' as any, '1')], { can_skip: true }),

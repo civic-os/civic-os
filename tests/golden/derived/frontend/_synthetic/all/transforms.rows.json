@@ -413,13 +413,11 @@
             "hidden_create_only": null,
             "hidden_detail_only": null,
             "hidden_list_only": null,
-            "show_flag_null_is_visible": "",
-            "status_id": "",
-            "submitted_at": null
+            "show_flag_null_is_visible": ""
           },
           "outputs": {
             "*": {
-              "control": {"filter_bool": null, "filter_category": null, "filter_date": null, "filter_datetime": null, "filter_fk": null, "filter_text_unsupported": null, "filter_user": null, "show_flag_null_is_visible": null, "status_id": null},
+              "control": {"filter_bool": null, "filter_category": null, "filter_date": null, "filter_datetime": null, "filter_fk": null, "filter_text_unsupported": null, "filter_user": null, "show_flag_null_is_visible": null},
               "createApi": {
                 "display_name": null,
                 "filter_bool": null,
@@ -459,13 +457,11 @@
                 "hidden_create_only": null,
                 "hidden_detail_only": null,
                 "hidden_list_only": null,
-                "show_flag_null_is_visible": "",
-                "status_id": "",
-                "submitted_at": null
+                "show_flag_null_is_visible": ""
               }
             }
           },
-          "rawRow": {"filter_bool": null, "filter_category": null, "filter_date": null, "filter_datetime": null, "filter_fk": null, "filter_text_unsupported": null, "filter_user": null, "show_flag_null_is_visible": null, "status_id": null}
+          "rawRow": {"filter_bool": null, "filter_category": null, "filter_date": null, "filter_datetime": null, "filter_fk": null, "filter_text_unsupported": null, "filter_user": null, "show_flag_null_is_visible": null}
         },
         "odd": {
           "createFormInput": {
@@ -507,9 +503,7 @@
             "hidden_create_only": 42,
             "hidden_detail_only": 42,
             "hidden_list_only": 42,
-            "show_flag_null_is_visible": 42,
-            "status_id": {"display_name": "x", "id": 3},
-            "submitted_at": "abcdefghijklmnop"
+            "show_flag_null_is_visible": 42
           },
           "outputs": {
             "*": {
@@ -531,9 +525,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "NaN-NaN-NaNTNaN:NaN"
+                "show_flag_null_is_visible": "text"
               },
               "createApi": {
                 "display_name": 42,
@@ -574,9 +566,7 @@
                 "hidden_create_only": 42,
                 "hidden_detail_only": 42,
                 "hidden_list_only": 42,
-                "show_flag_null_is_visible": 42,
-                "status_id": {"display_name": "x", "id": 3},
-                "submitted_at": "abcdefghijklmnop"
+                "show_flag_null_is_visible": 42
               }
             }
           },
@@ -598,9 +588,7 @@
             "hidden_create_only": "text",
             "hidden_detail_only": "text",
             "hidden_list_only": "text",
-            "show_flag_null_is_visible": "text",
-            "status_id": 3,
-            "submitted_at": "garbage"
+            "show_flag_null_is_visible": "text"
           }
         },
         "typical": {
@@ -649,8 +637,6 @@
             "hidden_detail_only": "text",
             "hidden_list_only": "text",
             "show_flag_null_is_visible": "text",
-            "status_id": 3,
-            "submitted_at": "2026-07-04T17:30",
             "updated_at": "2026-01-02T00:00:00Z"
           },
           "outputs": {
@@ -673,9 +659,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T13:30"
+                "show_flag_null_is_visible": "text"
               },
               "createApi": {
                 "display_name": "text",
@@ -718,9 +702,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T21:30:00.000Z"
+                "show_flag_null_is_visible": "text"
               }
             },
             "Asia/Kolkata": {
@@ -742,9 +724,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T23:00"
+                "show_flag_null_is_visible": "text"
               },
               "createApi": {
                 "display_name": "text",
@@ -787,9 +767,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T12:00:00.000Z"
+                "show_flag_null_is_visible": "text"
               }
             },
             "Australia/Lord_Howe": {
@@ -811,9 +789,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-05T04:00"
+                "show_flag_null_is_visible": "text"
               },
               "createApi": {
                 "display_name": "text",
@@ -856,9 +832,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T07:00:00.000Z"
+                "show_flag_null_is_visible": "text"
               }
             },
             "UTC": {
@@ -880,9 +854,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T17:30"
+                "show_flag_null_is_visible": "text"
               },
               "createApi": {
                 "display_name": "text",
@@ -925,9 +897,7 @@
                 "hidden_create_only": "text",
                 "hidden_detail_only": "text",
                 "hidden_list_only": "text",
-                "show_flag_null_is_visible": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T17:30:00.000Z"
+                "show_flag_null_is_visible": "text"
               }
             }
           },
@@ -949,9 +919,7 @@
             "hidden_create_only": "text",
             "hidden_detail_only": "text",
             "hidden_list_only": "text",
-            "show_flag_null_is_visible": "text",
-            "status_id": 3,
-            "submitted_at": "2026-07-04T17:30:00+00:00"
+            "show_flag_null_is_visible": "text"
           }
         }
       }

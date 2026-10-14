@@ -141,11 +141,11 @@ Each row was a temporary edit of the named source line; the golden check failed 
 | `getPreviewMode` count / id | always `count`; `id` -> `display_name` | `schema.inverse-menu.json` (synthetic and 12 more), `data.queries.json` |
 | `getEffectiveSteps` require_if branch | filter picks skip_if | `_synthetic/conditions.guided-forms.json` |
 | `getEffectiveSteps` multi-condition (first wins) | only the first skip_if / require_if evaluated | `_synthetic/conditions.guided-forms.json` |
-| `compareTimeSlotValues` end bound; local-time parse under the TZ matrix | end ignored; `Z` stripped | `_shared/data.compare-helpers.json` (+ `data.mutation-requests.json` for the local-time case) |
+| `compareTimeSlotValues` end bound; local-time parse under the TZ matrix; millisecond strip | end ignored; `Z` stripped; strip line removed | `_shared/data.compare-helpers.json` (+ `data.mutation-requests.json` for the local-time case) |
 | `pattern` rule matching `^\d{10}$` | `{10}` -> `{9}` | `schema.validators.json` (11 files; the matching probes `1234567890` / `0123456789` are in the matrix) |
 | `parseToHuman` P0001 with missing message | `err.message || 'System Error'` | `errors.lookup.json` (8 files) |
 | `transformManyToManyData` non-array guard | `!Array.isArray` removed | `_shared/data.compare-helpers.json` (`transformManyToManyGuards`) |
 
-Not detectable by construction: removing the `break` after `isSkipped = true` / `isRequired = true` in `getEffectiveSteps` (the flags are idempotent, so behavior is identical), and stripping milliseconds in `compareTimeSlotValues` (`new Date` parses both forms to the same instant).
+Not detectable by construction: removing the `break` after `isSkipped = true` / `isRequired = true` in `getEffectiveSteps` (the flags are idempotent, so behavior is identical). Stripping milliseconds in `compareTimeSlotValues` IS observable and is caught: a non-zero-millisecond input (`...00.500Z`) against a whole-second response matches only because of the strip (case in `_shared/data.compare-helpers.json`).
 
-Transform inputs follow the real pages: inline M:M properties are in `currentProps` but excluded from the FormGroup, so their keys are never present in the form values, the raw row or the control map.
+Transform inputs follow the real pages: inline M:M properties are in `currentProps` but excluded from the FormGroup, so their keys are never present in the form values, the raw row or the control map. On the edit side, props with `show_on_edit: false` (structural `display_name` / `status_id` / `submitted_at` appended by `ensureStructuralProps`) are likewise excluded, mirroring `edit.page.ts` (controls and `transformValueForControl` only for `show_on_edit !== false` and non-M:M); the create page excludes only M:M.

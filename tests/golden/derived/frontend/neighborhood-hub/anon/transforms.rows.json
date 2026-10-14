@@ -18,12 +18,12 @@
       "rows": {
         "empty": {
           "createFormInput": {},
-          "editFormInput": {"address_proof": "", "borrower_type": "", "city": null, "display_name": null, "liability_waiver": null, "phone_verified": null, "photo_id": null, "state": "", "status_id": "", "street": null, "zip": ""},
+          "editFormInput": {"address_proof": "", "borrower_type": "", "city": null, "liability_waiver": null, "phone_verified": null, "photo_id": null, "state": "", "status_id": "", "street": null, "zip": ""},
           "outputs": {
             "*": {
               "control": {"address_proof": null, "borrower_type": null, "state": null, "status_id": null, "zip": null},
               "createApi": {},
-              "editApi": {"address_proof": "", "borrower_type": "", "city": null, "display_name": null, "liability_waiver": null, "phone_verified": null, "photo_id": null, "state": "", "status_id": "", "street": null, "zip": ""}
+              "editApi": {"address_proof": "", "borrower_type": "", "city": null, "liability_waiver": null, "phone_verified": null, "photo_id": null, "state": "", "status_id": "", "street": null, "zip": ""}
             }
           },
           "rawRow": {"address_proof": null, "borrower_type": null, "state": null, "status_id": null, "zip": null}
@@ -34,7 +34,6 @@
             "address_proof": "11111111-1111-4111-8111-111111111111",
             "borrower_type": {"display_name": "x", "id": 3},
             "city": 42,
-            "display_name": 42,
             "liability_waiver": "11111111-1111-4111-8111-111111111111",
             "phone_verified": false,
             "photo_id": "11111111-1111-4111-8111-111111111111",
@@ -49,7 +48,6 @@
                 "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "borrower_type": 3,
                 "city": "text",
-                "display_name": "text",
                 "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "phone_verified": true,
                 "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
@@ -63,7 +61,6 @@
                 "address_proof": "11111111-1111-4111-8111-111111111111",
                 "borrower_type": {"display_name": "x", "id": 3},
                 "city": 42,
-                "display_name": 42,
                 "liability_waiver": "11111111-1111-4111-8111-111111111111",
                 "phone_verified": false,
                 "photo_id": "11111111-1111-4111-8111-111111111111",
@@ -78,7 +75,6 @@
             "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "borrower_type": 3,
             "city": "text",
-            "display_name": "text",
             "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "phone_verified": true,
             "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
@@ -95,7 +91,6 @@
             "borrower_type": 3,
             "city": "text",
             "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
             "extra_key": "kept",
             "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "phone_verified": true,
@@ -112,7 +107,6 @@
                 "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "borrower_type": 3,
                 "city": "text",
-                "display_name": "text",
                 "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
                 "phone_verified": true,
                 "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
@@ -126,7 +120,6 @@
                 "address_proof": "11111111-1111-4111-8111-111111111111",
                 "borrower_type": 3,
                 "city": "text",
-                "display_name": "text",
                 "extra_key": "kept",
                 "liability_waiver": "11111111-1111-4111-8111-111111111111",
                 "phone_verified": true,
@@ -142,7 +135,6 @@
             "address_proof": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "borrower_type": 3,
             "city": "text",
-            "display_name": "text",
             "liability_waiver": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
             "phone_verified": true,
             "photo_id": {"file_name": "f.pdf", "file_type": "application/pdf", "id": "11111111-1111-4111-8111-111111111111"},
@@ -409,25 +401,10 @@
             "time_slot": "",
             "website": ""
           },
-          "editFormInput": {
-            "borrower_id": "",
-            "contact_email": "",
-            "contact_name": null,
-            "contact_phone": "",
-            "contact_title": "",
-            "display_name": null,
-            "estimated_attendees": "",
-            "group_name": null,
-            "group_type": null,
-            "mission_description": "",
-            "status_id": "",
-            "submitted_at": null,
-            "time_slot": "",
-            "website": ""
-          },
+          "editFormInput": {"borrower_id": "", "contact_email": "", "contact_name": null, "contact_phone": "", "contact_title": "", "estimated_attendees": "", "group_name": null, "group_type": null, "mission_description": "", "time_slot": "", "website": ""},
           "outputs": {
             "*": {
-              "control": {"borrower_id": null, "contact_email": null, "contact_phone": null, "contact_title": null, "estimated_attendees": null, "mission_description": null, "status_id": null, "time_slot": null, "website": null},
+              "control": {"borrower_id": null, "contact_email": null, "contact_phone": null, "contact_title": null, "estimated_attendees": null, "mission_description": null, "time_slot": null, "website": null},
               "createApi": {
                 "borrower_id": "",
                 "contact_email": "",
@@ -443,25 +420,10 @@
                 "time_slot": "",
                 "website": ""
               },
-              "editApi": {
-                "borrower_id": "",
-                "contact_email": "",
-                "contact_name": null,
-                "contact_phone": "",
-                "contact_title": "",
-                "display_name": null,
-                "estimated_attendees": "",
-                "group_name": null,
-                "group_type": null,
-                "mission_description": "",
-                "status_id": "",
-                "submitted_at": null,
-                "time_slot": "",
-                "website": ""
-              }
+              "editApi": {"borrower_id": "", "contact_email": "", "contact_name": null, "contact_phone": "", "contact_title": "", "estimated_attendees": "", "group_name": null, "group_type": null, "mission_description": "", "time_slot": "", "website": ""}
             }
           },
-          "rawRow": {"borrower_id": null, "contact_email": null, "contact_phone": null, "contact_title": null, "estimated_attendees": null, "mission_description": null, "status_id": null, "time_slot": null, "website": null}
+          "rawRow": {"borrower_id": null, "contact_email": null, "contact_phone": null, "contact_title": null, "estimated_attendees": null, "mission_description": null, "time_slot": null, "website": null}
         },
         "odd": {
           "createFormInput": {
@@ -485,13 +447,10 @@
             "contact_name": 42,
             "contact_phone": 42,
             "contact_title": 42,
-            "display_name": 42,
             "estimated_attendees": 7,
             "group_name": 42,
             "group_type": {"display_name": "x", "id": 3},
             "mission_description": 42,
-            "status_id": {"display_name": "x", "id": 3},
-            "submitted_at": "abcdefghijklmnop",
             "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "website": 42
           },
@@ -503,13 +462,10 @@
                 "contact_name": "text",
                 "contact_phone": "text",
                 "contact_title": "text",
-                "display_name": "text",
                 "estimated_attendees": 7,
                 "group_name": "text",
                 "group_type": 3,
                 "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "NaN-NaN-NaNTNaN:NaN",
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
                 "website": "text"
               },
@@ -534,13 +490,10 @@
                 "contact_name": 42,
                 "contact_phone": 42,
                 "contact_title": 42,
-                "display_name": 42,
                 "estimated_attendees": 7,
                 "group_name": 42,
                 "group_type": {"display_name": "x", "id": 3},
                 "mission_description": 42,
-                "status_id": {"display_name": "x", "id": 3},
-                "submitted_at": "abcdefghijklmnop",
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
                 "website": 42
               }
@@ -552,13 +505,10 @@
             "contact_name": "text",
             "contact_phone": "text",
             "contact_title": "text",
-            "display_name": "text",
             "estimated_attendees": 7,
             "group_name": "text",
             "group_type": 3,
             "mission_description": "text",
-            "status_id": 3,
-            "submitted_at": "garbage",
             "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "website": "text"
           }
@@ -589,33 +539,27 @@
             "contact_phone": "text",
             "contact_title": "text",
             "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
             "estimated_attendees": 7,
             "extra_key": "kept",
             "group_name": "text",
             "group_type": 3,
             "mission_description": "text",
-            "status_id": 3,
-            "submitted_at": "2026-07-04T17:30",
             "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "updated_at": "2026-01-02T00:00:00Z",
             "website": "text"
           },
           "outputs": {
-            "America/New_York": {
+            "*": {
               "control": {
                 "borrower_id": 3,
                 "contact_email": "text",
                 "contact_name": "text",
                 "contact_phone": "text",
                 "contact_title": "text",
-                "display_name": "text",
                 "estimated_attendees": 7,
                 "group_name": "text",
                 "group_type": 3,
                 "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T13:30",
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
                 "website": "text"
               },
@@ -641,167 +585,11 @@
                 "contact_name": "text",
                 "contact_phone": "text",
                 "contact_title": "text",
-                "display_name": "text",
                 "estimated_attendees": 7,
                 "extra_key": "kept",
                 "group_name": "text",
                 "group_type": 3,
                 "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T21:30:00.000Z",
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              }
-            },
-            "Asia/Kolkata": {
-              "control": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "display_name": "text",
-                "estimated_attendees": 7,
-                "group_name": "text",
-                "group_type": 3,
-                "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T23:00",
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              },
-              "createApi": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "estimated_attendees": 7,
-                "extra_key": "kept",
-                "group_name": "text",
-                "group_type": 3,
-                "hold_harmless_accepted": true,
-                "mission_description": "text",
-                "photo_release_accepted": true,
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              },
-              "editApi": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "display_name": "text",
-                "estimated_attendees": 7,
-                "extra_key": "kept",
-                "group_name": "text",
-                "group_type": 3,
-                "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T12:00:00.000Z",
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              }
-            },
-            "Australia/Lord_Howe": {
-              "control": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "display_name": "text",
-                "estimated_attendees": 7,
-                "group_name": "text",
-                "group_type": 3,
-                "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-05T04:00",
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              },
-              "createApi": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "estimated_attendees": 7,
-                "extra_key": "kept",
-                "group_name": "text",
-                "group_type": 3,
-                "hold_harmless_accepted": true,
-                "mission_description": "text",
-                "photo_release_accepted": true,
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              },
-              "editApi": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "display_name": "text",
-                "estimated_attendees": 7,
-                "extra_key": "kept",
-                "group_name": "text",
-                "group_type": 3,
-                "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T07:00:00.000Z",
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              }
-            },
-            "UTC": {
-              "control": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "display_name": "text",
-                "estimated_attendees": 7,
-                "group_name": "text",
-                "group_type": 3,
-                "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T17:30",
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              },
-              "createApi": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "estimated_attendees": 7,
-                "extra_key": "kept",
-                "group_name": "text",
-                "group_type": 3,
-                "hold_harmless_accepted": true,
-                "mission_description": "text",
-                "photo_release_accepted": true,
-                "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
-                "website": "text"
-              },
-              "editApi": {
-                "borrower_id": 3,
-                "contact_email": "text",
-                "contact_name": "text",
-                "contact_phone": "text",
-                "contact_title": "text",
-                "display_name": "text",
-                "estimated_attendees": 7,
-                "extra_key": "kept",
-                "group_name": "text",
-                "group_type": 3,
-                "mission_description": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T17:30:00.000Z",
                 "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
                 "website": "text"
               }
@@ -813,13 +601,10 @@
             "contact_name": "text",
             "contact_phone": "text",
             "contact_title": "text",
-            "display_name": "text",
             "estimated_attendees": 7,
             "group_name": "text",
             "group_type": 3,
             "mission_description": "text",
-            "status_id": 3,
-            "submitted_at": "2026-07-04T17:30:00+00:00",
             "time_slot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "website": "text"
           }
@@ -976,63 +761,39 @@
       "rows": {
         "empty": {
           "createFormInput": {"display_name": null},
-          "editFormInput": {"checkout_notes": null, "checkout_photos": "", "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""},
+          "editFormInput": {"checkout_notes": null, "checkout_photos": "", "display_name": null, "return_notes": null, "return_photos": ""},
           "outputs": {
             "*": {
-              "control": {"checkout_photos": null, "return_photos": null, "status_id": null},
+              "control": {"checkout_photos": null, "return_photos": null},
               "createApi": {"display_name": null},
-              "editApi": {"checkout_notes": null, "checkout_photos": "", "display_name": null, "return_notes": null, "return_photos": "", "status_id": ""}
+              "editApi": {"checkout_notes": null, "checkout_photos": "", "display_name": null, "return_notes": null, "return_photos": ""}
             }
           },
-          "rawRow": {"checkout_photos": null, "return_photos": null, "status_id": null}
+          "rawRow": {"checkout_photos": null, "return_photos": null}
         },
         "odd": {
           "createFormInput": {"display_name": 42},
-          "editFormInput": {
-            "checkout_notes": 42,
-            "checkout_photos": 42,
-            "display_name": 42,
-            "return_notes": 42,
-            "return_photos": 42,
-            "status_id": {"display_name": "x", "id": 3}
-          },
+          "editFormInput": {"checkout_notes": 42, "checkout_photos": 42, "display_name": 42, "return_notes": 42, "return_photos": 42},
           "outputs": {
             "*": {
-              "control": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3},
+              "control": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text"},
               "createApi": {"display_name": 42},
-              "editApi": {
-                "checkout_notes": 42,
-                "checkout_photos": 42,
-                "display_name": 42,
-                "return_notes": 42,
-                "return_photos": 42,
-                "status_id": {"display_name": "x", "id": 3}
-              }
+              "editApi": {"checkout_notes": 42, "checkout_photos": 42, "display_name": 42, "return_notes": 42, "return_photos": 42}
             }
           },
-          "rawRow": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3}
+          "rawRow": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text"}
         },
         "typical": {
           "createFormInput": {"created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "updated_at": "2026-01-02T00:00:00Z"},
-          "editFormInput": {
-            "checkout_notes": "text",
-            "checkout_photos": "text",
-            "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
-            "extra_key": "kept",
-            "return_notes": "text",
-            "return_photos": "text",
-            "status_id": 3,
-            "updated_at": "2026-01-02T00:00:00Z"
-          },
+          "editFormInput": {"checkout_notes": "text", "checkout_photos": "text", "created_at": "2026-01-01T00:00:00Z", "display_name": "text", "extra_key": "kept", "return_notes": "text", "return_photos": "text", "updated_at": "2026-01-02T00:00:00Z"},
           "outputs": {
             "*": {
-              "control": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3},
+              "control": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text"},
               "createApi": {"display_name": "text", "extra_key": "kept"},
-              "editApi": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "extra_key": "kept", "return_notes": "text", "return_photos": "text", "status_id": 3}
+              "editApi": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "extra_key": "kept", "return_notes": "text", "return_photos": "text"}
             }
           },
-          "rawRow": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text", "status_id": 3}
+          "rawRow": {"checkout_notes": "text", "checkout_photos": "text", "display_name": "text", "return_notes": "text", "return_photos": "text"}
         }
       }
     },
@@ -1142,15 +903,15 @@
       "rows": {
         "empty": {
           "createFormInput": {"borrower_id": "", "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "responsibility_acknowledged": null, "timeslot": null},
-          "editFormInput": {"display_name": null, "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "status_id": "", "submitted_at": null, "timeslot": null},
+          "editFormInput": {"event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "timeslot": null},
           "outputs": {
             "*": {
-              "control": {"event_dates": null, "notes": null, "organization_name": null, "status_id": null},
+              "control": {"event_dates": null, "notes": null, "organization_name": null},
               "createApi": {"borrower_id": "", "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "responsibility_acknowledged": null, "timeslot": null},
-              "editApi": {"display_name": null, "event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "status_id": "", "submitted_at": null, "timeslot": null}
+              "editApi": {"event_dates": "", "event_location": null, "event_type": null, "notes": "", "organization_name": "", "timeslot": null}
             }
           },
-          "rawRow": {"event_dates": null, "notes": null, "organization_name": null, "status_id": null}
+          "rawRow": {"event_dates": null, "notes": null, "organization_name": null}
         },
         "odd": {
           "createFormInput": {
@@ -1164,29 +925,16 @@
             "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
           },
           "editFormInput": {
-            "display_name": 42,
             "event_dates": 42,
             "event_location": 42,
             "event_type": {"display_name": "x", "id": 3},
             "notes": 42,
             "organization_name": 42,
-            "status_id": {"display_name": "x", "id": 3},
-            "submitted_at": "abcdefghijklmnop",
             "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
           },
           "outputs": {
             "*": {
-              "control": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "NaN-NaN-NaNTNaN:NaN",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
+              "control": {"event_dates": "text", "event_location": "text", "event_type": 3, "notes": "text", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
               "createApi": {
                 "borrower_id": {"display_name": "x", "id": 3},
                 "event_dates": 42,
@@ -1198,19 +946,16 @@
                 "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               },
               "editApi": {
-                "display_name": 42,
                 "event_dates": 42,
                 "event_location": 42,
                 "event_type": {"display_name": "x", "id": 3},
                 "notes": 42,
                 "organization_name": 42,
-                "status_id": {"display_name": "x", "id": 3},
-                "submitted_at": "abcdefghijklmnop",
                 "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               }
             }
           },
-          "rawRow": {"display_name": "text", "event_dates": "text", "event_location": "text", "event_type": 3, "notes": "text", "organization_name": "text", "status_id": 3, "submitted_at": "garbage", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+          "rawRow": {"event_dates": "text", "event_location": "text", "event_type": 3, "notes": "text", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
         },
         "typical": {
           "createFormInput": {
@@ -1228,31 +973,18 @@
           },
           "editFormInput": {
             "created_at": "2026-01-01T00:00:00Z",
-            "display_name": "text",
             "event_dates": "text",
             "event_location": "text",
             "event_type": 3,
             "extra_key": "kept",
             "notes": "text",
             "organization_name": "text",
-            "status_id": 3,
-            "submitted_at": "2026-07-04T17:30",
             "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "updated_at": "2026-01-02T00:00:00Z"
           },
           "outputs": {
-            "America/New_York": {
-              "control": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T13:30",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
+            "*": {
+              "control": {"event_dates": "text", "event_location": "text", "event_type": 3, "notes": "text", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
               "createApi": {
                 "borrower_id": 3,
                 "event_dates": "text",
@@ -1264,139 +996,10 @@
                 "responsibility_acknowledged": true,
                 "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               },
-              "editApi": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T21:30:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
-            },
-            "Asia/Kolkata": {
-              "control": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T23:00",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "createApi": {
-                "borrower_id": 3,
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "responsibility_acknowledged": true,
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "editApi": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T12:00:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
-            },
-            "Australia/Lord_Howe": {
-              "control": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-05T04:00",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "createApi": {
-                "borrower_id": 3,
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "responsibility_acknowledged": true,
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "editApi": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T07:00:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
-            },
-            "UTC": {
-              "control": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T17:30",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "createApi": {
-                "borrower_id": 3,
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "responsibility_acknowledged": true,
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "editApi": {
-                "display_name": "text",
-                "event_dates": "text",
-                "event_location": "text",
-                "event_type": 3,
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "status_id": 3,
-                "submitted_at": "2026-07-04T17:30:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
+              "editApi": {"event_dates": "text", "event_location": "text", "event_type": 3, "extra_key": "kept", "notes": "text", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
             }
           },
-          "rawRow": {
-            "display_name": "text",
-            "event_dates": "text",
-            "event_location": "text",
-            "event_type": 3,
-            "notes": "text",
-            "organization_name": "text",
-            "status_id": 3,
-            "submitted_at": "2026-07-04T17:30:00+00:00",
-            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-          }
+          "rawRow": {"event_dates": "text", "event_location": "text", "event_type": 3, "notes": "text", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
         }
       }
     },
@@ -2127,12 +1730,12 @@
       "rows": {
         "empty": {
           "createFormInput": {"borrower_id": "", "delivery_required": null, "organization_name": "", "timeslot": null},
-          "editFormInput": {"borrower_id": "", "delivery_required": null, "display_name": null, "notes": "", "organization_name": "", "site_review_completed": null, "submitted_at": null, "timeslot": null},
+          "editFormInput": {"borrower_id": "", "delivery_required": null, "notes": "", "organization_name": "", "site_review_completed": null, "timeslot": null},
           "outputs": {
             "*": {
               "control": {"borrower_id": null, "delivery_required": null, "notes": null, "organization_name": null, "site_review_completed": null},
               "createApi": {"borrower_id": "", "delivery_required": null, "organization_name": "", "timeslot": null},
-              "editApi": {"borrower_id": "", "delivery_required": null, "display_name": null, "notes": "", "organization_name": "", "site_review_completed": null, "submitted_at": null, "timeslot": null}
+              "editApi": {"borrower_id": "", "delivery_required": null, "notes": "", "organization_name": "", "site_review_completed": null, "timeslot": null}
             }
           },
           "rawRow": {"borrower_id": null, "delivery_required": null, "notes": null, "organization_name": null, "site_review_completed": null}
@@ -2147,25 +1750,14 @@
           "editFormInput": {
             "borrower_id": {"display_name": "x", "id": 3},
             "delivery_required": false,
-            "display_name": 42,
             "notes": 42,
             "organization_name": 42,
             "site_review_completed": false,
-            "submitted_at": "abcdefghijklmnop",
             "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
           },
           "outputs": {
             "*": {
-              "control": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "NaN-NaN-NaNTNaN:NaN",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
+              "control": {"borrower_id": 3, "delivery_required": true, "notes": "text", "organization_name": "text", "site_review_completed": true, "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
               "createApi": {
                 "borrower_id": {"display_name": "x", "id": 3},
                 "delivery_required": false,
@@ -2175,16 +1767,14 @@
               "editApi": {
                 "borrower_id": {"display_name": "x", "id": 3},
                 "delivery_required": false,
-                "display_name": 42,
                 "notes": 42,
                 "organization_name": 42,
                 "site_review_completed": false,
-                "submitted_at": "abcdefghijklmnop",
                 "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
               }
             }
           },
-          "rawRow": {"borrower_id": 3, "delivery_required": true, "display_name": "text", "notes": "text", "organization_name": "text", "site_review_completed": true, "submitted_at": "garbage", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
+          "rawRow": {"borrower_id": 3, "delivery_required": true, "notes": "text", "organization_name": "text", "site_review_completed": true, "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
         },
         "typical": {
           "createFormInput": {"borrower_id": 3, "created_at": "2026-01-01T00:00:00Z", "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)", "updated_at": "2026-01-02T00:00:00Z"},
@@ -2192,123 +1782,21 @@
             "borrower_id": 3,
             "created_at": "2026-01-01T00:00:00Z",
             "delivery_required": true,
-            "display_name": "text",
             "extra_key": "kept",
             "notes": "text",
             "organization_name": "text",
             "site_review_completed": true,
-            "submitted_at": "2026-07-04T17:30",
             "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)",
             "updated_at": "2026-01-02T00:00:00Z"
           },
           "outputs": {
-            "America/New_York": {
-              "control": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T13:30",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
+            "*": {
+              "control": {"borrower_id": 3, "delivery_required": true, "notes": "text", "organization_name": "text", "site_review_completed": true, "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
               "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
-              "editApi": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T21:30:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
-            },
-            "Asia/Kolkata": {
-              "control": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T23:00",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
-              "editApi": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T12:00:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
-            },
-            "Australia/Lord_Howe": {
-              "control": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-05T04:00",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
-              "editApi": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T07:00:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
-            },
-            "UTC": {
-              "control": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T17:30",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              },
-              "createApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "organization_name": "text", "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"},
-              "editApi": {
-                "borrower_id": 3,
-                "delivery_required": true,
-                "display_name": "text",
-                "extra_key": "kept",
-                "notes": "text",
-                "organization_name": "text",
-                "site_review_completed": true,
-                "submitted_at": "2026-07-04T17:30:00.000Z",
-                "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-              }
+              "editApi": {"borrower_id": 3, "delivery_required": true, "extra_key": "kept", "notes": "text", "organization_name": "text", "site_review_completed": true, "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
             }
           },
-          "rawRow": {
-            "borrower_id": 3,
-            "delivery_required": true,
-            "display_name": "text",
-            "notes": "text",
-            "organization_name": "text",
-            "site_review_completed": true,
-            "submitted_at": "2026-07-04T17:30:00+00:00",
-            "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"
-          }
+          "rawRow": {"borrower_id": 3, "delivery_required": true, "notes": "text", "organization_name": "text", "site_review_completed": true, "timeslot": "[2026-07-04T15:00:00Z,2026-07-04T22:00:00Z)"}
         }
       }
     },

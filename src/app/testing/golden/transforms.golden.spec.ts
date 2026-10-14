@@ -84,7 +84,9 @@ function auditKeys(kind: RowKind): Record<string, unknown> {
 }
 
 /** M:M properties are in currentProps but excluded from the FormGroup, so their keys never reach the transforms. */
-const inForm = (p: SchemaEntityProperty) => p.type !== EntityPropertyType.ManyToMany;
+const inCreateForm = (p: SchemaEntityProperty) => p.type !== EntityPropertyType.ManyToMany;
+/** edit.page.ts builds controls (and calls transformValueForControl) only for show_on_edit !== false and non-M:M. */
+const inEditForm = (p: SchemaEntityProperty) => p.show_on_edit !== false && p.type !== EntityPropertyType.ManyToMany;
 
 const pageProps = {
   create: (props: SchemaEntityProperty[]) => props.filter(p =>
@@ -117,11 +119,11 @@ describe('golden: page transforms', () => {
         const rows: Record<string, unknown> = {};
         for (const kind of ['typical', 'empty', 'odd'] as RowKind[]) {
           const createForm: Record<string, unknown> = { ...auditKeys(kind) };
-          for (const p of createProps.filter(inForm)) createForm[p.column_name] = formValue(p, kind);
+          for (const p of createProps.filter(inCreateForm)) createForm[p.column_name] = formValue(p, kind);
           const editForm: Record<string, unknown> = { ...auditKeys(kind) };
-          for (const p of editProps.filter(inForm)) editForm[p.column_name] = formValue(p, kind);
+          for (const p of editProps.filter(inEditForm)) editForm[p.column_name] = formValue(p, kind);
           const raw: Record<string, unknown> = {};
-          for (const p of editProps.filter(inForm)) raw[p.column_name] = rawValue(p, kind);
+          for (const p of editProps.filter(inEditForm)) raw[p.column_name] = rawValue(p, kind);
 
           rows[kind] = {
             createFormInput: createForm,
@@ -130,7 +132,7 @@ describe('golden: page transforms', () => {
             outputs: acrossZones(() => ({
               createApi: createApi(createProps, createForm),
               editApi: editApi(editProps, editForm),
-              control: Object.fromEntries(editProps.filter(inForm).map(p => [p.column_name, editControl(p, raw[p.column_name])])),
+              control: Object.fromEntries(editProps.filter(inEditForm).map(p => [p.column_name, editControl(p, raw[p.column_name])])),
             })),
           };
         }
