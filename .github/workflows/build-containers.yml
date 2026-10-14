@@ -55,9 +55,20 @@ jobs:
           # Verify sub-package versions match (they ship with the same release)
           MCP_VERSION=$(jq -r .version tools/mcp-server/package.json)
           if [[ "$MCP_VERSION" != "$VERSION" ]]; then
-            echo "::error::MCP server version ($MCP_VERSION) does not match release version ($VERSION). Run: cd tools/mcp-server && npm run sync-version"
+            echo "::error::MCP server version ($MCP_VERSION) does not match release version ($VERSION). Run: npm run sync-versions"
             exit 1
           fi
+
+          # SDK workspace packages (packages/*) are versioned in lockstep too
+          for PKG_JSON in packages/*/package.json; do
+            [[ -f "$PKG_JSON" ]] || continue
+            WS_NAME=$(jq -r .name "$PKG_JSON")
+            WS_VERSION=$(jq -r .version "$PKG_JSON")
+            if [[ "$WS_VERSION" != "$VERSION" ]]; then
+              echo "::error::$WS_NAME version ($WS_VERSION) in $PKG_JSON does not match release version ($VERSION). Run: npm run sync-versions"
+              exit 1
+            fi
+          done
 
   build-frontend:
     name: Build Frontend Container

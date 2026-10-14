@@ -76,6 +76,7 @@ jobs:
           filters: |
             app:
               - 'src/**'
+              - 'packages/**'
               - 'package.json'
               - 'package-lock.json'
               - 'angular.json'

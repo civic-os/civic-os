@@ -27,6 +27,11 @@ import { configureLogging, getLogger } from './logger.js';
 const require = createRequire(import.meta.url);
 export const PKG_VERSION: string = (require('../package.json') as { version: string }).version;
 
+// @civic-os/core resolution canary (SDK P1.0; removed in P1.1a). Re-exporting it
+// makes every MCP runtime (tsc dist under Node, Bun on source in Docker)
+// resolve the core package when this entry module loads.
+export { CORE_CANARY } from '@civic-os/core';
+
 // Tool registrations
 import { registerListEntities } from './tools/list-entities.js';
 import { registerDescribeEntity } from './tools/describe-entity.js';

@@ -11,6 +11,11 @@ WORKDIR /app
 # Copy package files and npm config for dependency installation
 COPY package*.json .npmrc ./
 
+# npm workspace manifests: `npm ci` needs every workspace listed in the root
+# package.json. One COPY per package (COPY flattens globs);
+# scripts/check-docker-workspaces.mjs fails CI if one is missing.
+COPY packages/core/package.json ./packages/core/
+
 # Install all dependencies from lockfile (including devDeps needed for Angular build)
 # PUPPETEER_SKIP_DOWNLOAD avoids downloading Chromium (only needed for testing)
 RUN --mount=type=cache,target=/root/.npm \

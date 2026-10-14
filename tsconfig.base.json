@@ -1,0 +1,21 @@
+/*
+ * Shared strictness and emit semantics for the Angular app (tsconfig.json)
+ * and every workspace package (packages/<name>/tsconfig.json).
+ *
+ * useDefineForClassFields stays false everywhere so @civic-os/core source
+ * compiled by the app (via tsconfig paths) and core dist compiled by tsc have
+ * identical class-field semantics.
+ */
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "useDefineForClassFields": false
+  }
+}

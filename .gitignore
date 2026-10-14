@@ -6,6 +6,10 @@
 /out-tsc
 /bazel-out
 
+# Workspace packages (build output and per-package tool caches)
+packages/*/dist
+packages/*/node_modules
+
 # Node
 /node_modules
 npm-debug.log

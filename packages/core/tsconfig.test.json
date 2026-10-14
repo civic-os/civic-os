@@ -1,0 +1,16 @@
+/*
+ * Type-check config for @civic-os/core sources plus tests, used by
+ * `vitest --typecheck` (vitest.config.ts). Same constraints as the build:
+ * tests import `vitest` explicitly instead of relying on globals.
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "rootDir": ".",
+    "tsBuildInfoFile": null
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": []
+}

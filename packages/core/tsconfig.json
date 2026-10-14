@@ -1,0 +1,29 @@
+/*
+ * Build config for @civic-os/core (`tsc -b packages/core`).
+ *
+ * lib is ES2022 only and types is empty, so DOM and Node globals fail to
+ * compile: the core runs unchanged in browsers, workers, Node, and Bun, and
+ * defines its own minimal Fetch-like types when it needs them.
+ * Relative imports carry `.js` suffixes (NodeNext); no const enums.
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": [],
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test-d.ts"]
+}

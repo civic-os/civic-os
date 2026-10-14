@@ -279,6 +279,64 @@ jobs:
           flags: go-${{ matrix.service }}
           fail_ci_if_error: false
 
+  # SDK workspace packages (packages/*, currently @civic-os/core): build, unit +
+  # type tests under the timezone matrix, packaging lint, public API report, and
+  # the license/version/boundary guards from docs/notes/FRONTEND_SDK_DESIGN.md.
+  sdk-packages:
+    name: SDK Packages
+    runs-on: ubuntu-latest
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build:packages
+
+      - name: Test packages (unit, type tests, timezone matrix)
+        run: npm run test:packages
+
+      - name: Lint packages (license-boundary ESLint rules)
+        run: npx eslint packages
+
+      - name: publint
+        run: npm run check:publint
+
+      - name: Are the types wrong (ESM-only profile)
+        run: npm run check:attw
+
+      - name: Public API report is up to date
+        run: npm run api:check
+
+      - name: License headers (Apache-2.0 only under packages/)
+        run: npm run check:spdx
+
+      - name: Lockstep versions
+        run: npm run check:versions
+
+      - name: Dependency boundaries
+        run: npm run check:boundaries
+
+      - name: Docker images copy every workspace manifest
+        run: npm run check:docker-workspaces
+
+      - name: Dogfooding checker self-test (re-exports never count as usage)
+        run: npm run check:dogfood:self-test
+
+      - name: Dogfooding report (report only until SDK P1.6)
+        run: npm run check:dogfood
+
   # MCP Server Tests
   mcp-server-tests:
     name: MCP Server Tests

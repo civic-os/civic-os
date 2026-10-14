@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { CORE_CANARY } from '@civic-os/core';
 import { EntityPropertyType } from '../interfaces/entity';
 
 /**
@@ -43,6 +44,11 @@ describe('Import Validation Worker - EntityPropertyType Sync', () => {
   const EXPECTED_COUNT = 28;
 
   it('should have the expected number of EntityPropertyType enum members', () => {
+    // @civic-os/core resolution canary (SDK P1.0; removed in P1.1a, when the
+    // enum copies collapse into the core): `ng test` resolves the core through
+    // tsconfig paths, as the import worker does.
+    expect(CORE_CANARY).toBe('civic-os-core-canary');
+
     // TypeScript numeric enums have reverse mappings (key→value AND value→key),
     // so filter to only numeric values to get the true member count.
     const enumValues = Object.values(EntityPropertyType).filter(v => typeof v === 'number');

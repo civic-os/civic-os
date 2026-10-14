@@ -1,14 +1,18 @@
-# Copyright (C) 2023-2025 Civic OS, L3C
+# Copyright (C) 2023-2026 Civic OS, L3C
 # AGPL-3.0-or-later
 
 # Dependencies
+# (.dockerignore patterns are anchored at the context root; the ** forms also
+# exclude nested installs such as packages/*/node_modules and tools/*/node_modules)
 node_modules/
+**/node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build outputs
+# Build outputs (** also covers workspace builds such as packages/*/dist)
 dist/
+**/dist
 .angular/
 coverage/
 
