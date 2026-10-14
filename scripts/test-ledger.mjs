@@ -11,17 +11,25 @@
  *   node scripts/test-ledger.mjs --update        run suite N times (--runs N, default 5),
  *                                                rewrite baseline with per-test minimum
  *   node scripts/test-ledger.mjs --update --reset-unstable   rebuild unstable marks from scratch
- *   --update refuses to write on DECREASED / DISAPPEARED / NEWLY UNSTABLE /
+ *   --update never writes a baseline from a failing run: it refuses (exit 1,
+ *   no waiver) if the run exited non-zero, if a --from file records a failing
+ *   run outcome, or if any test's current state is `failed`.
+ *   It also refuses to write on DECREASED / DISAPPEARED / NEWLY UNSTABLE /
  *   STATE REGRESSED (passed -> skipped or todo) unless --accept-decreases /
  *   --accept-disappeared / --accept-new-unstable / --accept-state-regressions
- *   is given; waived items, and every other STATE CHANGED (e.g. skipped ->
- *   passed, informational), are recorded in the baseline's acceptedChanges.
+ *   is given (each flag waives only its own category); waived items, and every
+ *   other STATE CHANGED (e.g. skipped -> passed, informational), are recorded
+ *   in the baseline's acceptedChanges.
  *   node scripts/test-ledger.mjs --suggest-leakers   heuristic report, never writes
  *   node scripts/test-ledger.mjs --from <file>   use an existing raw ledger JSON
  *                                                (written by the vitest reporter
- *                                                when SDK_LEDGER_OUT is set)
+ *                                                when SDK_LEDGER_OUT is set; its
+ *                                                `run` field, when present, records
+ *                                                the run outcome and is honoured)
  *   --baseline <file>                            compare with / write this file instead
  *                                                of tests/baselines/unit-ledger.json
+ *
+ * Self-tests: node --test scripts/test-ledger.test.mjs
  *
  * Fails (exit 1) if, versus tests/baselines/unit-ledger.json:
  *   - any test's assertion count decreased
@@ -85,8 +93,22 @@ function totals(tests) {
   return t;
 }
 
+// Exit status implied by the run outcome the reporter recorded in a raw ledger
+// (`run: { reason, unhandledErrors }`). Files written before the reporter
+// recorded it carry no outcome; for those only the per-test states can be checked.
+function recordedRunExit(raw) {
+  const run = raw?.run;
+  if (!run || typeof run !== 'object') return 0;
+  if (run.reason !== undefined && run.reason !== 'passed') return 1;
+  if (Number(run.unhandledErrors) > 0) return 1;
+  return 0;
+}
+
 function acquireCurrent() {
-  if (fromFile) return { raw: JSON.parse(readFileSync(fromFile, 'utf8')), runExit: 0 };
+  if (fromFile) {
+    const raw = JSON.parse(readFileSync(fromFile, 'utf8'));
+    return { raw, runExit: recordedRunExit(raw) };
+  }
   const dir = mkdtempSync(join(tmpdir(), 'unit-ledger-'));
   const out = join(dir, 'raw.json');
   const res = spawnSync('npm', ['run', 'test:headless'], {
@@ -184,8 +206,21 @@ if (args.includes('--suggest-leakers')) {
 }
 
 if (update) {
+  // A baseline is never written from a failing run, whatever the flags: a
+  // failed test (or a failed file, an unhandled error) is not a reviewable
+  // assertion-count change, so there is deliberately no --accept flag for it.
   if (runExit !== 0) {
-    console.error('ledger: refusing to update baseline from a failing run.');
+    console.error(
+      fromFile
+        ? `ledger: refusing to update baseline: ${fromFile} records a failing run (${JSON.stringify(raw.run)}).`
+        : 'ledger: refusing to update baseline from a failing run.',
+    );
+    process.exit(1);
+  }
+  const failedNow = Object.keys(current).filter((k) => current[k].state === 'failed');
+  if (failedNow.length) {
+    console.error(`ledger: refusing to update baseline: ${failedNow.length} test(s) failed in this run (no waiver):`);
+    for (const k of failedNow) console.error(`  - ${k}`);
     process.exit(1);
   }
   const resetUnstable = args.includes('--reset-unstable');
@@ -211,8 +246,9 @@ if (update) {
       if (!c) disappeared.push({ test: k, from: e.assertions, to: null });
       else {
         if (c.state !== e.state) {
-          // passed -> skipped/todo loses coverage and is gated; anything else
-          // (typically skipped -> passed) is informational.
+          // passed -> skipped/todo loses coverage and is gated (failed states
+          // were refused above); anything else (typically skipped -> passed)
+          // is informational.
           (e.state === 'passed' ? stateRegressed : stateChanged).push({ test: k, from: e.state, to: c.state });
         }
         if (c.assertions < e.assertions) decreased.push({ test: k, from: e.assertions, to: c.assertions });
@@ -298,7 +334,9 @@ for (const k of Object.keys(current)) if (!(k in baseTests)) added.push(k);
 const bt = totals(baseTests);
 const ct = totals(current);
 const problems = [];
-if (runExit !== 0) problems.push(`test run exited ${runExit}`);
+if (runExit !== 0) {
+  problems.push(fromFile ? `${fromFile} records a failing run (${JSON.stringify(raw.run)})` : `test run exited ${runExit}`);
+}
 if (ct.tests < bt.tests) problems.push(`total test count decreased: ${bt.tests} -> ${ct.tests}`);
 if (ct.skipped + ct.todo > bt.skipped + bt.todo)
   problems.push(`skipped+todo increased: ${bt.skipped + bt.todo} -> ${ct.skipped + ct.todo}`);

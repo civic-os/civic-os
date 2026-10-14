@@ -9,7 +9,10 @@
  * Inert unless SDK_LEDGER_OUT is set to an output file path, so it can stay
  * registered in angular.json without changing a normal `npm run test:headless`.
  * Assertion counts come from the afterEach hook in src/test-setup.ts
- * (task.meta.ledgerAssertions).
+ * (task.meta.ledgerAssertions). The run outcome (`run.reason`: passed, failed
+ * or interrupted, and the number of unhandled errors) is recorded too, so
+ * `scripts/test-ledger.mjs --from <file>` can refuse a file from a failing run
+ * even when every test passed (a failed afterAll, an unhandled error).
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, relative } from 'node:path';
@@ -19,7 +22,7 @@ export default class LedgerReporter {
     this.root = vitest?.config?.root ?? process.cwd();
   }
 
-  onTestRunEnd(testModules) {
+  onTestRunEnd(testModules, unhandledErrors = [], reason) {
     const out = process.env.SDK_LEDGER_OUT;
     if (!out) return;
     const tests = {};
@@ -39,6 +42,7 @@ export default class LedgerReporter {
     const sorted = {};
     for (const k of Object.keys(tests).sort()) sorted[k] = tests[k];
     mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(out, JSON.stringify({ tests: sorted }, null, 2) + '\n');
+    const run = { ...(reason ? { reason } : {}), unhandledErrors: unhandledErrors?.length ?? 0 };
+    writeFileSync(out, JSON.stringify({ run, tests: sorted }, null, 2) + '\n');
   }
 }
