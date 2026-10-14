@@ -1,0 +1,23 @@
+[
+  {
+    "color": "#EF4444",
+    "description": null,
+    "display_name": "High",
+    "id": 7,
+    "sort_order": 1
+  },
+  {
+    "color": "#F59E0B",
+    "description": null,
+    "display_name": "Medium",
+    "id": 8,
+    "sort_order": 2
+  },
+  {
+    "color": "#6B7280",
+    "description": null,
+    "display_name": "Low",
+    "id": 9,
+    "sort_order": 3
+  }
+]

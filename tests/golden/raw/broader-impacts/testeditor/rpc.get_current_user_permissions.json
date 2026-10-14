@@ -1,0 +1,110 @@
+[
+  {
+    "permission": "read",
+    "table_name": "broader_impact_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "contact_broader_impact_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "contact_projects"
+  },
+  {
+    "permission": "read",
+    "table_name": "contacts"
+  },
+  {
+    "permission": "read",
+    "table_name": "files"
+  },
+  {
+    "permission": "read",
+    "table_name": "interest_centers"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "read",
+    "table_name": "organization_broader_impact_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "organizations"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_transactions"
+  },
+  {
+    "permission": "read",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "read",
+    "table_name": "project_broader_impact_categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "projects"
+  },
+  {
+    "permission": "read",
+    "table_name": "roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "read",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series_groups"
+  }
+]

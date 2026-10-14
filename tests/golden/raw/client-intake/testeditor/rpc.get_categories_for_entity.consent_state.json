@@ -1,0 +1,37 @@
+[
+  {
+    "color": "#9CA3AF",
+    "description": null,
+    "display_name": "None",
+    "id": 26,
+    "sort_order": 1
+  },
+  {
+    "color": "#F59E0B",
+    "description": null,
+    "display_name": "Pending",
+    "id": 27,
+    "sort_order": 2
+  },
+  {
+    "color": "#22C55E",
+    "description": null,
+    "display_name": "Active",
+    "id": 28,
+    "sort_order": 3
+  },
+  {
+    "color": "#EF4444",
+    "description": null,
+    "display_name": "Expired",
+    "id": 29,
+    "sort_order": 4
+  },
+  {
+    "color": "#991B1B",
+    "description": null,
+    "display_name": "Revoked",
+    "id": 30,
+    "sort_order": 5
+  }
+]

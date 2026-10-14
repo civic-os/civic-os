@@ -1,0 +1,650 @@
+[
+  {
+    "permission": "create",
+    "table_name": "borrowers"
+  },
+  {
+    "permission": "delete",
+    "table_name": "borrowers"
+  },
+  {
+    "permission": "read",
+    "table_name": "borrowers"
+  },
+  {
+    "permission": "update",
+    "table_name": "borrowers"
+  },
+  {
+    "permission": "read",
+    "table_name": "borrowers:notes"
+  },
+  {
+    "permission": "create",
+    "table_name": "building_use_request_rooms"
+  },
+  {
+    "permission": "delete",
+    "table_name": "building_use_request_rooms"
+  },
+  {
+    "permission": "read",
+    "table_name": "building_use_request_rooms"
+  },
+  {
+    "permission": "update",
+    "table_name": "building_use_request_rooms"
+  },
+  {
+    "permission": "create",
+    "table_name": "building_use_requests"
+  },
+  {
+    "permission": "delete",
+    "table_name": "building_use_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "building_use_requests"
+  },
+  {
+    "permission": "update",
+    "table_name": "building_use_requests"
+  },
+  {
+    "permission": "create",
+    "table_name": "building_use_rooms"
+  },
+  {
+    "permission": "delete",
+    "table_name": "building_use_rooms"
+  },
+  {
+    "permission": "read",
+    "table_name": "building_use_rooms"
+  },
+  {
+    "permission": "update",
+    "table_name": "building_use_rooms"
+  },
+  {
+    "permission": "create",
+    "table_name": "census_block_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "census_block_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "census_block_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "census_block_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "checkout_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "checkout_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "checkout_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "checkout_instances"
+  },
+  {
+    "permission": "create",
+    "table_name": "checkout_items"
+  },
+  {
+    "permission": "delete",
+    "table_name": "checkout_items"
+  },
+  {
+    "permission": "read",
+    "table_name": "checkout_items"
+  },
+  {
+    "permission": "update",
+    "table_name": "checkout_items"
+  },
+  {
+    "permission": "create",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "update",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "files"
+  },
+  {
+    "permission": "delete",
+    "table_name": "files"
+  },
+  {
+    "permission": "read",
+    "table_name": "files"
+  },
+  {
+    "permission": "update",
+    "table_name": "files"
+  },
+  {
+    "permission": "create",
+    "table_name": "mek_checkout_items"
+  },
+  {
+    "permission": "delete",
+    "table_name": "mek_checkout_items"
+  },
+  {
+    "permission": "read",
+    "table_name": "mek_checkout_items"
+  },
+  {
+    "permission": "update",
+    "table_name": "mek_checkout_items"
+  },
+  {
+    "permission": "create",
+    "table_name": "mek_checkouts"
+  },
+  {
+    "permission": "delete",
+    "table_name": "mek_checkouts"
+  },
+  {
+    "permission": "read",
+    "table_name": "mek_checkouts"
+  },
+  {
+    "permission": "update",
+    "table_name": "mek_checkouts"
+  },
+  {
+    "permission": "create",
+    "table_name": "mek_request_equipment"
+  },
+  {
+    "permission": "delete",
+    "table_name": "mek_request_equipment"
+  },
+  {
+    "permission": "read",
+    "table_name": "mek_request_equipment"
+  },
+  {
+    "permission": "update",
+    "table_name": "mek_request_equipment"
+  },
+  {
+    "permission": "create",
+    "table_name": "mek_request_equipment_items"
+  },
+  {
+    "permission": "delete",
+    "table_name": "mek_request_equipment_items"
+  },
+  {
+    "permission": "read",
+    "table_name": "mek_request_equipment_items"
+  },
+  {
+    "permission": "update",
+    "table_name": "mek_request_equipment_items"
+  },
+  {
+    "permission": "create",
+    "table_name": "mek_requests"
+  },
+  {
+    "permission": "delete",
+    "table_name": "mek_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "mek_requests"
+  },
+  {
+    "permission": "update",
+    "table_name": "mek_requests"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "create",
+    "table_name": "parcels"
+  },
+  {
+    "permission": "delete",
+    "table_name": "parcels"
+  },
+  {
+    "permission": "read",
+    "table_name": "parcels"
+  },
+  {
+    "permission": "update",
+    "table_name": "parcels"
+  },
+  {
+    "permission": "create",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_transactions"
+  },
+  {
+    "permission": "create",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "read",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "update",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "create",
+    "table_name": "project_parcels"
+  },
+  {
+    "permission": "delete",
+    "table_name": "project_parcels"
+  },
+  {
+    "permission": "read",
+    "table_name": "project_parcels"
+  },
+  {
+    "permission": "update",
+    "table_name": "project_parcels"
+  },
+  {
+    "permission": "create",
+    "table_name": "projects"
+  },
+  {
+    "permission": "delete",
+    "table_name": "projects"
+  },
+  {
+    "permission": "read",
+    "table_name": "projects"
+  },
+  {
+    "permission": "update",
+    "table_name": "projects"
+  },
+  {
+    "permission": "create",
+    "table_name": "roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "create",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "delete",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "read",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "update",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_instances:notes"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_reservation_checkouts"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_reservation_checkouts"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_reservation_checkouts"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_reservation_checkouts"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_reservation_tool_items"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_reservation_tool_items"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_reservation_tool_items"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_reservation_tool_items"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_reservation_tools"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_reservation_tools"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_reservation_tools"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_reservation_tools"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_reservation_work_site"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_reservation_work_site"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_reservation_work_site"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_reservation_work_site"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_reservations"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_reservations"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_reservations"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_reservations"
+  },
+  {
+    "permission": "create",
+    "table_name": "tool_types"
+  },
+  {
+    "permission": "delete",
+    "table_name": "tool_types"
+  },
+  {
+    "permission": "read",
+    "table_name": "tool_types"
+  },
+  {
+    "permission": "update",
+    "table_name": "tool_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "training_records"
+  },
+  {
+    "permission": "delete",
+    "table_name": "training_records"
+  },
+  {
+    "permission": "read",
+    "table_name": "training_records"
+  },
+  {
+    "permission": "update",
+    "table_name": "training_records"
+  },
+  {
+    "permission": "create",
+    "table_name": "work_site_parcels"
+  },
+  {
+    "permission": "delete",
+    "table_name": "work_site_parcels"
+  },
+  {
+    "permission": "read",
+    "table_name": "work_site_parcels"
+  },
+  {
+    "permission": "update",
+    "table_name": "work_site_parcels"
+  }
+]

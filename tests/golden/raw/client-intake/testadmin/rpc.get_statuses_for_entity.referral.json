@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#3B82F6",
+    "description": "Referral created, awaiting outcome",
+    "display_name": "Referred",
+    "id": 8,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "referred"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Client successfully connected with partner",
+    "display_name": "Completed",
+    "id": 9,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 2,
+    "status_key": "completed"
+  },
+  {
+    "color": "#EF4444",
+    "description": "Client unable to connect or referral unsuccessful",
+    "display_name": "Not Completed",
+    "id": 10,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "not_completed"
+  }
+]

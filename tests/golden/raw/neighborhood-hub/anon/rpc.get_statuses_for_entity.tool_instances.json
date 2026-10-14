@@ -1,0 +1,42 @@
+[
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "In Service",
+    "id": 9,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "in_service"
+  },
+  {
+    "color": "#f59e0b",
+    "description": null,
+    "display_name": "Maintenance",
+    "id": 10,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "maintenance"
+  },
+  {
+    "color": "#6b7280",
+    "description": null,
+    "display_name": "Retired",
+    "id": 11,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "retired"
+  },
+  {
+    "color": "#f59e0b",
+    "description": null,
+    "display_name": "Checked Out",
+    "id": 37,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 20,
+    "status_key": "checked_out"
+  }
+]

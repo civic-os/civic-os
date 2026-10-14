@@ -1,0 +1,15 @@
+[
+  {
+    "description": "Your client information for intake services",
+    "display_name": "Client Profile",
+    "exempt_roles": [
+      "admin",
+      "manager"
+    ],
+    "is_required": true,
+    "sort_order": 1,
+    "table_name": "clients",
+    "user_fk_column": "user_id",
+    "user_fk_constraint": "clients_user_id_fkey"
+  }
+]

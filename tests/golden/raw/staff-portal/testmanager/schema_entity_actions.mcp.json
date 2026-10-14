@@ -1,0 +1,534 @@
+[
+  {
+    "action_name": "approve",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": "Are you sure you want to approve this reimbursement?",
+    "default_navigate_to": null,
+    "default_success_message": "Reimbursement approved.",
+    "description": "Approve this reimbursement request",
+    "disabled_tooltip": "Only pending reimbursements can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 15
+    },
+    "icon": "check_circle",
+    "id": 8,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Notes",
+        "file_type": null,
+        "id": 6,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_response_notes",
+        "param_type": "text",
+        "placeholder": "Optional: add a note to this approval",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_reimbursement",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "reimbursements",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 16
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": true,
+    "confirmation_message": "Are you sure you want to deny this reimbursement?",
+    "default_navigate_to": null,
+    "default_success_message": "Reimbursement denied.",
+    "description": "Deny this reimbursement request",
+    "disabled_tooltip": "Only pending reimbursements can be denied",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 15
+    },
+    "icon": "cancel",
+    "id": 9,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Reason for Denial",
+        "file_type": null,
+        "id": 7,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_response_notes",
+        "param_type": "text",
+        "placeholder": "Optional: explain why this reimbursement was denied",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_reimbursement",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "reimbursements",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 17
+    }
+  },
+  {
+    "action_name": "submit",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": "Upload and submit this document for review?",
+    "default_navigate_to": null,
+    "default_success_message": "Document submitted for review.",
+    "description": "Upload and submit this document for review",
+    "disabled_tooltip": null,
+    "display_name": "Submit Document",
+    "enabled_condition": null,
+    "icon": "upload_file",
+    "id": 7,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Document File",
+        "file_type": "any",
+        "id": 3,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_document_file",
+        "param_type": "file",
+        "placeholder": null,
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "submit_staff_document",
+    "show_on_detail": true,
+    "sort_order": 5,
+    "table_name": "staff_documents",
+    "visibility_condition": {
+      "or": [
+        {
+          "field": "status_id",
+          "operator": "eq",
+          "value": 8
+        },
+        {
+          "field": "status_id",
+          "operator": "eq",
+          "value": 11
+        }
+      ]
+    }
+  },
+  {
+    "action_name": "approve",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": "Are you sure you want to approve this document?",
+    "default_navigate_to": null,
+    "default_success_message": "Document approved.",
+    "description": "Approve this submitted document",
+    "disabled_tooltip": "Only submitted documents can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 9
+    },
+    "icon": "check_circle",
+    "id": 5,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Reviewer Notes",
+        "file_type": null,
+        "id": 5,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_reviewer_notes",
+        "param_type": "text",
+        "placeholder": "Optional: add a note to this approval",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_staff_document",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "staff_documents",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 10
+    }
+  },
+  {
+    "action_name": "request_revision",
+    "button_style": "warning",
+    "can_execute": true,
+    "confirmation_message": "Please provide notes explaining what needs to be corrected.",
+    "default_navigate_to": null,
+    "default_success_message": "Document sent back for revision.",
+    "description": "Send this document back for revision with notes",
+    "disabled_tooltip": "Only submitted documents can be sent back for revision",
+    "display_name": "Request Revision",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 9
+    },
+    "icon": "edit_note",
+    "id": 6,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Revision Notes",
+        "file_type": null,
+        "id": 2,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_reviewer_notes",
+        "param_type": "text",
+        "placeholder": "Explain what needs to be corrected",
+        "required": true,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "request_document_revision",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "staff_documents",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 11
+    }
+  },
+  {
+    "action_name": "clock_in",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": null,
+    "default_navigate_to": null,
+    "default_success_message": "Clocked in successfully.",
+    "description": "Record clock-in time for this staff member",
+    "disabled_tooltip": null,
+    "display_name": "Clock In",
+    "enabled_condition": null,
+    "icon": "login",
+    "id": 1,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": false,
+    "rpc_function": "staff_clock_in",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "staff_members",
+    "visibility_condition": null
+  },
+  {
+    "action_name": "clock_out",
+    "button_style": "warning",
+    "can_execute": true,
+    "confirmation_message": null,
+    "default_navigate_to": null,
+    "default_success_message": "Clocked out successfully.",
+    "description": "Record clock-out time for this staff member",
+    "disabled_tooltip": null,
+    "display_name": "Clock Out",
+    "enabled_condition": null,
+    "icon": "logout",
+    "id": 2,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": false,
+    "rpc_function": "staff_clock_out",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "staff_members",
+    "visibility_condition": null
+  },
+  {
+    "action_name": "start",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": null,
+    "default_navigate_to": null,
+    "default_success_message": "Task started.",
+    "description": "Begin working on this task",
+    "disabled_tooltip": "Only open tasks can be started",
+    "display_name": "Start",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 18
+    },
+    "icon": "play_arrow",
+    "id": 10,
+    "parameters": [],
+    "refresh_after_action": true,
+    "requires_confirmation": false,
+    "rpc_function": "start_staff_task",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "staff_tasks",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 18
+    }
+  },
+  {
+    "action_name": "complete",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": "Mark this task as complete?",
+    "default_navigate_to": null,
+    "default_success_message": "Task completed.",
+    "description": "Mark this task as completed",
+    "disabled_tooltip": "Only open or in-progress tasks can be completed",
+    "display_name": "Mark Complete",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        18,
+        19
+      ]
+    },
+    "icon": "check_circle",
+    "id": 11,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Completion Notes",
+        "file_type": null,
+        "id": 8,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_completion_notes",
+        "param_type": "text",
+        "placeholder": "Optional: describe what was done",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "complete_staff_task",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "staff_tasks",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        18,
+        19
+      ]
+    }
+  },
+  {
+    "action_name": "cancel",
+    "button_style": "error",
+    "can_execute": true,
+    "confirmation_message": "Are you sure you want to cancel this task?",
+    "default_navigate_to": null,
+    "default_success_message": "Task cancelled.",
+    "description": "Cancel this task",
+    "disabled_tooltip": "Only open or in-progress tasks can be cancelled",
+    "display_name": "Cancel",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        18,
+        19
+      ]
+    },
+    "icon": "cancel",
+    "id": 12,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Reason for Cancellation",
+        "file_type": null,
+        "id": 9,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_cancel_reason",
+        "param_type": "text",
+        "placeholder": "Optional: explain why this task is being cancelled",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "cancel_staff_task",
+    "show_on_detail": true,
+    "sort_order": 30,
+    "table_name": "staff_tasks",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "in",
+      "value": [
+        18,
+        19
+      ]
+    }
+  },
+  {
+    "action_name": "approve",
+    "button_style": "primary",
+    "can_execute": true,
+    "confirmation_message": "Are you sure you want to approve this time off request?",
+    "default_navigate_to": null,
+    "default_success_message": "Time off request approved.",
+    "description": "Approve this time off request",
+    "disabled_tooltip": "Only pending requests can be approved",
+    "display_name": "Approve",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 12
+    },
+    "icon": "check_circle",
+    "id": 3,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Notes",
+        "file_type": null,
+        "id": 4,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_response_notes",
+        "param_type": "text",
+        "placeholder": "Optional: add a note to this approval",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "approve_time_off",
+    "show_on_detail": true,
+    "sort_order": 10,
+    "table_name": "time_off_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 13
+    }
+  },
+  {
+    "action_name": "deny",
+    "button_style": "error",
+    "can_execute": true,
+    "confirmation_message": "Are you sure you want to deny this time off request?",
+    "default_navigate_to": null,
+    "default_success_message": "Time off request denied.",
+    "description": "Deny this time off request",
+    "disabled_tooltip": "Only pending requests can be denied",
+    "display_name": "Deny",
+    "enabled_condition": {
+      "field": "status_id",
+      "operator": "eq",
+      "value": 12
+    },
+    "icon": "cancel",
+    "id": 4,
+    "parameters": [
+      {
+        "category_entity_type": null,
+        "default_value": null,
+        "depends_on_params": null,
+        "display_name": "Reason for Denial",
+        "file_type": null,
+        "id": 1,
+        "join_column": null,
+        "join_table": null,
+        "options_source_rpc": null,
+        "param_name": "p_response_notes",
+        "param_type": "text",
+        "placeholder": "Optional: explain why this request was denied",
+        "required": false,
+        "sort_order": 10,
+        "status_entity_type": null,
+        "target_column": null
+      }
+    ],
+    "refresh_after_action": true,
+    "requires_confirmation": true,
+    "rpc_function": "deny_time_off",
+    "show_on_detail": true,
+    "sort_order": 20,
+    "table_name": "time_off_requests",
+    "visibility_condition": {
+      "field": "status_id",
+      "operator": "ne",
+      "value": 14
+    }
+  }
+]

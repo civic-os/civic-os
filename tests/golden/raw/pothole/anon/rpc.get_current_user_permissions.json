@@ -1,0 +1,26 @@
+[
+  {
+    "permission": "read",
+    "table_name": "Bid"
+  },
+  {
+    "permission": "read",
+    "table_name": "Issue"
+  },
+  {
+    "permission": "read",
+    "table_name": "Tag"
+  },
+  {
+    "permission": "read",
+    "table_name": "WorkDetail"
+  },
+  {
+    "permission": "read",
+    "table_name": "WorkPackage"
+  },
+  {
+    "permission": "read",
+    "table_name": "issue_tags"
+  }
+]

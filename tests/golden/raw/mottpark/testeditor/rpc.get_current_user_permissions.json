@@ -1,0 +1,94 @@
+[
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "public_calendar_events"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_payment_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "reservation_payments"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_payments"
+  },
+  {
+    "permission": "update",
+    "table_name": "reservation_payments"
+  },
+  {
+    "permission": "create",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests"
+  },
+  {
+    "permission": "create",
+    "table_name": "reservation_requests:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "reservation_requests:notes"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series_groups"
+  }
+]

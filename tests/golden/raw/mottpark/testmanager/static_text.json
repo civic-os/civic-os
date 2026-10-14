@@ -1,0 +1,50 @@
+[
+  {
+    "column_width": 8,
+    "content": "### Cleaning Fee Payment Instructions\n\n**Cleaning Fee payments cannot be made by credit card.** Please pay [REDACTED NAME] directly using one of these methods:\n\n- **CashApp**: [REDACTED HANDLE]\n- **Money Order or Check**: Payable to [REDACTED NAME]\n  - Mail to: Mott Park Club House, 2401 Nolen Drive, Flint, Michigan 48504\n  - Or drop off at the clubhouse mailbox on the front door\n\n**Questions?** Contact [REDACTED NAME] at [REDACTED PHONE] or [REDACTED EMAIL]\n\n*Security Deposit and Facility Fee can be paid online using the Pay Now button.*",
+    "created_at": "__MASKED__",
+    "id": 4,
+    "show_on_create": false,
+    "show_on_detail": true,
+    "show_on_edit": false,
+    "sort_order": 1,
+    "table_name": "reservation_payments",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 2,
+    "content": "### Before You Submit\n\nPlease have the following information ready:\n- Your preferred date and time (at least 10 days in advance)\n- Estimated number of attendees (maximum 75)\n- Purpose/type of event\n- Contact phone number\n\n**Processing Time**: Requests are typically reviewed within 2-3 business days.",
+    "created_at": "__MASKED__",
+    "id": 3,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 0,
+    "table_name": "reservation_requests",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 2,
+    "content": "## Mott Park Recreation Area Facility and Parkland Use Policy\n\n### Facility Rules\n\nBy submitting this reservation request, you acknowledge and agree to the following:\n\n1. **No Alcohol** - Per City of Flint ordinance, no alcoholic beverages are permitted on the premises.\n\n2. **No Cooking** - Only warming of food is permitted. All food must be catered or prepared off-site.\n\n3. **No Open Flames** - Candles, grills, and other open flames are prohibited.\n\n4. **No Smoking** - Smoking and vaping are prohibited within 20 feet of the building.\n\n5. **Music Curfew** - All music must end by 10:00 PM.\n\n6. **Vacancy Requirement** - All guests must vacate the premises by 11:00 PM.\n\n7. **No Pets** - Only service animals are permitted.\n\n8. **Capacity Limit** - Maximum occupancy is 75 persons.\n\n### Checkout Requirements\n\nBefore leaving the facility, you must:\n\n1. **Vacuum all floors** - A vacuum is provided in the utility closet.\n\n2. **Remove all trash** - Take all garbage bags to the dumpsters located in the parking lot.\n\n3. **Turn off all lights** - Ensure all interior and exterior lights are switched off.\n\n**Failure to complete checkout requirements may result in forfeiture of your security deposit.**\n\n### Fees\n\n| Fee Type | Amount | Due |\n|----------|--------|-----|\n| Security Deposit | $150 | Upon approval |\n| Facility Fee (Weekday) | $150 | 30 days before event |\n| Facility Fee (Weekend/Holiday) | $300 | 30 days before event |\n| Cleaning Fee | $75 | 30 days before event |\n\n### Cancellation Policy\n\n- **More than 30 days before event**: Full refund of all fees\n- **Less than 30 days before event**: Security deposit refunded; facility and cleaning fees forfeited\n\n### Liability\n\nThe person signing this reservation request assumes full responsibility for:\n- The conduct of all guests and attendees\n- Any damage to the facility or grounds\n- Ensuring compliance with all rules and regulations\n\n**The security deposit will be refunded within 14 days after the event if no damages are found.**\n\n---",
+    "created_at": "__MASKED__",
+    "id": 1,
+    "show_on_create": true,
+    "show_on_detail": false,
+    "show_on_edit": false,
+    "sort_order": 1,
+    "table_name": "reservation_requests",
+    "updated_at": "__MASKED__"
+  },
+  {
+    "column_width": 2,
+    "content": "### Important Reminders\n\n- 🚫 No alcohol, cooking, or open flames\n- 🎵 Music ends at 10 PM, guests leave by 11 PM\n- 👥 Maximum 75 people\n- 🐕 Service animals only\n\n*The person who submitted this request is responsible for their group's conduct and any damages.*",
+    "created_at": "__MASKED__",
+    "id": 2,
+    "show_on_create": false,
+    "show_on_detail": true,
+    "show_on_edit": false,
+    "sort_order": 999,
+    "table_name": "reservation_requests",
+    "updated_at": "__MASKED__"
+  }
+]

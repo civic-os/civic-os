@@ -1,0 +1,10 @@
+[
+  {
+    "permission": "read",
+    "table_name": "reservations"
+  },
+  {
+    "permission": "read",
+    "table_name": "resources"
+  }
+]

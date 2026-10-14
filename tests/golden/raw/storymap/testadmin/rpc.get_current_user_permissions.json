@@ -1,0 +1,306 @@
+[
+  {
+    "permission": "create",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "read",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "update",
+    "table_name": "civic_os_users_private"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.categories"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.category_groups"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_transitions"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.status_types"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.statuses"
+  },
+  {
+    "permission": "create",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "delete",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "read",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "update",
+    "table_name": "metadata.translations"
+  },
+  {
+    "permission": "create",
+    "table_name": "participants"
+  },
+  {
+    "permission": "delete",
+    "table_name": "participants"
+  },
+  {
+    "permission": "read",
+    "table_name": "participants"
+  },
+  {
+    "permission": "update",
+    "table_name": "participants"
+  },
+  {
+    "permission": "create",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_refunds"
+  },
+  {
+    "permission": "read",
+    "table_name": "payment_transactions"
+  },
+  {
+    "permission": "create",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "permission_roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "delete",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "read",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "update",
+    "table_name": "permissions"
+  },
+  {
+    "permission": "create",
+    "table_name": "roles"
+  },
+  {
+    "permission": "delete",
+    "table_name": "roles"
+  },
+  {
+    "permission": "read",
+    "table_name": "roles"
+  },
+  {
+    "permission": "update",
+    "table_name": "roles"
+  },
+  {
+    "permission": "create",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "read",
+    "table_name": "schema_decisions"
+  },
+  {
+    "permission": "create",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "delete",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "read",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "update",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "create",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "delete",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "read",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "update",
+    "table_name": "static_assets"
+  },
+  {
+    "permission": "create",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "delete",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "read",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "update",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "create",
+    "table_name": "teams"
+  },
+  {
+    "permission": "delete",
+    "table_name": "teams"
+  },
+  {
+    "permission": "read",
+    "table_name": "teams"
+  },
+  {
+    "permission": "update",
+    "table_name": "teams"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_instances"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series"
+  },
+  {
+    "permission": "create",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "delete",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "read",
+    "table_name": "time_slot_series_groups"
+  },
+  {
+    "permission": "update",
+    "table_name": "time_slot_series_groups"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "Active",
+    "id": 27,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "active"
+  },
+  {
+    "color": "#ef4444",
+    "description": null,
+    "display_name": "Expired",
+    "id": 28,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 2,
+    "status_key": "expired"
+  },
+  {
+    "color": "#6b7280",
+    "description": null,
+    "display_name": "Revoked",
+    "id": 29,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "revoked"
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "color": "#f59e0b",
+    "description": null,
+    "display_name": "Pending",
+    "id": 12,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "pending"
+  },
+  {
+    "color": "#3b82f6",
+    "description": null,
+    "display_name": "Approved",
+    "id": 13,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 2,
+    "status_key": "approved"
+  },
+  {
+    "color": "#22c55e",
+    "description": null,
+    "display_name": "Checked Out",
+    "id": 14,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 3,
+    "status_key": "checked_out"
+  },
+  {
+    "color": "#8b5cf6",
+    "description": null,
+    "display_name": "Returned",
+    "id": 15,
+    "is_initial": false,
+    "is_terminal": false,
+    "sort_order": 4,
+    "status_key": "returned"
+  },
+  {
+    "color": "#6b7280",
+    "description": null,
+    "display_name": "Completed",
+    "id": 16,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 5,
+    "status_key": "completed"
+  },
+  {
+    "color": "#ef4444",
+    "description": null,
+    "display_name": "Denied",
+    "id": 17,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 6,
+    "status_key": "denied"
+  },
+  {
+    "color": "#94a3b8",
+    "description": null,
+    "display_name": "Cancelled",
+    "id": 18,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 7,
+    "status_key": "cancelled"
+  }
+]

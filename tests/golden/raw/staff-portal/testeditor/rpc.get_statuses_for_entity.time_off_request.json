@@ -1,0 +1,32 @@
+[
+  {
+    "color": "#F59E0B",
+    "description": "Awaiting review",
+    "display_name": "Pending",
+    "id": 12,
+    "is_initial": true,
+    "is_terminal": false,
+    "sort_order": 1,
+    "status_key": "pending"
+  },
+  {
+    "color": "#22C55E",
+    "description": "Time off approved",
+    "display_name": "Approved",
+    "id": 13,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 2,
+    "status_key": "approved"
+  },
+  {
+    "color": "#EF4444",
+    "description": "Time off denied",
+    "display_name": "Denied",
+    "id": 14,
+    "is_initial": false,
+    "is_terminal": true,
+    "sort_order": 3,
+    "status_key": "denied"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "permission": "read",
+    "table_name": "participants"
+  },
+  {
+    "permission": "read",
+    "table_name": "sponsors"
+  },
+  {
+    "permission": "read",
+    "table_name": "team_rosters"
+  },
+  {
+    "permission": "read",
+    "table_name": "teams"
+  }
+]
