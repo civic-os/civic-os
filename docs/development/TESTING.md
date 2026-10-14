@@ -868,6 +868,8 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - `HTMLDialogElement.showModal()` / `.close()` (basic attribute-based implementation)
 - `HTMLCanvasElement.getContext()` (stub returning a mock 2D context)
 
+It also installs the shared-window guard (see "One happy-dom window per worker" below), the assertion-ledger hook and the async-emission probe.
+
 ## Resources
 
 - [Angular Testing Guide](https://angular.dev/guide/testing)
@@ -974,8 +976,39 @@ const result = await result$;
 expect(result).toEqual(...);
 ```
 
-Anything that reads service state populated by the emission (signal caches, `ensure*Loaded` guards) must come after the `await`. `schema.service.spec.ts` and `data.service.spec.ts` are fully converted; other specs may still fail under the probe until converted (the probe run lists them).
+Anything that reads service state populated by the emission (signal caches, `ensure*Loaded` guards) must come after the `await`. Since P0.7c the whole suite passes under `SDK_ASYNC_FLUSH=macrotask` with the same per-test assertion counts as without it; keep it that way (any new DECREASED under the probe is an assertion that escaped its test).
 
 ### Shared fixtures are frozen
 
 The exported fixtures in `src/app/testing/mock-schema.ts` and `mock-dashboard.ts` (`MOCK_PROPERTIES`, `MOCK_ENTITIES`, `MOCK_DATA`, `MOCK_M2M_PROPERTY`, `MOCK_WIDGETS`, ...) are deep-frozen with `deepFreeze()`, so an in-place mutation throws at the mutation site. Angular's vitest runner shares module instances across spec files in a worker, so an unfrozen mutation (for example `SchemaService.getProperties()` setting `type` on a response object) silently corrupts later specs. Clone before passing a fixture through code that mutates its input: `structuredClone(MOCK_PROPERTIES.integer)`. The `createMock*` factories return fresh unfrozen objects.
+
+### One happy-dom window per worker
+
+Angular's Vitest builder runs with `isolate: false`: every spec file in a worker shares one module registry and one happy-dom `window`/`document`. Vitest restores `vi.spyOn` spies after each file, but nothing resets the DOM, `window.location`, storage contents, `<html>` attributes, `document.title` or timers. Which files share a worker changes from run to run, so a leak shows up as a rare failure in an unrelated spec.
+
+- **Never let a test navigate the window.** happy-dom follows an `<a href>` click as a navigation, including the `<a download href="blob:...">` pattern used for file downloads (`chart-export.ts`, `xlsx`'s `writeFileXLSX`, the image and PDF viewers). Stub `URL.createObjectURL`, `URL.revokeObjectURL` and `HTMLAnchorElement.prototype.click` (and restore them, e.g. `afterEach(() => vi.restoreAllMocks())`), or spy on the component's save wrapper (`saveWorkbook`, `saveExcelFile`).
+- **Shared-window guard**: `src/test-setup.ts` fails any test that leaves `window.location` different from the worker's base URL, names it, and resets the URL; a test that starts on a changed URL fails with the name of the previous test (async work outliving its test). It only adds failures.
+- **Do not depend on ambient window state.** A test that reads `window.location`, `localStorage`, `<html dir/lang/data-theme>` or `document.title` sets what it needs first (for the URL: `(window as any).happyDOM.setURL(url)` in `beforeEach`, restore in `afterEach`, as in `runtime.spec.ts`).
+
+To turn an order-dependent failure into a deterministic one, run the suspect files in one worker in a fixed order with a temporary runner config (do not commit it):
+
+```js
+// vitest-ordered.tmp.mjs
+import { defineConfig } from 'vitest/config';
+import { BaseSequencer } from 'vitest/node';
+const ORDER = (process.env.ORDER || '').split(',');
+const rank = (s) => { const i = ORDER.findIndex((o) => s.moduleId.endsWith(o)); return i < 0 ? 1e9 : i; };
+class Ordered extends BaseSequencer {
+  async shard(files) { return files; }
+  async sort(files) { return [...files].sort((a, b) => rank(a) - rank(b)); }
+}
+export default defineConfig({ test: { fileParallelism: false, maxWorkers: 1, sequence: { sequencer: Ordered } } });
+```
+
+```bash
+ORDER=chart-widget.component.spec.ts,runtime.spec.ts npx ng test --watch=false \
+  --runner-config=vitest-ordered.tmp.mjs \
+  --include='**/chart-widget.component.spec.ts' --include='**/runtime.spec.ts'
+```
+
+`detectAsyncLeaks: true` in such a config makes Vitest list timers and promises that outlive their spec file.
