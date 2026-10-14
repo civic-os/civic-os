@@ -763,7 +763,7 @@ export const RULES = [
   {
     id: 'X-02', area: X,
     rule: 'Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core)',
-    frontend: 'admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\\/(\\d+|\\*)/`, and a raw `%` is sent in `like` patterns.',
+    frontend: 'admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\\/(\\d+|\\*)/`, a raw `%` is sent in `like` patterns, and date filters use UTC day bounds (`T00:00:00Z` / `T23:59:59Z`) rather than the user\'s zone.',
     mcp: 'n/a (no admin tools).',
     evidence: ['src/app/pages/admin-files/admin-files.page.ts:207-225', 'src/app/pages/admin-files/admin-files.page.ts:464-505', 'src/app/pages/admin-galleries/admin-galleries.page.ts:151-180', 'src/app/pages/admin-payments/admin-payments.page.ts:227-270'],
     checks: [

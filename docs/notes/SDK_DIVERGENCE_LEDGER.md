@@ -69,8 +69,8 @@ Record the decision in the `decision` field of `tests/golden/ledger.json` (or te
 | [Q-10](#q-10) | Request building | Limit bounds: list_records accepts limit 1..100 and offset >= 0; the frontend accepts anything | `needs-decision` | 8, +1 synthetic |
 | [Q-12](#q-12) | Request building | get_record always selects created_at and updated_at, even on entities without those columns | `mcp-bug` | 47, +2 synthetic |
 | [Q-13](#q-13) | Request building | Detail read: the MCP selects every property; the frontend only detail-visible ones | `needs-decision` | 99, +6 synthetic |
-| [Q-14](#q-14) | Request building | Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select) | `mcp-bug` | 4, +2 synthetic |
-| [Q-15](#q-15) | Request building | Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews) | `needs-decision` | 83, +66 effects |
+| [Q-14](#q-14) | Request building | Empty column list: the MCP sends `select=id,` (invalid); the frontend sends `select=id` (or no select) | `mcp-bug` | 4, +1 synthetic |
+| [Q-15](#q-15) | Request building | Frontend reads the MCP cannot express (edit-form read, raw parameters, calendar range pages, inverse previews) | `needs-decision` | 83, +1 synthetic, +66 effects |
 | [Q-16](#q-16) | Request building | Content-Range parsing: the MCP reports no total for `*/0`, prefixed or malformed headers, and accepts trailing garbage | `mcp-bug` | 9 synthetic |
 | [N-01](#n-01) | Name resolution | Mixed-case table names never resolve by table name in the MCP | `mcp-bug` | 4 |
 | [N-02](#n-02) | Name resolution | Status names: the MCP resolves status_key first, then display name; the import worker matches display names only | `needs-decision` | 138 |
@@ -873,10 +873,10 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - Frontend: `select=id` for an empty field list; no select at all when fields is absent (every column).
 - MCP: `buildSelectString([])` is empty and list_records prepends `id,`, producing a trailing comma; also happens when an entity has no list-visible column.
 - Evidence: `tools/mcp-server/src/tools/list-records.ts:77-81`, `tools/mcp-server/src/select-builder.ts:66-91`
-- Instances: 4 in examples; 2 synthetic (`_shared` matrices, payload sets and probes); 6 occurrences; by example: _shared 2, neighborhood-hub 4
+- Instances: 4 in examples; 1 synthetic (`_shared` matrices, payload sets and probes); 5 occurrences; by example: _shared 1, neighborhood-hub 4
   - _shared · data.query-matrix · empty fields: MCP select=id,
   - neighborhood-hub · building_use_event_details · list: MCP select=id,
-  - _shared · data.query-matrix · no fields: frontend sends no select (every column), MCP select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)
+  - neighborhood-hub · building_use_event_details · list page 1/1: MCP select=id,
 - If the frontend behavior is adopted: list_records works for entities whose columns are all hidden from lists.
 - If the MCP behavior is adopted: n/a
 - Recommendation: `mcp-bug`. PostgREST rejects a trailing comma in select; the neighborhood-hub instances below fail today.
@@ -888,10 +888,10 @@ Every conditional action run through the real MCP `execute_action` and `get_reco
 - Frontend: Edit pages read raw FK ids; list pages pass rawQueryParams (hybrid search, calendar ranges); detail pages fetch inverse-relationship previews.
 - MCP: update_record PATCHes without reading; list_records has no raw parameter passthrough; there is no inverse-relationship tool.
 - Evidence: `tests/golden/derived/mcp/<example>/_example/data.queries.json (inexpressible)`, `tests/golden/derived/frontend/<example>/_example/data.queries.json (inversePreviews)`
-- Instances: 83 in examples; 83 occurrences; by example: broader-impacts 8, client-intake 20, community-center 5, mottpark 6, neighborhood-hub 19, pothole 8, staff-portal 14, storymap 3
+- Instances: 83 in examples; 1 synthetic (`_shared` matrices, payload sets and probes); 84 occurrences; by example: _shared 1, broader-impacts 8, client-intake 20, community-center 5, mottpark 6, neighborhood-hub 19, pothole 8, staff-portal 14, storymap 3
+  - _shared · data.query-matrix · no fields: frontend sends no select (every column); list_records has no all-columns mode, MCP select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)
   - broader-impacts · broader_impact_categories · edit: edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)
   - client-intake · client_consents · edit: edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)
-  - community-center · payment_transactions · edit: edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)
 - Effects: 66 downstream differences (67 occurrences); by example: _shared 2, broader-impacts 5, client-intake 9, community-center 4, mottpark 6, neighborhood-hub 19, pothole 5, staff-portal 12, storymap 4
   - _shared · data.query-matrix · everything at once: id=eq.9 dropped (rawQueryParams)
   - broader-impacts · broader_impact_categories · limit and rawQueryParams: or=(a.eq.1,b.eq.2) dropped (rawQueryParams)
@@ -1029,7 +1029,7 @@ MCP behavior with no golden counterpart on the frontend side, cited from code.
 
 **Three admin pages build PostgREST queries by hand, bypassing DataService (and later the core)**
 
-- Frontend: admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\/(\d+|\*)/`, and a raw `%` is sent in `like` patterns.
+- Frontend: admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\/(\d+|\*)/`, a raw `%` is sent in `like` patterns, and date filters use UTC day bounds (`T00:00:00Z` / `T23:59:59Z`) rather than the user's zone.
 - MCP: n/a (no admin tools).
 - Evidence: `src/app/pages/admin-files/admin-files.page.ts:207-225`, `src/app/pages/admin-files/admin-files.page.ts:464-505`, `src/app/pages/admin-galleries/admin-galleries.page.ts:151-180`, `src/app/pages/admin-payments/admin-payments.page.ts:227-270`
 - Instances: 3 in examples; 3 occurrences; by example: app 3

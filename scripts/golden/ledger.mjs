@@ -480,7 +480,7 @@ function compareRequests(feReq, mcReq, ctx) {
     const onlyF = fi.filter(x => !mSet.has(x));
     const onlyM = mi.filter(x => !fSet.has(x));
     if (!onlyF.length && !onlyM.length) hit('Q-03', { ...base, detail: `frontend ${fs_} | MCP ${ms}` });
-    if (fs_ === undefined && ms !== undefined) hit('Q-14', { ...base, detail: `frontend sends no select (every column), MCP select=${ms}` });
+    if (fs_ === undefined && ms !== undefined) hit('Q-15', { ...base, detail: `frontend sends no select (every column); list_records has no all-columns mode, MCP select=${ms}` });
     else {
       const mAlias = new Map(onlyM.map(x => [alias(x), x]));
       for (const item of onlyF) {

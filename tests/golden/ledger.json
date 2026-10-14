@@ -2903,7 +2903,7 @@
       },
       "instances": {
         "byExample": {
-          "_shared": 2,
+          "_shared": 1,
           "neighborhood-hub": 4
         },
         "count": 4,
@@ -2921,14 +2921,14 @@
             "subject": "list"
           },
           {
-            "detail": "frontend sends no select (every column), MCP select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)",
-            "entity": "data.query-matrix",
-            "example": "_shared",
-            "subject": "no fields"
+            "detail": "MCP select=id,",
+            "entity": "building_use_event_details",
+            "example": "neighborhood-hub",
+            "subject": "list page 1/1"
           }
         ],
-        "occurrences": 6,
-        "synthetic": 2
+        "occurrences": 5,
+        "synthetic": 1
       },
       "mcp": "`buildSelectString([])` is empty and list_records prepends `id,`, producing a trailing comma; also happens when an entity has no list-visible column.",
       "reason": "PostgREST rejects a trailing comma in select; the neighborhood-hub instances below fail today.",
@@ -2986,6 +2986,7 @@
       },
       "instances": {
         "byExample": {
+          "_shared": 1,
           "broader-impacts": 8,
           "client-intake": 20,
           "community-center": 5,
@@ -2998,6 +2999,12 @@
         "count": 83,
         "examples": [
           {
+            "detail": "frontend sends no select (every column); list_records has no all-columns mode, MCP select=id,name,c,x,owner:civic_os_users!owner(id,display_name,full_name),parent_id:parents!parent_id(id,display_name)",
+            "entity": "data.query-matrix",
+            "example": "_shared",
+            "subject": "no fields"
+          },
+          {
             "detail": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)",
             "entity": "broader_impact_categories",
             "example": "broader-impacts",
@@ -3008,16 +3015,10 @@
             "entity": "client_consents",
             "example": "client-intake",
             "subject": "edit"
-          },
-          {
-            "detail": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)",
-            "entity": "payment_transactions",
-            "example": "community-center",
-            "subject": "edit"
           }
         ],
-        "occurrences": 83,
-        "synthetic": 0
+        "occurrences": 84,
+        "synthetic": 1
       },
       "mcp": "update_record PATCHes without reading; list_records has no raw parameter passthrough; there is no inverse-relationship tool.",
       "reason": "Informational: these are MCP feature gaps, not divergences. They do not block parity for the shared functions.",
@@ -3466,7 +3467,7 @@
         "src/app/pages/admin-galleries/admin-galleries.page.ts:151-180",
         "src/app/pages/admin-payments/admin-payments.page.ts:227-270"
       ],
-      "frontend": "admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\\/(\\d+|\\*)/`, and a raw `%` is sent in `like` patterns.",
+      "frontend": "admin-files, admin-galleries and admin-payments concatenate query strings: user search and filter values are not encoded (`file_name=ilike.*${q}*`, `or=(description.ilike.*${search}*,user_email.ilike.*${search}*)`, `entity_id=ilike.*${search}*`), pagination uses limit/offset instead of Range, totals come from a third Content-Range regex `/\\/(\\d+|\\*)/`, a raw `%` is sent in `like` patterns, and date filters use UTC day bounds (`T00:00:00Z` / `T23:59:59Z`) rather than the user's zone.",
       "id": "X-02",
       "impact": {
         "adoptFrontend": "n/a",
