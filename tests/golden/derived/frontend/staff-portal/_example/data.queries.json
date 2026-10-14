@@ -5746,43 +5746,6 @@
   },
   "inversePreviews": [
     {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
-        "sortOrder": 3,
-        "sourceColumn": "requirement_id",
-        "sourceColumnDisplayName": "Requirement",
-        "sourceTable": "staff_documents",
-        "sourceTableDisplayName": "Staff Documents"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/staff_documents?requirement_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 3,
-          "sourceColumn": "requirement_id",
-          "sourceColumnDisplayName": "Requirement",
-          "sourceTable": "staff_documents",
-          "sourceTableDisplayName": "Staff Documents"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "document_requirements"
-    },
-    {
       "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "site_id", "sourceColumnDisplayName": "Site", "sourceTable": "incident_reports", "sourceTableDisplayName": "Incident Reports"},
       "request": {
         "headers": {"Prefer": "count=exact"},
@@ -6135,6 +6098,43 @@
         "totalCount": 15
       },
       "target": "staff_members"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 3,
+        "sourceColumn": "requirement_id",
+        "sourceColumnDisplayName": "Requirement",
+        "sourceTable": "staff_documents",
+        "sourceTableDisplayName": "Staff Documents"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/staff_documents?requirement_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "requirement_id",
+          "sourceColumnDisplayName": "Requirement",
+          "sourceTable": "staff_documents",
+          "sourceTableDisplayName": "Staff Documents"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "document_requirements"
     },
     {
       "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 4, "sourceColumn": "role_id", "sourceColumnDisplayName": "Staff Role", "sourceTable": "staff_members", "sourceTableDisplayName": "Staff Members"},

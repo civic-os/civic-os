@@ -21,6 +21,6 @@
       "excluding": []
     }
   },
-  "management": ["document_requirements", "sites", "staff_roles"],
-  "menu": ["document_requirements", "sites", "staff_roles"]
+  "management": ["sites", "document_requirements", "staff_roles"],
+  "menu": ["sites", "document_requirements", "staff_roles"]
 }

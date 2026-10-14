@@ -44,6 +44,6 @@
       "excluding": ["reservations"]
     }
   },
-  "management": ["payment_transactions", "reservation_requests", "reservations", "resources"],
-  "menu": ["payment_transactions", "reservation_requests", "reservations", "resources"]
+  "management": ["payment_transactions", "resources", "reservation_requests", "reservations"],
+  "menu": ["payment_transactions", "resources", "reservation_requests", "reservations"]
 }

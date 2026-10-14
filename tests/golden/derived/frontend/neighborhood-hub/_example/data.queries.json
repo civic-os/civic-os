@@ -9799,155 +9799,6 @@
         "previewLimit": 5,
         "previewMode": "display_name",
         "showOnDetail": true,
-        "sortOrder": 3,
-        "sourceColumn": "borrower_id",
-        "sourceColumnDisplayName": "Borrower",
-        "sourceTable": "tool_reservations",
-        "sourceTableDisplayName": "Tool Reservations"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/tool_reservations?borrower_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 3,
-          "sourceColumn": "borrower_id",
-          "sourceColumnDisplayName": "Borrower",
-          "sourceTable": "tool_reservations",
-          "sourceTableDisplayName": "Tool Reservations"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "borrowers"
-    },
-    {
-      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Requester", "sourceTable": "mek_requests", "sourceTableDisplayName": "Event Kit Requests"},
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/mek_requests?borrower_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Requester", "sourceTable": "mek_requests", "sourceTableDisplayName": "Event Kit Requests"},
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "borrowers"
-    },
-    {
-      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Trainee", "sourceTable": "training_records", "sourceTableDisplayName": "Training Records"},
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/training_records?borrower_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Trainee", "sourceTable": "training_records", "sourceTableDisplayName": "Training Records"},
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "borrowers"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
-        "sortOrder": 7,
-        "sourceColumn": "borrower_id",
-        "sourceColumnDisplayName": "Applicant",
-        "sourceTable": "building_use_requests",
-        "sourceTableDisplayName": "Building Use Requests"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/building_use_requests?borrower_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 7,
-          "sourceColumn": "borrower_id",
-          "sourceColumnDisplayName": "Applicant",
-          "sourceTable": "building_use_requests",
-          "sourceTableDisplayName": "Building Use Requests"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "borrowers"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "id",
-        "showOnDetail": true,
-        "sortOrder": 2,
-        "sourceColumn": "building_use_request_id",
-        "sourceColumnDisplayName": "Building Use Request Id",
-        "sourceTable": "building_use_event_details",
-        "sourceTableDisplayName": "Event Details"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/building_use_event_details?building_use_request_id=eq.7&select=id&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "id",
-          "showOnDetail": true,
-          "sortOrder": 2,
-          "sourceColumn": "building_use_request_id",
-          "sourceColumnDisplayName": "Building Use Request Id",
-          "sourceTable": "building_use_event_details",
-          "sourceTableDisplayName": "Event Details"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "building_use_requests"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
         "sortOrder": 10,
         "sourceColumn": "checkout_id",
         "sourceColumnDisplayName": "Checkout",
@@ -9979,173 +9830,6 @@
         "totalCount": 15
       },
       "target": "mek_checkouts"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "id",
-        "showOnDetail": true,
-        "sortOrder": 2,
-        "sourceColumn": "mek_request_id",
-        "sourceColumnDisplayName": "Mek Request Id",
-        "sourceTable": "mek_request_equipment",
-        "sourceTableDisplayName": "Equipment Selection"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/mek_request_equipment?mek_request_id=eq.7&select=id&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "id",
-          "showOnDetail": true,
-          "sortOrder": 2,
-          "sourceColumn": "mek_request_id",
-          "sourceColumnDisplayName": "Mek Request Id",
-          "sourceTable": "mek_request_equipment",
-          "sourceTableDisplayName": "Equipment Selection"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "mek_requests"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
-        "sortOrder": 10,
-        "sourceColumn": "mek_request_id",
-        "sourceColumnDisplayName": "MEK Request",
-        "sourceTable": "mek_checkouts",
-        "sourceTableDisplayName": "MEK Checkout"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/mek_checkouts?mek_request_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 10,
-          "sourceColumn": "mek_request_id",
-          "sourceColumnDisplayName": "MEK Request",
-          "sourceTable": "mek_checkouts",
-          "sourceTableDisplayName": "MEK Checkout"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "mek_requests"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
-        "sortOrder": 30,
-        "sourceColumn": "tool_instance_id",
-        "sourceColumnDisplayName": "Instance",
-        "sourceTable": "checkout_items",
-        "sourceTableDisplayName": "Checkout Items"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/checkout_items?tool_instance_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 30,
-          "sourceColumn": "tool_instance_id",
-          "sourceColumnDisplayName": "Instance",
-          "sourceTable": "checkout_items",
-          "sourceTableDisplayName": "Checkout Items"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "tool_instances"
-    },
-    {
-      "meta": {
-        "previewLimit": 5,
-        "previewMode": "display_name",
-        "showOnDetail": true,
-        "sortOrder": 30,
-        "sourceColumn": "tool_instance_id",
-        "sourceColumnDisplayName": "Instance",
-        "sourceTable": "mek_checkout_items",
-        "sourceTableDisplayName": "MEK Checkout Item"
-      },
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/mek_checkout_items?tool_instance_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {
-          "previewLimit": 5,
-          "previewMode": "display_name",
-          "showOnDetail": true,
-          "sortOrder": 30,
-          "sourceColumn": "tool_instance_id",
-          "sourceColumnDisplayName": "Instance",
-          "sourceTable": "mek_checkout_items",
-          "sourceTableDisplayName": "MEK Checkout Item"
-        },
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "tool_instances"
-    },
-    {
-      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 10, "sourceColumn": "checkout_id", "sourceColumnDisplayName": "Checkout", "sourceTable": "checkout_items", "sourceTableDisplayName": "Checkout Items"},
-      "request": {
-        "headers": {"Prefer": "count=exact"},
-        "method": "GET",
-        "reportProgress": false,
-        "responseType": "json",
-        "url": "<PGRST>/checkout_items?checkout_id=eq.7&select=id,display_name&limit=5"
-      },
-      "result": {
-        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 10, "sourceColumn": "checkout_id", "sourceColumnDisplayName": "Checkout", "sourceTable": "checkout_items", "sourceTableDisplayName": "Checkout Items"},
-        "previewRecords": [
-          {"id": 1}
-        ],
-        "targetId": 7,
-        "totalCount": 15
-      },
-      "target": "tool_reservation_checkouts"
     },
     {
       "meta": {
@@ -10259,6 +9943,137 @@
       "target": "tool_reservations"
     },
     {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 3,
+        "sourceColumn": "borrower_id",
+        "sourceColumnDisplayName": "Borrower",
+        "sourceTable": "tool_reservations",
+        "sourceTableDisplayName": "Tool Reservations"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/tool_reservations?borrower_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 3,
+          "sourceColumn": "borrower_id",
+          "sourceColumnDisplayName": "Borrower",
+          "sourceTable": "tool_reservations",
+          "sourceTableDisplayName": "Tool Reservations"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "borrowers"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Requester", "sourceTable": "mek_requests", "sourceTableDisplayName": "Event Kit Requests"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/mek_requests?borrower_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Requester", "sourceTable": "mek_requests", "sourceTableDisplayName": "Event Kit Requests"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "borrowers"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Trainee", "sourceTable": "training_records", "sourceTableDisplayName": "Training Records"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/training_records?borrower_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 5, "sourceColumn": "borrower_id", "sourceColumnDisplayName": "Trainee", "sourceTable": "training_records", "sourceTableDisplayName": "Training Records"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "borrowers"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 7,
+        "sourceColumn": "borrower_id",
+        "sourceColumnDisplayName": "Applicant",
+        "sourceTable": "building_use_requests",
+        "sourceTableDisplayName": "Building Use Requests"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/building_use_requests?borrower_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 7,
+          "sourceColumn": "borrower_id",
+          "sourceColumnDisplayName": "Applicant",
+          "sourceTable": "building_use_requests",
+          "sourceTableDisplayName": "Building Use Requests"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "borrowers"
+    },
+    {
+      "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 10, "sourceColumn": "checkout_id", "sourceColumnDisplayName": "Checkout", "sourceTable": "checkout_items", "sourceTableDisplayName": "Checkout Items"},
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/checkout_items?checkout_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 10, "sourceColumn": "checkout_id", "sourceColumnDisplayName": "Checkout", "sourceTable": "checkout_items", "sourceTableDisplayName": "Checkout Items"},
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "tool_reservation_checkouts"
+    },
+    {
       "meta": {"previewLimit": 5, "previewMode": "display_name", "showOnDetail": true, "sortOrder": 3, "sourceColumn": "tool_type_id", "sourceColumnDisplayName": "Tool Type", "sourceTable": "tool_instances", "sourceTableDisplayName": "Tool Instances"},
       "request": {
         "headers": {"Prefer": "count=exact"},
@@ -10332,6 +10147,191 @@
         "totalCount": 15
       },
       "target": "tool_types"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 30,
+        "sourceColumn": "tool_instance_id",
+        "sourceColumnDisplayName": "Instance",
+        "sourceTable": "checkout_items",
+        "sourceTableDisplayName": "Checkout Items"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/checkout_items?tool_instance_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 30,
+          "sourceColumn": "tool_instance_id",
+          "sourceColumnDisplayName": "Instance",
+          "sourceTable": "checkout_items",
+          "sourceTableDisplayName": "Checkout Items"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "tool_instances"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 30,
+        "sourceColumn": "tool_instance_id",
+        "sourceColumnDisplayName": "Instance",
+        "sourceTable": "mek_checkout_items",
+        "sourceTableDisplayName": "MEK Checkout Item"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/mek_checkout_items?tool_instance_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 30,
+          "sourceColumn": "tool_instance_id",
+          "sourceColumnDisplayName": "Instance",
+          "sourceTable": "mek_checkout_items",
+          "sourceTableDisplayName": "MEK Checkout Item"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "tool_instances"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "id",
+        "showOnDetail": true,
+        "sortOrder": 2,
+        "sourceColumn": "building_use_request_id",
+        "sourceColumnDisplayName": "Building Use Request Id",
+        "sourceTable": "building_use_event_details",
+        "sourceTableDisplayName": "Event Details"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/building_use_event_details?building_use_request_id=eq.7&select=id&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "id",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "building_use_request_id",
+          "sourceColumnDisplayName": "Building Use Request Id",
+          "sourceTable": "building_use_event_details",
+          "sourceTableDisplayName": "Event Details"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "building_use_requests"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "id",
+        "showOnDetail": true,
+        "sortOrder": 2,
+        "sourceColumn": "mek_request_id",
+        "sourceColumnDisplayName": "Mek Request Id",
+        "sourceTable": "mek_request_equipment",
+        "sourceTableDisplayName": "Equipment Selection"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/mek_request_equipment?mek_request_id=eq.7&select=id&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "id",
+          "showOnDetail": true,
+          "sortOrder": 2,
+          "sourceColumn": "mek_request_id",
+          "sourceColumnDisplayName": "Mek Request Id",
+          "sourceTable": "mek_request_equipment",
+          "sourceTableDisplayName": "Equipment Selection"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "mek_requests"
+    },
+    {
+      "meta": {
+        "previewLimit": 5,
+        "previewMode": "display_name",
+        "showOnDetail": true,
+        "sortOrder": 10,
+        "sourceColumn": "mek_request_id",
+        "sourceColumnDisplayName": "MEK Request",
+        "sourceTable": "mek_checkouts",
+        "sourceTableDisplayName": "MEK Checkout"
+      },
+      "request": {
+        "headers": {"Prefer": "count=exact"},
+        "method": "GET",
+        "reportProgress": false,
+        "responseType": "json",
+        "url": "<PGRST>/mek_checkouts?mek_request_id=eq.7&select=id,display_name&limit=5"
+      },
+      "result": {
+        "meta": {
+          "previewLimit": 5,
+          "previewMode": "display_name",
+          "showOnDetail": true,
+          "sortOrder": 10,
+          "sourceColumn": "mek_request_id",
+          "sourceColumnDisplayName": "MEK Request",
+          "sourceTable": "mek_checkouts",
+          "sourceTableDisplayName": "MEK Checkout"
+        },
+        "previewRecords": [
+          {"id": 1}
+        ],
+        "targetId": 7,
+        "totalCount": 15
+      },
+      "target": "mek_requests"
     }
   ]
 }

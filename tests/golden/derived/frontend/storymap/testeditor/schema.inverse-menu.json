@@ -25,6 +25,6 @@
       "excluding": ["team_rosters"]
     }
   },
-  "management": ["participants", "sponsors", "team_rosters", "teams"],
-  "menu": ["participants", "sponsors", "team_rosters", "teams"]
+  "management": ["participants", "teams", "team_rosters", "sponsors"],
+  "menu": ["participants", "teams", "team_rosters", "sponsors"]
 }
