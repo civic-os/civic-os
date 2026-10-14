@@ -11,13 +11,17 @@
  *   node scripts/test-ledger.mjs --update        run suite N times (--runs N, default 5),
  *                                                rewrite baseline with per-test minimum
  *   node scripts/test-ledger.mjs --update --reset-unstable   rebuild unstable marks from scratch
- *   --update refuses to write on DECREASED / DISAPPEARED / NEWLY UNSTABLE unless
- *   --accept-decreases / --accept-disappeared / --accept-new-unstable is given;
- *   waived items are recorded in the baseline's acceptedChanges.
+ *   --update refuses to write on DECREASED / DISAPPEARED / NEWLY UNSTABLE /
+ *   STATE REGRESSED (passed -> skipped or todo) unless --accept-decreases /
+ *   --accept-disappeared / --accept-new-unstable / --accept-state-regressions
+ *   is given; waived items, and every other STATE CHANGED (e.g. skipped ->
+ *   passed, informational), are recorded in the baseline's acceptedChanges.
  *   node scripts/test-ledger.mjs --suggest-leakers   heuristic report, never writes
  *   node scripts/test-ledger.mjs --from <file>   use an existing raw ledger JSON
  *                                                (written by the vitest reporter
  *                                                when SDK_LEDGER_OUT is set)
+ *   --baseline <file>                            compare with / write this file instead
+ *                                                of tests/baselines/unit-ledger.json
  *
  * Fails (exit 1) if, versus tests/baselines/unit-ledger.json:
  *   - any test's assertion count decreased
@@ -25,7 +29,8 @@
  *   - any test that passed no longer passes
  *   - total test count decreased
  *   - skipped + todo count increased
- * New tests are reported but allowed.
+ * New tests are reported but allowed. Other state changes (e.g. skipped ->
+ * passed) are reported under STATE CHANGED and allowed.
  *
  * Unstable vs leakers: some specs assert after their own test ended (inside
  * async subscribe callbacks). Vitest's global assertion counter charges those
@@ -44,9 +49,9 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const BASELINE = join(root, 'tests/baselines/unit-ledger.json');
-
 const args = process.argv.slice(2);
+const baselineIdx = args.indexOf('--baseline');
+const BASELINE = baselineIdx >= 0 ? resolve(args[baselineIdx + 1] ?? '') : join(root, 'tests/baselines/unit-ledger.json');
 const update = args.includes('--update');
 const fromIdx = args.indexOf('--from');
 const fromFile = fromIdx >= 0 ? resolve(args[fromIdx + 1] ?? '') : null;
@@ -199,11 +204,17 @@ if (update) {
   }
 
   const decreased = [], disappeared = [], newlyUnstable = [], added = [], increased = [];
+  const stateRegressed = [], stateChanged = [];
   if (existing) {
     for (const [k, e] of Object.entries(existing.tests)) {
       const c = current[k];
       if (!c) disappeared.push({ test: k, from: e.assertions, to: null });
       else {
+        if (c.state !== e.state) {
+          // passed -> skipped/todo loses coverage and is gated; anything else
+          // (typically skipped -> passed) is informational.
+          (e.state === 'passed' ? stateRegressed : stateChanged).push({ test: k, from: e.state, to: c.state });
+        }
         if (c.assertions < e.assertions) decreased.push({ test: k, from: e.assertions, to: c.assertions });
         else if (c.assertions > e.assertions) increased.push({ test: k, from: e.assertions, to: c.assertions });
         if (c.unstable && !e.unstable) newlyUnstable.push({ test: k, from: e.assertions, to: c.assertions });
@@ -220,6 +231,8 @@ if (update) {
   show('DECREASED', decreased, (i) => `${i.from} -> ${i.to}`);
   show('DISAPPEARED', disappeared);
   show('NEWLY UNSTABLE', newlyUnstable, (i) => `was stable at ${i.from}, now varies (min ${i.to})`);
+  show('STATE REGRESSED', stateRegressed, (i) => `${i.from} -> ${i.to}`);
+  show('STATE CHANGED (informational)', stateChanged, (i) => `${i.from} -> ${i.to}`);
   show('NEW', added);
   if (increased.length) console.log(`\nINCREASED (${increased.length}), allowed.`);
 
@@ -227,6 +240,7 @@ if (update) {
     ['DECREASED', decreased, '--accept-decreases'],
     ['DISAPPEARED', disappeared, '--accept-disappeared'],
     ['NEWLY UNSTABLE', newlyUnstable, '--accept-new-unstable'],
+    ['STATE REGRESSED', stateRegressed, '--accept-state-regressions'],
   ];
   const blocked = gates.filter(([, items, flag]) => items.length && !args.includes(flag));
   if (blocked.length) {
@@ -236,6 +250,7 @@ if (update) {
   const now = new Date().toISOString();
   const accepted = [];
   for (const [name, items] of gates) for (const i of items) accepted.push({ at: now, kind: name, test: i.test, from: i.from, to: i.to });
+  for (const i of stateChanged) accepted.push({ at: now, kind: 'STATE CHANGED', test: i.test, from: i.from, to: i.to });
   if (accepted.length) {
     console.log('\nACCEPTED CHANGES (recorded in baseline acceptedChanges):');
     for (const a of accepted) console.log(`  - [${a.kind}] ${a.test}  ${a.from} -> ${a.to}`);
@@ -264,6 +279,7 @@ const baseTests = base.tests;
 const decreased = [];
 const disappeared = [];
 const regressed = [];
+const stateChanged = [];
 const added = [];
 const increased = [];
 for (const [k, b] of Object.entries(baseTests)) {
@@ -275,6 +291,7 @@ for (const [k, b] of Object.entries(baseTests)) {
   if (c.assertions < b.assertions) decreased.push(`${k}\n      ${b.assertions} -> ${c.assertions} (state ${c.state})`);
   if (c.assertions > b.assertions) increased.push(k);
   if (b.state === 'passed' && c.state !== 'passed') regressed.push(`${k}\n      passed -> ${c.state}`);
+  else if (b.state !== c.state) stateChanged.push(`${k}\n      ${b.state} -> ${c.state}`);
 }
 for (const k of Object.keys(current)) if (!(k in baseTests)) added.push(k);
 
@@ -299,6 +316,7 @@ console.log(`current : ${ct.tests} tests, ${ct.assertions} assertions, ${ct.skip
 section('ASSERTION COUNT DECREASED', decreased, '(possible vacuous test)');
 section('BASELINE TEST DISAPPEARED', disappeared, '(a rename appears here AND under NEW; lead must approve)');
 section('PASSED -> NOT PASSED', regressed);
+section('STATE CHANGED', stateChanged, '(informational; e.g. skipped -> passed. Recorded in acceptedChanges by --update.)');
 section('NEW TESTS', added, '(allowed; listed so renames are visible)');
 if (increased.length) console.log(`\nassertion count increased on ${increased.length} test(s) (allowed).`);
 for (const p of problems) console.log(`\nPROBLEM: ${p}`);
