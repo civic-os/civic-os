@@ -29,7 +29,18 @@ interface Payload { httpCode?: number; code?: string; message?: string; details?
 const toError = (p: Payload) =>
   new PostgRESTRequestError(p.message as string, p.httpCode as number, p.code, p.details, p.hint);
 
-/** HTTP error cases of the frontend parseApiError artifact, as the MCP client would receive them. */
+/**
+ * HTTP error cases of the frontend parseApiError artifact, as the MCP client
+ * would receive them. FE_STATUS_TEXT is the statusText the frontend spec gives
+ * each HttpErrorResponse (the MCP client does not read it); it is recorded so
+ * the ledger can check the frontend's message fallback exactly.
+ */
+const FE_STATUS_TEXT: Record<string, string | null> = {
+  'postgrest 23505': 'Conflict', 'postgrest 23514 constraint': 'Bad Request', 'postgrest 42501': 'Forbidden',
+  'postgrest P0001': 'Bad Request', 'postgrest no message': 'Bad Request', 'postgrest no message no statusText': null,
+  'string body': 'Bad Gateway', 'null body': 'Not Found', 'network error status 0': 'Unknown Error', '401 empty': 'Unauthorized',
+  '503 PT503': 'Service Unavailable',
+};
 const CLIENT_CASES: Record<string, StubResponse> = {
   'postgrest 23505': { status: 409, body: { code: '23505', message: 'duplicate key', details: 'Key exists', hint: null } },
   'postgrest 23514 constraint': { status: 400, body: { code: '23514', message: 'violates check constraint "c1"', details: null, hint: 'h' } },
@@ -93,7 +104,10 @@ describe('golden (mcp): error messages', () => {
         }
       }
       restoreFetch();
+      // The stubbed response (and the frontend's statusText) so the ledger can model both sides exactly.
+      out[name] = { ...(out[name] as object), input: { response, feStatusText: FE_STATUS_TEXT[name] } };
     }
+    expect(Object.keys(FE_STATUS_TEXT).sort()).toEqual(Object.keys(CLIENT_CASES).sort());
     checkGolden('_shared/errors.data-parse-api-error.json', out);
   });
 

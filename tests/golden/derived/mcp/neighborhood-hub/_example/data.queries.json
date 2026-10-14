@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "borrowers", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -23,7 +23,7 @@
           "call": "list_records",
           "input": {"entity": "borrowers", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -40,7 +40,7 @@
           "call": "list_records",
           "input": {"entity": "borrowers", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -57,7 +57,7 @@
           "call": "list_records",
           "input": {"entity": "borrowers", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -310,7 +310,7 @@
           "call": "list_records",
           "input": {"entity": "borrowers", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": [
@@ -328,7 +328,7 @@
           "call": "get_record",
           "input": {"entity": "borrowers", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -369,7 +369,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_event_details", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,", "order=id.asc"],
@@ -383,7 +383,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_event_details", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,", "order=id.asc"],
@@ -397,7 +397,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_event_details", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,", "order=id.asc"],
@@ -411,7 +411,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_event_details", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,", "order=id.asc"],
@@ -483,7 +483,7 @@
           "call": "get_record",
           "input": {"entity": "building_use_event_details", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -524,7 +524,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_request_rooms", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)", "order=building_use_request_id.asc"],
@@ -538,7 +538,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_request_rooms", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)", "order=building_use_request_id.asc"],
@@ -552,7 +552,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_request_rooms", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)", "order=building_use_request_id.asc"],
@@ -566,7 +566,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_request_rooms", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name)", "order=building_use_request_id.asc"],
@@ -688,7 +688,7 @@
           "call": "get_record",
           "input": {"entity": "building_use_request_rooms", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=building_use_request_id:building_use_requests!building_use_request_id(id,display_name),room_id:building_use_rooms!room_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -720,7 +720,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_requests", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees", "order=display_name.asc"],
@@ -734,7 +734,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_requests", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees", "order=display_name.asc"],
@@ -748,7 +748,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_requests", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees", "order=display_name.asc"],
@@ -762,7 +762,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_requests", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees", "order=display_name.asc"],
@@ -997,7 +997,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,group_name,group_type:categories!group_type(id,display_name,color),time_slot,estimated_attendees", "status_id=eq.5", "order=display_name.asc"],
@@ -1089,14 +1089,14 @@
           },
           "invalidInput": ["limit: too_big"],
           "name": "calendar overlap filter",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
           "requests": []
         },
         {
           "call": "get_record",
           "input": {"entity": "building_use_requests", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -1137,7 +1137,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_rooms", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,capacity,has_av,description,sort_order", "order=display_name.asc"],
@@ -1151,7 +1151,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_rooms", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,capacity,has_av,description,sort_order", "order=display_name.asc"],
@@ -1165,7 +1165,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_rooms", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,capacity,has_av,description,sort_order", "order=display_name.asc"],
@@ -1179,7 +1179,7 @@
           "call": "list_records",
           "input": {"entity": "building_use_rooms", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,capacity,has_av,description,sort_order", "order=display_name.asc"],
@@ -1409,7 +1409,7 @@
           "call": "get_record",
           "input": {"entity": "building_use_rooms", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,capacity,has_av,description,sort_order,created_at,updated_at", "id=eq.1"],
@@ -1420,21 +1420,7 @@
           ],
           "toolError": "Record #1 not found in Building Use Rooms."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "building_use_rooms", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name,capacity,has_av,description,sort_order,created_at,updated_at", "id=eq.44444444-4444-4444-8444-444444444444"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/building_use_rooms?select=id%2Cdisplay_name%2Ccapacity%2Chas_av%2Cdescription%2Csort_order%2Ccreated_at%2Cupdated_at&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Building Use Rooms."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {
@@ -1461,7 +1447,7 @@
           "call": "list_records",
           "input": {"entity": "census_block_groups", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct", "order=display_name.asc"],
@@ -1475,7 +1461,7 @@
           "call": "list_records",
           "input": {"entity": "census_block_groups", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct", "order=display_name.asc"],
@@ -1489,7 +1475,7 @@
           "call": "list_records",
           "input": {"entity": "census_block_groups", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct", "order=display_name.asc"],
@@ -1503,7 +1489,7 @@
           "call": "list_records",
           "input": {"entity": "census_block_groups", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct", "order=display_name.asc"],
@@ -1733,7 +1719,7 @@
           "call": "list_records",
           "input": {"entity": "census_block_groups", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lmi_status:categories!lmi_status(id,display_name,color),geoid,lowmod_pct", "display_name=ilike.*pot hole*", "order=display_name.asc"],
@@ -1747,7 +1733,7 @@
           "call": "get_record",
           "input": {"entity": "census_block_groups", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lmi_status:categories!lmi_status(id,display_name,color),boundary:boundary_text,geoid,civic_os_text_search,created_at,updated_at,lowmod_pct,lowmod,lowmod_universe,low", "id=eq.1"],
@@ -1785,7 +1771,7 @@
           "call": "list_records",
           "input": {"entity": "checkout_items", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at", "order=display_name.asc"],
@@ -1799,7 +1785,7 @@
           "call": "list_records",
           "input": {"entity": "checkout_items", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at", "order=display_name.asc"],
@@ -1813,7 +1799,7 @@
           "call": "list_records",
           "input": {"entity": "checkout_items", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at", "order=display_name.asc"],
@@ -1827,7 +1813,7 @@
           "call": "list_records",
           "input": {"entity": "checkout_items", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes,created_at", "order=display_name.asc"],
@@ -2077,6 +2063,7 @@
           "call": "get_record",
           "input": {"entity": "checkout_items", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -2117,7 +2104,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkout_items", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes", "order=display_name.asc"],
@@ -2131,7 +2118,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkout_items", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes", "order=display_name.asc"],
@@ -2145,7 +2132,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkout_items", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes", "order=display_name.asc"],
@@ -2159,7 +2146,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkout_items", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),tool_instance_id:tool_instances!tool_instance_id(id,display_name),quantity,notes", "order=display_name.asc"],
@@ -2389,7 +2376,7 @@
           "call": "get_record",
           "input": {"entity": "mek_checkout_items", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -2430,7 +2417,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkouts", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -2447,7 +2434,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkouts", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -2464,7 +2451,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkouts", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -2481,7 +2468,7 @@
           "call": "list_records",
           "input": {"entity": "mek_checkouts", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -2774,7 +2761,7 @@
           "call": "get_record",
           "input": {"entity": "mek_checkouts", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -2815,7 +2802,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,equipment_notes", "order=id.asc"],
@@ -2829,7 +2816,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,equipment_notes", "order=id.asc"],
@@ -2843,7 +2830,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,equipment_notes", "order=id.asc"],
@@ -2857,7 +2844,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,equipment_notes", "order=id.asc"],
@@ -2957,7 +2944,7 @@
           "call": "get_record",
           "input": {"entity": "mek_request_equipment", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,mek_request_id:mek_requests!mek_request_id(id,display_name),equipment_notes,created_at,updated_at,guided_form_status_id:statuses!guided_form_status_id(id,display_name)", "id=eq.1"],
@@ -2968,21 +2955,7 @@
           ],
           "toolError": "Record #1 not found in Equipment Selection."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "mek_request_equipment", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
-          "requests": [
-            {
-              "decoded": ["select=id,mek_request_id:mek_requests!mek_request_id(id,display_name),equipment_notes,created_at,updated_at,guided_form_status_id:statuses!guided_form_status_id(id,display_name)", "id=eq.44444444-4444-4444-8444-444444444444"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/mek_request_equipment?select=id%2Cmek_request_id%3Amek_requests%21mek_request_id%28id%2Cdisplay_name%29%2Cequipment_notes%2Ccreated_at%2Cupdated_at%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%29&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Equipment Selection."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {
@@ -3009,7 +2982,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment_items", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)", "order=mek_request_equipment_id.asc"],
@@ -3023,7 +2996,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment_items", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)", "order=mek_request_equipment_id.asc"],
@@ -3037,7 +3010,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment_items", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)", "order=mek_request_equipment_id.asc"],
@@ -3051,7 +3024,7 @@
           "call": "list_records",
           "input": {"entity": "mek_request_equipment_items", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name)", "order=mek_request_equipment_id.asc"],
@@ -3187,6 +3160,7 @@
           "call": "get_record",
           "input": {"entity": "mek_request_equipment_items", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=mek_request_equipment_id:mek_request_equipment!mek_request_equipment_id(id,display_name),quantity,tool_type_id:tool_types!tool_type_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -3218,7 +3192,7 @@
           "call": "list_records",
           "input": {"entity": "mek_requests", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot", "order=display_name.asc"],
@@ -3232,7 +3206,7 @@
           "call": "list_records",
           "input": {"entity": "mek_requests", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot", "order=display_name.asc"],
@@ -3246,7 +3220,7 @@
           "call": "list_records",
           "input": {"entity": "mek_requests", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot", "order=display_name.asc"],
@@ -3260,7 +3234,7 @@
           "call": "list_records",
           "input": {"entity": "mek_requests", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,status_id:statuses!status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),event_type:categories!event_type(id,display_name,color),timeslot", "order=display_name.asc"],
@@ -3475,7 +3449,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -3571,14 +3545,14 @@
           },
           "invalidInput": ["limit: too_big"],
           "name": "calendar overlap filter",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
           "requests": []
         },
         {
           "call": "get_record",
           "input": {"entity": "mek_requests", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -3619,7 +3593,7 @@
           "call": "list_records",
           "input": {"entity": "parcels", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -3636,7 +3610,7 @@
           "call": "list_records",
           "input": {"entity": "parcels", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -3653,7 +3627,7 @@
           "call": "list_records",
           "input": {"entity": "parcels", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -3670,7 +3644,7 @@
           "call": "list_records",
           "input": {"entity": "parcels", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -3930,7 +3904,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -4020,7 +3994,7 @@
           "call": "list_records",
           "input": {"entity": "parcels", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": [
@@ -4038,7 +4012,7 @@
           "call": "get_record",
           "input": {"entity": "parcels", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -4079,7 +4053,7 @@
           "call": "list_records",
           "input": {"entity": "project_parcels", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=project_id.asc"],
@@ -4093,7 +4067,7 @@
           "call": "list_records",
           "input": {"entity": "project_parcels", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=project_id.asc"],
@@ -4107,7 +4081,7 @@
           "call": "list_records",
           "input": {"entity": "project_parcels", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=project_id.asc"],
@@ -4121,7 +4095,7 @@
           "call": "list_records",
           "input": {"entity": "project_parcels", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=project_id.asc"],
@@ -4243,7 +4217,7 @@
           "call": "get_record",
           "input": {"entity": "project_parcels", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -4275,7 +4249,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "order=display_name.asc"],
@@ -4289,7 +4263,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "order=display_name.asc"],
@@ -4303,7 +4277,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "order=display_name.asc"],
@@ -4317,7 +4291,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "order=display_name.asc"],
@@ -4507,7 +4481,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "display_name=ilike.*pot hole*", "order=display_name.asc"],
@@ -4521,7 +4495,7 @@
           "call": "get_record",
           "input": {"entity": "projects", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,created_at,updated_at,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "id=eq.1"],
@@ -4532,21 +4506,7 @@
           ],
           "toolError": "Record #1 not found in Projects."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "projects", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
-          "requests": [
-            {
-              "decoded": ["select=id,display_name,description,created_at,updated_at,photos:photo_galleries!photos(id,photo_gallery_files(file_id))", "id=eq.44444444-4444-4444-8444-444444444444"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/projects?select=id%2Cdisplay_name%2Cdescription%2Ccreated_at%2Cupdated_at%2Cphotos%3Aphoto_galleries%21photos%28id%2Cphoto_gallery_files%28file_id%29%29&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Projects."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {
@@ -4573,7 +4533,7 @@
           "call": "list_records",
           "input": {"entity": "tool_instances", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4587,7 +4547,7 @@
           "call": "list_records",
           "input": {"entity": "tool_instances", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4601,7 +4561,7 @@
           "call": "list_records",
           "input": {"entity": "tool_instances", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4615,7 +4575,7 @@
           "call": "list_records",
           "input": {"entity": "tool_instances", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4825,7 +4785,7 @@
           "call": "list_records",
           "input": {"entity": "tool_instances", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key)", "display_name=ilike.*pot hole*", "order=display_name.asc"],
@@ -4839,6 +4799,7 @@
           "call": "get_record",
           "input": {"entity": "tool_instances", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,tool_type_id:tool_types!tool_type_id(id,display_name),instance_number,status_id:statuses!status_id(id,display_name,color,status_key),created_at,updated_at", "id=eq.1"],
@@ -4876,7 +4837,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_checkouts", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -4893,7 +4854,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_checkouts", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -4910,7 +4871,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_checkouts", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -4927,7 +4888,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_checkouts", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -5200,7 +5161,7 @@
           "call": "get_record",
           "input": {"entity": "tool_reservation_checkouts", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -5241,7 +5202,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tool_items", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)", "order=quantity.asc"],
@@ -5255,7 +5216,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tool_items", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)", "order=quantity.asc"],
@@ -5269,7 +5230,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tool_items", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)", "order=quantity.asc"],
@@ -5283,7 +5244,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tool_items", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name)", "order=quantity.asc"],
@@ -5419,6 +5380,7 @@
           "call": "get_record",
           "input": {"entity": "tool_reservation_tool_items", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=quantity,tool_reservation_tools_id:tool_reservation_tools!tool_reservation_tools_id(id,display_name),tool_type_id:tool_types!tool_type_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -5450,7 +5412,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tools", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,tool_notes", "order=id.asc"],
@@ -5464,7 +5426,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tools", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,tool_notes", "order=id.asc"],
@@ -5478,7 +5440,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tools", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,tool_notes", "order=id.asc"],
@@ -5492,7 +5454,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_tools", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,tool_notes", "order=id.asc"],
@@ -5592,7 +5554,7 @@
           "call": "get_record",
           "input": {"entity": "tool_reservation_tools", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name),tool_notes,created_at,updated_at,guided_form_status_id:statuses!guided_form_status_id(id,display_name)", "id=eq.1"],
@@ -5603,21 +5565,7 @@
           ],
           "toolError": "Record #1 not found in Tool Selection."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "tool_reservation_tools", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
-          "requests": [
-            {
-              "decoded": ["select=id,tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name),tool_notes,created_at,updated_at,guided_form_status_id:statuses!guided_form_status_id(id,display_name)", "id=eq.44444444-4444-4444-8444-444444444444"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/tool_reservation_tools?select=id%2Ctool_reservation_id%3Atool_reservations%21tool_reservation_id%28id%2Cdisplay_name%29%2Ctool_notes%2Ccreated_at%2Cupdated_at%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%29&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Tool Selection."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {
@@ -5644,7 +5592,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_work_site", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,site_description", "order=id.asc"],
@@ -5658,7 +5606,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_work_site", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,site_description", "order=id.asc"],
@@ -5672,7 +5620,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_work_site", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,site_description", "order=id.asc"],
@@ -5686,7 +5634,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservation_work_site", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,site_description", "order=id.asc"],
@@ -5786,7 +5734,7 @@
           "call": "get_record",
           "input": {"entity": "tool_reservation_work_site", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name),site_description,created_at,updated_at,guided_form_status_id:statuses!guided_form_status_id(id,display_name)", "id=eq.1"],
@@ -5797,24 +5745,7 @@
           ],
           "toolError": "Record #1 not found in Work Site."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "tool_reservation_work_site", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
-          "requests": [
-            {
-              "decoded": [
-                "select=id,tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name),site_description,created_at,updated_at,guided_form_status_id:statuses!guided_form_status_id(id,display_name)",
-                "id=eq.44444444-4444-4444-8444-444444444444"
-              ],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/tool_reservation_work_site?select=id%2Ctool_reservation_id%3Atool_reservations%21tool_reservation_id%28id%2Cdisplay_name%29%2Csite_description%2Ccreated_at%2Cupdated_at%2Cguided_form_status_id%3Astatuses%21guided_form_status_id%28id%2Cdisplay_name%29&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Work Site."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {
@@ -5841,7 +5772,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservations", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes", "order=display_name.asc"],
@@ -5855,7 +5786,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservations", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes", "order=display_name.asc"],
@@ -5869,7 +5800,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservations", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes", "order=display_name.asc"],
@@ -5883,7 +5814,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservations", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,borrower_id:borrowers!borrower_id(id,display_name),timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes", "order=display_name.asc"],
@@ -6153,7 +6084,7 @@
           "call": "list_records",
           "input": {"entity": "tool_reservations", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": [
@@ -6179,14 +6110,14 @@
           },
           "invalidInput": ["limit: too_big"],
           "name": "calendar overlap filter",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
           "requests": []
         },
         {
           "call": "get_record",
           "input": {"entity": "tool_reservations", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -6227,7 +6158,7 @@
           "call": "list_records",
           "input": {"entity": "tool_types", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity", "order=display_name.asc"],
@@ -6241,7 +6172,7 @@
           "call": "list_records",
           "input": {"entity": "tool_types", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity", "order=display_name.asc"],
@@ -6255,7 +6186,7 @@
           "call": "list_records",
           "input": {"entity": "tool_types", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity", "order=display_name.asc"],
@@ -6269,7 +6200,7 @@
           "call": "list_records",
           "input": {"entity": "tool_types", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,total_quantity", "order=display_name.asc"],
@@ -6499,7 +6430,7 @@
           "call": "list_records",
           "input": {"entity": "tool_types", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": [
@@ -6517,7 +6448,7 @@
           "call": "get_record",
           "input": {"entity": "tool_types", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,category_id:categories!category_id(id,display_name,color),inventory_module_id:categories!inventory_module_id(id,display_name,color),description,is_qty_managed,total_quantity,created_at,updated_at", "id=eq.1"],
@@ -6555,7 +6486,7 @@
           "call": "list_records",
           "input": {"entity": "training_records", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -6572,7 +6503,7 @@
           "call": "list_records",
           "input": {"entity": "training_records", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -6589,7 +6520,7 @@
           "call": "list_records",
           "input": {"entity": "training_records", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -6606,7 +6537,7 @@
           "call": "list_records",
           "input": {"entity": "training_records", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -6859,7 +6790,7 @@
           "call": "list_records",
           "input": {"entity": "training_records", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": [
@@ -6877,7 +6808,7 @@
           "call": "get_record",
           "input": {"entity": "training_records", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -6918,7 +6849,7 @@
           "call": "list_records",
           "input": {"entity": "work_site_parcels", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=work_site_id.asc"],
@@ -6932,7 +6863,7 @@
           "call": "list_records",
           "input": {"entity": "work_site_parcels", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=work_site_id.asc"],
@@ -6946,7 +6877,7 @@
           "call": "list_records",
           "input": {"entity": "work_site_parcels", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=work_site_id.asc"],
@@ -6960,7 +6891,7 @@
           "call": "list_records",
           "input": {"entity": "work_site_parcels", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name)", "order=work_site_id.asc"],
@@ -7082,7 +7013,7 @@
           "call": "get_record",
           "input": {"entity": "work_site_parcels", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=work_site_id:tool_reservation_work_site!work_site_id(id,display_name),parcel_id:parcels!parcel_id(id,display_name),created_at,updated_at", "id=eq.1"],

@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "participants", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
@@ -20,7 +20,7 @@
           "call": "list_records",
           "input": {"entity": "participants", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
@@ -34,7 +34,7 @@
           "call": "list_records",
           "input": {"entity": "participants", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
@@ -48,7 +48,7 @@
           "call": "list_records",
           "input": {"entity": "participants", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
@@ -244,7 +244,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "birth_date=eq.2026-07-04", "enrolled_date=eq.2026-07-04", "order=display_name.asc"],
@@ -334,7 +334,7 @@
           "call": "get_record",
           "input": {"entity": "participants", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,birth_date,home_location:home_location_text,enrolled_date,status,parent_email,parent_phone,created_at,updated_at,home_location_text", "id=eq.1"],
@@ -372,7 +372,7 @@
           "call": "list_records",
           "input": {"entity": "sponsors", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
@@ -386,7 +386,7 @@
           "call": "list_records",
           "input": {"entity": "sponsors", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
@@ -400,7 +400,7 @@
           "call": "list_records",
           "input": {"entity": "sponsors", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
@@ -414,7 +414,7 @@
           "call": "list_records",
           "input": {"entity": "sponsors", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
@@ -609,7 +609,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "partnership_start=eq.2026-07-04", "order=display_name.asc"],
@@ -699,7 +699,7 @@
           "call": "get_record",
           "input": {"entity": "sponsors", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,contact_email,location:location_text,created_at,updated_at,location_text", "id=eq.1"],
@@ -737,7 +737,7 @@
           "call": "list_records",
           "input": {"entity": "team_rosters", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
@@ -751,7 +751,7 @@
           "call": "list_records",
           "input": {"entity": "team_rosters", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
@@ -765,7 +765,7 @@
           "call": "list_records",
           "input": {"entity": "team_rosters", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
@@ -779,7 +779,7 @@
           "call": "list_records",
           "input": {"entity": "team_rosters", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
@@ -914,7 +914,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "team_id=eq.5", "participant_id=eq.5", "season_year=gte.100", "order=id.asc"],
@@ -999,7 +999,7 @@
           "call": "get_record",
           "input": {"entity": "team_rosters", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,created_at,updated_at", "id=eq.1"],
@@ -1037,7 +1037,7 @@
           "call": "list_records",
           "input": {"entity": "teams", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
@@ -1051,7 +1051,7 @@
           "call": "list_records",
           "input": {"entity": "teams", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
@@ -1065,7 +1065,7 @@
           "call": "list_records",
           "input": {"entity": "teams", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
@@ -1079,7 +1079,7 @@
           "call": "list_records",
           "input": {"entity": "teams", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
@@ -1254,7 +1254,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,age_group,season_year,color", "season_year=gte.100", "order=display_name.asc"],
@@ -1344,7 +1344,7 @@
           "call": "get_record",
           "input": {"entity": "teams", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,age_group,season_year,color,created_at,updated_at", "id=eq.1"],
@@ -1355,20 +1355,7 @@
           ],
           "toolError": "Record #1 not found in Teams."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "teams", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "requests": [
-            {
-              "decoded": ["select=id,display_name,age_group,season_year,color,created_at,updated_at", "id=eq.44444444-4444-4444-8444-444444444444"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor%2Ccreated_at%2Cupdated_at&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Teams."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {

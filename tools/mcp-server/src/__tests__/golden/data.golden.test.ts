@@ -24,6 +24,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { vi } from 'vitest';
 import { PostgRESTClient } from '../../postgrest-client.js';
 import { NameResolutionError } from '../../name-resolver.js';
+import { EntityPropertyType } from '../../interfaces.js';
 import {
   adminVariant, checkGolden, expectNoOrphans, listExamples, loadFrontendArtifact,
 } from './golden-io.js';
@@ -66,24 +67,54 @@ function entityArg(ctx: McpContext, table: string): { arg: string; note?: string
   return { arg: table, note: 'entity resolves by neither table name nor display name (see mcp.names.json)' };
 }
 
+/**
+ * Query names of the frontend data.queries.json spec (data.golden.spec.ts) and
+ * how each maps to an MCP tool. The frontend artifact elides field arrays that
+ * equal one of the entity's named lists as `<list>` / `<detail>` / `<edit>`;
+ * those labels collide when two named lists are equal, so the mapping keys off
+ * the query NAME and the actual field array (label resolved through `named`).
+ */
+const LIST_DEFAULT_QUERIES = new Set(['list', 'filters (one per filterable property)', 'hybrid search rawQueryParams', 'calendar overlap filter']);
+const EXPLICIT_COLUMN_QUERIES = new Set([
+  'list without pagination arg', 'order without direction', 'filters with in-array, empty and null values',
+  'legacy search ignores order', 'blank search falls through to order', 'limit and rawQueryParams',
+]);
+
+/** The actual field array of a recorded frontend query (resolving an elided `<name>` label). */
+function actualFields(q: Any, e: Any): string[] | undefined {
+  const f = q.input?.fields;
+  if (typeof f === 'string') {
+    const m = /^<(\w+)>$/.exec(f);
+    if (!m || !Array.isArray(e.named?.[m[1]])) throw new Error(`unresolvable field label ${f} in ${q.name}`);
+    return e.named[m[1]];
+  }
+  return f;
+}
+
 /** Map one frontend DataQuery (as recorded in its data.queries.json) to the closest MCP tool call. */
-function mapQuery(q: Any, entity: string): Mapped {
+function mapQuery(q: Any, entity: string, e: Any): Mapped {
   const input = q.input ?? {};
   const notes: string[] = [];
-  const fields = input.fields;
-  if (input.entityId !== undefined) {
-    if (fields === '<edit>') {
-      return { inexpressible: 'edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)' };
-    }
-    const args: Record<string, unknown> = { entity, id: input.entityId };
-    if (Array.isArray(fields)) args.columns = fields;
-    if (fields === '<detail>') notes.push('fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)');
-    return { tool: 'get_record', args, notes };
+  const fields = actualFields(q, e);
+  const name = String(q.name);
+  if (name === 'edit') {
+    return { inexpressible: 'edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)' };
   }
+  if (name === 'detail') {
+    notes.push('detail read -> get_record (renders the detail columns; selects every property plus timestamps)');
+    return { tool: 'get_record', args: { entity, id: input.entityId }, notes };
+  }
+  if (input.entityId !== undefined) throw new Error(`unexpected entityId in frontend query ${name}`);
   const args: Record<string, unknown> = { entity };
-  if (fields === '<list>') notes.push('fields <list> -> list_records default columns');
-  else if (typeof fields === 'string') return { inexpressible: `fields ${fields} outside a single-record read` };
-  else if (Array.isArray(fields)) args.columns = fields;
+  if (LIST_DEFAULT_QUERIES.has(name) || name.startsWith('list page ')) {
+    if (JSON.stringify(fields) !== JSON.stringify(e.named.list)) throw new Error(`${name}: expected the list columns`);
+    notes.push('list columns -> list_records default columns');
+  } else if (EXPLICIT_COLUMN_QUERIES.has(name) || name.startsWith('order ')) {
+    if (!Array.isArray(fields)) throw new Error(`${name}: expected explicit columns`);
+    args.columns = fields;
+  } else {
+    throw new Error(`frontend query not mapped: ${name}`);
+  }
   if (input.pagination) {
     const { page, pageSize } = input.pagination;
     args.offset = (page - 1) * pageSize;
@@ -115,7 +146,7 @@ function mapQuery(q: Any, entity: string): Mapped {
   }
   if (input.searchQuery !== undefined) args.search = input.searchQuery;
   if (input.rawQueryParams) {
-    if (q.name === 'hybrid search rawQueryParams') {
+    if (name === 'hybrid search rawQueryParams') {
       args.search = 'pot hole';
       notes.push("rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'");
     } else {
@@ -255,7 +286,7 @@ describe('golden (mcp): request building', () => {
         const { arg, note } = entityArg(ctx, table);
         const queries: unknown[] = [];
         for (const q of e.queries) {
-          const mapped = mapQuery(q, arg);
+          const mapped = mapQuery(q, arg, e);
           queries.push({ name: q.name, ...(await runMapped(ctx, server, mapped)) });
         }
         entities[table] = { ...(note ? { entityNote: note } : {}), queries };
@@ -271,7 +302,9 @@ describe('golden (mcp): request building', () => {
     ctx.backend.responder = emptyResponder;
     const out: Record<string, unknown> = {};
     for (const key of Object.keys(fe)) out[key] = await runMapped(ctx, server, matrixCase(key));
-    checkGolden('_shared/data.query-matrix.json', { transportDefaults: TRANSPORT_DEFAULTS, synthetic: SYNTHETIC, cases: out });
+    // MCP-detected types of the synthetic properties (the ledger's request model needs them).
+    const syntheticTypes = Object.fromEntries(ctx.cache.properties.map(p => [`${p.table_name}.${p.column_name}`, EntityPropertyType[p.type ?? 0]]));
+    checkGolden('_shared/data.query-matrix.json', { transportDefaults: TRANSPORT_DEFAULTS, synthetic: SYNTHETIC, syntheticTypes, cases: out });
   });
 
   it('Content-Range parsing over the frontend header list', async () => {

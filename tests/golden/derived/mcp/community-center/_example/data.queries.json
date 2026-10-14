@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "payment_transactions", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -23,7 +23,7 @@
           "call": "list_records",
           "input": {"entity": "payment_transactions", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -40,7 +40,7 @@
           "call": "list_records",
           "input": {"entity": "payment_transactions", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -57,7 +57,7 @@
           "call": "list_records",
           "input": {"entity": "payment_transactions", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -70,7 +70,23 @@
             }
           ]
         },
-        {"inexpressible": "fields <edit> outside a single-record read", "name": "list without pagination arg"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "payment_transactions"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/payment_transactions?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
         {
           "call": "list_records",
           "input": {
@@ -694,7 +710,7 @@
           "call": "get_record",
           "input": {"entity": "payment_transactions", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -735,7 +751,7 @@
           "call": "list_records",
           "input": {"entity": "reservation_requests", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -752,7 +768,7 @@
           "call": "list_records",
           "input": {"entity": "reservation_requests", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -769,7 +785,7 @@
           "call": "list_records",
           "input": {"entity": "reservation_requests", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -786,7 +802,7 @@
           "call": "list_records",
           "input": {"entity": "reservation_requests", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -1067,14 +1083,14 @@
           },
           "invalidInput": ["limit: too_big"],
           "name": "calendar overlap filter",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
           "requests": []
         },
         {
           "call": "get_record",
           "input": {"entity": "reservation_requests", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -1115,7 +1131,7 @@
           "call": "list_records",
           "input": {"entity": "reservations", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color", "order=display_name.asc"],
@@ -1129,7 +1145,7 @@
           "call": "list_records",
           "input": {"entity": "reservations", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color", "order=display_name.asc"],
@@ -1143,7 +1159,7 @@
           "call": "list_records",
           "input": {"entity": "reservations", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color", "order=display_name.asc"],
@@ -1157,7 +1173,7 @@
           "call": "list_records",
           "input": {"entity": "reservations", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,resource_id:resources!resource_id(id,display_name),time_slot,purpose,attendee_count,event_color", "order=display_name.asc"],
@@ -1415,14 +1431,14 @@
           },
           "invalidInput": ["limit: too_big"],
           "name": "calendar overlap filter",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
+          "notes": ["list columns -> list_records default columns", "page 1/1000 -> offset 0, limit 1000"],
           "requests": []
         },
         {
           "call": "get_record",
           "input": {"entity": "reservations", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -1463,7 +1479,7 @@
           "call": "list_records",
           "input": {"entity": "resources", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,capacity,hourly_rate", "order=display_name.asc"],
@@ -1477,7 +1493,7 @@
           "call": "list_records",
           "input": {"entity": "resources", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,capacity,hourly_rate", "order=display_name.asc"],
@@ -1491,7 +1507,7 @@
           "call": "list_records",
           "input": {"entity": "resources", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,capacity,hourly_rate", "order=display_name.asc"],
@@ -1505,7 +1521,7 @@
           "call": "list_records",
           "input": {"entity": "resources", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,capacity,hourly_rate", "order=display_name.asc"],
@@ -1715,7 +1731,7 @@
           "call": "get_record",
           "input": {"entity": "resources", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,color,capacity,hourly_rate,active,created_at,updated_at,civic_os_text_search", "id=eq.1"],

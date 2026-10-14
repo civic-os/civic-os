@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "client_consents", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -23,7 +23,7 @@
           "call": "list_records",
           "input": {"entity": "client_consents", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -40,7 +40,7 @@
           "call": "list_records",
           "input": {"entity": "client_consents", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -57,7 +57,7 @@
           "call": "list_records",
           "input": {"entity": "client_consents", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -310,7 +310,7 @@
           "call": "get_record",
           "input": {"entity": "client_consents", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -351,7 +351,7 @@
           "call": "list_records",
           "input": {"entity": "client_contact_summary", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
@@ -365,7 +365,7 @@
           "call": "list_records",
           "input": {"entity": "client_contact_summary", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
@@ -379,7 +379,7 @@
           "call": "list_records",
           "input": {"entity": "client_contact_summary", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
@@ -393,7 +393,7 @@
           "call": "list_records",
           "input": {"entity": "client_contact_summary", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,new_clients,intake_pending,active_clients", "order=month.asc"],
@@ -543,6 +543,7 @@
           "call": "get_record",
           "input": {"entity": "client_contact_summary", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=month,new_clients,intake_pending,active_clients,created_at,updated_at", "id=eq.1"],
@@ -574,7 +575,7 @@
           "call": "list_records",
           "input": {"entity": "client_current_consents", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -591,7 +592,7 @@
           "call": "list_records",
           "input": {"entity": "client_current_consents", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -608,7 +609,7 @@
           "call": "list_records",
           "input": {"entity": "client_current_consents", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -625,7 +626,7 @@
           "call": "list_records",
           "input": {"entity": "client_current_consents", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": [
@@ -918,7 +919,7 @@
           "call": "get_record",
           "input": {"entity": "client_current_consents", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -959,7 +960,7 @@
           "call": "list_records",
           "input": {"entity": "client_service_needs", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
@@ -973,7 +974,7 @@
           "call": "list_records",
           "input": {"entity": "client_service_needs", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
@@ -987,7 +988,7 @@
           "call": "list_records",
           "input": {"entity": "client_service_needs", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
@@ -1001,7 +1002,7 @@
           "call": "list_records",
           "input": {"entity": "client_service_needs", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=client_id.asc"],
@@ -1123,6 +1124,7 @@
           "call": "get_record",
           "input": {"entity": "client_service_needs", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=client_id:clients!client_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -1154,7 +1156,7 @@
           "call": "list_records",
           "input": {"entity": "clients", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -1171,7 +1173,7 @@
           "call": "list_records",
           "input": {"entity": "clients", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -1188,7 +1190,7 @@
           "call": "list_records",
           "input": {"entity": "clients", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -1205,7 +1207,7 @@
           "call": "list_records",
           "input": {"entity": "clients", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -1424,7 +1426,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -1513,7 +1515,7 @@
           "call": "list_records",
           "input": {"entity": "clients", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": [
@@ -1531,7 +1533,7 @@
           "call": "get_record",
           "input": {"entity": "clients", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -1572,7 +1574,7 @@
           "call": "list_records",
           "input": {"entity": "consents_expiring_soon", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
@@ -1586,7 +1588,7 @@
           "call": "list_records",
           "input": {"entity": "consents_expiring_soon", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
@@ -1600,7 +1602,7 @@
           "call": "list_records",
           "input": {"entity": "consents_expiring_soon", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
@@ -1614,7 +1616,7 @@
           "call": "list_records",
           "input": {"entity": "consents_expiring_soon", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining", "order=display_name.asc"],
@@ -1624,7 +1626,23 @@
             }
           ]
         },
-        {"inexpressible": "fields <edit> outside a single-record read", "name": "list without pagination arg"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "consents_expiring_soon"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/consents_expiring_soon?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
         {
           "call": "list_records",
           "input": {
@@ -1822,6 +1840,7 @@
           "call": "get_record",
           "input": {"entity": "consents_expiring_soon", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,client_id:clients!client_id(id,display_name),client_name,expires_date,days_remaining,created_at,updated_at", "id=eq.1"],
@@ -1859,7 +1878,7 @@
           "call": "list_records",
           "input": {"entity": "follow_up_surveys", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -1876,7 +1895,7 @@
           "call": "list_records",
           "input": {"entity": "follow_up_surveys", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -1893,7 +1912,7 @@
           "call": "list_records",
           "input": {"entity": "follow_up_surveys", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -1910,7 +1929,7 @@
           "call": "list_records",
           "input": {"entity": "follow_up_surveys", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -2130,7 +2149,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -2220,7 +2239,7 @@
           "call": "get_record",
           "input": {"entity": "follow_up_surveys", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -2261,7 +2280,7 @@
           "call": "list_records",
           "input": {"entity": "monthly_referral_summary", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
@@ -2275,7 +2294,7 @@
           "call": "list_records",
           "input": {"entity": "monthly_referral_summary", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
@@ -2289,7 +2308,7 @@
           "call": "list_records",
           "input": {"entity": "monthly_referral_summary", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
@@ -2303,7 +2322,7 @@
           "call": "list_records",
           "input": {"entity": "monthly_referral_summary", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct", "order=month.asc"],
@@ -2509,6 +2528,7 @@
           "call": "get_record",
           "input": {"entity": "monthly_referral_summary", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=month,total_referrals,warm_referrals,info_referrals,completed,not_completed,open_referrals,completion_rate_pct,created_at,updated_at", "id=eq.1"],
@@ -2540,7 +2560,7 @@
           "call": "list_records",
           "input": {"entity": "newsletter_recipients", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
@@ -2554,7 +2574,7 @@
           "call": "list_records",
           "input": {"entity": "newsletter_recipients", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
@@ -2568,7 +2588,7 @@
           "call": "list_records",
           "input": {"entity": "newsletter_recipients", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
@@ -2582,7 +2602,7 @@
           "call": "list_records",
           "input": {"entity": "newsletter_recipients", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name)", "order=newsletter_id.asc"],
@@ -2704,6 +2724,7 @@
           "call": "get_record",
           "input": {"entity": "newsletter_recipients", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=newsletter_id:newsletters!newsletter_id(id,display_name),client_id:clients!client_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -2735,7 +2756,7 @@
           "call": "list_records",
           "input": {"entity": "newsletters", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -2749,7 +2770,7 @@
           "call": "list_records",
           "input": {"entity": "newsletters", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -2763,7 +2784,7 @@
           "call": "list_records",
           "input": {"entity": "newsletters", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -2777,7 +2798,7 @@
           "call": "list_records",
           "input": {"entity": "newsletters", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,subject,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -3027,7 +3048,7 @@
           "call": "get_record",
           "input": {"entity": "newsletters", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name),created_at,updated_at", "id=eq.1"],
@@ -3065,7 +3086,7 @@
           "call": "list_records",
           "input": {"entity": "partner_service_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
@@ -3079,7 +3100,7 @@
           "call": "list_records",
           "input": {"entity": "partner_service_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
@@ -3093,7 +3114,7 @@
           "call": "list_records",
           "input": {"entity": "partner_service_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
@@ -3107,7 +3128,7 @@
           "call": "list_records",
           "input": {"entity": "partner_service_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=partner_id.asc"],
@@ -3229,6 +3250,7 @@
           "call": "get_record",
           "input": {"entity": "partner_service_categories", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=partner_id:partners!partner_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -3260,7 +3282,7 @@
           "call": "list_records",
           "input": {"entity": "partner_utilization_report", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
@@ -3274,7 +3296,7 @@
           "call": "list_records",
           "input": {"entity": "partner_utilization_report", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
@@ -3288,7 +3310,7 @@
           "call": "list_records",
           "input": {"entity": "partner_utilization_report", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
@@ -3302,7 +3324,7 @@
           "call": "list_records",
           "input": {"entity": "partner_utilization_report", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories", "order=partner_name.asc"],
@@ -3480,6 +3502,7 @@
           "call": "get_record",
           "input": {"entity": "partner_utilization_report", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=partner_name,partner_active,referral_count,completed,completion_rate_pct,service_categories,created_at,updated_at", "id=eq.1"],
@@ -3511,7 +3534,7 @@
           "call": "list_records",
           "input": {"entity": "partners", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
@@ -3525,7 +3548,7 @@
           "call": "list_records",
           "input": {"entity": "partners", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
@@ -3539,7 +3562,7 @@
           "call": "list_records",
           "input": {"entity": "partners", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
@@ -3553,7 +3576,7 @@
           "call": "list_records",
           "input": {"entity": "partners", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "order=display_name.asc"],
@@ -3729,7 +3752,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "partner_type_id=eq.5", "active=eq.true", "order=display_name.asc"],
@@ -3813,7 +3836,7 @@
           "call": "list_records",
           "input": {"entity": "partners", "limit": 25, "offset": 0, "search": "pot hole"},
           "name": "hybrid search rawQueryParams",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "rawQueryParams are ListPage.buildSearchParams('pot hole', entity) -> search: 'pot hole'"],
           "requests": [
             {
               "decoded": ["select=id,display_name,partner_type_id:categories!partner_type_id(id,display_name,color),contact_name,active", "search_vector=wfts(simple).pot hole", "order=display_name.asc"],
@@ -3827,7 +3850,7 @@
           "call": "get_record",
           "input": {"entity": "partners", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -3868,7 +3891,7 @@
           "call": "list_records",
           "input": {"entity": "referral_service_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
@@ -3882,7 +3905,7 @@
           "call": "list_records",
           "input": {"entity": "referral_service_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
@@ -3896,7 +3919,7 @@
           "call": "list_records",
           "input": {"entity": "referral_service_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
@@ -3910,7 +3933,7 @@
           "call": "list_records",
           "input": {"entity": "referral_service_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name)", "order=referral_id.asc"],
@@ -4032,6 +4055,7 @@
           "call": "get_record",
           "input": {"entity": "referral_service_categories", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=referral_id:referrals!referral_id(id,display_name),service_category_id:service_categories!service_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -4063,7 +4087,7 @@
           "call": "list_records",
           "input": {"entity": "referrals", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -4080,7 +4104,7 @@
           "call": "list_records",
           "input": {"entity": "referrals", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -4097,7 +4121,7 @@
           "call": "list_records",
           "input": {"entity": "referrals", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -4114,7 +4138,7 @@
           "call": "list_records",
           "input": {"entity": "referrals", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -4335,7 +4359,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -4439,7 +4463,7 @@
           "call": "get_record",
           "input": {"entity": "referrals", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -4480,7 +4504,7 @@
           "call": "list_records",
           "input": {"entity": "referrals_per_week", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
@@ -4494,7 +4518,7 @@
           "call": "list_records",
           "input": {"entity": "referrals_per_week", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
@@ -4508,7 +4532,7 @@
           "call": "list_records",
           "input": {"entity": "referrals_per_week", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
@@ -4522,7 +4546,7 @@
           "call": "list_records",
           "input": {"entity": "referrals_per_week", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals", "order=week_start.asc"],
@@ -4672,6 +4696,7 @@
           "call": "get_record",
           "input": {"entity": "referrals_per_week", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=week_start,week_label,total_referrals,poor_outcome_referrals,created_at,updated_at", "id=eq.1"],
@@ -4703,7 +4728,7 @@
           "call": "list_records",
           "input": {"entity": "service_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
@@ -4717,7 +4742,7 @@
           "call": "list_records",
           "input": {"entity": "service_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
@@ -4731,7 +4756,7 @@
           "call": "list_records",
           "input": {"entity": "service_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
@@ -4745,7 +4770,7 @@
           "call": "list_records",
           "input": {"entity": "service_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,active", "order=display_name.asc"],
@@ -4935,7 +4960,7 @@
           "call": "get_record",
           "input": {"entity": "service_categories", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,color,active,sort_order,created_at,updated_at", "id=eq.1"],
@@ -4973,7 +4998,7 @@
           "call": "list_records",
           "input": {"entity": "time_lag_report", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
@@ -4987,7 +5012,7 @@
           "call": "list_records",
           "input": {"entity": "time_lag_report", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
@@ -5001,7 +5026,7 @@
           "call": "list_records",
           "input": {"entity": "time_lag_report", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
@@ -5015,7 +5040,7 @@
           "call": "list_records",
           "input": {"entity": "time_lag_report", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count", "order=referral_type.asc"],
@@ -5165,6 +5190,7 @@
           "call": "get_record",
           "input": {"entity": "time_lag_report", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=referral_type,partner_name,time_to_contact,response_count,created_at,updated_at", "id=eq.1"],
@@ -5196,7 +5222,7 @@
           "call": "list_records",
           "input": {"entity": "top_needs_report", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
@@ -5210,7 +5236,7 @@
           "call": "list_records",
           "input": {"entity": "top_needs_report", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
@@ -5224,7 +5250,7 @@
           "call": "list_records",
           "input": {"entity": "top_needs_report", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
@@ -5238,7 +5264,7 @@
           "call": "list_records",
           "input": {"entity": "top_needs_report", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients", "order=service_category.asc"],
@@ -5388,6 +5414,7 @@
           "call": "get_record",
           "input": {"entity": "top_needs_report", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=service_category,color,client_count,pct_of_active_clients,created_at,updated_at", "id=eq.1"],

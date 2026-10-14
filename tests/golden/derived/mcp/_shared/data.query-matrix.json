@@ -1794,5 +1794,17 @@
       }
     ]
   },
+  "syntheticTypes": {
+    "items.c": "TextShort",
+    "items.civic_os_text_search": "Unknown",
+    "items.id": "IntegerNumber",
+    "items.name": "TextShort",
+    "items.owner": "User",
+    "items.parent_id": "ForeignKeyName",
+    "items.x": "TextShort",
+    "parents.display_name": "TextShort",
+    "parents.id": "IntegerNumber",
+    "summary_items.name": "TextShort"
+  },
   "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
 }

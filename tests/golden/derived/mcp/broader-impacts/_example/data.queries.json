@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "broader_impact_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -20,7 +20,7 @@
           "call": "list_records",
           "input": {"entity": "broader_impact_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -34,7 +34,7 @@
           "call": "list_records",
           "input": {"entity": "broader_impact_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -48,7 +48,7 @@
           "call": "list_records",
           "input": {"entity": "broader_impact_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -218,7 +218,7 @@
           "call": "get_record",
           "input": {"entity": "broader_impact_categories", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,created_at,description,updated_at", "id=eq.1"],
@@ -256,7 +256,7 @@
           "call": "list_records",
           "input": {"entity": "contact_broader_impact_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=contact_id.asc"],
@@ -270,7 +270,7 @@
           "call": "list_records",
           "input": {"entity": "contact_broader_impact_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=contact_id.asc"],
@@ -284,7 +284,7 @@
           "call": "list_records",
           "input": {"entity": "contact_broader_impact_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=contact_id.asc"],
@@ -298,7 +298,7 @@
           "call": "list_records",
           "input": {"entity": "contact_broader_impact_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=contact_id.asc"],
@@ -420,7 +420,7 @@
           "call": "get_record",
           "input": {"entity": "contact_broader_impact_categories", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -452,7 +452,7 @@
           "call": "list_records",
           "input": {"entity": "contact_projects", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)", "order=contact_id.asc"],
@@ -466,7 +466,7 @@
           "call": "list_records",
           "input": {"entity": "contact_projects", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)", "order=contact_id.asc"],
@@ -480,7 +480,7 @@
           "call": "list_records",
           "input": {"entity": "contact_projects", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)", "order=contact_id.asc"],
@@ -494,7 +494,7 @@
           "call": "list_records",
           "input": {"entity": "contact_projects", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name)", "order=contact_id.asc"],
@@ -616,7 +616,7 @@
           "call": "get_record",
           "input": {"entity": "contact_projects", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=contact_id:contacts!contact_id(id,display_name),project_id:projects!project_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -648,7 +648,7 @@
           "call": "list_records",
           "input": {"entity": "contacts", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name", "order=display_name.asc"],
@@ -662,7 +662,7 @@
           "call": "list_records",
           "input": {"entity": "contacts", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name", "order=display_name.asc"],
@@ -676,7 +676,7 @@
           "call": "list_records",
           "input": {"entity": "contacts", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name", "order=display_name.asc"],
@@ -690,7 +690,7 @@
           "call": "list_records",
           "input": {"entity": "contacts", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,first_name,last_name,email,phone,organization_id:organizations!organization_id(id,display_name),display_name", "order=display_name.asc"],
@@ -940,7 +940,7 @@
           "call": "get_record",
           "input": {"entity": "contacts", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,first_name,created_at,last_name,email,updated_at,phone,organization_id:organizations!organization_id(id,display_name),display_name,title,description,civic_os_text_search", "id=eq.1"],
@@ -978,7 +978,7 @@
           "call": "list_records",
           "input": {"entity": "interest_centers", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -992,7 +992,7 @@
           "call": "list_records",
           "input": {"entity": "interest_centers", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -1006,7 +1006,7 @@
           "call": "list_records",
           "input": {"entity": "interest_centers", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -1020,7 +1020,7 @@
           "call": "list_records",
           "input": {"entity": "interest_centers", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description", "order=display_name.asc"],
@@ -1190,7 +1190,7 @@
           "call": "get_record",
           "input": {"entity": "interest_centers", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,created_at,description,updated_at", "id=eq.1"],
@@ -1201,20 +1201,7 @@
           ],
           "toolError": "Record #1 not found in Interest Centers."
         },
-        {
-          "call": "get_record",
-          "input": {"entity": "interest_centers", "id": "44444444-4444-4444-8444-444444444444"},
-          "name": "edit",
-          "requests": [
-            {
-              "decoded": ["select=id,display_name,created_at,description,updated_at", "id=eq.44444444-4444-4444-8444-444444444444"],
-              "headers": {},
-              "method": "GET",
-              "url": "<PGRST>/interest_centers?select=id%2Cdisplay_name%2Ccreated_at%2Cdescription%2Cupdated_at&id=eq.44444444-4444-4444-8444-444444444444"
-            }
-          ],
-          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Interest Centers."
-        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
         {
           "call": "list_records",
           "input": {
@@ -1241,7 +1228,7 @@
           "call": "list_records",
           "input": {"entity": "organization_broader_impact_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=organization_id.asc"],
@@ -1255,7 +1242,7 @@
           "call": "list_records",
           "input": {"entity": "organization_broader_impact_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=organization_id.asc"],
@@ -1269,7 +1256,7 @@
           "call": "list_records",
           "input": {"entity": "organization_broader_impact_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=organization_id.asc"],
@@ -1283,7 +1270,7 @@
           "call": "list_records",
           "input": {"entity": "organization_broader_impact_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=organization_id.asc"],
@@ -1405,7 +1392,7 @@
           "call": "get_record",
           "input": {"entity": "organization_broader_impact_categories", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=organization_id:organizations!organization_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -1437,7 +1424,7 @@
           "call": "list_records",
           "input": {"entity": "organizations", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website", "order=display_name.asc"],
@@ -1451,7 +1438,7 @@
           "call": "list_records",
           "input": {"entity": "organizations", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website", "order=display_name.asc"],
@@ -1465,7 +1452,7 @@
           "call": "list_records",
           "input": {"entity": "organizations", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website", "order=display_name.asc"],
@@ -1479,7 +1466,7 @@
           "call": "list_records",
           "input": {"entity": "organizations", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,organization_type_id:categories!organization_type_id(id,display_name,color),email,phone,website", "order=display_name.asc"],
@@ -1709,7 +1696,7 @@
           "call": "get_record",
           "input": {"entity": "organizations", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,organization_type_id:categories!organization_type_id(id,display_name,color),created_at,email,updated_at,phone,website,address,description,civic_os_text_search", "id=eq.1"],
@@ -1747,7 +1734,7 @@
           "call": "list_records",
           "input": {"entity": "project_broader_impact_categories", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=project_id.asc"],
@@ -1761,7 +1748,7 @@
           "call": "list_records",
           "input": {"entity": "project_broader_impact_categories", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=project_id.asc"],
@@ -1775,7 +1762,7 @@
           "call": "list_records",
           "input": {"entity": "project_broader_impact_categories", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=project_id.asc"],
@@ -1789,7 +1776,7 @@
           "call": "list_records",
           "input": {"entity": "project_broader_impact_categories", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "order=project_id.asc"],
@@ -1911,7 +1898,7 @@
           "call": "get_record",
           "input": {"entity": "project_broader_impact_categories", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=project_id:projects!project_id(id,display_name),broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -1943,7 +1930,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -1960,7 +1947,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -1977,7 +1964,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -1994,7 +1981,7 @@
           "call": "list_records",
           "input": {"entity": "projects", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -2247,7 +2234,7 @@
           "call": "get_record",
           "input": {"entity": "projects", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [

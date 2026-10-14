@@ -8,7 +8,9 @@ Written only by `scripts/golden/derive-mcp.sh` (vitest with `GOLDEN_UPDATE=1`); 
 
 A stubbed global `fetch` plays PostgREST. Bootstrap requests the MCP makes (`schema_entities?order=...`, `schema_properties?order=...`, `schema_entity_actions?order=...`, `statuses`, `categories`, `status_transitions`, `constraint_messages`, `schema_cache_versions`) are served from the variant's raw fixture files, routed by the exact paths recorded in `tests/golden/raw/<example>/meta.json`, so `SchemaCache.initialize()` runs unmodified and `detectPropertyType` runs on its real fetch path. Every other request is captured and answered by the test. Tools (`list_records`, `get_record`, `execute_action`) are invoked the way the SDK does it: standard-schema input validation first (`invalidInput`), then the registered executor; an error thrown out of the handler is recorded as `thrown` (the SDK would return it as tool-error text). No MCP source was changed except exporting `describeConditionFailure`.
 
-Inputs are shared with the frontend wherever a frontend artifact exists: condition records are recovered from the frontend's result labels, error payloads and query inputs are read from the frontend artifacts, and the matrix tests assert that every frontend case is mapped. Regenerate the frontend goldens first when both need refreshing.
+Inputs are shared with the frontend wherever a frontend artifact exists: condition records are recovered from the frontend's result labels, error payloads and query inputs are read from the frontend artifacts, and the matrix tests assert that every frontend case is mapped. Per-entity frontend queries are mapped by query NAME and the actual field array (the frontend artifact elides field arrays equal to a named list as `<list>` / `<detail>` / `<edit>`, and those labels collide when two lists are equal). Regenerate the frontend goldens first when both need refreshing.
+
+Harness limits: the stub answers every data request with an empty result (or, in `mcp.actions-execute.json`, the record under test) and cannot reject a select. A select PostgREST would refuse (an embed through a view without the FK relationship, a column the entity lacks) therefore still "succeeds" here; the request shapes are exact, their acceptance by PostgREST is not proven (the request-equivalence harness, P0.4, covers live behavior). The ledger states this as evidence confidence 4/5 where it matters (A-01, S-02).
 
 ## Layout
 
@@ -17,7 +19,7 @@ tests/golden/derived/mcp/
   <example>/<role>[.es]/              same variants as the frontend tree
     schema.properties.json            per property: type, typeId (detectPropertyType), select (propertyToSelectString)
     schema.views.json                 filterProperties(list|detail|create|edit) per entity
-    mcp.names.json                    NameResolver: entities (table / display / upper / padded / first word),
+    mcp.names.json                    (production variants only, not .es) NameResolver: entities (table / display / upper / padded / first word),
                                       column and action anomalies (probes that do not resolve to themselves) + counts
   <example>/_example/                 role-independent, from the testadmin variant
     conditions.actions.json           evaluateCondition over the frontend artifact's conditions and records
@@ -29,14 +31,15 @@ tests/golden/derived/mcp/
     mcp.names-status-category.json    resolveStatus / resolveCategory by status_key, display name, upper case, padding
   _shared/
     conditions.matrix.json            operator x value x data matrix, dot paths, compounds (frontend inputs)
-    errors.data-parse-api-error.json  PostgRESTClient error path over the frontend's HTTP error cases
-    data.query-matrix.json            the frontend's special-character / id / limit / pagination cases, synthetic `items` schema
+    mcp.conditions-extra.json         extra cells the frontend matrix lacks (empty / whitespace strings, falsy values, falsy ids)
+    errors.data-parse-api-error.json  PostgRESTClient error path over the frontend's HTTP error cases (each with its stubbed `input`)
+    data.query-matrix.json            the frontend's special-character / id / limit / pagination cases, synthetic `items` schema (+ the MCP's detected types)
     data.content-range.json           client contentRange and the total list_records reports, frontend header list
     mcp.names-fk-requests.json        resolveForeignKeyValue (eq, then ilike) and resolveData request shapes and outcomes
     mcp.type-probes.json              detectPropertyType / propertyToSelectString over synthetic properties (every rule)
 ```
 
-Files named `mcp.*` have no frontend counterpart. All other files have the frontend artifact's name and JSON shape, minus fields the MCP has no counterpart for. Key mapping where names differ: in `errors.lookup.json`, `parseToHuman` holds `toHumanMessage()` and `parseToHumanWithLookup` holds `toHumanMessage(constraintMessages)`; `unloaded` uses the cache's value before `initialize()` (an empty list). Request records use the frontend convention `<PGRST>/path?query` for the URL as sent, plus `decoded` (parameters as PostgREST decodes them, in order); `transportDefaults` lists the headers `PostgRESTClient` adds to every request, which are omitted per request. `.es` variants run the MCP code over the Spanish fixtures although the MCP itself never sends `Accept-Language`.
+Files named `mcp.*` have no frontend counterpart. All other files have the frontend artifact's name and JSON shape, minus fields the MCP has no counterpart for. Key mapping where names differ: in `errors.lookup.json`, `parseToHuman` holds `toHumanMessage()` and `parseToHumanWithLookup` holds `toHumanMessage(constraintMessages)`; `unloaded` uses the cache's value before `initialize()` (an empty list). Request records use the frontend convention `<PGRST>/path?query` for the URL as sent, plus `decoded` (parameters as PostgREST decodes them, in order); `transportDefaults` lists the headers `PostgRESTClient` adds to every request, which are omitted per request. The MCP never sends `Accept-Language`, so it never receives the `.es` fixtures in production: the shared artifacts (`schema.properties.json`, `schema.views.json`) are still produced for `.es` so the trees align under `diff -r`, but they are non-production, no MCP-only artifact is produced for them, and the ledger skips them.
 
 Conventions as in the frontend tree: keys sorted, 2-space indent, short flat arrays/objects inline, trailing newline, `undefined` keys dropped. A thrown evaluator error is written as `__throws:<ErrorName>__`.
 

@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "Bid", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
@@ -20,7 +20,7 @@
           "call": "list_records",
           "input": {"entity": "Bid", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
@@ -34,7 +34,7 @@
           "call": "list_records",
           "input": {"entity": "Bid", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
@@ -48,7 +48,7 @@
           "call": "list_records",
           "input": {"entity": "Bid", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "order=display_name.asc"],
@@ -338,7 +338,7 @@
           "call": "get_record",
           "input": {"entity": "Bid", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,created_at,updated_at,display_name,company_email,owner:civic_os_users!owner(id,display_name,full_name),contact_phone,work_start_date,work_end_date,work_package:WorkPackage!work_package(id,display_name),total_cost", "id=eq.1"],
@@ -377,7 +377,7 @@
           "call": "list_records",
           "input": {"entity": "Issues", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -394,7 +394,7 @@
           "call": "list_records",
           "input": {"entity": "Issues", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -411,7 +411,7 @@
           "call": "list_records",
           "input": {"entity": "Issues", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -428,7 +428,7 @@
           "call": "list_records",
           "input": {"entity": "Issues", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -781,7 +781,7 @@
           "call": "get_record",
           "input": {"entity": "Issues", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -823,7 +823,7 @@
           "call": "list_records",
           "input": {"entity": "Tags", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
@@ -837,7 +837,7 @@
           "call": "list_records",
           "input": {"entity": "Tags", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
@@ -851,7 +851,7 @@
           "call": "list_records",
           "input": {"entity": "Tags", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
@@ -865,7 +865,7 @@
           "call": "list_records",
           "input": {"entity": "Tags", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,description", "order=display_name.asc"],
@@ -1055,7 +1055,7 @@
           "call": "get_record",
           "input": {"entity": "Tags", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,color,description,created_at,updated_at", "id=eq.1"],
@@ -1093,7 +1093,7 @@
           "call": "list_records",
           "input": {"entity": "WorkDetail", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -1107,7 +1107,7 @@
           "call": "list_records",
           "input": {"entity": "WorkDetail", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -1121,7 +1121,7 @@
           "call": "list_records",
           "input": {"entity": "WorkDetail", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -1135,7 +1135,7 @@
           "call": "list_records",
           "input": {"entity": "WorkDetail", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "order=display_name.asc"],
@@ -1325,7 +1325,7 @@
           "call": "get_record",
           "input": {"entity": "WorkDetail", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,created_at,updated_at,display_name,issue:Issue!issue(id,display_name),added_by:civic_os_users!added_by(id,display_name,full_name)", "id=eq.1"],
@@ -1363,7 +1363,7 @@
           "call": "list_records",
           "input": {"entity": "WorkPackage", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -1380,7 +1380,7 @@
           "call": "list_records",
           "input": {"entity": "WorkPackage", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -1397,7 +1397,7 @@
           "call": "list_records",
           "input": {"entity": "WorkPackage", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -1414,7 +1414,7 @@
           "call": "list_records",
           "input": {"entity": "WorkPackage", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -1667,7 +1667,7 @@
           "call": "get_record",
           "input": {"entity": "WorkPackage", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -1708,7 +1708,7 @@
           "call": "list_records",
           "input": {"entity": "issue_status_summary", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
@@ -1722,7 +1722,7 @@
           "call": "list_records",
           "input": {"entity": "issue_status_summary", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
@@ -1736,7 +1736,7 @@
           "call": "list_records",
           "input": {"entity": "issue_status_summary", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
@@ -1750,7 +1750,7 @@
           "call": "list_records",
           "input": {"entity": "issue_status_summary", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report", "order=display_name.asc"],
@@ -1760,7 +1760,23 @@
             }
           ]
         },
-        {"inexpressible": "fields <edit> outside a single-record read", "name": "list without pagination arg"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "issue_status_summary"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/issue_status_summary?select=display_name&order=display_name.asc"
+            }
+          ]
+        },
         {
           "call": "list_records",
           "input": {
@@ -1904,6 +1920,7 @@
           "call": "get_record",
           "input": {"entity": "issue_status_summary", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=display_name,status_color,issue_count,earliest_report,latest_report,created_at,updated_at", "id=eq.1"],
@@ -1935,7 +1952,7 @@
           "call": "list_records",
           "input": {"entity": "issue_tags", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
@@ -1949,7 +1966,7 @@
           "call": "list_records",
           "input": {"entity": "issue_tags", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
@@ -1963,7 +1980,7 @@
           "call": "list_records",
           "input": {"entity": "issue_tags", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
@@ -1977,7 +1994,7 @@
           "call": "list_records",
           "input": {"entity": "issue_tags", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name)", "order=issue_id.asc"],
@@ -2099,7 +2116,7 @@
           "call": "get_record",
           "input": {"entity": "issue_tags", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=issue_id:Issue!issue_id(id,display_name),tag_id:Tag!tag_id(id,display_name),created_at,updated_at", "id=eq.1"],

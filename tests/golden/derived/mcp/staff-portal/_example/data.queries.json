@@ -6,7 +6,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirement_roles", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
@@ -20,7 +20,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirement_roles", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
@@ -34,7 +34,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirement_roles", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
@@ -48,7 +48,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirement_roles", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name)", "order=document_requirement_id.asc"],
@@ -170,6 +170,7 @@
           "call": "get_record",
           "input": {"entity": "document_requirement_roles", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=document_requirement_id:document_requirements!document_requirement_id(id,display_name),staff_role_id:staff_roles!staff_role_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -201,7 +202,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirements", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
@@ -215,7 +216,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirements", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
@@ -229,7 +230,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirements", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
@@ -243,7 +244,7 @@
           "call": "list_records",
           "input": {"entity": "document_requirements", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,requires_approval", "order=display_name.asc"],
@@ -378,7 +379,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,requires_approval", "requires_approval=eq.true", "order=display_name.asc"],
@@ -468,7 +469,7 @@
           "call": "get_record",
           "input": {"entity": "document_requirements", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,requires_approval,sort_order,created_at,updated_at", "id=eq.1"],
@@ -506,7 +507,7 @@
           "call": "list_records",
           "input": {"entity": "incident_reports", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
@@ -520,7 +521,7 @@
           "call": "list_records",
           "input": {"entity": "incident_reports", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
@@ -534,7 +535,7 @@
           "call": "list_records",
           "input": {"entity": "incident_reports", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
@@ -548,7 +549,7 @@
           "call": "list_records",
           "input": {"entity": "incident_reports", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,reported_by_id:staff_members!reported_by_id(id,display_name),site_id:sites!site_id(id,display_name),incident_date,status_id:statuses!status_id(id,display_name),follow_up_needed", "order=display_name.asc"],
@@ -766,7 +767,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -870,7 +871,7 @@
           "call": "get_record",
           "input": {"entity": "incident_reports", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -911,7 +912,7 @@
           "call": "list_records",
           "input": {"entity": "offboarding_feedback", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
@@ -925,7 +926,7 @@
           "call": "list_records",
           "input": {"entity": "offboarding_feedback", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
@@ -939,7 +940,7 @@
           "call": "list_records",
           "input": {"entity": "offboarding_feedback", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
@@ -953,7 +954,7 @@
           "call": "list_records",
           "input": {"entity": "offboarding_feedback", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "order=display_name.asc"],
@@ -1150,7 +1151,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,would_return,submitted_at", "staff_member_id=eq.5", "overall_rating=gte.100", "would_return=eq.true", "order=display_name.asc"],
@@ -1247,7 +1248,7 @@
           "call": "get_record",
           "input": {"entity": "offboarding_feedback", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),overall_rating,what_went_well,what_could_improve,would_return,additional_comments,submitted_at,created_at,updated_at", "id=eq.1"],
@@ -1285,7 +1286,7 @@
           "call": "list_records",
           "input": {"entity": "reimbursements", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -1299,7 +1300,7 @@
           "call": "list_records",
           "input": {"entity": "reimbursements", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -1313,7 +1314,7 @@
           "call": "list_records",
           "input": {"entity": "reimbursements", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -1327,7 +1328,7 @@
           "call": "list_records",
           "input": {"entity": "reimbursements", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),amount,description,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -1523,7 +1524,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -1625,7 +1626,7 @@
           "call": "get_record",
           "input": {"entity": "reimbursements", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -1666,7 +1667,7 @@
           "call": "list_records",
           "input": {"entity": "sites", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
@@ -1680,7 +1681,7 @@
           "call": "list_records",
           "input": {"entity": "sites", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
@@ -1694,7 +1695,7 @@
           "call": "list_records",
           "input": {"entity": "sites", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
@@ -1708,7 +1709,7 @@
           "call": "list_records",
           "input": {"entity": "sites", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address", "order=display_name.asc"],
@@ -1898,7 +1899,7 @@
           "call": "get_record",
           "input": {"entity": "sites", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,lead_id:staff_members!lead_id(id,display_name),address,updated_at,created_at", "id=eq.1"],
@@ -1936,7 +1937,7 @@
           "call": "list_records",
           "input": {"entity": "staff_directory", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
@@ -1950,7 +1951,7 @@
           "call": "list_records",
           "input": {"entity": "staff_directory", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
@@ -1964,7 +1965,7 @@
           "call": "list_records",
           "input": {"entity": "staff_directory", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
@@ -1978,7 +1979,7 @@
           "call": "list_records",
           "input": {"entity": "staff_directory", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1", "isSummaryView has no counterpart: list_records adds id whenever the entity has an id column"],
           "requests": [
             {
               "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "order=display_name.asc"],
@@ -1988,7 +1989,23 @@
             }
           ]
         },
-        {"inexpressible": "fields <edit> outside a single-record read", "name": "list without pagination arg"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "staff_directory"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/staff_directory?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
         {
           "call": "list_records",
           "input": {
@@ -2152,7 +2169,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name", "role_id=eq.5", "site_id=eq.5", "order=display_name.asc"],
@@ -2249,6 +2266,7 @@
           "call": "get_record",
           "input": {"entity": "staff_directory", "id": "1"},
           "name": "detail",
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,email,phone_number,staff_role,site_name,role_id:staff_roles!role_id(id,display_name),site_id:sites!site_id(id,display_name),created_at,updated_at", "id=eq.1"],
@@ -2286,7 +2304,7 @@
           "call": "list_records",
           "input": {"entity": "staff_documents", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -2303,7 +2321,7 @@
           "call": "list_records",
           "input": {"entity": "staff_documents", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -2320,7 +2338,7 @@
           "call": "list_records",
           "input": {"entity": "staff_documents", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -2337,7 +2355,7 @@
           "call": "list_records",
           "input": {"entity": "staff_documents", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -2517,7 +2535,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -2620,7 +2638,7 @@
           "call": "get_record",
           "input": {"entity": "staff_documents", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -2661,7 +2679,7 @@
           "call": "list_records",
           "input": {"entity": "staff_members", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -2678,7 +2696,7 @@
           "call": "list_records",
           "input": {"entity": "staff_members", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -2695,7 +2713,7 @@
           "call": "list_records",
           "input": {"entity": "staff_members", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -2712,7 +2730,7 @@
           "call": "list_records",
           "input": {"entity": "staff_members", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -2912,7 +2930,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -3015,7 +3033,7 @@
           "call": "get_record",
           "input": {"entity": "staff_members", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -3056,7 +3074,7 @@
           "call": "list_records",
           "input": {"entity": "staff_roles", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
@@ -3070,7 +3088,7 @@
           "call": "list_records",
           "input": {"entity": "staff_roles", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
@@ -3084,7 +3102,7 @@
           "call": "list_records",
           "input": {"entity": "staff_roles", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
@@ -3098,7 +3116,7 @@
           "call": "list_records",
           "input": {"entity": "staff_roles", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,sort_order", "order=display_name.asc"],
@@ -3288,7 +3306,7 @@
           "call": "get_record",
           "input": {"entity": "staff_roles", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": ["select=id,display_name,description,sort_order,created_at,updated_at", "id=eq.1"],
@@ -3326,7 +3344,7 @@
           "call": "list_records",
           "input": {"entity": "staff_tasks", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -3343,7 +3361,7 @@
           "call": "list_records",
           "input": {"entity": "staff_tasks", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": [
@@ -3360,7 +3378,7 @@
           "call": "list_records",
           "input": {"entity": "staff_tasks", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": [
@@ -3377,7 +3395,7 @@
           "call": "list_records",
           "input": {"entity": "staff_tasks", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": [
@@ -3640,7 +3658,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -3733,7 +3751,7 @@
           "call": "get_record",
           "input": {"entity": "staff_tasks", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -3774,7 +3792,7 @@
           "call": "list_records",
           "input": {"entity": "time_entries", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
@@ -3788,7 +3806,7 @@
           "call": "list_records",
           "input": {"entity": "time_entries", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
@@ -3802,7 +3820,7 @@
           "call": "list_records",
           "input": {"entity": "time_entries", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
@@ -3816,7 +3834,7 @@
           "call": "list_records",
           "input": {"entity": "time_entries", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "order=display_name.asc"],
@@ -3992,7 +4010,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),entry_type_id:categories!entry_type_id(id,display_name,color),entry_time", "staff_member_id=eq.5", "entry_type_id=eq.5", "order=display_name.asc"],
@@ -4089,7 +4107,7 @@
           "call": "get_record",
           "input": {"entity": "time_entries", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [
@@ -4130,7 +4148,7 @@
           "call": "list_records",
           "input": {"entity": "time_off_requests", "limit": 25, "offset": 0},
           "name": "list",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4144,7 +4162,7 @@
           "call": "list_records",
           "input": {"entity": "time_off_requests", "limit": 10, "offset": 20},
           "name": "list page 3/10",
-          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "notes": ["list columns -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4158,7 +4176,7 @@
           "call": "list_records",
           "input": {"entity": "time_off_requests", "limit": 100, "offset": 100},
           "name": "list page 2/100",
-          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "notes": ["list columns -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4172,7 +4190,7 @@
           "call": "list_records",
           "input": {"entity": "time_off_requests", "limit": 1, "offset": 0},
           "name": "list page 1/1",
-          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "notes": ["list columns -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
           "requests": [
             {
               "decoded": ["select=id,display_name,staff_member_id:staff_members!staff_member_id(id,display_name),start_date,end_date,status_id:statuses!status_id(id,display_name,color,status_key)", "order=display_name.asc"],
@@ -4368,7 +4386,7 @@
             "offset": 0
           },
           "name": "filters (one per filterable property)",
-          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "notes": ["list columns -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
           "requests": [
             {
               "decoded": [
@@ -4470,7 +4488,7 @@
           "call": "get_record",
           "input": {"entity": "time_off_requests", "id": "1"},
           "name": "detail",
-          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "notes": ["detail read -> get_record (renders the detail columns; selects every property plus timestamps)"],
           "requests": [
             {
               "decoded": [

@@ -285,6 +285,26 @@ describe('golden (mcp): condition evaluator', () => {
     checkGolden('_shared/conditions.matrix.json', { operators: fe.operators, matrix, dotted, compound });
   });
 
+  it('extra operator x value x data cells the frontend matrix lacks (MCP-only inputs)', () => {
+    // Empty strings, whitespace, "null"/"0" strings, falsy values and id-bearing
+    // objects with falsy ids. The ledger checks these against its model of both
+    // evaluators (the frontend model is anchored on every frontend golden cell).
+    const ops = ['eq', 'ne', 'in', 'is_null', 'is_not_null', 'gt', 'lte'];
+    const values: unknown[] = [1, 0, '', null, 'a', [''], ['a', 1]];
+    const data: unknown[] = ['', ' ', 'null', '0', 0, false, null, { id: '' }, { id: 0 }, undefined];
+    const matrix: Record<string, Record<string, boolean | string>> = {};
+    for (const op of ops) {
+      for (const v of values) {
+        const row: Record<string, boolean | string> = {};
+        for (const d of data) {
+          row[d === undefined ? '<missing>' : compactStringify(d)] = safeEval({ field: 'f', operator: op, value: v }, d === undefined ? {} : { f: d });
+        }
+        matrix[`${op} ${compactStringify(v)}`] = row;
+      }
+    }
+    checkGolden('_shared/mcp.conditions-extra.json', { matrix });
+  });
+
   it('labels round-trip (inputs recovered from the frontend artifacts are exact)', () => {
     const fe = loadFrontendArtifact('_shared/conditions.matrix.json');
     for (const key of Object.keys(fe.dotted)) {
