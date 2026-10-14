@@ -51,8 +51,9 @@ GRANT EXECUTE ON FUNCTION public.your_function_name TO authenticated;
 -- For admin-only functions:
 -- GRANT EXECUTE ON FUNCTION public.your_function_name TO admin;
 
--- 4. Revoke from anonymous if needed
-REVOKE EXECUTE ON FUNCTION public.your_function_name FROM web_anon;
+-- 4. Revoke PUBLIC execute (PostgreSQL grants EXECUTE to PUBLIC by default;
+--    the GRANT above does NOT remove it, so web_anon can still call the function)
+REVOKE EXECUTE ON FUNCTION public.your_function_name FROM PUBLIC;
 
 -- Examples of common RPC function patterns:
 
