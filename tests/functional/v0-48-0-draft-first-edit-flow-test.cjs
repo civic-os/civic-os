@@ -790,6 +790,9 @@ async function runTests() {
     await settle(page);
 
     const submitBtn2 = page.locator('app-guided-form-review-section button:has-text("Submit")');
+    // The review section renders only after guided-form context loads (async);
+    // wait for the button instead of sampling it once after a fixed delay.
+    await submitBtn2.first().waitFor({ timeout: 15000 }).catch(() => {});
     assert('3a. Submit button visible', await submitBtn2.count() > 0);
 
     if (await submitBtn2.count() > 0) {
