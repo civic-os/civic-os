@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "document_requirement_roles": {
+      "create": ["document_requirement_id", "staff_role_id"],
+      "detail": ["document_requirement_id", "staff_role_id"],
+      "edit": ["document_requirement_id", "staff_role_id"],
+      "list": ["document_requirement_id", "staff_role_id"]
+    },
+    "document_requirements": {
+      "create": ["display_name", "description", "requires_approval", "sort_order"],
+      "detail": ["display_name", "description", "requires_approval", "sort_order", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "requires_approval", "sort_order"],
+      "list": ["display_name", "requires_approval"]
+    },
+    "incident_reports": {
+      "create": ["site_id", "incident_date", "description", "people_involved", "action_taken", "follow_up_needed"],
+      "detail": ["display_name", "reported_by_id", "site_id", "incident_date", "status_id", "description", "people_involved", "action_taken", "follow_up_needed", "follow_up_notes", "created_at", "updated_at"],
+      "edit": ["site_id", "incident_date", "description", "people_involved", "action_taken", "follow_up_needed", "follow_up_notes"],
+      "list": ["display_name", "reported_by_id", "site_id", "incident_date", "status_id", "follow_up_needed"]
+    },
+    "offboarding_feedback": {
+      "create": ["staff_member_id", "overall_rating", "what_went_well", "what_could_improve", "would_return", "additional_comments"],
+      "detail": ["display_name", "staff_member_id", "overall_rating", "what_went_well", "what_could_improve", "would_return", "additional_comments", "submitted_at", "created_at", "updated_at"],
+      "edit": ["overall_rating", "what_went_well", "what_could_improve", "would_return", "additional_comments"],
+      "list": ["display_name", "staff_member_id", "overall_rating", "would_return", "submitted_at"]
+    },
+    "reimbursements": {
+      "create": ["amount", "description", "receipt"],
+      "detail": ["display_name", "staff_member_id", "amount", "description", "receipt", "status_id", "response_notes", "responded_by", "responded_at", "created_at", "updated_at"],
+      "edit": ["amount", "description", "receipt", "response_notes"],
+      "list": ["display_name", "staff_member_id", "amount", "description", "status_id"]
+    },
+    "sites": {
+      "create": ["display_name", "address"],
+      "detail": ["display_name", "lead_id", "address", "updated_at", "created_at"],
+      "edit": ["display_name", "lead_id", "address"],
+      "list": ["display_name", "lead_id", "address"]
+    },
+    "staff_directory": {
+      "create": ["display_name", "email", "staff_role", "site_name"],
+      "detail": ["display_name", "email", "phone_number", "staff_role", "site_name"],
+      "edit": ["display_name", "email", "staff_role", "site_name"],
+      "list": ["display_name", "email", "phone_number", "staff_role", "site_name"]
+    },
+    "staff_documents": {
+      "create": [],
+      "detail": ["display_name", "staff_member_id", "requirement_id", "status_id", "file", "reviewer_notes", "reviewed_by", "reviewed_at", "created_at", "updated_at"],
+      "edit": ["file", "reviewer_notes"],
+      "list": ["display_name", "staff_member_id", "requirement_id", "status_id"]
+    },
+    "staff_members": {
+      "create": ["user_id", "site_id", "role_id", "pay_rate", "start_date"],
+      "detail": ["display_name", "user_id", "site_id", "role_id", "onboarding_status_id", "pay_rate", "start_date", "updated_at", "created_at"],
+      "edit": ["user_id", "site_id", "role_id", "pay_rate", "start_date"],
+      "list": ["display_name", "user_id", "site_id", "role_id", "onboarding_status_id"]
+    },
+    "staff_roles": {
+      "create": ["display_name", "description", "sort_order"],
+      "detail": ["display_name", "description", "sort_order", "created_at", "updated_at"],
+      "edit": ["display_name", "description", "sort_order"],
+      "list": ["display_name", "description", "sort_order"]
+    },
+    "staff_tasks": {
+      "create": ["display_name", "priority_id", "description", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date"],
+      "detail": ["display_name", "created_at", "updated_at", "priority_id", "description", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "assigned_by", "status_id", "completion_notes", "completed_at"],
+      "edit": ["display_name", "priority_id", "description", "site_id", "due_date"],
+      "list": ["display_name", "priority_id", "assigned_to_id", "assigned_to_site_id", "assigned_to_role_id", "site_id", "due_date", "status_id"]
+    },
+    "time_entries": {
+      "create": ["entry_type_id", "edit_reason"],
+      "detail": ["display_name", "staff_member_id", "entry_type_id", "entry_time", "staff_name", "site_name", "edited_by", "edit_reason", "created_at", "updated_at"],
+      "edit": ["entry_type_id", "entry_time", "edit_reason"],
+      "list": ["display_name", "staff_member_id", "entry_type_id", "entry_time"]
+    },
+    "time_off_requests": {
+      "create": ["start_date", "end_date", "reason"],
+      "detail": ["display_name", "staff_member_id", "start_date", "end_date", "reason", "status_id", "response_notes", "responded_by", "responded_at", "created_at", "updated_at"],
+      "edit": ["start_date", "end_date", "reason", "response_notes"],
+      "list": ["display_name", "staff_member_id", "start_date", "end_date", "status_id"]
+    }
+  }
+}

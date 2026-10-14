@@ -1,0 +1,16 @@
+{
+  "categories": {},
+  "statuses": {
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "reservation_request": {
+      "5 Pending": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "pending"},
+      "6 Approved": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "approved"},
+      "7 Denied": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "denied"},
+      "8 Cancelled": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "cancelled"}
+    }
+  }
+}

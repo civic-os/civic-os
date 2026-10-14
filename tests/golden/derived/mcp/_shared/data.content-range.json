@@ -1,0 +1,85 @@
+{
+  "paginated": {
+    "": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    "*/0": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    "*/5": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    "0-0/1": {
+      "contentRange": {"from": 0, "to": 0, "total": 1},
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 1
+    },
+    "0-24/": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    "0-24/*": {
+      "contentRange": {"from": 0, "to": 24, "total": null},
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": null
+    },
+    "0-24/237": {
+      "contentRange": {"from": 0, "to": 24, "total": 237},
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 237
+    },
+    "0-9/12abc": {
+      "contentRange": {"from": 0, "to": 9, "total": 12},
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ],
+      "totalCount": 12
+    },
+    "garbage": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    "items 0-24/237": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    "null": {
+      "contentRange": null,
+      "data": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  }
+}

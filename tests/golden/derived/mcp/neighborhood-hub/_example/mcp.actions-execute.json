@@ -1,0 +1,795 @@
+{
+  "actions": {
+    "building_use_requests.approve_request": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "building_use_requests.deny_request": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id.status_key is \"pending_other\", expected \"pending\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "pending_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "pending"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.add_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.confirm_checkout": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.mark_returned": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out"}
+          },
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nstatus_id.status_key is \"checked_out_other\", expected \"checked_out\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_checkouts.remove_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "mek_requests.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":30,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 30},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 30}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":30,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [30,31]\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [30, 31]
+        },
+        "visibility_condition": {
+          "field": "status_id",
+          "operator": "in",
+          "value": [30, 31]
+        }
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.check_out": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is {\"id\":31,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 31, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is {\"id\":1031,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1031, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nstatus_id is {\"id\":1031,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 31\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1031, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 31},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 31}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is {\"id\":33,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 33, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is {\"id\":1033,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1033, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nstatus_id is {\"id\":1033,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 33\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1033, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 33},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 33}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "mek_requests.deny_request": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is {\"id\":30,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 30, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny Request\" is not available for this record.\n\nstatus_id is {\"id\":1030,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 30\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1030, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id", "operator": "eq", "value": 30},
+        "visibility_condition": {"field": "status_id", "operator": "eq", "value": 30}
+      },
+      "leafShapes": {"status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.add_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Add Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.confirm_checkout": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": true
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Confirm Checkout\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.mark_returned": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "executed",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out"}
+          },
+          "rpcCalled": true
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nstatus_id.status_key is \"checked_out_other\", expected \"checked_out\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "checked_out_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "checked_out"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservation_checkouts.remove_item": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "passed-conditions (missing required parameter)",
+          "getRecordListing": "listed",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing"}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Remove Item\" is not available for this record.\n\nstatus_id.status_key is \"preparing_other\", expected \"preparing\"\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "status_id": {"color": null, "display_name": "N", "id": 1, "status_key": "preparing_other"}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"},
+        "visibility_condition": {"field": "status_id.status_key", "operator": "eq", "value": "preparing"}
+      },
+      "leafShapes": {"status_id.status_key": "embed-dotted"},
+      "showOnDetail": true
+    },
+    "tool_reservations.approve": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is {\"id\":12,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Approve\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.cancel": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is {\"id\":12,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Cancel\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, must be one of [12,13]\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {
+          "field": "workflow_status_id",
+          "operator": "in",
+          "value": [12, 13]
+        },
+        "visibility_condition": {
+          "field": "workflow_status_id",
+          "operator": "in",
+          "value": [12, 13]
+        }
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.check_out": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is {\"id\":13,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 13, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is {\"id\":1013,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1013, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Start Checkout\" is not available for this record.\n\nworkflow_status_id is {\"id\":1013,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 13\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1013, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 13},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 13}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.complete": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is {\"id\":15,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 15, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is {\"id\":1015,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Complete\" is not available for this record.\n\nworkflow_status_id is {\"id\":1015,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 15\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1015, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 15},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 15}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.deny": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is {\"id\":12,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 12, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Deny\" is not available for this record.\n\nworkflow_status_id is {\"id\":1012,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 12\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1012, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 12}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    },
+    "tool_reservations.mark_returned": {
+      "canExecute": true,
+      "cases": {
+        "satisfies all conditions": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is {\"id\":14,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 14, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates enabled_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is {\"id\":1014,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1014, "status_key": null}
+          },
+          "rpcCalled": false
+        },
+        "violates visibility_condition": {
+          "executeAction": "not-available",
+          "executeActionText": "Action \"Mark Returned\" is not available for this record.\n\nworkflow_status_id is {\"id\":1014,\"display_name\":\"N\",\"color\":null,\"status_key\":null}, expected 14\n\nUse `get_record` to see the current state and available actions.",
+          "getRecordListing": "hidden",
+          "record": {
+            "workflow_status_id": {"color": null, "display_name": "N", "id": 1014, "status_key": null}
+          },
+          "rpcCalled": false
+        }
+      },
+      "conditions": {
+        "enabled_condition": {"field": "workflow_status_id", "operator": "eq", "value": 14},
+        "visibility_condition": {"field": "workflow_status_id", "operator": "eq", "value": 14}
+      },
+      "leafShapes": {"workflow_status_id": "embed"},
+      "showOnDetail": true
+    }
+  },
+  "conditionFetchSelect": {
+    "building_use_requests": "id,decision_notes,guided_form_status_id:statuses!guided_form_status_id(id,display_name,color,status_key),status_id:statuses!status_id(id,display_name,color,status_key),display_name,submitted_at,group_name,group_type:categories!group_type(id,display_name,color),borrower_id:borrowers!borrower_id(id,display_name),contact_name,contact_title,contact_phone,contact_email,website,mission_description,time_slot,estimated_attendees,created_by,created_at,updated_at,hold_harmless_accepted,photo_release_accepted",
+    "mek_checkouts": "id,created_at,updated_at,mek_request_id:mek_requests!mek_request_id(id,display_name),display_name,checkout_photos,return_photos,checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key)",
+    "mek_requests": "id,decision_notes,guided_form_status_id:statuses!guided_form_status_id(id,display_name,color,status_key),status_id:statuses!status_id(id,display_name,color,status_key),display_name,submitted_at,borrower_id:borrowers!borrower_id(id,display_name),organization_name,event_type:categories!event_type(id,display_name,color),created_by,event_location,created_at,updated_at,calendar_hex_color,event_dates,timeslot,responsibility_acknowledged,notes",
+    "tool_reservation_checkouts": "id,tool_reservation_id:tool_reservations!tool_reservation_id(id,display_name),checkout_notes,return_notes,damage_reported,status_id:statuses!status_id(id,display_name,color,status_key),created_at,updated_at,display_name,checkout_photos:photo_galleries!checkout_photos(id,photo_gallery_files(file_id)),return_photos:photo_galleries!return_photos(id,photo_gallery_files(file_id))",
+    "tool_reservations": "id,guided_form_status_id:statuses!guided_form_status_id(id,display_name,color,status_key),display_name,borrower_id:borrowers!borrower_id(id,display_name),reserved_date,organization_name,timeslot,workflow_status_id:statuses!workflow_status_id(id,display_name,color,status_key),delivery_required,notes,created_by,created_at,updated_at,submitted_at,calendar_hex_color,site_review_completed"
+  }
+}

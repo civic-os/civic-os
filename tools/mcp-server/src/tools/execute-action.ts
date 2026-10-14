@@ -285,8 +285,9 @@ function resolveFieldValue(record: Record<string, unknown>, field: string): unkn
 /**
  * Build a human-readable explanation of why a condition failed.
  * Tells the LLM what the record's current value is vs what was expected.
+ * Exported for the golden-output tests (src/__tests__/golden).
  */
-function describeConditionFailure(
+export function describeConditionFailure(
   condition: ActionCondition,
   record: Record<string, unknown>,
 ): string {

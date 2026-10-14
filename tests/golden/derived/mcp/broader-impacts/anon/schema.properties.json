@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "broader_impact_categories": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "contact_broader_impact_categories": [
+      {"column": "contact_id", "select": "contact_id:contacts!contact_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "broader_impact_category_id", "select": "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "contact_projects": [
+      {"column": "contact_id", "select": "contact_id:contacts!contact_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "project_id", "select": "project_id:projects!project_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "contacts": [
+      {"column": "first_name", "select": "first_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "last_name", "select": "last_name", "type": "TextLong", "typeId": 2},
+      {"column": "email", "select": "email", "type": "Email", "typeId": 14},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "phone", "select": "phone", "type": "Telephone", "typeId": 15},
+      {"column": "organization_id", "select": "organization_id:organizations!organization_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "title", "select": "title", "type": "TextLong", "typeId": 2},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+    ],
+    "interest_centers": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "organization_broader_impact_categories": [
+      {"column": "organization_id", "select": "organization_id:organizations!organization_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "broader_impact_category_id", "select": "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "organizations": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "organization_type_id", "select": "organization_type_id:categories!organization_type_id(id,display_name,color)", "type": "Category", "typeId": 23},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "email", "select": "email", "type": "Email", "typeId": 14},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "phone", "select": "phone", "type": "Telephone", "typeId": 15},
+      {"column": "website", "select": "website", "type": "TextLong", "typeId": 2},
+      {"column": "address", "select": "address", "type": "TextLong", "typeId": 2},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+    ],
+    "project_broader_impact_categories": [
+      {"column": "project_id", "select": "project_id:projects!project_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "broader_impact_category_id", "select": "broader_impact_category_id:broader_impact_categories!broader_impact_category_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6}
+    ],
+    "projects": [
+      {"column": "display_name", "select": "display_name", "type": "TextLong", "typeId": 2},
+      {"column": "id", "select": "id", "type": "IntegerNumber", "typeId": 8},
+      {"column": "created_at", "select": "created_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "organization_id", "select": "organization_id:organizations!organization_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "status_id", "select": "status_id:statuses!status_id(id,display_name,color,status_key)", "type": "Status", "typeId": 22},
+      {"column": "updated_at", "select": "updated_at", "type": "DateTimeLocal", "typeId": 6},
+      {"column": "interest_center_id", "select": "interest_center_id:interest_centers!interest_center_id(id,display_name)", "type": "ForeignKeyName", "typeId": 10},
+      {"column": "start_date", "select": "start_date", "type": "Date", "typeId": 4},
+      {"column": "end_date", "select": "end_date", "type": "Date", "typeId": 4},
+      {"column": "description", "select": "description", "type": "TextLong", "typeId": 2},
+      {"column": "civic_os_text_search", "select": "civic_os_text_search", "type": "Unknown", "typeId": 0}
+    ]
+  }
+}

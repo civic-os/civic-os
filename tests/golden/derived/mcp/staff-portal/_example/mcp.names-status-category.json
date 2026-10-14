@@ -1,0 +1,52 @@
+{
+  "categories": {
+    "task_priority": {
+      "7 High": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byUpperDisplayName": "7"},
+      "8 Medium": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byUpperDisplayName": "8"},
+      "9 Low": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byUpperDisplayName": "9"}
+    },
+    "time_entry": {
+      "1 Clock In": {"byDisplayName": "1", "byPaddedDisplayName": "1", "byUpperDisplayName": "1"},
+      "2 Clock Out": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byUpperDisplayName": "2"}
+    }
+  },
+  "statuses": {
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "incident_report": {
+      "22 New": {"byDisplayName": "22", "byPaddedDisplayName": "22", "byStatusKey": "22", "byUpperDisplayName": "22", "statusKey": "new"},
+      "23 Reviewed": {"byDisplayName": "23", "byPaddedDisplayName": "23", "byStatusKey": "23", "byUpperDisplayName": "23", "statusKey": "reviewed"},
+      "24 Closed": {"byDisplayName": "24", "byPaddedDisplayName": "24", "byStatusKey": "24", "byUpperDisplayName": "24", "statusKey": "closed"}
+    },
+    "reimbursement": {
+      "15 Pending": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byStatusKey": "15", "byUpperDisplayName": "15", "statusKey": "pending"},
+      "16 Approved": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byStatusKey": "16", "byUpperDisplayName": "16", "statusKey": "approved"},
+      "17 Denied": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byStatusKey": "17", "byUpperDisplayName": "17", "statusKey": "denied"}
+    },
+    "staff_document": {
+      "10 Approved": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byStatusKey": "10", "byUpperDisplayName": "10", "statusKey": "approved"},
+      "11 Needs Revision": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byStatusKey": "11", "byUpperDisplayName": "11", "statusKey": "needs_revision"},
+      "8 Pending": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "pending"},
+      "9 Submitted": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "submitted"}
+    },
+    "staff_onboarding": {
+      "5 No Approvals": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "no_approvals"},
+      "6 In Progress": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "in_progress"},
+      "7 All Approved": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "all_approved"}
+    },
+    "staff_task": {
+      "18 Open": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byStatusKey": "18", "byUpperDisplayName": "18", "statusKey": "open"},
+      "19 In Progress": {"byDisplayName": "19", "byPaddedDisplayName": "19", "byStatusKey": "19", "byUpperDisplayName": "19", "statusKey": "in_progress"},
+      "20 Completed": {"byDisplayName": "20", "byPaddedDisplayName": "20", "byStatusKey": "20", "byUpperDisplayName": "20", "statusKey": "completed"},
+      "21 Cancelled": {"byDisplayName": "21", "byPaddedDisplayName": "21", "byStatusKey": "21", "byUpperDisplayName": "21", "statusKey": "cancelled"}
+    },
+    "time_off_request": {
+      "12 Pending": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byStatusKey": "12", "byUpperDisplayName": "12", "statusKey": "pending"},
+      "13 Approved": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byStatusKey": "13", "byUpperDisplayName": "13", "statusKey": "approved"},
+      "14 Denied": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byStatusKey": "14", "byUpperDisplayName": "14", "statusKey": "denied"}
+    }
+  }
+}

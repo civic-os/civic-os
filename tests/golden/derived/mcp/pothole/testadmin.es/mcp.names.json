@@ -1,0 +1,36 @@
+{
+  "actionAnomalies": {},
+  "actionCounts": {"probes": 0, "resolvedToSelf": 0},
+  "columnAnomalies": {},
+  "columnCounts": {"probes": 165, "resolvedToSelf": 165},
+  "entities": {
+    "Bid": {
+      "byDisplayName": "Bid",
+      "byFirstWord": "Bid",
+      "byPaddedDisplayName": "Bid",
+      "byTableName": "ERR Entity \"Bid\" not found. Available entities include: \"Ofertas\", \"Paquetes de Trabajo\", \"WorkDetail\", \"issue_tags\", \"Problemas\", \"Etiquetas\"",
+      "byUpperDisplayName": "Bid",
+      "displayName": "Ofertas"
+    },
+    "Issue": {"byDisplayName": "Issue", "byFirstWord": "Issue", "byPaddedDisplayName": "Issue", "byTableName": "issue_tags", "byUpperDisplayName": "Issue", "displayName": "Problemas"},
+    "Tag": {"byDisplayName": "Tag", "byFirstWord": "Tag", "byPaddedDisplayName": "Tag", "byTableName": "issue_tags", "byUpperDisplayName": "Tag", "displayName": "Etiquetas"},
+    "WorkDetail": {"byDisplayName": "WorkDetail", "byFirstWord": "WorkDetail", "byPaddedDisplayName": "WorkDetail", "byTableName": "WorkDetail", "byUpperDisplayName": "WorkDetail", "displayName": "WorkDetail"},
+    "WorkPackage": {
+      "byDisplayName": "WorkPackage",
+      "byFirstWord": "WorkPackage",
+      "byPaddedDisplayName": "WorkPackage",
+      "byTableName": "ERR Entity \"WorkPackage\" not found. Available entities include: \"Ofertas\", \"Paquetes de Trabajo\", \"WorkDetail\", \"issue_tags\", \"Problemas\", \"Etiquetas\"",
+      "byUpperDisplayName": "WorkPackage",
+      "displayName": "Paquetes de Trabajo"
+    },
+    "issue_status_summary": {
+      "byDisplayName": "issue_status_summary",
+      "byFirstWord": "issue_status_summary",
+      "byPaddedDisplayName": "issue_status_summary",
+      "byTableName": "issue_status_summary",
+      "byUpperDisplayName": "issue_status_summary",
+      "displayName": "Resumen de Problemas"
+    },
+    "issue_tags": {"byDisplayName": "issue_tags", "byFirstWord": "issue_tags", "byPaddedDisplayName": "issue_tags", "byTableName": "issue_tags", "byUpperDisplayName": "issue_tags", "displayName": "issue_tags"}
+  }
+}

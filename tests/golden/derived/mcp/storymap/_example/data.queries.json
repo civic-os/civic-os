@@ -1,0 +1,1394 @@
+{
+  "entities": {
+    "participants": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "participants", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name%2Cbirth_date%2Cenrolled_date%2Cstatus%2Chome_location_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "participants", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name%2Cbirth_date%2Cenrolled_date%2Cstatus%2Chome_location_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "participants", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name%2Cbirth_date%2Cenrolled_date%2Cstatus%2Chome_location_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "participants", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name%2Cbirth_date%2Cenrolled_date%2Cstatus%2Chome_location_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "participants"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "birth_date"
+          },
+          "name": "order birth_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=birth_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=birth_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-birth_date"
+          },
+          "name": "order birth_date desc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=birth_date.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=birth_date.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "enrolled_date"
+          },
+          "name": "order enrolled_date asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=enrolled_date.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=enrolled_date.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "status"
+          },
+          "name": "order status asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=status.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=status.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "sort": "home_location_text"
+          },
+          "name": "order home_location_text asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=home_location_text.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&order=home_location_text.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "participants",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "participants",
+            "filters": [
+              {"field": "birth_date", "operator": "eq", "value": "2026-07-04"},
+              {"field": "enrolled_date", "operator": "eq", "value": "2026-07-04"}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,birth_date,enrolled_date,status,home_location_text", "birth_date=eq.2026-07-04", "enrolled_date=eq.2026-07-04", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name%2Cbirth_date%2Cenrolled_date%2Cstatus%2Chome_location_text&birth_date=eq.2026-07-04&enrolled_date=eq.2026-07-04&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "participants",
+            "filters": [
+              {
+                "field": "birth_date",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "birth_date", "operator": "eq", "value": ""},
+              {"field": "birth_date", "operator": "eq", "value": null},
+              {
+                "field": "birth_date",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "birth_date", "operator": "in", "value": "not-an-array"},
+              {"field": "birth_date", "operator": "eq", "value": 0},
+              {"field": "birth_date", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter birth_date eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [
+            {
+              "decoded": ["select=id", "and=(birth_date.in.(1,2,3),birth_date.eq.,birth_date.eq.null,birth_date.in.(),birth_date.in.not-an-array,birth_date.eq.0,birth_date.eq.false)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id&and=%28birth_date.in.%281%2C2%2C3%29%2Cbirth_date.eq.%2Cbirth_date.eq.null%2Cbirth_date.in.%28%29%2Cbirth_date.in.not-an-array%2Cbirth_date.eq.0%2Cbirth_date.eq.false%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "participants",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "participants", "id": "1"},
+          "name": "detail",
+          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,birth_date,home_location:home_location_text,enrolled_date,status,parent_email,parent_phone,created_at,updated_at,home_location_text", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id%2Cdisplay_name%2Cbirth_date%2Chome_location%3Ahome_location_text%2Cenrolled_date%2Cstatus%2Cparent_email%2Cparent_phone%2Ccreated_at%2Cupdated_at%2Chome_location_text&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Youth Soccer Participants."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "participants",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/participants?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "sponsors": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsors", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name%2Csponsor_type%2Ctotal_contribution%2Cpartnership_start%2Clocation_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsors", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name%2Csponsor_type%2Ctotal_contribution%2Cpartnership_start%2Clocation_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsors", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name%2Csponsor_type%2Ctotal_contribution%2Cpartnership_start%2Clocation_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "sponsors", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name%2Csponsor_type%2Ctotal_contribution%2Cpartnership_start%2Clocation_text&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "sponsors"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "sponsor_type"
+          },
+          "name": "order sponsor_type asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=sponsor_type.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=sponsor_type.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-sponsor_type"
+          },
+          "name": "order sponsor_type desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=sponsor_type.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=sponsor_type.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "total_contribution"
+          },
+          "name": "order total_contribution asc [Money]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=total_contribution.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=total_contribution.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "partnership_start"
+          },
+          "name": "order partnership_start asc [Date]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=partnership_start.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=partnership_start.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "sort": "location_text"
+          },
+          "name": "order location_text asc [TextLong]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=location_text.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&order=location_text.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsors",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "sponsors",
+            "filters": [
+              {"field": "partnership_start", "operator": "eq", "value": "2026-07-04"}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,location_text", "partnership_start=eq.2026-07-04", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name%2Csponsor_type%2Ctotal_contribution%2Cpartnership_start%2Clocation_text&partnership_start=eq.2026-07-04&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsors",
+            "filters": [
+              {
+                "field": "partnership_start",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "partnership_start", "operator": "eq", "value": ""},
+              {"field": "partnership_start", "operator": "eq", "value": null},
+              {
+                "field": "partnership_start",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "partnership_start", "operator": "in", "value": "not-an-array"},
+              {"field": "partnership_start", "operator": "eq", "value": 0},
+              {"field": "partnership_start", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter partnership_start eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [
+            {
+              "decoded": ["select=id", "and=(partnership_start.in.(1,2,3),partnership_start.eq.,partnership_start.eq.null,partnership_start.in.(),partnership_start.in.not-an-array,partnership_start.eq.0,partnership_start.eq.false)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id&and=%28partnership_start.in.%281%2C2%2C3%29%2Cpartnership_start.eq.%2Cpartnership_start.eq.null%2Cpartnership_start.in.%28%29%2Cpartnership_start.in.not-an-array%2Cpartnership_start.eq.0%2Cpartnership_start.eq.false%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsors",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "sponsors", "id": "1"},
+          "name": "detail",
+          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,sponsor_type,total_contribution,partnership_start,contact_email,location:location_text,created_at,updated_at,location_text", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id%2Cdisplay_name%2Csponsor_type%2Ctotal_contribution%2Cpartnership_start%2Ccontact_email%2Clocation%3Alocation_text%2Ccreated_at%2Cupdated_at%2Clocation_text&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Community Sponsors."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "sponsors",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/sponsors?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "team_rosters": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "team_rosters", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "team_rosters", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "team_rosters", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "team_rosters", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "team_rosters"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "sort": "team_id"
+          },
+          "name": "order team_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of team_id -> sort by the column team_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-team_id"
+          },
+          "name": "order team_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of team_id -> sort by the column team_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "sort": "participant_id"
+          },
+          "name": "order participant_id asc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of participant_id -> sort by the column participant_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-participant_id"
+          },
+          "name": "order participant_id desc [ForeignKeyName]",
+          "notes": ["page 1/25 -> offset 0, limit 25", "order by embedded display_name of participant_id -> sort by the column participant_id itself (list_records sorts by own columns only)"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "sort": "season_year"
+          },
+          "name": "order season_year asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "sort": "jersey_number"
+          },
+          "name": "order jersey_number asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "team_rosters",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "team_rosters",
+            "filters": [
+              {"field": "team_id", "operator": "eq", "value": 5},
+              {"field": "participant_id", "operator": "eq", "value": 5},
+              {"field": "season_year", "operator": "gte", "value": 100}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number", "team_id=eq.5", "participant_id=eq.5", "season_year=gte.100", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number&team_id=eq.5&participant_id=eq.5&season_year=gte.100&order=id.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "team_rosters",
+            "filters": [
+              {
+                "field": "team_id",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "team_id", "operator": "eq", "value": ""},
+              {"field": "team_id", "operator": "eq", "value": null},
+              {
+                "field": "team_id",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "team_id", "operator": "in", "value": "not-an-array"},
+              {"field": "team_id", "operator": "eq", "value": 0},
+              {"field": "team_id", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter team_id eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=eq.", "limit=5"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&display_name=eq.&limit=5"
+            },
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.", "limit=5"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&display_name=ilike.&limit=5"
+            }
+          ],
+          "toolError": "\"\" not found in teams. Check the name and try again."
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "team_rosters",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [],
+          "thrown": "NameResolutionError: Column \"display_name\" not found in team_rosters. Available columns: \"Id\", \"Team\", \"Player\", \"Season\", \"Jersey #\", \"Created At\""
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "team_rosters", "id": "1"},
+          "name": "detail",
+          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,team_id:teams!team_id(id,display_name),participant_id:participants!participant_id(id,display_name),season_year,jersey_number,created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id%2Cteam_id%3Ateams%21team_id%28id%2Cdisplay_name%29%2Cparticipant_id%3Aparticipants%21participant_id%28id%2Cdisplay_name%29%2Cseason_year%2Cjersey_number%2Ccreated_at%2Cupdated_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Team Rosters."
+        },
+        {"inexpressible": "edit-form read: the MCP has no counterpart (update_record sends a PATCH without reading the record first)", "name": "edit"},
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "team_rosters",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=id.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/team_rosters?select=id&order=id.asc"
+            }
+          ]
+        }
+      ]
+    },
+    "teams": {
+      "queries": [
+        {
+          "call": "list_records",
+          "input": {"entity": "teams", "limit": 25, "offset": 0},
+          "name": "list",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "teams", "limit": 10, "offset": 20},
+          "name": "list page 3/10",
+          "notes": ["fields <list> -> list_records default columns", "page 3/10 -> offset 20, limit 10"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "20-29", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "teams", "limit": 100, "offset": 100},
+          "name": "list page 2/100",
+          "notes": ["fields <list> -> list_records default columns", "page 2/100 -> offset 100, limit 100"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "100-199", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {"entity": "teams", "limit": 1, "offset": 0},
+          "name": "list page 1/1",
+          "notes": ["fields <list> -> list_records default columns", "page 1/1 -> offset 0, limit 1"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-0", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["display_name"],
+            "entity": "teams"
+          },
+          "name": "list without pagination arg",
+          "notes": ["no pagination argument: list_records applies its default offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "sort": "display_name"
+          },
+          "name": "order display_name asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-display_name"
+          },
+          "name": "order display_name desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "sort": "age_group"
+          },
+          "name": "order age_group asc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=age_group.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=age_group.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "sort": "-age_group"
+          },
+          "name": "order age_group desc [TextShort]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=age_group.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=age_group.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "sort": "season_year"
+          },
+          "name": "order season_year asc [IntegerNumber]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=season_year.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=season_year.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "sort": "color"
+          },
+          "name": "order color asc [Color]",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "order=color.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&order=color.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "teams",
+            "sort": "created_at"
+          },
+          "name": "order without direction",
+          "requests": [
+            {
+              "decoded": ["select=id", "order=created_at.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id&order=created_at.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "entity": "teams",
+            "filters": [
+              {"field": "season_year", "operator": "gte", "value": 100}
+            ],
+            "limit": 25,
+            "offset": 0
+          },
+          "name": "filters (one per filterable property)",
+          "notes": ["fields <list> -> list_records default columns", "page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color", "season_year=gte.100", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor&season_year=gte.100&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "teams",
+            "filters": [
+              {
+                "field": "season_year",
+                "operator": "in",
+                "value": [1, 2, 3]
+              },
+              {"field": "season_year", "operator": "eq", "value": ""},
+              {"field": "season_year", "operator": "eq", "value": null},
+              {
+                "field": "season_year",
+                "operator": "in",
+                "value": []
+              },
+              {"field": "season_year", "operator": "in", "value": "not-an-array"},
+              {"field": "season_year", "operator": "eq", "value": 0},
+              {"field": "season_year", "operator": "eq", "value": false}
+            ]
+          },
+          "name": "filters with in-array, empty and null values",
+          "notes": ["filter season_year eq with an undefined value dropped (no counterpart in the tool input)"],
+          "requests": [
+            {
+              "decoded": ["select=id", "and=(season_year.in.(1,2,3),season_year.eq.,season_year.eq.null,season_year.in.(),season_year.in.not-an-array,season_year.eq.0,season_year.eq.false)", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id&and=%28season_year.in.%281%2C2%2C3%29%2Cseason_year.eq.%2Cseason_year.eq.null%2Cseason_year.in.%28%29%2Cseason_year.in.not-an-array%2Cseason_year.eq.0%2Cseason_year.eq.false%29&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id", "display_name"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "search": "  pot hole & co  ",
+            "sort": "-display_name"
+          },
+          "name": "legacy search ignores order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name", "display_name=ilike.*  pot hole & co  *", "order=display_name.desc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name&display_name=ilike.*++pot+hole+%26+co++*&order=display_name.desc"
+            }
+          ]
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "teams",
+            "limit": 25,
+            "offset": 0,
+            "search": "   ",
+            "sort": "display_name"
+          },
+          "name": "blank search falls through to order",
+          "notes": ["page 1/25 -> offset 0, limit 25"],
+          "requests": [
+            {
+              "decoded": ["select=id", "display_name=ilike.*   *", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-24", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id&display_name=ilike.*+++*&order=display_name.asc"
+            }
+          ]
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "teams", "id": "1"},
+          "name": "detail",
+          "notes": ["fields <detail> -> get_record default (renders detail columns; selects every property plus timestamps)"],
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color,created_at,updated_at", "id=eq.1"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor%2Ccreated_at%2Cupdated_at&id=eq.1"
+            }
+          ],
+          "toolError": "Record #1 not found in Teams."
+        },
+        {
+          "call": "get_record",
+          "input": {"entity": "teams", "id": "44444444-4444-4444-8444-444444444444"},
+          "name": "edit",
+          "requests": [
+            {
+              "decoded": ["select=id,display_name,age_group,season_year,color,created_at,updated_at", "id=eq.44444444-4444-4444-8444-444444444444"],
+              "headers": {},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id%2Cdisplay_name%2Cage_group%2Cseason_year%2Ccolor%2Ccreated_at%2Cupdated_at&id=eq.44444444-4444-4444-8444-444444444444"
+            }
+          ],
+          "toolError": "Record #44444444-4444-4444-8444-444444444444 not found in Teams."
+        },
+        {
+          "call": "list_records",
+          "input": {
+            "columns": ["id"],
+            "entity": "teams",
+            "limit": 5
+          },
+          "name": "limit and rawQueryParams",
+          "notes": ["rawQueryParams [\"or=(a.eq.1,b.eq.2)\",\"select=ignored\"] dropped: list_records has no raw parameter passthrough"],
+          "requests": [
+            {
+              "decoded": ["select=id", "order=display_name.asc"],
+              "headers": {"Prefer": "count=exact", "Range": "0-4", "Range-Unit": "items"},
+              "method": "GET",
+              "url": "<PGRST>/teams?select=id&order=display_name.asc"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "transportDefaults": {"Accept": "application/json", "Content-Type": "application/json"}
+}

@@ -1,0 +1,85 @@
+{
+  "categories": {
+    "consent_method": {
+      "23 Verbal": {"byDisplayName": "23", "byPaddedDisplayName": "23", "byUpperDisplayName": "23"},
+      "24 Written": {"byDisplayName": "24", "byPaddedDisplayName": "24", "byUpperDisplayName": "24"},
+      "25 Portal": {"byDisplayName": "25", "byPaddedDisplayName": "25", "byUpperDisplayName": "25"}
+    },
+    "consent_state": {
+      "26 None": {"byDisplayName": "26", "byPaddedDisplayName": "26", "byUpperDisplayName": "26"},
+      "27 Pending": {"byDisplayName": "27", "byPaddedDisplayName": "27", "byUpperDisplayName": "27"},
+      "28 Active": {"byDisplayName": "28", "byPaddedDisplayName": "28", "byUpperDisplayName": "28"},
+      "29 Expired": {"byDisplayName": "29", "byPaddedDisplayName": "29", "byUpperDisplayName": "29"},
+      "30 Revoked": {"byDisplayName": "30", "byPaddedDisplayName": "30", "byUpperDisplayName": "30"}
+    },
+    "gender": {
+      "1 Male": {"byDisplayName": "1", "byPaddedDisplayName": "1", "byUpperDisplayName": "1"},
+      "2 Female": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byUpperDisplayName": "2"},
+      "3 Non-Binary": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byUpperDisplayName": "3"},
+      "4 Prefer Not to Say": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byUpperDisplayName": "4"}
+    },
+    "helpfulness": {
+      "10 Somewhat Helpful": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byUpperDisplayName": "10"},
+      "11 Not Helpful": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byUpperDisplayName": "11"},
+      "12 Could Not Make Contact": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byUpperDisplayName": "12"},
+      "9 Very Helpful": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byUpperDisplayName": "9"}
+    },
+    "outcome": {
+      "18 Enrolled in Services": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byUpperDisplayName": "18"},
+      "19 Received Information": {"byDisplayName": "19", "byPaddedDisplayName": "19", "byUpperDisplayName": "19"},
+      "20 Referred Elsewhere": {"byDisplayName": "20", "byPaddedDisplayName": "20", "byUpperDisplayName": "20"},
+      "21 No Action Taken": {"byDisplayName": "21", "byPaddedDisplayName": "21", "byUpperDisplayName": "21"},
+      "22 Other": {"byDisplayName": "22", "byPaddedDisplayName": "22", "byUpperDisplayName": "22"}
+    },
+    "partner_type": {
+      "5 Organization": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byUpperDisplayName": "5"},
+      "6 Individual": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byUpperDisplayName": "6"}
+    },
+    "referral_type": {
+      "7 Warm": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byUpperDisplayName": "7"},
+      "8 Info": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byUpperDisplayName": "8"}
+    },
+    "time_to_contact": {
+      "13 Same Day": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byUpperDisplayName": "13"},
+      "14 1-2 Days": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byUpperDisplayName": "14"},
+      "15 3-5 Days": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byUpperDisplayName": "15"},
+      "16 More Than 5 Days": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byUpperDisplayName": "16"},
+      "17 Unable to Make Contact": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byUpperDisplayName": "17"}
+    }
+  },
+  "statuses": {
+    "client": {
+      "5 Intake Pending": {"byDisplayName": "5", "byPaddedDisplayName": "5", "byStatusKey": "5", "byUpperDisplayName": "5", "statusKey": "intake_pending"},
+      "6 Active": {"byDisplayName": "6", "byPaddedDisplayName": "6", "byStatusKey": "6", "byUpperDisplayName": "6", "statusKey": "active"},
+      "7 Inactive": {"byDisplayName": "7", "byPaddedDisplayName": "7", "byStatusKey": "7", "byUpperDisplayName": "7", "statusKey": "inactive"}
+    },
+    "client_consent": {
+      "14 Pending": {"byDisplayName": "14", "byPaddedDisplayName": "14", "byStatusKey": "14", "byUpperDisplayName": "14", "statusKey": "pending"},
+      "15 Active": {"byDisplayName": "15", "byPaddedDisplayName": "15", "byStatusKey": "15", "byUpperDisplayName": "15", "statusKey": "active"},
+      "16 Expired": {"byDisplayName": "16", "byPaddedDisplayName": "16", "byStatusKey": "16", "byUpperDisplayName": "16", "statusKey": "expired"},
+      "17 Revoked": {"byDisplayName": "17", "byPaddedDisplayName": "17", "byStatusKey": "17", "byUpperDisplayName": "17", "statusKey": "revoked"},
+      "18 Superseded": {"byDisplayName": "18", "byPaddedDisplayName": "18", "byStatusKey": "18", "byUpperDisplayName": "18", "statusKey": "superseded"}
+    },
+    "guided_form": {
+      "2 Draft": {"byDisplayName": "2", "byPaddedDisplayName": "2", "byStatusKey": "2", "byUpperDisplayName": "2", "statusKey": "draft"},
+      "3 Complete": {"byDisplayName": "3", "byPaddedDisplayName": "3", "byStatusKey": "3", "byUpperDisplayName": "3", "statusKey": "complete"},
+      "4 Submitted": {"byDisplayName": "4", "byPaddedDisplayName": "4", "byStatusKey": "4", "byUpperDisplayName": "4", "statusKey": "submitted"}
+    },
+    "newsletter": {
+      "19 Draft": {"byDisplayName": "19", "byPaddedDisplayName": "19", "byStatusKey": "19", "byUpperDisplayName": "19", "statusKey": "draft"},
+      "20 Scheduled": {"byDisplayName": "20", "byPaddedDisplayName": "20", "byStatusKey": "20", "byUpperDisplayName": "20", "statusKey": "scheduled"},
+      "21 Sent": {"byDisplayName": "21", "byPaddedDisplayName": "21", "byStatusKey": "21", "byUpperDisplayName": "21", "statusKey": "sent"},
+      "22 Archived": {"byDisplayName": "22", "byPaddedDisplayName": "22", "byStatusKey": "22", "byUpperDisplayName": "22", "statusKey": "archived"}
+    },
+    "referral": {
+      "10 Not Completed": {"byDisplayName": "10", "byPaddedDisplayName": "10", "byStatusKey": "10", "byUpperDisplayName": "10", "statusKey": "not_completed"},
+      "8 Referred": {"byDisplayName": "8", "byPaddedDisplayName": "8", "byStatusKey": "8", "byUpperDisplayName": "8", "statusKey": "referred"},
+      "9 Completed": {"byDisplayName": "9", "byPaddedDisplayName": "9", "byStatusKey": "9", "byUpperDisplayName": "9", "statusKey": "completed"}
+    },
+    "survey": {
+      "11 Pending": {"byDisplayName": "11", "byPaddedDisplayName": "11", "byStatusKey": "11", "byUpperDisplayName": "11", "statusKey": "pending"},
+      "12 Completed": {"byDisplayName": "12", "byPaddedDisplayName": "12", "byStatusKey": "12", "byUpperDisplayName": "12", "statusKey": "completed"},
+      "13 Expired": {"byDisplayName": "13", "byPaddedDisplayName": "13", "byStatusKey": "13", "byUpperDisplayName": "13", "statusKey": "expired"}
+    }
+  }
+}
