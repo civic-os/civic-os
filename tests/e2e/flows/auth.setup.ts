@@ -76,10 +76,20 @@ for (const role of roles.filter((r) => r !== 'anonymous')) {
 /**
  * Id-reference metadata of the instance, used by the normalizer to know which
  * table an id refers to: the FK map (schema_properties.join_table) and each
- * guided form's parent table (for p_parent_id arguments).
+ * guided form's parent table (for p_parent_id arguments). Also the Keycloak
+ * user id of every test role (random per stack), so a recorded user id is
+ * masked as <user:role> and a request for a different user is a diff.
  */
+const ALL_TEST_USERS: Role[] = ['testadmin', 'testeditor', 'testmanager', 'testuser'];
+
 setup('capture foreign-key map', async () => {
   const api = await Api.forRole('testadmin');
+  const users: Array<{ role: Role; id: string }> = [];
+  for (const role of ALL_TEST_USERS) {
+    const id = (await Api.forRole(role)).userId;
+    expect(id, `user id of ${role}`).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    users.push({ role, id: id! });
+  }
   const rows = await api.get<Array<{ table_name: string; column_name: string; join_table: string }>>(
     'schema_properties?select=table_name,column_name,join_table&join_table=not.is.null&order=table_name,column_name',
   );
@@ -89,5 +99,6 @@ setup('capture foreign-key map', async () => {
   fs.mkdirSync(RAW_DIR, { recursive: true });
   fs.writeFileSync(path.join(RAW_DIR, '_foreign-keys.json'), JSON.stringify(rows, null, 1));
   fs.writeFileSync(path.join(RAW_DIR, '_guided-forms.json'), JSON.stringify(forms, null, 1));
+  fs.writeFileSync(path.join(RAW_DIR, '_users.json'), JSON.stringify(users, null, 1));
   expect(rows.length).toBeGreaterThan(0);
 });

@@ -29,7 +29,15 @@ export default defineConfig({
   },
   projects: [
     { name: 'auth', testMatch: /auth\.setup\.ts$/ },
-    { name: 'flows', testMatch: new RegExp(`/${example}\\.spec\\.ts$`), dependencies: ['auth'] },
+    {
+      name: 'flows',
+      testMatch: new RegExp(`/${example}\\.spec\\.ts$`),
+      // Saving a retain-on-failure trace stalls some failed flows until the test timeout
+      // (Playwright 1.59.1, reproduced in the P0.5 verification). A failed flow keeps
+      // error-context.md (ARIA snapshot) and a screenshot instead.
+      use: { trace: 'off', screenshot: 'only-on-failure' },
+      dependencies: ['auth'],
+    },
     // Data-integrity suite (pothole only; run-integrity.sh). Not part of the equivalence flows.
     {
       name: 'integrity',

@@ -32,7 +32,9 @@ tests/e2e/run-equivalence.sh <example> --visual-base <git-ref> # screenshots: <r
 
 `<example>` is one of `pothole`, `neighborhood-hub`, `community-center` or
 `client-intake`. Each has a flow file `flows/<example>.spec.ts` and a pinned
-compose env file `env/<example>.env`.
+compose env file `env/<example>.compose-env` (compose interpolation values
+passed with `--env-file`; deliberately not named `*.env`, so no tool loads
+it as a dotenv file).
 
 Each run does the following:
 
@@ -83,13 +85,13 @@ Outputs go under `tests/e2e/.artifacts/<example>/` (gitignored):
 - `compare/normalized/`
 - `*/raw/`: the un-normalized recordings
 - `*/screenshots/`
-- `*/test-results/`: Playwright traces of failed flows
+- `*/test-results/`: `error-context.md` (ARIA snapshot) and a screenshot of
+  each failed flow. Tracing is off for the `flows` and `integrity` projects:
+  saving a `retain-on-failure` trace in Playwright 1.59.1 stalled some failed
+  tests until their timeout.
 - `visual/report/report.txt` and its `*.diff.png` files
 
-### npm scripts (root, proposed)
-
-The root `package.json` belongs to the lead. These are the scripts this
-package expects to be added there:
+### npm scripts (root)
 
 ```bash
 npm run e2e:install                            # npm --prefix tests/e2e ci && npx --prefix tests/e2e playwright install chromium
@@ -102,16 +104,20 @@ npm run e2e:integrity                          # tests/e2e/run-integrity.sh (see
 
 | Example | Flows (role testadmin unless noted) |
 |---|---|
-| pothole | List with search, sort, page change, page size and a deep-link filter. Create WorkPackage (DateTimeLocal, Status, Money). Create Issue (FK select, user FK search modal, GeoPoint, phone), then M:M tags on detail. Edit Issue (FileImage upload, two PhotoGallery uploads, coordinated save). WorkPackage detail with inverse relationship and a FilePDF upload. testeditor: status edit and delete. anonymous: list, sort, detail. |
+| pothole | List with search, sort, page change, page size and a deep-link filter. Create WorkPackage (DateTimeLocal, Status, Money). Create Issue (FK select, user FK search modal, GeoPoint, phone, DateTime `observed_at`), then M:M tags on detail. Edit Issue (FileImage upload, two PhotoGallery uploads, DateTime change, coordinated save). WorkPackage detail with inverse relationship and a FilePDF upload. testeditor: status edit and delete. Spanish: switch to `es` in Preferences, list and detail with `Accept-Language: es` and translated metadata, switch back. anonymous: list, sort, detail. |
 | community-center | List with the calendar (clock-pinned week, next week, month view) and sort. Create a reservation request (FK, time-slot range). testeditor: note plus the Approve action (confirmation). Resource create (Money, Color) and delete. Recurring series: "This and future occurrences" split from one occurrence. anonymous: resources list, sort, detail. |
 | neighborhood-hub | Tool types hybrid search, sort and last page. Parcels filter bar. testeditor: tool instance create (FK, Status) plus a note. Project create with M:M parcels (search modal), then two gallery uploads. Borrower "Update Address" action with params, then a FileImage upload. Building-use guided form: parent step with per-field autosave, M:M rooms, Event Details step, review, submit. anonymous: tool types list, search, detail. |
 | client-intake | Partner list: sort, page change, filter bar. Client create (Category, Date, M:M needs via modal). Client note plus the "Record Consent" action (category, two dates, file param). Newsletter: M:M recipients, Markdown body, DateTimeLocal edit, "Schedule" action (datetime_local param). Service category create and delete. anonymous: partner list, filter, detail. No guided form is configured in this example. |
 
-`DateTime` (`timestamp`) has no equivalence flow yet. Pothole's
-`Issue.observed_at` (init script `15_add_observed_at_timestamp.sql`) is
-covered by the data-integrity suite below. `flows/pothole.spec.ts` keeps a
-`TODO(P0.5)` hook for filling it in an equivalence flow, which needs a
-pothole re-record.
+`DateTime` (`timestamp`) is covered by pothole's `Issue.observed_at` (init
+script `15_add_observed_at_timestamp.sql`): typed on create and changed on
+edit, so the `:00` the app appends shows in the recorded bodies. The
+data-integrity suite below checks the stored values.
+
+The Spanish flow covers the locale interceptor. Switching through
+Preferences also persists the choice (`rpc/set_user_locale`), so the flow
+runs after the other testadmin flows and switches back to English at the
+end.
 
 ## What is recorded
 
@@ -134,6 +140,14 @@ The recorded headers are `Accept`, `Accept-Language`, `Accept-Profile`,
 PostgREST semantics: a single-object response, or a different schema.
 
 Every request belongs to the `test.step` that was active when it started. A
+PostgREST or MinIO request that starts outside any step (before the first
+step, or between two steps, for example from a timer that outlived its step)
+is kept as an **unattributed** entry of the flow, addressed by the step it
+followed. It fails every comparison, and `--record` refuses to write
+baselines that contain one (`cli.mjs normalize --strict`, exit 3): fix the
+flow so the request falls inside a step. Requests inside a `harness.setup()`
+step are deliberately not recorded. Keycloak calls outside steps are token
+refreshes on keycloak-js timers and are ignored. A
 step ends only when nothing is in flight and nothing new has started for
 2 s. The idle window is longer than the 1 s thumbnail poll, the
 `debounceTime(300)` chains and the detail page's 1.5 s post-action refresh
@@ -179,6 +193,7 @@ The diff lines mean the following:
 | `COUNT` | Same request, different number of times. |
 | `KEYCLOAK` | Different number of OIDC calls in the step. |
 | `MINIO` | Different upload or download calls. |
+| `UNATTRIBUTED` | A request started outside any step, in the current run or the baseline. Always a failure. |
 
 `WARN ... RAW` lines show both raw URL lists. A raw-only diff is legal but
 worth a look, for example an `in.(...)` list that is now percent-encoded.
@@ -190,10 +205,11 @@ Every other value stays exact, and that includes every value a flow types.
 
 | Rule | Replacement | Why |
 |---|---|---|
-| UUIDs anywhere (path, query, headers, body, MinIO path) | `<uuid:N>` | File ids, gallery ids, upload request ids and Keycloak user ids are random per run. They are numbered by first appearance in canonical order, which is independent of network timing, so the same UUID keeps its token across steps and flows. |
-| Ids of rows the run created, only where the position is known to refer to that row's table | `<Table:N>` | Mainly absorbs seed data whose size depends on the date. For example, community-center's init-time series expansion runs to `NOW() + 90 days`, which shifts the ids of every row created later. See the details below. |
+| Keycloak user ids of the test roles, anywhere | `<user:testadmin>`, ... | Keycloak assigns user ids per stack. `auth.setup.ts` captures each test role's id (the JWT `sub`) into `raw/_users.json`, so a request for another user's id (say, the editor picked instead of the admin) is a diff. |
+| Other UUIDs anywhere (path, query, headers, body, MinIO path) | `<uuid:N>` | File ids, gallery ids and upload request ids are random per run. They are numbered by first appearance in canonical order, which is independent of network timing, so the same UUID keeps its token across steps and flows. Limit: two such UUIDs that each appear only once, in the same position, compare equal. |
+| Ids of rows the run created, only where the position is known to refer to that row's table | `<Table:N>` | Mainly absorbs seed data whose size depends on the date. For example, community-center's init-time series expansion runs to `NOW() + 90 days`, which shifts the ids of every row created later. Each table's created ids are numbered in creation order before anything is masked, so `<Issue:5>` is the fifth Issue the run created, and opening the sixth instead is a diff. See the details below. |
 | JWTs | `<jwt>` | Tokens are minted per login. |
-| ISO-8601 timestamps whose instant falls inside the run's clock windows (±5 min) | `<runtime-ts>` | These are values generated from `new Date()` or the database's `now()` during the run. There are two windows: the fake client clock (`CLOCK_T0` plus elapsed run time) and the real wall clock of the run. Zone-less values are checked as UTC and as America/New_York wall time. |
+| A run-time timestamp, only in a field declared in `RUNTIME_TS_FIELDS` (`lib/normalize.mjs`) | `<runtime-ts:shape>` | No field is declared today, because no flow sends a value generated from `new Date()` or the database's `now()`: every timestamp in a request stays exact. See below. |
 
 **Created ids in detail.** Ids are tracked as `(table, id)` pairs, and a
 number is masked only when its position is known to refer to that table.
@@ -223,14 +239,28 @@ The position's table is resolved like this:
 
 Everything else stays exact. That includes `limit=10`, `severity_level: 3`,
 seed ids such as a status or tag id, and ids nested inside JSON arguments.
-Tokens are numbered per table, in order of first appearance after the
-canonical in-step sort.
+Tokens are numbered per table in creation order: integer ids by ascending
+value (the table's sequence order, which does not depend on the order the
+responses were recorded in), other ids in registration order. Every
+registered id gets its number, whether or not it ever appears in a request.
+
+**Run-time timestamps.** A timestamp is masked only when all of these hold:
+its JSON key or query parameter name is declared in `RUNTIME_TS_FIELDS`; the
+whole value is an ISO-8601 date-time in the format declared for that field
+(`zoned`: with `Z` or an offset; `wall`: zone-less); and its instant lies
+within 5 minutes of one of the run's two clock windows (the fake client
+clock, `CLOCK_T0` plus elapsed run time, and the real wall clock of the run).
+A zone-less value is read as America/New_York wall time, never as UTC, so a
+now-derived wall-clock value sent with UTC digits lands hours outside the
+window and shows as a diff. The token keeps the value's shape
+(`<runtime-ts:dddd-dd-ddTdd:dd:dd.dddZ>`), so a format change (`Z` versus an
+offset, dropped milliseconds) also shows. The list is empty today. Adding a
+field needs a written justification here.
 
 Not masked:
 - Dates without a time. "Today" is pinned by the fake clock.
-- Calendar range bounds derived from the fake clock. They are deterministic
-  and fall outside the windows.
-- Anything typed. Flows type dates in 2031, far from both windows.
+- Calendar range bounds derived from the fake clock. They are deterministic.
+- Anything typed. Flows type dates in 2031.
 
 **Status classes.** A 2xx response and a request the app cancelled itself
 (`net::ERR_ABORTED`, from `switchMap` or a navigation) are both recorded as
@@ -245,7 +275,10 @@ in `Prefer` or `Range` shows up in the recorded headers.
 depends on worker timing. Each collapses to one entry with `n: ">=1"`:
 - `GET /schema_cache_versions`
 - `GET /rpc/get_upload_url`, the presigned-URL retries
-- `GET /files?id=eq.<uuid>[&select=thumbnail_status]`, the thumbnail polling
+- `GET /files?id=eq.<uuid>&select=thumbnail_status`, the thumbnail polling
+  of `FileUploadService.waitForThumbnails()`. Only that exact shape: the
+  full-row `GET /files?id=eq.<uuid>` that follows an upload is counted
+  exactly.
 
 Nothing else is collapsed.
 
@@ -407,7 +440,7 @@ not leave its record behind.
 | `run-integrity.sh` | Data-integrity suite runner (`run-equivalence.sh pothole --integrity`) |
 | `integrity.spec.ts` | Data-integrity suite: UI input, `psql` checks, edit-page round trip |
 | `playwright.config.ts` | `auth` setup project, then the `flows` project for `$E2E_EXAMPLE`, or the `integrity` project |
-| `flows/auth.setup.ts` | Real Keycloak UI login per role → `storageState` |
+| `flows/auth.setup.ts` | Real Keycloak UI login per role → `storageState`; captures the FK map, guided-form parents and role user ids into `raw/_*.json` |
 | `flows/<example>.spec.ts` | Flows; one `test()` per flow, steps via `harness.step()` |
 | `lib/harness.ts` | Fixtures: pinned context, recorder, `step`, `setup`, `api`, `registerIds` |
 | `lib/recorder.mjs` | Passive recording and the quiet detection that ends a step |

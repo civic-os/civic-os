@@ -11,7 +11,7 @@
  * Bump HARNESS_VERSION whenever a change here, in the normalizer or in a flow
  * changes the shape of recorded baselines; compare mode warns on a mismatch.
  */
-export const HARNESS_VERSION = '1';
+export const HARNESS_VERSION = '2';
 
 export const APP_ORIGIN = 'http://localhost:4200';
 export const POSTGREST_ORIGIN = 'http://localhost:3000';

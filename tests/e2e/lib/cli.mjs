@@ -5,14 +5,15 @@
  */
 
 /**
- * node lib/cli.mjs normalize --raw <dir> --out <dir> --meta <json>
+ * node lib/cli.mjs normalize --raw <dir> --out <dir> --meta <json> [--strict]
+ *                           --strict (record mode): refuse, exit 3, when a flow has requests outside any step
  * node lib/cli.mjs compare   --baseline <dir> --current <dir> [--report <file>]
  * node lib/cli.mjs visual    --base <dir> --current <dir> --report-dir <dir>
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { normalizeRun } from './normalize.mjs';
+import { normalizeRun, describeUnattributed } from './normalize.mjs';
 import { compareRuns } from './compare.mjs';
 import { compareScreenshotTrees } from './visual.mjs';
 import { HARNESS_VERSION } from './config.mjs';
@@ -52,12 +53,23 @@ if (cmd === 'normalize') {
   if (!foreignKeys.length) console.warn('warning: no _foreign-keys.json in raw dir; created ids in FK columns will not be masked');
   const gfFile = path.join(a.raw, '_guided-forms.json');
   const guidedForms = fs.existsSync(gfFile) ? JSON.parse(fs.readFileSync(gfFile, 'utf8')) : [];
+  const usersFile = path.join(a.raw, '_users.json');
+  const users = fs.existsSync(usersFile) ? JSON.parse(fs.readFileSync(usersFile, 'utf8')) : [];
+  if (!users.length) console.warn('warning: no _users.json in raw dir; role user ids will be numbered like any other UUID');
   if (!rawFiles.length) {
     console.error(`no raw recordings in ${a.raw}`);
     process.exit(2);
   }
   const raws = rawFiles.map((f) => JSON.parse(fs.readFileSync(path.join(a.raw, f), 'utf8')));
-  const docs = normalizeRun(raws, foreignKeys, guidedForms);
+  const docs = normalizeRun(raws, foreignKeys, guidedForms, users);
+  const outside = docs.flatMap((d) => describeUnattributed(d).map((l) => `[${d.flow}] ${l}`));
+  if (outside.length) {
+    console.error(`UNATTRIBUTED: ${outside.length} request(s) started outside any step:\n  ${outside.join('\n  ')}`);
+    if (a.strict) {
+      console.error('refusing to write baselines that contain unattributed requests (--strict)');
+      process.exit(3);
+    }
+  }
   fs.mkdirSync(a.out, { recursive: true });
   for (const f of fs.readdirSync(a.out).filter((x) => x.endsWith('.json'))) fs.rmSync(path.join(a.out, f));
   docs.forEach((doc, i) => writeJson(path.join(a.out, rawFiles[i]), doc));

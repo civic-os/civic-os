@@ -112,6 +112,13 @@ export async function newPinnedContext(browser: Browser, role: Role | null): Pro
 export class Api {
   constructor(private token: string | null) {}
 
+  /** The role's Keycloak user id (the JWT `sub`), which is also its civic_os_users id. */
+  get userId(): string | null {
+    if (!this.token) return null;
+    const payload = JSON.parse(Buffer.from(this.token.split('.')[1], 'base64url').toString('utf8')) as { sub?: string };
+    return payload.sub ?? null;
+  }
+
   static async forRole(role: Role | null): Promise<Api> {
     if (!role || role === 'anonymous') return new Api(null);
     const body = new URLSearchParams({

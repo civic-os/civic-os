@@ -43,6 +43,8 @@ export class Recorder {
     this.registered = [];
     this.currentStep = '(before first step)';
     this.currentKind = 'pre';
+    /** Name of the last step that ended; requests in the gap after it carry it as afterStep. */
+    this.lastStep = null;
     this.seq = 0;
     this.inflight = new Map();
     this.lastActivity = Date.now();
@@ -74,6 +76,7 @@ export class Recorder {
   }
 
   endStep() {
+    this.lastStep = this.currentStep;
     this.currentStep = '(between steps)';
     this.currentKind = 'gap';
   }
@@ -104,6 +107,7 @@ export class Recorder {
       seq: ++this.seq,
       step: this.currentStep,
       stepKind: this.currentKind,
+      afterStep: this.currentKind === 'gap' ? this.lastStep : null,
       kind,
       method: req.method(),
       url,
@@ -171,8 +175,8 @@ export class Recorder {
       realEnd: this.realEnd ?? Date.now(),
       steps: this.steps,
       registered: this.registered,
-      requests: this.requests.map(({ seq, step, stepKind, kind, method, url, resourceType, headers, frameUrl, postData, status, failure, createdIds }) => ({
-        seq, step, stepKind, kind, method, url, resourceType, headers, frameUrl, postData, status, failure, createdIds,
+      requests: this.requests.map(({ seq, step, stepKind, afterStep, kind, method, url, resourceType, headers, frameUrl, postData, status, failure, createdIds }) => ({
+        seq, step, stepKind, afterStep, kind, method, url, resourceType, headers, frameUrl, postData, status, failure, createdIds,
       })),
     };
   }
