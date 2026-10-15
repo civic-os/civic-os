@@ -1,6 +1,6 @@
 {
   "name": "civic-os",
-  "version": "0.76.4",
+  "version": "0.76.5",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "workspaces": [
@@ -42,7 +42,9 @@
     "a11y:audit": "lighthouse http://localhost:4200 --only-categories=accessibility --output=html --output-path=./baseline-lighthouse.html",
     "test:a11y-full": "npm run a11y:pa11y && npm run a11y:lighthouse",
     "test:ledger": "node scripts/test-ledger.mjs",
-    "test:ledger:update": "node scripts/test-ledger.mjs --update"
+    "test:ledger:update": "node scripts/test-ledger.mjs --update",
+    "test:sanitize-browser": "node tests/functional/markdown-sanitize-browser-test.cjs",
+    "css:classset": "node scripts/css-classset.mjs --out css-classset.json"
   },
   "private": true,
   "dependencies": {
@@ -114,6 +116,7 @@
     "angular-eslint": "^22.2.0",
     "autoprefixer": "^10.5.4",
     "daisyui": "^5.7.27",
+    "esbuild": "0.28.2",
     "eslint": "^10.10.0",
     "eslint-plugin-import-x": "^4.17.1",
     "fast-check": "^4.10.2",

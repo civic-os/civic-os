@@ -19,6 +19,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { EditPage } from './edit.page';
@@ -99,6 +100,7 @@ describe('EditPage', () => {
             providers: [
                 provideZonelessChangeDetection(),
                 provideHttpClient(withXhr()),
+                provideHttpClientTesting(),
                 provideRouter([]),
                 { provide: ActivatedRoute, useValue: { params: routeParams.asObservable() } },
                 { provide: SchemaService, useValue: mockSchemaService },
@@ -385,19 +387,19 @@ describe('EditPage', () => {
         });
 
         it('should hide error banner when form becomes valid', async () => {
-            component.data$.subscribe(async () => {
-                // Make form invalid and submit to show error
-                component.editForm?.patchValue({ name: '' });
-                component.submitForm({});
-                expect(component.showValidationError()).toBe(true);
+            await firstValueFrom(component.data$);
 
-                // Make form valid
-                component.editForm?.patchValue({ name: 'Valid Name' });
+            // Make form invalid and submit to show error
+            component.editForm?.patchValue({ name: '' });
+            component.submitForm({});
+            expect(component.showValidationError()).toBe(true);
 
-                // Wait for statusChanges observable to trigger
-                await new Promise(resolve => setTimeout(resolve, 50));
-                expect(component.showValidationError()).toBe(false);
-            });
+            // Make form valid
+            component.editForm?.patchValue({ name: 'Valid Name' });
+
+            // Let the statusChanges subscription react before asserting
+            await fixture.whenStable();
+            expect(component.showValidationError()).toBe(false);
         });
 
         it('should call scrollToFirstError when form is invalid', async () => {

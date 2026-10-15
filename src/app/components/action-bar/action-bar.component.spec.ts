@@ -57,6 +57,33 @@ describe('ActionBarComponent', () => {
         }));
     };
 
+    /**
+     * Poll until `probe` returns a truthy value (re-running change detection
+     * each tick). Replaces fixed sleeps, which flaked under CPU load because
+     * the ResizeObserver/requestAnimationFrame layout pass is not bounded by
+     * wall-clock time. Fails with a clear error instead of hanging.
+     */
+    const waitFor = async (probe: () => unknown, timeoutMs = 4000): Promise<void> => {
+        const deadline = Date.now() + timeoutMs;
+        for (;;) {
+            fixture.detectChanges();
+            if (probe()) return;
+            if (Date.now() > deadline) {
+                throw new Error(`waitFor timed out after ${timeoutMs}ms`);
+            }
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+    };
+
+    // The layout pass has completed once the visible container (`div.items-center`)
+    // renders at least one button. Unscoped `button` queries are satisfied
+    // earlier by the always-rendered hidden measurement container, which is
+    // exactly how a fixed sleep used to race the rAF -> measure -> rAF ->
+    // calculateOverflow chain under load. (Under happy-dom getBoundingClientRect
+    // is 0, so the component shows its minimum of one visible button.)
+    const waitForLayout = () =>
+        waitFor(() => fixture.nativeElement.querySelector('app-action-bar div.items-center > button'));
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [TestHostComponent, ActionBarComponent],
@@ -81,8 +108,8 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(createButtons(3));
         fixture.detectChanges();
         await fixture.whenStable();
-        // Allow for requestAnimationFrame
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait (deterministically) for the rAF-driven layout pass to complete
+        await waitForLayout();
 
         const buttons = fixture.nativeElement.querySelectorAll('app-action-bar button:not(.dropdown button)');
         // Should render 3 visible buttons (no More dropdown)
@@ -93,7 +120,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(createButtons(2));
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForLayout();
 
         const button = fixture.nativeElement.querySelector('app-action-bar button');
         button?.click();
@@ -110,7 +137,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(buttons);
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForLayout();
 
         const disabledButton = fixture.nativeElement.querySelector('app-action-bar button[disabled]');
         expect(disabledButton).toBeTruthy();
@@ -124,7 +151,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(buttons);
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForLayout();
 
         const icon = fixture.nativeElement.querySelector('app-action-bar .material-symbols-outlined');
         expect(icon).toBeTruthy();
@@ -138,7 +165,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(buttons);
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForLayout();
 
         const button = fixture.nativeElement.querySelector('app-action-bar button');
         expect(button.getAttribute('title')).toBe('Cannot click this');
@@ -152,7 +179,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(buttons);
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForLayout();
 
         const allButtons = fixture.nativeElement.querySelectorAll('app-action-bar button');
         const buttonClasses = Array.from(allButtons).map((btn: any) => btn.className);
@@ -173,7 +200,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(createButtons(2));
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitForLayout();
 
         // Update one button
         const updatedButtons = [
@@ -183,7 +210,7 @@ describe('ActionBarComponent', () => {
         hostComponent.buttons.set(updatedButtons);
         fixture.detectChanges();
         await fixture.whenStable();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await waitFor(() => fixture.nativeElement.querySelector('app-action-bar button:nth-of-type(2)')?.textContent?.includes('Updated Button'));
 
         const button = fixture.nativeElement.querySelector('app-action-bar button:nth-of-type(2)');
         expect(button?.textContent).toContain('Updated Button');

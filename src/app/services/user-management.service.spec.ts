@@ -21,6 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { UserManagementService } from './user-management.service';
 import { AuthService } from './auth.service';
+import { firstValueFrom } from 'rxjs';
 
 describe('UserManagementService', () => {
     let service: UserManagementService;
@@ -68,45 +69,51 @@ describe('UserManagementService', () => {
                 { id: '1', display_name: 'Test User', email: 'test@example.com', status: 'active', provision_id: null }
             ];
 
-            service.getManagedUsers().subscribe(users => {
-                expect(users).toEqual(mockUsers as any);
-            });
+            const result$ = firstValueFrom(service.getManagedUsers());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'managed_users?order=created_at.desc');
             expect(req.request.method).toBe('GET');
             req.flush(mockUsers);
+            const users = await result$;
+            expect(users).toEqual(mockUsers as any);
         });
 
-        it('should append search filter when provided', () => {
-            service.getManagedUsers('jane').subscribe();
+        it('should append search filter when provided', async () => {
+            const result$ = firstValueFrom(service.getManagedUsers('jane'));
 
             const req = httpMock.expectOne((r) => r.url.includes('managed_users') && r.url.includes('ilike.*jane*'));
             expect(req.request.method).toBe('GET');
             req.flush([]);
+            await result$;
+
         });
 
-        it('should append status filter when not "all"', () => {
-            service.getManagedUsers(undefined, 'active').subscribe();
+        it('should append status filter when not "all"', async () => {
+            const result$ = firstValueFrom(service.getManagedUsers(undefined, 'active'));
 
             const req = httpMock.expectOne((r) => r.url.includes('managed_users') && r.url.includes('status=eq.active'));
             expect(req.request.method).toBe('GET');
             req.flush([]);
+            await result$;
+
         });
 
-        it('should not append status filter when "all"', () => {
-            service.getManagedUsers(undefined, 'all').subscribe();
+        it('should not append status filter when "all"', async () => {
+            const result$ = firstValueFrom(service.getManagedUsers(undefined, 'all'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'managed_users?order=created_at.desc');
             req.flush([]);
+            await result$;
+
         });
 
         it('should return empty array on error', async () => {
-            service.getManagedUsers().subscribe(users => {
-                expect(users).toEqual([]);
-            });
+            const result$ = firstValueFrom(service.getManagedUsers());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'managed_users?order=created_at.desc');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+            const users = await result$;
+            expect(users).toEqual([]);
         });
     });
 
@@ -114,9 +121,7 @@ describe('UserManagementService', () => {
         it('should POST to create_provisioned_user RPC with p_-prefixed params', async () => {
             const user = { email: 'new@test.com', first_name: 'New', last_name: 'User' };
 
-            service.createUser(user).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.createUser(user));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_provisioned_user');
             expect(req.request.method).toBe('POST');
@@ -124,29 +129,31 @@ describe('UserManagementService', () => {
             expect(req.request.body.p_first_name).toBe('New');
             expect(req.request.body.p_last_name).toBe('User');
             req.flush({ success: true, provision_id: 1 });
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle RPC error response', async () => {
             const user = { email: 'bad@test.com', first_name: 'Bad', last_name: 'User', initial_roles: ['nonexistent'] };
 
-            service.createUser(user).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Role "nonexistent" does not exist');
-            });
+            const result$ = firstValueFrom(service.createUser(user));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_provisioned_user');
             req.flush({ success: false, error: 'Role "nonexistent" does not exist' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Role "nonexistent" does not exist');
         });
 
         it('should handle HTTP error', async () => {
             const user = { email: 'denied@test.com', first_name: 'Denied', last_name: 'User' };
 
-            service.createUser(user).subscribe(response => {
-                expect(response.success).toBe(false);
-            });
+            const result$ = firstValueFrom(service.createUser(user));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/create_provisioned_user');
             req.flush({ message: 'Forbidden' }, { status: 403, statusText: 'Forbidden' });
+            const response = await result$;
+            expect(response.success).toBe(false);
         });
     });
 
@@ -157,32 +164,32 @@ describe('UserManagementService', () => {
                 { email: 'b@test.com', first_name: 'B', last_name: 'User' }
             ];
 
-            service.importUsers(users).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.importUsers(users));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
             expect(req.request.method).toBe('POST');
             expect(req.request.body.p_users).toEqual(users);
             req.flush({ success: true, created_count: 2, error_count: 0, errors: [] });
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle partial failure response', async () => {
-            service.importUsers([{ email: 'a@test.com', first_name: 'A', last_name: 'User' }]).subscribe(response => {
-                expect(response.success).toBe(false);
-            });
+            const result$ = firstValueFrom(service.importUsers([{ email: 'a@test.com', first_name: 'A', last_name: 'User' }]));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
             req.flush({ success: false, created_count: 0, error_count: 1, errors: [{ index: 1, email: 'a@test.com', error: 'Duplicate email' }] });
+            const response = await result$;
+            expect(response.success).toBe(false);
         });
 
         it('should handle HTTP error', async () => {
-            service.importUsers([]).subscribe(response => {
-                expect(response.success).toBe(false);
-            });
+            const result$ = firstValueFrom(service.importUsers([]));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
             req.flush({ message: 'Bulk import failed' }, { status: 400, statusText: 'Bad Request' });
+            const response = await result$;
+            expect(response.success).toBe(false);
         });
     });
 
@@ -192,16 +199,16 @@ describe('UserManagementService', () => {
                 { email: 'a@test.com', first_name: 'A', last_name: 'User' }
             ];
 
-            service.importUsersDetailed(users).subscribe(result => {
-                expect(result.success).toBe(true);
-                expect(result.created_count).toBe(1);
-                expect(result.error_count).toBe(0);
-            });
+            const result$ = firstValueFrom(service.importUsersDetailed(users));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
             expect(req.request.method).toBe('POST');
             expect(req.request.body.p_users).toEqual(users);
             req.flush({ success: true, created_count: 1, error_count: 0, errors: [] });
+            const result = await result$;
+            expect(result.success).toBe(true);
+            expect(result.created_count).toBe(1);
+            expect(result.error_count).toBe(0);
         });
 
         it('should return full BulkProvisionResult on partial failure', async () => {
@@ -210,13 +217,7 @@ describe('UserManagementService', () => {
                 { email: 'b@test.com', first_name: 'B', last_name: 'User' }
             ];
 
-            service.importUsersDetailed(users).subscribe(result => {
-                expect(result.success).toBe(false);
-                expect(result.created_count).toBe(1);
-                expect(result.error_count).toBe(1);
-                expect(result.errors.length).toBe(1);
-                expect(result.errors[0].email).toBe('b@test.com');
-            });
+            const result$ = firstValueFrom(service.importUsersDetailed(users));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
             req.flush({
@@ -225,50 +226,56 @@ describe('UserManagementService', () => {
                 error_count: 1,
                 errors: [{ index: 2, email: 'b@test.com', error: 'Duplicate email' }]
             });
+            const result = await result$;
+            expect(result.success).toBe(false);
+            expect(result.created_count).toBe(1);
+            expect(result.error_count).toBe(1);
+            expect(result.errors.length).toBe(1);
+            expect(result.errors[0].email).toBe('b@test.com');
         });
 
         it('should handle HTTP error with fallback error response', async () => {
-            service.importUsersDetailed([{ email: 'a@test.com', first_name: 'A', last_name: 'User' }]).subscribe(result => {
-                expect(result.success).toBe(false);
-                expect(result.created_count).toBe(0);
-                expect(result.error_count).toBe(1);
-                expect(result.errors.length).toBe(1);
-            });
+            const result$ = firstValueFrom(service.importUsersDetailed([{ email: 'a@test.com', first_name: 'A', last_name: 'User' }]));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/bulk_provision_users');
             req.flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
+            const result = await result$;
+            expect(result.success).toBe(false);
+            expect(result.created_count).toBe(0);
+            expect(result.error_count).toBe(1);
+            expect(result.errors.length).toBe(1);
         });
     });
 
     describe('retryProvisioning()', () => {
         it('should POST to retry_user_provisioning RPC', async () => {
-            service.retryProvisioning(42).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.retryProvisioning(42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/retry_user_provisioning');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_provision_id: 42 });
             req.flush({ success: true });
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle RPC error response', async () => {
-            service.retryProvisioning(42).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Only failed requests can be retried');
-            });
+            const result$ = firstValueFrom(service.retryProvisioning(42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/retry_user_provisioning');
             req.flush({ success: false, error: 'Only failed requests can be retried' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Only failed requests can be retried');
         });
 
         it('should handle HTTP error', async () => {
-            service.retryProvisioning(42).subscribe(response => {
-                expect(response.success).toBe(false);
-            });
+            const result$ = firstValueFrom(service.retryProvisioning(42));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/retry_user_provisioning');
             req.flush({ message: 'Not found' }, { status: 400, statusText: 'Bad Request' });
+            const response = await result$;
+            expect(response.success).toBe(false);
         });
     });
 
@@ -279,102 +286,100 @@ describe('UserManagementService', () => {
                 { role_id: 2, display_name: 'editor', description: 'Can edit', role_key: 'editor' }
             ];
 
-            service.getManageableRoles().subscribe(roles => {
-                expect(roles).toEqual(mockRoles);
-            });
+            const result$ = firstValueFrom(service.getManageableRoles());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_manageable_roles');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({});
             req.flush(mockRoles);
+            const roles = await result$;
+            expect(roles).toEqual(mockRoles);
         });
 
         it('should return empty array on error', async () => {
-            service.getManageableRoles().subscribe(roles => {
-                expect(roles).toEqual([]);
-            });
+            const result$ = firstValueFrom(service.getManageableRoles());
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/get_manageable_roles');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+            const roles = await result$;
+            expect(roles).toEqual([]);
         });
     });
 
     describe('assignUserRole()', () => {
         it('should POST to assign_user_role RPC with correct params', async () => {
-            service.assignUserRole('uuid-123', 'editor').subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.assignUserRole('uuid-123', 'editor'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/assign_user_role');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_user_id: 'uuid-123', p_role_name: 'editor' });
             req.flush({ success: true, message: 'Role "editor" assigned' });
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle delegation violation error from API', async () => {
-            service.assignUserRole('uuid-123', 'admin').subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Your role cannot assign the "admin" role');
-            });
+            const result$ = firstValueFrom(service.assignUserRole('uuid-123', 'admin'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/assign_user_role');
             req.flush({ success: false, error: 'Your role cannot assign the "admin" role' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Your role cannot assign the "admin" role');
         });
 
         it('should handle HTTP error', async () => {
-            service.assignUserRole('uuid-123', 'editor').subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Failed to assign role');
-            });
+            const result$ = firstValueFrom(service.assignUserRole('uuid-123', 'editor'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/assign_user_role');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Failed to assign role');
         });
     });
 
     describe('revokeUserRole()', () => {
         it('should POST to revoke_user_role RPC with correct params', async () => {
-            service.revokeUserRole('uuid-123', 'editor').subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            const result$ = firstValueFrom(service.revokeUserRole('uuid-123', 'editor'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/revoke_user_role');
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual({ p_user_id: 'uuid-123', p_role_name: 'editor' });
             req.flush({ success: true, message: 'Role "editor" revoked' });
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
         it('should handle delegation violation error from API', async () => {
-            service.revokeUserRole('uuid-123', 'admin').subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Your role cannot revoke the "admin" role');
-            });
+            const result$ = firstValueFrom(service.revokeUserRole('uuid-123', 'admin'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/revoke_user_role');
             req.flush({ success: false, error: 'Your role cannot revoke the "admin" role' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Your role cannot revoke the "admin" role');
         });
 
         it('should handle HTTP error', async () => {
-            service.revokeUserRole('uuid-123', 'editor').subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Failed to revoke role');
-            });
+            const result$ = firstValueFrom(service.revokeUserRole('uuid-123', 'editor'));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/revoke_user_role');
             req.flush({ message: 'Error' }, { status: 500, statusText: 'Internal Server Error' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Failed to revoke role');
         });
     });
 
     describe('updateUserInfo()', () => {
         it('should POST to update_user_info RPC with p_-prefixed params', async () => {
-            service.updateUserInfo({
+            const result$ = firstValueFrom(service.updateUserInfo({
                 user_id: 'uuid-456',
                 first_name: 'Jane',
                 last_name: 'Doe',
                 phone: '5559876543'
-            }).subscribe(response => {
-                expect(response.success).toBe(true);
-            });
+            }));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
             expect(req.request.method).toBe('POST');
@@ -385,42 +390,46 @@ describe('UserManagementService', () => {
                 p_phone: '5559876543'
             });
             req.flush({ success: true, message: 'User info updated' });
+            const response = await result$;
+            expect(response.success).toBe(true);
         });
 
-        it('should send null phone when not provided', () => {
-            service.updateUserInfo({
+        it('should send null phone when not provided', async () => {
+            const result$ = firstValueFrom(service.updateUserInfo({
                 user_id: 'uuid-456',
                 first_name: 'Jane',
                 last_name: 'Doe'
-            }).subscribe();
+            }));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
             expect(req.request.body.p_phone).toBeNull();
             req.flush({ success: true });
+            await result$;
+
         });
 
         it('should handle RPC error response', async () => {
-            service.updateUserInfo({
+            const result$ = firstValueFrom(service.updateUserInfo({
                 user_id: 'uuid-456', first_name: 'Jane', last_name: 'Doe'
-            }).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Permission denied');
-            });
+            }));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
             req.flush({ success: false, error: 'Permission denied' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Permission denied');
         });
 
         it('should handle HTTP error', async () => {
-            service.updateUserInfo({
+            const result$ = firstValueFrom(service.updateUserInfo({
                 user_id: 'uuid-456', first_name: 'Jane', last_name: 'Doe'
-            }).subscribe(response => {
-                expect(response.success).toBe(false);
-                expect(response.error?.humanMessage).toBe('Internal error');
-            });
+            }));
 
             const req = httpMock.expectOne(testPostgrestUrl + 'rpc/update_user_info');
             req.flush({ message: 'Internal error' }, { status: 500, statusText: 'Internal Server Error' });
+            const response = await result$;
+            expect(response.success).toBe(false);
+            expect(response.error?.humanMessage).toBe('Internal error');
         });
     });
 

@@ -64,3 +64,4 @@ pa11y-results/
 
 
 .playwright-mcp/
+css-classset.json

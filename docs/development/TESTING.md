@@ -856,9 +856,10 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 
 - **No `:modal` pseudo-selector** — use `hasAttribute('open')` instead
 - **No focus trapping** for `<dialog>` — test open/close lifecycle rather than focus containment
-- **DOMPurify doesn't work** — happy-dom's parser isn't complete enough for sanitization. Wrap those tests in a browser-detection guard.
 - **Inline styles keep raw hex** — happy-dom doesn't convert `#3b82f6` to `rgb(59, 130, 246)` like browsers do
-- **`@unovis/angular`** — uses bare ESM directory imports that Node.js can't resolve. Those tests are skipped with a TODO.
+- **`@unovis/angular`** — uses bare ESM directory imports that Node.js can't resolve, so specs for components that import it substitute the package with `src/app/testing/unovis-angular.stub.ts` via `vi.mock('@unovis/angular', () => import('../../../testing/unovis-angular.stub'))` (see `chart-widget.component.spec.ts`). Component logic is tested; SVG rendering is not.
+- **DOMPurify does not sanitize under happy-dom** — it is not a pass-through either: it drops the tag of the first top-level element and returns that element's content and every later sibling untouched, without running hooks on any of them. `<button onclick="…">Click</button>` comes back as `Click`, `<h1>Title</h1><p>…</p>` as `Title<p>…</p>`, but `<p>Hello</p><script>…</script>` keeps the `<script>` and a second element keeps its `onclick`. Real sanitization cannot be asserted in a unit spec, and do not paper over it with a browser-detection guard (a guarded test is a skipped test). `markdown-sanitize.spec.ts` unit-tests our own logic against a recording fake (`vi.mock('dompurify')`): the config, the hook lifecycle and the iframe allowlist hook called directly on node-like inputs. Because `isolate: false` keeps `markdown-sanitize.ts` bound to whichever `dompurify` it saw first in a worker, that spec must be the only unit spec importing `markdown-sanitize.ts`; stub `markdownSanitize` elsewhere. Its fake throws a named error when called from another file, and the spec fails every test by name if the module was loaded with the real `dompurify` first. Real sanitization is asserted in `tests/functional/markdown-sanitize-browser-test.cjs`, which bundles the real sanitizer and runs it in headless Chromium (no Docker stack needed).
+- **No real network in unit specs** — `src/test-setup.ts` disables happy-dom iframe page loading, and any spec that provides `provideHttpClient(...)` must also provide `provideHttpClientTesting()`; otherwise requests escape to the real `localhost:3000` / remote hosts.
 
 ### Test Setup
 
@@ -867,6 +868,8 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - `HTMLDialogElement.showModal()` / `.close()` (basic attribute-based implementation)
 - `HTMLCanvasElement.getContext()` (stub returning a mock 2D context)
 
+It also installs the shared-window guard (see "One happy-dom window per worker" below), the assertion-ledger hook and the async-emission probe.
+
 ## Resources
 
 - [Angular Testing Guide](https://angular.dev/guide/testing)
@@ -874,51 +877,61 @@ Civic OS uses **Vitest** (via `@angular/build:unit-test` builder) with **happy-d
 - [Marble Testing](https://rxjs.dev/guide/testing/marble-testing)
 - [Schema-Driven UI Patterns](https://medium.com/expedia-group-tech/schema-driven-uis-dd8fdb516120)
 
-## PostgREST API Testing with JWT Generation
+## PostgREST API Testing with Keycloak Tokens
 
-For full-loop API testing with different roles, permissions, and users, you can generate JWTs by reading the secret from the example's `.env` file.
+Example stacks run PostgREST with `PGRST_JWT_SECRET: "@/etc/postgrest/jwt-secret.jwks"` (the realm's JWKS, fetched from Keycloak at container start) and `PGRST_JWT_AUD: "account"`. Locally signed tokens (for example HS256 with a shared secret) are rejected with `PGRST301 No suitable key was found to decode the JWT`. Test against the same tokens the browser gets: Keycloak access tokens obtained with the password grant.
 
 ### Workflow
 
-1. Read `PGRST_JWT_SECRET` from the example `.env` (e.g., `examples/community-center/.env`)
-2. Generate JWT with desired claims:
-   - `sub` - User UUID
-   - `role` - PostgreSQL role (`authenticated` or `web_anon`)
-   - `civic_os_roles` - Application roles array (e.g., `["user", "editor", "admin"]`)
-3. Call PostgREST API with `Authorization: Bearer <token>`
-4. Verify RLS enforcement and permission checks
+1. Start an example stack (for example `cd examples/pothole && docker compose -p sdk-pothole up -d --build`).
+2. Request a token for one of the realm's test users (`testuser`, `testeditor`, `testmanager`, `testadmin`; password equals username):
+
+```bash
+TOKEN=$(curl -s \
+  -d client_id=civic-os-dev-client \
+  -d username=testadmin -d password=testadmin \
+  -d grant_type=password \
+  http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/token | jq -r .access_token)
+```
+
+3. Call PostgREST with `Authorization: Bearer $TOKEN`. Omit the header entirely for the anonymous (`web_anon`) role:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:3000/schema_entities?select=table_name,insert,update&table_name=eq.Issue'
+curl -X POST -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{}' http://localhost:3000/rpc/is_admin
+```
+
+### What the token carries
+
+- `aud` is `account` (the claim PostgREST validates) and `azp` is the client, `civic-os-dev-client`.
+- Application roles come from `realm_access.roles` (for `testadmin`: `admin`, `user`, plus Keycloak defaults). `metadata.check_jwt` and `has_permission()` read that claim; there is no `civic_os_roles` claim and no `role` claim to set by hand.
+- Inspect a token: `echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+' | base64 -d | jq` (add `=` padding if `base64` complains).
 
 ### What You Can Test
 
-- **RLS policies** with different user IDs (e.g., users can only see their own records)
-- **Permission checks** for different roles (`user`, `editor`, `admin`)
-- **Anonymous vs authenticated** access (use `web_anon` role for anonymous)
-- **Multi-tenant scenarios** (different user UUIDs)
+- **RLS policies** per user (`testuser` vs `testadmin`, or users you create in the realm)
+- **Permission checks** for different roles (`user`, `editor`, `manager`, `admin`)
+- **Anonymous vs authenticated** access (no `Authorization` header)
+- **Role-dependent metadata**: `schema_entities.insert/update/delete` and `is_admin()` reflect the caller's roles
 
-### Example (using Node.js `jsonwebtoken`)
+### Node example
 
-```bash
-# Read the secret
-PGRST_JWT_SECRET=$(grep PGRST_JWT_SECRET examples/community-center/.env | cut -d= -f2)
-
-# Generate a token (example using node)
-node -e "
-const jwt = require('jsonwebtoken');
-const token = jwt.sign(
-  { sub: 'test-user-uuid', role: 'authenticated', civic_os_roles: ['user', 'admin'] },
-  '$PGRST_JWT_SECRET',
-  { expiresIn: '1h' }
-);
-console.log(token);
-"
-
-# Use the token
-curl -H "Authorization: Bearer <token>" http://localhost:3000/my_table
+```javascript
+const res = await fetch('http://localhost:8082/realms/civic-os-dev/protocol/openid-connect/token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  body: new URLSearchParams({ client_id: 'civic-os-dev-client', username: 'testadmin', password: 'testadmin', grant_type: 'password' }),
+});
+const { access_token } = await res.json();
 ```
+
+`tests/functional/postgrest-api-regression-test.sh` and the `getToken()` helpers in `tests/functional/*.cjs` follow this recipe. Token lifetime is short (minutes); request a fresh one per test run.
 
 ---
 
-**Last Updated**: 2026-09-04
+**Last Updated**: 2026-10-13
 **Maintainer**: Development Team
 
 ## Assertion ledger (SDK program)
@@ -933,8 +946,69 @@ node scripts/test-ledger.mjs --from raw.json  # compare an existing raw ledger i
 node scripts/test-ledger.mjs --update         # re-baseline (runs the suite 5 times; --runs N to change)
 ```
 
-The check fails if any test's assertion count decreased, a baseline test disappeared (a rename shows as disappeared plus new, and needs approval), a passing test stopped passing, the total test count dropped, or skipped/todo count rose. New tests are reported and allowed.
+The check fails if any test's assertion count decreased, a baseline test disappeared (a rename shows as disappeared plus new, and needs approval), a passing test stopped passing, the total test count dropped, or skipped/todo count rose. New tests are reported and allowed, and so are other state changes (e.g. skipped -> passed), which are listed under STATE CHANGED. `--baseline <file>` compares with (or, with `--update`, writes) another baseline file.
 
 Tests marked `unstable` in the baseline have counts inflated by assertions that leak from other tests which assert after they ended (typically inside an async `subscribe` callback): vitest charges a late assertion to whichever test is running at that moment. The baseline stores the minimum observed count and `maxAssertions` for them, and later `--update` runs only widen that range. The leaking tests are in the baseline's hand-curated `leakers` array (file, name, mechanism); `uncountedButReal` lists zero-count tests that are real (they assert through `HttpTestingController` helpers that throw). `--suggest-leakers` prints heuristic candidates and never writes.
 
-`--update` compares against the existing baseline first and prints DECREASED, DISAPPEARED, NEWLY UNSTABLE, NEW and INCREASED. It refuses to write (exit 1) on the first three unless `--accept-decreases`, `--accept-disappeared` or `--accept-new-unstable` is passed; waived items are recorded with a timestamp under `acceptedChanges`. `--update --reset-unstable` rebuilds the unstable marks and is subject to the same gates. Update the baseline only for intentional, reviewed changes.
+`--update` compares against the existing baseline first and prints DECREASED, DISAPPEARED, NEWLY UNSTABLE, STATE REGRESSED (passed -> skipped or todo), STATE CHANGED (informational, e.g. skipped -> passed), NEW and INCREASED. It refuses to write (exit 1) on the first four unless `--accept-decreases`, `--accept-disappeared`, `--accept-new-unstable` or `--accept-state-regressions` is passed; waived items and every STATE CHANGED are recorded with a timestamp under `acceptedChanges`. `--update --reset-unstable` rebuilds the unstable marks and is subject to the same gates. Update the baseline only for intentional, reviewed changes.
+
+### Async-emission probe
+
+`src/app/testing/async-flush-probe.ts` (imported from `src/test-setup.ts`) is inert unless `SDK_ASYNC_FLUSH` is set. It patches `TestRequest.prototype.flush`, `error` and `event` so delivery to the subscriber is deferred, simulating the Promise hops introduced when `SchemaService`/`DataService` delegate to Promise-based core clients. Two modes:
+
+- `macrotask`: delivery runs from a real `setTimeout(0)`. **This is the gate.** It detects assertions outside the test body: a `subscribe()` callback that nobody awaits now fires after the test ended, so the ledger count of that test drops (DECREASED) or its state changes.
+- `microtask`: delivery runs after `ASYNC_FLUSH_HOPS` (3) chained microtasks. It checks ordering assumptions only (code that reads state right after `flush()`). It cannot detect assertions that moved back into `subscribe()`, because vitest runs `afterEach` more than 10 microtask hops later, so such a late assertion still lands inside the counted test lifecycle.
+
+The real `setTimeout` is captured at module load, so fake timers do not stall delivery. If the request is already cancelled when `flush`/`error`/`event` is called, the original runs synchronously (and throws, as before). Otherwise delivery is deferred and dropped if the request was cancelled by then, matching production behavior for a late response to an unsubscribed request.
+
+```bash
+SDK_ASYNC_FLUSH=macrotask node scripts/test-ledger.mjs            # gate: no DECREASED, same pass/fail
+SDK_ASYNC_FLUSH=microtask node scripts/test-ledger.mjs            # ordering assumptions
+SDK_ASYNC_FLUSH=macrotask npx ng test --watch=false --include='**/schema.service.spec.ts'
+```
+
+A spec is robust to deferred emission when it passes under the probe with the same assertion count as without it. Await-style pattern (works for synchronous and deferred emission):
+
+```ts
+const result$ = firstValueFrom(service.getX(args));   // subscribe before flush
+httpMock.expectOne(url).flush(body);
+const result = await result$;
+expect(result).toEqual(...);
+```
+
+Anything that reads service state populated by the emission (signal caches, `ensure*Loaded` guards) must come after the `await`. Since P0.7c the whole suite passes under `SDK_ASYNC_FLUSH=macrotask` with the same per-test assertion counts as without it; keep it that way (any new DECREASED under the probe is an assertion that escaped its test).
+
+### Shared fixtures are frozen
+
+The exported fixtures in `src/app/testing/mock-schema.ts` and `mock-dashboard.ts` (`MOCK_PROPERTIES`, `MOCK_ENTITIES`, `MOCK_DATA`, `MOCK_M2M_PROPERTY`, `MOCK_WIDGETS`, ...) are deep-frozen with `deepFreeze()`, so an in-place mutation throws at the mutation site. Angular's vitest runner shares module instances across spec files in a worker, so an unfrozen mutation (for example `SchemaService.getProperties()` setting `type` on a response object) silently corrupts later specs. Clone before passing a fixture through code that mutates its input: `structuredClone(MOCK_PROPERTIES.integer)`. The `createMock*` factories return fresh unfrozen objects.
+
+### One happy-dom window per worker
+
+Angular's Vitest builder runs with `isolate: false`: every spec file in a worker shares one module registry and one happy-dom `window`/`document`. Vitest restores `vi.spyOn` spies after each file, but nothing resets the DOM, `window.location`, storage contents, `<html>` attributes, `document.title` or timers. Which files share a worker changes from run to run, so a leak shows up as a rare failure in an unrelated spec.
+
+- **Never let a test navigate the window.** happy-dom follows an `<a href>` click as a navigation, including the `<a download href="blob:...">` pattern used for file downloads (`chart-export.ts`, `xlsx`'s `writeFileXLSX`, the image and PDF viewers). Stub `URL.createObjectURL`, `URL.revokeObjectURL` and `HTMLAnchorElement.prototype.click` (and restore them, e.g. `afterEach(() => vi.restoreAllMocks())`), or spy on the component's save wrapper (`saveWorkbook`, `saveExcelFile`).
+- **Shared-window guard**: `src/test-setup.ts` fails any test that leaves `window.location` different from the worker's base URL, names it, and resets the URL; a test that starts on a changed URL fails with the full name of the previous test (async work outliving it, or an `afterAll` hook, changed the URL). It only adds failures.
+- **Do not depend on ambient window state.** A test that reads `window.location`, `localStorage`, `<html dir/lang/data-theme>` or `document.title` sets what it needs first (for the URL: `(window as any).happyDOM.setURL(url)` in `beforeEach`, restore in `afterEach`, as in `runtime.spec.ts`).
+
+To turn an order-dependent failure into a deterministic one, run the suspect files in one worker in a fixed order with a temporary runner config (do not commit it):
+
+```js
+// vitest-ordered.tmp.mjs
+import { defineConfig } from 'vitest/config';
+import { BaseSequencer } from 'vitest/node';
+const ORDER = (process.env.ORDER || '').split(',');
+const rank = (s) => { const i = ORDER.findIndex((o) => s.moduleId.endsWith(o)); return i < 0 ? 1e9 : i; };
+class Ordered extends BaseSequencer {
+  async shard(files) { return files; }
+  async sort(files) { return [...files].sort((a, b) => rank(a) - rank(b)); }
+}
+export default defineConfig({ test: { fileParallelism: false, maxWorkers: 1, sequence: { sequencer: Ordered } } });
+```
+
+```bash
+ORDER=chart-widget.component.spec.ts,runtime.spec.ts npx ng test --watch=false \
+  --runner-config=vitest-ordered.tmp.mjs \
+  --include='**/chart-widget.component.spec.ts' --include='**/runtime.spec.ts'
+```
+
+`detectAsyncLeaks: true` in such a config makes Vitest list timers and promises that outlive their spec file.

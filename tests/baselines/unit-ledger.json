@@ -1,206 +1,15 @@
 {
   "version": 1,
   "totals": {
-    "tests": 3065,
-    "passed": 3057,
+    "tests": 3092,
+    "passed": 3092,
     "failed": 0,
-    "skipped": 8,
+    "skipped": 0,
     "todo": 0,
-    "assertions": 5469,
-    "passedWithZeroAssertions": 48
+    "assertions": 5718,
+    "passedWithZeroAssertions": 10
   },
-  "leakers": [
-    {
-      "file": "src/app/components/geo-point-map/geo-point-map.component.spec.ts",
-      "name": "GeoPointMapComponent > Event Emitters > should emit coordinatesChange with initial value",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/components/geo-point-map/geo-point-map.component.spec.ts",
-      "name": "GeoPointMapComponent > Reset View Functionality > should emit resetView event when onResetView is called",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/components/save-progress/save-progress.component.spec.ts",
-      "name": "SaveProgressComponent > should handle Observable errors gracefully",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/pages/create/create.page.spec.ts",
-      "name": "CreatePage > Form Validation UX > should hide error banner when form becomes valid",
-      "mechanism": "decisive expect runs after a 50 ms wait inside an async subscribe, after the test ended"
-    },
-    {
-      "file": "src/app/pages/create/create.page.spec.ts",
-      "name": "CreatePage > Token Refresh (Keycloak Integration) > should not call createData when token refresh fails",
-      "mechanism": "assertions inside async subscribe/error callbacks after token-refresh rejection; run after test end"
-    },
-    {
-      "file": "src/app/pages/create/create.page.spec.ts",
-      "name": "CreatePage > Token Refresh (Keycloak Integration) > should show 401 error modal when token refresh fails",
-      "mechanism": "assertions inside async subscribe/error callbacks after token-refresh rejection; run after test end"
-    },
-    {
-      "file": "src/app/pages/detail/detail.page.spec.ts",
-      "name": "DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/pages/detail/detail.page.spec.ts",
-      "name": "DetailPage > Observable Chain Integration > should extract first item from data array",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/pages/detail/detail.page.spec.ts",
-      "name": "DetailPage > Observable Chain Integration > should return undefined when no data found",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/pages/detail/detail.page.spec.ts",
-      "name": "DetailPage > Route Parameter Changes > should reload data when entityId changes",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/pages/edit/edit.page.spec.ts",
-      "name": "EditPage > Form Validation UX > should hide error banner when form becomes valid",
-      "mechanism": "decisive expect runs after a 50 ms wait inside an async subscribe, after the test ended"
-    },
-    {
-      "file": "src/app/pages/list/list.page.spec.ts",
-      "name": "ListPage > Observable Chain Integration > should return empty observable when properties are empty",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getEntities() > should cache entities and return from memory on subsequent calls",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getEntities() > should fetch entities from PostgREST on first call",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getEntity() > should return entity matching the key",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getEntity() > should return undefined for non-existent entity",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getInverseRelationships() - previewMode derivation > should derive previewMode from the source table columns",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getProperties() > should cache properties on first call",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getProperties() > should fetch properties from PostgREST",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForCreate() > should filter based on show_on_create flag",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForCreate() > should filter out generated and identity columns",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForCreate() > should filter out hidden fields (id, created_at, updated_at)",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForCreate() > should filter out non-updatable columns",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForEdit() > should filter out fields with show_on_edit=false",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForEdit() > should use same logic as getPropsForCreate",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForList() > should filter out hidden fields based on show_on_list flag",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForList() > should include map property even if hidden from list when map is enabled",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForList() > should not duplicate map property if already visible in list",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > getPropsForList() > should only return properties for the specified table",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Many-to-Many Detection > should generate bidirectional M:M properties",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Many-to-Many Detection > should generate ManyToMany property for each side of relationship",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Many-to-Many Detection > should set relatedTableHasColor=false when related table has no color column",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Many-to-Many Detection > should set relatedTableHasColor=true when related table has color column",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Property Sorting > getPropsForCreate() > should return properties sorted by sort_order",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Property Sorting > getPropsForDetail() > should filter out fields with show_on_detail=false",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Property Sorting > getPropsForDetail() > should return properties sorted by sort_order",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Property Sorting > getPropsForEdit() > should return properties sorted by sort_order (inherits from getPropsForCreate)",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    },
-    {
-      "file": "src/app/services/schema.service.spec.ts",
-      "name": "SchemaService > Property Sorting > getPropsForList() > should return properties sorted by sort_order",
-      "mechanism": "all decisive expect() calls sit inside a subscribe() callback that fires after the test body has ended, so they are not counted for this test and are charged to whichever test is running then"
-    }
-  ],
+  "leakers": [],
   "uncountedButReal": [
     {
       "file": "src/app/pages/admin-payments/admin-payments.page.spec.ts",
@@ -263,7 +72,113 @@
       "mechanism": "real assertions via HttpTestingController expectOne()/expectNone()/verify(), which throw on failure instead of incrementing expect(); not counted but not vacuous. Do not \"fix\"."
     }
   ],
-  "acceptedChanges": [],
+  "acceptedChanges": [
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Navigation > onActionButtonClick(\"edit\") should navigate with replaceUrl: true",
+      "from": 2,
+      "to": 1
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should handle string entityId values",
+      "from": 3,
+      "to": 1
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DECREASED",
+      "test": "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when entityKey is undefined",
+      "from": 2,
+      "to": 1
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > skipped: @unovis/angular ESM directory imports incompatible with Node.js",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should not pollute global DOMPurify state between calls",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should preserve iframe sandbox and allow attributes",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should preserve normal HTML",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should preserve target attribute on links",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should still strip <script> tags",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should still strip onclick attributes",
+      "from": 0,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should allow YouTube iframes",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should strip iframes with invalid src URL",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should strip iframes with no src",
+      "from": 1,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "DISAPPEARED",
+      "test": "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should strip iframes with non-allowlisted src",
+      "from": 2,
+      "to": null
+    },
+    {
+      "at": "2026-10-14T12:29:13.160Z",
+      "kind": "STATE CHANGED",
+      "test": "src/app/interceptors/error-tracking.interceptor.spec.ts :: errorTrackingInterceptor > should NOT track errors from Matomo URLs",
+      "from": "skipped",
+      "to": "passed"
+    }
+  ],
   "tests": {
     "src/app/app.component.spec.ts :: AppComponent > Profile Menu Integration > should NOT render Account Settings link when not authenticated": {
       "state": "passed",
@@ -2239,7 +2154,7 @@
     },
     "src/app/components/geo-point-map/geo-point-map.component.spec.ts :: GeoPointMapComponent > Event Emitters > should emit coordinatesChange with initial value": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 3
     },
     "src/app/components/geo-point-map/geo-point-map.component.spec.ts :: GeoPointMapComponent > Event Emitters > should not emit coordinates for null initial value": {
       "state": "passed",
@@ -2371,7 +2286,7 @@
     },
     "src/app/components/geo-point-map/geo-point-map.component.spec.ts :: GeoPointMapComponent > Reset View Functionality > should emit resetView event when onResetView is called": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/components/geo-point-map/geo-point-map.component.spec.ts :: GeoPointMapComponent > Theme Integration > should call getMapTileConfig when addTileLayer is called": {
       "state": "passed",
@@ -4027,7 +3942,7 @@
     },
     "src/app/components/save-progress/save-progress.component.spec.ts :: SaveProgressComponent > should handle Observable errors gracefully": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 5
     },
     "src/app/components/save-progress/save-progress.component.spec.ts :: SaveProgressComponent > should retry a failed step": {
       "state": "passed",
@@ -4705,9 +4620,121 @@
       "state": "passed",
       "assertions": 1
     },
-    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > skipped: @unovis/angular ESM directory imports incompatible with Node.js": {
-      "state": "skipped",
-      "assertions": 0
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should apply PostgREST filters from config": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should build correct y-accessors from valueColumns array": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should build legend items from seriesLabels": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should compute container height from widget rows": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should create": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should default to chart view: chart visible and data table sr-only": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should expose pressed state on the table toggle button": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should extract config with defaults for optional fields": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should fall back to valueColumn names when seriesLabels are absent": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should fetch data and populate chartData signal": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should format x-axis ticks using label column values": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should format y-axis ticks as integers only": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should handle DataService errors": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should handle empty data (shows empty state)": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should handle empty valueColumns gracefully": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should handle missing entity_key gracefully": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should have downloadCsv method callable without error": {
+      "state": "passed",
+      "assertions": 6
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should have downloadPng method callable without error": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should hide download button when data is empty": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should hide download button when loading": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should include labelColumn, valueColumns, and orderBy in select fields": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should label the table toggle via the a11y translation key": {
+      "state": "passed",
+      "assertions": 2
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should mark the visual chart container aria-hidden": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should render an sr-only data table with a caption and one column per series": {
+      "state": "passed",
+      "assertions": 5
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should return empty legend items when seriesLabels not provided": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should show download button when chart has data": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should swap chart for a visible table when the toggle is clicked, and back": {
+      "state": "passed",
+      "assertions": 10
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should use isSummaryView: true in DataService call": {
+      "state": "passed",
+      "assertions": 1
+    },
+    "src/app/components/widgets/chart-widget/chart-widget.component.spec.ts :: ChartWidgetComponent > should work with single valueColumn (simple bar)": {
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/components/widgets/dashboard-navigation-widget/dashboard-navigation-widget.component.spec.ts :: DashboardNavigationWidgetComponent > Full Navigation > should render navigation buttons as anchor tags": {
       "state": "passed",
@@ -5175,7 +5202,7 @@
     },
     "src/app/config/runtime.spec.ts :: Runtime Configuration Helpers > getKeycloakAccountUrl > should include URL-encoded referrer_uri parameter": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 3
     },
     "src/app/config/runtime.spec.ts :: Runtime Configuration Helpers > getKeycloakAccountUrl > should include all required parameters in correct format": {
       "state": "passed",
@@ -5346,8 +5373,8 @@
       "assertions": 1
     },
     "src/app/interceptors/error-tracking.interceptor.spec.ts :: errorTrackingInterceptor > should NOT track errors from Matomo URLs": {
-      "state": "skipped",
-      "assertions": 0
+      "state": "passed",
+      "assertions": 2
     },
     "src/app/interceptors/error-tracking.interceptor.spec.ts :: errorTrackingInterceptor > should NOT track successful requests": {
       "state": "passed",
@@ -5469,45 +5496,41 @@
       "state": "passed",
       "assertions": 4
     },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should not pollute global DOMPurify state between calls": {
-      "state": "skipped",
-      "assertions": 0
-    },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should preserve iframe sandbox and allow attributes": {
-      "state": "skipped",
-      "assertions": 0
-    },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should preserve normal HTML": {
-      "state": "skipped",
-      "assertions": 0
-    },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should preserve target attribute on links": {
-      "state": "skipped",
-      "assertions": 0
-    },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should still strip <script> tags": {
-      "state": "skipped",
-      "assertions": 0
-    },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > sanitization (requires browser-grade DOM parser) > should still strip onclick attributes": {
-      "state": "skipped",
-      "assertions": 0
-    },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should allow YouTube iframes": {
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > DOMPurify wiring > should allow iframes plus the embed and link attributes (allow, allowfullscreen, frameborder, sandbox, loading, target)": {
       "state": "passed",
       "assertions": 2
     },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should strip iframes with invalid src URL": {
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > DOMPurify wiring > should install one uponSanitizeElement hook for the sanitize call and remove it afterwards": {
+      "state": "passed",
+      "assertions": 3
+    },
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > DOMPurify wiring > should sanitize with a fresh DOMPurify instance bound to window and return its output": {
+      "state": "passed",
+      "assertions": 7
+    },
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > iframe allowlist hook > should keep iframes from allowlisted YouTube hosts": {
+      "state": "passed",
+      "assertions": 4
+    },
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > iframe allowlist hook > should leave non-iframe elements to DOMPurify": {
+      "state": "passed",
+      "assertions": 8
+    },
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > iframe allowlist hook > should not throw for a disallowed iframe that has no parent": {
       "state": "passed",
       "assertions": 1
     },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should strip iframes with no src": {
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > iframe allowlist hook > should remove iframes from hosts outside the allowlist, including lookalikes": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
-    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > should strip iframes with non-allowlisted src": {
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > iframe allowlist hook > should remove iframes whose src has no host (javascript:, data:)": {
       "state": "passed",
       "assertions": 2
+    },
+    "src/app/markdown/markdown-sanitize.spec.ts :: markdownSanitize > iframe allowlist hook > should remove iframes with no src or an unparseable src": {
+      "state": "passed",
+      "assertions": 4
     },
     "src/app/markdown/video-embed.constants.spec.ts :: video-embed.constants > ALLOWED_EMBED_DOMAINS > should include YouTube domains": {
       "state": "passed",
@@ -6395,7 +6418,7 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should hide error banner when form becomes valid": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Form Validation UX > should mark all controls as touched when submitting invalid form": {
       "state": "passed",
@@ -6431,23 +6454,19 @@
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should call updateToken before form submission": {
       "state": "passed",
-      "assertions": 2,
-      "unstable": true,
-      "maxAssertions": 3
+      "assertions": 2
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should not call createData when token refresh fails": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should proceed with submission when token refresh succeeds": {
       "state": "passed",
-      "assertions": 3,
-      "unstable": true,
-      "maxAssertions": 4
+      "assertions": 3
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > Token Refresh (Keycloak Integration) > should show 401 error modal when token refresh fails": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 5
     },
     "src/app/pages/create/create.page.spec.ts :: CreatePage > goBack() > should delegate to NavigationService with fallback URL": {
       "state": "passed",
@@ -6631,7 +6650,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Data Flow with Complex Property Types > should handle all property types in detail view": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 10
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Entity Action Parameters (v0.32.0) > should always return display_name from getParamDisplayColumn": {
       "state": "passed",
@@ -6771,7 +6790,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Navigation > onActionButtonClick(\"edit\") should navigate with replaceUrl: true": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should build PostgREST query with entityId filter": {
       "state": "passed",
@@ -6779,7 +6798,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should extract first item from data array": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should fetch properties for detail view": {
       "state": "passed",
@@ -6787,7 +6806,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should handle string entityId values": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should load entity metadata from route params": {
       "state": "passed",
@@ -6803,7 +6822,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should return undefined when no data found": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Observable Chain Integration > should store entityKey and entityId from route params": {
       "state": "passed",
@@ -6811,7 +6830,7 @@
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityId changes": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 4
     },
     "src/app/pages/detail/detail.page.spec.ts :: DetailPage > Route Parameter Changes > should reload data when entityKey changes": {
       "state": "passed",
@@ -6855,7 +6874,7 @@
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should hide error banner when form becomes valid": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Form Validation UX > should mark all controls as touched when submitting invalid form": {
       "state": "passed",
@@ -6895,9 +6914,7 @@
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Route Parameter Changes > should reload data when entityId changes": {
       "state": "passed",
-      "assertions": 5,
-      "unstable": true,
-      "maxAssertions": 6
+      "assertions": 5
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Token Refresh (Keycloak Integration) > should call updateToken before form submission": {
       "state": "passed",
@@ -6933,9 +6950,7 @@
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should add seconds to DateTime value on submit (timezone-naive)": {
       "state": "passed",
-      "assertions": 1,
-      "unstable": true,
-      "maxAssertions": 2
+      "assertions": 1
     },
     "src/app/pages/edit/edit.page.spec.ts :: EditPage > Value Transformation > transformValuesForApi() - Submit-time transformations > should convert DateTimeLocal local time to UTC on submit": {
       "state": "passed",
@@ -7255,11 +7270,11 @@
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when entityKey is undefined": {
       "state": "passed",
-      "assertions": 2
+      "assertions": 1
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should return empty observable when properties are empty": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/pages/list/list.page.spec.ts :: ListPage > Observable Chain Integration > should store entityKey from route params": {
       "state": "passed",
@@ -9527,7 +9542,7 @@
     },
     "src/app/services/guided-form.service.spec.ts :: GuidedFormService > Context Loading > should refresh context without clearing old data": {
       "state": "passed",
-      "assertions": 3
+      "assertions": 4
     },
     "src/app/services/guided-form.service.spec.ts :: GuidedFormService > Context Loading > should return cached context on second call": {
       "state": "passed",
@@ -10303,11 +10318,11 @@
     },
     "src/app/services/profile.service.spec.ts :: ProfileService > getExtensionRecord() > should build correct PostgREST URL": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/services/profile.service.spec.ts :: ProfileService > getExtensionRecord() > should use select=* when no fields specified": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/services/profile.service.spec.ts :: ProfileService > getProfileExtensions() — own profile (no userId) > should detect has_record=true when embedded array has items": {
       "state": "passed",
@@ -10339,7 +10354,7 @@
     },
     "src/app/services/profile.service.spec.ts :: ProfileService > getProfileExtensions(userId) — other user > should not use cache from own profile when querying other user": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/profile.service.spec.ts :: ProfileService > getProfileExtensions(userId) — other user > should use provided userId instead of current user": {
       "state": "passed",
@@ -10843,7 +10858,7 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Category Options Caching > getCategoriesForEntity() > should prevent duplicate concurrent requests": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Category Options Caching > getCategoryOptionsSync() > should return cached options after load completes": {
       "state": "passed",
@@ -10871,15 +10886,15 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > In-Flight Request Tracking > should prevent concurrent getEntities() calls from triggering duplicate HTTP requests": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > In-Flight Request Tracking > should prevent concurrent getProperties() calls from triggering duplicate HTTP requests": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Locale-aware cache invalidation > should clear category caches on refreshCache": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Locale-aware cache invalidation > should not trigger refreshCache on initial locale": {
       "state": "passed",
@@ -10919,11 +10934,11 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should generate ManyToMany property for each side of relationship": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 10
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should generate bidirectional M:M properties": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 8
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should not detect junction table with 3+ FKs": {
       "state": "passed",
@@ -10939,11 +10954,11 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should set relatedTableHasColor=false when related table has no color column": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should set relatedTableHasColor=true when related table has color column": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Many-to-Many Detection > should skip parent hop detection when intermediate has multiple FK candidates": {
       "state": "passed",
@@ -10951,23 +10966,23 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForCreate() > should return properties sorted by sort_order": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 3
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForDetail() > should filter out fields with show_on_detail=false": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 5
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForDetail() > should return properties sorted by sort_order": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForEdit() > should return properties sorted by sort_order (inherits from getPropsForCreate)": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Property Sorting > getPropsForList() > should return properties sorted by sort_order": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Static Text Methods > getStaticText() > should cache static text on subsequent calls": {
       "state": "passed",
@@ -11035,7 +11050,7 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Status Options Caching > getStatusesForEntity() > should prevent duplicate concurrent requests": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > Status Options Caching > invalidateStatusCache() > should allow fresh HTTP request after invalidation": {
       "state": "passed",
@@ -11099,7 +11114,7 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getConstraintMessages() > should prevent duplicate HTTP requests when called multiple times before response": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 3
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getDefaultValueForProperty() > should return false for Boolean type": {
       "state": "passed",
@@ -11111,19 +11126,19 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntities() > should cache entities and return from memory on subsequent calls": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntities() > should fetch entities from PostgREST on first call": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntity() > should return entity matching the key": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getEntity() > should return undefined for non-existent entity": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getFormValidatorsForProperty() > should add required validator for non-nullable columns": {
       "state": "passed",
@@ -11135,15 +11150,15 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getInverseRelationships() - previewMode derivation > should derive previewMode from the source table columns": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 3
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getProperties() > should cache properties on first call": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 1
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getProperties() > should fetch properties from PostgREST": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 3
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropertiesForEntityFresh() > should calculate property types for all properties": {
       "state": "passed",
@@ -11251,43 +11266,43 @@
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter based on show_on_create flag": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter out generated and identity columns": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter out hidden fields (id, created_at, updated_at)": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForCreate() > should filter out non-updatable columns": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForEdit() > should filter out fields with show_on_edit=false": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 4
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForEdit() > should use same logic as getPropsForCreate": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should filter out hidden fields based on show_on_list flag": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 5
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should include map property even if hidden from list when map is enabled": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 3
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should not duplicate map property if already visible in list": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getPropsForList() > should only return properties for the specified table": {
       "state": "passed",
-      "assertions": 0
+      "assertions": 2
     },
     "src/app/services/schema.service.spec.ts :: SchemaService > getRenderableColumnSpan() > should return column_width for static text": {
       "state": "passed",
@@ -12531,7 +12546,7 @@
     },
     "src/app/workers/import-validation-enum-sync.spec.ts :: Import Validation Worker - EntityPropertyType Sync > should have the expected number of EntityPropertyType enum members": {
       "state": "passed",
-      "assertions": 1
+      "assertions": 2
     }
   }
 }

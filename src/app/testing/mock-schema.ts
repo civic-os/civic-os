@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023-2025 Civic OS, L3C
+ * Copyright (C) 2023-2026 Civic OS, L3C
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,6 +16,24 @@
  */
 
 import { EntityPropertyType, SchemaEntityProperty, SchemaEntityTable, ManyToManyMeta, ParentHop } from '../interfaces/entity';
+
+/**
+ * Recursively freezes a shared test fixture so any in-place mutation throws at the
+ * mutation site instead of leaking into other specs (Angular's vitest runner shares
+ * module instances across spec files in a worker). Tests that need to mutate a
+ * fixture, or that pass one through code that mutates its input (for example
+ * SchemaService.getProperties() sets `type` in place), must clone it first with
+ * structuredClone(). The createMock* factories return fresh, unfrozen objects.
+ */
+export function deepFreeze<T>(value: T): T {
+  if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const key of Reflect.ownKeys(value as object)) {
+      deepFreeze((value as any)[key]);
+    }
+  }
+  return value;
+}
 
 /**
  * Creates a mock SchemaEntityTable with sensible defaults.
@@ -78,7 +96,7 @@ export function createMockProperty(overrides?: Partial<SchemaEntityProperty>): S
  * Pre-configured property type samples for common test scenarios.
  * Use these to quickly set up tests for each EntityPropertyType.
  */
-export const MOCK_PROPERTIES = {
+export const MOCK_PROPERTIES = deepFreeze({
   textShort: createMockProperty({
     column_name: 'name',
     display_name: 'Name',
@@ -208,7 +226,7 @@ export const MOCK_PROPERTIES = {
     udt_name: 'unknown_type',
     type: EntityPropertyType.Unknown
   })
-};
+});
 
 /**
  * Pre-configured entity samples for common test scenarios.
@@ -217,7 +235,7 @@ export const MOCK_ENTITIES: {
   issue: SchemaEntityTable;
   status: SchemaEntityTable;
   workPackage: SchemaEntityTable;
-} = {
+} = deepFreeze({
   issue: createMockEntity({
     table_name: 'Issue',
     display_name: 'Issues',
@@ -235,7 +253,7 @@ export const MOCK_ENTITIES: {
     display_name: 'Work Packages',
     sort_order: 3
   })
-};
+});
 
 /**
  * Creates a mock ManyToManyMeta object with sensible defaults.
@@ -262,7 +280,7 @@ export function createMockManyToManyMeta(overrides?: Partial<ManyToManyMeta>): M
 /**
  * Mock data samples for testing DisplayPropertyComponent
  */
-export const MOCK_DATA = {
+export const MOCK_DATA = deepFreeze({
   textValue: { name: 'Test Issue' },
   booleanTrue: { is_active: true },
   booleanFalse: { is_active: false },
@@ -282,36 +300,36 @@ export const MOCK_DATA = {
   geoPolygon: { boundary: 'POLYGON((-83.749 43.013, -83.748 43.013, -83.748 43.014, -83.749 43.014, -83.749 43.013))' },
   geoPolygonNull: { boundary: null },
   markdown: { body: '# Hello\n\nThis is **bold** text.' }
-};
+});
 
 /**
  * Mock M:M property with complete metadata for testing ManyToManyEditorComponent
  */
-export const MOCK_M2M_PROPERTY = createMockProperty({
+export const MOCK_M2M_PROPERTY = deepFreeze(createMockProperty({
   column_name: 'tags',
   display_name: 'Tags',
   table_name: 'Issue',
   udt_name: '_junction_',
   type: EntityPropertyType.ManyToMany,
   many_to_many_meta: createMockManyToManyMeta()
-});
+}));
 
 /**
  * Mock related entity data with colors (for M:M display/edit testing)
  */
-export const MOCK_RELATED_DATA = [
+export const MOCK_RELATED_DATA = deepFreeze([
   { id: 1, display_name: 'Urgent', color: '#FF0000', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   { id: 2, display_name: 'Road Surface', color: '#00FF00', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   { id: 3, display_name: 'Sidewalk', color: '#0000FF', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   { id: 4, display_name: 'Lighting', color: '#FFFF00', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
   { id: 5, display_name: 'Drainage', color: '#FF00FF', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' }
-];
+]);
 
 /**
  * Mock junction table properties for testing junction detection logic.
  * This represents a clean junction table with exactly 2 FKs and only metadata columns.
  */
-export const MOCK_JUNCTION_PROPERTIES = [
+export const MOCK_JUNCTION_PROPERTIES = deepFreeze([
   createMockProperty({
     table_name: 'issue_tags',
     column_name: 'issue_id',
@@ -341,13 +359,13 @@ export const MOCK_JUNCTION_PROPERTIES = [
     is_updatable: false,
     type: EntityPropertyType.DateTime
   })
-];
+]);
 
 /**
  * Mock non-junction table properties (has extra business columns).
  * This table has 2+ FKs but also has non-metadata columns, so it should NOT be detected as a junction table.
  */
-export const MOCK_NON_JUNCTION_PROPERTIES = [
+export const MOCK_NON_JUNCTION_PROPERTIES = deepFreeze([
   createMockProperty({
     table_name: 'user_roles',
     column_name: 'user_id',
@@ -376,4 +394,4 @@ export const MOCK_NON_JUNCTION_PROPERTIES = [
     udt_name: 'timestamptz',
     type: EntityPropertyType.DateTime
   })
-];
+]);

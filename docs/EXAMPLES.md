@@ -293,6 +293,7 @@ docker-compose up -d
 
 ```bash
 cd examples/neighborhood-hub
+cp .env.example .env
 docker-compose up -d --build  # PostgREST auto-fetches JWKS from Keycloak
 ```
 

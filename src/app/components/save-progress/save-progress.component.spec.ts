@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { SaveProgressComponent, SaveStep } from './save-progress.component';
 
 describe('SaveProgressComponent', () => {
@@ -87,20 +87,25 @@ describe('SaveProgressComponent', () => {
     });
 
     it('should handle Observable errors gracefully', async () => {
+        const second = vi.fn().mockName('step2.execute').mockReturnValue(of({ success: true }));
         const steps: SaveStep[] = [
-            { label: 'Step 1', execute: () => { throw new Error('boom'); } }
+            { label: 'Step 1', execute: () => throwError(() => new Error('boom')) },
+            { label: 'Step 2', execute: second }
         ];
 
-        // Should not throw — the component should catch and show error
-        // Note: since execute throws synchronously (not an Observable error),
-        // this tests the extreme edge case
-        try {
-            fixture.componentRef.setInput('steps', steps);
-            fixture.detectChanges();
-        }
-        catch (e) {
-            // Expected — synchronous throw in execute
-        }
+        vi.spyOn(component.completed, 'emit').mockReturnValue(undefined);
+        fixture.componentRef.setInput('steps', steps);
+        fixture.detectChanges();
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const states = component.stepStates();
+        // The Observable error is caught and surfaced as an error state
+        expect(states[0].status).toBe('error');
+        expect(states[0].errorMessage).toBe('An unexpected error occurred');
+        // Execution stops: later steps never start and the flow does not complete
+        expect(states[1].status).toBe('pending');
+        expect(second).not.toHaveBeenCalled();
+        expect(component.completed.emit).not.toHaveBeenCalled();
     });
 
     it('should skip a step and continue to next', async () => {

@@ -6,7 +6,7 @@
 # CHECK constraints, submit locks, on_submit_rpc, and progress tracking.
 #
 # Usage:
-#   ./tests/functional/v0-48-0-workflow-system-test.sh
+#   ./tests/functional/v0-48-0-guided-form-system-test.sh
 #
 # Prerequisites:
 #   - Docker compose running (neighborhood-hub example)
@@ -137,6 +137,16 @@ if [ -z "$ADMIN_TOKEN" ]; then
 fi
 
 echo "  Admin token acquired."
+
+# Ensure the JWT user exists in metadata.civic_os_users (mirrors the app's
+# login flow). complete_guided_form_step records completed_by, which has a FK
+# to civic_os_users; on a fresh stack where testadmin has never logged in via
+# the frontend, the call fails with 409 (23503) and every later step cascades.
+curl -s -o /dev/null \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X POST "$POSTGREST_URL/rpc/refresh_current_user"
+echo "  Registered testadmin in civic_os_users"
 
 # Look up guided_form status IDs (shared across all guided forms)
 DRAFT_STATUS_ID=$(PGPASSWORD=$DB_PASS $PSQL -c \

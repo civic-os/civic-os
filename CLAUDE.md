@@ -203,6 +203,8 @@ sqitch deploy dev --verify      # Re-deploy
 
 Use templates in `postgres/migrations/templates/` as starting points for common operations (`add_metadata_table`, `add_rpc_function`, `add_domain`, `modify_metadata_view`). **Migrations change schema shape, never instance content** — never UPDATE/replace dashboard widgets, display names, translations, or other metadata rows that integrators customize per deployment. See `postgres/migrations/README.md` for comprehensive documentation and the "Instance-Specific Data Is Off-Limits" policy.
 
+**Function Security** (v0.76.5+): All non-anonymous functions have PUBLIC EXECUTE revoked; `ALTER DEFAULT PRIVILEGES` prevents regression. New migrations must `REVOKE EXECUTE ... FROM PUBLIC` (not `FROM web_anon`, which is a no-op). SECURITY DEFINER functions must include in-body authorization guards. See `docs/notes/SECURITY_DEFINER_AUDIT_2026-10.md` for the full audit, `docs/INTEGRATOR_GUIDE.md` (Securing RPC Functions) for the integrator rules, and `postgres/migrations/templates/add_rpc_function.sql` for the corrected template.
+
 **Future Direction**: Declarative schema management deferred to v1.0 milestone. See `docs/notes/DECLARATIVE_SCHEMA_MANAGEMENT.md`.
 
 ## Production Deployment & Containerization
@@ -237,7 +239,7 @@ All API calls use PostgREST conventions (select, filter, order, embed). `SchemaS
 
 **PostgREST Version** (v0.73.0+): PostgREST v16.2. Upgraded from custom Docker image (`docker/postgrest/Dockerfile`). Admin server healthchecks on port 3001 in all production compose files. See `docs/development/POSTGREST_UPGRADE_RUNBOOK.md` for the upgrade verification procedure and `tests/functional/postgrest-api-regression-test.sh` for the API regression test.
 
-**API Testing with JWT Generation**: Generate JWTs from the example `.env` secret to test RLS policies, permissions, and multi-tenant scenarios. See `docs/development/TESTING.md` (PostgREST API Testing section) for workflow.
+**API Testing with JWTs**: Get real tokens from the example Keycloak via the password grant (test users `testuser`/`testeditor`/`testmanager`/`testadmin`) to test RLS policies and permissions; PostgREST validates Keycloak's JWKS, so self-signed tokens are rejected. See `docs/development/TESTING.md` (PostgREST API Testing section) for the recipe.
 
 ## Built-in PostgreSQL Functions
 
