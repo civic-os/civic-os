@@ -29,6 +29,12 @@ let createdRequestPath = '';
 
 test('01 list requests with calendar', async ({ harness }) => {
   const { page } = harness;
+  // init-scripts/14 seeds the "Weekly Yoga Class" series at NOW() + 1 day, so its times
+  // depend on when the stack started; mask those chips and rows in screenshots only.
+  harness.screenshotMasks = (p) => [
+    p.getByRole('button', { name: /Weekly Yoga Class/ }),
+    p.getByRole('row').filter({ hasText: 'Weekly Yoga Class' }),
+  ];
 
   await harness.step('open Reservation Requests list', async () => {
     await page.goto('/view/reservation_requests');

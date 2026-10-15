@@ -303,6 +303,11 @@ some text, so `runtimeTextMasks()` in `lib/harness.ts` paints it magenta:
 - date-times on the fake clock's day;
 - relative times such as "3 minutes ago".
 
+A flow can add masks for example seed data stamped with the database's
+`NOW()` at stack start, through `harness.screenshotMasks`. Community-center
+masks the "Weekly Yoga Class" series, which init script 14 seeds at
+`NOW() + 1 day`. These masks affect screenshots only, never recordings.
+
 Map tiles are blocked, so maps render grey in both runs.
 
 ## Rules

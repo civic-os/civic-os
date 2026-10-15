@@ -13,7 +13,7 @@
  *   harness.registerIds()   declare ids created on the flow's behalf so they are masked like UI-created ids
  */
 
-import { test as base, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import { test as base, expect, type Browser, type BrowserContext, type Locator, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { Recorder } from './recorder.mjs';
@@ -165,6 +165,11 @@ export class Harness {
   private stepIndex = 0;
   private contexts: BrowserContext[] = [];
   page!: Page;
+  /**
+   * Extra screenshot masks for example seed data stamped with the database's NOW()
+   * at stack start (differs between two stacks). Visual only; never affects recordings.
+   */
+  screenshotMasks: (page: Page) => Locator[] = () => [];
   api!: Api;
 
   constructor(
@@ -233,7 +238,7 @@ export class Harness {
       animations: 'disabled',
       caret: 'hide',
       scale: 'css',
-      mask: runtimeTextMasks(this.page),
+      mask: [...runtimeTextMasks(this.page), ...this.screenshotMasks(this.page)],
       maskColor: '#FF00FF',
     });
   }
