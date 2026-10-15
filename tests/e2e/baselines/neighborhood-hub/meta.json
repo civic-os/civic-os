@@ -1,8 +1,8 @@
 {
   "example": "neighborhood-hub",
-  "baseSha": "e99b90725845b0a1c7274605e82fe953b33c5e72",
-  "exampleTree": "e0efe63f9e0cccf36f4197de54ad12468de90363",
-  "migrationsTree": "3a0cfb2e9f88224b5b7d326128edda544ad2f02e",
+  "baseSha": "4fbdd1f6d724bc9501aa6d8a3e0ad699540a763c",
+  "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
+  "migrationsTree": "61187f7ff250e6239fa569ab9cc12e3e7205e8db",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
   "timezone": "America/New_York",
@@ -13,6 +13,7 @@
     "02-editor-creates-a-tool-instance-and-adds-a-note",
     "03-project-with-parcels-and-gallery",
     "04-borrower-address-action-and-photo-id-upload",
-    "05-guided-form-building-use-request"
+    "05-guided-form-building-use-request",
+    "06-anonymous-browsing"
   ]
 }
