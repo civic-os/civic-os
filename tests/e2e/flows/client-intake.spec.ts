@@ -82,6 +82,8 @@ test('02 create client with service needs', async ({ harness }) => {
     await dialog.getByRole('checkbox', { name: 'ESL / English Classes' }).check();
     await dialog.getByRole('checkbox', { name: 'Employment / Job Placement' }).check();
     await dialog.getByRole('button', { name: /^Apply/ }).click();
+    // The chosen names are also rows of the closing dialog; wait for it to go first.
+    await expect(dialog).toBeHidden();
     await expect(page.getByText('ESL / English Classes')).toBeVisible();
   });
 
@@ -147,6 +149,7 @@ test('04 newsletter with recipients, schedule date and schedule action', async (
     const dialog = page.getByRole('dialog', { name: 'Select Recipients' });
     await dialog.getByRole('checkbox', { name: `${CLIENT_FIRST} ${CLIENT_LAST}` }).check();
     await dialog.getByRole('button', { name: /^Apply/ }).click();
+    await expect(dialog).toBeHidden();
     await expect(page.getByText(`${CLIENT_FIRST} ${CLIENT_LAST}`)).toBeVisible();
   });
 

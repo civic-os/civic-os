@@ -121,6 +121,7 @@ test('03 project with parcels and gallery', async ({ harness }) => {
     await dialog.getByRole('checkbox', { name: '123 Main St 48503' }).check();
     await dialog.getByRole('checkbox', { name: '789 Elm Blvd 48504' }).check();
     await dialog.getByRole('button', { name: /Apply|Confirm/ }).click();
+    await expect(dialog).toBeHidden();
   });
 
   await harness.step('fill and save', async () => {
@@ -233,6 +234,8 @@ test('05 guided form: building use request', async ({ harness }) => {
     await dialog.getByRole('checkbox', { name: 'Large Meeting Room' }).check();
     await dialog.getByRole('checkbox', { name: 'Outdoor Space' }).check();
     await dialog.getByRole('button', { name: /Apply|Confirm/ }).click();
+    // The chosen names are also rows of the closing dialog; wait for it to go first.
+    await expect(dialog).toBeHidden();
     await expect(page.getByText('Outdoor Space')).toBeVisible();
   });
 
