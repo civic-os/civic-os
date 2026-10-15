@@ -7,12 +7,12 @@
       "condition-describe": 46,
       "content-range": 11,
       "error": 915,
-      "es-model": 415,
+      "es-model": 420,
       "fe-hybrid-model": 130,
       "fe-synthetic-model": 312,
       "fe-view-model": 2015,
       "name": 469,
-      "property": 3952,
+      "property": 3957,
       "query": 1696,
       "type-probe": 64,
       "view": 1612
@@ -27,7 +27,6 @@
         "null"
       ],
       "mcpTypes": [
-        "DateTime",
         "RecurringTimeSlot"
       ],
       "udts": [
@@ -36,8 +35,7 @@
         "float4",
         "float8",
         "int2",
-        "jsonb",
-        "timestamp"
+        "jsonb"
       ]
     },
     "unattributed": 0
@@ -3546,11 +3544,11 @@
           "community-center": 1,
           "mottpark": 3,
           "neighborhood-hub": 3,
-          "pothole": 7,
+          "pothole": 8,
           "staff-portal": 3,
           "storymap": 1
         },
-        "count": 19,
+        "count": 20,
         "entities": 12,
         "examples": [
           {
@@ -3572,7 +3570,7 @@
             "subject": "base_amount"
           }
         ],
-        "occurrences": 19,
+        "occurrences": 20,
         "synthetic": 0
       },
       "mcp": "Only display-name to id resolution (`resolveData`); dates, money and files go to PostgREST exactly as the LLM wrote them.",
