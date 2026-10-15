@@ -1,13 +1,13 @@
 {
   "example": "neighborhood-hub",
-  "baseSha": "fe3ee3017f89682d414402ea8eaa2a768e8ccd77",
+  "baseSha": "78687fd131eed728f78dab041db109ffbfaf955a",
   "exampleTree": "925cd42e1aa4a80d30198f2d2db000109201acab",
   "migrationsTree": "e29ab41fac2f5c2de336bd688ca626c4908ea73b",
   "appSourceDirty": false,
   "clockT0": "2026-10-20T09:30:00-04:00",
   "timezone": "America/New_York",
   "locale": "en-US",
-  "harness": "2",
+  "harness": "3",
   "flows": [
     "01-lists-tool-types-search-sort-page-parcels-filter",
     "02-editor-creates-a-tool-instance-and-adds-a-note",

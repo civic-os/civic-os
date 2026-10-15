@@ -1,5 +1,5 @@
 {
-  "harness": "2",
+  "harness": "3",
   "flow": "03 client note and consent action with params",
   "steps": [
     {

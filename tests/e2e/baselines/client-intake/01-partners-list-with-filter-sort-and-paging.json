@@ -1,5 +1,5 @@
 {
-  "harness": "2",
+  "harness": "3",
   "flow": "01 partners list with filter, sort and paging",
   "steps": [
     {

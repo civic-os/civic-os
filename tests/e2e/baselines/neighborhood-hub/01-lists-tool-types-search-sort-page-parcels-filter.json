@@ -1,5 +1,5 @@
 {
-  "harness": "2",
+  "harness": "3",
   "flow": "01 lists: tool types search/sort/page, parcels filter",
   "steps": [
     {

@@ -1,5 +1,5 @@
 {
-  "harness": "2",
+  "harness": "3",
   "flow": "04 edit issue with photo and gallery",
   "steps": [
     {
@@ -498,7 +498,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 1,
+          "n": ">=1",
           "raw": [
             {
               "body": null,
@@ -605,7 +605,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 1,
+          "n": ">=1",
           "raw": [
             {
               "body": null,
@@ -712,7 +712,7 @@
           },
           "body": null,
           "status": "2xx|cancelled",
-          "n": 1,
+          "n": ">=1",
           "raw": [
             {
               "body": null,

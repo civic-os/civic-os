@@ -1,5 +1,5 @@
 {
-  "harness": "2",
+  "harness": "3",
   "flow": "02 editor creates a tool instance and adds a note",
   "steps": [
     {
