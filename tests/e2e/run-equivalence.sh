@@ -7,6 +7,7 @@
 #   run-equivalence.sh <example> --record              write committed baselines (lead only)
 #   run-equivalence.sh <example> --compare             record to .artifacts and diff against baselines
 #   run-equivalence.sh <example> --visual-base <ref>   screenshots of <ref>'s app vs this checkout's app
+#   run-equivalence.sh pothole --integrity             data-integrity suite (integrity.spec.ts; see run-integrity.sh)
 #
 # Options:
 #   --keep-stack     leave the Docker stack and dev server running afterwards (development)
@@ -24,7 +25,7 @@ set -euo pipefail
 E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$E2E_DIR" rev-parse --show-toplevel)"
 
-usage() { sed -n '4,21p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '4,22p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # Everything runs inside main(), which bash parses completely before running it,
 # so editing this file during a run cannot change the run in progress.
@@ -45,6 +46,7 @@ stop_dev_server() {
 
 # Globals the EXIT trap relies on; main() fills in the rest.
 KEEP_STACK=0; KEEP_BASE=0; STACK_STARTED=0; LOCK_ACQUIRED=0; DEV_PID=""; BASE_WT=""; T_START=$(date +%s)
+PW_PROJECT=flows
 
 cleanup() {
   local rc=$?
@@ -215,9 +217,9 @@ run_flows() {
   rm -rf "$art/raw" "$art/screenshots" "$art/auth" "$art/test-results"
   local grep_args=()
   [[ -n "$GREP" ]] && grep_args=(--grep "$GREP")
-  log "running flows for $EXAMPLE"
+  log "running $PW_PROJECT for $EXAMPLE"
   ( cd "$E2E_DIR" && E2E_EXAMPLE="$EXAMPLE" E2E_ARTIFACT_DIR="$art" E2E_ROLES="$ROLES" \
-      npx playwright test --project=flows ${grep_args[@]+"${grep_args[@]}"} ) || rc=$?
+      npx playwright test --project="$PW_PROJECT" ${grep_args[@]+"${grep_args[@]}"} ) || rc=$?
   log "flows finished in $(( $(date +%s) - t0 ))s (exit $rc)"
   return $rc
 }
@@ -257,6 +259,7 @@ main() {
       --record) MODE=record ;;
       --compare) MODE=compare ;;
       --visual-base) MODE=visual; VISUAL_REF="${2:?--visual-base needs a git ref}"; shift ;;
+      --integrity) MODE=integrity ;;
       --keep-stack) KEEP_STACK=1 ;;
       --reuse-stack) REUSE_STACK=1 ;;
       --grep) GREP="${2:?--grep needs a pattern}"; shift ;;
@@ -266,6 +269,9 @@ main() {
     shift
   done
   [[ -n "$MODE" ]] || usage
+  if [[ "$MODE" == integrity && "$EXAMPLE" != pothole ]]; then
+    echo "--integrity runs against pothole only (its init scripts define the columns under test)" >&2; exit 2
+  fi
   if [[ "$MODE" == record && ( $REUSE_STACK == 1 || -n "$GREP" ) ]]; then
     echo "--record always runs every flow on a fresh stack; --reuse-stack/--grep are not allowed" >&2; exit 2
   fi
@@ -285,6 +291,10 @@ main() {
   ART="$E2E_DIR/.artifacts/$EXAMPLE"
   LOCK="${E2E_STD_LOCK:-${TMPDIR:-/tmp}/civic-os-e2e-std.lock}"
   ROLES="${E2E_ROLES:-testadmin,testeditor,anonymous}"
+  if [[ "$MODE" == integrity ]]; then
+    PW_PROJECT=integrity
+    ROLES="${E2E_ROLES:-testadmin}"
+  fi
   mkdir -p "$ART"
   acquire_lock
 
@@ -304,6 +314,10 @@ main() {
       else
         log "baselines written to tests/e2e/baselines/$EXAMPLE (review the diff before committing)"
       fi
+      ;;
+    integrity)
+      # Asserts against psql inside the spec; there is nothing to normalize or compare.
+      capture "$ROOT" "$ART/integrity"
       ;;
     visual)
       BASE_SHA=$(git -C "$ROOT" rev-parse --verify "$VISUAL_REF^{commit}")

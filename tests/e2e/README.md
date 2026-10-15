@@ -95,6 +95,7 @@ package expects to be added there:
 npm run e2e:install                            # npm --prefix tests/e2e ci && npx --prefix tests/e2e playwright install chromium
 npm run e2e:lib                                # npm --prefix tests/e2e run test:lib
 npm run e2e:equivalence -- <example> --compare # tests/e2e/run-equivalence.sh
+npm run e2e:integrity                          # tests/e2e/run-integrity.sh (see "Data-integrity suite")
 ```
 
 ## Flows
@@ -106,9 +107,11 @@ npm run e2e:equivalence -- <example> --compare # tests/e2e/run-equivalence.sh
 | neighborhood-hub | Tool types hybrid search, sort and last page. Parcels filter bar. testeditor: tool instance create (FK, Status) plus a note. Project create with M:M parcels (search modal), then two gallery uploads. Borrower "Update Address" action with params, then a FileImage upload. Building-use guided form: parent step with per-field autosave, M:M rooms, Event Details step, review, submit. anonymous: tool types list, search, detail. |
 | client-intake | Partner list: sort, page change, filter bar. Client create (Category, Date, M:M needs via modal). Client note plus the "Record Consent" action (category, two dates, file param). Newsletter: M:M recipients, Markdown body, DateTimeLocal edit, "Schedule" action (datetime_local param). Service category create and delete. anonymous: partner list, filter, detail. No guided form is configured in this example. |
 
-`DateTime` (`timestamp`) is not covered yet, because no example has such a
-column. `flows/pothole.spec.ts` has a `TODO(P0.5)` hook where the column
-added by P0.5 is to be filled.
+`DateTime` (`timestamp`) has no equivalence flow yet. Pothole's
+`Issue.observed_at` (init script `15_add_observed_at_timestamp.sql`) is
+covered by the data-integrity suite below. `flows/pothole.spec.ts` keeps a
+`TODO(P0.5)` hook for filling it in an equivalence flow, which needs a
+pothole re-record.
 
 ## What is recorded
 
@@ -318,12 +321,85 @@ Map tiles are blocked, so maps render grey in both runs.
   baseline format or content, then re-record every example.
 - A flow change requires re-recording that example.
 
+## Data-integrity suite
+
+Request equivalence proves that a refactor sends the same requests. It does
+not prove that those requests store the right values. `integrity.spec.ts`
+does: it types values through the pothole UI as `testadmin`, reads the stored
+values with `psql`, and reopens the edit page to check that the inputs show
+what was typed. It is the backstop for the transforms that move into the SDK
+core (`transformValuesForApi`, `transformValueForControl`,
+`parseDatetimeLocal`) and for Money, GeoPoint and M:M writes.
+
+```bash
+tests/e2e/run-integrity.sh       # fresh pothole stack, dev server, suite, teardown
+```
+
+`run-integrity.sh` is `run-equivalence.sh pothole --integrity`: the same lock,
+fresh `sdk-pothole` stack (`down -v`, then `up`), dev server on `:4200`,
+real Keycloak login and teardown. It prepares only the `testadmin` login and
+records nothing. `--keep-stack`, `--reuse-stack` and `--grep` work as above;
+never use them for gate runs. It needs a `psql` client on the host
+(`E2E_PSQL` overrides the binary). The spec connects to
+`localhost:15432/civic_os_db` as `postgres`, and `E2E_PG_HOST`, `E2E_PG_PORT`,
+`E2E_PG_USER`, `E2E_PG_DB` and `E2E_PG_PASSWORD` override that.
+
+**Expected values are derived by hand.** Each expected value in the spec is
+written out from the typed input and the time-zone rules, with the derivation
+in a comment next to it. No expectation is read from the app's output, so the
+suite cannot drift along with a regression. Each browser context checks
+first that it really runs under its zone's offsets (`getTimezoneOffset()` in
+January and July).
+
+| Area | Typed (context zone) | Stored (psql), derivation | Edit page shows |
+|---|---|---|---|
+| DateTimeLocal `WorkPackage.quote_due_date` (`timestamptz`) | `2026-11-01T01:30` (NY, fall-back overlap) | `2026-11-01T05:30Z`: a repeated local time resolves to the earlier instant, EDT (UTC-4) | `2026-11-01T01:30` |
+| | `2026-03-08T02:30` (NY, spring-forward gap) | `2026-03-08T07:30Z`: a skipped local time takes the pre-transition offset, EST (UTC-5) | `2026-03-08T03:30` (see below) |
+| | `2026-07-04T18:45` (NY, EDT) | `2026-07-04T22:45Z` | `2026-07-04T18:45`; in Kolkata `2026-07-05T04:15` |
+| | `2026-07-04T09:15` (Kolkata, IST UTC+05:30) | `2026-07-04T03:45Z` | `2026-07-04T09:15` |
+| | `2027-01-01T00:10` (Kolkata) | `2026-12-31T18:40Z` | `2027-01-01T00:10` |
+| DateTime `Issue.observed_at` (`timestamp`) | `2026-03-08T02:30` and `2026-11-01T01:30` (NY), `2026-07-04T09:15` and `2027-01-01T00:10` (Kolkata) | exactly as typed, seconds `:00`, in every zone | exactly as typed, also from the other zone |
+| Money `WorkPackage.cost` | `1234567.89`, `0.10`, keystrokes `987654321`, `$ 1,000,000.01`, `4321.00` | `cost::numeric` = `1234567.89`, `0.10`, `9876543.21`, `1000000.01`, `4321.00` (financial input mode: all typed digits count, the last two are cents) | |
+| GeoPoint `Issue.location` | Latitude `43.0186` / Longitude `-83.6929`, then `42.9634` / `-85.6681` | `ST_AsText` = `POINT(-83.6929 43.0186)`, then `POINT(-85.6681 42.9634)` (x = longitude) | the typed coordinates |
+| M:M `issue_tags` | Edit Tags: add Urgent and Road Surface; then remove Urgent, add Drainage | exactly {Road Surface, Urgent}, then {Drainage, Road Surface} | |
+
+Unrelated edits (renaming, changing severity or cost, re-saving from the
+other zone) must leave every stored value above unchanged; the spec checks
+that too.
+
+**The spring-forward gap.** 02:30 on 2026-03-08 does not exist in New York.
+Chromium's `datetime-local` input accepts it as typed; the app then builds a
+local `Date` from it, which ECMAScript resolves with the offset in effect
+before the transition (EST), giving `07:30Z`. That instant is 03:30 EDT, so
+the edit page shows `03:30`, not the `02:30` that was typed. Re-saving does
+not move it again. The `timestamp` column stores the gap value exactly as
+typed, because no zone is applied.
+
+**Pinned state.** The same as the equivalence flows (locale, viewport,
+localStorage, blocked third-party origins, fake clock at `CLOCK_T0`), except
+the time zone, which each test sets to `America/New_York` or `Asia/Kolkata`.
+The fake clock only fixes "today": every value under test is typed
+explicitly.
+
+**Failures.** Each assertion message names its case (for example `NY gap
+02:30 -> pre-transition offset (EST)`). A failed test leaves
+`error-context.md` (ARIA snapshot) and a screenshot under
+`.artifacts/pothole/integrity/test-results/`. Tracing is off for this
+project: saving a `retain-on-failure` trace stalled every failed test until
+its timeout, with or without the fake clock.
+
+**Order.** The five tests run in file order. The last one reopens the New York
+records in a Kolkata context, so it fails too if an earlier New York test did
+not leave its record behind.
+
 ## Layout
 
 | Path | Purpose |
 |---|---|
-| `run-equivalence.sh` | Runner: lock, stack, dev server, Playwright, normalize, compare, visual |
-| `playwright.config.ts` | `auth` setup project, then the `flows` project for `$E2E_EXAMPLE` |
+| `run-equivalence.sh` | Runner: lock, stack, dev server, Playwright, normalize, compare, visual; `--integrity` mode |
+| `run-integrity.sh` | Data-integrity suite runner (`run-equivalence.sh pothole --integrity`) |
+| `integrity.spec.ts` | Data-integrity suite: UI input, `psql` checks, edit-page round trip |
+| `playwright.config.ts` | `auth` setup project, then the `flows` project for `$E2E_EXAMPLE`, or the `integrity` project |
 | `flows/auth.setup.ts` | Real Keycloak UI login per role → `storageState` |
 | `flows/<example>.spec.ts` | Flows; one `test()` per flow, steps via `harness.step()` |
 | `lib/harness.ts` | Fixtures: pinned context, recorder, `step`, `setup`, `api`, `registerIds` |

@@ -30,5 +30,19 @@ export default defineConfig({
   projects: [
     { name: 'auth', testMatch: /auth\.setup\.ts$/ },
     { name: 'flows', testMatch: new RegExp(`/${example}\\.spec\\.ts$`), dependencies: ['auth'] },
+    // Data-integrity suite (pothole only; run-integrity.sh). Not part of the equivalence flows.
+    {
+      name: 'integrity',
+      testDir: import.meta.dirname,
+      testMatch: /\/tests\/e2e\/integrity\.spec\.ts$/,
+      testIgnore: ['**/node_modules/**', '**/.artifacts/**'],
+      // Each test takes well under a minute; this bounds a failed test's teardown.
+      timeout: 3 * 60_000,
+      // Saving a retain-on-failure trace stalls a failed test until the timeout here
+      // (Playwright 1.59.1 against the dev server; not caused by the fake clock).
+      // A failure keeps error-context.md (ARIA snapshot) and a screenshot instead.
+      use: { trace: 'off', screenshot: 'only-on-failure' },
+      dependencies: ['auth'],
+    },
   ],
 });
