@@ -1,0 +1,657 @@
+{
+  "harness": "1",
+  "flow": "04 newsletter with recipients, schedule date and schedule action",
+  "steps": [
+    {
+      "name": "open create form",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/constraint_messages",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/constraint_messages"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entities",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entities"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_m2m_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_m2m_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_properties",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_properties"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/static_text",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/static_text"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_current_user_permissions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_current_user_permissions"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_dashboards",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/get_dashboards"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/refresh_current_user",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {},
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{}",
+              "url": "/rpc/refresh_current_user"
+            }
+          ]
+        }
+      ],
+      "keycloak": {
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step1.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/3p-cookies/step2.html": 1,
+        "GET /realms/civic-os-dev/protocol/openid-connect/auth": 1,
+        "POST /realms/civic-os-dev/protocol/openid-connect/token": 1
+      },
+      "minio": []
+    },
+    {
+      "name": "choose recipients",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/clients",
+          "query": {
+            "order": "id.asc",
+            "select": "user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "prefer": "count=exact",
+            "range": "0-9",
+            "range-unit": "items",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/clients?select=user_id:civic_os_users!user_id(id,display_name,full_name,phone,email),display_name,email,phone,status_id:statuses!status_id(id,display_name,color,status_key),consent_state_id:categories!consent_state_id(id,display_name,color),id&order=id.asc"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_statuses_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "client"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"client\"}",
+              "url": "/rpc/get_statuses_for_entity"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/get_categories_for_entity",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_type": "gender"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_type\":\"gender\"}",
+              "url": "/rpc/get_categories_for_entity"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "fill and save",
+      "postgrest": [
+        {
+          "method": "POST",
+          "path": "/newsletters",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "body": "Registration for spring ESL classes opens April 6.",
+            "display_name": "Harness Spring Newsletter",
+            "subject": "Spring programs at the community center"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"display_name\":\"Harness Spring Newsletter\",\"subject\":\"Spring programs at the community center\",\"body\":\"Registration for spring ESL classes opens April 6.\"}",
+              "url": "/newsletters"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/newsletter_recipients",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=minimal",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "client_id": "<clients:1>",
+            "newsletter_id": "<newsletters:1>"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"newsletter_id\":\"<newsletters:1>\",\"client_id\":\"<clients:1>\"}",
+              "url": "/newsletter_recipients"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "view created newsletter",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/civic_os_users",
+          "query": {
+            "id": "eq.<uuid:1>",
+            "select": "id,clients!clients_user_id_fkey(id)"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/civic_os_users?id=eq.<uuid:1>&select=id,clients!clients_user_id_fkey(id)"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/newsletters",
+          "query": {
+            "id": "eq.<newsletters:1>",
+            "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.<newsletters:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.newsletters"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 2,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.newsletters&order=sort_order.asc"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/user_profile_extensions",
+          "query": {
+            "order": "sort_order,table_name"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/user_profile_extensions?order=sort_order,table_name"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "edit scheduled for",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/newsletters",
+          "query": {
+            "id": "eq.<newsletters:1>",
+            "select": "display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/newsletters?select=display_name,subject,body,scheduled_for,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),status_id,id&id=eq.<newsletters:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/newsletters",
+          "query": {
+            "id": "eq.<newsletters:1>"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "prefer": "return=representation",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "body": "Registration for spring ESL classes opens April 6.",
+            "display_name": "Harness Spring Newsletter",
+            "scheduled_for": "2031-04-02T11:15:00.000Z",
+            "subject": "Spring programs at the community center"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"display_name\":\"Harness Spring Newsletter\",\"subject\":\"Spring programs at the community center\",\"body\":\"Registration for spring ESL classes opens April 6.\",\"scheduled_for\":\"2031-04-02T11:15:00.000Z\"}",
+              "url": "/newsletters?id=eq.<newsletters:1>"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "back to newsletter",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/newsletters",
+          "query": {
+            "id": "eq.<newsletters:1>",
+            "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.<newsletters:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_cache_versions",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": ">=1",
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_cache_versions"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.newsletters"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 2,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.newsletters&order=sort_order.asc"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    },
+    {
+      "name": "schedule action with send time",
+      "postgrest": [
+        {
+          "method": "GET",
+          "path": "/newsletters",
+          "query": {
+            "id": "eq.<newsletters:1>",
+            "select": "display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/newsletters?select=display_name,subject,body,status_id:statuses!status_id(id,display_name,color,status_key),scheduled_for,sent_at,created_by:civic_os_users!created_by(id,display_name,full_name,phone,email),created_at,updated_at,newsletter_recipients_m2m:newsletter_recipients!newsletter_id(clients!client_id(id,display_name)),id&id=eq.<newsletters:1>"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/schema_entity_actions",
+          "query": {
+            "order": "sort_order.asc",
+            "table_name": "eq.newsletters"
+          },
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "authorization": "Bearer <present>"
+          },
+          "body": null,
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": null,
+              "url": "/schema_entity_actions?table_name=eq.newsletters&order=sort_order.asc"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/rpc/schedule_newsletter",
+          "query": {},
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US",
+            "content-type": "application/json",
+            "authorization": "Bearer <present>"
+          },
+          "body": {
+            "p_entity_id": "<newsletters:1>",
+            "p_scheduled_for": "2031-04-02T11:30:00.000Z"
+          },
+          "status": "2xx|cancelled",
+          "n": 1,
+          "raw": [
+            {
+              "body": "{\"p_entity_id\":\"<newsletters:1>\",\"p_scheduled_for\":\"2031-04-02T11:30:00.000Z\"}",
+              "url": "/rpc/schedule_newsletter"
+            }
+          ]
+        }
+      ],
+      "keycloak": {},
+      "minio": []
+    }
+  ]
+}
