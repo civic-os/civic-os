@@ -58,7 +58,8 @@
     "golden:ledger:check": "node scripts/golden/ledger.mjs --check",
     "golden:ledger:mutations": "bash scripts/golden/ledger-mutation-check.sh",
     "test:leaks": "node scripts/detect-async-leaks.mjs",
-    "test:ledger:self": "node --test scripts/test-ledger.test.mjs"
+    "test:ledger:self": "node --test scripts/test-ledger.test.mjs",
+    "golden:selftest": "node --test scripts/golden/volatile.test.mjs"
   },
   "private": true,
   "dependencies": {
