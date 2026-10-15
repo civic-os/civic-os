@@ -276,9 +276,17 @@ depends on worker timing. Each collapses to one entry with `n: ">=1"`:
 - `GET /schema_cache_versions`
 - `GET /rpc/get_upload_url`, the presigned-URL retries
 - `GET /files?id=eq.<uuid>&select=thumbnail_status`, the thumbnail polling
-  of `FileUploadService.waitForThumbnails()`. Only that exact shape: the
-  full-row `GET /files?id=eq.<uuid>` that follows an upload is counted
-  exactly.
+  of `FileUploadService.waitForThumbnails()`.
+- `GET /files?id=eq.<uuid>` with no other parameter: `FileUploadService.getFile()`,
+  which `FileThumbnailComponent` calls every second while a shown file's
+  thumbnail is pending. Gallery uploads do not wait for thumbnails, so the
+  count follows the worker (1 or 2 were seen on pothole). The cost: a
+  regression that fetches one file's full row several times instead of once
+  is not visible.
+
+Both rules match only that exact shape: a single file id (`eq.<uuid:N>`) and
+nothing else, or `select=thumbnail_status` and nothing else. Any other
+select, order or filter on `/files` is counted exactly.
 
 Nothing else is collapsed.
 

@@ -69,14 +69,28 @@ export const COLLAPSE_RULES = [
   { name: 'presigned upload URL retries', test: (e) => e.method === 'GET' && e.path === '/rpc/get_upload_url' },
   {
     // FileUploadService.waitForThumbnails(): GET files?id=eq.<id>&select=thumbnail_status every second.
-    // Only that exact shape; a full-row GET /files?id=eq.<id> (getFile()) is counted exactly.
     name: 'file thumbnail_status polling',
     test: (e) => e.method === 'GET' && e.path === '/files'
       && Object.keys(e.query).length === 2
       && e.query.select === 'thumbnail_status'
-      && typeof e.query.id === 'string' && e.query.id.startsWith('eq.'),
+      && isFileIdFilter(e.query.id),
+  },
+  {
+    // FileThumbnailComponent.startPolling(): FileUploadService.getFile(), i.e. GET files?id=eq.<id>
+    // with no other parameter, every second while a shown file's thumbnail is pending. Gallery
+    // uploads do not wait for thumbnails, so the count follows the worker (seen as 1 or 2).
+    // Only that exact shape: any select, order or second filter is counted exactly.
+    name: 'file thumbnail component polling (getFile)',
+    test: (e) => e.method === 'GET' && e.path === '/files'
+      && Object.keys(e.query).length === 1
+      && isFileIdFilter(e.query.id),
   },
 ];
+
+/** eq.<uuid token>: a single file by its (masked) id. */
+function isFileIdFilter(v) {
+  return typeof v === 'string' && /^eq\.<uuid:\d+>$/.test(v);
+}
 
 export function stableStringify(value) {
   return JSON.stringify(sortKeys(value));

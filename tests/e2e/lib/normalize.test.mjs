@@ -341,21 +341,31 @@ test('requests before the first step are UNATTRIBUTED; setup-step and Keycloak t
 // Collapse rules
 // ---------------------------------------------------------------------------
 
-test('only the thumbnail_status poll collapses; a full-row GET /files is counted exactly (probe R3)', () => {
+test('the two file polls collapse in their exact shapes only; every other /files GET is counted exactly', () => {
   const u = 'cccccccc-3333-4333-8333-333333333333';
   const poll = { url: `http://localhost:3000/files?id=eq.${u}&select=thumbnail_status` };
   const doc = run([poll, poll, poll]);
   assert.equal(doc.steps[0].postgrest.length, 1);
   assert.equal(doc.steps[0].postgrest[0].n, '>=1');
+  // FileThumbnailComponent polls getFile() (full row) while a thumbnail is pending, so that
+  // shape collapses too. Accepted limit (verifier probe R3): 4 such GETs instead of 1 compare equal.
   const full = { url: `http://localhost:3000/files?id=eq.${u}` };
-  const r = cmp([full], [full, full, full, full]);
+  assert.equal(cmp([full], [full, full, full, full]).failures.length, 0);
+  // Anything else stays exact.
+  const sel = { url: `http://localhost:3000/files?id=eq.${u}&select=id,file_name` };
+  const r = cmp([sel], [sel, sel]);
   assert.equal(r.failures.length, 1);
-  assert.match(r.failures[0], /COUNT GET \/files\?id=eq\.<uuid:1>.*baseline n=1, current n=4/);
-  const rule = COLLAPSE_RULES.find((c) => c.name === 'file thumbnail_status polling');
+  assert.match(r.failures[0], /COUNT GET \/files\?id=eq\.<uuid:1>&select=id,file_name.*baseline n=1, current n=2/);
+  const status = COLLAPSE_RULES.find((c) => c.name === 'file thumbnail_status polling');
+  const getFile = COLLAPSE_RULES.find((c) => c.name === 'file thumbnail component polling (getFile)');
   const entry = (query) => ({ method: 'GET', path: '/files', query });
-  assert.ok(rule.test(entry({ id: 'eq.<uuid:1>', select: 'thumbnail_status' })));
-  assert.ok(!rule.test(entry({ id: 'eq.<uuid:1>' })));
-  assert.ok(!rule.test(entry({ id: 'eq.<uuid:1>', select: 'id,thumbnail_status' })));
-  assert.ok(!rule.test(entry({ select: 'thumbnail_status' })));
-  assert.ok(!rule.test(entry({ id: 'in.(<uuid:1>)', select: 'thumbnail_status' })));
+  assert.ok(status.test(entry({ id: 'eq.<uuid:1>', select: 'thumbnail_status' })));
+  assert.ok(!status.test(entry({ id: 'eq.<uuid:1>', select: 'id,thumbnail_status' })));
+  assert.ok(!status.test(entry({ select: 'thumbnail_status' })));
+  assert.ok(!status.test(entry({ id: 'in.(<uuid:1>)', select: 'thumbnail_status' })));
+  assert.ok(getFile.test(entry({ id: 'eq.<uuid:1>' })));
+  assert.ok(!getFile.test(entry({ id: 'eq.<uuid:1>', order: 'id' })));
+  assert.ok(!getFile.test(entry({ id: 'eq.7' })), 'only a single file id (UUID) qualifies');
+  assert.ok(!getFile.test(entry({ id: 'in.(<uuid:1>,<uuid:2>)' })));
+  assert.ok(!getFile.test({ method: 'DELETE', path: '/files', query: { id: 'eq.<uuid:1>' } }));
 });
