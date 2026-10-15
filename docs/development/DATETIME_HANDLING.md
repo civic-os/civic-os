@@ -63,7 +63,8 @@ When testing timestamp handling:
 - DateTime values should round-trip without any transformation
 - DateTimeLocal values should shift by the test environment's timezone offset
 - See `edit.page.spec.ts` for timestamp transformation test examples
+- End to end, `tests/e2e/run-integrity.sh` types both types through the UI in America/New_York and Asia/Kolkata (including the DST gap and overlap), checks the stored values with `psql`, and checks the edit page shows them again. A local time inside the spring-forward gap (e.g. 02:30 on 2026-03-08 in New York) is stored as the instant of the pre-transition offset and re-displayed as 03:30. See `tests/e2e/README.md` (Data-integrity suite).
 
 ---
 
-**Last Updated**: 2026-03-11
+**Last Updated**: 2026-10-15
