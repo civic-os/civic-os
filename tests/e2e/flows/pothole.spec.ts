@@ -106,8 +106,8 @@ test('02 create work package', async ({ harness }) => {
     await page.getByRole('textbox', { name: 'Quote Due Date' }).fill('2031-03-14T14:30');
     await page.getByRole('combobox', { name: 'Status' }).selectOption({ label: 'Competitive' });
     await page.getByRole('textbox', { name: 'Cost' }).fill('1250.50');
-    // TODO(P0.5): when examples/pothole/init-scripts/14_add_timestamp_column.sql adds a
-    // `timestamp` (DateTime) column, fill it here with a fixed wall-clock value far
+    // TODO(P0.5): when P0.5's new pothole init script adds a `timestamp` (DateTime)
+    // column (on WorkPackage or Issue), fill it here with a fixed wall-clock value far
     // from CLOCK_T0 (e.g. '2031-03-15T08:45') so the DateTime transform is covered,
     // then re-record the pothole baselines.
     await page.getByRole('button', { name: 'Save', exact: true }).click();
