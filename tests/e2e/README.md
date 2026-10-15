@@ -125,6 +125,12 @@ timer. Flows also wait explicitly for the UI effect of such timers, for
 example the action dialog closing. Inside a step, requests compare as a
 multiset, because parallel requests such as `forkJoin` have no fixed order.
 
+The 2 s window and the "dialog closed" waits mirror the app's 1.5 s
+auto-close-then-refresh timer after an entity action
+(`detail.page.ts` around line 1382, `entity-action-panel.component.ts`
+around line 266). That timer is a known app bug. If it changes, revisit
+these waits and the window, then re-record.
+
 ## Comparison levels
 
 - **Semantic: fails the run.** Compares decoded, param-order-insensitive
