@@ -25,8 +25,14 @@ import { SchemaService } from '../../services/schema.service';
 import { of, throwError, Subject } from 'rxjs';
 import { MOCK_M2M_PROPERTY, MOCK_RELATED_DATA, createMockManyToManyMeta } from '../../testing/mock-schema';
 import { provideRouter } from '@angular/router';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('ManyToManyEditorComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: ManyToManyEditorComponent;
     let fixture: ComponentFixture<ManyToManyEditorComponent>;
     let mockDataService: any;
@@ -92,7 +98,7 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.getData).toHaveBeenCalledWith({
                 key: 'tags',
                 fields: ['id', 'display_name', 'color'],
@@ -113,7 +119,7 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.getData).toHaveBeenCalledWith({
                 key: 'tags',
                 fields: ['id', 'display_name'],
@@ -128,7 +134,7 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockAuthService.hasPermission).toHaveBeenCalledWith('issue_tags', 'create');
             expect(mockAuthService.hasPermission).toHaveBeenCalledWith('issue_tags', 'delete');
             expect(component.canEdit()).toBe(true);
@@ -145,7 +151,7 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.canEdit()).toBe(false);
         });
 
@@ -160,7 +166,7 @@ describe('ManyToManyEditorComponent', () => {
 
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.canEdit()).toBe(false);
         });
     });
@@ -201,7 +207,7 @@ describe('ManyToManyEditorComponent', () => {
         });
 
         it('should show Edit button when canEdit is true', async () => {
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
             const compiled = fixture.nativeElement;
             const editButton = compiled.querySelector('button');
@@ -214,7 +220,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('property', { ...MOCK_M2M_PROPERTY });
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
             const compiled = fixture.nativeElement;
             const editButton = compiled.querySelector('button');
@@ -230,7 +236,7 @@ describe('ManyToManyEditorComponent', () => {
                 { id: 1, display_name: 'Urgent', color: '#FF0000' }
             ]);
             fixture.detectChanges();
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             component.enterEditMode();
             fixture.detectChanges();
@@ -281,7 +287,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await advanceTime(20);
             component.enterEditMode();
             fixture.detectChanges();
 
@@ -346,7 +352,7 @@ describe('ManyToManyEditorComponent', () => {
                 { id: 2, display_name: 'Road Surface', color: '#00FF00' }
             ]);
             fixture.detectChanges();
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             component.enterEditMode();
             fixture.detectChanges();
@@ -404,7 +410,7 @@ describe('ManyToManyEditorComponent', () => {
                 { id: 1, display_name: 'Urgent', color: '#FF0000' }
             ]);
             fixture.detectChanges();
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             component.enterEditMode();
             fixture.detectChanges();
@@ -421,7 +427,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(1, MOCK_M2M_PROPERTY.many_to_many_meta!, 2);
         });
 
@@ -429,7 +435,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(1);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.removeManyToManyRelation).toHaveBeenCalledWith(1, MOCK_M2M_PROPERTY.many_to_many_meta!, 1);
         });
 
@@ -439,7 +445,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(3); // Add
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.removeManyToManyRelation).toHaveBeenCalledTimes(1);
             expect(mockDataService.addManyToManyRelation).toHaveBeenCalledTimes(2);
         });
@@ -449,7 +455,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.relationChanged.emit).toHaveBeenCalled();
         });
 
@@ -457,7 +463,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.isEditing()).toBe(false);
         });
 
@@ -483,7 +489,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.loading()).toBe(false);
         });
 
@@ -492,7 +498,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toBe('All changes failed. Please try again.');
             expect(component.isEditing()).toBe(true); // Stays in edit mode
         });
@@ -509,7 +515,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(3);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toContain('1 changes succeeded, 1 failed');
             expect(component.relationChanged.emit).toHaveBeenCalled();
         });
@@ -520,7 +526,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.error()).toBe('Failed to save changes');
             expect(component.loading()).toBe(false);
         });
@@ -562,7 +568,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.callRpc).toHaveBeenCalledWith('get_eligible_parcels', {
                 p_id: '1',
                 p_depends_on: {}
@@ -586,7 +592,7 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             // Initial load via RPC
             const initialCallCount = vi.mocked(mockDataService.callRpc).mock.calls.length;
 
@@ -594,7 +600,7 @@ describe('ManyToManyEditorComponent', () => {
             component.toggleSelection(20); // Add new
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             // After save, should re-fetch options via RPC
             expect(vi.mocked(mockDataService.callRpc).mock.calls.length).toBeGreaterThan(initialCallCount);
         });
@@ -614,14 +620,14 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const initialCallCount = vi.mocked(mockDataService.callRpc).mock.calls.length;
 
             component.enterEditMode();
             component.toggleSelection(10); // Remove existing
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(vi.mocked(mockDataService.callRpc).mock.calls.length).toBeGreaterThan(initialCallCount);
         });
 
@@ -633,14 +639,14 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const initialGetDataCount = vi.mocked(mockDataService.getData).mock.calls.length;
 
             component.enterEditMode();
             component.toggleSelection(2); // Add
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             // getData should NOT be called again after save (no RPC, no re-fetch)
             expect(vi.mocked(mockDataService.getData).mock.calls.length).toBe(initialGetDataCount);
             expect(mockDataService.callRpc).not.toHaveBeenCalled();
@@ -656,12 +662,12 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             component.enterEditMode();
             component.toggleSelection(2);
             component.save();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.dependencyChanged.emit).toHaveBeenCalledWith('tags');
         });
     });
@@ -678,7 +684,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.useFkSearchModal()).toBe(true);
         });
 
@@ -688,7 +694,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.useFkSearchModal()).toBe(false);
         });
 
@@ -703,7 +709,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
             const compiled = fixture.nativeElement;
             expect(compiled.textContent).toContain('Browse');
@@ -722,12 +728,12 @@ describe('ManyToManyEditorComponent', () => {
             ]);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             vi.spyOn(component.relationChanged, 'emit').mockReturnValue(undefined);
 
             component.onSearchModalApply({ toAdd: [2], toRemove: [] });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.addManyToManyRelation).toHaveBeenCalledWith(1, m2mPropWithModal.many_to_many_meta!, 2);
             expect(component.showSearchModal()).toBe(false);
         });
@@ -743,10 +749,10 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             component.onSearchModalApply({ toAdd: [], toRemove: [] });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(mockDataService.addManyToManyRelation).not.toHaveBeenCalled();
             expect(mockDataService.removeManyToManyRelation).not.toHaveBeenCalled();
             expect(component.showSearchModal()).toBe(false);
@@ -769,7 +775,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             const rpcOpts = component.resolvedRpcOptions();
             expect(rpcOpts).toBeTruthy();
             expect(rpcOpts!.length).toBe(2);
@@ -782,7 +788,7 @@ describe('ManyToManyEditorComponent', () => {
             fixture.componentRef.setInput('currentValues', []);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.resolvedRpcOptions()).toBeNull();
         });
     });

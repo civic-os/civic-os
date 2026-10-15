@@ -23,6 +23,7 @@ import { DataService } from '../../../services/data.service';
 import { ThemeService } from '../../../services/theme.service';
 import { TranslationService } from '../../../services/translation.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
+import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 
 // @unovis/angular uses bare ESM directory imports that Node's loader cannot
 // resolve, so the Vitest run substitutes it with selector-compatible stubs.
@@ -30,7 +31,12 @@ import { DashboardWidget } from '../../../interfaces/dashboard';
 vi.mock('@unovis/angular', () => import('../../../testing/unovis-angular.stub'));
 
 describe('ChartWidgetComponent', () => {
-  const settle = () => new Promise<void>(resolve => setTimeout(resolve, 10));
+  // Fixed real-time waits raced debounces, polling and change-detection
+  // scheduling under CPU starvation; every test runs on fake time
+  // (testing/fake-time.ts) and advances it instead.
+  useFakeTimeInEachTest();
+
+  const settle = () => advanceTime(10);
 
   let component: ChartWidgetComponent;
   let fixture: ComponentFixture<ChartWidgetComponent>;

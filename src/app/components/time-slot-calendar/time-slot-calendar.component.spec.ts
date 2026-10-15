@@ -21,8 +21,19 @@ import { TimeSlotCalendarComponent, CalendarEvent } from './time-slot-calendar.c
 import { FullCalendarComponent } from '@fullcalendar/angular';
 import { ThemeService } from '../../services/theme.service';
 import { provideTranslationTesting } from '../../testing/translation-testing';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
-describe('TimeSlotCalendarComponent', () => {
+// Every test renders a real FullCalendar view (a Preact tree built synchronously
+// on change detection): a few hundred ms of CPU each under happy-dom, nothing
+// time-based (the spec runs on fake time). Vitest's default 5 s per-test timeout
+// was exceeded only when the machine was starved of CPU (a full run at 5x its
+// normal duration), so these tests get an explicit 20 s budget.
+describe('TimeSlotCalendarComponent', { timeout: 20_000 }, () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: TimeSlotCalendarComponent;
     let fixture: ComponentFixture<TimeSlotCalendarComponent>;
     let mockThemeService: any;
@@ -147,7 +158,7 @@ describe('TimeSlotCalendarComponent', () => {
         fixture.detectChanges();
 
         // Give effect time to run (effects are microtasks)
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await advanceTime(0);
         expect(mockCalendarApi.getEventSources).toHaveBeenCalled();
         expect(mockEventSource.remove).toHaveBeenCalled();
         expect(mockCalendarApi.addEventSource).toHaveBeenCalled();
@@ -308,7 +319,7 @@ describe('TimeSlotCalendarComponent', () => {
             ]);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
             expect(mockApi.getEventSources).toHaveBeenCalled();
             expect(mockApi.addEventSource).toHaveBeenCalled();
         });
@@ -469,7 +480,7 @@ describe('TimeSlotCalendarComponent', () => {
             fixture.componentRef.setInput('initialDate', '2026-04-15');
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
             expect(mockApi.gotoDate).toHaveBeenCalledWith(new Date('2026-04-15T00:00:00'));
         });
 
@@ -498,7 +509,7 @@ describe('TimeSlotCalendarComponent', () => {
             fixture.componentRef.setInput('initialView', 'dayGridMonth');
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
             expect(mockApi.changeView).toHaveBeenCalledWith('dayGridMonth');
         });
 
@@ -527,7 +538,7 @@ describe('TimeSlotCalendarComponent', () => {
             fixture.componentRef.setInput('initialDate', undefined);
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await advanceTime(0);
             expect(mockApi.gotoDate).toHaveBeenCalled();
             // Should be called with approximately today's date
             const calledDate = vi.mocked(mockApi.gotoDate).mock.lastCall![0] as Date;

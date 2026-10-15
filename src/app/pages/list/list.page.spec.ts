@@ -33,8 +33,14 @@ import { take } from 'rxjs/operators';
 import { MOCK_ENTITIES, MOCK_PROPERTIES, createMockProperty, createMockEntity } from '../../testing';
 import { EntityPropertyType } from '../../interfaces/entity';
 import { settleLazyComponents } from '../../testing/lazy-components';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('ListPage', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: ListPage;
     let fixture: ComponentFixture<ListPage>;
     let mockSchemaService: any;
@@ -191,7 +197,7 @@ describe('ListPage', () => {
             routeParams.next({ entityKey: 'Issue' });
 
             // Wait for async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
                 key: 'Issue',
                 fields: ['name', 'status_id:Status!status_id(id,display_name)'],
@@ -218,7 +224,7 @@ describe('ListPage', () => {
             // Trigger new route params to force data$ to re-emit
             routeParams.next({ entityKey: 'Issue' });
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             expect(mockDataService.getDataPaginated).toHaveBeenCalledWith({
                 key: 'Issue',
                 fields: ['location:location_text'],
@@ -237,7 +243,10 @@ describe('ListPage', () => {
             mockSchemaService.getPropsForList.mockReturnValue(of([]));
             mockDataService.getDataPaginated.mockReturnValue(of({ data: [], totalCount: 0 }));
 
-            const data = await firstValueFrom(component.data$);
+            // data$ batches its inputs with debounceTime(0): subscribe, then let fake time run.
+            const data$ = firstValueFrom(component.data$);
+            await advanceTime(10);
+            const data = await data$;
             expect(data).toEqual({ data: [], totalCount: 0 });
         });
 
@@ -246,7 +255,7 @@ describe('ListPage', () => {
             mockSchemaService.getEntity.mockReturnValue(of(undefined));
             routeParams.next({});
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             expect(mockDataService.getDataPaginated).not.toHaveBeenCalled();
         });
     });
@@ -298,7 +307,7 @@ describe('ListPage', () => {
             // Trigger new route params to force data$ to re-emit
             routeParams.next({ entityKey: 'Issue' });
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             expect(mockDataService.getDataPaginated).toHaveBeenCalled();
             const callArgs = vi.mocked(mockDataService.getDataPaginated).mock.lastCall[0];
             expect(callArgs.fields).toContain('name'); // TextShort
@@ -343,28 +352,28 @@ describe('ListPage', () => {
             // Update query params to simulate URL change
             queryParams.next({ q: 'pothole main street' });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.searchTerms()).toEqual(['pothole', 'main', 'street']);
         });
 
         it('should return empty array for empty search query', async () => {
             queryParams.next({ q: '' });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.searchTerms()).toEqual([]);
         });
 
         it('should trim whitespace and split search terms', async () => {
             queryParams.next({ q: '  pothole   main   ' });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.searchTerms()).toEqual(['pothole', 'main']);
         });
 
         it('should handle single search term', async () => {
             queryParams.next({ q: 'pothole' });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.searchTerms()).toEqual(['pothole']);
         });
 
@@ -374,7 +383,7 @@ describe('ListPage', () => {
             // Update URL query params
             queryParams.next({ q: 'pothole' });
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             expect(component.searchControl.value).toBe('pothole');
         });
 
@@ -442,7 +451,7 @@ describe('ListPage', () => {
             component.onRowHover(42);
 
             // After debounce (>150ms), signal should update
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await advanceTime(200);
             expect(component.highlightedRecordId()).toBe(42);
         });
 
@@ -453,7 +462,7 @@ describe('ListPage', () => {
             component.onRowHover(3);
 
             // After debounce, should have the last value
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await advanceTime(200);
             expect(component.highlightedRecordId()).toBe(3);
         });
     });
@@ -590,7 +599,7 @@ describe('ListPage', () => {
 
             await new Promise<void>(resolve => {
                 component.entity$.subscribe(async () => {
-                    await new Promise(r => setTimeout(r, 10));
+                    await advanceTime(10);
                     expect(component.showMap()).toBe(false);
                     resolve();
                 });
@@ -663,7 +672,7 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await advanceTime(100);
                 const events = component.calendarEvents();
                 expect(events).toEqual([]);
             });
@@ -695,7 +704,7 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await advanceTime(100);
                 const events = component.calendarEvents();
                 expect(events.length).toBe(2);
 
@@ -745,7 +754,7 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await advanceTime(100);
                 const events = component.calendarEvents();
                 expect(events.length).toBe(3);
 
@@ -793,7 +802,7 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await advanceTime(100);
                 const events = component.calendarEvents();
                 expect(events.length).toBe(2);
                 expect(events[0].id).toBe(1);
@@ -830,7 +839,7 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await advanceTime(100);
                 const events = component.calendarEvents();
                 expect(events.length).toBe(2);
                 expect(events[0].color).toBe('#10B981');
@@ -861,7 +870,7 @@ describe('ListPage', () => {
 
                 routeParams.next({ entityKey: 'Issue' });
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await advanceTime(100);
                 const events = component.calendarEvents();
                 expect(events.length).toBe(1);
                 expect(events[0].title).toBe('Reservation #1');
@@ -1009,7 +1018,7 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'issues' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
         });
 
@@ -1023,7 +1032,7 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'issues' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:priority,status_id', 15);
         });
 
@@ -1036,7 +1045,7 @@ describe('ListPage', () => {
             queryParams.next({ q: 'pothole' });
             routeParams.next({ entityKey: 'issues' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:search', 5);
         });
 
@@ -1049,7 +1058,7 @@ describe('ListPage', () => {
             queryParams.next({ q: 'pothole', f0_col: 'status_id', f0_op: 'eq', f0_val: '1', page: '3' });
             routeParams.next({ entityKey: 'issues' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:status_id:search:p3', 3);
         });
 
@@ -1060,7 +1069,7 @@ describe('ListPage', () => {
 
             routeParams.next({ entityKey: 'issues' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             // First load: page 1
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
 
@@ -1068,7 +1077,7 @@ describe('ListPage', () => {
             mockAnalyticsService.trackEvent.mockClear();
             queryParams.next({ page: '2' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             // Should fire new event with page indicator
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues:p2', 42);
         });
@@ -1081,7 +1090,7 @@ describe('ListPage', () => {
             queryParams.next({ page: '1' });
             routeParams.next({ entityKey: 'issues' });
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             // Page 1 should NOT have :p1 suffix
             expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('Entity', 'List', 'issues', 42);
         });

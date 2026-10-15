@@ -25,8 +25,14 @@ import { SchemaService } from '../../../services/schema.service';
 import { DashboardWidget } from '../../../interfaces/dashboard';
 import { provideTranslationTesting } from '../../../testing/translation-testing';
 import { settleLazyComponents } from '../../../testing/lazy-components';
+import { advanceTime, useFakeTimeInEachTest } from '../../../testing/fake-time';
 
 describe('MapWidgetComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let component: MapWidgetComponent;
     let fixture: ComponentFixture<MapWidgetComponent>;
     let mockDataService: any;
@@ -171,7 +177,7 @@ describe('MapWidgetComponent', () => {
     it('should fetch entity properties and data', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(mockSchemaService.getProperties).toHaveBeenCalled();
         expect(mockDataService.getData).toHaveBeenCalled();
     });
@@ -179,7 +185,7 @@ describe('MapWidgetComponent', () => {
     it('should transform records to markers', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers().length).toBe(1);
         expect(component.markers()[0].id).toBe(1);
         expect(component.markers()[0].name).toBe('Test Participant');
@@ -198,7 +204,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers().length).toBe(1);
         expect(component.markers()[0].id).toBe(1);
     });
@@ -206,7 +212,7 @@ describe('MapWidgetComponent', () => {
     it('should navigate to detail page on marker click', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         component.onMarkerClick(42);
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/view', 'participants', 42]);
     });
@@ -220,7 +226,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers().length).toBe(0);
         expect(component.isLoading()).toBe(false);
     });
@@ -235,7 +241,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers().length).toBe(0);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toBeTruthy();
@@ -251,7 +257,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.isLoading()).toBe(false);
         expect(component.error()).toBe('Failed to load schema');
     });
@@ -261,7 +267,7 @@ describe('MapWidgetComponent', () => {
 
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.isLoading()).toBe(false);
     });
 
@@ -274,7 +280,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers().length).toBe(0);
         expect(component.isLoading()).toBe(false);
     });
@@ -291,7 +297,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoMap);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers().length).toBe(0);
         expect(component.isLoading()).toBe(false);
     });
@@ -299,14 +305,14 @@ describe('MapWidgetComponent', () => {
     it('should use display_name as marker name', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers()[0].name).toBe('Test Participant');
     });
 
     it('should resolve the entity display name for cluster accessible names', async () => {
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(mockSchemaService.getEntity).toHaveBeenCalledWith('participants');
         expect(component.entityDisplayName()).toBe('Participants');
     });
@@ -320,7 +326,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', widgetNoEntity);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.entityDisplayName()).toBe('');
     });
 
@@ -333,7 +339,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.entityDisplayName()).toBe('');
     });
 
@@ -354,7 +360,7 @@ describe('MapWidgetComponent', () => {
         fixture.componentRef.setInput('widget', mockWidget);
         fixture.detectChanges();
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await advanceTime(10);
         expect(component.markers()[0].name).toBe('Record 1');
     });
 });

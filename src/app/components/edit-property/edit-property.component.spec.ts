@@ -29,8 +29,14 @@ import { MOCK_PROPERTIES, createMockProperty } from '../../testing';
 import { provideTranslationTesting } from '../../testing/translation-testing';
 import { GeoPointMapComponent } from '../geo-point-map/geo-point-map.component';
 import { settleLazyComponents, waitOutFkSearchFocusRetention } from '../../testing/lazy-components';
+import { advanceTime, useFakeTimeInEachTest } from '../../testing/fake-time';
 
 describe('EditPropertyComponent', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     // A hosted FkSearchModal may leave its 60 ms focus-retention timer pending
     // (testing/lazy-components.ts).
     afterAll(waitOutFkSearchFocusRetention);
@@ -549,7 +555,7 @@ describe('EditPropertyComponent', () => {
             component.ngOnInit();
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const options = fixture.debugElement.queryAll(By.css('option'));
@@ -570,7 +576,7 @@ describe('EditPropertyComponent', () => {
             component.ngOnInit();
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const options = fixture.debugElement.queryAll(By.css('option'));
@@ -613,7 +619,7 @@ describe('EditPropertyComponent', () => {
             component.onMapValueChange(newValue);
 
             // onMapValueChange uses setTimeout(0), wait for it
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             expect(formControl.value).toBe(newValue);
             expect(formControl.dirty).toBe(true);
@@ -1516,7 +1522,7 @@ describe('EditPropertyComponent', () => {
             const newValue = 'SRID=4326;POINT(-80.5 40.2)';
             component.onMapValueChange(newValue);
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             expect(formControl.value).toBe(newValue);
             expect(formControl.dirty).toBe(true);
@@ -1532,7 +1538,7 @@ describe('EditPropertyComponent', () => {
 
             component.onMapValueChange('');
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
 
             expect(formControl.value).toBe('');
         });
@@ -1973,7 +1979,7 @@ describe('EditPropertyComponent', () => {
             formGroup.get('category_id')?.setValue(5);
 
             // Wait past debounce (300ms)
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await advanceTime(400);
             expect(mockDataService.callRpc).toHaveBeenCalled();
             expect(mockDataService.callRpc).toHaveBeenCalledWith('get_tool_types_by_category', {
                 p_id: '42',
@@ -2013,13 +2019,13 @@ describe('EditPropertyComponent', () => {
 
             // Rapid changes within debounce window
             formGroup.get('category_id')?.setValue(1);
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             formGroup.get('category_id')?.setValue(2);
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             formGroup.get('category_id')?.setValue(3);
 
             // Wait past debounce from last change — only the final value should trigger a call
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await advanceTime(500);
             // The debounced callback fires loadOptionsFromRpc once.
             // The underlying callRpc may be invoked multiple times due to async pipe re-subscription,
             // but the most recent call should contain the final dependency value.
@@ -2136,7 +2142,7 @@ describe('EditPropertyComponent', () => {
             component.ngOnInit();
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const button = fixture.debugElement.query(By.css('button.btn-outline'));
@@ -2159,7 +2165,7 @@ describe('EditPropertyComponent', () => {
             component.ngOnInit();
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             fixture.detectChanges();
 
             const button = fixture.debugElement.query(By.css('button.btn-outline'));
@@ -2440,7 +2446,7 @@ describe('EditPropertyComponent', () => {
             component.ngOnInit();
             fixture.detectChanges();
 
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await advanceTime(10);
             fixture.detectChanges();
 
             const button = fixture.debugElement.query(By.css('button.btn-outline'));

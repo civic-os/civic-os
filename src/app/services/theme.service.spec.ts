@@ -18,8 +18,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ThemeService, MapTileConfig } from './theme.service';
+import { advanceTime, useFakeTimeInEachTest } from '../testing/fake-time';
 
 describe('ThemeService', () => {
+    // Fixed real-time waits raced debounces, polling and change-detection
+    // scheduling under CPU starvation; every test runs on fake time
+    // (testing/fake-time.ts) and advances it instead.
+    useFakeTimeInEachTest();
+
     let service: ThemeService;
     let localStorageSpy: any;
 
@@ -104,7 +110,7 @@ describe('ThemeService', () => {
         it('should calculate luminance based on current theme', async () => {
             // Set a theme and verify the computed signal executes without errors
             document.documentElement.setAttribute('data-theme', 'corporate');
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             const result = service.isDark();
             expect(typeof result).toBe('boolean');
         });
@@ -177,11 +183,11 @@ describe('ThemeService', () => {
 
         it('should respond to theme changes', async () => {
             document.documentElement.setAttribute('data-theme', 'light');
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             const config1 = service.getMapTileConfig();
 
             document.documentElement.setAttribute('data-theme', 'dark');
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             const config2 = service.getMapTileConfig();
 
             // Both should return valid configs
@@ -436,27 +442,27 @@ describe('ThemeService', () => {
             const initialTheme = service.theme();
 
             // Change theme externally (simulates browser extension or manual DOM change)
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             document.documentElement.setAttribute('data-theme', 'dark');
 
             // Give MutationObserver time to fire
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             expect(service.theme()).toBe('dark');
             expect(localStorageSpy.setItem).toHaveBeenCalledWith('civic-os-theme', 'dark');
         });
 
         it('should handle multiple rapid external theme changes', async () => {
             // Make multiple rapid external changes
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             document.documentElement.setAttribute('data-theme', 'light');
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             document.documentElement.setAttribute('data-theme', 'dark');
 
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await advanceTime(50);
             document.documentElement.setAttribute('data-theme', 'emerald');
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             // Should reflect the final theme
             expect(service.theme()).toBe('emerald');
         });
@@ -468,13 +474,13 @@ describe('ThemeService', () => {
             service.setTheme('nord');
 
             // Wait for any potential MutationObserver callback
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const firstCheckCount = vi.mocked(localStorageSpy.setItem).mock.calls.length;
             // Should have some calls (at least 1 from setTheme)
             expect(firstCheckCount).toBeGreaterThan(initialCallCount);
 
             // Wait again to verify count isn't still increasing (which would indicate infinite loop)
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await advanceTime(100);
             const secondCheckCount = vi.mocked(localStorageSpy.setItem).mock.calls.length;
             // Count should stabilize (no infinite loop)
             expect(secondCheckCount).toBe(firstCheckCount);
